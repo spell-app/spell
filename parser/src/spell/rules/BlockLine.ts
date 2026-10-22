@@ -8,8 +8,8 @@ import { SpellJSX } from "./JSX"
 import { ParseError } from "./ParseError"
 
 /**
- * Blank line, compiling to `P.ASTBlankLine` -- generic `P.BlankLine` has no `getAST()` of its own,
- * and spell always converts to AST before compiling.
+ * A blank line, compiling to `P.ASTBlankLine`.
+ * - The parser's own `P.BlankLine` has no `getAST()`, and spell always converts to AST before compiling.
  * - Subclass rather than patching `P.BlankLine.prototype`, which would change it for every language.
  * - Class named `SpellBlankLine`, so it doesn't read as the parser's `P.BlankLine`.
  */
@@ -44,8 +44,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   }
 
   /**
-   * SIDE EFFECT: calls `statement.rule.mutateScope()` on the parsed statement (and on any nested block's
-   * errors are folded in too), so a locked-in statement can e.g. add variables to `scope` as it's parsed.
+   * SIDE EFFECT: calls `statement.rule.mutateScope()` on the parsed statement,
+   * so a locked-in statement can e.g. add variables to `scope` as it's parsed.
+   * - A nested block's errors are folded in too.
    * - SIDE EFFECT:  then notes a warning on the statement for each article which doesn't agree with its noun,
    *   e.g. `a apple` -- see `SP.SpellWarnings.noteArticles()`.
    */
@@ -66,9 +67,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
     const { tokens } = line
     // Blank line
     if (tokens.length === 0) {
-      // NOTE: `line.leading` (the fallback in the original code) is a plain `string`, not a `Token` --
-      // pushing it into `matched`/`tokens` below would fail `Match`'s own runtime assertions, so this
-      // dynamic fallback was already dead code; only `line.newline` is ever a usable `Token` here.
+      // NOTE: only `line.newline` is ever a usable `Token` here.
+      // `line.leading` (once a fallback) is a plain `string`:
+      // pushing it into `matched` / `tokens` below would fail `Match`'s own runtime assertions.
       const token = line.newline
       if (token) {
         matched.push(
@@ -184,8 +185,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   }
 
   /**
-   * Is `tokens` an outline body's line, e.g. `it has a deck` or `its "suit" is ...`, NOT in a type's body -- so it
-   * didn't parse?  Its error then says where it belongs (epic page `outline-spell`, P6).
+   * Is `tokens` an outline body's line, e.g. `it has a deck` or `its "suit" is ...`, NOT in a type's body,
+   * so it didn't parse?
+   * - Its error then says where it belongs (epic page `outline-spell`, P6).
    * - `it` / `its` (`subject_it`, `subject_its`), then a quoted name or phrase, or `has` / `belongs`
    *   (`has_or_belongs`):  each language's own words.
    */
@@ -198,8 +200,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   }
 
   /**
-   * Re-parse ONLY the nested body of `line` from `blockToken`, keeping its header statement's match -- and so the
-   * scope changes that made -- as they are.  See `P.IncrementalParse`.
+   * Re-parse ONLY the nested body of `line` from `blockToken`,
+   * keeping its header statement's match -- and so the scope changes that made -- as they are.
+   * - SEE:  `P.IncrementalParse`.
    * - Returns a new `line` match, or `undefined` if that's not safe, so caller does a full parse:
    *   - no statement, or its body isn't an indented block of statements
    *   - body shares the header's scope, so its variables land outside it

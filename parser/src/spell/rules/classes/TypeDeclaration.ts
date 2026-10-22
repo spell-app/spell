@@ -22,8 +22,8 @@ import { SpellType } from "spell-lang/spell/rules/types/SpellType"
  *   - Either name finds the type afterwards, e.g. `the accounts`, `a new bank account`.
  *   - A name some other type already goes by is refused -- see `refuseTakenNames()`.
  *   - So is a type declared a second time (issue I13):  `a game:` adds to it -- see `reopen_type`.
- * - A DRAWABLE type (`a card is a drawable thing`, or a sub-type of one) defines its element as its class is declared,
- *   in a static field:  `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
+ * - A DRAWABLE type (`a card is a drawable thing`, or a sub-type of one) defines its element as its class is declared:
+ *   a static field, `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
  */
 export class TypeDeclaration<
   Groups extends string,

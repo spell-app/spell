@@ -6,7 +6,8 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
 
 /**
- * `markdown_block` rule:  formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
+ * `markdown_block` rule:  formatted text in a drawing,
+ * drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
  *
  * ```spell
  * to draw a rules panel:

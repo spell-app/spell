@@ -28,8 +28,8 @@ export type ActiveTest = {
  *    - uses `core.equals(thing, otherThing)`
  *    - `thingSource` is spell Expression source for `thing`
  *    - `otherSource` is spell Expression source for `otherThing`
- * - SIDE EFFECT: appends to `core.ACTIVE_TEST.output` if a test is running, else logs directly
- *   to `core.console`.
+ * - SIDE EFFECT: appends to `core.ACTIVE_TEST.output` if a test is running,
+ *   else logs directly to `core.console`.
  * - Compiles from spell `expect {expression} (to be {value})?` (see `expect_test` rule in
  *   `src/spell/rules/tests/`).
  */
@@ -62,8 +62,8 @@ export function expect(thing: unknown, thingSource: string, otherThing?: unknown
 }
 
 /**
- * Assembled `core` test-utility methods -- `test()`/`expect()`/`echo()`/`start test`/`end test`
- * for writing inline assertions and debug narration directly in spell source.
+ * The `core` methods for writing inline assertions and debug narration directly in spell source:
+ * `test()`, `expect()`, `echo()`, `start test`, `end test`.
  * TODO: merge this with Core.console so `print XXX` in a test goes to ACTIVE_TEST
  * TODO: print result of "executing" e.g. Executing `display the deck` returned `xxx`
  */

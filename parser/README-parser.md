@@ -135,9 +135,8 @@ NumberToken    1
   - double-quoted text only, so a single quote can sit inside `isn't`
   - indentation matters at the start of a line
   - raw `css` and `markdown` blocks
-- Where it falls short:  Spell's words are the tokenizer's default, a letter from A to Z and then letters, digits,
-  `-` or `_`.
-  So `año` is three tokens, `a`, `ñ` and `o`;  markdown's tokenizer reads it as one word.
+- Spell's words are the tokenizer's default:  a letter in any script, then letters, accents, digits, `-` or `_`.
+  So `año` and `corazón` are one word each, as Spanish needs.
 
 <details>
 <summary>Every kind of token, and the settings</summary>
@@ -647,21 +646,29 @@ From [Parser.ts](src/parser/Parser.ts);  each does nothing, or the simplest thin
 
 </details>
 
-### 🌱 Spell in another human language
+### Spell in another human language
 
-It would start the same way:  its own syntax strings, registered on Spell's SAME rule classes.
+Spell reads Spanish this way:  its own syntax strings, registered on Spell's SAME rule classes.
 - That's why `addRule()` takes only a syntax and its tests:  the class is reusable.
-- Words with negated forms are registered word by word.
-  English's `is`, from [Negatable.ts](src/spell/rules/expressions/Negatable.ts):
+- Each folder of rules registers its English in `<folder>.en.ts`, and its Spanish in `<folder>.es.ts`,
+  the same rules in the same order.
+- Words with negated forms are WORD RULES, registered word by word.
+  English's `is`, from [expressions.en.ts](src/spell/rules/expressions/expressions.en.ts),
+  and Spanish's, from [expressions.es.ts](src/spell/rules/expressions/expressions.es.ts):
 
   ```ts
-  expressions.addRule(Negatable.specialize({ ruleName: "is" }), { syntax: "(is|(negated:is not|isn't|isnt))" })
+  expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
+    syntax: "(is|(negated:is not|isn't|isnt))"
+  })
+  expressionsEs.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
+    syntax: "(es|está|esta|(negated:no es|no está|no esta))"
+  })
   ```
 
-  A Spanish one would add `(es|(negated:no es))`, as `es`.
-- A type's words are Spell's vocabulary, handed to the parser:  a translation brings its own.
-- Where it stands:  no second language's words are written yet,
-  and Spell's tokenizer would first need markdown's idea of a word (above, "Tokens").
+  A rule asks which form matched (`Negatable.isNegated()`), never which word.
+- A type's words are Spell's vocabulary, handed to the parser:  each language's pack brings its own,
+  in [languages/](src/spell/languages/).
+- A third language is a third file per folder, and a pack:  `spell lang packs check` says what it still lacks.
 
 ## Testing rules
 

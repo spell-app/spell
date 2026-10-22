@@ -33,8 +33,8 @@ export class NamedObjectLiteralProperty extends ObjectLiteralProperty {
 }
 
 /**
- * `flag_object_literal_property` rule:  `jokers` -- a property's name alone, meaning `jokers = yes`
- * (epic `outline-spell` P26).
+ * `flag_object_literal_property` rule:  `jokers` --
+ * a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).
  * - e.g. `a new deck with jokers`, `a new deck with jokers and name = "big"`
  * - One word, then the end, a comma or `and` (`and_or`, meaning `and`):  a word with more after it is something else.
  */

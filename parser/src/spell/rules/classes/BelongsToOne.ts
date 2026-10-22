@@ -13,9 +13,9 @@ import { SpellStatement } from "spell-lang/spell/rules/Statement"
  *   Adding a card to one takes it out of the other.
  * - A list outside the family, e.g. `a deck is a list of cards`, stays outside:
  *   a card can be in the deck AND one pile.
- * - Both types MUST be declared ABOVE, e.g. `a pile is a list of cards`:
- *   what we compile to needs both classes.  A type only mentioned so far (a stub) is refused, as is
- *   a list type of spell's own, e.g. `one list`:  it'd make every list hold a card once.
+ * - Both types MUST be declared ABOVE, e.g. `a pile is a list of cards`:  what we compile to needs both classes.
+ *   - A type only mentioned so far (a stub) is refused,
+ *     as is a list type of spell's own, e.g. `one list`:  it'd make every list hold a card once.
  * - SIDE EFFECT:  the item type gains a READ-ONLY member naming the list type, `the pile of a card`:
  *   the pile holding it, or nothing.  Declared by THIS line -- see `P.TypeScope.declareOwnerMember()`.
  *   - A built-in item type, e.g. `a thing belongs to one bag`, gets NO member:

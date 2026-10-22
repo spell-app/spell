@@ -142,9 +142,9 @@ It holds `equals`, not `==`, and `up`, not `"up"`.
 Each human language reads into it, and each target writes out of it,
 so a new language, or a new target, is one piece of work, not one per pair.
 
-![English, and Spanish coming, read into one Spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
+![English and Spanish read into one Spell tree;  JavaScript, TypeScript and Python, and WebAssembly coming, written out of it](docs/images/languages-and-targets.svg)
 
-_N languages plus M targets, never N × M:  the dashed boxes are coming._
+_N languages plus M targets, never N × M:  the dashed box is coming._
 
 <details>
 <summary>As text</summary>
@@ -153,7 +153,7 @@ _N languages plus M targets, never N × M:  the dashed boxes are coming._
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   en[English] --> tree((the Spell tree))
-  es[Spanish, coming] -.-> tree
+  es[Spanish] --> tree
   tree --> js[JavaScript on Solid]
   tree --> ts[TypeScript on Solid, or a library]
   tree --> py[Python]
@@ -161,16 +161,17 @@ flowchart LR
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef coming fill:#F2F7EE,stroke:#7BA05B,stroke-width:1.5px,stroke-dasharray:5 4,color:#3D5A2A,rx:8px,ry:8px
-  class es,wasm coming
+  class wasm coming
 ```
 
 </details>
 
-- **Real today:**  English in, four targets out.
+- **Real today:**  English and Spanish in, four targets out.
+  A project written in Spanish says `language: "es"` in its project file;  English is the default.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
   Eleven frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
-- **Not yet:**  a second human language, and WebAssembly (below, "Coming").
+- **Not yet:**  a third human language, and WebAssembly (below, "Coming").
 - What each target gives you, and what it costs:
   [README-targets](README-targets.md#four-targets-and-what-each-one-costs).
 
@@ -236,13 +237,13 @@ Six ideas carry most of the language, and each reads both ways:
   `the color of a card is red if its suit is either diamonds or hearts otherwise it is black` works the color out
   each time it's read, a getter, so there's nothing to keep in step.
 - **Phrases become rules.**  Quoted words are a new phrase, a rule from the next line on (above, "Underneath").
-  A blank in brackets makes a phrase per value:  after `a card "is a (rank)" for its ranks`,
-  `the card is a queen` reads, and so does `the card is not an ace`.
+  A blank in brackets makes a phrase per value:
+  after `a card "is a (rank)" for its ranks`, `the card is a queen` reads, and so does `the card is not an ace`.
 - **Precedence, as you'd read it.**  `its suit is either diamonds or hearts` asks ONE question:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
-  Sums come before comparisons, too:  the tableau's rule in
-  [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
+  Sums come before comparisons, too:
+  the tableau's rule in [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -356,13 +357,14 @@ Lint first.
 ## The language commands
 
 You've just used four of them.
-The kit's `spell` takes eleven commands from this repo:
+The kit's `spell` takes thirteen commands from this repo:
 `compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
-`parse`, `repl`, `explain` and `describe` show what Spell made of it;  and `speedtest` times the parser.
+`parse`, `repl`, `explain` and `describe` show what Spell made of it;  `speedtest` times the parser;
+and `lang packs check` and `lang packs fix` check the language packs against English.
 [commands.ts](src/cli/commands.ts) lists them, and spell-lang's `package.json` names that file,
 `"spell": { "commands" }`.
-What each does, every option, with examples:  [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang),
-or `spell help <command>`.
+What each does, every option, with examples:
+[the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang), or `spell help <command>`.
 
 **Their work is spell-app's, for now.**
 The names live here, and each command hands its work to spell-app's `language` hook
@@ -371,8 +373,8 @@ The names live here, and each command hands its work to spell-app's `language` h
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
-- `spell lang packs check` / `fix` are the exception:  they need no project, so their work is here,
-  in [packsCommand.ts](src/cli/packsCommand.ts).
+- `spell lang packs check` / `fix` are the exception:
+  they need no project, so their work is here, in [packsCommand.ts](src/cli/packsCommand.ts).
 
 <details>
 <summary>The files in cli/</summary>
@@ -381,6 +383,7 @@ The names live here, and each command hands its work to spell-app's `language` h
 | --- | --- |
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
+| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell lang packs check` and `fix`:  what each language pack lacks against English, and stubs for it |
 | [cli/index.ts](src/cli/index.ts) | `spell-lang/cli`:  the types, for spell-app |
 
 </details>
@@ -402,7 +405,8 @@ What each one needs:
   - `test`, `watch`:  the loader;  `watch`'s compile step as `compile`'s
   - `speedtest`:  finds Spell by its package, not through spaces
   - `compile`, `lint`, `run`:  the loader, plus spell-app's hooks above
-- And the progress lists and screens they draw, which are spell-app's today (Ink, in its `src/cli/ui/`).
+- And the progress lists and screens they draw, which are spell-app's today:
+  [its Ink screens](https://github.com/spell-app/spell-app/tree/main/src/cli/ui).
 
 </details>
 
@@ -448,27 +452,47 @@ and the command line's base is the kit's:
 
 The language's own commands are this repo's (above):  the command line finds them here.
 
+## Spell in Spanish
+
+A project can be written in Spanish, and compile to the same targets:
+the second box on the left of the picture above.
+Its project file says `language: "es"`, its files stay `.spell`, and its outline reads the way an English one does:
+
+```spell
+una carta es una cosa
+las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
+el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
+```
+
+_Three lines of [Carta.spell](tests/spaces/@spell/test/cartas/Carta.spell),
+from `cartas`, the frozen `cards` project translated line for line._
+
+- It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
+  - Each folder of rules has `<folder>.en.ts`, the rules with their English syntax and tests,
+    and `<folder>.es.ts`, the same rules in the same order, in Spanish.
+  - A rule reads what a WORD RULE matched (an article, `is` or `is not`), never the word itself.
+- A LANGUAGE PACK is everything else a language brings, in [languages/](src/spell/languages/):
+  its word tables, its singulars and plurals, its articles and their agreement, and its messages.
+  English is the first pack, Spanish the second.
+- Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
+- A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
+- `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
+  `fix` writes stubs to translate.
+- **Not yet:**  a translated example beyond `cartas`, and docs that teach Spanish Spell.
+  Most of the parser's warnings still speak English.
+- The whole story, and what Spell UI and the editor do in Spanish:  the docs site's Spell in Spanish guide,
+  `/guides/spanish.html`.
+
 ## 🌱 Coming
 
 None of these is here yet.
 Each says where it stands.
 
-### Spell in Spanish, and then other languages
+### A third human language
 
-The same programs, written in Spanish, compiling to the same targets:  the dashed box on the left of the picture above.
-A hand translation of the sentence card has worked out the words, though nothing reads it yet:
-
-```spell
-una carta es una cosa
-las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
-el color de una carta es rojo si su palo es diamantes o corazones de lo contrario es negro
-```
-
-_Three lines of [Card.spell-es](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/Card.spell-es), beside the
-outline Solitaire example._
-
-Where it stands:  the rule classes can already take a second language's syntax strings, and no Spanish rules are
-written ([how one would start](README-parser.md#-spell-in-another-human-language)).
+Norwegian and Portuguese are next, with help from friends.
+Each is a third file per folder of rules, and a pack of its own:  words, not code
+([how a language starts](README-parser.md#spell-in-another-human-language)).
 
 ### Two more targets, and mixins
 
@@ -509,7 +533,11 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
     (the `spell` folder's and the parser's), core's declarations writer, the scripts and configs
 - One folder's tests:  `yarn vp test run --project parser`, or `markdown`, `core`, `py`, `spell`, `cli`.
 - Tests live in `tests/<folder>/`, at the same paths as the code under `src/`:
-  `tests/parser/rules/Rule.test.ts` tests `src/parser/rules/Rule.ts`.
+
+  ```text
+  tests/parser/rules/Rule.test.ts    tests    src/parser/rules/Rule.ts
+  ```
+
 - The frozen test projects, [tests/spaces/@spell/test/](tests/spaces/@spell/test/), pin every target's output:
   [README-spell](README-spell.md#the-frozen-test-projects).
 - The folders' own scripts, each named for its folder:
@@ -533,7 +561,7 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
 - Its lineage is HyperCard ("programming for the rest of us"), SuperCard, Inform and literate programming,
   and it aims to fix what HyperCard couldn't:  one platform, no network, a closed file format.
 - Its own parser dates from then, too:  the talk's notes found the language too dynamic for YACC, ANTLR or Chevrotain.
-- The 2017 notes are in [docs/spell/thoughts/](docs/spell/thoughts/):  history, not current plans.
+- [The 2017 notes](docs/spell/thoughts/) are history, not current plans.
 
 </details>
 
@@ -546,5 +574,5 @@ MIT, as spell-lang's [package.json](package.json) says.
 - [README-parser](README-parser.md):  the parser on its own, if the rules-as-classes part is why you came
 - [README-spell](README-spell.md):  everything a line of Spell can say, and how to add a rule
 - [README-targets](README-targets.md):  what each target writes, and what each one costs
-- [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  every option of the eleven commands, with examples
+- [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  every option of the thirteen commands, with examples
 - [the kit's README](https://github.com/spell-app/spell-kit/blob/main/README.md):  setup from zero, the five repos, and every page of every repo

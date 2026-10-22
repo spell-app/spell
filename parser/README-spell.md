@@ -49,7 +49,8 @@ and `spell lint` fails on it by file, line and column.
 <details>
 <summary>Run the card yourself</summary>
 
-You need `spell` on your PATH:  [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
+You need `spell` on your PATH:
+[setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
 then [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up).
 In any folder outside the checkout, save the card as `try/solitaire/Card.spell`, then:
 
@@ -109,8 +110,9 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 
 - In an outline, `it` and `its` mean the type its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
-- A file may mix the two:  [outline-solitaire's card](tests/spaces/@spell/test/outline-solitaire/Card.spell)
-  is an outline, and its actions, underneath, are sentences.
+- A file may mix the two:
+  [outline-solitaire's card](tests/spaces/@spell/test/outline-solitaire/Card.spell) is an outline,
+  and its actions, underneath, are sentences.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
 
@@ -147,7 +149,7 @@ something (a type, a property, a phrase, how a thing is saved).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
-- Nineteen modules are folders of [src/spell/rules/](src/spell/rules/), one rule class per file;
+- Nineteen modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
   the base rules sit at the top of it:  a block, a line, a blank line, a line nothing reads.
 - The 241 classes are 224 rules, and 17 base classes that no syntax names.
   There are more syntaxes than rules because a rule with several ways to be written is registered once per way.
@@ -207,8 +209,8 @@ every later line can use the phrase, in this project and in any project that imp
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
   the `cards` project wrote `(suits)`, and answers to `the queen of spades`.
-- A phrase travels with its project's declarations:  `klondike` imports `cards`,
-  and its `a tableau can give up a card if: the card is face up` reads a phrase `cards` made.
+- A phrase travels with its project's declarations, e.g. from `cards` to `klondike`, which imports it:
+  klondike's `a tableau can give up a card if: the card is face up` reads a phrase `cards` made.
 
 **The edge, and it's a sharp one:**  a phrase in the other form doesn't fail;  it reads as something else.
 Against the card at the top, `the card is the queen of spades` compiles to `card == "spades".queen`:
@@ -250,8 +252,8 @@ Its first line is how you call it, with each blank's type in brackets:
 | `move card to tableau` | `core.move(card, tableau)` |
 | `a card belongs to one pile` | `Pile.exclusive = true`, and a `pile` getter on the card |
 
-- Positions count from 1, as people count;  the compiler turns them into the target's own
-  ([README-core](README-core.md#positions-count-from-1)).
+- Positions count from 1, as people count:
+  the compiler turns them into the target's own ([README-core](README-core.md#positions-count-from-1)).
 - A project whose project file says `"listsStartAt": 0` counts from 0 instead:  the frozen `cards-from-zero`.
 - `a card belongs to one pile` makes piles exclusive:  adding a card to one takes it out of the last.
 
@@ -365,10 +367,10 @@ Every thing has an `id`, built in:  nobody declares it.
 | `a person is saved in its own file` | `Person.savedInFile = true` |
 | `a dated-event is saved inline` | `DatedEvent.savedInline = true` |
 
-- A thing saves as readable JSON, its type first:  the format is the runtime's
-  ([README-core](README-core.md#the-pieces--one-object-built-as-it-loads), "JSON").
-- Saved in its own file, each person is a file of their own;  saved inline, a small thing stays inside what holds it
-  ([people](tests/spaces/@spell/test/people/People.spell)).
+- A thing saves as readable JSON, its type first:
+  the format is the runtime's ([README-core](README-core.md#the-pieces--one-object-built-as-it-loads), "JSON").
+- Saved in its own file, each person is a file of their own;
+  saved inline, a small thing stays inside what holds it ([people](tests/spaces/@spell/test/people/People.spell)).
 
 One thing of a running program is named by its type, then its name or its place:
 
@@ -605,10 +607,10 @@ _async.addRule(Pause, {
 The rules for writing rules, in full, are in [the `spell` folder's AGENTS.md](src/spell/AGENTS.md), "Parser rules":
 what goes on the class and what on the match, and why `getAST()` must never touch scope.
 
-**The cost:**  English lives in the syntax strings.
-A rule's class can take another language's syntax, which is why `addRule()` takes only `{ syntax, tests }`;
-but no second human language has its syntaxes written yet
-([how one would start](README-parser.md#-spell-in-another-human-language)).
+**The cost:**  each human language lives in its own syntax strings.
+A rule's class takes any language's syntax, which is why `addRule()` takes only `{ syntax, tests }`:
+English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
+([how a language is added](README-parser.md#spell-in-another-human-language)).
 
 ## What lives here, and what doesn't
 

@@ -1,6 +1,6 @@
 /**
- * The `methods` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `methods` parser
- * (epic `spanish`).
+ * The `methods` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `methods` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `methods.en.ts`:  a tie between two rules goes to the first.
  * - Its tests are English's, said in Spanish.
@@ -981,8 +981,8 @@ methodsEs.addRule(QuotedTypeExpression, {
   ]
 })
 
-// in an outline body, as English's `- it "is face up" if ...`:  Spanish's `subject_it` has no word (it leaves the
-// subject out, below), so this matches nothing until it gets one -- registered to keep English's order
+// in an outline body, as English's `- it "is face up" if ...`:  Spanish's `subject_it` has no word,
+// as it leaves the subject out (below), so this matches nothing until it gets one -- registered to keep English's order
 methodsEs.addRule(QuotedTypeExpression, {
   syntax: "{type:subject_it} {signature:quoted_method_signature} (si|es)? :? {expression_body}?"
 })

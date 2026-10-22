@@ -11,8 +11,8 @@ import { SP, type SpellHighlightSpan } from "spell-lang/spell"
  *      types, properties, variables ...), over the first pass.  Lines that don't parse (a name declared in another
  *      file) keep their token colours;  a parse that throws keeps them all.
  * - Kinds are highlight.js scopes (`SCOPES`), so `<ui-code>` colours spell with every other language's classes.
- * - Lighter than the language server's `highlightSpans()`:  no project, so no "declared here" / "built in"
- *   refinements.
+ * - Lighter than the language server's `highlightSpans()`:
+ *   no project, so no "declared here" / "built in" refinements.
  * - NEVER throws.
  ****************/
 export class SpellHighlighter {

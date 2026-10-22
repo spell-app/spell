@@ -2,8 +2,8 @@ import { P } from "spell-lang/parser"
 import { Negatable, SpellExpression } from "spell-lang/spell/rules/expressions"
 
 /**
- * `check_process` rule:  check whether a conceptual animation or process is currently running, e.g.
- * `animation dealing is running`.
+ * `check_process` rule:  check whether a conceptual animation or process is currently running.
+ * - e.g. `animation dealing is running`
  * - `is not`/`isn't`/`isnt` negate the check via `P.ASTNotExpression`.
  */
 export class CheckProcess extends SpellExpression<"name|operator"> {

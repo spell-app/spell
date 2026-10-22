@@ -3,7 +3,8 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 
 /**
- * `property` rule:  ONE word naming a property:  initial-lower-case, not one of the language's own words (its `blacklist`).
+ * `property` rule:  ONE word naming a property:
+ * initial-lower-case, not one of the language's own words (its `blacklist`).
  * - What a LOOSE read takes, e.g. `the is-set-up of the deck` -- see `property_expression`.
  * - Declarations and resolved reads take `member_words`.
  * - `mapValue()` converts dashes to underscores, e.g. `foo-bar` compiles as `foo_bar`.

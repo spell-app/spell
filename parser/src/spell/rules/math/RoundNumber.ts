@@ -14,8 +14,9 @@ export class RoundNumber extends SpellExpression<"expression|operator?"> {
   @proto static datatype = "number"
 
   /**
-   * Maps `operator`'s meaning, none / `up` / `down`, to `round`/`roundUp`/`roundDown`:  each writer says it as its platform does
-   * (epic `python-target` P24, Owen on Q29):  `Math.round(price)`, `math.floor(price + 0.5)`.
+   * Maps `operator`'s meaning, none / `up` / `down`, to `round`/`roundUp`/`roundDown`.
+   * - Each writer says it as its platform does (epic `python-target` P24, Owen on Q29):
+   *   `Math.round(price)`, `math.floor(price + 0.5)`.
    */
   getAST(match: P.MatchFor<this>) {
     const { expression, operator } = match.groups

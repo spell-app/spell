@@ -8,7 +8,8 @@ import { SpellIdentifier } from "./SpellIdentifier"
 export class PluralIdentifier extends SpellIdentifier {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    // Anything but a definite singular will do -- uncountable words (`"either"`) match here AND in `singular_identifier`.
+    // Anything but a definite singular will do:
+    // uncountable words (`"either"`) match here AND in `singular_identifier`.
     if (!match || super.getPlurality(match) === "singular") return undefined
     return match
   }

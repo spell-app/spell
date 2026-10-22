@@ -2,8 +2,8 @@
  * The language's `spell` commands (spell-lang's `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
  * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest;
  * and `spell lang packs check|fix`, for the language packs (epic `spanish` P7).
- * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:  every one
- *   loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
+ * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
+ *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
  *   - Moving the work down here, command by command, is epic `repo-split`'s open issue (P13).
  *   - `spell lang packs` is the exception:  it needs no project, so its work is here, `packsCommand.ts`.

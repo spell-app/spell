@@ -4,8 +4,8 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
 
 /**
  * `minus` rule:  `minus` / `-`, e.g. `price - tax`.
- * - NOTE: bare `-` requires surrounding spaces -- otherwise it'd clash with negative-number literals,
- *   see commented-out test below.
+ * - NOTE: bare `-` requires surrounding spaces -- otherwise it'd clash with negative-number literals:
+ *   see the commented-out test in `math.en.ts`.
  */
 export class Minus extends InfixOperatorSuffix {
   @proto static precedence = Precedence.sum

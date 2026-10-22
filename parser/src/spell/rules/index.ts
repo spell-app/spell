@@ -1,8 +1,9 @@
 /**
- * Assembles every spell language rule module into the single `spellParser` instance.
+ * Assembles every spell rule module into ONE parser, `spellParser`.
  * - Not a plain re-export barrel:  this folder is a list of independent rule modules.
- *   - Each exports its rule classes, plus a `SpellParser` which registers them.
- *   - This file combines those parsers, via `spellParser.import(...)`.
+ *   - Each exports its rule classes and its own `SpellParser`.
+ *   - Each module's `<module>.en.ts` registers its classes on that parser, with their English syntax and tests.
+ *   - This file loads every `.en.ts`, then combines the parsers, via `spellParser.import(...)`.
  * - A module is a folder, one rule per file, e.g. `events/`:
  *   see "Parser rules" in spell's `AGENTS.md`.
  * - NOTE: import order matters in a few places -- see the comment above the `ParseError` import.
@@ -59,9 +60,8 @@ import "./async/async.en"
 import "./draw/draw.en"
 import "./tests/tests.en"
 
-// NOTE: kept as the last import (matching the original `export { ParseError } from "./ParseError"`
-// placement, which was hoisted to evaluate after all the modules above) since `ParseError.ts`'s own
-// evaluation order relative to the other rule modules is load-bearing.
+// NOTE: kept as the last import:  `ParseError.ts` MUST evaluate after every rule module above.
+// It was `export { ParseError } from "./ParseError"`, which was hoisted to the same place.
 import { ParseError } from "./ParseError"
 
 /**
@@ -102,7 +102,10 @@ export { SPELL_TAG_NAMES }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }
-/** Export so a `<spell-app>` layout's `<markdown>` splits its holes as a drawing's does -- see `MarkdownBlock.partsOf()`. */
+/**
+ * Export so a `<spell-app>` layout's `<markdown>` splits its holes as a drawing's does
+ * -- see `MarkdownBlock.partsOf()`.
+ */
 export { MarkdownBlock }
 
 // Structural rules.  `SpellBlankLine` and `BlockLine` set `static ruleName`:  their class names don't give them.

@@ -1,8 +1,8 @@
 import { P } from "spell-lang/parser"
 
 /**
- * `with_nested_statements` rule:  `where:`, `with:` or a bare `:` ending a line -- then the indented block under it is
- * the statement's body, e.g. a type's outline body (epic page `outline-spell` Q7).
+ * `with_nested_statements` rule:  `where:`, `with:` or a bare `:` ending a line --
+ * then the indented block under it is the statement's body, e.g. a type's outline body (epic page `outline-spell` Q7).
  * - A body keyword which matches words on the line (`leadIn`, see `BODY_KEYWORDS`):
  *   it ends a statement's `syntax`, e.g. `(a|an) {type} is (a|an) {superType:type} {with_nested_statements}?`.
  *   - The statement takes the block only when this matched,

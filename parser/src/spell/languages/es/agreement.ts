@@ -2,8 +2,9 @@
  * How Spanish's articles agree with their noun, for spell's Spanish pack (epic `spanish` P8):
  * in gender and number, `la carta`, `los mazos`, `unas cartas`.
  * - `el carta` warns "la carta"?, `un cartas` "unas cartas"?:  see `SP.Language.agreement()`.
- * - A type's gender is read off its declaration's article:  `una carta es una cosa` is feminine, `un mazo ...`
- *   masculine (`genderOf()`).  The built-in types' are in `BUILT_IN_GENDERS`, e.g. `lista`.
+ * - A type's gender is read off its declaration's article (`genderOf()`):
+ *   `una carta es una cosa` is feminine, `un mazo ...` masculine.
+ *   The built-in types' are in `BUILT_IN_GENDERS`, e.g. `lista`.
  * - Its number is the noun's as written:  `cartas` is plural.
  * - Only a noun naming a type:  a word spell knows no gender for (`un trébol`, a value) never warns.
  * - NOT the contractions `al` and `del`, nor a feminine noun taking `el` before a stressed `a` (`el agua`).

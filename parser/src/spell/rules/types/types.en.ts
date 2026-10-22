@@ -1,7 +1,7 @@
 /**
  * The `types` rules in English:  each rule's syntax and its tests, registered on the `types` module's parser.
  * - The rule CLASSES are their own files, beside this one:  what a rule does, whatever the language.
- * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
+ * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `types.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
@@ -94,8 +94,8 @@ types.addRule(KnownType, {
   tests: [
     {
       beforeEach(scope: P.Scope) {
-        // `Scope.types` is typed narrowly (`ScopeList<TypeScope>`); the concrete `RootScope` accepts
-        // plain `TypeScopeProps` too -- see report.
+        // `Scope.types` is typed narrowly (`ScopeList<TypeScope>`):
+        // the concrete `RootScope` accepts plain `TypeScopeProps` too
         const { types } = scope as P.RootScope
         types.add({ name: "Thing" })
         types.add({ name: "Bank-Account", aka: "account" })

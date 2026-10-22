@@ -6,8 +6,8 @@ import { core } from "spell-lang/core"
 import { CORE_MESSAGES } from "spell-lang/core/core.types"
 
 /**
- * The core's messages in English:  Python's core reads the same file, so the two can't drift apart
- * (`tests/py/core/tests/test_messages.py`).
+ * The core's messages in English.
+ * - Python's core reads the same file (`tests/py/core/tests/test_messages.py`), so the two can't drift apart.
  */
 const EXPECTED = JSON.parse(readFileSync(resolve(import.meta.dirname, "messages.expected.json5"), "utf8")) as {
   messages: Record<string, string>

@@ -84,9 +84,10 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       // which already accepts a plain name string as `.add()`/`.get()` input.
       const scope = match.scope as P.BlockScope
       const { variables } = scope
-      // `set it to ...` always declares a new `it` -- see `AssignmentStatement.declareIt()`
-      // REFACTOR: `"it"` is the `it` VARIABLE's name, which spell's code shares (`MethodScope`, `Get`, `ItsProperty` ...);
-      //  a language's own word for it (epic `spanish`) maps to that name where `variable` reads it, not here.
+      // `set it to ...` always declares a new `it` -- see `AssignmentStatement.declareIt()`.
+      // REFACTOR: `"it"` is the `it` VARIABLE's name,
+      // which spell's code shares (`MethodScope`, `Get`, `ItsProperty` ...):
+      // a language's own word for it (epic `spanish`) maps to that name where `variable` reads it, not here.
       const { datatype } = value
       if (varName === "it") {
         match.data.newIt = AssignmentStatement.declareIt(scope, match, datatype)

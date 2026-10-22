@@ -14,8 +14,9 @@ import { Synonyms } from "spell-lang/spell/rules/expressions"
 
 /**
  * Notes warnings on matches while parsing, and gathers a file's back up.
- * - A rule notes one on its OWN match's `data.warnings` (`note()`), WHILE PARSING:  in `parse()`, or `mutateScope()`
- *   for what it only knows then.  NEVER in `getAST()`, which is pure.
+ * - A rule notes one on its OWN match's `data.warnings` (`note()`), WHILE PARSING:
+ *   in `parse()`, or `mutateScope()` for what it only knows then.
+ *   NEVER in `getAST()`, which is pure.
  * - Shown under their text by editors (`SpellLanguageService.diagnostics()`, as `DiagnosticSeverity.Warning`), and
  *   listed by `spell compile` after its errors, which they never count as.
  * - STATIC and instance-free on purpose:  what it knows is on the matches, which incremental parsing keeps or

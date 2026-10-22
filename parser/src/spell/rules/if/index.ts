@@ -1,8 +1,10 @@
 /**
  * The `if` rule module:  `if`/`else if`/`else` statements, plus the backwards `if...else` ternary suffix.
- * - One rule per file, each registering itself on `_if_` (`if.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `if.en.ts` registers them on `_if_` (`if.parser.ts`),
+ *   and each other language's `if.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./if.parser"
 export * from "./if.shared"

@@ -1,6 +1,6 @@
 /**
- * `spell lang packs check|fix`:  is a language pack complete, against English -- and stubs for what it lacks
- * (epic `spanish` P7).
+ * `spell lang packs check|fix`:  is a language pack complete, against English?
+ * - `fix` writes stubs for what it lacks (epic `spanish` P7).
  * - The checking and the stub writing are `spell-lang/spell/languages/packs` (node-free, on text);
  *   this file reads and writes the rule files, asks `claude` for drafts, and prints.
  * - Their work is HERE, not behind spell-app's `"language"` hook:  it needs no project, only spell-lang's own files.

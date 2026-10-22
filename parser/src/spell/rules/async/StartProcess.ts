@@ -6,8 +6,8 @@ import { Negatable } from "spell-lang/spell/rules/expressions"
 
 /**
  * `start_process` rule:  start a conceptual animation or process, e.g. `start animation dealing`.
- * - An `exclusive` process (`operator`, un-negated:  `exclusive_or_not`) guards against re-entry: compiles to an early `return` if the process is
- *   already running, then starts it flagged `'EXCLUSIVE'`.
+ * - An `exclusive` process (`operator`, un-negated:  `exclusive_or_not`) guards against re-entry:
+ *   it compiles to an early `return` if the process is already running, then starts it flagged `'EXCLUSIVE'`.
  * - `animation`/`process` are synonyms in the syntax -- purely for readability at the call site.
  */
 export class StartProcess extends SpellStatement<"operator?|name"> {

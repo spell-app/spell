@@ -20,7 +20,7 @@
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
           "line": 16,
-          "purpose": "Blank line, compiling to `P.ASTBlankLine` -- generic `P.BlankLine` has no `getAST()` of its own, and spell always converts to AST before compiling.",
+          "purpose": "A blank line, compiling to `P.ASTBlankLine`.",
           "syntaxes": [],
           "aliases": []
         },
@@ -64,7 +64,7 @@
           "ruleNames": ["eat_whitespace"],
           "internal": false,
           "file": "src/spell/rules/core/EatWhitespace.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "Eats all whitespace at start of tokens -- used to skip leading indent/newlines before a real rule.",
           "syntaxes": [
             {
@@ -462,7 +462,7 @@
           "ruleNames": ["words_variable"],
           "internal": false,
           "file": "src/spell/rules/variables/WordsVariable.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "A variable of several words, known or not, e.g. `the start pile` (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -781,7 +781,7 @@
           "internal": false,
           "file": "src/spell/rules/expressions/Or.ts",
           "line": 10,
-          "purpose": "`{lhs} or {rhs}`, e.g. `thing or other` -- `Precedence.or`: lowest of the boolean / comparison suffixes.",
+          "purpose": "`{lhs} or {rhs}`, e.g. `thing or other`.",
           "syntaxes": [
             {
               "syntax": "(operator:or) {expression:operand}",
@@ -911,7 +911,7 @@
           "internal": false,
           "file": "src/spell/rules/expressions/IsIn.ts",
           "line": 14,
-          "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`, e.g. `thing is in theList`, `thing is neither red nor green`.",
+          "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`.",
           "syntaxes": [
             {
               "syntax": "{operator:is_or_is_not} (in|one of|either of?) (expression:{operand}|{identifier_list})",
@@ -1149,7 +1149,7 @@
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
           "line": 15,
-          "purpose": "`as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
+          "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
               "syntax": "as (a|an) (type:string|number|fraction|integer)",
@@ -1253,7 +1253,7 @@
           "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "A WORD RULE whose forms all mean the same to spell, e.g. `is_or_are`, `(is|are)` (epic `spanish` P3).",
           "syntaxes": [
             {
@@ -1462,7 +1462,7 @@
           "ruleNames": ["gt_lt"],
           "internal": false,
           "file": "src/spell/rules/math/GtLt.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`<`, `>`, `<=`, `>=` comparison, e.g. `salary > expenses`.",
           "syntaxes": [
             {
@@ -1489,7 +1489,7 @@
           "internal": false,
           "file": "src/spell/rules/math/IsGtLt.ts",
           "line": 12,
-          "purpose": "`is greater than`, `is less than`, optionally `... or equal to`, e.g. `salary is greater than expenses`.",
+          "purpose": "`is greater than` or `is less than`, optionally `... or equal to`.",
           "syntaxes": [
             {
               "syntax": "{operator:is_greater_or_less_than} {expression:operand}",
@@ -1916,7 +1916,7 @@
           "ruleNames": ["property"],
           "internal": false,
           "file": "src/spell/rules/properties/Property.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "ONE word naming a property: initial-lower-case, not one of the language's own words (its `blacklist`).",
           "syntaxes": [],
           "aliases": []
@@ -1967,7 +1967,7 @@
           "ruleNames": ["copy_list"],
           "internal": false,
           "file": "src/spell/rules/lists/CopyList.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "Duplicate a list, e.g. `a copy of the piles` => `core.duplicateList(piles)`.",
           "syntaxes": [
             {
@@ -3264,7 +3264,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 12,
+          "line": 14,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -3317,7 +3317,7 @@
           "internal": false,
           "file": "src/spell/rules/classes/CreateThing.ts",
           "line": 14,
-          "purpose": "`create a thing` -- same as `new_thing` above, worded with `create` instead of `a new`.",
+          "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
               "syntax": "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
@@ -3528,7 +3528,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -3651,7 +3651,7 @@
           "ruleNames": ["create_drawable_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateDrawableListType.ts",
-          "line": 11,
+          "line": 12,
           "purpose": "`a pile is a drawable list of cards` -- `create_list_type`, extending `DrawableList`.",
           "syntaxes": [
             {
@@ -3916,7 +3916,7 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 37,
+          "line": 38,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
@@ -4736,7 +4736,7 @@
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
           "line": 9,
-          "purpose": "`the color of a card` -- one of two `type_property` spellings consumed by `property_value_either` and `property_value_getter` below.",
+          "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {
               "syntax": "the {property:member_words} of (a|an) {type}"
@@ -4752,8 +4752,8 @@
           "ruleNames": ["a_things_property"],
           "internal": false,
           "file": "src/spell/rules/classes/AThingsProperty.ts",
-          "line": 8,
-          "purpose": "`a cards color` -- the other `type_property` spelling, see `the_property_of_a_thing` above.",
+          "line": 7,
+          "purpose": "`a cards color` -- the other `type_property` spelling, see `the_property_of_a_thing`.",
           "syntaxes": [
             {
               "syntax": "(a|an) {type:plural_type} {property:member_words}"
@@ -4767,7 +4767,7 @@
           "internal": false,
           "file": "src/spell/rules/classes/ItsQuotedProperty.ts",
           "line": 9,
-          "purpose": "`its \"color\"` in an outline body -- the third `type_property` spelling, for `property_value_either`: `- its \"color\" is red if its suit is either diamonds or hearts otherwise it is black`.",
+          "purpose": "`its \"color\"` in an outline body -- the third `type_property` spelling.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} {property:quoted_member}"
@@ -4824,7 +4824,7 @@
           "internal": false,
           "file": "src/spell/rules/async/CheckProcess.ts",
           "line": 9,
-          "purpose": "Check whether a conceptual animation or process is currently running, e.g. `animation dealing is running`.",
+          "purpose": "Check whether a conceptual animation or process is currently running.",
           "syntaxes": [
             {
               "syntax": "(animation|process) {name:constant} {operator:is_or_is_not} (running|active)",
@@ -5001,7 +5001,7 @@
           "ruleNames": ["markdown_block"],
           "internal": false,
           "file": "src/spell/rules/JSX/MarkdownBlock.ts",
-          "line": 36,
+          "line": 37,
           "purpose": "Formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).",
           "syntaxes": [
             {
@@ -5121,7 +5121,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/types/SpellType.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "Base pattern rule for matching a type name, singular or plural, known or unknown.",
           "syntaxes": [],
           "aliases": []
@@ -5131,8 +5131,8 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/types/SubjectRule.ts",
-          "line": 18,
-          "purpose": "`it` in an outline-style type's body: the type the body is about -- `Card` in `- it has a deck` under `a card is a thing where:`.",
+          "line": 19,
+          "purpose": "`it` in an outline-style type's body: the type the body is about, e.g. `Card` in `- it has a deck` under `a card is a thing where:`.",
           "syntaxes": [],
           "aliases": []
         },
@@ -5217,7 +5217,7 @@
           "internal": false,
           "file": "src/spell/rules/types/QuotedType.ts",
           "line": 16,
-          "purpose": "A type's name in quotes, where it's being declared: `a \"card\" is a thing where:` -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
+          "purpose": "A type's name in quotes, where it's being declared, e.g. `a \"card\" is a thing where:` -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
           "syntaxes": [
             {
               "example": "\"card\"",
@@ -5668,8 +5668,8 @@
           "ruleNames": ["else"],
           "internal": false,
           "file": "src/spell/rules/if/Else.ts",
-          "line": 12,
-          "purpose": "`(else|otherwise) :?` -- else branch; must be tried after `else_if` (see NOTE there) so this rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.",
+          "line": 13,
+          "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
               "syntax": "(else|otherwise) :? {statement_body}?",
@@ -5721,7 +5721,7 @@
           "internal": false,
           "file": "src/spell/rules/if/ValueIf.ts",
           "line": 25,
-          "purpose": "`red if it is diamonds or hearts` -- one line of a getter's body: a VALUE, then when it's the answer; `value_otherwise` (`black otherwise`) is the last line (epic page `outline-spell`, P2): ```spell",
+          "purpose": "`red if it is diamonds or hearts` -- one line of a getter's body: a VALUE, then when it's the answer.",
           "syntaxes": [
             {
               "syntax": "(value:{expression}|{constant}) if {condition:expression} (otherwise it is (otherValue:{constant}|{expression}))?",
@@ -5911,7 +5911,7 @@
           "ruleNames": ["var_method_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/VarMethodArg.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "Untyped variable inside parens, e.g. `(message)` in `to notify (message): ...`.",
           "syntaxes": [],
           "aliases": ["method_arg", "simple_method_arg"]
@@ -5963,8 +5963,8 @@
           "ruleNames": ["with_props_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/WithPropsArg.ts",
-          "line": 23,
-          "purpose": "A `with`-prefixed prop list, e.g. `(with bar and baz = \"baz\" and bong as text)` in `to foo (with bar and baz = \"baz\" and bong as text)`.",
+          "line": 22,
+          "purpose": "A `with`-prefixed prop list.",
           "syntaxes": [
             {
               "syntax": "with [{simple_method_arg} (,|and)]"
@@ -5991,8 +5991,8 @@
           "ruleNames": ["method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/MethodSignature.ts",
-          "line": 18,
-          "purpose": "A full method signature, alternating keywords and args, e.g. `foo the (bar as a thing)`, `give a card to a pile`.",
+          "line": 20,
+          "purpose": "A full method signature, alternating keywords and args.",
           "syntaxes": [
             {
               "syntax": "({bare_type_arg}|{method_keyword}|\\( {method_arg} \\))+"
@@ -6019,7 +6019,7 @@
           "ruleNames": ["quoted_method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedMethodSignature.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "Method signature surrounded by quotes.",
           "syntaxes": [],
           "aliases": []
@@ -6035,7 +6035,7 @@
           "internal": false,
           "file": "src/spell/rules/tests/ExpectTest.ts",
           "line": 15,
-          "purpose": "`expect {expression}`, `expect {expression} to be {value}` or `{expression} should be {value}` -- an assertion.",
+          "purpose": "An assertion -- `expect {expression}`, `expect {expression} to be {value}` or `{expression} should be {value}`.",
           "syntaxes": [
             {
               "syntax": "expect that? {expression} (to be (value:{expression}|{constant}))?",
