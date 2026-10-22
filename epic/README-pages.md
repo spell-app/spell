@@ -493,7 +493,7 @@ _Trimmed of its change time.  Its body waits in a part file;  the element draws 
 
 Epic UI is `spell-epic`'s set of these:  one component pack, `epics`, every tag starting `epic-`,
 47 tags in 35 families.
-The frame around them (sections, tables, buttons, icons) is [Spell UI](../spell-ui/README.md)'s `<ui-*>` elements.
+The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s `<ui-*>` elements.
 43 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
 the other four (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`)
 are drawn only inside other elements.
@@ -569,7 +569,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 ### Working on the elements
 
 The elements are written exactly like Spell UI's own families,
-on [the kit's element framework](../README-element.md) and Spell UI's core.
+on [the kit's element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md) and Spell UI's core.
 
 If you find yourself writing a second copy of any of these, stop and reuse:
 
@@ -622,13 +622,13 @@ Adding a new element:
 - [README-skills.md](README-skills.md):  `/epic review`, `/details` and the other skills that open these pages
 - [README-cli.md](README-cli.md):  `epic inbox`, `epic test` and every other verb that writes a page
 - [README-vscode.md](README-vscode.md):  the Review tab the pages show in, and how a session reaches its window
-- [The kit's README-element.md](../README-element.md):  how packs and elements work, before you write an `epic-*` one
+- [The kit's README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md):  how packs and elements work, before you write an `epic-*` one
 
 <details>
 <summary>More in the docs site</summary>
 
 In the content folder, so only where `spell.epics` sits beside the repos
-([the kit's setup](../README.md#setup-from-zero) says where), served by `spell server start`:
+([the kit's setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero) says where), served by `spell server start`:
 
 - "Epic Pages":  `/guides/plan-docs/plan-docs.html`, every part of the page, every colour and button
 - "Reviewing an Epic Page":  `/guides/epic-components/review.html`

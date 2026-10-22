@@ -41,7 +41,7 @@ the verbs that find sessions, move windows and wake a session are built on Claud
 and spell-epic's VS Code extension.
 
 - Claude Code sessions have `epic` on their `PATH` while the spell-epic plugin is on;
-  your own terminal needs one link, the last of [the plugin's four install commands](../README-agents.md#the-epic-plugin).
+  your own terminal needs one link, the last of [the plugin's four install commands](https://github.com/spell-app/spell-kit/blob/main/README-agents.md#the-epic-plugin).
 - No build step:  [bin/epic](bin/epic) runs spell-epic's source through `tsx`, so an edit to it is live at once.
 - It loads no Spell, so it starts fast:  `epic --version` answers in about 0.2 s.
 
@@ -596,5 +596,5 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
 - [README-skills.md](README-skills.md):  the skills that run these verbs for you, and when to reach for which
 - [README-pages.md](README-pages.md):  what the verbs write, and a review round as you see it on the page
 - [README-adopting.md](README-adopting.md):  `epic init` in a repo of your own, every config key, the epic server
-- [The kit's README-cli.md](../README-cli.md#epic):  `epic` beside `spell`, and the rest of the command line
+- [The kit's README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#epic):  `epic` beside `spell`, and the rest of the command line
 - [README.md](README.md):  what an epic is, its words and its life, if this page assumed too much

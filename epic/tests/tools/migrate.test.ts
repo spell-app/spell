@@ -49,6 +49,7 @@ describe("page kinds", () => {
       // `<epic-page>` named in an attribute's text is no epic page (I25:  the epic tool's guide)
       "guides/tool.html": '<ui-step description="its data moves onto <epic-page>, its chrome dropped"></ui-step>',
       "sagas/s/s.saga.html": '<ui-root>\n  <epic-page kind="saga"></epic-page>\n</ui-root>',
+      "sagas/index.html": "",
       "guides/c.html": '<div class="spell-filter"></div>',
       "guides/dev/commands/commands.html": '<script src="commands.js"></script><div class="spell-filter"></div>',
       "guides/changelog.html": "",
@@ -72,6 +73,7 @@ describe("page kinds", () => {
         "guides/x/x.html",
         "guides/tool.html",
         "sagas/s/s.saga.html",
+        "sagas/index.html",
         "guides/c.html",
         "guides/dev/commands/commands.html",
         "guides/changelog.html",
@@ -90,7 +92,9 @@ describe("page kinds", () => {
     ).toEqual([
       "guide",
       "guide",
-      "epic",
+      // a saga page, though it's an `<epic-page>`:  `epic migrate` lists only epics' pages
+      "goal",
+      "list",
       "cheatsheet",
       "command",
       "changelog",
@@ -113,9 +117,37 @@ describe("page kinds", () => {
       expect(step.date).toMatch(/^\d{4}-\d\d-\d\d$/)
       expect(step.kinds.every((kind) => KINDS.includes(kind) && kind !== "epic")).toBe(true)
     }
-    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["components-not-markup"])
-    expect(stepsFor("goal-set")).toEqual([])
+    expect(stepsFor("cheatsheet").map((step) => step.name)).toEqual(["components-not-markup", "engine-asset-paths"])
+    expect(stepsFor("goal-set").map((step) => step.name)).toEqual(["engine-asset-paths"])
     expect(() => stepsFor("guide", "nope")).toThrow(/no step "nope"/)
+  })
+})
+
+describe("engine-asset-paths", () => {
+  // epic `repo-split` I63:  the saga pages, the parked goal sets and a brand page still loaded these
+  test("the engine's files by an old checkout path -> /_epic/;  a plain link and another file kept;  once", () => {
+    const page =
+      '<!doctype html><html><head><link rel="stylesheet" href="../../../packages/epics/tools/_assets/spell-doc.css" />' +
+      '<link rel="stylesheet" href="../../../packages/brand/_assets/brand-pages.css" /></head><body>' +
+      '<ui-root><ui-components source="../../packages/epics/pack/epics.pack.js"></ui-components>' +
+      '<a href="../../../packages/epics/tools/_assets/spell-ui.js">its source</a></ui-root>' +
+      '<script src="../../../packages/epics/tools/_assets/goals-live.js"></script></body></html>'
+    const root = checkout({ "goals/spell/ai/ai.html": page, "sagas/s/s.saga.html": page })
+    const pages = pagesFor(root)
+    expect(pages.map(({ kind }) => kind)).toEqual(["goal-set", "goal"])
+    const { results } = migratePages(pages, { tidied: false })
+    expect(results[0]!.notes).toEqual([
+      "engine-asset-paths:  ../../../packages/epics/tools/_assets/spell-doc.css -> /_epic/assets/spell-doc.css",
+      "engine-asset-paths:  ../../../packages/epics/tools/_assets/goals-live.js -> /_epic/assets/goals-live.js",
+      "engine-asset-paths:  ../../packages/epics/pack/epics.pack.js -> /_epic/pack/epics.pack.js"
+    ])
+    const html = readFileSync(join(root, "goals/spell/ai/ai.html"), "utf8")
+    expect(html).toContain('href="/_epic/assets/spell-doc.css"')
+    expect(html).toContain('href="../../../packages/brand/_assets/brand-pages.css"')
+    expect(html).toContain('source="/_epic/pack/epics.pack.js"')
+    expect(html).toContain('<a href="../../../packages/epics/tools/_assets/spell-ui.js">')
+    expect(html).toContain('src="/_epic/assets/goals-live.js"')
+    expect(migratePages(pagesFor(root), { tidied: false }).written).toEqual([])
   })
 })
 
@@ -229,9 +261,9 @@ describe("migratePages", () => {
     expect(report(again.results, root).at(-2)).toBe("guides:  0 of 3 changed")
   })
 
-  test("a saga page is never a step's:  it keeps the old markup", () => {
+  test("a parked saga page keeps the old markup:  only its engine paths are a step's", () => {
     const root = checkout({ "templates/goals/index.html": OLD_PAGE })
-    expect(pagesFor(root)).toEqual([])
+    expect(migratePages(pagesFor(root), { tidied: false }).written).toEqual([])
   })
 })
 

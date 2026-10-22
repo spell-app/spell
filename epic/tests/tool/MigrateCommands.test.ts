@@ -189,7 +189,8 @@ describe("migrate:  the runner", () => {
     expect(await commands().run(["migrate", "--list"])).toBe(0)
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
       "epic 2026-10-11 links-agree",
-      expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/)
+      expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
+      expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/)
     ])
   })
 })
@@ -205,9 +206,9 @@ describe("migrate:  kinds", () => {
     expect(() => MigrateCommands.parse(["guide"], { notify: true })).toThrow(/--notify is for epic pages/)
   })
 
-  test("another kind runs the docs tool's steps (a kind without any says so)", async () => {
-    expect(await commands().run(["migrate", "brand"])).toBe(0)
-    expect([printed, warned]).toEqual([["brand pages:  no steps for them yet"], []])
+  test("another kind runs the docs tool's steps", async () => {
+    expect(await commands().run(["migrate", "brand", "--dry-run"])).toBe(0)
+    expect([printed, warned]).toEqual([[], []])
   })
 })
 

@@ -10,11 +10,12 @@ import { EPIC_UI } from "spell-epic/server/server.types.ts"
 /****************
  * ### `ComponentSetFolders`
  * Where each COMPONENT SET's pages are on disk, and the PAGE PATH the tools name each one by:  its address, as the
- * page servers serve it (`components/app/Chooser.html`), never its folder (`packages/app/docs/Chooser.html`).
+ * page servers serve it (`components/app/Chooser.html`), never its folder (spell-app's `app/docs/Chooser.html`).
  * - The sets:  the ones checkout `root`'s settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
  *   `componentSets()`), as the epic server's `componentSetMounts()` reads them:  spell-app's are Spell UI, Epic UI,
  *   App UI, Brand.
- *   - each in its folder in checkout `root` (`packages/app/docs/`)
+ *   - each in the folder the settings name, from checkout `root`:
+ *     spell-app's `app/docs/`, or one in a repo beside it (`../spell-ui/docs`)
  *   - except Epic UI:  the engine's own `src/docs/` (`epicUi`), wherever spell-epic is;  listed even when the
  *     settings don't name it (spell-epic's own checkout), since the epic server serves it for every repo
  * - Their pages take comments, in inbox files beside them (`commentsRoutes.ts`);
@@ -54,7 +55,7 @@ export class ComponentSetFolders {
   }
 }
 
-/** One component set's pages:  `{ name: "App UI", path: "components/app", dir: "<checkout>/packages/app/docs" }`. */
+/** One component set's pages:  `{ name: "App UI", path: "components/app", dir: "<checkout>/app/docs" }`. */
 export type ComponentSetFolder = {
   /** what prose calls it, `App UI` */
   name: string
