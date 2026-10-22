@@ -56,5 +56,11 @@
   "engineFolder": "",
 
   // The VS Code window files, each machine's own:  the content repo's `windows/`, git-ignored there.
-  "windowsFolder": "spell.epics/windows"
+  "windowsFolder": "spell.epics/windows",
+
+  // The VOICES pages are written in (epic `readme` P13;  `epic voice`):  a name each, its file from here.
+  // - `code`:  docstrings, comments, AGENTS.md files, epic pages:  WWOD's writing rules, §6 and its spoke.
+  // - `readme` (READMEs, guides) is spell-epic's own, `voices/readme.md`, plus WWOD §6's Spell additions.
+  // - The child repos read the kit's:  they have no voices of their own.
+  "voices": { "code": "agents/wwod/writing.md" }
 }
