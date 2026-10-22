@@ -1,7 +1,7 @@
 /**
- * Barrel for `$/ui/runtime` -- the shared `UI` runtime.
+ * Barrel for `spell-ui/runtime` -- the shared `UI` runtime.
  * - `UI` is the page's ONE runtime instance (a lazy accessor, see `load.ts`);  `loadUI()` ~== `UI.load()`.
- *   - Component files reach it through the `core` entry (`import { UI } from "$/ui/core"`).
+ *   - Component files reach it through the `core` entry (`import { UI } from "spell-ui/core"`).
  *   - `UIComponent` calls `UI.load()` on connect.
  * - NOTE: service CLASSES are exported as TYPES only.
  *   - Why:  a value export would statically import the whole runtime into every component's chunk,

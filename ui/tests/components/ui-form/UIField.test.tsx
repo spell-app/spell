@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import type { DOMFieldElement } from "$/ui/components/ui-form/UIField"
+import type { DOMFieldElement } from "spell-ui/components/ui-form/UIField"
 
-import "$/ui"
+import "spell-ui"
 
 ////////////////
 // ## Helpers

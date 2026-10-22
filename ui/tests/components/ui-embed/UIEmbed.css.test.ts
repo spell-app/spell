@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { embedVocabulary } from "$/ui/components/ui-embed/UIEmbed.en"
+import { embedVocabulary } from "spell-ui/components/ui-embed/UIEmbed.en"
 
-import embedCSS from "$/ui/components/ui-embed/UIEmbed.css?inline"
-import embedRaw from "$/ui/components/ui-embed/UIEmbed.css?raw"
+import embedCSS from "spell-ui/components/ui-embed/UIEmbed.css?inline"
+import embedRaw from "spell-ui/components/ui-embed/UIEmbed.css?raw"
 
 /**
  * `UIEmbed.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -18,7 +18,7 @@ import embedRaw from "$/ui/components/ui-embed/UIEmbed.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-embed",
+  base: "/src/components/ui-embed",
   query: "?raw",
   import: "default",
   eager: true

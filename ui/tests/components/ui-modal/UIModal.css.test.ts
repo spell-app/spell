@@ -1,16 +1,16 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { modalVocabulary } from "$/ui/components/ui-modal/UIModal.en"
+import { modalVocabulary } from "spell-ui/components/ui-modal/UIModal.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import modalCSS from "$/ui/components/ui-modal/UIModal.css?inline"
-import modalRaw from "$/ui/components/ui-modal/UIModal.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import modalCSS from "spell-ui/components/ui-modal/UIModal.css?inline"
+import modalRaw from "spell-ui/components/ui-modal/UIModal.css?raw"
 
 /**
  * `UIModal.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -22,7 +22,7 @@ import modalRaw from "$/ui/components/ui-modal/UIModal.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-modal",
+  base: "/src/components/ui-modal",
   query: "?raw",
   import: "default",
   eager: true

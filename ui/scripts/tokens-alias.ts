@@ -5,17 +5,17 @@
  *   write the alias, and every read in the family's sheets reads the alias.  See `ComponentTokens.convert()`.
  * - Without `--write` it only prints:  the notes to review, and every OTHER file still naming a converted token
  *   (other sheets' reads, tests, examples, docs) -- those need a human, see the recipe.
- * - NOTE: imports the leaf file, not the `$/ui/styles` barrel (whose `?inline` imports only Vite understands).
+ * - NOTE: imports the leaf file, not the `spell-ui/styles` barrel (whose `?inline` imports only Vite understands).
  */
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
-import { ComponentTokens } from "../src/styles/ComponentTokens.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import { SITE_PAGES } from "../tools/tools.types.ts"
+import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import { SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { formatFiles } from "./generatedFiles.ts"
+import { formatFiles } from "spell-ui/tools/generatedFiles"
 
 /****************
  * ### `AliasTokensCommand`
@@ -31,10 +31,10 @@ class AliasTokensCommand {
    */
   run({ family, write }: AliasTokensOptions) {
     const tokens = new ComponentTokens({
-      vocabularies: this.read(this.files("components", ENGLISH_VOCABULARY)),
+      vocabularies: this.read(this.files("src/components", ENGLISH_VOCABULARY)),
       foundation: Object.values(this.read(this.files("src/styles", /\.css$/)))
     })
-    const sheets = this.read(this.files(`components/${family}`, /\.css$/))
+    const sheets = this.read(this.files(`src/components/${family}`, /\.css$/))
     const declared = new Set(
       Object.values(sheets).flatMap((css) =>
         tokens
@@ -62,7 +62,7 @@ class AliasTokensCommand {
     const own = new Set(Object.keys(sheets))
     const pattern = new RegExp(`(?<!var\\(--_ui-[a-z0-9-]+, var\\()(${[...declared].join("|")})(?![a-z0-9-])`, "g")
     // the site's pages too (`SITE_PAGES`)
-    for (const directory of ["src", "components", "test", "site", SITE_PAGES, "notes"]) {
+    for (const directory of ["src", "tests", "site", SITE_PAGES, "notes"]) {
       for (const path of this.files(directory, /\.(css|ts|tsx|html|md)$/)) {
         if (own.has(path) || path.endsWith("notes/report.md") || GENERATED_SITE.test(path) || declared.size === 0)
           continue

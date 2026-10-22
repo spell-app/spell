@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 
-import { TreeData } from "$/ui/components/ui-tree-diagram/TreeData"
+import { TreeData } from "spell-ui/components/ui-tree-diagram/TreeData"
 
 describe("TreeData.node()", () => {
   test("keeps a node's own fields, as a NEW tree", () => {

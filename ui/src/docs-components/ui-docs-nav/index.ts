@@ -12,11 +12,11 @@ import { DOMDocsNavElement, UIDocsNav } from "./UIDocsNav"
 import { NavIndex } from "./NavIndex"
 import { NavPreferences } from "./NavPreferences"
 
-import "$/ui/docs-components/ui-docs-search"
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-message"
+import "spell-ui/docs-components/ui-docs-search"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-message"
 
 UIDocsNav.define()
 

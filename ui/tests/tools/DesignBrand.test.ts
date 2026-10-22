@@ -3,8 +3,8 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, test } from "vite-plus/test"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
-import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
-import { DesignBrand } from "$/ui/tools/DesignBrand"
+import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import { DesignBrand } from "spell-ui/tools/DesignBrand"
 
 /**
  * Spell UI's folder, and a brand's:  a FIXTURE, two families cut from spell-brand's docs set (`fixtures/brand/`).

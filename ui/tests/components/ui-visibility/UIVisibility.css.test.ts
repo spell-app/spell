@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { visibilityVocabulary } from "$/ui/components/ui-visibility/UIVisibility.en"
+import { visibilityVocabulary } from "spell-ui/components/ui-visibility/UIVisibility.en"
 
-import visibilityCSS from "$/ui/components/ui-visibility/UIVisibility.css?inline"
-import visibilityRaw from "$/ui/components/ui-visibility/UIVisibility.css?raw"
+import visibilityCSS from "spell-ui/components/ui-visibility/UIVisibility.css?inline"
+import visibilityRaw from "spell-ui/components/ui-visibility/UIVisibility.css?raw"
 
 /**
  * `UIVisibility.css` on its own:  the DOM element's box.  Visibility has no look;  the examples are plain content.
@@ -16,7 +16,7 @@ import visibilityRaw from "$/ui/components/ui-visibility/UIVisibility.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-visibility",
+  base: "/src/components/ui-visibility",
   query: "?raw",
   import: "default",
   eager: true

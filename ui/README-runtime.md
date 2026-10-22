@@ -115,7 +115,7 @@ Localization comes in two halves:
   CSS classes, `:state()`s, JavaScript property names, `detail` keys, tokens, utility classes.
 
 Where it stands:
-the mechanism works, tested with a Spanish dictionary on [the translation smoke page](tools/smoke/translate.html).
+the mechanism works, tested with a Spanish dictionary on [the translation smoke page](src/tools/smoke/translate.html).
 But no real translations ship, and the page-wide call that would rename every family at once isn't built yet.
 
 <details>

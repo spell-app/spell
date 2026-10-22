@@ -11,15 +11,15 @@
  *   2026-10-20).  Until then only the other sets' own build of the site had it (`sets.ts`, `site/_assets/sets/`, epic
  *   `epic-workflow` P10), to spare Spell UI's pages that;  once they loaded the epics pack for the comments they needed
  *   it too, and the two builds were the same.
- * - `import * as` the Solid packages, against "One Solid per page" in `packages/ui/AGENTS.md`, on purpose and ONLY
+ * - `import * as` the Solid packages, against "One Solid per page" in Spell UI's `AGENTS.md`, on purpose and ONLY
  *   here and in the docs bundle.
  * - SIDE EFFECT:  sets `globalThis.SpellUI`;  listed in `package.json`'s `sideEffects`, or the bundler drops it.
- * - `packModules` MUST name the pack build's externals (`PACK_MODULES`, the kit's `element/tools/packModules.ts`).
+ * - `packModules` MUST name the pack build's externals (`PACK_MODULES`, the kit's `element-tools/packModules.ts`).
  *   - Also `@solidjs/h` and `ui-root`, as the docs bundle's:  the app's element bundles (`/element/spell.pack.js`,
  *     App UI's live `<spell-app>`) take the page's Solid only when ALL their shared modules are here
  *     (`spell-solid-shared.js`, app's `vite.solid.config.ts`), else they'd load a second one.
  * - A pack's elements draw Spell UI's in their shadow roots (`<epic-phase>`'s `<ui-section>`), which the root never
- *   sees:  so a pack's `define()` waits for EVERY Spell UI family first (`$/ui`), as the docs bundle has them.  Only
+ *   sees:  so a pack's `define()` waits for EVERY Spell UI family first (`spell-ui`), as the docs bundle has them.  Only
  *   then, after the root is in, so it never defines the root early.
  *   - `ui-root` arrives later, from the site entry (`site.ts`), once it imports it:  importing it defines
  *     `<ui-root>`, which the site does only once its layout and theme are in.  A pack's script comes a network round
@@ -31,22 +31,23 @@
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
-import * as uiCore from "$/ui/core"
-import * as uiForms from "$/ui/forms"
-import type { ComponentPack } from "$/ui/components/ui-components/UIComponents.types"
-import { registerPack } from "$/ui/components/ui-components/ComponentPacks"
+import * as uiCore from "spell-ui/core"
+import * as uiForms from "spell-ui/forms"
+import type { ComponentPack } from "spell-ui/components/ui-components/UIComponents.types"
+import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
 
 /**
- * What a pack imports, by the specifier its build leaves external => the page's copy of that module.
- * - `$/spell-element`:  Spell UI's core module, which carries all of it (`$/ui/core` re-exports it):  one per page.
+ * What a pack imports, by its `packModules` key => the page's copy of that module.
+ * - The keys are the pack build's externals, by the names its source imports them by:  `spell-ui/core`.
+ * - `spell-kit/element`:  Spell UI's core module, which carries all of it (`spell-ui/core` re-exports it):  one per page.
  */
 const packModules: Record<string, unknown> = {
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
-  "$/spell-element": uiCore,
-  "$/ui/core": uiCore,
-  "$/ui/forms": uiForms
+  "spell-kit/element": uiCore,
+  "spell-ui/core": uiCore,
+  "spell-ui/forms": uiForms
 }
 
 /**
@@ -54,14 +55,17 @@ const packModules: Record<string, unknown> = {
  * - The families a pack's elements may EXTEND join `packModules` first (`shareFamilies()`).
  */
 function registerWithFamilies(pack: ComponentPack): void {
-  registerPack({ ...pack, define: () => import("$/ui").then(shareFamilies).then(() => pack.define()) })
+  registerPack({ ...pack, define: () => import("spell-ui").then(shareFamilies).then(() => pack.define()) })
 }
 
-/** Put the families a pack's elements may extend in `packModules`, by their specifiers. */
+/** Put the families a pack's elements may extend in `packModules`, by their keys. */
 async function shareFamilies(): Promise<void> {
-  const [code, markdown] = await Promise.all([import("$/ui/components/ui-code"), import("$/ui/components/ui-markdown")])
-  packModules["$/ui/components/ui-code"] = code
-  packModules["$/ui/components/ui-markdown"] = markdown
+  const [code, markdown] = await Promise.all([
+    import("spell-ui/components/ui-code"),
+    import("spell-ui/components/ui-markdown")
+  ])
+  packModules["spell-ui/components/ui-code"] = code
+  packModules["spell-ui/components/ui-markdown"] = markdown
 }
 
 const spellUI = (globalThis as { SpellUI?: object }).SpellUI

@@ -1,23 +1,23 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI, type SourceSaver } from "$/ui/runtime"
+import { UI, type SourceSaver } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import { UIInclude } from "$/ui/components/ui-include/UIInclude"
-import type { DOMIncludeElement } from "$/ui/components/ui-include/UIInclude"
+import { UIInclude } from "spell-ui/components/ui-include/UIInclude"
+import type { DOMIncludeElement } from "spell-ui/components/ui-include/UIInclude"
 
-import "$/ui/components/ui-include"
+import "spell-ui/components/ui-include"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-include/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-include/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
 })
 
 /** Fixture files the test server serves. */
-const DIR = "/test-helpers/fixtures/sources"
+const DIR = "/src/test-helpers/fixtures/sources"
 
 beforeAll(async () => {
   await UI.load()

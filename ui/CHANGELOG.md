@@ -19,6 +19,7 @@ First public version:  Fomantic UI 2.9.4's vocabulary as `ui-*` custom elements 
   - views:  ad, card, comment, feed, item / items, statistic
   - modules:  accordion, calendar, checkbox / radio / toggle, dimmer, dropdown, embed, flyout, modal, nag, popup,
     progress, rating, search, select, shape, sidebar, slider, sticky, tab, toast, transition, visibility
+  - each its own entry:  `spell-ui/ui-button`, or by its longer name `spell-ui/components/ui-button`
 - **Source elements** (ours):  `<ui-include>` shows another page of the site, `<ui-code>` highlighted code
   (highlight.js, loaded lazily;  `UI.code.register()` adds languages;  spell's own colours), `<ui-markdown>` GitHub
   markdown (marked + DOMPurify, loaded lazily);  each takes inline text or a

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { accordionVocabulary } from "$/ui/components/ui-accordion/UIAccordion.en"
+import { accordionVocabulary } from "spell-ui/components/ui-accordion/UIAccordion.en"
 
-import accordionCSS from "$/ui/components/ui-accordion/UIAccordion.css?inline"
-import accordionRaw from "$/ui/components/ui-accordion/UIAccordion.css?raw"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
+import accordionCSS from "spell-ui/components/ui-accordion/UIAccordion.css?inline"
+import accordionRaw from "spell-ui/components/ui-accordion/UIAccordion.css?raw"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
 
 /**
  * `UIAccordion.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -20,7 +20,7 @@ import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-accordion",
+  base: "/src/components/ui-accordion",
   query: "?raw",
   import: "default",
   eager: true

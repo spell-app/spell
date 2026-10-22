@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 
 import { baseConfig } from "./vite.config.ts"
 
-/** `packages/ui/`. */
+/** Spell UI's root. */
 const ROOT = fileURLToPath(new URL("./", import.meta.url))
 
 /** Where the bundle goes:  `site/_assets/`, git-ignored, built by the page server when stale (`spell bundle`). */
@@ -24,9 +24,8 @@ export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
  *   every other chunk (shared code, the runtime, engines) `<name>-<hash>.js`.
  * - Minified, no sourcemaps:  as a deploy would ship it.  `emptyOutDir: false`:
  *   `scripts/site-bundle.ts` clears the folder itself, keeping the `icon-packs` link.
- * - `ui`'s aliases set here as well:  `site/` is outside `tsconfig.json`'s files, where `tsconfigPaths` may not apply.
- *   Other repos' packages (util, server, spell-element) by their npm names, through their `exports` (epic
- *   `repo-split` P6).
+ * - No aliases:  `site/_src` imports Spell UI and the kit by their package names, through their `exports`
+ *   (epic `repo-split` P14).
  * - ONE build for every component set's pages (the page server's `componentSets` setting):  the other sets had
  *   their own, mode `sets` (`site/_src/sets.ts` => `site/_assets/sets/`), from epic `epic-workflow` P10 until epic
  *   `epic-engine` gave Spell UI's pages the component packs too (`SitePacks`).
@@ -39,15 +38,6 @@ export default defineConfig(() => {
     base: "./",
     publicDir: false,
     logLevel: "warn",
-    resolve: {
-      ...base.resolve,
-      alias: [
-        { find: /^\$\/ui$/, replacement: `${ROOT}src/index.ts` },
-        // the elements sit beside `src/`, as every set's do (epic `people-and-orgs` P18):  before `$/ui/`
-        { find: /^\$\/ui\/components\//, replacement: `${ROOT}components/` },
-        { find: /^\$\/ui\//, replacement: `${ROOT}src/` }
-      ]
-    },
     build: {
       outDir: SITE_ASSETS,
       emptyOutDir: false,
@@ -88,8 +78,8 @@ function siteChunkName(chunk: { facadeModuleId: string | null; moduleIds: readon
   return "[name]-[hash].js"
 }
 
-/** A family barrel:  `components/ui-button/index.ts`, `src/docs-components/ui-docs-example/index.ts`. */
-const FAMILY_BARREL = /\/(?:src\/docs-)?components\/(ui-[\w-]+)\/index\.ts$/
+/** A family barrel:  `src/components/ui-button/index.ts`, `src/docs-components/ui-docs-example/index.ts`. */
+const FAMILY_BARREL = /\/src\/(?:docs-)?components\/(ui-[\w-]+)\/index\.ts$/
 
 /** An emoji name-data module:  its set and chunk letter. */
 const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/

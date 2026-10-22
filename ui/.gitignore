@@ -9,10 +9,10 @@ reference/
 *.log
 .yarn/install-state.gz
 .vitest/
-# package tooling output (`yarn vendor`, `yarn measure` ..., `tools/`)
+# package tooling output (`yarn vendor`, `yarn measure` ..., `src/tools/`)
 vendor
-tools/results
-tools/frameworks/solid/dist
+/results/
+src/tools/frameworks/solid/dist
 # `/park`'s note on where parked work stopped:  never committed
 PARKED-*.md
 *.code-workspace

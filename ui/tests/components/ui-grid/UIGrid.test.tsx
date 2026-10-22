@@ -1,16 +1,16 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { GRID_CONTAINER_NAME } from "$/ui/components/components.types"
+import { GRID_CONTAINER_NAME } from "spell-ui/components/components.types"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-grid"
+import "spell-ui/components/ui-grid"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-grid/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-grid/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

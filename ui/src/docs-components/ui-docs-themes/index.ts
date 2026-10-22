@@ -14,10 +14,10 @@
 import { UIDocsThemes } from "./UIDocsThemes"
 import { ThemeMenu } from "./ThemeMenu"
 
-import "$/ui/components/ui-dropdown"
-import "$/ui/components/ui-item"
-import "$/ui/components/ui-popup"
-import "$/ui/components/ui-icon"
+import "spell-ui/components/ui-dropdown"
+import "spell-ui/components/ui-item"
+import "spell-ui/components/ui-popup"
+import "spell-ui/components/ui-icon"
 
 UIDocsThemes.define()
 

@@ -3,12 +3,12 @@ import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
-import { TreeLayout, type TreeDiagramNode } from "$/ui/components/ui-tree-diagram"
+import { TreeLayout, type TreeDiagramNode } from "spell-ui/components/ui-tree-diagram"
 
-import "$/ui/components/ui-tree-diagram"
+import "spell-ui/components/ui-tree-diagram"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-tree-diagram/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-tree-diagram/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ProgressValues } from "$/ui/components/ui-progress/ProgressValues"
+import { ProgressValues } from "spell-ui/components/ui-progress/ProgressValues"
 
 ////////////////
 // ## `new ProgressValues()`

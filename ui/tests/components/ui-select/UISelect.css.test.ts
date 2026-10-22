@@ -1,18 +1,18 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { ClassBuilder } from "$/ui/elements"
-import { UI } from "$/ui/runtime"
-import { colorsCSS, foundationCSS } from "$/ui/styles"
-import type { AttributeSpec, ComponentVocabulary } from "$/ui/vocabulary"
+import { ClassBuilder } from "spell-ui/elements"
+import { UI } from "spell-ui/runtime"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { selectVocabulary } from "$/ui/components/ui-select/UISelect.en"
+import { selectVocabulary } from "spell-ui/components/ui-select/UISelect.en"
 
-import selectCSS from "$/ui/components/ui-select/UISelect.css?inline"
-import selectRaw from "$/ui/components/ui-select/UISelect.css?raw"
+import selectCSS from "spell-ui/components/ui-select/UISelect.css?inline"
+import selectRaw from "spell-ui/components/ui-select/UISelect.css?raw"
 
 /**
  * `UISelect.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -29,7 +29,7 @@ const BASE_SELECT = (await UI.load()).browser.supports.baseSelect
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-select",
+  base: "/src/components/ui-select",
   query: "?raw",
   import: "default",
   eager: true

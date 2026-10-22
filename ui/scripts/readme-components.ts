@@ -27,11 +27,11 @@ import { chromium, type Page } from "playwright"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
 
-import type { SiteDataFile, SiteFamily } from "../src/docs-components/docs-components.types.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
+import type { SiteDataFile, SiteFamily } from "spell-ui/docs-components/docs-components.types"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, spliceGenerated, writeOrCheck } from "./generatedFiles.ts"
+import { STATUS_TEXT, spliceGenerated, writeOrCheck } from "spell-ui/tools/generatedFiles"
 
 /** The repo's root:  `spell-ui/`. */
 const UI = path.resolve(import.meta.dirname, "..")

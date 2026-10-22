@@ -2,15 +2,15 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "$/ui/static"
-import { UIFeed } from "$/ui/components/ui-feed/UIFeed"
-import { UIFeedEvent } from "$/ui/components/ui-feed/UIFeedEvent"
-import { UIContent } from "$/ui/components/ui-parts/UIContent"
-import { UIDate } from "$/ui/components/ui-parts/UIDate"
-import { UISummary } from "$/ui/components/ui-parts/UISummary"
+import { StaticRender } from "spell-ui/static"
+import { UIFeed } from "spell-ui/components/ui-feed/UIFeed"
+import { UIFeedEvent } from "spell-ui/components/ui-feed/UIFeedEvent"
+import { UIContent } from "spell-ui/components/ui-parts/UIContent"
+import { UIDate } from "spell-ui/components/ui-parts/UIDate"
+import { UISummary } from "spell-ui/components/ui-parts/UISummary"
 
 /**
- * `<ui-feed>` in the static server render (`$/ui/static`):
+ * `<ui-feed>` in the static server render (`spell-ui/static`):
  * a `<ul>` (`<ol>` when `ordered`) whose events' `<div>` roots become the `<li>`s.
  * - The events' `listitem` role is an `@aria` getter, applied once on the server.
  */

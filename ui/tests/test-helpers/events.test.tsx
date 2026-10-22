@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 import { render } from "@solidjs/web"
 
-import { UI } from "$/ui/runtime"
+import { UI } from "spell-ui/runtime"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-dropdown"
-import "$/ui/components/ui-input"
-import "$/ui/components/ui-label"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-dropdown"
+import "spell-ui/components/ui-input"
+import "spell-ui/components/ui-label"
 
 /**
  * Page listeners on `ui-*` elements see the platform's retargeted event:

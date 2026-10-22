@@ -1,5 +1,5 @@
-import type { SiteSearchSection } from "$/ui/docs-components/docs-components.types"
-import * as UIT from "$/ui/components/components.types"
+import type { SiteSearchSection } from "spell-ui/docs-components/docs-components.types"
+import * as UIT from "spell-ui/components/components.types"
 import { SearchIndex } from "./SearchIndex"
 import { TRAIL, type SearchEntry } from "./UIDocsSearch.types"
 
@@ -14,14 +14,14 @@ import { TRAIL, type SearchEntry } from "./UIDocsSearch.types"
  * - a section:  a `<ui-section id>`, or a level 2-4 header with an id (`<ui-header level id>`, `<h2 id>` ...)
  *   - so a page not nested into sections yet (the overview) still lists its headings
  *   - never one inside an example, a `<template>` or a `<script>`
- * - its title:  the section's `label`, else its `slot="label"` child's text (or their old name, `header`)
+ * - its title:  the section's `label`, else its `slot="label"` child's text
  *   - a header's own text, without its sub header or icon
  * - its `parent`:  the section around it
  *   - a top-level one in a `<ui-tabs id="site-tabs">` pane names its `tab`
  * - every tab's sections, the hidden panes' too:  landing on one selects its tab (the site's router)
  * - Its links are `#id`:  the page shown, whatever its URL.
  * - Plain DOM, no Solid, no globals (node's linkedom runs it too).
- *   - NEVER imports a value from `$/ui/core`, which node can't load.
+ *   - NEVER imports a value from `spell-ui/core`, which node can't load.
  *   - Cheap enough to read on every search.
  * - Static only:  pure reads of the DOM it's given.
  ****************/

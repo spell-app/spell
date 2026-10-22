@@ -5,11 +5,11 @@ import { fileURLToPath } from "node:url"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
-import { DesignColor } from "$/ui/tools/DesignColor"
-import { DesignExport } from "$/ui/tools/DesignExport"
-import { ElementManifests } from "$/ui/tools/ElementManifests"
-import type { SiteDataFile } from "$/ui/docs-components/docs-components.types"
-import type { DesignExportResult, DesignTokensFile, ThemedValue } from "$/ui/tools/tools.types"
+import { DesignColor } from "spell-ui/tools/DesignColor"
+import { DesignExport } from "spell-ui/tools/DesignExport"
+import { ElementManifests } from "spell-ui/tools/ElementManifests"
+import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import type { DesignExportResult, DesignTokensFile, ThemedValue } from "spell-ui/tools/tools.types"
 
 /**
  * The claude.ai design-system export (`yarn design:build`) keeps to the format's rules

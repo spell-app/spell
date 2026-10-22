@@ -1,13 +1,13 @@
 /**
- * `yarn gen:root`:  write `components/ui-root/UIRoot.catalog.ts`, every component tag => what `<ui-root>` needs
+ * `yarn gen:root`:  write `src/components/ui-root/UIRoot.catalog.ts`, every component tag => what `<ui-root>` needs
  * BEFORE that tag's family loads:  its folder (which family to import) and its skeleton
  * (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`;  a vocabulary
  * without one writes no `skeleton` key).
- * - Run after adding or moving a tag, or changing a skeleton.  `components/ui-root/UIRoot.catalog.test.ts` and
+ * - Run after adding or moving a tag, or changing a skeleton.  `tests/components/ui-root/UIRoot.catalog.test.ts` and
  *   `tests/test-helpers/vocabularies.test.ts` fail while the file is stale.
  * - Why generated, not `ComponentDefinitions`:  that roll-up imports every vocabulary (~325 kB of source);  a lib
  *   entry importing it would split each vocabulary into a chunk shared with its family.  The catalog is a few kB.
- * - Reads the vocabularies with the kit's `RootCatalog` (`spell-kit/element/tools/RootCatalog`;  the pack build,
+ * - Reads the vocabularies with the kit's `RootCatalog` (`spell-kit/element-tools/RootCatalog`;  the pack build,
  *   `spell-pack build`, shares it for a component pack's catalog), the way `ComponentDefinitions` does:
  *   every `UI<Name>.en.ts` of every folder, every export with a `tag` and `attributes`.
  * - Scans `components/` AND `src/docs-components/` (the doc-only `<ui-docs-*>` elements):  `<ui-root>` loads
@@ -21,14 +21,14 @@ import { writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { FamilyFiles } from "../tools/FamilyFiles.ts"
-import { RootCatalog } from "spell-kit/element/tools/RootCatalog"
-import { Terminal } from "spell-kit/element/tools/Terminal"
+import { FamilyFiles } from "spell-ui/tools/FamilyFiles"
+import { RootCatalog } from "spell-kit/element-tools/RootCatalog"
+import { Terminal } from "spell-kit/element-tools/Terminal"
 
-import { formatFiles } from "./generatedFiles.ts"
+import { formatFiles } from "spell-ui/tools/generatedFiles"
 
-/** `components/`. */
-const COMPONENTS = fileURLToPath(new URL("../components/", import.meta.url))
+/** `src/components/`. */
+const COMPONENTS = fileURLToPath(new URL("../src/components/", import.meta.url))
 
 /** `src/docs-components/`:  the doc-only element families. */
 const DOCS_COMPONENTS = fileURLToPath(new URL("../src/docs-components/", import.meta.url))

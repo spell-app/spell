@@ -8,22 +8,22 @@ import type {
   FormRules,
   FormSuccessDetail,
   FormValues
-} from "$/ui/components/components.types"
-import { E } from "$/ui/core"
+} from "spell-ui/components/components.types"
+import { E } from "spell-ui/core"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
 
-import "$/ui/components/ui-form"
-import "$/ui/components/ui-input"
-import "$/ui/components/ui-checkbox"
-import "$/ui/components/ui-dropdown"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-message"
+import "spell-ui/components/ui-form"
+import "spell-ui/components/ui-input"
+import "spell-ui/components/ui-checkbox"
+import "spell-ui/components/ui-dropdown"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-message"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-form/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-form/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -3,16 +3,16 @@ import { userEvent } from "vite-plus/test/browser"
 import { OBSERVE } from "solid-js"
 import { attribution } from "solid-js/attribution"
 
-import { E } from "$/ui/core"
-import type { DOMFormControl } from "$/ui/elements"
+import { E } from "spell-ui/core"
+import type { DOMFormControl } from "spell-ui/elements"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import { UICheckbox } from "$/ui/components/ui-checkbox"
+import { UICheckbox } from "spell-ui/components/ui-checkbox"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-checkbox/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-checkbox/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

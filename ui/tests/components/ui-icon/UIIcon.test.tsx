@@ -5,11 +5,11 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-root"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-root"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-icon/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-icon/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -206,7 +206,7 @@ describe("<ui-icons>", () => {
 
 describe("<ui-icon> in a <ui-root icons>", () => {
   /** The stroke-style (Lucide-like) fixture pack:  `bell`, `sun`;  its id is `stroke`. */
-  const STROKE = new URL("/test-helpers/fixtures/stroke-pack/pack.js", location.href).href
+  const STROKE = new URL("/src/test-helpers/fixtures/stroke-pack/pack.js", location.href).href
 
   /** `<div>` holding `html`, every element ready. */
   async function page(html: string) {

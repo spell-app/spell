@@ -12,15 +12,15 @@
  *   rerun `yarn site:build` for those.
  * - A watch rebuild doesn't clear `_assets/`, so a chunk whose hash changed leaves its old file behind:  harmless,
  *   since `_assets/` isn't committed;  the page server's next start rebuilds it clean (its `site.js` is newer than
- *   the last recorded build, `$/assembler` `Bundle`).
+ *   the last recorded build, `spell-kit/server`'s `Bundle`).
  * - `Ctrl-C` stops the watch;  the page server keeps running (`spell server stop`).
  */
 import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
-import { SPELL_APP, SPELL_CLI } from "../tools/spellApp.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
+import { SPELL_APP, SPELL_CLI } from "spell-ui/tools/spellApp"
+import { Terminal } from "spell-kit/element-tools/Terminal"
 
 /** Spell UI's folder. */
 const UI = path.resolve(import.meta.dirname, "..")

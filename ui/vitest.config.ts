@@ -2,7 +2,7 @@ import { configDefaults, defineConfig, type TestProjectConfiguration } from "vit
 import { playwright } from "vite-plus/test/browser-playwright"
 import { resolve } from "node:path"
 
-import { environment } from "./tools/environment.ts"
+import { environment } from "spell-ui/tools/environment"
 import { baseConfig } from "./vite.config.ts"
 
 /**
@@ -17,19 +17,18 @@ const BROWSERS = environment.isAllBrowsers ? (["chromium", "firefox", "webkit"] 
  * - Absolute:  a relative `dir` is read from wherever the run starts (the repo root's run too).
  * - The globs below are relative to it.
  * - `root` stays this package, so these still mean this package's files:
- *   `/src/...` and `/components/...` globs, `/test-helpers/fixtures/...` URLs, `setupFiles`.
+ *   `/src/...` globs, `/src/test-helpers/fixtures/...` URLs, `setupFiles`.
  */
 const TESTS = resolve(import.meta.dirname, "./tests")
 
-/** The folders of tests, as the code's:  `src/`, the families' `components/`, and the cross-family `test-helpers/`. */
-const TEST_FOLDERS = "{src,components,test-helpers}"
-
 /** Server-render tests:  `*.ssr.test.ts(x)`, anywhere. */
-const SSR_TESTS = [`${TEST_FOLDERS}/**/*.ssr.test.{ts,tsx}`]
+const SSR_TESTS = ["**/*.ssr.test.{ts,tsx}"]
 
 /**
- * Node tooling tests, run with the `ssr` project, in node:  the tools' (`tools/`), and Spell UI's `spell` commands'
- * (`cli/`:  `spell icon`, `spell ssr`, `spell pack`, `spell design`).
+ * Node tooling tests, run with the `ssr` project, in node:  the tools' (`src/tools/`), and Spell UI's `spell` commands'
+ * (`src/cli/`:  `spell icon`, `spell ssr`, `spell pack`, `spell design`).
+ * - The tests mirror `src/`:  `tests/tools/` tests `src/tools/`, `tests/components/ui-button/` tests
+ *   `src/components/ui-button/` ...
  */
 const TOOL_TESTS = ["tools/**/*.test.ts", "cli/**/*.test.ts"]
 
@@ -74,9 +73,9 @@ export function uiProjects({ prefix = "", root }: { prefix?: string; root?: stri
         name: `${prefix}browser`,
         sequence: { groupOrder: 1 },
         dir: TESTS,
-        include: [`${TEST_FOLDERS}/**/*.test.{ts,tsx}`],
-        exclude: [...configDefaults.exclude, ...SSR_TESTS],
-        setupFiles: ["./test-helpers/setup.ts"],
+        include: ["**/*.test.{ts,tsx}"],
+        exclude: [...configDefaults.exclude, ...SSR_TESTS, ...TOOL_TESTS],
+        setupFiles: ["./src/test-helpers/setup.ts"],
         // a guard:  an element bug that halts rendering must fail its test, not hang the run
         testTimeout: 10_000,
         // Test files of one browser run in parallel iframes of ONE page, which has ONE focus:
@@ -84,7 +83,7 @@ export function uiProjects({ prefix = "", root }: { prefix?: string; root?: stri
         //   so `focus()` / Tab / Escape tests of another file fail
         // - Chromium fakes focus for every frame, so the quick single-browser run keeps its parallelism
         fileParallelism: !environment.isAllBrowsers,
-        // `inject("ci")` in a test:  timing budgets are skipped on a shared CI runner (`tests/ui/tests.types.ts`);
+        // `inject("ci")` in a test:  timing budgets are skipped on a shared CI runner (`tests/tests.types.ts`);
         // `CI=false` / `CI=0` count as not CI
         provide: { ci: environment.isCI },
         browser: {

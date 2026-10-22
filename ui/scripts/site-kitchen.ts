@@ -1,7 +1,7 @@
 /**
  * `yarn site:kitchen [--check]`:  write the kitchen sink's examples, from every component family's MAIN example file.
  * - The page:  `docs/kitchen-sink.html`, one of the site's pages (`SITE_PAGES`).
- * - A family's main file:  `components/ui-<family>/examples/elements/types.html`, else its first `.html`.
+ * - A family's main file:  `src/components/ui-<family>/examples/elements/types.html`, else its first `.html`.
  *   - `MAIN_FILES` names it where `types.html` isn't the main one (`ui-parts`:  `header.html`).
  * - Why generated:  the old Astro page read the same files at build time;  a static page would drift from them.
  *   - The markup is the files' own (the families' tests render them),
@@ -34,11 +34,11 @@ import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
 
-import type { SiteDataFile, SiteFamily, SiteTag } from "../src/docs-components/docs-components.types.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
+import type { SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "./generatedFiles.ts"
+import { escapeHtml, spliceGenerated, withoutTicks, writeOrCheck } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */
@@ -122,7 +122,7 @@ class KitchenSinkWriter {
 
   /** `family`'s main example file:  `types.html`, else its first `.html`;  `undefined` without one. */
   private exampleFile(family: SiteFamily): string | undefined {
-    const folder = path.join(UI, "components", family.folder, "examples/elements")
+    const folder = path.join(UI, "src/components", family.folder, "examples/elements")
     if (!existsSync(folder)) return undefined
     const files = readdirSync(folder)
       .filter((name) => name.endsWith(".html"))
@@ -163,7 +163,7 @@ class KitchenSinkWriter {
   /** `line` with its dev-server example sources pointed at the site's copies (`examples/<file>`). */
   private static siteSources(line: string): string {
     return line.replace(
-      /source="\/components\/[^/"]+\/examples\/sources\/([^"]+)"/g,
+      /source="\/src\/components\/[^/"]+\/examples\/sources\/([^"]+)"/g,
       (_match, file: string) => `source="examples/${SITE_SOURCES[file] ?? file}"`
     )
   }
@@ -218,7 +218,7 @@ const MAIN_FILES: Readonly<Record<string, string>> = { "ui-parts": "header.html"
 
 /**
  * The site's copies of the example source files (`docs/examples/`), by the source's file name, where the name differs.
- * - A `source="/components/.../examples/sources/<file>"` (a dev-server path) points at the copy.
+ * - A `source="/src/components/.../examples/sources/<file>"` (a dev-server path) points at the copy.
  */
 const SITE_SOURCES: Readonly<Record<string, string>> = { "notes.html": "release-notes.html" }
 

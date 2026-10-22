@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { railVocabulary } from "$/ui/components/ui-rail/UIRail.en"
+import { railVocabulary } from "spell-ui/components/ui-rail/UIRail.en"
 
-import railCSS from "$/ui/components/ui-rail/UIRail.css?inline"
-import railRaw from "$/ui/components/ui-rail/UIRail.css?raw"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
+import railCSS from "spell-ui/components/ui-rail/UIRail.css?inline"
+import railRaw from "spell-ui/components/ui-rail/UIRail.css?raw"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
 
 /**
  * `UIRail.css` on the class-grammar examples (with `UISegment.css`:  a segment is the rails' container).
@@ -21,7 +21,7 @@ const BORDER = 1
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-rail",
+  base: "/src/components/ui-rail",
   query: "?raw",
   import: "default",
   eager: true

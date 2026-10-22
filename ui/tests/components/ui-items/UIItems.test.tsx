@@ -1,6 +1,6 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
@@ -8,14 +8,14 @@ import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-items"
-import "$/ui/components/ui-list"
-import "$/ui/components/ui-image"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-items"
+import "spell-ui/components/ui-list"
+import "spell-ui/components/ui-image"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-items/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-items/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

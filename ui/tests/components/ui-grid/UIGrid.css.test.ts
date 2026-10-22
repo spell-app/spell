@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 import { Viewport } from "spell-kit/test-helpers/Viewport"
 
-import { gridVocabulary } from "$/ui/components/ui-grid/UIGrid.en"
-import { columnVocabulary } from "$/ui/components/ui-grid/UIColumn.en"
-import { rowVocabulary } from "$/ui/components/ui-grid/UIRow.en"
+import { gridVocabulary } from "spell-ui/components/ui-grid/UIGrid.en"
+import { columnVocabulary } from "spell-ui/components/ui-grid/UIColumn.en"
+import { rowVocabulary } from "spell-ui/components/ui-grid/UIRow.en"
 
-import gridCSS from "$/ui/components/ui-grid/UIGrid.css?inline"
-import gridRaw from "$/ui/components/ui-grid/UIGrid.css?raw"
+import gridCSS from "spell-ui/components/ui-grid/UIGrid.css?inline"
+import gridRaw from "spell-ui/components/ui-grid/UIGrid.css?raw"
 
 /**
  * `UIGrid.css` on its own, before any element exists:  the sheet's source rules, the computed layout of the
@@ -23,7 +23,7 @@ import gridRaw from "$/ui/components/ui-grid/UIGrid.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-grid",
+  base: "/src/components/ui-grid",
   query: "?raw",
   import: "default",
   eager: true

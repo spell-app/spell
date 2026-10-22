@@ -5,7 +5,7 @@
  *   A constant only one class reads sits below that class.
  */
 
-import type { DocsScheme, DocsShownScheme } from "$/ui/docs-components/docs-components.types"
+import type { DocsScheme, DocsShownScheme } from "spell-ui/docs-components/docs-components.types"
 import type { docsThemesVocabulary } from "./UIDocsThemes.en"
 
 ////////////////

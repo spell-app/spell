@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { sectionVocabulary } from "$/ui/components/ui-section/UISection.en"
-import { sectionsVocabulary } from "$/ui/components/ui-section/UISections.en"
+import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
+import { sectionsVocabulary } from "spell-ui/components/ui-section/UISections.en"
 
-import sectionCSS from "$/ui/components/ui-section/UISection.css?inline"
-import sectionRaw from "$/ui/components/ui-section/UISection.css?raw"
+import sectionCSS from "spell-ui/components/ui-section/UISection.css?inline"
+import sectionRaw from "spell-ui/components/ui-section/UISection.css?raw"
 
 /**
  * `UISection.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -19,7 +19,7 @@ import sectionRaw from "$/ui/components/ui-section/UISection.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-section",
+  base: "/src/components/ui-section",
   query: "?raw",
   import: "default",
   eager: true

@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { commentVocabulary } from "$/ui/components/ui-comment/UIComment.en"
-import { commentsVocabulary } from "$/ui/components/ui-comment/UIComments.en"
+import { commentVocabulary } from "spell-ui/components/ui-comment/UIComment.en"
+import { commentsVocabulary } from "spell-ui/components/ui-comment/UIComments.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import partsCSS from "$/ui/components/ui-parts/UIParts.css?inline"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import commentCSS from "$/ui/components/ui-comment/UIComment.css?inline"
-import commentRaw from "$/ui/components/ui-comment/UIComment.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import commentCSS from "spell-ui/components/ui-comment/UIComment.css?inline"
+import commentRaw from "spell-ui/components/ui-comment/UIComment.css?raw"
 
 /**
  * `UIComment.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of the
@@ -22,7 +22,7 @@ import commentRaw from "$/ui/components/ui-comment/UIComment.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-comment",
+  base: "/src/components/ui-comment",
   query: "?raw",
   import: "default",
   eager: true

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { labelVocabulary } from "$/ui/components/ui-label/UILabel.en"
-import { labelsVocabulary } from "$/ui/components/ui-label/UILabels.en"
+import { labelVocabulary } from "spell-ui/components/ui-label/UILabel.en"
+import { labelsVocabulary } from "spell-ui/components/ui-label/UILabels.en"
 
-import labelCSS from "$/ui/components/ui-label/UILabel.css?inline"
-import labelRaw from "$/ui/components/ui-label/UILabel.css?raw"
+import labelCSS from "spell-ui/components/ui-label/UILabel.css?inline"
+import labelRaw from "spell-ui/components/ui-label/UILabel.css?raw"
 
 /**
  * `UILabel.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -19,7 +19,7 @@ import labelRaw from "$/ui/components/ui-label/UILabel.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-label",
+  base: "/src/components/ui-label",
   query: "?raw",
   import: "default",
   eager: true

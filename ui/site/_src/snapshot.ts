@@ -5,6 +5,6 @@
  *   `<ui-root>`'s module defines anything.  The entry's own body runs only after ALL its imports.
  * - SIDE EFFECT:  fills the page's snapshot map.
  */
-import { ExampleSource } from "$/ui/docs-components/ui-docs-example/ExampleSource"
+import { ExampleSource } from "spell-ui/docs-components/ui-docs-example/ExampleSource"
 
 ExampleSource.snapshot(document)

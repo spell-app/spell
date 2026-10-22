@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-form"
-import "$/ui/components/ui-input"
-import "$/ui/components/ui-checkbox"
+import "spell-ui/components/ui-form"
+import "spell-ui/components/ui-input"
+import "spell-ui/components/ui-checkbox"
 
 ////////////////
 // ## Fixtures

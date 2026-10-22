@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, onTestFinished, test } from "vite-plus/test"
 
-import { EmojiData } from "$/ui/components/ui-emoji/EmojiData"
+import { EmojiData } from "spell-ui/components/ui-emoji/EmojiData"
 
 // every test leaves the default name set on
 afterEach(() => {

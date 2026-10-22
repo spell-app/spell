@@ -2,7 +2,7 @@
  * `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (also `spell design build`):  write
  * the claude.ai Design System's files for Spell UI into `<dir>/project/` (default `packages/ui/build/design-system/`,
  * git-ignored), from the vocabularies (`docs/__data/components.json5`), the element examples and the Spell theme
- * (see `tools/DesignExport.ts`).
+ * (see `src/tools/DesignExport.ts`).
  * - `--brand`:  the brand's package folder, whose `<brand-*>` cards join the system (a "Brand" group);
  *   `--brand-book`:  Claude Design's brand book, whose content rules join the README.
  *   Spell UI never names either itself (epic `repo-split` P5):  `spell design build` passes the kit's spell-brand.
@@ -14,9 +14,9 @@
 import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
-import { DesignExport } from "../tools/DesignExport.ts"
-import { environment } from "../tools/environment.ts"
-import { Terminal } from "spell-kit/element/tools/Terminal"
+import { DesignExport } from "spell-ui/tools/DesignExport"
+import { environment } from "spell-ui/tools/environment"
+import { Terminal } from "spell-kit/element-tools/Terminal"
 
 const { values } = parseArgs({
   options: { out: { type: "string" }, brand: { type: "string" }, "brand-book": { type: "string" } }

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { segmentsVocabulary } from "$/ui/components/ui-segment/UISegments.en"
-import { segmentVocabulary } from "$/ui/components/ui-segment/UISegment.en"
+import { segmentsVocabulary } from "spell-ui/components/ui-segment/UISegments.en"
+import { segmentVocabulary } from "spell-ui/components/ui-segment/UISegment.en"
 
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import segmentRaw from "$/ui/components/ui-segment/UISegment.css?raw"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import segmentRaw from "spell-ui/components/ui-segment/UISegment.css?raw"
 
 /**
  * `UISegment.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -19,7 +19,7 @@ import segmentRaw from "$/ui/components/ui-segment/UISegment.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-segment",
+  base: "/src/components/ui-segment",
   query: "?raw",
   import: "default",
   eager: true

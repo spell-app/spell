@@ -229,7 +229,7 @@ at desktop, phone width and dark, and fails on:
 - a section id that doesn't follow its nesting, a flat level 2 header, a deep link that doesn't land
 
 Screenshots go to the tools' results folder, `results/site-check/`:  LOOK at them.
-The command is [`site-check.ts`](scripts/site-check.ts), on [`SiteCheck`](tools/SiteCheck.ts).
+The command is [`site-check.ts`](scripts/site-check.ts), on [`SiteCheck`](src/tools/SiteCheck.ts).
 
 ### Deploying
 
@@ -241,8 +241,8 @@ Not deployed yet.
 
 ## The tools
 
-The tools are node programs in [`tools/`](tools/), each a class, run through yarn scripts.
-Their results land in `tools/results/` (git-ignored).
+The tools are node programs in [`src/tools/`](src/tools/), each a class, run through yarn scripts.
+Their results land in `results/` (git-ignored).
 
 | Script | What it does |
 | --- | --- |
@@ -271,7 +271,7 @@ yarn report
 ### The visual tests
 
 `yarn test:visual` screenshots every page in each family's `examples/elements/`, light and dark,
-and compares each with [its baseline](test-helpers/visual/baselines/).
+and compares each with [its baseline](src/test-helpers/visual/baselines/).
 
 ```sh
 yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] [--update] [--grep <family>] [--parity]
@@ -286,44 +286,45 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
   but a change that alters rendering runs it, and updates its baselines in the same change.
 
 <details>
-<summary>Every file in tools/, one line each</summary>
+<summary>Every file in src/tools/, one line each</summary>
 
 | File | What |
 | --- | --- |
-| [`cli.ts`](tools/cli.ts) | the command line behind `yarn vendor`, `measure`, `smoke` (`declarations`, then `smoke`), `serve`, `report` (`loc`, then `report`), `icons:pack` |
-| [`index.ts`](tools/index.ts) | the barrel:  the measure, vendor, LOC, report, smoke and icon-pack classes;  NOT the site and design tools, the static renderer, the pages or the scripts (its header says why) |
-| [`package.config.ts`](tools/package.config.ts) | `PACKAGE`:  entries, shared entries (`core`, `forms`), externals, peer list, module → bucket;  `DIST_IMPORTS` for import maps |
-| [`tools.types.ts`](tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, the site's two halves (`SITE_PAGES`, `SITE_BUILD`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
-| [`BundleMeasure.ts`](tools/BundleMeasure.ts) | an in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library as used and in full;  standalone per-family builds;  structural checks |
-| [`PeerVendor.ts`](tools/PeerVendor.ts) | one ES module per peer specifier, plus `importmap.json`, in `vendor/`:  deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
-| [`DeclarationCheck.ts`](tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every `exports` `types` path exists, and no declaration in `dist/` imports an alias or leaves `dist/` |
-| [`HostApp.ts`](tools/HostApp.ts) | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
-| [`SmokeRunner.ts`](tools/SmokeRunner.ts), [`StaticServer.ts`](tools/StaticServer.ts) | serve `dist/`, `vendor/`, `tools/`, `test-helpers/` from ONE static server (a thin wrapper over the kit's web server), inject the import map, drive each page in headless chromium |
-| [`LocCount.ts`](tools/LocCount.ts) | lines and code lines per file, by group |
-| [`ReportTables.ts`](tools/ReportTables.ts) | rewrites the generated tables of the status report, in the content folder's Spell UI notes |
-| [`peers.ts`](tools/peers.ts) | the peer specifiers `dist/` imports |
-| [`IconPackBuilder.ts`](tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
-| [`SiteDataBuilder.ts`](tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale |
-| [`SiteSearchBuilder.ts`](tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
-| [`FamilyTokens.ts`](tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
-| [`FoundationTokens.ts`](tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
-| [`ThemeFamilies.ts`](tools/ThemeFamilies.ts) | which families each theme sheet touches, read from its CSS |
-| [`SiteCheck.ts`](tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless chromium, from the page server's `/components/ui/` (started with `spell server start`):  errors and failed requests, undefined or unrendered `ui-*`, the four tabs each loaded from its hash, the "On this page" rail, phone overflow (naming the offending elements), the nav flyout, dark;  screenshots in `tools/results/site-check/`, a JSON summary on stdout, exit 1 on any problem |
-| [`StaticRenderer.ts`](tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages and by `spell ssr`, in its child process (`cli/src/runner/renderStatic.ts`) |
-| [`StaticDocument.ts`](tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
-| [`DesignExport.ts`](tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts`, `DesignBrand.ts` | `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]`:  also `spell design build`, which passes spell-brand's folder:  the claude.ai design system's files in `<dir>/project/` (default `build/design-system/`, git-ignored):  the brand book README, `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  keeps the design bundle's `components/bundle.js` and `bundle.css`;  the tokens per scheme from the `spell-brand` theme;  a "Brand" group of `<brand-*>` cards read from the GIVEN brand folder's data, since Spell UI imports nothing of the brand |
-| [`ElementManifests.ts`](tools/ElementManifests.ts) | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code's `html.customData`, loaded by the repo's `.vscode/settings.json`), written by `yarn site:data` into `docs/__data/` |
-| [`environment.ts`](tools/environment.ts) | EVERY environment variable `tools/`, `scripts/` and the configs read, parsed once;  nowhere else reads `process.env` |
-| [`hmr.e2e.ts`](tools/hmr.e2e.ts) | `yarn test:hmr`:  8 scenarios, as a plain `node:test` script |
-| [`screenshots.ts`](tools/screenshots.ts) | `yarn screenshots`:  one PNG per example pair of `demo/index.html`, into `.cache/screenshots/` |
+| [`cli.ts`](src/tools/cli.ts) | the command line behind `yarn vendor`, `measure`, `smoke` (`declarations`, then `smoke`), `serve`, `report` (`loc`, then `report`), `icons:pack` |
+| [`index.ts`](src/tools/index.ts) | the barrel:  the measure, vendor, LOC, report, smoke and icon-pack classes;  NOT the site and design tools, the static renderer, the pages or the scripts (its header says why) |
+| [`package.config.ts`](src/tools/package.config.ts) | `PACKAGE`:  entries, shared entries (`core`, `forms`), externals, peer list, module → bucket;  `DIST_IMPORTS` for import maps |
+| [`tools.types.ts`](src/tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, the site's two halves (`SITE_PAGES`, `SITE_BUILD`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
+| [`BundleMeasure.ts`](src/tools/BundleMeasure.ts) | an in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library as used and in full;  standalone per-family builds;  structural checks |
+| [`PeerVendor.ts`](src/tools/PeerVendor.ts) | one ES module per peer specifier, plus `importmap.json`, in `vendor/`:  deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
+| [`DeclarationCheck.ts`](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every `exports` `types` path exists, and no declaration in `dist/` imports an alias, names `spell-ui` itself or leaves `dist/` |
+| [`HostApp.ts`](src/tools/HostApp.ts) | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
+| [`SmokeRunner.ts`](src/tools/SmokeRunner.ts), [`StaticServer.ts`](src/tools/StaticServer.ts) | serve `dist/`, `vendor/`, `src/` from ONE static server (a thin wrapper over the kit's web server), inject the import map, drive each page in headless chromium |
+| [`LocCount.ts`](src/tools/LocCount.ts) | lines and code lines per file, by group |
+| [`ReportTables.ts`](src/tools/ReportTables.ts) | rewrites the generated tables of the status report, in the content folder's Spell UI notes |
+| [`peers.ts`](src/tools/peers.ts) | the peer specifiers `dist/` imports |
+| [`IconPackBuilder.ts`](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
+| [`SiteDataBuilder.ts`](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale |
+| [`SiteSearchBuilder.ts`](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
+| [`FamilyTokens.ts`](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
+| [`FoundationTokens.ts`](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
+| [`ThemeFamilies.ts`](src/tools/ThemeFamilies.ts) | which families each theme sheet touches, read from its CSS |
+| [`SiteCheck.ts`](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless chromium, from the page server's `/components/ui/` (started with `spell server start`):  errors and failed requests, undefined or unrendered `ui-*`, the four tabs each loaded from its hash, the "On this page" rail, phone overflow (naming the offending elements), the nav flyout, dark;  screenshots in `results/site-check/`, a JSON summary on stdout, exit 1 on any problem |
+| [`StaticRenderer.ts`](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages and by `spell ssr`, in its child process (`src/cli/runner/renderStatic.ts`) |
+| [`StaticDocument.ts`](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
+| [`DesignExport.ts`](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts`, `DesignBrand.ts` | `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]`:  also `spell design build`, which passes spell-brand's folder:  the claude.ai design system's files in `<dir>/project/` (default `build/design-system/`, git-ignored):  the brand book README, `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  keeps the design bundle's `components/bundle.js` and `bundle.css`;  the tokens per scheme from the `spell-brand` theme;  a "Brand" group of `<brand-*>` cards read from the GIVEN brand folder's data, since Spell UI imports nothing of the brand |
+| [`ElementManifests.ts`](src/tools/ElementManifests.ts) | `custom-elements.json` (Custom Elements Manifest 2.1) and `html-custom-data.json` (VS Code's `html.customData`, loaded by the repo's `.vscode/settings.json`), written by `yarn site:data` into `docs/__data/` |
+| [`environment.ts`](src/tools/environment.ts) | EVERY environment variable `src/tools/`, `scripts/` and the configs read, parsed once;  nowhere else reads `process.env` |
+| [`generatedFiles.ts`](src/tools/generatedFiles.ts) | what the scripts that write generated files share:  write-or-`--check`, `vp fmt`, splicing between markers, markup escaping;  in `scripts/` until epic `repo-split` P14 |
+| [`hmr.e2e.ts`](src/tools/hmr.e2e.ts) | `yarn test:hmr`:  8 scenarios, as a plain `node:test` script |
+| [`screenshots.ts`](src/tools/screenshots.ts) | `yarn screenshots`:  one PNG per example pair of `demo/index.html`, into `.cache/screenshots/` |
 | tests | in [`tests/tools/`](tests/tools/):  `DesignExport`, `IconPackBuilder`, `SiteDataBuilder` (fails while `docs/__data/` is stale), `SiteSearchBuilder` ...;  in the `ssr` project |
 | `results/` | what the tools write (git-ignored):  `measure-results.json`, `perf-results.json`, `site-check/`, `visual/` |
-| [`frameworks/`](tools/frameworks/) | the host pages:  `vanilla`, `react` (esm.sh), `vue` (unpkg), `solid` (a Solid 2 app and the `identity.js` probe), the shared round trip `check.js`, `perf.html` |
-| [`smoke/`](tools/smoke/) | more import-map pages:  `compat-solid-1.9.html`, `translate.html`, `perf-adapter.js` |
-| [`visual/`](tools/visual/) | `yarn test:visual`:  `cli.ts` (flags) → `VisualRunner` (dev server, one Playwright run per OS, pruning) and `DockerBrowserServer` (Docker checks, the browser server container);  `playwright.config.ts`, `visual.spec.ts` (tests generated by `VisualExamples`), `fixture.html` / `Fixture.ts` (one example, settled), `ParityReport` (`--parity` / `--static`);  for `--static`, `StaticFamilies`, `StaticPages` and `StaticFixture`;  `VisualSettings` (viewport, time, tolerances, paths);  `visual.types.ts` |
-| [`demo/`](tools/demo/) | the `yarn dev` pages:  every example side by side (`index.html`), `perf`, `translate`, `hmr`;  `fallback.html` is also a smoke page;  `FamilySheets` puts every family sheet on the page |
+| [`frameworks/`](src/tools/frameworks/) | the host pages:  `vanilla`, `react` (esm.sh), `vue` (unpkg), `solid` (a Solid 2 app and the `identity.js` probe), the shared round trip `check.js`, `perf.html` |
+| [`smoke/`](src/tools/smoke/) | more import-map pages:  `compat-solid-1.9.html`, `translate.html`, `perf-adapter.js` |
+| [`visual/`](src/tools/visual/) | `yarn test:visual`:  `cli.ts` (flags) → `VisualRunner` (dev server, one Playwright run per OS, pruning) and `DockerBrowserServer` (Docker checks, the browser server container);  `playwright.config.ts`, `visual.spec.ts` (tests generated by `VisualExamples`), `fixture.html` / `Fixture.ts` (one example, settled), `ParityReport` (`--parity` / `--static`);  for `--static`, `StaticFamilies`, `StaticPages` and `StaticFixture`;  `VisualSettings` (viewport, time, tolerances, paths);  `visual.types.ts` |
+| [`demo/`](src/tools/demo/) | the `yarn dev` pages:  every example side by side (`index.html`), `perf`, `translate`, `hmr`;  `fallback.html` is also a smoke page;  `FamilySheets` puts every family sheet on the page |
 
-The generic tools are the kit's (`spell-kit/element/tools/<Name>`, in the kit's [`element/tools/`](../element/tools/)):
+The generic tools are the kit's (`spell-kit/element-tools/<Name>`, in the kit's [`src/element-tools/`](../src/element-tools/)):
 
 - `Terminal`, where every tool and script prints;  `NodePackage`, finding an installed dependency
 - `ComponentPack` and `packModules`, a component pack's build (`spell-pack build | check`)
@@ -337,29 +338,30 @@ The generic tools are the kit's (`spell-kit/element/tools/<Name>`, in the kit's 
 <details>
 <summary>How the tools are written:  imports, pages, the identity probe, buckets</summary>
 
-- The CLASSES live in `tools/`, in PascalCase files.
+- The CLASSES live in `src/tools/`, in PascalCase files.
   - A yarn script that only runs one is a few lines in [`scripts/`](scripts/), named for the script:
     `yarn site:check` → [`site-check.ts`](scripts/site-check.ts) → `SiteCheck.main()`.
-  - A folder with its own flags has a `cli.ts`:  [the tools'](tools/cli.ts), [the visual tests'](tools/visual/cli.ts).
+  - A folder with its own flags has a `cli.ts`:  [the tools'](src/tools/cli.ts), [the visual tests'](src/tools/visual/cli.ts).
 - Output goes through `Terminal` (stdout and stderr), never `console.*`.
 - Environment variables are read through `environment`.
 - Imports:  these are node scripts, run by `tsx`.
-  - Relative imports with `.ts` extensions;  another package by its name (`spell-kit/server`).
-  - Page scripts Vite serves or loads for the server (the demo's `*.ts`, the visual tests' fixtures) import Spell UI
-    as its own source does ([AGENTS.md](AGENTS.md), "Imports").
+  - By package name, as all of Spell UI's code is (`spell-ui/tools/SiteCheck`, `spell-kit/server`;
+    [AGENTS.md](AGENTS.md), "Imports");  a same-folder peer stays relative (`./tools.types.ts`).
+  - Their TypeScript settings are the node ones, [tsconfig.node.json](tsconfig.node.json), with `src/cli/`, `scripts/`
+    and the configs.
   - Browser-side helpers the static server serves are transpiled on the fly, and may import types only
-    ([`PerfRun`](test-helpers/PerfRun.ts), [the Spanish dictionary](test-helpers/dictionary.es.ts)).
+    ([`PerfRun`](src/test-helpers/PerfRun.ts), [the Spanish dictionary](src/test-helpers/dictionary.es.ts)).
 - Pages:
   a smoke page imports `spell-ui...` and the peers by name, and publishes `window.smokeResult = { ok, label, checks }`.
   - `kind: "compat"` is reported as COMPATIBILITY.
   - A page module that imports a peer binding itself must be listed in `PeerVendor`'s `usedBy`,
-    in [the tools' command line](tools/cli.ts):
+    in [the tools' command line](src/tools/cli.ts):
     else the vendored file lacks it ("does not provide an export named ...").
-- The identity probe ([`identity.js`](tools/frameworks/solid/identity.js)) is the ONLY place that proves
+- The identity probe ([`identity.js`](src/tools/frameworks/solid/identity.js)) is the ONLY place that proves
   the host app and the components share one Solid.
   It binds `createSignal` and `render`, and never `import * as` a package, so the vendored Solid stays tree-shaken.
 - Buckets:
-  - a module [the package config](tools/package.config.ts) can't place is `other`, and fails the `unattributed` check
+  - a module [the package config](src/tools/package.config.ts) can't place is `other`, and fails the `unattributed` check
   - a `shared:<name>` module outside `<name>.js` fails `coreOutsideCore`
 
 </details>
@@ -380,7 +382,7 @@ spell design build                   # the claude.ai design system's files;  bun
 - The kit's `spell` finds them through `package.json`'s `"spell": { "commands": "./cli/commands.ts" }`.
 - They were spell-app's until epic `repo-split` P13, as `spell icons`, `spell static`, `spell dev pack` and
   `spell dev design`.
-- The rules for writing one:  [cli/AGENTS.md](cli/AGENTS.md).
+- The rules for writing one:  [cli/AGENTS.md](src/cli/AGENTS.md).
 
 <details>
 <summary>The DRY rule (one of each)</summary>
@@ -388,24 +390,24 @@ spell design build                   # the claude.ai design system's files;  bun
 If you find yourself writing a second copy of any of these, stop and reuse.
 
 - the `spell` program, its errors and exit codes, running another tool:  the kit's `spell-kit/cli`
-- building and checking a pack:  the kit's `ComponentPack` (`spell-kit/element/tools/ComponentPack`)
-- the static render:  [`StaticRenderer`](tools/StaticRenderer.ts) and [`StaticDocument`](tools/StaticDocument.ts)
+- building and checking a pack:  the kit's `ComponentPack` (`spell-kit/element-tools/ComponentPack`)
+- the static render:  [`StaticRenderer`](src/tools/StaticRenderer.ts) and [`StaticDocument`](src/tools/StaticDocument.ts)
 - the icon packs:  Spell UI's icons (`BuiltInPacks`, `IconName`)
 
 </details>
 
 <details>
-<summary>Every file in cli/, one line each</summary>
+<summary>Every file in src/cli/, one line each</summary>
 
 | Path | What |
 | --- | --- |
-| [`commands.ts`](cli/commands.ts) | the list the kit's `spell` loads:  each command's name, flags and help |
-| [`src/cli.types.ts`](cli/src/cli.types.ts) | the commands' options and reports:  types only |
-| [`src/iconCommand.ts`](cli/src/iconCommand.ts) | `spell icon`:  the list, or the gallery page;  `iconSearch.ts` finds them, `serve.ts` serves the gallery |
-| [`src/ssrCommand.ts`](cli/src/ssrCommand.ts) | `spell ssr`:  which pages, where they go, the shared stylesheets;  renders in `runner/renderStatic.ts` |
-| [`src/packCommand.ts`](cli/src/packCommand.ts) | `spell pack`'s four verbs, on `packCreate.ts` (create, add) and `packBuild.ts` (build, check) |
-| [`src/designCommand.ts`](cli/src/designCommand.ts) | `spell design`:  each verb's tool, run with its arguments as typed |
-| [`templates/`](cli/templates/) | the files `spell pack create` and `add` write from:  [their README](cli/templates/README.md) |
+| [`src/cli/commands.ts`](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, flags and help |
+| [`cli.types.ts`](src/cli/cli.types.ts) | the commands' options and reports:  types only |
+| [`iconCommand.ts`](src/cli/iconCommand.ts) | `spell icon`:  the list, or the gallery page;  `iconSearch.ts` finds them, `serve.ts` serves the gallery |
+| [`ssrCommand.ts`](src/cli/ssrCommand.ts) | `spell ssr`:  which pages, where they go, the shared stylesheets;  renders in `runner/renderStatic.ts` |
+| [`packCommand.ts`](src/cli/packCommand.ts) | `spell pack`'s four verbs, on `packCreate.ts` (create, add) and `packBuild.ts` (build, check) |
+| [`designCommand.ts`](src/cli/designCommand.ts) | `spell design`:  each verb's tool, run with its arguments as typed |
+| [`templates/`](src/cli/templates/) | the files `spell pack create` and `add` write from:  [their README](src/cli/templates/README.md) |
 | tests | in [`tests/cli/`](tests/cli/) |
 
 </details>
@@ -415,10 +417,10 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 
 1. Read the commands guide, `/guides/dev/commands/commands.md` (below, "More in the docs site"):
    where it belongs, and its name.
-2. Its work:  a file in `cli/src/`, `(args, options) => Promise<exitCode>`, throwing `CLI.CliError` for a mistake.
-3. Its line in `cli/commands.ts`:  `spell.command("name")`, its arguments, flags and help,
+2. Its work:  a file in `src/cli/`, `(args, options) => Promise<exitCode>`, throwing `CLI.CliError` for a mistake.
+3. Its line in `src/cli/commands.ts`:  `spell.command("name")`, its arguments, flags and help,
    and an action that imports the file when it runs.
-4. Its test in `tests/cli/src/`, then its row on the commands page, and `spell commands check`.
+4. Its test in `tests/cli/`, then its row on the commands page, and `spell commands check`.
 
 </details>
 
@@ -426,7 +428,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 <summary>Deferred</summary>
 
 - `serve.ts` has a twin in spell-app (`spell run`'s browser page):
-  one shared home, the kit's `cli/`, would do for both.
+  one shared home, the kit's `src/cli/`, would do for both.
 
 </details>
 

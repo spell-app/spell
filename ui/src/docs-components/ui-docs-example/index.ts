@@ -12,10 +12,10 @@ import { UIDocsExample } from "./UIDocsExample"
 import { ExampleSource } from "./ExampleSource"
 import { HtmlFormatter } from "./HtmlFormatter"
 
-import "$/ui/components/ui-segment"
-import "$/ui/components/ui-parts"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-code"
+import "spell-ui/components/ui-segment"
+import "spell-ui/components/ui-parts"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-code"
 
 UIDocsExample.define()
 

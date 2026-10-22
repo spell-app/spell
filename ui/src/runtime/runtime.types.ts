@@ -1,5 +1,5 @@
 /**
- * Shared types, constants and small error classes for `$/ui/runtime`.
+ * Shared types, constants and small error classes for `spell-ui/runtime`.
  * - The BOTTOM of the runtime's import graph:  every service imports it, it imports none of them.
  * - Runtime-light:  `import type` only (plus `package.json`'s `version`, a string), so the eager half (`load.ts`:
  *   the `UI` accessor + `loadUI`, in every page's `core.js`) stays tiny and the service classes stay in the lazily
@@ -9,7 +9,7 @@
 import type { Temporal } from "temporal-polyfill"
 
 // No alias reaches `package.json` (outside `src/`):  the one relative import.  Bundlers keep `version` alone.
-import { version } from "../../package.json"
+import { version } from "spell-ui/package.json"
 import type { UIRuntime } from "./UIRuntime"
 
 ////////////////
@@ -21,7 +21,7 @@ import type { UIRuntime } from "./UIRuntime"
  * - `Symbol.for()` so two copies of `spell-ui` on one page (duplicate bundles, micro-frontends)
  *   find each other's runtime rather than fighting over shortcuts, overlays and scroll lock.
  */
-export const RUNTIME_KEY = Symbol.for("@spell-app/ui:runtime")
+export const RUNTIME_KEY = Symbol.for("spell-ui:runtime")
 
 /**
  * Version of this runtime build:  `spell-ui`'s `package.json` `version`, inlined by the bundler.
@@ -596,7 +596,7 @@ export type SourceSaveResult = {
 
 /**
  * Writes text back to where it came from;  `UI.sources.saver`.
- * - `ui` ships none:  it can't know the server.  The page server's lives in `$/server` (`SPELL_SERVER.saveFile`),
+ * - `ui` ships none:  it can't know the server.  The page server's lives in `spell-kit/server` (`SPELL_SERVER.saveFile`),
  *   registered by the docs runtime.
  * - MUST throw on failure:  a `SourceError` (`conflict` for a 409 / 412, `save` otherwise), or -- from code that
  *   can't import it (a page's classic script) -- any object with a `kind` of `SourceErrorKind`, a `message` and
@@ -679,7 +679,7 @@ export const CODE_LANGUAGES_EVENT = "ui-code-languages"
 
 /**
  * A highlight.js language definition:  `(hljs) => Language` (highlight.js's own "language function").
- * - Typed loosely so `$/ui/runtime` needn't import highlight.js's types:  `ui-code` hands it to `hljs.registerLanguage`.
+ * - Typed loosely so `spell-ui/runtime` needn't import highlight.js's types:  `ui-code` hands it to `hljs.registerLanguage`.
  */
 export type CodeGrammar = (hljs: any) => object
 

@@ -1,16 +1,16 @@
 import type { JSX } from "@solidjs/web"
 import { describe, expect, it } from "vite-plus/test"
 
-import type { ItemContext, ItemOwner } from "$/ui/components/components.types"
+import type { ItemContext, ItemOwner } from "spell-ui/components/components.types"
 import { UIComponent, type AttributeValues, type UIComponentClass, type DOMElement } from "spell-kit/element"
-import type { ComponentVocabulary } from "$/ui/vocabulary"
-import { UI } from "$/ui/runtime"
+import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-item"
-import "$/ui/components/ui-parts"
+import "spell-ui/components/ui-item"
+import "spell-ui/components/ui-parts"
 
 /**
  * `<ui-item>` on its own:

@@ -1,4 +1,4 @@
-import type { E } from "$/ui/core"
+import type { E } from "spell-ui/core"
 
 /****************
  * ### `ElementSnapshot`

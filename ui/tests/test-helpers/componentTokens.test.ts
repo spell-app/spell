@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ComponentTokens } from "$/ui/styles/ComponentTokens"
+import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
 
 /**
  * The component-token rule (`notes/theming.md`, "Component tokens"):
@@ -15,10 +15,10 @@ import { ComponentTokens } from "$/ui/styles/ComponentTokens"
  */
 
 /** Every component sheet, by path. */
-const SHEETS = import.meta.glob<string>("/components/*/*.css", { query: "?raw", import: "default", eager: true })
+const SHEETS = import.meta.glob<string>("/src/components/*/*.css", { query: "?raw", import: "default", eager: true })
 
 /** Every English vocabulary (the tags), by path. */
-const VOCABULARIES = import.meta.glob<string>("/components/*/*.en.ts", {
+const VOCABULARIES = import.meta.glob<string>("/src/components/*/*.en.ts", {
   query: "?raw",
   import: "default",
   eager: true
@@ -42,15 +42,15 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
 /** The real tags and foundation;  `ComponentTokens.test.ts` (beside the class) tests its methods. */
 const TOKENS = new ComponentTokens({ vocabularies: VOCABULARIES, foundation: Object.values(FOUNDATION) })
 
-/** `components/ui-button/UIButton.css` => `ui-button/UIButton.css` */
+/** `/src/components/ui-button/UIButton.css` => `ui-button/UIButton.css` */
 function short(path: string): string {
-  return path.replace("/components/", "")
+  return path.replace("/src/components/", "")
 }
 
 describe("ui-*.css component tokens", () => {
   it.each(Object.keys(SHEETS).map(short))("%s never declares a public component token", (path) => {
     const allowed = EXCEPTIONS[path] ?? {}
-    const declared = TOKENS.publicDeclarations(SHEETS[`/components/${path}`]!)
+    const declared = TOKENS.publicDeclarations(SHEETS[`/src/components/${path}`]!)
     const found = declared.filter(({ name }) => !(name in allowed)).map(({ name, line }) => `${name} (line ${line})`)
     expect(found, "declare `--_ui-x: var(--ui-x, <default>)` instead (notes/theming.md)").toEqual([])
     for (const name of Object.keys(allowed))
@@ -61,7 +61,7 @@ describe("ui-*.css component tokens", () => {
   })
 
   it.each(Object.keys(SHEETS).map(short))("%s names every alias after the token it reads", (path) => {
-    const css = SHEETS[`/components/${path}`]!
+    const css = SHEETS[`/src/components/${path}`]!
     const mismatched = ComponentTokens.declarations(css)
       .filter(({ name, value }) => name.startsWith("--_ui-") && /^var\(\s*--ui-/.test(value))
       .map(({ name, value, line }) => ({ name, read: /^var\(\s*(--ui-[a-z0-9-]+)/.exec(value)![1]!, line }))
@@ -74,7 +74,7 @@ describe("ui-*.css component tokens", () => {
   })
 
   it.each(Object.keys(SHEETS).map(short))("%s reads its aliased tokens only through the alias", (path) => {
-    const css = ComponentTokens.stripComments(SHEETS[`/components/${path}`]!)
+    const css = ComponentTokens.stripComments(SHEETS[`/src/components/${path}`]!)
     const aliased = ComponentTokens.aliases(css).map(({ name }) => name)
     const bypasses: string[] = []
     for (const name of aliased) {

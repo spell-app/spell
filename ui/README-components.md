@@ -4,9 +4,9 @@ Every component family, by group, one line each:  its tags, what it is, the name
 and a picture of its first example where a picture says more than the line.
 Each family links to its page on the docs site, where every example is live.
 
-- A FAMILY is one folder of `components/` (`ui-button/`):
+- A FAMILY is one folder of `src/components/` (`ui-button/`):
   its main tag (`<ui-button>`) and the tags that go with it (`<ui-buttons>`, `<ui-or>`).
-  - Each family is its own entry, `spell-ui/ui-button`:
+  - Each family is its own entry, `spell-ui/ui-button` (`spell-ui/components/ui-button` inside the Spell repos):
     [`<ui-root>`](README.md#ui-root) loads it the first time one of its tags appears.
 - The groups are Fomantic UI's four, as the docs site's kitchen sink files them, then the generic content parts,
   then the elements Spell UI added.
@@ -164,7 +164,7 @@ A new tag fills them all;  the tests fail on one that's missing a piece.
 | File | What it is |
 | --- | --- |
 | `UI<Name>.tsx` | the component:  one class per tag, its state and its `render()` into the shadow root;  a family's own DOM element class, `DOM<Name>Element`, sits above it in the same file |
-| `index.ts` | the family's barrel:  defines every tag (a side effect), re-exports the classes;  also the family's entry, `spell-ui/ui-<name>` |
+| `index.ts` | the family's barrel:  defines every tag (a side effect), re-exports the classes;  also the family's entry, `spell-ui/ui-<name>` (`spell-ui/components/ui-<name>` inside the repos) |
 | `UI<Name>.css` | its sheet, a port of Fomantic's `.less` and `.variables`, in layers |
 | `UI<Name>.en.ts` | the VOCABULARY, one per tag:  every name the tag uses (attributes and their values, events, slots, parts, states, texts), plus `topics`, `aka` and `skeleton` |
 | `UI<Name>.types.ts` | constants and types several of its files share |

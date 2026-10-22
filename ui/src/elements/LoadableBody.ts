@@ -1,4 +1,4 @@
-import { E, UI } from "$/ui/core"
+import { E, UI } from "spell-ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { state, untracked } from "spell-kit/element"
 
@@ -14,7 +14,7 @@ import { state, untracked } from "spell-kit/element"
  *   every child but an element with a `slot` attribute (a section's header, icon, badge ... stay);
  *   on `reload()`, replaces the body it put there before too.
  * - Events through the owner:
- *   - `ui-load` once the body is in
+ *   - `ui-loading` as it starts, `ui-loaded` once the body is in
  *   - the cancelable `ui-error` on failure, after which `loadError` holds what to say (unless cancelled)
  *   - a failure isn't remembered:  the next `load()` tries again
  * - `isVeiled`:  the owner keeps its content box closed while it's true,
@@ -141,8 +141,6 @@ export class LoadableBody {
       this.insert(E.SourceMarkup.parse(loaded.text, { page: domElement.ownerDocument, source, select }))
       this.loadStatus = E.SourceStatus.loaded
       this.owner.send(E.SourceEvent.loaded, { source, content: loaded.text })
-      // its old name, until every page listens for the new (epic `property-editor` P10)
-      this.owner.send(E.SourceEvent.load, { source, content: loaded.text })
     } catch (error) {
       if (generation !== this.generation) return
       this.fail(source, error)

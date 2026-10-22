@@ -1,6 +1,6 @@
 /**
  * Constants the site bundle's glue (`SiteShell`, `SiteRouter`, `SiteSections`) shares -- and the site's checks
- * (`tools/SiteCheck.ts`), which is why they live here.
+ * (`src/tools/SiteCheck.ts`), which is why they live here.
  * - Pure data, at the bottom of the folder's imports:  no imports at all, so a node tool loads it by path without
  *   pulling in the browser code beside it.
  */

@@ -1,4 +1,4 @@
-import type { SiteDataFile, SiteSearchFile, SiteTag } from "$/ui/docs-components/docs-components.types"
+import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import {
   GROUP_LIMIT,
   INSIDE_MIN,

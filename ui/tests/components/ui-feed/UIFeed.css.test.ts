@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { eventVocabulary } from "$/ui/components/ui-feed/UIFeedEvent.en"
-import { feedVocabulary } from "$/ui/components/ui-feed/UIFeed.en"
+import { eventVocabulary } from "spell-ui/components/ui-feed/UIFeedEvent.en"
+import { feedVocabulary } from "spell-ui/components/ui-feed/UIFeed.en"
 
-import iconCSS from "$/ui/components/ui-icon/UIIcon.css?inline"
-import partsCSS from "$/ui/components/ui-parts/UIParts.css?inline"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import feedCSS from "$/ui/components/ui-feed/UIFeed.css?inline"
-import feedRaw from "$/ui/components/ui-feed/UIFeed.css?raw"
+import iconCSS from "spell-ui/components/ui-icon/UIIcon.css?inline"
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import feedCSS from "spell-ui/components/ui-feed/UIFeed.css?inline"
+import feedRaw from "spell-ui/components/ui-feed/UIFeed.css?raw"
 
 /**
  * `UIFeed.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of the
@@ -22,7 +22,7 @@ import feedRaw from "$/ui/components/ui-feed/UIFeed.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-feed",
+  base: "/src/components/ui-feed",
   query: "?raw",
   import: "default",
   eager: true

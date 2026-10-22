@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { listVocabulary } from "$/ui/components/ui-list/UIList.en"
+import { listVocabulary } from "spell-ui/components/ui-list/UIList.en"
 
-import itemCSS from "$/ui/components/ui-item/UIItem.css?inline"
-import partsCSS from "$/ui/components/ui-parts/UIParts.css?inline"
-import listCSS from "$/ui/components/ui-list/UIList.css?inline"
-import listRaw from "$/ui/components/ui-list/UIList.css?raw"
+import itemCSS from "spell-ui/components/ui-item/UIItem.css?inline"
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import listCSS from "spell-ui/components/ui-list/UIList.css?inline"
+import listRaw from "spell-ui/components/ui-list/UIList.css?raw"
 
 /**
  * `UIList.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -22,7 +22,7 @@ import listRaw from "$/ui/components/ui-list/UIList.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-list",
+  base: "/src/components/ui-list",
   query: "?raw",
   import: "default",
   eager: true

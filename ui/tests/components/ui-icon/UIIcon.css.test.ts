@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { iconVocabulary } from "$/ui/components/ui-icon/UIIcon.en"
-import { iconsVocabulary } from "$/ui/components/ui-icon/UIIcons.en"
+import { iconVocabulary } from "spell-ui/components/ui-icon/UIIcon.en"
+import { iconsVocabulary } from "spell-ui/components/ui-icon/UIIcons.en"
 
-import iconCSS from "$/ui/components/ui-icon/UIIcon.css?inline"
-import iconRaw from "$/ui/components/ui-icon/UIIcon.css?raw"
+import iconCSS from "spell-ui/components/ui-icon/UIIcon.css?inline"
+import iconRaw from "spell-ui/components/ui-icon/UIIcon.css?raw"
 
 /**
  * `UIIcon.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -19,7 +19,7 @@ import iconRaw from "$/ui/components/ui-icon/UIIcon.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-icon",
+  base: "/src/components/ui-icon",
   query: "?raw",
   import: "default",
   eager: true

@@ -5,12 +5,12 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import { EmojiData } from "$/ui/components/ui-emoji"
+import { EmojiData } from "spell-ui/components/ui-emoji"
 
-import "$/ui/components/ui-root"
+import "spell-ui/components/ui-root"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-emoji/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-emoji/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

@@ -1,6 +1,6 @@
-import type { E } from "$/ui/core"
-import { DOCS_PLAIN_THEME, type SiteDataFile } from "$/ui/docs-components/docs-components.types"
-import { SiteData } from "$/ui/docs-components/SiteData"
+import type { E } from "spell-ui/core"
+import { DOCS_PLAIN_THEME, type SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import { SiteData } from "spell-ui/docs-components/SiteData"
 import { CLASSIC, SPELL, SPELL_BRAND, type DocsThemesText } from "./UIDocsThemes.types"
 
 /****************

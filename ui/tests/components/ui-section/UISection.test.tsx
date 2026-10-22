@@ -1,23 +1,23 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import type { SectionToggleDetail } from "$/ui/components/components.types"
-import { UI } from "$/ui/runtime"
-import { nextFrame } from "$/ui/util"
+import type { SectionToggleDetail } from "spell-ui/components/components.types"
+import { UI } from "spell-ui/runtime"
+import { nextFrame } from "spell-ui/util"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/components/ui-section"
-import "$/ui/components/ui-icon"
-import "$/ui/components/ui-label"
-import "$/ui/components/ui-button"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-section"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-button"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-section/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-section/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -99,7 +99,7 @@ describe("<ui-section> classes", () => {
     ['scrolling="very short"', "ui very short scrolling section"],
     ['text-align="center" inverted', "ui inverted center aligned section"],
     ["styled basic loading disabled", "ui basic disabled loading styled section"],
-    ['collapsible collapsed header="H" subhead="S" level="3" badge="2" icon="bug" offset="4"', "ui section"]
+    ['collapsible collapsed label="H" hint="S" level="3" badge="2" icon="bug" offset="4"', "ui section"]
   ])("<ui-section %s>", async (attributes, classes) => {
     const { root } = await section(`<ui-section ${attributes}>Body</ui-section>`)
     expect(root.localName).toBe("section")
@@ -692,7 +692,7 @@ describe("<ui-sections>", () => {
 
 describe("<ui-section source>", () => {
   /** Fixture bodies the test server serves. */
-  const DIR = "/test-helpers/fixtures/sources/bodies"
+  const DIR = "/src/test-helpers/fixtures/sources/bodies"
 
   /** A section DOM element with its source API. */
   type SourceSection = SectionElement & { load(): Promise<void>; reload(): Promise<void> }
@@ -1024,26 +1024,17 @@ describe("<ui-section> accessibility", () => {
   })
 })
 
-describe("<ui-section> its old words, until every page says the new (epic `property-editor` P10)", () => {
-  it("`header`, `subhead` and `info`, attributes and slots, show as `label`, `hint` and `description`", async () => {
+describe("<ui-section> its words:  `<ui-field>`'s (epic `property-editor` P10)", () => {
+  it("the old ones are gone (epic `repo-split` Q45):  `header`, `subhead`, `info`, attributes or slots, show nothing", async () => {
     const plain = await section(`<ui-section header="Title" subhead="Sub" info="Tip">Body</ui-section>`)
-    expect(plain.header.textContent).toBe("Title")
-    expect(plain.subhead!.textContent).toBe("Sub")
-    expect(plain.title.querySelector("[part~=tip]")!.textContent).toBe("Tip")
-    const rich = await section(
-      `<ui-section><b slot="header">Rich</b><i slot="subhead">sub</i><span slot="info">tip</span>Body</ui-section>`
-    )
-    expect(rich.host.querySelector("[slot=header]")!.assignedSlot!.closest("[part~=header]")).toBe(rich.header)
-    expect(rich.subhead).not.toBeNull()
-    expect(rich.title.querySelector("[part~=tip]")).not.toBeNull()
+    expect(plain.header.textContent).toBe("")
+    expect(plain.subhead).toBeNull()
+    expect(plain.title.querySelector("[part~=tip]")).toBeNull()
+    const rich = await section(`<ui-section><b slot="header">Rich</b>Body</ui-section>`)
+    expect(rich.host.querySelector("[slot=header]")!.assignedSlot).toBeNull()
   })
 
-  it("the new name wins over the old", async () => {
-    const { header } = await section(`<ui-section label="New" header="Old">Body</ui-section>`)
-    expect(header.textContent).toBe("New")
-  })
-
-  it("`ui-close` / `ui-open` follow `ui-closing` / `ui-opening`;  `ui-closed` / `ui-opened` once it has folded", async () => {
+  it("`ui-closing` / `ui-opening`, then `ui-closed` / `ui-opened` once it has folded;  never `ui-close` / `ui-open`", async () => {
     const { host, toggle } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
     const seen = record(host, ["ui-closing", "ui-close", "ui-closed", "ui-opening", "ui-open", "ui-opened"])
     await userEvent.click(toggle)
@@ -1052,15 +1043,7 @@ describe("<ui-section> its old words, until every page says the new (epic `prope
     await ElementFixture.tick()
     await expect
       .poll(() => seen.map(({ type }) => type))
-      .toEqual(["ui-closing", "ui-close", "ui-closed", "ui-opening", "ui-open", "ui-opened"])
-  })
-
-  it("cancelling the old name still keeps it open", async () => {
-    const { host, toggle } = await section(`<ui-section label="H" collapsible>Body</ui-section>`)
-    host.addEventListener("ui-close", (event) => event.preventDefault(), { once: true })
-    await userEvent.click(toggle)
-    await ElementFixture.tick()
-    expect(host.collapsed).toBe(false)
+      .toEqual(["ui-closing", "ui-closed", "ui-opening", "ui-opened"])
   })
 
   it("`ui-closed` too when the page folds it", async () => {
@@ -1070,14 +1053,14 @@ describe("<ui-section> its old words, until every page says the new (epic `prope
     await expect.poll(() => seen.map(({ type, event }) => [type, event.detail.open])).toEqual([["ui-closed", false]])
   })
 
-  it(":state(in-section) and :state(in-sections) beside :state(nested) and :state(in-group)", async () => {
+  it(":state(in-section) and :state(in-sections), the part's own, beside :state(nested) and :state(in-group)", async () => {
     const { host } = await section(
       `<ui-section label="A"><ui-sections><ui-section id="b" label="B">x</ui-section></ui-sections></ui-section>`
     )
     const b = host.querySelector("#b")!
     await expect.poll(() => b.matches(":state(in-sections)")).toBe(true)
     expect(b.matches(":state(in-group)")).toBe(true)
-    // `nested` counts a section around it through the group;  the old `in-section` only one directly around
+    // `nested` counts a section around it through the group;  the part's `in-section` only one directly around
     expect(b.matches(":state(nested)")).toBe(true)
     expect(b.matches(":state(in-section)")).toBe(false)
   })

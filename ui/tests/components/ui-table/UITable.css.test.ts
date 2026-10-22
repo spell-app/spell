@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { tableVocabulary } from "$/ui/components/ui-table/UITable.en"
+import { tableVocabulary } from "spell-ui/components/ui-table/UITable.en"
 
-import tableCSS from "$/ui/components/ui-table/UITable.css?inline"
-import tableRaw from "$/ui/components/ui-table/UITable.css?raw"
+import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
+import tableRaw from "spell-ui/components/ui-table/UITable.css?raw"
 
 /**
  * `UITable.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the
@@ -21,7 +21,7 @@ import tableRaw from "$/ui/components/ui-table/UITable.css?raw"
 
 /** Every class-grammar example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-table",
+  base: "/src/components/ui-table",
   query: "?raw",
   import: "default",
   eager: true

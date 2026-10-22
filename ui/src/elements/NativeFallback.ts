@@ -1,6 +1,6 @@
 // Import directly to avoid circular import
-import { lazy, proto } from "$/ui/util"
-import { E } from "$/ui/core"
+import { lazy, proto } from "spell-ui/util"
+import { E } from "spell-ui/core"
 
 /****************
  * ### `NativeFallback`

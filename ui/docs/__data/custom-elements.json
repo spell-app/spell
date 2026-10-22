@@ -4,7 +4,7 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "components/ui-accordion/index.ts",
+      "path": "src/components/ui-accordion/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -163,13 +163,6 @@
             {
               "name": "ui-loaded",
               "description": "The `source` file arrived and its body is in place (`content` is the file's text).",
-              "type": {
-                "text": "CustomEvent<{ source: string, content: string }>"
-              }
-            },
-            {
-              "name": "ui-load",
-              "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new.",
               "type": {
                 "text": "CustomEvent<{ source: string, content: string }>"
               }
@@ -346,7 +339,7 @@
           "name": "UIAccordion",
           "declaration": {
             "name": "UIAccordion",
-            "module": "components/ui-accordion/index.ts"
+            "module": "src/components/ui-accordion/index.ts"
           }
         },
         {
@@ -354,14 +347,14 @@
           "name": "ui-accordion",
           "declaration": {
             "name": "UIAccordion",
-            "module": "components/ui-accordion/index.ts"
+            "module": "src/components/ui-accordion/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-ad/index.ts",
+      "path": "src/components/ui-ad/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -502,7 +495,7 @@
           "name": "UIAd",
           "declaration": {
             "name": "UIAd",
-            "module": "components/ui-ad/index.ts"
+            "module": "src/components/ui-ad/index.ts"
           }
         },
         {
@@ -510,14 +503,14 @@
           "name": "ui-ad",
           "declaration": {
             "name": "UIAd",
-            "module": "components/ui-ad/index.ts"
+            "module": "src/components/ui-ad/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-breadcrumb/index.ts",
+      "path": "src/components/ui-breadcrumb/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -829,7 +822,7 @@
           "name": "UIBreadcrumb",
           "declaration": {
             "name": "UIBreadcrumb",
-            "module": "components/ui-breadcrumb/index.ts"
+            "module": "src/components/ui-breadcrumb/index.ts"
           }
         },
         {
@@ -837,7 +830,7 @@
           "name": "ui-breadcrumb",
           "declaration": {
             "name": "UIBreadcrumb",
-            "module": "components/ui-breadcrumb/index.ts"
+            "module": "src/components/ui-breadcrumb/index.ts"
           }
         },
         {
@@ -845,7 +838,7 @@
           "name": "UIBreadcrumbSection",
           "declaration": {
             "name": "UIBreadcrumbSection",
-            "module": "components/ui-breadcrumb/index.ts"
+            "module": "src/components/ui-breadcrumb/index.ts"
           }
         },
         {
@@ -853,14 +846,14 @@
           "name": "ui-breadcrumb-section",
           "declaration": {
             "name": "UIBreadcrumbSection",
-            "module": "components/ui-breadcrumb/index.ts"
+            "module": "src/components/ui-breadcrumb/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-button/index.ts",
+      "path": "src/components/ui-button/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -1839,7 +1832,7 @@
           "name": "UIButton",
           "declaration": {
             "name": "UIButton",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         },
         {
@@ -1847,7 +1840,7 @@
           "name": "ui-button",
           "declaration": {
             "name": "UIButton",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         },
         {
@@ -1855,7 +1848,7 @@
           "name": "UIButtons",
           "declaration": {
             "name": "UIButtons",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         },
         {
@@ -1863,7 +1856,7 @@
           "name": "ui-buttons",
           "declaration": {
             "name": "UIButtons",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         },
         {
@@ -1871,7 +1864,7 @@
           "name": "UIOr",
           "declaration": {
             "name": "UIOr",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         },
         {
@@ -1879,14 +1872,14 @@
           "name": "ui-or",
           "declaration": {
             "name": "UIOr",
-            "module": "components/ui-button/index.ts"
+            "module": "src/components/ui-button/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-calendar/index.ts",
+      "path": "src/components/ui-calendar/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -2415,7 +2408,7 @@
           "name": "UICalendar",
           "declaration": {
             "name": "UICalendar",
-            "module": "components/ui-calendar/index.ts"
+            "module": "src/components/ui-calendar/index.ts"
           }
         },
         {
@@ -2423,14 +2416,14 @@
           "name": "ui-calendar",
           "declaration": {
             "name": "UICalendar",
-            "module": "components/ui-calendar/index.ts"
+            "module": "src/components/ui-calendar/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-card/index.ts",
+      "path": "src/components/ui-card/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -3014,7 +3007,7 @@
           "name": "UICard",
           "declaration": {
             "name": "UICard",
-            "module": "components/ui-card/index.ts"
+            "module": "src/components/ui-card/index.ts"
           }
         },
         {
@@ -3022,7 +3015,7 @@
           "name": "ui-card",
           "declaration": {
             "name": "UICard",
-            "module": "components/ui-card/index.ts"
+            "module": "src/components/ui-card/index.ts"
           }
         },
         {
@@ -3030,7 +3023,7 @@
           "name": "UICards",
           "declaration": {
             "name": "UICards",
-            "module": "components/ui-card/index.ts"
+            "module": "src/components/ui-card/index.ts"
           }
         },
         {
@@ -3038,14 +3031,14 @@
           "name": "ui-cards",
           "declaration": {
             "name": "UICards",
-            "module": "components/ui-card/index.ts"
+            "module": "src/components/ui-card/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-checkbox/index.ts",
+      "path": "src/components/ui-checkbox/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -3690,7 +3683,7 @@
           "name": "UICheckbox",
           "declaration": {
             "name": "UICheckbox",
-            "module": "components/ui-checkbox/index.ts"
+            "module": "src/components/ui-checkbox/index.ts"
           }
         },
         {
@@ -3698,7 +3691,7 @@
           "name": "ui-checkbox",
           "declaration": {
             "name": "UICheckbox",
-            "module": "components/ui-checkbox/index.ts"
+            "module": "src/components/ui-checkbox/index.ts"
           }
         },
         {
@@ -3706,7 +3699,7 @@
           "name": "UIRadio",
           "declaration": {
             "name": "UIRadio",
-            "module": "components/ui-checkbox/index.ts"
+            "module": "src/components/ui-checkbox/index.ts"
           }
         },
         {
@@ -3714,14 +3707,14 @@
           "name": "ui-radio",
           "declaration": {
             "name": "UIRadio",
-            "module": "components/ui-checkbox/index.ts"
+            "module": "src/components/ui-checkbox/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-code/index.ts",
+      "path": "src/components/ui-code/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -4033,7 +4026,7 @@
           "name": "UICode",
           "declaration": {
             "name": "UICode",
-            "module": "components/ui-code/index.ts"
+            "module": "src/components/ui-code/index.ts"
           }
         },
         {
@@ -4041,14 +4034,14 @@
           "name": "ui-code",
           "declaration": {
             "name": "UICode",
-            "module": "components/ui-code/index.ts"
+            "module": "src/components/ui-code/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-comment/index.ts",
+      "path": "src/components/ui-comment/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -4356,7 +4349,7 @@
           "name": "UIComment",
           "declaration": {
             "name": "UIComment",
-            "module": "components/ui-comment/index.ts"
+            "module": "src/components/ui-comment/index.ts"
           }
         },
         {
@@ -4364,7 +4357,7 @@
           "name": "ui-comment",
           "declaration": {
             "name": "UIComment",
-            "module": "components/ui-comment/index.ts"
+            "module": "src/components/ui-comment/index.ts"
           }
         },
         {
@@ -4372,7 +4365,7 @@
           "name": "UIComments",
           "declaration": {
             "name": "UIComments",
-            "module": "components/ui-comment/index.ts"
+            "module": "src/components/ui-comment/index.ts"
           }
         },
         {
@@ -4380,14 +4373,14 @@
           "name": "ui-comments",
           "declaration": {
             "name": "UIComments",
-            "module": "components/ui-comment/index.ts"
+            "module": "src/components/ui-comment/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-components/index.ts",
+      "path": "src/components/ui-components/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -4481,7 +4474,7 @@
           "name": "UIComponents",
           "declaration": {
             "name": "UIComponents",
-            "module": "components/ui-components/index.ts"
+            "module": "src/components/ui-components/index.ts"
           }
         },
         {
@@ -4489,14 +4482,14 @@
           "name": "ui-components",
           "declaration": {
             "name": "UIComponents",
-            "module": "components/ui-components/index.ts"
+            "module": "src/components/ui-components/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-container/index.ts",
+      "path": "src/components/ui-container/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -4717,7 +4710,7 @@
           "name": "UIContainer",
           "declaration": {
             "name": "UIContainer",
-            "module": "components/ui-container/index.ts"
+            "module": "src/components/ui-container/index.ts"
           }
         },
         {
@@ -4725,14 +4718,14 @@
           "name": "ui-container",
           "declaration": {
             "name": "UIContainer",
-            "module": "components/ui-container/index.ts"
+            "module": "src/components/ui-container/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-dimmer/index.ts",
+      "path": "src/components/ui-dimmer/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -4979,7 +4972,7 @@
           "name": "UIDimmer",
           "declaration": {
             "name": "UIDimmer",
-            "module": "components/ui-dimmer/index.ts"
+            "module": "src/components/ui-dimmer/index.ts"
           }
         },
         {
@@ -4987,14 +4980,14 @@
           "name": "ui-dimmer",
           "declaration": {
             "name": "UIDimmer",
-            "module": "components/ui-dimmer/index.ts"
+            "module": "src/components/ui-dimmer/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-divider/index.ts",
+      "path": "src/components/ui-divider/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -5231,7 +5224,7 @@
           "name": "UIDivider",
           "declaration": {
             "name": "UIDivider",
-            "module": "components/ui-divider/index.ts"
+            "module": "src/components/ui-divider/index.ts"
           }
         },
         {
@@ -5239,14 +5232,14 @@
           "name": "ui-divider",
           "declaration": {
             "name": "UIDivider",
-            "module": "components/ui-divider/index.ts"
+            "module": "src/components/ui-divider/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-dropdown/index.ts",
+      "path": "src/components/ui-dropdown/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -5607,7 +5600,7 @@
             {
               "kind": "field",
               "name": "options",
-              "description": "Options as a PROPERTY:  `MenuOption[]` (`$/ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
+              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -5965,7 +5958,7 @@
           "name": "UIDropdown",
           "declaration": {
             "name": "UIDropdown",
-            "module": "components/ui-dropdown/index.ts"
+            "module": "src/components/ui-dropdown/index.ts"
           }
         },
         {
@@ -5973,14 +5966,14 @@
           "name": "ui-dropdown",
           "declaration": {
             "name": "UIDropdown",
-            "module": "components/ui-dropdown/index.ts"
+            "module": "src/components/ui-dropdown/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-embed/index.ts",
+      "path": "src/components/ui-embed/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -6247,7 +6240,7 @@
           "name": "UIEmbed",
           "declaration": {
             "name": "UIEmbed",
-            "module": "components/ui-embed/index.ts"
+            "module": "src/components/ui-embed/index.ts"
           }
         },
         {
@@ -6255,14 +6248,14 @@
           "name": "ui-embed",
           "declaration": {
             "name": "UIEmbed",
-            "module": "components/ui-embed/index.ts"
+            "module": "src/components/ui-embed/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-emoji/index.ts",
+      "path": "src/components/ui-emoji/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -6419,7 +6412,7 @@
           "name": "UIEmoji",
           "declaration": {
             "name": "UIEmoji",
-            "module": "components/ui-emoji/index.ts"
+            "module": "src/components/ui-emoji/index.ts"
           }
         },
         {
@@ -6427,14 +6420,14 @@
           "name": "ui-emoji",
           "declaration": {
             "name": "UIEmoji",
-            "module": "components/ui-emoji/index.ts"
+            "module": "src/components/ui-emoji/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-feed/index.ts",
+      "path": "src/components/ui-feed/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -6790,7 +6783,7 @@
           "name": "UIFeedEvent",
           "declaration": {
             "name": "UIFeedEvent",
-            "module": "components/ui-feed/index.ts"
+            "module": "src/components/ui-feed/index.ts"
           }
         },
         {
@@ -6798,7 +6791,7 @@
           "name": "ui-event",
           "declaration": {
             "name": "UIFeedEvent",
-            "module": "components/ui-feed/index.ts"
+            "module": "src/components/ui-feed/index.ts"
           }
         },
         {
@@ -6806,7 +6799,7 @@
           "name": "UIFeed",
           "declaration": {
             "name": "UIFeed",
-            "module": "components/ui-feed/index.ts"
+            "module": "src/components/ui-feed/index.ts"
           }
         },
         {
@@ -6814,14 +6807,14 @@
           "name": "ui-feed",
           "declaration": {
             "name": "UIFeed",
-            "module": "components/ui-feed/index.ts"
+            "module": "src/components/ui-feed/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-flag/index.ts",
+      "path": "src/components/ui-flag/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -6966,7 +6959,7 @@
           "name": "UIFlag",
           "declaration": {
             "name": "UIFlag",
-            "module": "components/ui-flag/index.ts"
+            "module": "src/components/ui-flag/index.ts"
           }
         },
         {
@@ -6974,14 +6967,14 @@
           "name": "ui-flag",
           "declaration": {
             "name": "UIFlag",
-            "module": "components/ui-flag/index.ts"
+            "module": "src/components/ui-flag/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-flyout/index.ts",
+      "path": "src/components/ui-flyout/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -7290,7 +7283,7 @@
           "name": "UIFlyout",
           "declaration": {
             "name": "UIFlyout",
-            "module": "components/ui-flyout/index.ts"
+            "module": "src/components/ui-flyout/index.ts"
           }
         },
         {
@@ -7298,14 +7291,14 @@
           "name": "ui-flyout",
           "declaration": {
             "name": "UIFlyout",
-            "module": "components/ui-flyout/index.ts"
+            "module": "src/components/ui-flyout/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-form/index.ts",
+      "path": "src/components/ui-form/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -8190,7 +8183,7 @@
           "name": "UIField",
           "declaration": {
             "name": "UIField",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8198,7 +8191,7 @@
           "name": "ui-field",
           "declaration": {
             "name": "UIField",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8206,7 +8199,7 @@
           "name": "UIFields",
           "declaration": {
             "name": "UIFields",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8214,7 +8207,7 @@
           "name": "ui-fields",
           "declaration": {
             "name": "UIFields",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8222,7 +8215,7 @@
           "name": "UIForm",
           "declaration": {
             "name": "UIForm",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8230,7 +8223,7 @@
           "name": "ui-form",
           "declaration": {
             "name": "UIForm",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8238,7 +8231,7 @@
           "name": "UIRepeat",
           "declaration": {
             "name": "UIRepeat",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         },
         {
@@ -8246,14 +8239,14 @@
           "name": "ui-repeat",
           "declaration": {
             "name": "UIRepeat",
-            "module": "components/ui-form/index.ts"
+            "module": "src/components/ui-form/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-grid/index.ts",
+      "path": "src/components/ui-grid/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -8952,7 +8945,7 @@
           "name": "UIColumn",
           "declaration": {
             "name": "UIColumn",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         },
         {
@@ -8960,7 +8953,7 @@
           "name": "ui-column",
           "declaration": {
             "name": "UIColumn",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         },
         {
@@ -8968,7 +8961,7 @@
           "name": "UIGrid",
           "declaration": {
             "name": "UIGrid",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         },
         {
@@ -8976,7 +8969,7 @@
           "name": "ui-grid",
           "declaration": {
             "name": "UIGrid",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         },
         {
@@ -8984,7 +8977,7 @@
           "name": "UIRow",
           "declaration": {
             "name": "UIRow",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         },
         {
@@ -8992,14 +8985,14 @@
           "name": "ui-row",
           "declaration": {
             "name": "UIRow",
-            "module": "components/ui-grid/index.ts"
+            "module": "src/components/ui-grid/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-icon/index.ts",
+      "path": "src/components/ui-icon/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -9443,7 +9436,7 @@
           "name": "UIIcon",
           "declaration": {
             "name": "UIIcon",
-            "module": "components/ui-icon/index.ts"
+            "module": "src/components/ui-icon/index.ts"
           }
         },
         {
@@ -9451,7 +9444,7 @@
           "name": "ui-icon",
           "declaration": {
             "name": "UIIcon",
-            "module": "components/ui-icon/index.ts"
+            "module": "src/components/ui-icon/index.ts"
           }
         },
         {
@@ -9459,7 +9452,7 @@
           "name": "UIIcons",
           "declaration": {
             "name": "UIIcons",
-            "module": "components/ui-icon/index.ts"
+            "module": "src/components/ui-icon/index.ts"
           }
         },
         {
@@ -9467,14 +9460,14 @@
           "name": "ui-icons",
           "declaration": {
             "name": "UIIcons",
-            "module": "components/ui-icon/index.ts"
+            "module": "src/components/ui-icon/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-image/index.ts",
+      "path": "src/components/ui-image/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -9942,7 +9935,7 @@
           "name": "UIImage",
           "declaration": {
             "name": "UIImage",
-            "module": "components/ui-image/index.ts"
+            "module": "src/components/ui-image/index.ts"
           }
         },
         {
@@ -9950,7 +9943,7 @@
           "name": "ui-image",
           "declaration": {
             "name": "UIImage",
-            "module": "components/ui-image/index.ts"
+            "module": "src/components/ui-image/index.ts"
           }
         },
         {
@@ -9958,7 +9951,7 @@
           "name": "UIImages",
           "declaration": {
             "name": "UIImages",
-            "module": "components/ui-image/index.ts"
+            "module": "src/components/ui-image/index.ts"
           }
         },
         {
@@ -9966,14 +9959,14 @@
           "name": "ui-images",
           "declaration": {
             "name": "UIImages",
-            "module": "components/ui-image/index.ts"
+            "module": "src/components/ui-image/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-include/index.ts",
+      "path": "src/components/ui-include/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -10165,7 +10158,7 @@
           "name": "UIInclude",
           "declaration": {
             "name": "UIInclude",
-            "module": "components/ui-include/index.ts"
+            "module": "src/components/ui-include/index.ts"
           }
         },
         {
@@ -10173,14 +10166,14 @@
           "name": "ui-include",
           "declaration": {
             "name": "UIInclude",
-            "module": "components/ui-include/index.ts"
+            "module": "src/components/ui-include/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-input/index.ts",
+      "path": "src/components/ui-input/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -10952,7 +10945,7 @@
           "name": "UIInput",
           "declaration": {
             "name": "UIInput",
-            "module": "components/ui-input/index.ts"
+            "module": "src/components/ui-input/index.ts"
           }
         },
         {
@@ -10960,7 +10953,7 @@
           "name": "ui-input",
           "declaration": {
             "name": "UIInput",
-            "module": "components/ui-input/index.ts"
+            "module": "src/components/ui-input/index.ts"
           }
         },
         {
@@ -10968,7 +10961,7 @@
           "name": "UITextarea",
           "declaration": {
             "name": "UITextarea",
-            "module": "components/ui-input/index.ts"
+            "module": "src/components/ui-input/index.ts"
           }
         },
         {
@@ -10976,14 +10969,14 @@
           "name": "ui-textarea",
           "declaration": {
             "name": "UITextarea",
-            "module": "components/ui-input/index.ts"
+            "module": "src/components/ui-input/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-item/index.ts",
+      "path": "src/components/ui-item/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -11208,7 +11201,7 @@
           "name": "UIItem",
           "declaration": {
             "name": "UIItem",
-            "module": "components/ui-item/index.ts"
+            "module": "src/components/ui-item/index.ts"
           }
         },
         {
@@ -11216,14 +11209,14 @@
           "name": "ui-item",
           "declaration": {
             "name": "UIItem",
-            "module": "components/ui-item/index.ts"
+            "module": "src/components/ui-item/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-items/index.ts",
+      "path": "src/components/ui-items/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -11440,7 +11433,7 @@
           "name": "UIItems",
           "declaration": {
             "name": "UIItems",
-            "module": "components/ui-items/index.ts"
+            "module": "src/components/ui-items/index.ts"
           }
         },
         {
@@ -11448,14 +11441,14 @@
           "name": "ui-items",
           "declaration": {
             "name": "UIItems",
-            "module": "components/ui-items/index.ts"
+            "module": "src/components/ui-items/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-label/index.ts",
+      "path": "src/components/ui-label/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -12185,7 +12178,7 @@
           "name": "UILabel",
           "declaration": {
             "name": "UILabel",
-            "module": "components/ui-label/index.ts"
+            "module": "src/components/ui-label/index.ts"
           }
         },
         {
@@ -12193,7 +12186,7 @@
           "name": "ui-label",
           "declaration": {
             "name": "UILabel",
-            "module": "components/ui-label/index.ts"
+            "module": "src/components/ui-label/index.ts"
           }
         },
         {
@@ -12201,7 +12194,7 @@
           "name": "UILabels",
           "declaration": {
             "name": "UILabels",
-            "module": "components/ui-label/index.ts"
+            "module": "src/components/ui-label/index.ts"
           }
         },
         {
@@ -12209,14 +12202,14 @@
           "name": "ui-labels",
           "declaration": {
             "name": "UILabels",
-            "module": "components/ui-label/index.ts"
+            "module": "src/components/ui-label/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-list/index.ts",
+      "path": "src/components/ui-list/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -12717,7 +12710,7 @@
           "name": "UIList",
           "declaration": {
             "name": "UIList",
-            "module": "components/ui-list/index.ts"
+            "module": "src/components/ui-list/index.ts"
           }
         },
         {
@@ -12725,14 +12718,14 @@
           "name": "ui-list",
           "declaration": {
             "name": "UIList",
-            "module": "components/ui-list/index.ts"
+            "module": "src/components/ui-list/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-loader/index.ts",
+      "path": "src/components/ui-loader/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -12985,7 +12978,7 @@
           "name": "UILoader",
           "declaration": {
             "name": "UILoader",
-            "module": "components/ui-loader/index.ts"
+            "module": "src/components/ui-loader/index.ts"
           }
         },
         {
@@ -12993,14 +12986,14 @@
           "name": "ui-loader",
           "declaration": {
             "name": "UILoader",
-            "module": "components/ui-loader/index.ts"
+            "module": "src/components/ui-loader/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-markdown/index.ts",
+      "path": "src/components/ui-markdown/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -13347,7 +13340,7 @@
           "name": "UIMarkdown",
           "declaration": {
             "name": "UIMarkdown",
-            "module": "components/ui-markdown/index.ts"
+            "module": "src/components/ui-markdown/index.ts"
           }
         },
         {
@@ -13355,14 +13348,14 @@
           "name": "ui-markdown",
           "declaration": {
             "name": "UIMarkdown",
-            "module": "components/ui-markdown/index.ts"
+            "module": "src/components/ui-markdown/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-menu/index.ts",
+      "path": "src/components/ui-menu/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -14088,7 +14081,7 @@
           "name": "UIMenu",
           "declaration": {
             "name": "UIMenu",
-            "module": "components/ui-menu/index.ts"
+            "module": "src/components/ui-menu/index.ts"
           }
         },
         {
@@ -14096,14 +14089,14 @@
           "name": "ui-menu",
           "declaration": {
             "name": "UIMenu",
-            "module": "components/ui-menu/index.ts"
+            "module": "src/components/ui-menu/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-message/index.ts",
+      "path": "src/components/ui-message/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -14442,7 +14435,7 @@
           "name": "UIMessage",
           "declaration": {
             "name": "UIMessage",
-            "module": "components/ui-message/index.ts"
+            "module": "src/components/ui-message/index.ts"
           }
         },
         {
@@ -14450,14 +14443,14 @@
           "name": "ui-message",
           "declaration": {
             "name": "UIMessage",
-            "module": "components/ui-message/index.ts"
+            "module": "src/components/ui-message/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-modal/index.ts",
+      "path": "src/components/ui-modal/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -14797,7 +14790,7 @@
           "name": "UIModal",
           "declaration": {
             "name": "UIModal",
-            "module": "components/ui-modal/index.ts"
+            "module": "src/components/ui-modal/index.ts"
           }
         },
         {
@@ -14805,14 +14798,14 @@
           "name": "ui-modal",
           "declaration": {
             "name": "UIModal",
-            "module": "components/ui-modal/index.ts"
+            "module": "src/components/ui-modal/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-nag/index.ts",
+      "path": "src/components/ui-nag/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -15144,7 +15137,7 @@
           "name": "UINag",
           "declaration": {
             "name": "UINag",
-            "module": "components/ui-nag/index.ts"
+            "module": "src/components/ui-nag/index.ts"
           }
         },
         {
@@ -15152,14 +15145,14 @@
           "name": "ui-nag",
           "declaration": {
             "name": "UINag",
-            "module": "components/ui-nag/index.ts"
+            "module": "src/components/ui-nag/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-panel/index.ts",
+      "path": "src/components/ui-panel/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -15171,7 +15164,7 @@
           "attributes": [
             {
               "name": "label",
-              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`.",
+              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).",
               "type": {
                 "text": "string"
               },
@@ -15179,7 +15172,7 @@
             },
             {
               "name": "hint",
-              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`.",
+              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.",
               "type": {
                 "text": "string"
               },
@@ -15211,7 +15204,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`.",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -15227,7 +15220,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match.",
+              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
               "type": {
                 "text": "boolean"
               },
@@ -15458,20 +15451,6 @@
               }
             },
             {
-              "name": "ui-open",
-              "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
-              "name": "ui-close",
-              "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
               "name": "ui-loading",
               "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`.",
               "type": {
@@ -15481,13 +15460,6 @@
             {
               "name": "ui-loaded",
               "description": "The `source` file arrived and its body is in place (`content` is the file's text).",
-              "type": {
-                "text": "CustomEvent<{ source: string, content: string }>"
-              }
-            },
-            {
-              "name": "ui-load",
-              "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new.",
               "type": {
                 "text": "CustomEvent<{ source: string, content: string }>"
               }
@@ -15528,18 +15500,6 @@
             {
               "name": "description",
               "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-            },
-            {
-              "name": "header",
-              "description": "Old name of the `label` slot."
-            },
-            {
-              "name": "subhead",
-              "description": "Old name of the `hint` slot."
-            },
-            {
-              "name": "info",
-              "description": "Old name of the `description` slot."
             }
           ],
           "cssParts": [
@@ -15619,11 +15579,11 @@
             },
             {
               "name": "in-section",
-              "description": "Old name of `nested`."
+              "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
             },
             {
               "name": "in-sections",
-              "description": "Old name of `in-group`."
+              "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
             },
             {
               "name": "inverted",
@@ -15731,7 +15691,7 @@
           "name": "UIPanel",
           "declaration": {
             "name": "UIPanel",
-            "module": "components/ui-panel/index.ts"
+            "module": "src/components/ui-panel/index.ts"
           }
         },
         {
@@ -15739,14 +15699,14 @@
           "name": "ui-panel",
           "declaration": {
             "name": "UIPanel",
-            "module": "components/ui-panel/index.ts"
+            "module": "src/components/ui-panel/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-parts/index.ts",
+      "path": "src/components/ui-parts/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -17498,7 +17458,7 @@
           "name": "UIActions",
           "declaration": {
             "name": "UIActions",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17506,7 +17466,7 @@
           "name": "ui-actions",
           "declaration": {
             "name": "UIActions",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17514,7 +17474,7 @@
           "name": "UIAuthor",
           "declaration": {
             "name": "UIAuthor",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17522,7 +17482,7 @@
           "name": "ui-author",
           "declaration": {
             "name": "UIAuthor",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17530,7 +17490,7 @@
           "name": "UIAvatar",
           "declaration": {
             "name": "UIAvatar",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17538,7 +17498,7 @@
           "name": "ui-avatar",
           "declaration": {
             "name": "UIAvatar",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17546,7 +17506,7 @@
           "name": "UIContent",
           "declaration": {
             "name": "UIContent",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17554,7 +17514,7 @@
           "name": "ui-content",
           "declaration": {
             "name": "UIContent",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17562,7 +17522,7 @@
           "name": "UIDate",
           "declaration": {
             "name": "UIDate",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17570,7 +17530,7 @@
           "name": "ui-date",
           "declaration": {
             "name": "UIDate",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17578,7 +17538,7 @@
           "name": "UIDescription",
           "declaration": {
             "name": "UIDescription",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17586,7 +17546,7 @@
           "name": "ui-description",
           "declaration": {
             "name": "UIDescription",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17594,7 +17554,7 @@
           "name": "UIDetail",
           "declaration": {
             "name": "UIDetail",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17602,7 +17562,7 @@
           "name": "ui-detail",
           "declaration": {
             "name": "UIDetail",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17610,7 +17570,7 @@
           "name": "UIExtra",
           "declaration": {
             "name": "UIExtra",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17618,7 +17578,7 @@
           "name": "ui-extra",
           "declaration": {
             "name": "UIExtra",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17626,7 +17586,7 @@
           "name": "UIHeader",
           "declaration": {
             "name": "UIHeader",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17634,7 +17594,7 @@
           "name": "ui-header",
           "declaration": {
             "name": "UIHeader",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17642,7 +17602,7 @@
           "name": "UIMeta",
           "declaration": {
             "name": "UIMeta",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17650,7 +17610,7 @@
           "name": "ui-meta",
           "declaration": {
             "name": "UIMeta",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17658,7 +17618,7 @@
           "name": "UISummary",
           "declaration": {
             "name": "UISummary",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17666,7 +17626,7 @@
           "name": "ui-summary",
           "declaration": {
             "name": "UISummary",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17674,7 +17634,7 @@
           "name": "UITitle",
           "declaration": {
             "name": "UITitle",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17682,7 +17642,7 @@
           "name": "ui-title",
           "declaration": {
             "name": "UITitle",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17690,7 +17650,7 @@
           "name": "UIValue",
           "declaration": {
             "name": "UIValue",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         },
         {
@@ -17698,14 +17658,14 @@
           "name": "ui-value",
           "declaration": {
             "name": "UIValue",
-            "module": "components/ui-parts/index.ts"
+            "module": "src/components/ui-parts/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-placeholder/index.ts",
+      "path": "src/components/ui-placeholder/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -18284,7 +18244,7 @@
           "name": "UIPlaceholder",
           "declaration": {
             "name": "UIPlaceholder",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18292,7 +18252,7 @@
           "name": "ui-placeholder",
           "declaration": {
             "name": "UIPlaceholder",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18300,7 +18260,7 @@
           "name": "UIPlaceholderHeader",
           "declaration": {
             "name": "UIPlaceholderHeader",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18308,7 +18268,7 @@
           "name": "ui-placeholder-header",
           "declaration": {
             "name": "UIPlaceholderHeader",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18316,7 +18276,7 @@
           "name": "UIPlaceholderImage",
           "declaration": {
             "name": "UIPlaceholderImage",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18324,7 +18284,7 @@
           "name": "ui-placeholder-image",
           "declaration": {
             "name": "UIPlaceholderImage",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18332,7 +18292,7 @@
           "name": "UIPlaceholderLine",
           "declaration": {
             "name": "UIPlaceholderLine",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18340,7 +18300,7 @@
           "name": "ui-placeholder-line",
           "declaration": {
             "name": "UIPlaceholderLine",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18348,7 +18308,7 @@
           "name": "UIPlaceholderParagraph",
           "declaration": {
             "name": "UIPlaceholderParagraph",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         },
         {
@@ -18356,14 +18316,14 @@
           "name": "ui-placeholder-paragraph",
           "declaration": {
             "name": "UIPlaceholderParagraph",
-            "module": "components/ui-placeholder/index.ts"
+            "module": "src/components/ui-placeholder/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-popup/index.ts",
+      "path": "src/components/ui-popup/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -18709,7 +18669,7 @@
           "name": "UIPopup",
           "declaration": {
             "name": "UIPopup",
-            "module": "components/ui-popup/index.ts"
+            "module": "src/components/ui-popup/index.ts"
           }
         },
         {
@@ -18717,14 +18677,14 @@
           "name": "ui-popup",
           "declaration": {
             "name": "UIPopup",
-            "module": "components/ui-popup/index.ts"
+            "module": "src/components/ui-popup/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-progress/index.ts",
+      "path": "src/components/ui-progress/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -19113,7 +19073,7 @@
           "name": "UIProgress",
           "declaration": {
             "name": "UIProgress",
-            "module": "components/ui-progress/index.ts"
+            "module": "src/components/ui-progress/index.ts"
           }
         },
         {
@@ -19121,14 +19081,14 @@
           "name": "ui-progress",
           "declaration": {
             "name": "UIProgress",
-            "module": "components/ui-progress/index.ts"
+            "module": "src/components/ui-progress/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-property-editor/index.ts",
+      "path": "src/components/ui-property-editor/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -19604,7 +19564,7 @@
             },
             {
               "name": "label",
-              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`.",
+              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).",
               "type": {
                 "text": "string"
               },
@@ -19612,7 +19572,7 @@
             },
             {
               "name": "hint",
-              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`.",
+              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.",
               "type": {
                 "text": "string"
               },
@@ -19644,7 +19604,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`.",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -19660,7 +19620,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match.",
+              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
               "type": {
                 "text": "boolean"
               },
@@ -19945,20 +19905,6 @@
               }
             },
             {
-              "name": "ui-open",
-              "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
-              "name": "ui-close",
-              "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
               "name": "ui-error",
               "description": "The `source` file couldn't be loaded or shown;  `kind` says why.  An error line shows in the content unless cancelled;  opening it again tries again.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
@@ -19998,18 +19944,6 @@
             {
               "name": "description",
               "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-            },
-            {
-              "name": "header",
-              "description": "Old name of the `label` slot."
-            },
-            {
-              "name": "subhead",
-              "description": "Old name of the `hint` slot."
-            },
-            {
-              "name": "info",
-              "description": "Old name of the `description` slot."
             }
           ],
           "cssParts": [
@@ -20149,11 +20083,11 @@
             },
             {
               "name": "in-section",
-              "description": "Old name of `nested`."
+              "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
             },
             {
               "name": "in-sections",
-              "description": "Old name of `in-group`."
+              "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
             },
             {
               "name": "inverted",
@@ -20236,7 +20170,7 @@
             },
             {
               "name": "label",
-              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`.",
+              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).",
               "type": {
                 "text": "string"
               },
@@ -20244,7 +20178,7 @@
             },
             {
               "name": "hint",
-              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`.",
+              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.",
               "type": {
                 "text": "string"
               },
@@ -20276,7 +20210,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`.",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -20292,7 +20226,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match.",
+              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
               "type": {
                 "text": "boolean"
               },
@@ -20521,20 +20455,6 @@
               }
             },
             {
-              "name": "ui-open",
-              "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
-              "name": "ui-close",
-              "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
               "name": "ui-loading",
               "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`.",
               "type": {
@@ -20588,18 +20508,6 @@
             {
               "name": "description",
               "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-            },
-            {
-              "name": "header",
-              "description": "Old name of the `label` slot."
-            },
-            {
-              "name": "subhead",
-              "description": "Old name of the `hint` slot."
-            },
-            {
-              "name": "info",
-              "description": "Old name of the `description` slot."
             }
           ],
           "cssParts": [
@@ -20699,11 +20607,11 @@
             },
             {
               "name": "in-section",
-              "description": "Old name of `nested`."
+              "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
             },
             {
               "name": "in-sections",
-              "description": "Old name of `in-group`."
+              "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
             },
             {
               "name": "inverted",
@@ -20747,7 +20655,7 @@
           "name": "UIProperty",
           "declaration": {
             "name": "UIProperty",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         },
         {
@@ -20755,7 +20663,7 @@
           "name": "ui-property",
           "declaration": {
             "name": "UIProperty",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         },
         {
@@ -20763,7 +20671,7 @@
           "name": "UIPropertyEditor",
           "declaration": {
             "name": "UIPropertyEditor",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         },
         {
@@ -20771,7 +20679,7 @@
           "name": "ui-property-editor",
           "declaration": {
             "name": "UIPropertyEditor",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         },
         {
@@ -20779,7 +20687,7 @@
           "name": "UIPropertyGroup",
           "declaration": {
             "name": "UIPropertyGroup",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         },
         {
@@ -20787,14 +20695,14 @@
           "name": "ui-property-group",
           "declaration": {
             "name": "UIPropertyGroup",
-            "module": "components/ui-property-editor/index.ts"
+            "module": "src/components/ui-property-editor/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-rail/index.ts",
+      "path": "src/components/ui-rail/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -20963,7 +20871,7 @@
           "name": "UIRail",
           "declaration": {
             "name": "UIRail",
-            "module": "components/ui-rail/index.ts"
+            "module": "src/components/ui-rail/index.ts"
           }
         },
         {
@@ -20971,14 +20879,14 @@
           "name": "ui-rail",
           "declaration": {
             "name": "UIRail",
-            "module": "components/ui-rail/index.ts"
+            "module": "src/components/ui-rail/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-rating/index.ts",
+      "path": "src/components/ui-rating/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -21200,7 +21108,7 @@
           "name": "UIRating",
           "declaration": {
             "name": "UIRating",
-            "module": "components/ui-rating/index.ts"
+            "module": "src/components/ui-rating/index.ts"
           }
         },
         {
@@ -21208,14 +21116,14 @@
           "name": "ui-rating",
           "declaration": {
             "name": "UIRating",
-            "module": "components/ui-rating/index.ts"
+            "module": "src/components/ui-rating/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-reveal/index.ts",
+      "path": "src/components/ui-reveal/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -21416,7 +21324,7 @@
           "name": "UIReveal",
           "declaration": {
             "name": "UIReveal",
-            "module": "components/ui-reveal/index.ts"
+            "module": "src/components/ui-reveal/index.ts"
           }
         },
         {
@@ -21424,14 +21332,14 @@
           "name": "ui-reveal",
           "declaration": {
             "name": "UIReveal",
-            "module": "components/ui-reveal/index.ts"
+            "module": "src/components/ui-reveal/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-root/index.ts",
+      "path": "src/components/ui-root/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -21660,7 +21568,7 @@
           "name": "UIRoot",
           "declaration": {
             "name": "UIRoot",
-            "module": "components/ui-root/index.ts"
+            "module": "src/components/ui-root/index.ts"
           }
         },
         {
@@ -21668,14 +21576,14 @@
           "name": "ui-root",
           "declaration": {
             "name": "UIRoot",
-            "module": "components/ui-root/index.ts"
+            "module": "src/components/ui-root/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-search/index.ts",
+      "path": "src/components/ui-search/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -22223,7 +22131,7 @@
           "name": "UISearch",
           "declaration": {
             "name": "UISearch",
-            "module": "components/ui-search/index.ts"
+            "module": "src/components/ui-search/index.ts"
           }
         },
         {
@@ -22231,14 +22139,14 @@
           "name": "ui-search",
           "declaration": {
             "name": "UISearch",
-            "module": "components/ui-search/index.ts"
+            "module": "src/components/ui-search/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-section/index.ts",
+      "path": "src/components/ui-section/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -22250,7 +22158,7 @@
           "attributes": [
             {
               "name": "label",
-              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).  Old name:  `header`.",
+              "description": "Title text;  a slotted `slot=\"label\"` is the rich version (code, links).",
               "type": {
                 "text": "string"
               },
@@ -22258,7 +22166,7 @@
             },
             {
               "name": "hint",
-              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.  Old name:  `subhead`.",
+              "description": "Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot=\"hint\"`.",
               "type": {
                 "text": "string"
               },
@@ -22290,7 +22198,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).  Old name:  `info`.",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -22306,7 +22214,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-open` / `ui-close` can veto a person's changes.  Find-in-page unfolds a match.",
+              "description": "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.",
               "type": {
                 "text": "boolean"
               },
@@ -22537,20 +22445,6 @@
               }
             },
             {
-              "name": "ui-open",
-              "description": "Old name of `ui-opening`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
-              "name": "ui-close",
-              "description": "Old name of `ui-closing`:  sent just after it, the same way, until every page listens for the new.  Cancelable:  `preventDefault()` vetoes it.",
-              "type": {
-                "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
-              }
-            },
-            {
               "name": "ui-loading",
               "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`.",
               "type": {
@@ -22560,13 +22454,6 @@
             {
               "name": "ui-loaded",
               "description": "The `source` file arrived and its body is in place (`content` is the file's text).",
-              "type": {
-                "text": "CustomEvent<{ source: string, content: string }>"
-              }
-            },
-            {
-              "name": "ui-load",
-              "description": "Old name of `ui-loaded`:  sent just after it, until every page listens for the new.",
               "type": {
                 "text": "CustomEvent<{ source: string, content: string }>"
               }
@@ -22607,18 +22494,6 @@
             {
               "name": "description",
               "description": "Rich tip, instead of the `description` attribute (bold words, line breaks)."
-            },
-            {
-              "name": "header",
-              "description": "Old name of the `label` slot."
-            },
-            {
-              "name": "subhead",
-              "description": "Old name of the `hint` slot."
-            },
-            {
-              "name": "info",
-              "description": "Old name of the `description` slot."
             }
           ],
           "cssParts": [
@@ -22698,11 +22573,11 @@
             },
             {
               "name": "in-section",
-              "description": "Old name of `nested`."
+              "description": "Directly in another section (its part's state);  `nested` counts one through a group too."
             },
             {
               "name": "in-sections",
-              "description": "Old name of `in-group`."
+              "description": "Directly in a `<ui-sections>` group (its part's state), as `in-group`."
             },
             {
               "name": "inverted",
@@ -23048,7 +22923,7 @@
           "name": "UISection",
           "declaration": {
             "name": "UISection",
-            "module": "components/ui-section/index.ts"
+            "module": "src/components/ui-section/index.ts"
           }
         },
         {
@@ -23056,7 +22931,7 @@
           "name": "ui-section",
           "declaration": {
             "name": "UISection",
-            "module": "components/ui-section/index.ts"
+            "module": "src/components/ui-section/index.ts"
           }
         },
         {
@@ -23064,7 +22939,7 @@
           "name": "UISections",
           "declaration": {
             "name": "UISections",
-            "module": "components/ui-section/index.ts"
+            "module": "src/components/ui-section/index.ts"
           }
         },
         {
@@ -23072,14 +22947,14 @@
           "name": "ui-sections",
           "declaration": {
             "name": "UISections",
-            "module": "components/ui-section/index.ts"
+            "module": "src/components/ui-section/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-segment/index.ts",
+      "path": "src/components/ui-segment/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -23688,7 +23563,7 @@
           "name": "UISegment",
           "declaration": {
             "name": "UISegment",
-            "module": "components/ui-segment/index.ts"
+            "module": "src/components/ui-segment/index.ts"
           }
         },
         {
@@ -23696,7 +23571,7 @@
           "name": "ui-segment",
           "declaration": {
             "name": "UISegment",
-            "module": "components/ui-segment/index.ts"
+            "module": "src/components/ui-segment/index.ts"
           }
         },
         {
@@ -23704,7 +23579,7 @@
           "name": "UISegments",
           "declaration": {
             "name": "UISegments",
-            "module": "components/ui-segment/index.ts"
+            "module": "src/components/ui-segment/index.ts"
           }
         },
         {
@@ -23712,14 +23587,14 @@
           "name": "ui-segments",
           "declaration": {
             "name": "UISegments",
-            "module": "components/ui-segment/index.ts"
+            "module": "src/components/ui-segment/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-select/index.ts",
+      "path": "src/components/ui-select/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -23854,7 +23729,7 @@
             {
               "kind": "field",
               "name": "options",
-              "description": "Options as a PROPERTY:  `MenuOption[]` (`$/ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
+              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -24097,7 +23972,7 @@
           "name": "UISelect",
           "declaration": {
             "name": "UISelect",
-            "module": "components/ui-select/index.ts"
+            "module": "src/components/ui-select/index.ts"
           }
         },
         {
@@ -24105,14 +23980,14 @@
           "name": "ui-select",
           "declaration": {
             "name": "UISelect",
-            "module": "components/ui-select/index.ts"
+            "module": "src/components/ui-select/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-shape/index.ts",
+      "path": "src/components/ui-shape/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -24399,7 +24274,7 @@
           "name": "UIShape",
           "declaration": {
             "name": "UIShape",
-            "module": "components/ui-shape/index.ts"
+            "module": "src/components/ui-shape/index.ts"
           }
         },
         {
@@ -24407,7 +24282,7 @@
           "name": "ui-shape",
           "declaration": {
             "name": "UIShape",
-            "module": "components/ui-shape/index.ts"
+            "module": "src/components/ui-shape/index.ts"
           }
         },
         {
@@ -24415,7 +24290,7 @@
           "name": "UISide",
           "declaration": {
             "name": "UISide",
-            "module": "components/ui-shape/index.ts"
+            "module": "src/components/ui-shape/index.ts"
           }
         },
         {
@@ -24423,14 +24298,14 @@
           "name": "ui-side",
           "declaration": {
             "name": "UISide",
-            "module": "components/ui-shape/index.ts"
+            "module": "src/components/ui-shape/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-sidebar/index.ts",
+      "path": "src/components/ui-sidebar/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -24829,7 +24704,7 @@
           "name": "UIPushable",
           "declaration": {
             "name": "UIPushable",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         },
         {
@@ -24837,7 +24712,7 @@
           "name": "ui-pushable",
           "declaration": {
             "name": "UIPushable",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         },
         {
@@ -24845,7 +24720,7 @@
           "name": "UIPusher",
           "declaration": {
             "name": "UIPusher",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         },
         {
@@ -24853,7 +24728,7 @@
           "name": "ui-pusher",
           "declaration": {
             "name": "UIPusher",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         },
         {
@@ -24861,7 +24736,7 @@
           "name": "UISidebar",
           "declaration": {
             "name": "UISidebar",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         },
         {
@@ -24869,14 +24744,14 @@
           "name": "ui-sidebar",
           "declaration": {
             "name": "UISidebar",
-            "module": "components/ui-sidebar/index.ts"
+            "module": "src/components/ui-sidebar/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-slider/index.ts",
+      "path": "src/components/ui-slider/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -25291,7 +25166,7 @@
           "name": "UISlider",
           "declaration": {
             "name": "UISlider",
-            "module": "components/ui-slider/index.ts"
+            "module": "src/components/ui-slider/index.ts"
           }
         },
         {
@@ -25299,14 +25174,14 @@
           "name": "ui-slider",
           "declaration": {
             "name": "UISlider",
-            "module": "components/ui-slider/index.ts"
+            "module": "src/components/ui-slider/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-statistic/index.ts",
+      "path": "src/components/ui-statistic/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -25678,7 +25553,7 @@
           "name": "UIStatistic",
           "declaration": {
             "name": "UIStatistic",
-            "module": "components/ui-statistic/index.ts"
+            "module": "src/components/ui-statistic/index.ts"
           }
         },
         {
@@ -25686,7 +25561,7 @@
           "name": "ui-statistic",
           "declaration": {
             "name": "UIStatistic",
-            "module": "components/ui-statistic/index.ts"
+            "module": "src/components/ui-statistic/index.ts"
           }
         },
         {
@@ -25694,7 +25569,7 @@
           "name": "UIStatistics",
           "declaration": {
             "name": "UIStatistics",
-            "module": "components/ui-statistic/index.ts"
+            "module": "src/components/ui-statistic/index.ts"
           }
         },
         {
@@ -25702,14 +25577,14 @@
           "name": "ui-statistics",
           "declaration": {
             "name": "UIStatistics",
-            "module": "components/ui-statistic/index.ts"
+            "module": "src/components/ui-statistic/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-step/index.ts",
+      "path": "src/components/ui-step/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -26260,7 +26135,7 @@
           "name": "UIStep",
           "declaration": {
             "name": "UIStep",
-            "module": "components/ui-step/index.ts"
+            "module": "src/components/ui-step/index.ts"
           }
         },
         {
@@ -26268,7 +26143,7 @@
           "name": "ui-step",
           "declaration": {
             "name": "UIStep",
-            "module": "components/ui-step/index.ts"
+            "module": "src/components/ui-step/index.ts"
           }
         },
         {
@@ -26276,7 +26151,7 @@
           "name": "UISteps",
           "declaration": {
             "name": "UISteps",
-            "module": "components/ui-step/index.ts"
+            "module": "src/components/ui-step/index.ts"
           }
         },
         {
@@ -26284,14 +26159,14 @@
           "name": "ui-steps",
           "declaration": {
             "name": "UISteps",
-            "module": "components/ui-step/index.ts"
+            "module": "src/components/ui-step/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-sticky/index.ts",
+      "path": "src/components/ui-sticky/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -26453,7 +26328,7 @@
           "name": "UISticky",
           "declaration": {
             "name": "UISticky",
-            "module": "components/ui-sticky/index.ts"
+            "module": "src/components/ui-sticky/index.ts"
           }
         },
         {
@@ -26461,14 +26336,14 @@
           "name": "ui-sticky",
           "declaration": {
             "name": "UISticky",
-            "module": "components/ui-sticky/index.ts"
+            "module": "src/components/ui-sticky/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-tab/index.ts",
+      "path": "src/components/ui-tab/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -26913,7 +26788,7 @@
           "name": "UITab",
           "declaration": {
             "name": "UITab",
-            "module": "components/ui-tab/index.ts"
+            "module": "src/components/ui-tab/index.ts"
           }
         },
         {
@@ -26921,7 +26796,7 @@
           "name": "ui-tab",
           "declaration": {
             "name": "UITab",
-            "module": "components/ui-tab/index.ts"
+            "module": "src/components/ui-tab/index.ts"
           }
         },
         {
@@ -26929,7 +26804,7 @@
           "name": "UITabs",
           "declaration": {
             "name": "UITabs",
-            "module": "components/ui-tab/index.ts"
+            "module": "src/components/ui-tab/index.ts"
           }
         },
         {
@@ -26937,14 +26812,14 @@
           "name": "ui-tabs",
           "declaration": {
             "name": "UITabs",
-            "module": "components/ui-tab/index.ts"
+            "module": "src/components/ui-tab/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-table/index.ts",
+      "path": "src/components/ui-table/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -27544,7 +27419,7 @@
           "name": "UITable",
           "declaration": {
             "name": "UITable",
-            "module": "components/ui-table/index.ts"
+            "module": "src/components/ui-table/index.ts"
           }
         },
         {
@@ -27552,14 +27427,14 @@
           "name": "ui-table",
           "declaration": {
             "name": "UITable",
-            "module": "components/ui-table/index.ts"
+            "module": "src/components/ui-table/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-text/index.ts",
+      "path": "src/components/ui-text/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -27725,7 +27600,7 @@
           "name": "UIText",
           "declaration": {
             "name": "UIText",
-            "module": "components/ui-text/index.ts"
+            "module": "src/components/ui-text/index.ts"
           }
         },
         {
@@ -27733,14 +27608,14 @@
           "name": "ui-text",
           "declaration": {
             "name": "UIText",
-            "module": "components/ui-text/index.ts"
+            "module": "src/components/ui-text/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-toast/index.ts",
+      "path": "src/components/ui-toast/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -28145,7 +28020,7 @@
           "name": "UIToast",
           "declaration": {
             "name": "UIToast",
-            "module": "components/ui-toast/index.ts"
+            "module": "src/components/ui-toast/index.ts"
           }
         },
         {
@@ -28153,14 +28028,14 @@
           "name": "ui-toast",
           "declaration": {
             "name": "UIToast",
-            "module": "components/ui-toast/index.ts"
+            "module": "src/components/ui-toast/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-transition/index.ts",
+      "path": "src/components/ui-transition/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -28351,7 +28226,7 @@
           "name": "UITransition",
           "declaration": {
             "name": "UITransition",
-            "module": "components/ui-transition/index.ts"
+            "module": "src/components/ui-transition/index.ts"
           }
         },
         {
@@ -28359,14 +28234,14 @@
           "name": "ui-transition",
           "declaration": {
             "name": "UITransition",
-            "module": "components/ui-transition/index.ts"
+            "module": "src/components/ui-transition/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-tree-diagram/index.ts",
+      "path": "src/components/ui-tree-diagram/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -28535,7 +28410,7 @@
           "name": "UITreeDiagram",
           "declaration": {
             "name": "UITreeDiagram",
-            "module": "components/ui-tree-diagram/index.ts"
+            "module": "src/components/ui-tree-diagram/index.ts"
           }
         },
         {
@@ -28543,14 +28418,14 @@
           "name": "ui-tree-diagram",
           "declaration": {
             "name": "UITreeDiagram",
-            "module": "components/ui-tree-diagram/index.ts"
+            "module": "src/components/ui-tree-diagram/index.ts"
           }
         }
       ]
     },
     {
       "kind": "javascript-module",
-      "path": "components/ui-visibility/index.ts",
+      "path": "src/components/ui-visibility/index.ts",
       "declarations": [
         {
           "kind": "class",
@@ -28750,7 +28625,7 @@
           "name": "UIVisibility",
           "declaration": {
             "name": "UIVisibility",
-            "module": "components/ui-visibility/index.ts"
+            "module": "src/components/ui-visibility/index.ts"
           }
         },
         {
@@ -28758,7 +28633,7 @@
           "name": "ui-visibility",
           "declaration": {
             "name": "UIVisibility",
-            "module": "components/ui-visibility/index.ts"
+            "module": "src/components/ui-visibility/index.ts"
           }
         }
       ]

@@ -1,4 +1,4 @@
-import { once } from "$/ui/util"
+import { once } from "spell-ui/util"
 
 import {
   EN_STRINGS,

@@ -1,4 +1,4 @@
-import { after, Warnings, type CancelablePromise } from "$/ui/util"
+import { after, Warnings, type CancelablePromise } from "spell-ui/util"
 
 import { APP_STYLESHEET_ID, LAYER_ORDER } from "./runtime.types"
 

@@ -13,7 +13,7 @@ import { PageOutline } from "./PageOutline"
 import { SearchData } from "./SearchData"
 import { SearchIndex } from "./SearchIndex"
 
-import "$/ui/components/ui-icon"
+import "spell-ui/components/ui-icon"
 
 UIDocsSearch.define()
 

@@ -1,5 +1,5 @@
-import { E, UIT } from "$/ui/core"
-import { F } from "$/ui/forms"
+import { E, UIT } from "spell-ui/core"
+import { F } from "spell-ui/forms"
 // Import directly to avoid circular import
 import { DOMFormControl } from "./DOMFormControl"
 import { Validator } from "./Validator"
@@ -32,7 +32,7 @@ import { Validator } from "./Validator"
  *   - a click aimed at the DOM element itself (its `<label for>`, its `click()`) calls `activateControl()`
  * - Every form vocabulary has `disabled`, `name` and `required`:  their getters are typed here once (`FormAttributes`).
  *
- * - Part of the `forms` entry:  reaches the element core through the `$/ui/core` ENTRY (`E`), never its leaves,
+ * - Part of the `forms` entry:  reaches the element core through the `spell-ui/core` ENTRY (`E`), never its leaves,
  *   or the build splits what `core` and `forms` share into a third chunk.
  *   - `E.UIComponent` and the decorators (`@E.proto`, `@E.onChange` ...) are safe while this module evaluates:
  *     the core never imports `forms`, so it has always finished loading first.

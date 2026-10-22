@@ -2,10 +2,10 @@ import { describe, it } from "vite-plus/test"
 
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { FALLBACK_CASES, type FallbackAdapter } from "$/ui/test-helpers/fallback.cases"
+import { FALLBACK_CASES, type FallbackAdapter } from "spell-ui/test-helpers/fallback.cases"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/index"
+import "spell-ui"
 
 /**
  * The native-fallback cases (`fallback.cases.ts`) on the Solid elements:

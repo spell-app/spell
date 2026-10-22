@@ -1,17 +1,17 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { BreadcrumbDividerTokens } from "$/ui/components/components.types"
-import { UI } from "$/ui/runtime"
+import { BreadcrumbDividerTokens } from "spell-ui/components/components.types"
+import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
-import { BreadcrumbDivider } from "$/ui/components/ui-breadcrumb/BreadcrumbDivider"
+import { BreadcrumbDivider } from "spell-ui/components/ui-breadcrumb/BreadcrumbDivider"
 
-import "$/ui/components/ui-breadcrumb"
+import "spell-ui/components/ui-breadcrumb"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-breadcrumb/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-breadcrumb/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

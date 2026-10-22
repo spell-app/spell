@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { FlagCountry } from "$/ui/components/ui-flag/FlagCountry"
+import { FlagCountry } from "spell-ui/components/ui-flag/FlagCountry"
 
 describe("new FlagCountry()", () => {
   test.each([

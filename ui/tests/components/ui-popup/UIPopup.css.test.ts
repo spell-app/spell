@@ -1,22 +1,22 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "$/ui/test-helpers/Keys"
+import { Keys } from "spell-ui/test-helpers/Keys"
 
-import { colorsCSS, foundationCSS, nativeCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS, nativeCSS } from "spell-ui/styles"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import "$/ui/components/ui-button"
+import "spell-ui/components/ui-button"
 
-import { popupVocabulary } from "$/ui/components/ui-popup/UIPopup.en"
+import { popupVocabulary } from "spell-ui/components/ui-popup/UIPopup.en"
 
-import buttonCSS from "$/ui/components/ui-button/UIButton.css?inline"
-import popupCSS from "$/ui/components/ui-popup/UIPopup.css?inline"
-import popupRaw from "$/ui/components/ui-popup/UIPopup.css?raw"
-import anchoredRaw from "$/ui/components/ui-popup/UIPopup.anchored.css?raw"
+import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import popupCSS from "spell-ui/components/ui-popup/UIPopup.css?inline"
+import popupRaw from "spell-ui/components/ui-popup/UIPopup.css?raw"
+import anchoredRaw from "spell-ui/components/ui-popup/UIPopup.anchored.css?raw"
 
 /**
  * `UIPopup.css` on its own, before any element exists:
@@ -28,7 +28,7 @@ import anchoredRaw from "$/ui/components/ui-popup/UIPopup.anchored.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-popup",
+  base: "/src/components/ui-popup",
   query: "?raw",
   import: "default",
   eager: true

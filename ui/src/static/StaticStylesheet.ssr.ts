@@ -1,8 +1,8 @@
 import postcss, { AtRule, type ChildNode, type Container, type Document, type Rule } from "postcss"
 
-import { foundationCSS, nativeCSS, resetCSS, typographyCSS } from "$/ui/styles"
+import { foundationCSS, nativeCSS, resetCSS, typographyCSS } from "spell-ui/styles"
 
-import { SSR } from "$/ui/static"
+import { SSR } from "spell-ui/static"
 // Import directly to avoid circular import:  the constants below the class read them
 import { LIST_ITEM, ROOT, SLOTTED } from "./static.types.ssr"
 
@@ -30,8 +30,8 @@ import { LIST_ITEM, ROOT, SLOTTED } from "./static.types.ssr"
  *   - NOTE: a slotted COMPONENT's root carries `data-ui-slotted` too, so the first clause skips `[data-ui]`:
  *     otherwise its own scope would end at its own children
  * - A sheet shared by several families (`UIParts.css`) is emitted once, scoped to all their kinds.
- * - Node only (`$/ui/static`, postcss):  reads the families' sheet TEXT (`styles`), never renders.
- *   NEVER imported by a component or `$/ui`.
+ * - Node only (`spell-ui/static`, postcss):  reads the families' sheet TEXT (`styles`), never renders.
+ *   NEVER imported by a component or `spell-ui`.
  ****************/
 export class StaticStylesheet {
   /**

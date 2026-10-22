@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "$/ui/styles"
+import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { sliderVocabulary } from "$/ui/components/ui-slider/UISlider.en"
+import { sliderVocabulary } from "spell-ui/components/ui-slider/UISlider.en"
 
-import sliderCSS from "$/ui/components/ui-slider/UISlider.css?inline"
-import sliderRaw from "$/ui/components/ui-slider/UISlider.css?raw"
+import sliderCSS from "spell-ui/components/ui-slider/UISlider.css?inline"
+import sliderRaw from "spell-ui/components/ui-slider/UISlider.css?raw"
 
 /**
  * `UISlider.css` on its own, before any element exists:  the sheet's source rules and the computed layout of the
@@ -18,7 +18,7 @@ import sliderRaw from "$/ui/components/ui-slider/UISlider.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-slider",
+  base: "/src/components/ui-slider",
   query: "?raw",
   import: "default",
   eager: true

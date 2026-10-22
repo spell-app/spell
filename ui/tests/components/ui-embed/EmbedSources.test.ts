@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { EmbedSources } from "$/ui/components/ui-embed/EmbedSources"
+import { EmbedSources } from "spell-ui/components/ui-embed/EmbedSources"
 
 describe("EmbedSources.resolve()", () => {
   test("fills the source's URL and its player parameters", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ThemeFamilies } from "$/ui/tools/ThemeFamilies"
+import { ThemeFamilies } from "spell-ui/tools/ThemeFamilies"
 
 describe("ThemeFamilies.touched()", () => {
   test("reads class grammar, tag selectors and declared tokens;  a box's remap isn't site-wide", () => {

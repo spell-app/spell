@@ -1,26 +1,26 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import * as core from "$/ui/core"
+import * as core from "spell-ui/core"
 import { Fixture } from "spell-kit/test-helpers/Fixture"
 import type { DOMElement } from "spell-kit/element"
 
-import { ComponentPacks, registerPack } from "$/ui/components/ui-components"
-import type { RootFailure, UIRoot } from "$/ui/components/ui-root"
+import { ComponentPacks, registerPack } from "spell-ui/components/ui-components"
+import type { RootFailure, UIRoot } from "spell-ui/components/ui-root"
 
-import "$/ui/components/ui-root"
+import "spell-ui/components/ui-root"
 
 ////////////////
 // ## Fixtures
 ////////////////
 
-/** The test pack:  `<x-card>` (ready when the test says) and `<x-note>`, a classic script (`test-helpers/fixtures/`). */
-const X_PACK = "/test-helpers/fixtures/component-packs/x.pack.js"
+/** The test pack:  `<x-card>` (ready when the test says) and `<x-note>`, a classic script (`src/test-helpers/fixtures/`). */
+const X_PACK = "/src/test-helpers/fixtures/component-packs/x.pack.js"
 
 /** A pack whose `define()` loads its families first:  `<later-card>`, defined a while after the script ran. */
-const LATER_PACK = "/test-helpers/fixtures/component-packs/later.pack.js"
+const LATER_PACK = "/src/test-helpers/fixtures/component-packs/later.pack.js"
 
 /** A pack script that runs but registers nothing. */
-const SILENT_PACK = "/test-helpers/fixtures/component-packs/silent.pack.js"
+const SILENT_PACK = "/src/test-helpers/fixtures/component-packs/silent.pack.js"
 
 /** A pack script that can't load:  nothing listens on port 1. */
 const MISSING_PACK = "http://127.0.0.1:1/missing.pack.js"
@@ -29,7 +29,7 @@ const MISSING_PACK = "http://127.0.0.1:1/missing.pack.js"
 type XPackGlobal = { __xPack?: { runs: number; cards: Set<DOMElement> } }
 
 // what the docs bundle puts on `window.SpellUI`, for the packs' classic scripts
-Object.assign(globalThis, { SpellUI: { registerPack, packModules: { "$/ui/core": core } } })
+Object.assign(globalThis, { SpellUI: { registerPack, packModules: { "spell-ui/core": core } } })
 
 /** The test pack's state, once it ran. */
 function xPack() {

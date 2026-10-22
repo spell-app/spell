@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { RootLoader } from "$/ui/components/ui-root/RootLoader"
+import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
 
 // `RootLoader`'s registries are page-wide and have no reset:  each case uses folders of its own
 

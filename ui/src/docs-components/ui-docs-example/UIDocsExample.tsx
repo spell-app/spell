@@ -1,8 +1,8 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "$/ui/core"
-import { CODE_SPAN, HeadingLevels, type HeadingBounds } from "$/ui/docs-components/docs-components.types"
+import { E, UIT } from "spell-ui/core"
+import { CODE_SPAN, HeadingLevels, type HeadingBounds } from "spell-ui/docs-components/docs-components.types"
 import { ExampleSource } from "./ExampleSource"
 import { docsExampleVocabulary } from "./UIDocsExample.en"
 

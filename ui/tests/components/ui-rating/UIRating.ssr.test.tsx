@@ -2,11 +2,11 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "$/ui/static"
-import { UIRating } from "$/ui/components/ui-rating/UIRating"
+import { StaticRender } from "spell-ui/static"
+import { UIRating } from "spell-ui/components/ui-rating/UIRating"
 
 /**
- * `<ui-rating>` in a static server render (`$/ui/static`):  a radio group of native radios,
+ * `<ui-rating>` in a static server render (`spell-ui/static`):  a radio group of native radios,
  * the value's radio checked and named for the form, so a no-JS form submits it.
  */
 describe("<ui-rating> static render", () => {

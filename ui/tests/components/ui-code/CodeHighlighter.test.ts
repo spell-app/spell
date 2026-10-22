@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { CodeHighlighter } from "$/ui/components/ui-code/CodeHighlighter"
+import { CodeHighlighter } from "spell-ui/components/ui-code/CodeHighlighter"
 
 describe("CodeHighlighter.highlight()", () => {
   test("loads highlight.js only for code it must colour", async () => {

@@ -1,18 +1,18 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { tabsVocabulary } from "$/ui/components/ui-tab/UITabs.en"
-import { tabVocabulary } from "$/ui/components/ui-tab/UITab.en"
+import { tabsVocabulary } from "spell-ui/components/ui-tab/UITabs.en"
+import { tabVocabulary } from "spell-ui/components/ui-tab/UITab.en"
 
-import menuCSS from "$/ui/components/ui-menu/UIMenu.css?inline"
-import segmentCSS from "$/ui/components/ui-segment/UISegment.css?inline"
-import tabCSS from "$/ui/components/ui-tab/UITab.css?inline"
-import tabRaw from "$/ui/components/ui-tab/UITab.css?raw"
+import menuCSS from "spell-ui/components/ui-menu/UIMenu.css?inline"
+import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import tabCSS from "spell-ui/components/ui-tab/UITab.css?inline"
+import tabRaw from "spell-ui/components/ui-tab/UITab.css?raw"
 
 /**
  * `UITab.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the
@@ -23,7 +23,7 @@ import tabRaw from "$/ui/components/ui-tab/UITab.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-tab",
+  base: "/src/components/ui-tab",
   query: "?raw",
   import: "default",
   eager: true

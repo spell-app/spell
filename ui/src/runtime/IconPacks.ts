@@ -1,5 +1,5 @@
-import { Warnings } from "$/ui/util"
-import { BuiltInPacks, DEFAULT_ICON_PACK, IconName } from "$/ui/icons"
+import { Warnings } from "spell-ui/util"
+import { BuiltInPacks, DEFAULT_ICON_PACK, IconName } from "spell-ui/icons"
 
 import type { IconPackOptions, ResolvedIcon } from "./runtime.types"
 import { IconPack } from "./IconPack"
@@ -7,7 +7,7 @@ import { IconPack } from "./IconPack"
 /****************
  * ### `IconPacks`
  * Icon packs and the SVG cache, as `UI.icons` (`notes/icons.md`).
- * - In the runtime's lazy chunk;  imports the icon PACK format (`$/ui/icons`) and `IconPack`, never a pack itself.
+ * - In the runtime's lazy chunk;  imports the icon PACK format (`spell-ui/icons`) and `IconPack`, never a pack itself.
  * - A pack is a folder of SVGs plus its index, `pack.js`.  Packs are added in order and the LAST one added wins a
  *   name;  `prefix:name` asks one pack.
  * - Starts on first use (any lookup or `use()`), not on construction, so a page that never draws an icon loads no

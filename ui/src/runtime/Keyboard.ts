@@ -1,6 +1,6 @@
 // Import directly to avoid circular import
-import { proto } from "$/ui/util"
-import { Warnings, type Prettify } from "$/ui/util"
+import { proto } from "spell-ui/util"
+import { Warnings, type Prettify } from "spell-ui/util"
 
 import { PAGE_SCOPE, type Disposer, type KeyHandler, type KeyRegistrationOptions } from "./runtime.types"
 import { Chord } from "./Chord"

@@ -33,10 +33,10 @@ import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell-kit/util/node/json5"
 
-import { Terminal } from "spell-kit/element/tools/Terminal"
-import { SITE_DATA, SITE_PAGES } from "../tools/tools.types.ts"
+import { Terminal } from "spell-kit/element-tools/Terminal"
+import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, escapeHtml } from "./generatedFiles.ts"
+import { STATUS_TEXT, escapeHtml } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */

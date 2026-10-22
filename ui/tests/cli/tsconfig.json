@@ -1,5 +1,5 @@
 {
-  // the `spell` commands' tests:  the commands' own settings (cli/tsconfig.json), over this folder
-  "extends": "../../cli/tsconfig.json",
+  // the `spell` commands' tests:  Spell UI's node settings (`tsconfig.node.json`), over this folder
+  "extends": "../../tsconfig.node.json",
   "include": ["."]
 }

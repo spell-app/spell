@@ -1,4 +1,4 @@
-import { numberToWord, proto, suggest } from "$/ui/util"
+import { numberToWord, proto, suggest } from "spell-ui/util"
 import type { AttributeKind, AttributeSpec, ValueSetName } from "spell-kit/element/vocabulary.types"
 
 /****************
@@ -9,7 +9,7 @@ import type { AttributeKind, AttributeSpec, ValueSetName } from "spell-kit/eleme
  * - Data is `@proto static` (on the prototype, and on the class as a static), so a theme which adds hues
  *   calls `ValueSets.add("hues", "indigo")` and every reader sees it.
  * - Helpers are static:  there is one set of canonical values per page.
- * - Pure data, no DOM, imports only `$/ui/util`:  node reads it with the vocabularies (`yarn site:data`).
+ * - Pure data, no DOM, imports only `spell-ui/util`:  node reads it with the vocabularies (`yarn site:data`).
  ****************/
 export class ValueSets {
   ////////////////
@@ -223,7 +223,7 @@ export class ValueSets {
 
   /**
    * Closest canonical value to a misspelt `value`, for dev-time "did you mean" warnings.
-   * - Delegates to `$/ui/util`'s Levenshtein `suggest()`;  `undefined` when nothing is close.
+   * - Delegates to `spell-ui/util`'s Levenshtein `suggest()`;  `undefined` when nothing is close.
    */
   static suggest(set: ValueSetName | readonly string[], value: string): string | undefined {
     return suggest(value, ValueSets.get(set))

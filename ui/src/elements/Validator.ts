@@ -1,4 +1,4 @@
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 
 /****************
  * ### `Validator`
@@ -15,7 +15,7 @@ import { E } from "$/ui/core"
  * - Fomantic's names stay where they're its API (`prompts`, `text`, `regExp`, `rules`, a rule's `(value, ruleValue)`);
  *   the steps rules share (`range()`, `normalize()`, `count()`:  `RuleValidator`) are ours.
  * - Library-neutral:  no DOM, no Solid;  of the core (`E`), it uses only `E.proto`, `E.suggest()`, `E.Warnings` and
- *   the folder's types.  Part of the `forms` entry:  reaches the core through the `$/ui/core` ENTRY, never its leaves
+ *   the folder's types.  Part of the `forms` entry:  reaches the core through the `spell-ui/core` ENTRY, never its leaves
  *   (`forms.ts`).
  ****************/
 export class Validator {

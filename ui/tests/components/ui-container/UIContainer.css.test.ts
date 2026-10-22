@@ -1,15 +1,15 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { containerVocabulary } from "$/ui/components/ui-container/UIContainer.en"
+import { containerVocabulary } from "spell-ui/components/ui-container/UIContainer.en"
 
-import containerCSS from "$/ui/components/ui-container/UIContainer.css?inline"
-import containerRaw from "$/ui/components/ui-container/UIContainer.css?raw"
+import containerCSS from "spell-ui/components/ui-container/UIContainer.css?inline"
+import containerRaw from "spell-ui/components/ui-container/UIContainer.css?raw"
 
 /**
  * `UIContainer.css` on its own, before any element exists:  the sheet's source rules and the computed widths of the
@@ -19,7 +19,7 @@ import containerRaw from "$/ui/components/ui-container/UIContainer.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-container",
+  base: "/src/components/ui-container",
   query: "?raw",
   import: "default",
   eager: true

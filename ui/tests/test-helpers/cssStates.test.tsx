@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import type { DOMElement } from "spell-kit/element"
 
-import "$/ui/index"
+import "spell-ui"
 
 describe("UIComponent.onMount() effects", () => {
   it("an error thrown by cssStates() reaches the error boundary:  :state(errored) and the fallback", async () => {

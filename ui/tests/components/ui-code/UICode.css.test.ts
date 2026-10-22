@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { codeVocabulary } from "$/ui/components/ui-code/UICode.en"
+import { codeVocabulary } from "spell-ui/components/ui-code/UICode.en"
 
-import codeCSS from "$/ui/components/ui-code/UICode.css?inline"
-import codeRaw from "$/ui/components/ui-code/UICode.css?raw"
+import codeCSS from "spell-ui/components/ui-code/UICode.css?inline"
+import codeRaw from "spell-ui/components/ui-code/UICode.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-code",
+  base: "/src/components/ui-code",
   query: "?raw",
   import: "default",
   eager: true

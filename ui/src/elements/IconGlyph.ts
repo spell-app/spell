@@ -1,7 +1,7 @@
 import { createEffect, untrack, type Accessor } from "solid-js"
 import { isServer, ssr } from "@solidjs/web"
 
-import { E, UI } from "$/ui/core"
+import { E, UI } from "spell-ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { derived, state } from "spell-kit/element"
 
@@ -16,7 +16,7 @@ import { derived, state } from "spell-kit/element"
  * - A later request wins over an earlier, slower load.
  * - `svg` is a fresh `aria-hidden` clone per change;  the box around it is the caller's.
  * - MUST be created under the element's owner:  it creates an effect.
- * - Server render (`$/ui/static`):  `svg` is the SVG as markup, read synchronously through `serverMarkup`;
+ * - Server render (`spell-ui/static`):  `svg` is the SVG as markup, read synchronously through `serverMarkup`;
  *   `svgTemplate` stays empty.  It NEVER imports the server's code:  that reaches it through the hook.
  ****************/
 export class IconGlyph {
@@ -80,7 +80,7 @@ export class IconGlyph {
   ////////////////
 
   /**
-   * Server hook, set by `$/ui/static` (`ServerRuntime`):  an icon name => its SVG markup, from `packs`.
+   * Server hook, set by `spell-ui/static` (`ServerRuntime`):  an icon name => its SVG markup, from `packs`.
    * - Why a hook:  the server reads SVG files from disk (`node:fs`), which browser code must never import.
    * - Static:  one server runtime per process, installed before any element renders.
    */

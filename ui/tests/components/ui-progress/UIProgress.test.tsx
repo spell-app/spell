@@ -5,11 +5,11 @@ import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 
-import "$/ui/components/ui-progress"
-import "$/ui/components/ui-segment"
+import "spell-ui/components/ui-progress"
+import "spell-ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/components/ui-progress/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-progress/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true

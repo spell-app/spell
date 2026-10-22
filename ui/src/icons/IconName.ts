@@ -1,4 +1,4 @@
-// `.ts` extension:  node tooling loads this file directly (`tools/IconPackBuilder.ts`)
+// `.ts` extension:  node tooling loads this file directly (`src/tools/IconPackBuilder.ts`)
 import { ICON_PREFIX_SEPARATOR } from "./icons.types.ts"
 
 /****************

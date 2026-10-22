@@ -38,15 +38,15 @@ Four of them are pages that run in a headless browser on every `yarn smoke`;  Sv
 
 | Framework | Pass data | Hear `ui-change` | Checked |
 | --- | --- | --- | --- |
-| plain JavaScript | `dropdown.options = OPTIONS` | `addEventListener("ui-change", fn)` | ✓ [`vanilla.html`](tools/frameworks/vanilla.html) |
-| React 19 | `options={OPTIONS}` | `onui-change={fn}` | ✓ [`react.html`](tools/frameworks/react.html) |
+| plain JavaScript | `dropdown.options = OPTIONS` | `addEventListener("ui-change", fn)` | ✓ [`vanilla.html`](src/tools/frameworks/vanilla.html) |
+| React 19 | `options={OPTIONS}` | `onui-change={fn}` | ✓ [`react.html`](src/tools/frameworks/react.html) |
 | Svelte 5 | `{options}` | `onui-change={fn}` | not yet:  standard contract |
-| Solid 2 | `prop:options={options}` | a `ref` that adds the listener | ✓ [`solid.html`](tools/frameworks/solid.html) |
-| Vue 3 | `:options="options"` | `@ui-change="fn"` | ✓ [`vue.html`](tools/frameworks/vue.html) |
+| Solid 2 | `prop:options={options}` | a `ref` that adds the listener | ✓ [`solid.html`](src/tools/frameworks/solid.html) |
+| Vue 3 | `:options="options"` | `@ui-change="fn"` | ✓ [`vue.html`](src/tools/frameworks/vue.html) |
 
 ## Plain JavaScript
 
-✓ Checked by [`vanilla.html`](tools/frameworks/vanilla.html),
+✓ Checked by [`vanilla.html`](src/tools/frameworks/vanilla.html),
 which sets the property and the listener BEFORE the element is defined, to prove the backstop.
 
 ```html
@@ -68,7 +68,7 @@ which sets the property and the listener BEFORE the element is defined, to prove
 
 ## React 19
 
-✓ Checked by [`react.html`](tools/frameworks/react.html), on React 19.3.1.
+✓ Checked by [`react.html`](src/tools/frameworks/react.html), on React 19.3.1.
 React 19 passes a prop as a PROPERTY when the element has one (`key in el`),
 and listens to a custom event through `on<event-name>`.
 
@@ -131,8 +131,8 @@ Svelte 5 sets a prop as a property when the element has one, and an `on<name>` a
 
 ## Solid 2
 
-✓ Checked by [`solid.html`](tools/frameworks/solid.html), a compiled Solid 2 app,
-[`app.tsx`](tools/frameworks/solid/app.tsx), sharing the components' own Solid.
+✓ Checked by [`solid.html`](src/tools/frameworks/solid.html), a compiled Solid 2 app,
+[`app.tsx`](src/tools/frameworks/solid/app.tsx), sharing the components' own Solid.
 
 ```tsx
 import { createSignal } from "solid-js"
@@ -176,7 +176,7 @@ function listen(element) {
 
 ## Vue 3
 
-✓ Checked by [`vue.html`](tools/frameworks/vue.html), on Vue 3.5.44.
+✓ Checked by [`vue.html`](src/tools/frameworks/vue.html), on Vue 3.5.44.
 
 ```js
 app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-")
@@ -252,7 +252,7 @@ yarn vendor                  # ONE copy of Solid for import-map pages, into vend
 - A page then maps them with an import map, exactly as the smoke pages do:
   - `spell-ui` and `spell-ui/<family>` onto `dist/`
   - `solid-js` / `@solidjs/web` onto the vendored copy
-- `yarn serve` serves `dist/`, `vendor/` and `tools/` for such pages, with the import map injected.
+- `yarn serve` serves `dist/`, `vendor/` and `src/` for such pages, with the import map injected.
 
 ### 🌱 Coming:  `npm install spell-ui`
 
@@ -278,7 +278,7 @@ PASS /tools/smoke/translate.html (es (ie-boton, ie-desplegable))
 PASS /tools/demo/fallback.html (every form control, working + failed)
 ```
 
-- Every framework page runs the same round trip ([`check.js`](tools/frameworks/check.js)):
+- Every framework page runs the same round trip ([`check.js`](src/tools/frameworks/check.js)):
   - the dropdown shows the app's value (`Banana`), and starts open
   - `options` arrived as a property, never an attribute
   - a pick (`Apple`) reaches the app's state, and back
@@ -293,7 +293,7 @@ PASS /tools/demo/fallback.html (every form control, working + failed)
 <details>
 <summary>The identity probe:  proving there's one Solid on the page</summary>
 
-[`identity.js`](tools/frameworks/solid/identity.js) is the ONLY place that proves
+[`identity.js`](src/tools/frameworks/solid/identity.js) is the ONLY place that proves
 the host app and the components share one Solid.
 
 - It hands the app the components' own `createSignal` and `render`;
@@ -307,7 +307,7 @@ the host app and the components share one Solid.
 <details>
 <summary>A Solid 1.9 app, with the components on Solid 2</summary>
 
-[`compat-solid-1.9.html`](tools/smoke/compat-solid-1.9.html) runs a Solid 1.9 app (from esm.sh)
+[`compat-solid-1.9.html`](src/tools/smoke/compat-solid-1.9.html) runs a Solid 1.9 app (from esm.sh)
 beside the components' vendored Solid 2:  two runtimes on one page.
 It passes, as compatibility, not as the recommended setup.
 

@@ -1,6 +1,6 @@
-import { SiteData } from "$/ui/docs-components/SiteData"
+import { SiteData } from "spell-ui/docs-components/SiteData"
 // A leaf, not the barrel:  the barrel defines `<ui-docs-toc>`, which `<ui-root>` does on first use
-import { TocIndex } from "$/ui/docs-components/ui-docs-toc/TocIndex"
+import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { FOLDS_KEY } from "./site.types"
 
 /****************

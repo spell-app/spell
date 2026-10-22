@@ -1,9 +1,9 @@
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { ServerRuntime, StaticRender } from "$/ui/static"
-import { UIButton } from "$/ui/components/ui-button/UIButton"
-import { UIIcon } from "$/ui/components/ui-icon/UIIcon"
-import { UIIcons } from "$/ui/components/ui-icon/UIIcons"
+import { ServerRuntime, StaticRender } from "spell-ui/static"
+import { UIButton } from "spell-ui/components/ui-button/UIButton"
+import { UIIcon } from "spell-ui/components/ui-icon/UIIcon"
+import { UIIcons } from "spell-ui/components/ui-icon/UIIcons"
 
 /** Icons in a static render:  the pack's SVG inline, `aria-hidden`, read from disk in node. */
 describe("<ui-icon> static render", () => {

@@ -18,7 +18,7 @@ docs/__data/custom-elements.json                              linguist-generated
 docs/__data/html-custom-data.json                             linguist-generated merge=binary
 
 # emoji data, from a reference clone (`yarn gen:emoji`):  collapsed only, never regenerated on a merge
-components/ui-emoji/data/**                                   linguist-generated -diff
+src/components/ui-emoji/data/**                               linguist-generated -diff
 
 # Visual regression baselines (`yarn test:visual`):  images, never diffed or merged as text
-test-helpers/visual/baselines/**/*.png binary
+src/test-helpers/visual/baselines/**/*.png binary

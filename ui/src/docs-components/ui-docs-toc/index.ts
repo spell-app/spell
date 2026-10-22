@@ -11,9 +11,9 @@
 import { UIDocsToc } from "./UIDocsToc"
 import { TocIndex } from "./TocIndex"
 
-import "$/ui/components/ui-menu"
-import "$/ui/components/ui-item"
-import "$/ui/components/ui-parts"
+import "spell-ui/components/ui-menu"
+import "spell-ui/components/ui-item"
+import "spell-ui/components/ui-parts"
 
 UIDocsToc.define()
 

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { foundationCSS } from "$/ui/styles"
+import { foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Sheets } from "$/ui/test-helpers/Sheets"
+import { Sheets } from "spell-ui/test-helpers/Sheets"
 
-import { treeDiagramVocabulary } from "$/ui/components/ui-tree-diagram/UITreeDiagram.en"
+import { treeDiagramVocabulary } from "spell-ui/components/ui-tree-diagram/UITreeDiagram.en"
 
-import treeDiagramCSS from "$/ui/components/ui-tree-diagram/UITreeDiagram.css?inline"
-import treeDiagramRaw from "$/ui/components/ui-tree-diagram/UITreeDiagram.css?raw"
+import treeDiagramCSS from "spell-ui/components/ui-tree-diagram/UITreeDiagram.css?inline"
+import treeDiagramRaw from "spell-ui/components/ui-tree-diagram/UITreeDiagram.css?raw"
 
 /**
  * `UITreeDiagram.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of
@@ -17,7 +17,7 @@ import treeDiagramRaw from "$/ui/components/ui-tree-diagram/UITreeDiagram.css?ra
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {
-  base: "/components/ui-tree-diagram",
+  base: "/src/components/ui-tree-diagram",
   query: "?raw",
   import: "default",
   eager: true

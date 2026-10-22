@@ -12,8 +12,8 @@ import type { TokenDeclaration } from "./styles.types"
  *   So these share it:
  *   - the browser test (`tests/test-helpers/componentTokens.test.ts`)
  *   - the codemod (`yarn tokens:alias`, `scripts/tokens-alias.ts`)
- *   - the docs site's token tables, in node (`tools/FamilyTokens.ts`, `tools/FoundationTokens.ts`)
- * - Build / test time only:  left out of the `$/ui/styles` barrel, import the leaf file.
+ *   - the docs site's token tables, in node (`src/tools/FamilyTokens.ts`, `src/tools/FoundationTokens.ts`)
+ * - Build / test time only:  left out of the `spell-ui/styles` barrel, import the leaf file.
  * - A COMPONENT token is `--ui-<tag>` or `--ui-<tag>-*`, for a tag some vocabulary declares:
  *   `ui-button` => `--ui-button-radius`.
  *   - Minus the foundation's own names:  `--ui-text-color` is a token of `tokens.css`, not of `<ui-text>`.
@@ -112,7 +112,7 @@ export class ComponentTokens {
       notes.push(
         `declares another family's token ${declaration.name} (line ${declaration.line}):  convert by hand -- ` +
           "the alias `--_ui-x: var(--ui-x, <default>)` for a look token its readers take through the alias, a " +
-          "private switch for an internal one, or an EXCEPTION in `test-helpers/componentTokens.test.ts` when it " +
+          "private switch for an internal one, or an EXCEPTION in `tests/test-helpers/componentTokens.test.ts` when it " +
           "deliberately themes a nested component"
       )
     }
@@ -130,7 +130,7 @@ export class ComponentTokens {
   /**
    * Public tokens a sheet exposes through private aliases:  `--_ui-x: var(--ui-x, <default>)`.
    * - The first one wins.
-   * - The `/* comment *\/` right above is its description (the docs' token tables, `tools/FamilyTokens.ts`).
+   * - The `/* comment *\/` right above is its description (the docs' token tables, `src/tools/FamilyTokens.ts`).
    * - `prefix`:  the tokens' first word, `ui` (Spell UI's);  another set's own, `brand` (`--_brand-x: var(--brand-x)`)
    * - Static:  one sheet's text is all it reads, no vocabulary or foundation.
    */

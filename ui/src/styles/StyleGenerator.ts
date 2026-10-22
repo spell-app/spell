@@ -1,4 +1,4 @@
-import { kebabCase } from "$/ui/util"
+import { kebabCase } from "spell-ui/util"
 
 import { ColorContrast } from "./ColorContrast"
 
@@ -50,8 +50,8 @@ import {
  * `styles.en.ts`.
  * - Pure:  returns CSS text and touches no file system, so it runs both in node (`scripts/gen-styles.ts`,
  *   `yarn gen:styles`) and in the browser test that checks the committed sheets are current.
- * - Imports only its own folder (the vocabulary, `ColorContrast`, types) and `$/ui/util`'s `kebabCase`:  never the
- *   element layer, which node can't load.  Build-time only, so left out of the `$/ui/styles` barrel.
+ * - Imports only its own folder (the vocabulary, `ColorContrast`, types) and `spell-ui/util`'s `kebabCase`:  never the
+ *   element layer, which node can't load.  Build-time only, so left out of the `spell-ui/styles` barrel.
  * - Output is close to oxfmt's CSS style;  the script runs oxfmt afterwards, and the staleness test
  *   compares with whitespace stripped, so line breaking never matters.
  * - Token declarations go on `:root`, plus a `:host` copy guarded by

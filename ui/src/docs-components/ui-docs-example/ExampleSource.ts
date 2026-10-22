@@ -1,4 +1,4 @@
-import { E } from "$/ui/core"
+import { E } from "spell-ui/core"
 import { HtmlFormatter } from "./HtmlFormatter"
 
 /****************
@@ -129,7 +129,7 @@ const EXAMPLE_TAG = "ui-docs-example"
  * - A registered symbol, so the site entry's copy of `ExampleSource` and the lazily loaded family's agree even if a
  *   bundler gave each its own copy of the module.
  */
-const SNAPSHOTS_KEY = Symbol.for("@spell-app/ui-docs:example-sources")
+const SNAPSHOTS_KEY = Symbol.for("spell-ui:docs-example-sources")
 
 /** `globalThis` with the snapshots. */
 type SnapshotGlobal = typeof globalThis & { [SNAPSHOTS_KEY]?: WeakMap<Element, string> }
