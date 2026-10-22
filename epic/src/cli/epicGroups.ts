@@ -440,7 +440,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
-      description: "show an .html page in the window's side bar:  Spell Docs, or with --review the Review tab",
+      description: "show an .html page in the window's side bar:  Epic Docs, or with --review the Review tab",
       example: "epic window show epics/seo/seo.plan.html --review"
     },
     {
@@ -457,10 +457,10 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "launch",
-      usage: "<name> [--pkg <pkg>] [--color <look>] [--prompt <text>]",
+      usage: "<name> [--pkg <pkg>] [--color <look>] [--prompt <text>] [--move]",
       description:
         "wake epic <name>:  its running session, else a NEW one in its open window (look untouched), else make " +
-        "worktree <name> if needed, open its window, a NEW session there",
+        "worktree <name> if needed, open its window, a NEW session there;  --move:  THIS session goes there instead",
       example: 'epic window launch seo --prompt "/epic request seo r3"'
     },
     {

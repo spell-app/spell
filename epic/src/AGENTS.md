@@ -1034,7 +1034,8 @@ In `tools/`:
       Remembered per page.
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
-      - the page header (Send and Review Now while reviewed, the step label, git), and its toolbar's tools
+      - the page header (Send and its countdown while reviewed, `<epic-send-buttons>`;  the step label, git), and its
+        toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
       - every review control on the page's ONE review client
@@ -1350,7 +1351,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
     P19):  live exactly while that process runs, with no heartbeat.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
-    - Send, Review Now or Do Now with nobody listening wakes it, inside the request:
+    - Send (or its countdown) or Do Now with nobody listening wakes it, inside the request:
       `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
     - Claimed under the inbox's lock (`claimWake()`):  two Sends at once wake once.
     - It stands 10 minutes (`WAKE_COOLDOWN_MS`), or until a session listens (`setListening()` clears it).
@@ -1366,7 +1367,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST now { page, id, action, note? }`:  Add Details, or revisit now, queued on `now`
       - revisit now keeps the item's pick
     - `POST cancel { page, id }`:  "nevermind"
-    - `POST send { page, now? }`:  `now: true` is Review Now, every revisit waiting asked now too (`reviewNow()`)
+    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20),
+      every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
     - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key
@@ -1994,7 +1996,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
 - `epic pages open [page] [--vs | --review]` ([open.js](tools/open.js)):  shows a page, by default the index.
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
-  - `--vs`:  in VS Code's doc preview, the right side bar's "Spell Docs" tab (`/spell-docs`)
+  - `--vs`:  in VS Code's doc preview, the right side bar's "Epic Docs" tab (`/spell-docs`)
   - `--review`:  its "Review" tab (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.
@@ -2084,7 +2086,7 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
       Approve, Make Todo, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
-      Add Details Now, Send, Review Now.
+      Add Details Now, Send, the countdown's send.
     - No control past the window, or over a title, at 280 / 900px, light and dark.
     - It refuses while the copy's inbox file exists.
     - Run it after touching the review controls or `ReviewClient`.

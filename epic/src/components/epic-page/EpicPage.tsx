@@ -22,6 +22,7 @@ import {
   TEST_QUERY,
   TEST_START
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
+import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
 
 import { shownReadingTime } from "spell-epic/tools/ReadingTime.js"
 
@@ -58,7 +59,6 @@ import {
   PILL,
   PROMPT,
   REVIEW_LINE,
-  REVIEW_NOW,
   SAGA_KIND,
   SEND,
   STACK_PROPERTY,
@@ -90,7 +90,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     - no `DOCS / EPICS /` while the doc still holds its old `.spell-crumbs` before the page, nor narrow, 720px or
  *       less, where the side bar is too narrow for them (`Crumbs.css`)
  *     - the epic's title isn't drawn:  the name says it (the page's `<title>` and the Epics list still show it)
- *     at its right, while reviewed, Send and Review Now;  then the bedtime label, the step label (the state's icon in
+ *     at its right, while reviewed, Send and its countdown;  then the bedtime label, the step label (the state's icon in
  *     it) and the git toggle (Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git
  *     icon, but bigger)";  then the state went into the step label:  "Into the pill")
  *   - the toolbar's bar, sticky again, right below the header (`--epic-head-h`):  the new item form, the toolbar
@@ -114,21 +114,21 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     a session listening to the review counts as running
  * - The review line under the header:  "To review this doc, type `/epic review <name>`", copied on click (it flashes)
  *   - on every epic page, as today:  it's how a review starts;  airplane mode:  `/airplane land`
- * - SEND AND REVIEW NOW (P10), at the header's right, before its labels:
- *   blue, and wearing the fill rule (Q20).
+ * - SEND AND ITS COUNTDOWN, at the header's right, before its labels:  `<epic-send-buttons>` (epic `epic-engine`
+ *   P20, in place of P10's Send and Review Now)
  *   - there whenever the page is reviewed (served with a token, its inbox answering:
- *     `ReviewClient`, through a `ReviewState` of its own), so they're always in the same place;
- *     grey with nothing to send
+ *     `ReviewClient`, through a `ReviewState` of its own), so it's always in the same place
  *   - Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header,
  *     to the left of P11" (epic `airplane` P8 had put them in a bar stuck to the window's bottom)
- *   - Send (paper plane):
- *     a grey outline with nothing to send, dashed blue with marks not sent, outlined blue once sent
+ *   - the paper plane:  every unsent mark and comment to Claude, by the fill rule (Q20)
+ *     - a grey outline with nothing to send, dashed blue with marks not sent, outlined blue once sent
  *     - Owen's comments too (Owen, 2026-10-10, he keeps Send as the way they reach Claude):
  *       a new comment, or his reply on a thread, makes it blue;  its tooltip counts both ("2 marks, 1 comment")
- *   - Review Now (wand):  every mark sent and each revisit asked now;
- *     outlined blue while there's anything to work through
- *   - nobody listening:  their tooltips say so (`NOBODY_LISTENING`)
- *   - what a click did goes to the notice line at the window's bottom (`ReviewState`'s)
+ *   - the wand:  countdown mode (Owen, 2026-10-22).  On (the default), what's unsent goes by itself 2 minutes after
+ *     Owen stops typing, clicking and scrolling, a ring draining round the wand;  that send asks every revisit now,
+ *     as Review Now did (decision Q7).  Off, the plane is filled blue until he presses it.
+ *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
+ *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE PILL, under the review line, while marks, comments or Do Now requests wait and nobody can take them:
  *   no session listening (solid orange, a warning), or airplane mode;  a click copies the review line's command,
  *   and, out of airplane mode, starts the review in the epic's own session (`ReviewClient.startReview()`)
@@ -267,8 +267,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     saga: new E.IconGlyph({ owner: this, name: () => "bullseye" }),
     git: new E.IconGlyph({ owner: this, name: () => "git" }),
     chevron: new E.IconGlyph({ owner: this, name: () => "chevron right" }),
-    send: new E.IconGlyph({ owner: this, name: () => "paper plane" }),
-    reviewNow: new E.IconGlyph({ owner: this, name: () => "wand magic sparkles" }),
     copy: new E.IconGlyph({ owner: this, name: () => "copy" })
   }
 
@@ -387,7 +385,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
   })
 
-  /** Where the page's marks stand, for Send and Review Now;  `undefined` while the page isn't reviewed. */
+  /** Where the page's marks stand, for Send and the pill;  `undefined` while the page isn't reviewed. */
   readonly marks = createMemo((): HeaderMarks | undefined => {
     const client = this.review.client
     // tracks the client's changes:  every read below follows them
@@ -892,37 +890,30 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * Send (paper plane) and Review Now (wand), at the header's right, before its labels.
-   * - blue and wearing the fill rule (Q20);  grey with nothing to send or to work through
-   * - a click on a grey one says so on the notice line (`ReviewClient.send()`)
+   * Send and its countdown (`<epic-send-buttons>`), at the header's right, before its labels.
+   * - the plane by the fill rule (Q20), its tooltip what a press sends, or why it sends nothing
+   * - a press, or the countdown running out:  `onSendAsked()`
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
     return (
-      <>
-        <button
-          type="button"
-          class={SEND}
-          part={this.partForName("send")}
-          data-state={marks().send}
-          aria-label={this.sendWords(marks())}
-          title={this.withNobody(this.sendWords(marks()), marks(), marks().send !== "idle")}
-          onClick={() => void this.review.client?.send()}
-        >
-          {this.icon(this.icons.send)}
-        </button>
-        <button
-          type="button"
-          class={REVIEW_NOW}
-          part={this.partForName("review-now")}
-          data-state={marks().waiting || marks().comments ? "ready" : "idle"}
-          aria-label={this.reviewNowWords(marks())}
-          title={this.withNobody(this.reviewNowWords(marks()), marks(), !!(marks().waiting || marks().comments))}
-          onClick={() => void this.review.client?.send({ now: true })}
-        >
-          {this.icon(this.icons.reviewNow)}
-        </button>
-      </>
+      <epic-send-buttons
+        class={SEND}
+        part={this.partForName("send")}
+        state={marks().send}
+        send-tip={this.withNobody(this.sendWords(marks()), marks(), marks().send !== "idle")}
+      />
     )
+  }
+
+  /**
+   * Send asked for (`<epic-send-buttons>`'s `epic-send-asked`):  the plane sends what's unsent (`ReviewClient.send()`);
+   * the countdown sends as Review Now did, every revisit asked now (decision Q7).
+   * - a press with nothing to send says so on the notice line
+   */
+  @E.on(SEND_ASKED, { target: "renderRoot" })
+  protected onSendAsked(event: CustomEvent<SendAskedDetail>) {
+    event.stopPropagation()
+    void this.review.client?.send({ now: event.detail.auto })
   }
 
   /**
@@ -962,14 +953,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     if (marks.send === "unsent")
       return this.translationForKey("send", { what: this.countWords(marks.unsent, marks.comments) })
     return this.translationForKey(marks.send === "sent" ? "sent" : "sendIdle")
-  }
-
-  /** Review Now's words:  what Claude would work through. */
-  private reviewNowWords(marks: HeaderMarks): string {
-    const total = marks.waiting + marks.comments
-    if (!total) return this.translationForKey("reviewNowIdle")
-    const what = this.countWords(marks.waiting, marks.comments)
-    return this.translationForKey(total === 1 ? "reviewNowOne" : "reviewNowMany", { what })
   }
 
   /** `marks` marks and `comments` comments, in words:  `2 marks, 1 comment`;  either left out at 0. */

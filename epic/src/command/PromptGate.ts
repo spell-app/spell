@@ -64,6 +64,9 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  *      - Let through, the session NOT renamed (it stays `<other>`'s), with a note (`additionalContext`)
  *        sending Claude to the `/epic` skill's "From another worktree", which opens it at once (no question:
  *        Owen, 2026-10-21, "type `/epic name` and you do the right thing").
+ *      - A FRESH session (`isFresh()`:  a new tab, opened to type it) is the epic's instead:  titled `🚧 <name>`,
+ *        and told to MOVE to the epic's window (`epic window launch <name> --move`), its tab here closing
+ *        (epic `epic-engine` I72)
  * 3. Otherwise:  renames the session `🚧 <name>` (`hookSpecificOutput.sessionTitle`), unless it already is.
  *    - "already is":  its `session_title`, and its transcript's last title line too (`rename()`)
  *    - `/epic resume` and `/unpark` rename it whatever it seems to be:  a resumed session's tab may show
@@ -86,6 +89,22 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  * All `static`:  no state, one answer per prompt.
  ****************/
 export class PromptGate {
+  /**
+   * Whether the session whose transcript is at `path` is FRESH:  Claude hasn't answered anything in it yet, so the
+   * prompt being sent is its first (a new tab, opened to type `/epic <name>`;  epic `epic-engine` I72).
+   * - a transcript not written yet:  fresh;  no path at all:  not (nothing to tell by)
+   * - NEVER throws:  unreadable is not fresh
+   */
+  static isFresh(path: string | undefined): boolean {
+    if (!path) return false
+    if (!existsSync(path)) return true
+    try {
+      return !/"type":"assistant"/.test(readFileSync(path, "utf8"))
+    } catch {
+      return false
+    }
+  }
+
   /**
    * What the hook answers for `input` (its stdin);  `null` lets the prompt through untouched.
    * - `window`:  the session's window's registry entry, or `null`
@@ -122,7 +141,7 @@ export class PromptGate {
       }
       const other = PromptGate.otherWorktree(input.cwd, window, name)
       // `/epic <name>` in another epic's session means "open a window for `<name>`" (Owen, 2026-10-07):  Claude asks
-      if (other && skill === "epic") return launchNote(other, name, text)
+      if (other && skill === "epic") return launchNote(other, name, text, PromptGate.isFresh(input.transcript_path))
       if (other) {
         return block(
           name,
@@ -310,13 +329,19 @@ function rename(input: GateInput, title: string, always = false): GateAnswer | n
  * with a note telling Claude to open a new window for `<name>` instead, at once.
  * - SIDE EFFECT:  `text` saved first (`savePrompt()`), so the new window's `/epic <name>` picks it up
  */
-function launchNote(other: string, name: string, text: string): GateAnswer {
+function launchNote(other: string, name: string, text: string, fresh = false): GateAnswer {
   const saved = text ? `  Its text is saved in ${PromptGate.savePrompt(name, text).replace(homedir(), "~")}.` : ""
   const note =
     `This session works in worktree \`${other}\`:  \`/epic ${name}\` must NOT run here.  Owen means "open a new ` +
     `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  launch it now, ` +
-    `without asking.`
-  return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note } }
+    `without asking.` +
+    (fresh
+      ? `  This session is FRESH (started for this prompt):  MOVE it, \`epic window launch ${name} --move\`, and ` +
+        `do nothing else here:  no ${other} work, no questions about ${other} (its worktree behind main ...).`
+      : "")
+  // a fresh session becomes the epic's:  titled for it now, so the move finds its tab here to close
+  const title = fresh ? { sessionTitle: `${TITLE_ICONS.active} ${name}` } : {}
+  return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note, ...title } }
 }
 
 /**

@@ -521,6 +521,48 @@ export class ReviewClient {
     return this.save(id, { action: "revisit", when: "soon", note, ...pickOf(this.inbox.marks[id]) })
   }
 
+  /**
+   * Save what's typed in `id`'s note box (`text`) as the mark it makes (`typedMark()`), else as its draft;
+   * true when saved (the backup then goes).
+   * - Owen, 2026-10-22 (epic `epic-engine` P20):  "when I type in the revisit box, revisit is automatically on (but
+   *   don't auto-close the field from underneath me)"
+   * - so Send, and the countdown, hand his words over without a press of Later
+   * - the box stays open, and what's typed stays in it:  it counts as written in (`isBoxOpen()`), so the marked note
+   *   isn't drawn above it as well
+   */
+  async saveTyped(id: string, text: string, options: WriteOptions = {}): Promise<boolean> {
+    const mark = this.typedMark(id, text)
+    if (mark === "draft") return this.saveDraft(id, text, options)
+    this.boxes.add(id)
+    const saved = await this.save(id, mark, { quiet: true, ...options })
+    if (saved && this.typedOf(id) === text) this.backup(id, "")
+    return saved
+  }
+
+  /**
+   * The mark `text` typed in `id`'s note box makes (`saveTyped()`):
+   * - words, and no note mark yet (none, an Approve, a pick):  Revisit ON, a revisit to talk over carrying them, the
+   *   pick kept ("pick B, but ...")
+   * - words, and a note mark already (a revisit, Make Todo, the x, a todo's plane or drop):  the same mark, its words
+   *   changed
+   * - emptied:  a revisit goes again (its pick stays, a plain pick);  any other mark stays as it is, and the empty box
+   *   is a draft
+   * - `"draft"`:  saved as the box's draft instead, as before P20:  a request at work (Do Now, a revisit now), or an
+   *   empty box with no revisit
+   */
+  typedMark(id: string, text: string): MarkInput | null | "draft" {
+    const mark = this.inbox.marks[id]
+    const note = text.trim()
+    if (mark && isImmediate(mark)) return "draft"
+    if (!note) {
+      if (mark?.action !== "revisit") return "draft"
+      const pick = pickOf(mark)
+      return pick.pick ? { action: "pick", ...pick } : null
+    }
+    if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note }
+    return { action: "revisit", when: "soon", note, ...pickOf(mark) }
+  }
+
   /** Save `text` as `id`'s draft in the inbox;  true when saved (the backup then goes). */
   async saveDraft(id: string, text: string, { keepalive = false }: { keepalive?: boolean } = {}): Promise<boolean> {
     const saved = await this.write("draft", { id, action: "revisit", note: text }, { quiet: true, keepalive })
@@ -533,13 +575,13 @@ export class ReviewClient {
   ////////////////
 
   /** Mark item `id` (`mark`, or `null` to clear), shown at once, then saved. */
-  async save(id: string, mark: MarkInput | null): Promise<boolean> {
+  async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word
     this.taken.delete(id)
     if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
     else delete this.inbox.marks[id]
     this.changed()
-    return this.write("mark", { id, mark })
+    return this.write("mark", { id, mark }, options)
   }
 
   /**
@@ -844,6 +886,12 @@ export class ReviewClient {
 
 /** A test answer's action (epic `epic-engine` P4). */
 const TEST_ACTION = "test"
+
+/**
+ * The note marks typing in the note box keeps as they are, changing only their words (`typedMark()`):  Make Todo, the
+ * x (`skip`), a todo's plane (`next`) and its x (`drop`).  A revisit's words change too, as a revisit to talk over.
+ */
+const TYPED_KEEPS: ReadonlySet<string> = new Set(["todo", "skip", "next", "drop"])
 
 /** Is `result` one of a test's four answers? */
 function isTestResult(result: unknown): result is TestResult {

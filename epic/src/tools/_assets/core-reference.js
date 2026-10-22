@@ -8,18 +8,18 @@
  * - The data:  two JSON files, fetched from the checkout SERVING the page,
  *   so the page shows that checkout's core and can't go stale.
  *   Their paths are relative to the page, in `<body>`'s data attributes:
- *   - `data-core-declarations`:  `packages/core/core.declarations.json5`, the core's method list
- *     (`yarn gen:declarations` in `packages/core`, `coreDeclarations.ts`);  `{ provides, statements: [Statement] }`
- *   - `data-not-ported`:  `packages/py/core/not_ported_yet.json5`, what spell_core doesn't have yet;
+ *   - `data-core-declarations`:  `spell-lang/src/core/core.declarations.json5`, the core's method list
+ *     (`yarn core:gen:declarations` in spell-lang, `coreDeclarations.ts`);  `{ provides, statements: [Statement] }`
+ *   - `data-not-ported`:  `spell-lang/src/py/core/not_ported_yet.json5`, what spell_core doesn't have yet;
  *     `{ about, groups: [{ why, names: [javascript name] }] }`.  Optional:  without it the Python column says "?"
  * - `Statement`, by its keys:
  *   - a method of `core`:  `{ kind: "method", name, of, module, params?: [{ name }], section?, description? }`
  *   - a property of `core`:  `{ property, of, module, section?, description? }`
  *   - a class compiled code imports:  `{ type, superType?, module, description? }`
  *   - a function compiled code imports:  `{ kind: "function", name, module, params?, description? }`
- *   - `module`:  the core's file under `packages/core/src/`, without `.ts` (`classes` is `classes/index.ts`);
+ *   - `module`:  the core's file under `spell-lang/src/core/`, without `.ts` (`classes` is `classes/index.ts`);
  *     `section`:  the `// ## Heading` it's under there
- * - Python's names, as `tests/py/core/tests/test_core_declarations.py` checks them:
+ * - Python's names, as spell-lang's `tests/py/core/tests/test_core_declarations.py` checks them:
  *   `snakeCase()` of the javascript name
  *   - a member is `core.get_item_at()`
  *   - a class keeps its name (`spell_core.Thing`)
@@ -142,7 +142,7 @@
   function moduleSection(module, statements, missing, prefix) {
     const file = sourceFile(module)
     const notIn = missing ? statements.filter((statement) => missing.has(jsName(statement))).length : 0
-    const path = `packages/core/src/${file}`
+    const path = `spell-lang/src/core/${file}`
     const source = el("ui-button", {
       slot: "actions",
       circular: "",
@@ -226,7 +226,7 @@
 
   /** "in Python" cell:  ✓, or ✗ with why as its tooltip;  "?" without `not_ported_yet.json5`. */
   function ported(name, missing) {
-    if (!missing) return el("td", { title: "this checkout has no packages/py/core/not_ported_yet.json5" }, "?")
+    if (!missing) return el("td", { title: "this checkout has no spell-lang/src/py/core/not_ported_yet.json5" }, "?")
     const why = missing.get(name)
     if (why === undefined) return el("td", { class: "yes positive", title: "spell_core has it" }, "✓")
     return el("td", { class: "no negative", title: why }, "✗ not yet")
@@ -249,7 +249,7 @@
       return el(
         "ui-message",
         { state: "warning", header: "No list of what Python lacks" },
-        el("p", {}, "This checkout has no ", el("code", {}, "packages/py/core/not_ported_yet.json5"), ".")
+        el("p", {}, "This checkout has no ", el("code", {}, "spell-lang/src/py/core/not_ported_yet.json5"), ".")
       )
     const byName = new Map(statements.map((statement) => [jsName(statement), statement]))
     const items = (notPorted.groups ?? []).map((group) => {
@@ -311,7 +311,7 @@
    * `name` as Python writes it:  `getItemAt` is `get_item_at`.
    * - capitals together stay one word:  `isANumber` is `is_a_number`, `fromJSON` `from_json`
    * - a name all in capitals is lowercased:  `ACTIVE_TEST` is `active_test`
-   * - SEE:  `snake_case()` in `tests/py/core/tests/test_core_declarations.py`, which this must match
+   * - SEE:  `snake_case()` in spell-lang's `tests/py/core/tests/test_core_declarations.py`, which this must match
    */
   function snakeCase(name) {
     if (/^[A-Z0-9_]+$/.test(name)) return name.toLowerCase()
@@ -327,7 +327,7 @@
     return new Map((notPorted.groups ?? []).flatMap((group) => group.names.map((name) => [name, group.why])))
   }
 
-  /** `module`'s file under `packages/core/src/`:  `classes` is `classes/index.ts`. */
+  /** `module`'s file under `spell-lang/src/core/`:  `classes` is `classes/index.ts`. */
   function sourceFile(module) {
     return module === "classes" ? "classes/index.ts" : `${module}.ts`
   }

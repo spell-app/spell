@@ -84,7 +84,7 @@ export type ReviewButtonSpec = {
 /**
  * The line's four review buttons, in their order (decision Q20):
  * - Approve, Revisit, Make Todo (the GROUP:  what Owen makes of it)
- * - then Do Now apart, with the magic wand, as the page header's Review Now
+ * - then Do Now apart, with the magic wand (the page header's Review Now had it too, until epic `epic-engine` P20)
  *   - Owen, 2026-10-09:  it was a paper plane, which a todo's "next phase" button wears now
  *   - an action, not a state:  it replaces Add Details Now and the note box's Do Now
  * - Every one shows at every step:  a mark done can still be followed by another.

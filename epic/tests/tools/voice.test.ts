@@ -29,6 +29,12 @@ describe("PageVoice", () => {
     expect(PageVoice.stampOf(stamped)).toEqual({ voice: "readme", date: "2026-10-22" })
   })
 
+  test("a description holding a tag (`<epic-*>`) gets the stamp after it, not inside it", () => {
+    const tagged = PAGE.replace("How the page server works", "The epic command on <epic-*>\n      markup")
+    const stamped = PageVoice.withStamp(tagged, { voice: "readme", date: "2026-10-22" })
+    expect(stamped).toContain('markup" />\n    <meta name="spell-voice" content="readme 2026-10-22" />')
+  })
+
   test("a new stamp replaces the old one, never a second", () => {
     const once = PageVoice.withStamp(PAGE, { voice: "novice", date: "2026-10-01" })
     const twice = PageVoice.withStamp(once, { voice: "readme", date: "2026-10-22" })

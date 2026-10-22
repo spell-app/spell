@@ -193,7 +193,7 @@ export class EpicProgram {
     ).usage("<epic> [--json]")
     this.page(
       epic.command("open"),
-      "show an epic's page in VS Code's side bar:  Spell Docs, or with --review the Review tab",
+      "show an epic's page in VS Code's side bar:  Epic Docs, or with --review the Review tab",
       "epic open seo --review"
     ).usage("<epic> [--review]")
     this.page(

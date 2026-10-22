@@ -177,6 +177,17 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
    - Then carry on with `<other>`'s work, if any was waiting.
    - It fails (no window bridge, an old extension:  `unknown op` / `bad session id`):
      say so in one line;  the text stays saved.
+5. A FRESH session (the prompt hook's note says so:  a new tab, opened only to type `/epic <name>`) MOVES instead
+   (epic `epic-engine` I72;  Owen, 2026-10-22:  the tab stayed in epic-engine's window, beside the new window's
+   session).
+   - `epic window launch <name> --move`, LAST in its command line:  the worktree and window file made, then this
+     session handed off.
+   - The hook titled it `🚧 <name>` already:  the move closes this tab by that title.
+   - Nothing else here:  no `<other>` work, no question about `<other>` (its worktree behind `main` ...).
+   - One line:  "moving to `⎇ <name>`:  press enter on `/epic <name>` there", and end the turn:  the move happens as
+     it ends.
+   - It says `wake` (one of the epic's sessions is running):  that one got the prompt;  say so, and that this tab
+     can be closed.
 
 **Launched:**  the new session's `/epic <name>`, its worktree made, this window its own:
 - The worktree:  `epic worktree path <name>` (`.claude/worktrees/<name>`, or beside the repo).

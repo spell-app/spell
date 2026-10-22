@@ -1,0 +1,142 @@
+/*
+ * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send and its countdown, ONE pill.
+ * - The plane's round end, a hairline, the wand's round end;  each a circle as tall as the pill.
+ * - The pill's outline wears the fill rule, from `state` (`templates/epics/plan-doc.md`, "Colours"):  a grey
+ *   outline with nothing to send, dashed blue with something not sent, a blue outline once sent.
+ * - Countdown off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
+ * - The wand blue while countdown mode is on (`:state(countdown)`), grey while off;  while it counts, a blue ring
+ *   round it drains (`stroke-dashoffset`, set each second by the element;  eased over the second).
+ * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
+ *   - `--epic-send-buttons-size`:  each round end's size.  Default 28px (an epic page's `--epic-control-size`).
+ *   - `--epic-send-buttons-rule`:  the grey outline and the hairline.  Default:  Spell UI's border colour.
+ *   - `--epic-send-buttons-muted`:  the grey of a button with nothing to do.  Default:  Spell UI's muted text.
+ */
+
+@layer ui.components.epic-send-buttons.types;
+
+@layer ui.components.epic-send-buttons.types {
+  :host {
+    --_size: var(--epic-send-buttons-size, 28px);
+    --_tint: var(--ui-blue, #2185d0);
+    --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
+    --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
+    display: inline-flex;
+    flex: none;
+    vertical-align: middle;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  .group {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: var(--_size);
+    border: 1px solid var(--_rule);
+    border-radius: 999px;
+  }
+  .group[data-state="unsent"] {
+    border: 1.5px dashed var(--_tint);
+  }
+  .group[data-state="sent"] {
+    border: 1.5px solid var(--_tint);
+  }
+  button {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: calc(var(--_size) - 2px);
+    height: calc(var(--_size) - 2px);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--_muted);
+    font: inherit;
+    /* the glyphs a little small for their round ends:  the countdown's ring goes round the wand's, clear of it */
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover {
+    color: var(--_tint);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--_tint));
+    outline-offset: 1px;
+  }
+  /* the plane wears the group's state;  the wand, the mode */
+  .send:is([data-state="unsent"], [data-state="sent"]),
+  :host(:state(countdown)) .countdown {
+    color: var(--_tint);
+  }
+  /* countdown off, something not sent:  it waits for a press, plainly */
+  :host(:state(waiting)) .send {
+    background: var(--_tint);
+    color: var(--ui-blue-on, #fff);
+  }
+  :host(:state(waiting)) .send:hover {
+    background: color-mix(in oklab, var(--_tint) 85%, black);
+  }
+  .send[aria-busy="true"] {
+    cursor: progress;
+  }
+  /* the hairline between the plane's end and the wand's */
+  .countdown::before {
+    content: "";
+    position: absolute;
+    inset-block: 20%;
+    inset-inline-start: -0.5px;
+    border-inline-start: 1px solid var(--_rule);
+  }
+  .count {
+    position: absolute;
+    inset-block-start: -6px;
+    inset-inline-end: -6px;
+    min-width: 1.4em;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--_tint);
+    color: var(--ui-blue-on, #fff);
+    font: 600 10px/1.4 var(--ui-font-family, system-ui, sans-serif);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  /* the icons take no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
+  ui-icon {
+    pointer-events: none;
+  }
+  /* centred in its round end:  no icon margin or fixed width of its own */
+  ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  .ring {
+    position: absolute;
+    inset: 1px;
+    width: 100%;
+    height: 100%;
+    rotate: -90deg;
+    pointer-events: none;
+  }
+  .ring circle {
+    fill: none;
+    stroke-width: 2.5;
+  }
+  .ring .track {
+    stroke: color-mix(in oklab, var(--_tint) 18%, transparent);
+  }
+  .ring .left {
+    stroke: var(--_tint);
+    stroke-dasharray: 100;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ring .left {
+      transition: none;
+    }
+  }
+}

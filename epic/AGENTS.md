@@ -31,6 +31,11 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
   (epic `readme` P12).
   - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
+  - `novice` ([novice.md](voices/novice.md)):  pages for people who don't program (yet).
+  - `blog` ([blog.md](voices/blog.md)):  essays and posts, an argument a reader finishes.
+  - `brand` ([brand.md](voices/brand.md)):  product pages:  a home page, a feature page, a launch page.
+  - The last three are named by no kind of page yet (`"pageVoices"`):  ask for one by name, `epic voice blog`
+    (epic `readme` P15).
   - `code`:  docstrings, comments, `AGENTS.md` files, epic pages:  each repo's own house style (Spell's:  WWOD §6),
     so spell-epic ships no file for it.
   - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a

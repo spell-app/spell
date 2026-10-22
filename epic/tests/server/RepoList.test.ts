@@ -141,6 +141,24 @@ describe("RepoList", () => {
     expect(list.linkRootOf(engine, join(own, "docs"))).toBe(engine)
   })
 
+  test("linkRootOf():  a multi-repo top's pages are laid under the TOP, which serves them (readme P14)", () => {
+    const list = new RepoList({ home: scratch("epic-home-") })
+    const top = scratch("epic-top-")
+    mkdirSync(join(top, ".epic"), { recursive: true })
+    mkdirSync(join(top, "content"), { recursive: true })
+    writeFileSync(join(top, ".epic", "config.json5"), `{ "contentFolder": "content", "repos": ["app", "engine"] }\n`)
+    for (const child of ["app", "engine"]) {
+      mkdirSync(join(top, child, ".epic"), { recursive: true })
+      writeFileSync(join(top, child, ".epic", "config.json5"), `{ "contentFolder": "../content" }\n`)
+    }
+    // the app registered first, as on Owen's machine:  still the top
+    list.add(join(top, "app"))
+    list.add(top)
+    expect(list.linkRootOf(join(top, "engine"))).toBe(top)
+    expect(list.linkRootOf(join(top, "app"))).toBe(top)
+    expect(list.linkRootOf(top)).toBe(top)
+  })
+
   test("a repo whose config won't read is left out, the rest still listed", () => {
     const list = new RepoList({ home: scratch("epic-home-") })
     const [good, bad] = [repo("good"), repo("bad")]
