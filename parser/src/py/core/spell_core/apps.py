@@ -56,5 +56,12 @@ class DrawableList(List):
     """
 
     def draw(self) -> Element:
-        """Our outside, with a `<slot>` where our items show:  just the slot, by default."""
+        """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show -- just the slot."""
         return h("slot")
+
+    def draw_each_item(self, item: object) -> object:
+        """`item` drawn as one of ours, `to draw each item`:  its own drawing, or its text if it can't draw."""
+        drawing = program_core().draw_thing(item)
+        if drawing is None and item is not None:
+            return str(item)
+        return drawing

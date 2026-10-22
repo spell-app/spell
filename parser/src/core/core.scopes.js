@@ -254,10 +254,12 @@
     {
       path: "type:Drawable",
       super: "type:Thing",
-      description: "A thing drawn as its own custom element -- `a card is a drawable thing` makes a card that is one.\n- Everything a thing has.\n- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.\n- `a drawable thing` and `a drawable` both say it.\n\n```spell\na card is a drawable thing\na card has a rank as a number\nto draw (a card)\n  return <div>{its rank}</div>\n```",
+      description: "A thing drawn as its own custom element -- `a card is a drawable thing` makes a card that is one.\n- Everything a thing has.\n- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.\n- `a drawable thing` and `a drawable` both say it.\n- ONE drawing, its `to draw it`:  a card face down checks its own direction there.\n\n```spell\na card is a drawable thing where:\n  - its rank is a number\n  - to \"draw it\": <div>{its rank}</div>\n```",
       rules: [
         { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?" },
-        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" }
+        { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" },
+        { name: "draw_it", syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?" },
+        { name: "draw_it", syntax: "to {phrase:draw_method} :? {statement_body}?" }
       ]
     },
     {

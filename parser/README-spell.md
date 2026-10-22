@@ -304,10 +304,16 @@ export class Card extends Drawable {
   the TypeScript target writes that element out as a class, `CardElement`
   ([README-targets](README-targets.md#the-card-line-by-line)).
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
-- A drawable list draws a frame round its items, with named places a child can fill,
-  `<children name="header"/>`:  [card-table](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/card-table/CardTable.spell).
-- In an outline, `- to "draw its front":` and `- to "draw its back":` give the type its `draw()`, by its direction
+- A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there
   ([outline-solitaire/Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/outline-solitaire/Card.spell)).
+  - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
+    `- to draw it:` unquoted takes a method's body, which returns it.
+- A drawable list has two:
+  - its `to draw it` is the WRAPPER around its items, by default nothing but the place they show
+  - its `to draw each item` is the wrapper each item is drawn in, by default just the item's own drawing:
+    `core.drawItems()` draws each item with it, `drawEachItem(item)`
+- A drawable list's wrapper may have named places a child can fill,
+  `<children name="header"/>`:  [card-table](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/card-table/CardTable.spell).
 
 ### Events
 
@@ -661,7 +667,8 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell lang packs check` says `Spanish (es):  complete, 19 modules`.
-A project in Spanish says `"language": "es"` in its project file, as the frozen `cartas` does.
+A file in Spanish says so in its name, `Carta.es.spell`, as the frozen `cartas`'s do;  a plain `.spell` is English,
+and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't
 

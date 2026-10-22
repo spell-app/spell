@@ -155,7 +155,5 @@ export const PARSER_MESSAGES = {
   /** `it "is a (suit)"`:  `{sources}` are `long-form-source`s, joined by `long-form-and`. */
   "long-form-phrase-for": 'a {type} "{phrase}" for {sources}',
   "long-form-source": "its {plural}",
-  "long-form-and": " and ",
-  /** `to "draw its front":`. */
-  "long-form-side": "the {side} of a {type} is:"
+  "long-form-and": " and "
 }

@@ -19,7 +19,7 @@ import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
-import { DrawSide } from "./DrawSide"
+import { DrawIt } from "./DrawIt"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE } from "./ListGuard"
@@ -77,12 +77,9 @@ classes.addRule(Wording.specialize({ ruleName: "url_or_email", meanings: ["url",
   syntax: "((url:url)|(email:email))"
 })
 
-// What a side's quoted name starts with, for `draw_side`:  `to "draw its front":`
-classes.addRule(P.Sequence.specialize({ ruleName: "draw_its" }), { syntax: "draw its" })
-
-// Which side a side's name means, for `draw_side`:  `to "draw its back":` is the `back`, drawn face down
-classes.addRule(Wording.specialize({ ruleName: "side_name", meanings: ["front", "back"] }), {
-  syntax: "((front:front)|(back:back))"
+// Which drawing a type writes, for `draw_it`:  `to draw it` is `draw`, a list's `to draw each item` is `draw_each_item`
+classes.addRule(Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item"] }), {
+  syntax: "((draw:draw it)|(draw_each_item:draw each item))"
 })
 
 classes.addRule(WithNestedStatements, {
@@ -382,6 +379,11 @@ classes.addRule(CreateDrawableListType, {
       ]
     }
   ]
+})
+
+// ... with its name quoted, as an outline names it:  `a "pile" is a drawable list of cards where:`
+classes.addRule(CreateDrawableListType, {
+  syntax: "(a|an) {type:quoted_type} is (a|an) drawable list of {instanceType:type} {with_nested_statements}?"
 })
 
 classes.addRule(CSSBlock, {
@@ -1565,8 +1567,14 @@ classes.addRule(PropertyValueGetter, {
   syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
 })
 
-classes.addRule(DrawSide, {
+// quoted:  its body is markup, which IS the drawing -- `- to "draw it": <div>[rank]</div>`
+classes.addRule(DrawIt, {
   syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?"
+})
+
+// unquoted:  a method's body, which returns it -- `- to draw each item:` + `return <div>{draw the card}</div>`
+classes.addRule(DrawIt, {
+  syntax: "to {phrase:draw_method} :? {statement_body}?"
 })
 
 classes.addRule(QuotedPropertyFormula, {

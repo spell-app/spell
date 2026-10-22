@@ -28,7 +28,7 @@ import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas } from "./DefinePropertyHas"
-import { DrawSide } from "./DrawSide"
+import { DrawIt } from "./DrawIt"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { ListGuard } from "./ListGuard"
@@ -139,12 +139,10 @@ classesEs.addRule(Wording.specialize({ ruleName: "url_or_email", meanings: ["url
   syntax: "((url:url)|(email:email|correo electrónico|correo electronico|correo))"
 })
 
-// What a side's quoted name starts with, for `draw_side`:  `para "dibujar su frente":`
-classesEs.addRule(P.Sequence.specialize({ ruleName: "draw_its" }), { syntax: "dibujar (su|sus)" })
-
-// Which side a side's name means, for `draw_side`:  `para "dibujar su dorso":` is the `back`, drawn face down
-classesEs.addRule(Wording.specialize({ ruleName: "side_name", meanings: ["front", "back"] }), {
-  syntax: "((front:frente)|(back:dorso|reverso))"
+// Which drawing a type writes, for `draw_it`:  `para dibujarlo` is `draw`, a list's `para dibujar cada elemento` is
+// `draw_each_item` -- Spanish fuses `it` into its verb, `dibujarlo` (`dibujarla` for a feminine type)
+classesEs.addRule(Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item"] }), {
+  syntax: "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento))"
 })
 
 classesEs.addRule(WithNestedStatements, {
@@ -355,6 +353,11 @@ classesEs.addRule(CreateDrawableListType, {
       ]
     }
   ]
+})
+
+// ... with its name quoted, as an outline names it:  `una "pila" es una lista dibujable de cartas donde:`
+classesEs.addRule(CreateDrawableListType, {
+  syntax: `${A} {type:quoted_type} es ${A} lista dibujable ${OF} {instanceType:type} {with_nested_statements}?`
 })
 
 classesEs.addRule(CSSBlock, {
@@ -1567,9 +1570,14 @@ classesEs.addRule(PropertyValueGetter, {
   syntax: `${THE} {property:quoted_member} ${OF} ${A} {type:known_type} es :? {expression_body}?`
 })
 
-// in an outline body:  `- para "dibujar su frente":` then markup -- tests in `classes.test.ts`
-classesEs.addRule(DrawSide, {
+// quoted:  its body is markup, which IS the drawing -- `- para "dibujarla": <div>[rango]</div>`
+classesEs.addRule(DrawIt, {
   syntax: "para {alias:text} :? ({inline_expression}|{nested_expression})?"
+})
+
+// unquoted:  a method's body, which returns it -- `- para dibujar cada elemento:` + `devolver <div>...</div>`
+classesEs.addRule(DrawIt, {
+  syntax: "para {phrase:draw_method} :? {statement_body}?"
 })
 
 classesEs.addRule(QuotedPropertyFormula, {

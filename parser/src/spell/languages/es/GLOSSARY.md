@@ -99,7 +99,7 @@ Names people choose keep their accents.
 | on (an event) / trigger / fire | `al` / `(disparar|lanzar)` |
 | create a X | `crear (un|una) X` |
 | a new X with p = v | `(un nuevo|una nueva) X con p = v` |
-| draw its front / back | `dibujar su (frente|dorso)` -- meanings `front` / `back` (a word rule, Owen's pick) |
+| to draw it / to draw each item | `para dibujarlo` (`dibujarla`, `dibujar eso`) / `para dibujar cada elemento` -- meanings `draw` / `draw_each_item` (the `draw_method` word rule);  the item is `el elemento` |
 
 ## Rules for translating a module
 

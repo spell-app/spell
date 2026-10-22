@@ -773,18 +773,58 @@ describe("outline style", () => {
     })
   })
 
-  test('`to "draw its front":` + markup:  a side, as a getter;  front and back give `draw()` by direction (Q14)', () => {
-    const lines = [
-      "a card is a thing where:",
-      "\t- its direction is up or down",
-      '\t- to "draw its front":',
-      '\t\t<ui-image source="images/front.png" />',
-      '\t- to "draw its back": <ui-image source="images/back.png" />'
-    ]
-    const js = compile(lines)
-    expect(js).toMatch(/get front\(\) \{\s+return h\("ui-image"/)
-    expect(js).toContain("draw() {")
-    expect(js).toContain('return this.direction === "down" ? this.back : this.front')
+  describe("drawing:  ONE `to draw it`, and a list's `to draw each item` (epic `spanish` P20)", () => {
+    test('`to "draw it":` + markup:  the markup IS its `draw()`, no `return` needed', () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        '\t- to "draw it":',
+        '\t\t<ui-image source="images/front.png" />'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+return h\("ui-image"/)
+      expect(js).not.toContain("this.direction ===")
+    })
+
+    test("`to draw it:` unquoted is a method's body, which returns it:  the same `draw()`", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        "\t- to draw it:",
+        "\t\tif its direction is down",
+        '\t\t\treturn <div class="back"/>',
+        '\t\treturn <div class="front"/>'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction == "down"\) return h\("div", \{ class: "back" \}\)/)
+    })
+
+    test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- to draw it:",
+        '\t\treturn <div class="pile"><children/></div>',
+        "\t- to draw each item:",
+        '\t\treturn <div class="spot">{draw the card}</div>'
+      ])
+      expect(js).toContain('return h("div", { class: "pile" }, h("slot"))')
+      expect(js).toMatch(
+        /drawEachItem\(item\) \{\s+return h\("div", \{ class: "spot" \}, \(\) => core\.drawThing\(item\)\)/
+      )
+    })
+
+    test('`to "draw each item":` + markup:  `the item` is the item too', () => {
+      const js = compile([
+        "a card is a drawable thing",
+        "a pile is a drawable list of cards where:",
+        '\t- to "draw each item": <b>{draw the item}</b>'
+      ])
+      expect(js).toMatch(/drawEachItem\(item\) \{\s+return h\("b", \(\) => core\.drawThing\(item\)\)/)
+    })
+
+    test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
+    })
   })
 
   test("`[rank]` fills in, in text and markup:  inside a card, a bare property is its own (P4)", () => {
@@ -792,10 +832,10 @@ describe("outline style", () => {
       "a card is a thing where:",
       "\t- its rank is a number",
       "\t- its suit is text",
-      '\t- to "draw its front":',
+      '\t- to "draw it":',
       '\t\t<ui-image source="images/[rank]-of-[suit].png" />',
       '\t- its "label" is: "the [rank] of [suit]"',
-      '\t- to "draw its back": <span>[rank] of [suit], [[face down]]</span>'
+      '\t- its "caption" is: <span>[rank] of [suit], [[face down]]</span>'
     ]
     const js = compile(lines)
     expect(js).toContain('{ "prop:source": () => `images/${this.rank}-of-${this.suit}.png` }')

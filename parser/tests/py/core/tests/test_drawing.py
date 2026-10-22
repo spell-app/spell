@@ -167,6 +167,19 @@ def test_drawable_things_draw_as_any_thing_and_a_drawable_list_as_its_slot(core:
     assert str(core.draw_thing(DrawableList([Token()]))) == "<slot></slot>"
 
 
+def test_a_drawable_lists_items_draw_as_themselves_or_their_text_or_in_its_own_wrapper(core: Core) -> None:
+    class Spots(DrawableList):
+        def draw_each_item(self, item: object) -> Element:
+            return h("div", {"class": "spot"}, core.draw_thing(item))
+
+    heap = DrawableList([Card(rank="ace"), 7])
+    assert [str(drawn) for drawn in core.draw_items(heap) or []] == ['<div class="card">ace</div>', "7"]
+    spots = Spots([Card(rank=2)])
+    assert [str(drawn) for drawn in core.draw_items(spots) or []] == [
+        '<div class="spot"><div class="card">2</div></div>'
+    ]
+
+
 def test_install_styles_keeps_the_css_and_draws_nothing(core: Core) -> None:
     core.install_styles(None, ".card {¬  color: red;¬}")
     assert core.page.styles == {"anonymous-css": ".card {\n  color: red;\n}"}

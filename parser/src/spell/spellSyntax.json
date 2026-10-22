@@ -1338,7 +1338,7 @@
             "take_or_give_up",
             "at_least_or_at_most",
             "url_or_email",
-            "side_name",
+            "draw_method",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1376,7 +1376,7 @@
               "syntax": "((url:url)|(email:email))"
             },
             {
-              "syntax": "((front:front)|(back:back))"
+              "syntax": "((draw:draw it)|(draw_each_item:draw each item))"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -3730,6 +3730,9 @@
                   "code": "class Pile(DrawableList):\n    item_type = Card"
                 }
               }
+            },
+            {
+              "syntax": "(a|an) {type:quoted_type} is (a|an) drawable list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4733,15 +4736,18 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawSide",
-          "ruleNames": ["draw_side"],
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
           "internal": false,
-          "file": "src/spell/rules/classes/DrawSide.ts",
-          "line": 29,
-          "purpose": "One SIDE of a thing, as markup, in a type's outline body: `to \"draw its front\":` then markup (epic page `outline-spell`, P3; Q14).",
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 41,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
               "syntax": "to {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "to {phrase:draw_method} :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -4779,18 +4785,6 @@
             }
           ],
           "aliases": ["statement"]
-        },
-        {
-          "className": "Sequence",
-          "ruleNames": ["draw_its"],
-          "internal": false,
-          "purpose": "",
-          "syntaxes": [
-            {
-              "syntax": "draw its"
-            }
-          ],
-          "aliases": []
         },
         {
           "className": "ThePropertyOfAThing",

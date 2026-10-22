@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vite-plus/test"
 
 import { bridgeSolid } from "spell-kit/util"
-import { core, Thing, List, prop, drawn, h } from "spell-lang/core"
+import { core, Thing, List, DrawableList, prop, drawn, h } from "spell-lang/core"
 import { isElementThunk, type Drawing } from "spell-lang/core/drawing"
 
 // counts each error boundary drawn:  `drawing.ts` makes one with `createComponent(Errored, ...)`
@@ -289,6 +289,42 @@ describe("@drawn", () => {
     core.flush()
     expect(element.innerHTML).toBe(`spades`)
     expect(drawCalls.get(card)).toBe(1)
+  })
+
+  describe("a drawable list:  `to draw it` wraps its items, `to draw each item` wraps each (epic `spanish` P20)", () => {
+    /** A drawable list with neither of its own:  the defaults. */
+    class Heap extends DrawableList<unknown> {}
+
+    /** A drawable list that wraps each card in a spot. */
+    class SpotPile extends DrawableList<Card> {
+      override drawEachItem(item: Card): Drawing {
+        if (item.isBroken) throw new Error("no spot for a broken card")
+        return h("div", { class: "spot" }, () => core.drawThing(item)) as unknown as Drawing
+      }
+    }
+
+    test("by default, its wrapper is just a slot, and each item is its own drawing -- or its text", () => {
+      const heap = new Heap()
+      heap.add(new PlainCard({ rank: "ace" }), 7)
+      draw(() => [core.drawOwn(heap), core.drawItems(heap)] as unknown as Drawing)
+      expect(element.innerHTML).toBe(`<slot></slot><i>hearts</i>7`)
+      // the card's own boundary, and none around it:  the heap's own drawing has one
+      expect(Errored).toHaveBeenCalledTimes(2)
+    })
+
+    test("`to draw each item` wraps each item;  one that throws shows its stand-in, and the rest keeps drawing", () => {
+      const pile = new SpotPile()
+      pile.add(new PlainCard({ rank: "ace" }), new Card({ rank: 3, isBroken: true }))
+      draw(() => core.drawItems(pile))
+      expect(element.innerHTML).toBe(
+        `<div class="spot"><i>hearts</i></div>` +
+          `<span class="spell-draw-error" role="alert" title="no spot for a broken card">⚠ SpotPile can't draw</span>`
+      )
+
+      pile.add(new PlainCard({ rank: 4, suit: "spades" }))
+      core.flush()
+      expect(element.querySelectorAll(".spot")).toHaveLength(2)
+    })
   })
 
   test("@prop takes a read-only `as const` list", () => {

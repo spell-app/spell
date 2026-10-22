@@ -1335,7 +1335,7 @@
             "take_or_give_up",
             "at_least_or_at_most",
             "url_or_email",
-            "side_name",
+            "draw_method",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1373,7 +1373,7 @@
               "syntax": "((url:url)|(email:email|correo electrónico|correo electronico|correo))"
             },
             {
-              "syntax": "((front:frente)|(back:dorso|reverso))"
+              "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento))"
             },
             {
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
@@ -3752,6 +3752,9 @@
                   "code": "class Pile(DrawableList):\n    item_type = Carta"
                 }
               }
+            },
+            {
+              "syntax": "(un|una) {type:quoted_type} es (un|una) lista dibujable (de|del) {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4770,15 +4773,18 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawSide",
-          "ruleNames": ["draw_side"],
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
           "internal": false,
-          "file": "src/spell/rules/classes/DrawSide.ts",
-          "line": 29,
-          "purpose": "One SIDE of a thing, as markup, in a type's outline body: `to \"draw its front\":` then markup (epic page `outline-spell`, P3; Q14).",
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 41,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
               "syntax": "para {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "para {phrase:draw_method} :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -4816,18 +4822,6 @@
             }
           ],
           "aliases": ["statement"]
-        },
-        {
-          "className": "Sequence",
-          "ruleNames": ["draw_its"],
-          "internal": false,
-          "purpose": "",
-          "syntaxes": [
-            {
-              "syntax": "dibujar (su|sus)"
-            }
-          ],
-          "aliases": []
         },
         {
           "className": "ThePropertyOfAThing",

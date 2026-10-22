@@ -814,7 +814,7 @@ A kind that says so is saved in a file of its own.
 - Editors:  hovering an outline line shows **Reads as**, the sentence style's words for it.
   - That's each rule's `SpellStatement.getLongForm()`.
   - default:  the subject spelled out, `it has a deck` => `a card has a deck`
-  - `define_property_has`, `belongs_to_one`, `quoted_property_formula` and `draw_side` say their own
+  - `define_property_has`, `belongs_to_one` and `quoted_property_formula` say their own
   - Compiling the long forms gives the same javascript as the outline (`outline.test.ts`).
 - A line starting `it` / `its` OUTSIDE a type's body says so.
   See `BlockLine.isOutlineLineOutsideBody()`.
@@ -930,10 +930,14 @@ A kind that says so is saved in a file of its own.
   - A suffix after `and` / `or` is told the operand after it (epic page I7).
     - e.g. `the game`, in `... and the game is red`
   - After anything else, it isn't:  what it follows is the chain so far, e.g. a sum.
-- [`draw_side`](rules/classes/DrawSide.ts):  `- to "draw its front":` + one line of markup => `get front() {...}`.
-  - Front AND back also give the type `draw()`, by its direction (epic page Q14).
+- [`draw_it`](rules/classes/DrawIt.ts):  how a type draws, by what its words mean (the `draw_method` word rule).
+  - `- to "draw it":` + one line of markup => `draw() { return ... }`;  unquoted, a method's body.
+  - A list's `- to draw each item:` => `drawEachItem(item) {...}`, the item as `item` or its type's name.
+  - English's unquoted `to draw it:` stays `to_do_something`'s, the same `draw()`;
+    Spanish's `para dibujarlo:` is this rule's, as the fused `-lo` makes no method name.
+  - ONE drawing per thing:  the front / back sides (`draw_side`) are gone (epic `spanish` P20).
 - A one-line indented body (a `{nested_expression}`) parses in the statement's `nestedScope`.
-  - e.g. `return` + markup, or `draw_side`'s
+  - e.g. `return` + markup, or `draw_it`'s
   - As an inline body does (`SpellStatement.parseNestedBlock()`).
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
@@ -975,7 +979,10 @@ A kind that says so is saved in a file of its own.
   - `FileScope` is a `BlockScope`, so a file owns only variables.
 - `RootScope` adds `types`, `constants`, `rules`.
   - `ProjectScope` is a `RootScope`, and holds the records of the project's free functions.
-  - `SpellParser.rootScope` is ONE static root, shared by every project (see "Built-in types"):
+  - Each language pack has ONE root, shared by every project in it:  `SP.Language.rootScope`.
+    `SpellParser.rootScope` is the default's, English's.
+    A project mixing languages has a root of its own (see "Projects").
+  - A root holds (see "Built-in types"):
     - spell's classes:  `Thing`, `List`, `App`, `Object`
     - every built-in type's NAME, with super-types (`P.BUILT_IN_TYPES`)
       - e.g. `text`, `number` ...
@@ -1300,6 +1307,24 @@ A kind that says so is saved in a file of its own.
   - The clone has empty own rules, and imports the base spell parser.
   - Every file gets a `FileScope` under it, and SHARES that parser.
 - So one file's types, constants and rules are visible to every later file.
+- A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
+  - `SP.Language.forFile()`;  `SpellFile.language`, `SpellProject.languages`.
+  - One project may mix them:
+    - Its root:  `SP.Language.rootScopeFor(languages)`.
+      One language:  that language's own root, so its project parses as it always has.
+      Several:  a root of their own, its built-in types' members in each one's words (`length` and `largo`).
+    - Its project parser is its first language's.
+      A file in another parses with that parser's TWIN in its language, `SpellParser.twinFor()`, set on its `FileScope`:
+      - the language's own rules, plus a copy of every rule the project's layers added (imports', then its own)
+      - every rule one twin adds, the others add too (`SpellParser.addOwnRule()`), into the same journal
+      - so a Spanish file calls a method an English file defines by its English words, and the other way round
+    - Types, variables and methods live in the scopes, as ever:  every file sees every other's.
+    - `P.IncrementalProject` takes each file's parser, and stubs each file's declarations by it.
+  - The program speaks ONE language to the person running it (its runtime messages):
+    its app's file's, else its first file's (`SpellDeclarations.speakingFirst()`).
+  - A words file per language (`<Project>.en.js`, `<Project>.es.js`), each with the members its own files declare
+    (`SP.SpellWords.of(declarations, writer, lang)`), the declarations naming them all (`languages`).
+    A runner reads them as one.
 - Another project can come in WITHOUT its sources, as its declarations (`SP.SpellDeclarations`).
   - They're in `<Project>.declarations.json5`, committed beside its source (epic `output-targets` P5).
   - Before that they were inline in the compiled JS, and `fromComments()` still reads those.

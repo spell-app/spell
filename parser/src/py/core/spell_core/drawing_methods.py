@@ -21,6 +21,7 @@ game.start()                      # the game is drawn on `core.page`, when the p
   Every thing draws as its own drawing, as in the JavaScript run, which defines no elements either.
 """
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from spell_core.drawing import Element, Page, h
@@ -91,12 +92,24 @@ class DrawingMethods:
 
         - Compiled from `draw each card in the deck`, as `h("div", ..., core.draw_items(self))`.
         - An item that can't draw shows nothing.
+        - A list with its own `to draw each item` (`draw_each_item()`) draws each item with it, as the JavaScript
+          core does:  a drawable list's wrapper around each item.
         """
         from spell_core.lists import List
 
         if not isinstance(items, List):
             return None
-        return [self.draw_thing(item) for item in items]
+        draw_each_item = getattr(items, "draw_each_item", None)
+        if not callable(draw_each_item):
+            return [self.draw_thing(item) for item in items]
+        return [self._draw_each_item_of(items, draw_each_item, item) for item in items]
+
+    def _draw_each_item_of(self, items: object, draw_each_item: Callable[[object], object], item: object) -> object:
+        """`item` drawn by its list's `draw_each_item()`, in the list's own error boundary."""
+        try:
+            return draw_each_item(item)
+        except Exception as error:  # one item that can't draw mustn't stop the page
+            return self.drawing_failed(items, error)
 
     def drawing_failed(self, thing: object, error: Exception) -> Element:
         """What a thing whose `draw()` threw shows:  a stand-in naming it, `⚠ Card can't draw`.

@@ -102,6 +102,5 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "long-form-belongs-to-one": "{aType} pertenece a {aList}",
   "long-form-phrase-for": '{aType} "{phrase}" para {sources}',
   "long-form-source": "sus {plural}",
-  "long-form-and": " y ",
-  "long-form-side": "{theSide} de {aType} es:"
+  "long-form-and": " y "
 }
