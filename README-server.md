@@ -3,17 +3,25 @@
 ```sh
 cd ~/www/spell/spell-app
 spell server status
-# {
-#   "pid": 80305,
-#   "port": 4747,
-#   "root": "~/www/spell",
-#   "started": "2026-10-22T05:57:41.696Z",
-#   "branch": "main",
-#   "worktrees": "~/www/spell.worktrees",
-#   "contentFolder": "~/www/spell/spell.epics",
-#   "base": "http://127.0.0.1:4747"
-# }
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+{
+  "pid": 80305,
+  "port": 4747,
+  "root": "~/www/spell",
+  "started": "2026-10-22T05:57:41.696Z",
+  "branch": "main",
+  "worktrees": "~/www/spell.worktrees",
+  "contentFolder": "~/www/spell/spell.epics",
+  "base": "http://127.0.0.1:4747"
+}
+```
+
+</details>
 
 _Real output, trimmed:  `~` is the home folder, and the list of every worktree folder is left out._
 
@@ -134,12 +142,20 @@ Try it on a running server:
 
 ```sh
 curl -s http://127.0.0.1:4747/hello
-# {"message":"Hello from the API!"}
 curl -s http://127.0.0.1:4747/ui/
-# /ui/ moved out of the shared content
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:4747/_epic/assets/highlight.min.js
-# 200
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+{"message":"Hello from the API!"}
+/ui/ moved out of the shared content
+200
+```
+
+</details>
 
 Three answers, from three repos' parts of the settings:  spell-app's route module, the content repo's `gone`, and a
 folder of spell-epic's.
@@ -498,8 +514,16 @@ Each is git-ignored, and built when it's stale:
 
 ```sh
 spell bundle check ui-site
-# ui-site:  current
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+ui-site:  current
+```
+
+</details>
 
 | Bundle | Built by | Into |
 | --- | --- | --- |
@@ -808,23 +832,31 @@ So before it serves or writes anything, the server asks a few questions:
 
 ```sh
 curl -H "Host: attacker.example" http://127.0.0.1:4747/guides/server.html
-# {"error":"unknown host"}                                403
 curl http://127.0.0.1:4747/.spell-server.json
-# {"error":"hidden file:  /.spell-server.json"}           403
 curl --path-as-is http://127.0.0.1:4747/../etc/passwd
-# {"error":"outside the root:  /../etc/passwd"}           403
 curl http://127.0.0.1:4747/guides%2Fserver.html
-# {"error":"bad path:  /guides%2Fserver.html"}            400
 curl -X PUT "http://127.0.0.1:4747/api/files?path=guides/x.html" -d hi
-# {"error":"bad token:  reload the page"}                 403
 curl "http://127.0.0.1:4747/guides/server.html%00"
-# {"error":"bad path:  /guides/server.html%00"}           400
 curl -X PATCH "http://127.0.0.1:4747/api/pages?path=/guides/no-such-page.html" -H "x-server-token: $TOKEN" \
   -H "Origin: http://elsewhere.example" -H 'If-Match: "x"' -H "Content-Type: application/json" -d '{"id":"x"}'
-# {"error":"wrong origin"}                                403
 ```
 
-_Real answers from a running page server;  the status codes added at the right.
+<details>
+<summary>What it printed</summary>
+
+```text
+{"error":"unknown host"}                                403
+{"error":"hidden file:  /.spell-server.json"}           403
+{"error":"outside the root:  /../etc/passwd"}           403
+{"error":"bad path:  /guides%2Fserver.html"}            400
+{"error":"bad token:  reload the page"}                 403
+{"error":"bad path:  /guides/server.html%00"}           400
+{"error":"wrong origin"}                                403
+```
+
+</details>
+
+_Real answers from a running page server, one line per request in the order asked;  the status codes added at the right.
 `$TOKEN` was read out of a page the server sent, which any program on the machine can do._
 
 - Loopback only (`127.0.0.1`) by default.

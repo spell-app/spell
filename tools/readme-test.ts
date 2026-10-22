@@ -73,7 +73,10 @@ export class ReadmeTest {
       // indented too:  an example under a bullet
       const opening = /^(\s*)(`{3,})sh\s*$/.exec(lines[index])
       if (!opening) {
-        index++
+        // any other fenced block is skipped whole:  a page SHOWING an example (```` ````markdown ````) runs nothing
+        const other = /^\s*(`{3,})\S*\s*$/.exec(lines[index])
+        const end = other ? findClose(lines, index + 1, other[1]) : -1
+        index = end === -1 ? index + 1 : end + 1
         continue
       }
       const close = findClose(lines, index + 1, opening[2])

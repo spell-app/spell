@@ -487,10 +487,18 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
 The check, run in spell-epic, when the pack is current:
 
 ```sh
-cd ~/www/spell/spell-epic
+cd spell-epic          # from the kit's root
 yarn pack:check
-# epics:  current
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+epics:  current
+```
+
+</details>
 
 - Stale, it names each file and why (`built from older sources`), prints the fix, `spell-pack build <folder>`,
   and exits 1.

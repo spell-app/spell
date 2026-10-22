@@ -81,6 +81,13 @@ describe("ReadmeTest.examples() under a bullet", () => {
   })
 })
 
+describe("ReadmeTest.examples() inside another block", () => {
+  test("an example shown inside a ````markdown block is a sample, not run", () => {
+    const sample = ["````markdown", ...PAGE.split("\n").slice(2, 16), "````"].join("\n")
+    expect(new ReadmeTest(SCRATCH).examples(join(SCRATCH, "README.md"), sample)).toEqual([])
+  })
+})
+
 describe("ReadmeTest.matches()", () => {
   test("line by line, trailing spaces and blank lines ignored", () => {
     expect(ReadmeTest.matches("one\ntwo", "one  \ntwo\n\n")).toBe(true)

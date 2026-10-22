@@ -14,8 +14,16 @@
 ```sh
 cd ~/www/spell/spell-ui
 yarn vp lint src
-# src/components/ui-code/UICode.tsx:150:5: error spell-ui(no-raw-timer): `setTimeout()` by hand: use `E.after(seconds, fn)` (or `E.soon(fn)` for a zero delay), which says WHEN it runs and can be canceled
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+src/components/ui-code/UICode.tsx:150:5: error spell-ui(no-raw-timer): `setTimeout()` by hand: use `E.after(seconds, fn)` (or `E.soon(fn)` for a zero delay), which says WHEN it runs and can be canceled
+```
+
+</details>
 
 _A real run, on Spell UI's `<ui-code>` with its copy button's timer written the usual way._
 
@@ -69,20 +77,28 @@ Every Spell repo has one, `vite-plus`, and it pins a set that's known to work to
 
 ```sh
 yarn vp --version
-# vp v1.0.0
-#
-# Local vite-plus:
-#   vite-plus  v1.0.0
-#
-# Tools:
-#   vite             v8.3.1
-#   rolldown         v1.2.11
-#   vitest           v5.0.1
-#   oxfmt            v0.70.0
-#   oxlint           v1.85.0
-#   oxlint-tsgolint  v7.0.2003
-#   tsdown           v0.23.0
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+vp v1.0.0
+
+Local vite-plus:
+  vite-plus  v1.0.0
+
+Tools:
+  vite             v8.3.1
+  rolldown         v1.2.11
+  vitest           v5.0.1
+  oxfmt            v0.70.0
+  oxlint           v1.85.0
+  oxlint-tsgolint  v7.0.2003
+  tsdown           v0.23.0
+```
+
+</details>
 
 - Its command is `vp`:  `yarn vp test run`, `yarn vp lint src`, `yarn vp fmt`, `yarn vp dev`.
 - No ESLint and no Prettier anywhere:  oxlint lints, oxfmt formats, and `oxlint-tsgolint` is oxlint's type-aware half.
@@ -222,11 +238,42 @@ and a new one fails it until it's added there:  every exception is seen in revie
 ([LintPatterns.test.ts](https://github.com/spell-app/spell-ui/blob/main/tests/tools/LintPatterns.test.ts)).
 Not yet elsewhere:  spell-epic's three exceptions get only the report of an unused one, and spell-app has none.
 
-Even this page is linted, by two scripts at the kit's root:
+Even this page is linted, and its examples run, by three scripts at the kit's root:
 - `yarn readme:check` ([readme-check.ts](tools/readme-check.ts)) follows every link to its file and heading,
   wants an italic caption under every picture, and fails stale names.
+- `yarn readme:test` ([readme-test.ts](tools/readme-test.ts)) runs every command a page shows with its output,
+  and fails one that prints something else.
 - `yarn mermaid:pretty` ([mermaid-pretty.ts](tools/mermaid-pretty.ts)) gives every Mermaid picture the Spell look,
   in place;  the check fails a picture it hasn't styled.
+- The first two are `spell readme check` and `spell readme test` too;  both take page paths, from the kit's root.
+
+A tested example is an `sh` block, then a fold titled Output holding a `text` block,
+the way `yarn vp --version` is shown above:
+
+````markdown
+```sh
+spell run @spell/examples/fizzbuzz --no-browser
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ Compiling @spell/examples/fizzbuzz
+1
+...
+15 fizzbuzz
+...
+```
+
+</details>
+````
+
+- It runs in `bash`, from its page's repo root, with this checkout's `spell` and `epic`.
+- What it prints must match line by line, but for `...`:
+  alone on a line, any lines or none;  inside a line, any text there, such as a time, a hash or a port.
+- A fold titled anything else, such as What it printed, is shown but never run:
+  that's for installs, clones, servers and anything slow.
 
 ## Every tool reads source, but one
 
