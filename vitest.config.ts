@@ -18,6 +18,8 @@ import { packageVersion } from "spell-kit/toolchain/packageVersion"
  *   - `element`'s:  its elements drawn with NO Spell UI on the page, on the stand-in settings of `TestSettings.ts`.
  * - Every other project runs in node:  `util:node` (util's `spell/`, `reactive/` and `node/`), `server`,
  *   `element-tools`, `cli`, `toolchain`, and the glue `tools/`.
+ * - `readme`:  every README example, run (`tools/readme-test.ts`);  its tests skip themselves unless
+ *   `yarn readme:test` asks for them, since they need every repo cloned.
  * - `standardDecorators()` lowers decorators (Vite 8's own transform doesn't), BEFORE Solid's plugin:  both are
  *   `enforce: "pre"`, and the Solid compiler must see decorator-free code.
  */
@@ -68,7 +70,9 @@ export default defineConfig({
       nodeProject("element-tools"),
       nodeProject("cli"),
       nodeProject("toolchain"),
-      nodeProject("tools")
+      nodeProject("tools"),
+      // every README example, run:  skipped unless `yarn readme:test` sets SPELL_README_TEST (tools/readme-test.ts)
+      nodeProject("readme")
     ]
   }
 })

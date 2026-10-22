@@ -6,6 +6,8 @@
  * - `spell bundle [names...]` / `spell bundle check`:  the bundles the page server serves, built on demand
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths
+ * - `spell readme check | test [pages...]`:  every repo's README pages, checked, or their examples run
+ *   (epic `readme` P16)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
  * - `spell help`:  the program's own (`addHelp()`), not this list's
  * - Loads fast:  each action imports its command's file when it runs.
@@ -111,6 +113,29 @@ export default function kitCommands(spell: Command): void {
     )
 
   ////////////////
+  // ## The READMEs
+  ////////////////
+
+  const readme = spell
+    .command("readme")
+    .description("every repo's README pages:  check their links and words, or run their examples")
+
+  readme
+    .command("check")
+    .description("links, anchors, captions and words of every README (yarn readme:check) -- exits 1 on a finding")
+    .argument("[pages...]", "only these pages, from the kit's root (spell-lang/README.md)")
+    .action((pages: string[]) => CLI.runCommand(() => CLI.runTool(README_CHECK, pages)))
+
+  readme
+    .command("test")
+    .description("run every example a README prints with its Output fold, and compare -- exits 1 when one differs")
+    .argument("[pages...]", "only these pages, from the kit's root (spell-lang/README.md)")
+    .option("--list", "only list the examples, without running them")
+    .action((pages: string[], options: { list?: boolean }) =>
+      CLI.runCommand(() => CLI.runTool(README_TEST, [...pages, ...(options.list ? ["--list"] : [])]))
+    )
+
+  ////////////////
   // ## And a pony
   ////////////////
 
@@ -132,6 +157,12 @@ function pageServer(verb: string, skip: string[] = []): Promise<never> {
   const args = CLI.rawArgsAfter("server", verb).filter((arg) => !skip.includes(arg))
   return CLI.runCommand(async () => (await serverCommand()).pageServer([verb, ...args]))
 }
+
+/** The README check, the kit's glue tool:  node runs it as is, from the kit's root (`spell readme check`). */
+const README_CHECK: CLI.ToolSpec = { tool: "tools/readme-check.ts", cwd: "." }
+
+/** The README examples, run (`spell readme test`;  epic `readme` P16). */
+const README_TEST: CLI.ToolSpec = { tool: "tools/readme-test.ts", cwd: "." }
 
 /** `serverCommand.ts`, loaded when a `spell server` verb runs. */
 function serverCommand() {

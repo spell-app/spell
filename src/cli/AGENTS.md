@@ -27,7 +27,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  pony        (help is the program's own)
+  server  bundle  commands  wwod  readme  pony        (help is the program's own)
   ```
 
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
