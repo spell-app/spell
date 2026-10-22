@@ -14,7 +14,6 @@ describe("<ui-root lang>:  the page's language", () => {
     await host.ready
     expect(await (host.component as UIRoot).settled).toEqual([])
     expect(customElements.get("es-tarjeta")).toBeDefined()
-    // the root defines every catalog tag early (epic `solid-17` P7):  "its family has loaded" is `isAttached()`
     expect(E.DOMElement.isAttached("ui-card")).toBe(true)
     expect(E.DOMElement.isAttached("ui-table")).toBe(false)
     const card = host.querySelector<DOMElement>("es-tarjeta")!
