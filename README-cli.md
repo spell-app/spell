@@ -431,6 +431,43 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 </details>
 
+### Checking the language packs
+
+Spell reads programs in more than one language:  each language pack registers every rule again, with its own words.
+When a rule is added in English, these say which packs still need it, and write the stubs to translate.
+Their work is `spell-lang`'s own, not the hook's:  they read only its rule files.
+
+| Command | What it does |
+| --- | --- |
+| `spell lang packs check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
+| `spell lang packs fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
+
+<details>
+<summary>What they check, and what fix writes</summary>
+
+| Option | What it does |
+| --- | --- |
+| `spell lang packs check --json` | the report as JSON |
+| `spell lang packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
+
+- `check` reads each rules module's `<module>.en.ts` and `<module>.<lang>.ts` as text, and lists:
+  - `missing`:  a rule English registers that the pack doesn't
+  - `no tests`, `no syntax`:  a registration without them, where English's has them
+  - `out of order`:  a registration in another place than English's, so a tie between two rules may go the other way
+  - `unregistered`:  a rule class a rules folder exports that no `.en.ts` registers
+    (a base class, or a rule built while parsing, doesn't count)
+  - the pack's words:  every word table English has, and a word for every built-in type
+- A difference on purpose is a comment in the pack's file, with the reason:
+  - above the registration:  `// packs: ok -- si no is else AND if no, so else comes first`
+  - for one left out:  `// packs: none AThingsProperty -- no "a card's color" in Spanish`
+- `fix` puts each stub after the registration English has before it, and adds the imports it needs.
+  A module with no file yet gets one, which the language's `parser.ts` must then import.
+- `--ai` sends `claude` the rule's class docstring, its English registration, the module's translations so far,
+  and the pack's glossary (`languages/<lang>/GLOSSARY.md`), one stub at a time.
+- `fix` writes only what's missing:  translate each stub, then run `check` and the module's rule tests.
+
+</details>
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.
