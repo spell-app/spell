@@ -83,7 +83,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `SPELL_SERVER.worktreesPath`, by `urlPathOf()`.
         So worktrees beside the repo work too (epic `epic-eject` P7).
   - `Guard` -- `Host` check, per-run token, same-origin writes
-  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop.
+  - `PidFile` -- a background server's `.spell-server.json`, at its root:  status, ensure, stop;  and
+    `isProcessAlive(pid)`, for whoever needs to know a process still runs (spell-epic's review inbox).
     - `ensure` restarts a server that started before its code last changed.
       So after a merge, the next opener gets the new routes.
       - its code:  the `sources` folders, by `newestChange()`

@@ -582,7 +582,7 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 | `Guard` | the host check, the per-run write token, same-origin writes |
 | `FileLock` | `<file>.lock`, so tools writing one file take turns (waits up to 20 s;  takes a lock older than 60 s) |
 | `FileOperations` | save, create, rename, duplicate, delete:  under the lock, written all at once (a temp file, then a rename) |
-| `PidFile` | a background server's `.spell-server.json`:  status, ensure, stop (which waits for the process to end, so the port is free) |
+| `PidFile` | a background server's `.spell-server.json`:  status, ensure, stop (which waits for the process to end, so the port is free);  and `isProcessAlive(pid)`, which spell-epic's review inbox asks too |
 | `ports` | `isFree()`, `freePort()`, `listenPreferred()` |
 | openers | a browser, a new window, or a Chrome tab reused by its address |
 | `resolveInside()` | the one path check:  a URL path to a file under a root, never outside it |
