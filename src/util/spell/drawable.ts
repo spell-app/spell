@@ -17,7 +17,10 @@ import { camelCase, kebabCase } from "spell-kit/util/string"
  *   inflector (epic `spanish` P3).
  * - The word "drawable" in the project's name is left out, so its tags don't all say it (epic `drawable-thing` P18):
  *   `Drawable Solitaire`, `Tableau` => `solitaire-tableau`, never `drawable-solitaire-tableau`.
+ *   - Spanish's word too (epic `spanish` P9):  `Solitario Dibujable`, `Carta` => `solitario-carta`.
  * - Only letters, digits and dashes, starting with a letter:  always a valid custom element name, as it has a dash.
+ *   - A letter's accent is dropped, as Spell UI's Spanish tags drop it (`<es-boton>`):
+ *     `canciones`, `Canción` => `canciones-cancion`.
  */
 export function elementTagFor(project: string, className: string): string {
   const projectWords = tagWords(project)
@@ -28,13 +31,19 @@ export function elementTagFor(project: string, className: string): string {
   return `${prefix}-${tagWords(className)}`
 }
 
-/** The word left out of a project's name in its tags:  "drawable", or "drawables". */
-const DRAWABLE_WORD = /^drawables?$/
+/**
+ * The word left out of a project's name in its tags:  "drawable", or "drawables", in each of spell's languages.
+ * - Here, not in a language pack:  a compiled program names its tags as it runs, and never loads one.
+ * - English's, then Spanish's (`dibujable`).
+ */
+const DRAWABLE_WORD = /^(drawables?|dibujables?)$/
 
-/** `name` as a tag's words:  kebab-case, lowercase, only letters, digits and single dashes. */
+/** `name` as a tag's words:  kebab-case, lowercase, only letters, digits and single dashes, accents dropped. */
 function tagWords(name: string): string {
   return kebabCase(name.replace(/_/g, "-"))
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^[^a-z]+|-+$/g, "")

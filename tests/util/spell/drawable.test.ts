@@ -9,6 +9,13 @@ describe("a drawable type's element names", () => {
     expect(elementTagFor("test_classes", "Card")).toBe("test-classes-card")
   })
 
+  test("a Spanish program's:  its own names, without the word dibujable, accents dropped", () => {
+    expect(elementTagFor("cartas", "Carta")).toBe("cartas-carta")
+    expect(elementTagFor("Solitario Dibujable", "PilaDeDescarte")).toBe("solitario-pila-de-descarte")
+    expect(elementTagFor("Canciones", "Canción")).toBe("canciones-cancion")
+    expect(elementTagFor("Diseño", "Año")).toBe("diseno-ano")
+  })
+
   test("a property's attribute, by its declared type", () => {
     expect(drawableAttributeFor("shortRank", "number")).toEqual({
       name: "short-rank",
