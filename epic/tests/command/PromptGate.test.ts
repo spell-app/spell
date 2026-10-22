@@ -181,6 +181,21 @@ describe("gate()", () => {
     expect(readFileSync(join(prompts, "foo.md"), "utf8")).toBe("do it\n")
   })
 
+  // epic-engine I72:  `/epic solid-17` typed in a fresh tab of epic-engine's window left that tab behind
+  test("`/epic <name>` as a FRESH session's first prompt in another worktree:  titled for the epic, told to move", () => {
+    const transcript = join(prompts, "session.jsonl")
+    writeFileSync(transcript, `${JSON.stringify({ type: "user", message: { content: "/epic foo" } })}\n`)
+    const fresh = gate({ prompt: "/epic foo", cwd: WORKTREE, transcript_path: transcript }, null)
+    expect(fresh?.hookSpecificOutput?.sessionTitle).toBe("🚧 foo")
+    expect(fresh?.hookSpecificOutput?.additionalContext).toMatch(/FRESH.*epic window launch foo --move/s)
+    // once Claude has answered in it, it's another epic's session:  not renamed, not moved
+    writeFileSync(transcript, `${JSON.stringify({ type: "assistant", message: { content: [] } })}\n`, { flag: "a" })
+    const busy = gate({ prompt: "/epic foo", cwd: WORKTREE, transcript_path: transcript }, null)
+    expect(busy?.hookSpecificOutput?.sessionTitle).toBeUndefined()
+    expect(busy?.hookSpecificOutput?.additionalContext).not.toMatch(/--move/)
+    rmSync(transcript)
+  })
+
   test("`/epic <name>` in another worktree:  through, not renamed, a note to ask;  text saved", () => {
     const places: [string, GateWindow | null][] = [
       [WORKTREE, null],
