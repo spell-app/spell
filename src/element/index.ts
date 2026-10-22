@@ -17,6 +17,7 @@
  *   the HMR plugin loads it into each component barrel (the kit's `src/element-tools/HotElements.ts`).
  * - NOTE: `ShadowEvents` (Solid's events kept from leaking out of shadow roots) is left out too:
  *   only `UIComponent` uses it, directly.
+ * - NOTE: so is `RichAttributes` (plain JSX props:  `on-ui-change={f}`, `options={[...]}`):  only `DOMElement` uses it.
  * - NOTE: the files import this barrel back, as `E`:  a cycle, on purpose (WWOD §4 › "ONE namespace per sub-system").
  *   - What a file reads while it EVALUATES (a base class, a decorator, a static initializer)
  *     comes from its own file instead (WWOD §4 › "Circular imports").

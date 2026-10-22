@@ -691,7 +691,7 @@ It ships no bundle of its own, though:  it's source, bundled by whoever draws wi
 so on a page it arrives inside Spell UI's core, and packs leave it out.
 
 What it costs you, writing one:
-- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.13, pinned to one copy across every repo.
+- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.17, pinned to one copy across every repo.
 - **A component is a class.**
   No function components, and no hand-written Solid effects in a component file:
   the lint guard flags them, and names the decorator to use ([README-toolchain.md](README-toolchain.md)).
@@ -770,6 +770,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [Cell.ts](src/element/Cell.ts), [SlotContent.ts](src/element/SlotContent.ts) | a reactive cell;  slotted content |
 | [PartContext.ts](src/element/PartContext.ts), [OwnerContext.ts](src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
 | [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
+| [RichAttributes.ts](src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
 | [HotDefinitions.ts](src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
 | [timing.ts](src/element/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()` |
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |

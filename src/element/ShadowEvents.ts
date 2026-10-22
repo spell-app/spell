@@ -28,7 +28,7 @@ import { DelegatedEvents, getDelegatedRoot, registerDelegatedContainer, unregist
  *     instead of dropping the event or walking it twice
  * - Cost:  one wrapper call per delegated event per render root on its path;  no extra listeners.
  *   - A `composedPath()` only for nested roots, or when the host itself has a delegated handler.
- * - HACK:  reads dom-expressions internals, as of `@solidjs/web` rc.13 (`ShadowEvents.test.tsx` fails when they move):
+ * - HACK:  reads dom-expressions internals, as of `@solidjs/web` rc.17 (`ShadowEvents.test.tsx` fails when they move):
  *   - `registerDelegatedContainer()` returns the container's state (typed `void`):
  *     its `handlers` map tells Solid's listener apart from a component's own
  *   - `_$SOLID_EVENT_OWNER` (the marker) and `_$$<type>` / `_$$<type>Data` (a node's delegated handler)
