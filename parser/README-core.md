@@ -64,8 +64,8 @@ spell lint try/deal
 
 - Without `--seed`, each run draws differently.
 - A seed is a whole number from 1 to 2147483646 (`spell help run`).
-- No checkout yet:  [setup from zero](../README.md#setup-from-zero), then `spell` on your PATH
-  ([README-cli](../README-cli.md#setting-it-up)).
+- No checkout yet:  [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero), then `spell` on your PATH
+  ([README-cli](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up)).
 
 </details>
 
@@ -132,7 +132,7 @@ reading it means knowing the core's names, and the Core Reference lists all 141,
 ## A type is a class, and the class is the core's
 
 The other half of the import is classes.
-Here's the start of the card from [the kit's front page](../README.md), in the outline style:
+Here's the start of the card from [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md), in the outline style:
 
 ```spell
 a "card" is a drawable thing:
@@ -238,7 +238,7 @@ If you write Solid 2, you'd bet on `red` twice.
 Solid 2 stages a write:  a read right after it sees the OLD value, until the next flush.
 Spell can't work that way, because it's imperative:  `set x to 1` then `print x` must print 1.
 
-So a thing's properties aren't Solid's signals but cells, from [the kit's util](../README-util.md):
+So a thing's properties aren't Solid's signals but cells, from [the kit's util](https://github.com/spell-app/spell-kit/blob/main/README-util.md):
 small reactive values, read and written synchronously.
 - Drawing still follows:  Solid redraws only what read a changed cell, on its own schedule, so ten writes redraw once.
 - A write of the value already there (`===`) tells nobody.
@@ -392,7 +392,7 @@ _Two apps on one page, two cores;  everything else reads only the types._
 
 Compiled JavaScript and TypeScript import it as `@spell/core`.
 In a page, ONLY the runner in `spell-app` imports the core's code:
-[spellRuntime.ts](../spell-app/src/app/runner/spellRuntime.ts) bundles it as `spell-runtime.js`,
+[spellRuntime.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/spellRuntime.ts) bundles it as `spell-runtime.js`,
 the one module in each runner's bundle (the `<spell-app>` element's, the VS Code runner's, the web app's)
 that holds the runtime's code.
 Each `<spell-app>` then imports a fresh copy, from a `blob:` URL of its own,
@@ -401,8 +401,8 @@ So a program never runs on whatever else the page loaded, nor on another app's c
 
 Everything else, the editor, the parser and the language among them, imports only the core's TYPES
 (`import type` from `spell-lang/core/core.types`), which erase to nothing.
-Two tests in `spell-app` hold that line, [element.build.test.ts](../spell-app/tests/app/runner/element.build.test.ts)
-and [build.test.ts](../spell-app/tests/app/build.test.ts):
+Two tests in `spell-app` hold that line, [element.build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/runner/element.build.test.ts)
+and [build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/build.test.ts):
 import the core's code anywhere else, and it lands in a shared chunk, or loads twice.
 
 Three more rules, each with its reason:
@@ -418,8 +418,8 @@ Where `@spell/core` points, by where the program runs:
 
 | Where | `@spell/core` is | Who points it |
 | --- | --- | --- |
-| a page:  the editor, VS Code, a `<spell-app>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](../spell-app/src/app/runner/runCompiled.ts) |
-| node:  `spell run`, `spell test` | the core's source | node module hooks, which do the job of a page's import map:  [hooks.mjs](../spell-app/src/cli/runner/hooks.mjs) |
+| a page:  the editor, VS Code, a `<spell-app>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/runCompiled.ts) |
+| node:  `spell run`, `spell test` | the core's source | node module hooks, which do the job of a page's import map:  [hooks.mjs](https://github.com/spell-app/spell-app/blob/main/src/cli/runner/hooks.mjs) |
 | the type check | the core's source | [typecheck.ts](src/spell/node/typecheck.ts) |
 
 ## Working on it
@@ -469,5 +469,5 @@ These guides need a checkout with the content folder beside it, and the page ser
   Python half
 - [README-spell](README-spell.md):  the sentences behind each call, from types and lists to saving by id
 - [core's AGENTS.md](src/core/AGENTS.md):  the rules for changing the core, in full
-- [the kit's README-util](../README-util.md):  the cells under every thing's properties
-- [spell-app's README-app](../spell-app/README-app.md):  the runner that gives each app its own copy
+- [the kit's README-util](https://github.com/spell-app/spell-kit/blob/main/README-util.md):  the cells under every thing's properties
+- [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  the runner that gives each app its own copy

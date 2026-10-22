@@ -178,7 +178,7 @@ Spell's own rules aren't the only ones.
 When a program declares a phrase, Spell writes a Rulex syntax for it and registers it as a rule,
 while it's still reading the file.
 
-The card on [the kit's front page](../README.md) has four quoted phrases, and each becomes a rule.
+The card on [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md) has four quoted phrases, and each becomes a rule.
 Here are the lines behind two of them:
 
 ```spell
@@ -221,7 +221,7 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The outline Solitaire example's card](../spell-app/spaces/@spell/examples/outline-solitaire/Card.spell) has the
+[The outline Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/Card.spell) has the
 same `it "is a (rank)"` line, and Spell writes it the same syntax:
 
 ```sh
@@ -233,7 +233,7 @@ spell parse --in @spell/examples/outline-solitaire $'set the card to a new card\
 
 - A project writes its phrases' syntaxes down, so another project can register the same rules from data:
   that example's are in
-  [outline-solitaire.declarations.json5](../spell-app/spaces/@spell/examples/outline-solitaire/outline-solitaire.declarations.json5).
+  [outline-solitaire.declarations.json5](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/outline-solitaire.declarations.json5).
 - The code that builds a phrase's syntax, word by word:
   [QuotedPropertyFormula.ts](src/spell/rules/classes/QuotedPropertyFormula.ts).
 - What phrases are, from the language's side:  [README-spell](README-spell.md).
@@ -469,5 +469,5 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-parser](README-parser.md):  the rule classes Rulex builds, and how to make them by hand
 - [README-markdown](README-markdown.md):  a second language's lines in Rulex, and the parts written in code
 - [README-spell](README-spell.md):  Spell's twenty rule modules, and the phrases a program declares
-- [The command line](../README-cli.md#spell-lang):  `spell parse`, `spell explain` and the other language commands
+- [The command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  `spell parse`, `spell explain` and the other language commands
 - [spell-lang's front page](README.md):  where Rulex sits in the pipeline, from a line of English to running code

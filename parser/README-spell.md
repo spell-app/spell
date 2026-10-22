@@ -13,7 +13,7 @@ a "card" is a drawable thing:
 	- it "is the (rank) of (suit)"
 ```
 
-_The card from [the kit's front page](../README.md), in the outline style:  a name, then bullets of what's true of it.
+_The card from [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md), in the outline style:  a name, then bullets of what's true of it.
 It lints clean, and every output on this page is the compiler's own, from a real run._
 
 Ten lines, and the language is bigger than it was.
@@ -49,8 +49,8 @@ and `spell lint` fails on it by file, line and column.
 <details>
 <summary>Run the card yourself</summary>
 
-You need `spell` on your PATH:  [setup from zero](../README.md#setup-from-zero),
-then [the command line](../README-cli.md#setting-it-up).
+You need `spell` on your PATH:  [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
+then [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up).
 In any folder outside the checkout, save the card as `try/solitaire/Card.spell`, then:
 
 ```sh
@@ -71,7 +71,7 @@ spell compile ./solitaire --stdout
 - The element's tag is the project's name, then the type's:  `<solitaire-card>`.
 - Look for `2 ... 10`:  it became the nine numbers between, and the choice of words a list on the class, `Card.Suits`.
 - The whole of all three, JavaScript, TypeScript and Python, is folded under the card on
-  [the kit's front page](../README.md);  the three side by side, a line of Spell at a time, are in
+  [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md);  the three side by side, a line of Spell at a time, are in
   [README-targets](README-targets.md#the-card-line-by-line).
 
 </details>
@@ -394,7 +394,7 @@ A project, and each file in it, has an ADDRESS:  a group, then the project, then
 ```
 
 - The groups (`@spell/examples`, `@spell/library`, `@spell/test`) are spell-app's spaces',
-  which tells Spell where each one's folder is ([README-spaces](../spell-app/README-spaces.md)).
+  which tells Spell where each one's folder is ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)).
 - A project outside every group is `@local/<folders>`:  the card above, compiled in `try/`, was `@local/try/solitaire`.
 
 ## The compiler
@@ -617,7 +617,7 @@ Where projects live, and the editor, the language server and the extension peopl
 all on one language service built on this parser ([what isn't in this repo](README.md#whats-not-here)).
 Two seams show when you work in this folder:
 - **Project groups:**  Spell's registry of groups starts empty.
-  spell-app's spaces registers `@spell/examples` and the rest ([README-spaces](../spell-app/README-spaces.md)),
+  spell-app's spaces registers `@spell/examples` and the rest ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)),
   and Spell never imports spaces.
 - **Projects on disk:**  Spell holds none but the frozen ones.
 

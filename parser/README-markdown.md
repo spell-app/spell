@@ -293,16 +293,16 @@ _Every arrow points down, to what it uses:  Spell UI never reaches this engine, 
 
 | Who | What for |
 | --- | --- |
-| spell-app's `<spell-markdown>` ([MDEngine.ts](../spell-app/src/app/components/spell-markdown/MDEngine.ts)) | a `<ui-markdown>` in every way, plain or `editable`, but drawn by this engine in `ui-*` tags;  the engine loads in a chunk of its own on the first render |
-| the editor's docstrings ([Markdown.tsx](../spell-app/src/app/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML;  the engine loads on first use, so a runner page carries no parser until it shows a docstring |
-| the language server ([SpellLanguageService.ts](../spell-app/src/lsp/SpellLanguageService.ts)) | `**bold**`, `*italic*`, `~~struck~~` and links inside a comment keep its colour with a modifier;  a `` `code` `` span is coloured as a string |
+| spell-app's `<spell-markdown>` ([MDEngine.ts](https://github.com/spell-app/spell-app/blob/main/src/app/components/spell-markdown/MDEngine.ts)) | a `<ui-markdown>` in every way, plain or `editable`, but drawn by this engine in `ui-*` tags;  the engine loads in a chunk of its own on the first render |
+| the editor's docstrings ([Markdown.tsx](https://github.com/spell-app/spell-app/blob/main/src/app/solid/Markdown.tsx)) | a type's or member's docs, as plain HTML;  the engine loads on first use, so a runner page carries no parser until it shows a docstring |
+| the language server ([SpellLanguageService.ts](https://github.com/spell-app/spell-app/blob/main/src/lsp/SpellLanguageService.ts)) | `**bold**`, `*italic*`, `~~struck~~` and links inside a comment keep its colour with a modifier;  a `` `code` `` span is coloured as a string |
 
 The cost lands on the page:  its first `<spell-markdown>` loads the engine when it first renders, parser and all.
 
 ## Working on it:  the spec is the scoreboard
 
 Progress here is a number you can read:  670 of 670, section by section, and a test that fails when it moves.
-From spell-lang's root, in a checkout set up as [the kit's README](../README.md#setup-from-zero) says:
+From spell-lang's root, in a checkout set up as [the kit's README](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero) says:
 
 ```sh
 cd ~/www/spell/spell-lang
@@ -384,5 +384,5 @@ These guides need a checkout with the content folder beside it, and the page ser
   a parser for a language of your own, with this engine as the worked example
 - [README-rulex](README-rulex.md):  every construct the line rules use, counts and `{spaces}` included
 - [README-spell](README-spell.md):  the other language on the same parser, Spell itself
-- [spell-app's README-app](../spell-app/README-app.md):  `<spell-markdown>` and the editor that draws with this
+- [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  `<spell-markdown>` and the editor that draws with this
 - [spell-lang's front page](README.md):  the language, its pipeline, and every page of the repo

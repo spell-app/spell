@@ -87,7 +87,7 @@ A language may skip the tree:  the dates language, further down, compiles straig
 
 - The parser imports only the kit's shared helpers, `spell-kit/util`:  no UI framework, no JSX, no DOM.
   So the same parser runs in the editor's page, under node, and in the language server.
-- To run the commands on this page, you need the kit's checkout:  [setup](../README.md#setup-from-zero).
+- To run the commands on this page, you need the kit's checkout:  [setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero).
 - The deep map of how Spell's lines go through it, about 1,600 lines for the curious:
   [PARSING.md](src/spell/PARSING.md).
 
@@ -702,7 +702,7 @@ math.addRule(Plus, {
   run the tests with `BLESS_RULE_TESTS=1` (Spell's script for it is `yarn spell:test:rules:bless`), then read the diff.
 - `parser.speedTest()` runs every rule test once to warm up, then 20 more times, and reports the average.
   `spell speedtest --against HEAD` does it in fresh processes, against a commit
-  ([the language commands](../README-cli.md#spell-lang)).
+  ([the language commands](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang)).
 
 ### Adding a rule
 

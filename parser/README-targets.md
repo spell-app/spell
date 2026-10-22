@@ -45,7 +45,7 @@ The same program gives the same file every time, and a snapshot test pins it, ch
 And the three agree.
 Every frozen test project is compiled to JavaScript, TypeScript and Python, then run headless from the same seed,
 and each must print the same thing, line for line, its drawing included:
-that's [the core contract test](../spell-app/tests/cli/contract.test.ts).
+that's [the core contract test](https://github.com/spell-app/spell-app/blob/main/tests/cli/contract.test.ts).
 The edge:  Python runs ten of the eleven, as one is still beyond its writer (below).
 
 ## Four targets, and what each one costs
@@ -120,7 +120,7 @@ It also holds what changes from one language to the next:
 ## The card, line by line
 
 The two lines at the top of this page come from a card of ten.
-[The kit's front page](../README.md) opens with all ten, and folds their whole output, in all three, under them.
+[The kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md) opens with all ten, and folds their whole output, in all three, under them.
 Most of it comes out the same shape in all three.
 The differences sit in four places:  imports, types, the element, and each language's own words.
 
@@ -203,7 +203,7 @@ The cost:
 
 Sometimes the program isn't the point, the types are.
 The editor keeps the people and orgs of its "You" panel as Spell,
-in [People.spell](../spell-app/spaces/@spell/library/people/People.spell):
+in [People.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/people/People.spell):
 
 ```spell
 a person is a thing:
@@ -214,7 +214,7 @@ a person is a thing:
 ```
 
 Its project file asks for `"targets": ["ts/lib"]`, and the compile writes
-[people.lib.ts](../spell-app/spaces/@spell/library/people/people.lib.ts) beside it:
+[people.lib.ts](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/people/people.lib.ts) beside it:
 
 ```ts
 import { Thing, List, prop } from "spell-lang/core/model"
@@ -231,7 +231,7 @@ export class Person extends Thing {
   accessor emails!: List<string>
 ```
 
-spell-app's [people store](../spell-app/src/spaces/server/node/people/PeopleStore.ts) imports it like any other
+spell-app's [people store](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/people/PeopleStore.ts) imports it like any other
 TypeScript, by package name:  `import * as People from "spell-app/spaces/@spell/library/people/people.lib.ts"`.
 
 - It's `TSWriter`'s TypeScript, with the program's top-level steps left out:
@@ -243,7 +243,7 @@ TypeScript, by package name:  `import * as People from "spell-app/spaces/@spell/
   Vite, `tsx` and `tsc` import it as they import any TypeScript;
   a browser page with no build step, or plain node, can't load it as is.
 - It's committed, and marked generated, so GitHub folds it in a pull request's diff.
-  [A test](../spell-app/tests/spaces/library/people.test.ts) fails when it isn't what the Spell compiles to now:
+  [A test](https://github.com/spell-app/spell-app/blob/main/tests/spaces/library/people.test.ts) fails when it isn't what the Spell compiles to now:
   the fix is `spell compile @spell/library/people`.
 
 Compile a program as a library and you see what's left:
@@ -317,7 +317,7 @@ node dumps its insides, `Card { Symbol(props): Map(3) {...}, ... }`.
 
 A program that draws runs as a web app, without `--no-browser`:
 - Its Python runs on Quart, served by `spell_quart`, which is spell-app's
-  ([README-spaces](../spell-app/README-spaces.md)).
+  ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)).
   `spell run` serves it and opens it in your browser, until Ctrl-C.
 - Its page draws from the state Python sends:  the whole state when it opens, then a patch after each change,
   a game per visitor.
@@ -390,7 +390,7 @@ What it says when you ask for what isn't there:
 | a program that draws, as `ts/lib` | `'drawable-solitaire' draws a UI, which target 'ts/lib' can't.` |
 | `spell run --target ts/lib` | `"ts/lib" doesn't run:  it's compiled for other code to import (spell compile)` |
 
-Every option of `spell compile` and `spell run`:  [the command line](../README-cli.md#spell-lang).
+Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang).
 
 ## 🌱 Coming
 
@@ -434,4 +434,4 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
 - [README-spell](README-spell.md#the-frozen-test-projects):  the eleven test projects whose snapshots pin every target
 - [the `py` folder's AGENTS.md](src/py/AGENTS.md):  the rules for working on Python's writers and `spell_core`
-- [The command line](../README-cli.md#spell-lang):  `spell compile`, `spell run` and the rest of the language's commands
+- [The command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  `spell compile`, `spell run` and the rest of the language's commands
