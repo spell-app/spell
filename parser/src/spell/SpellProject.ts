@@ -547,7 +547,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
    *   e.g. `Card.move_to_$pile` from `Pile.spell` goes in `Card.spell`'s `class Card`.
    *   Each file's own were moved in by `SP.Block`.
-   * - Also how a fixture compiles -- see `compiledFixture()` in `spell-lang/spell/test`.
+   * - Also how a fixture compiles -- see `compiledFixture()` in spell-app's `spell-app/spaces/test`.
    * - `writer`:  the target's, javascript's by default -- see `SP.TARGETS`.
    *   It sees the whole project first (`P.ProgramWriter.forProject()`),
    *   and finishes the module last (`P.Writer.module()`).

@@ -14,7 +14,7 @@ to play fizzbuzz
 play fizzbuzz
 ```
 
-_FizzBuzz, all eight lines of it, from [the frozen test projects](tests/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)._
+_FizzBuzz, all eight lines of it, from [the frozen test projects](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)._
 
 You've probably written FizzBuzz for an interviewer, in a language with braces.
 This time it's English, and it runs.
@@ -85,8 +85,8 @@ and each language has a writer of its own, which turns that tree into code the w
 
 Ask a model for FizzBuzz in Python, and you'll get a good one, a little different each time you ask.
 These eight lines give the same JavaScript and the same Python every time, character for character:
-a test holds them to their snapshots, [the JavaScript](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
-and [the Python](tests/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py), and fails the day they differ.
+a test holds them to their snapshots, [the JavaScript](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
+and [the Python](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py), and fails the day they differ.
 
 Everything that just happened lives in this repo, `spell-lang`:
 the parser that read those eight lines, the grammar it read them with, the writers that wrote both columns
@@ -243,7 +243,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [outline-solitaire](tests/spaces/@spell/test/outline-solitaire/Solitaire.spell),
+  the tableau's rule in [outline-solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/outline-solitaire/Solitaire.spell),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -316,7 +316,7 @@ Copy FizzBuzz out of the frozen test projects first:  nobody edits those.
 
 ```sh
 mkdir -p try
-cp -R ~/www/spell/spell-lang/tests/spaces/@spell/test/fizzbuzz try/fizzbuzz
+cp -R ~/www/spell/spell-app/spaces/@spell/test/fizzbuzz try/fizzbuzz
 spell run try/fizzbuzz
 # ✓ Compiling @local/try/fizzbuzz
 # 1
@@ -401,7 +401,7 @@ What each one needs:
   - `parse`, `repl`:  the parser alone;  only a project argument (`--in`) needs the loader
   - `explain`:  the language service, from spell-app's `lsp`
   - `describe`:  the Type Explorer's builder (`ScopeExplorer`), from spell-app's `lsp`
-  - `format`:  the language service's formatting;  its frozen-projects check names spell-lang's own `tests/spaces/`
+  - `format`:  the language service's formatting;  its frozen-projects check names spell-app's `spaces/@spell/test/`
   - `test`, `watch`:  the loader;  `watch`'s compile step as `compile`'s
   - `speedtest`:  finds Spell by its package, not through spaces
   - `compile`, `lint`, `run`:  the loader, plus spell-app's hooks above
@@ -464,7 +464,7 @@ las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
 el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
 ```
 
-_Three lines of [Carta.spell](tests/spaces/@spell/test/cartas/Carta.spell),
+_Three lines of [Carta.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/cartas/Carta.spell),
 from `cartas`, the frozen `cards` project translated line for line._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
@@ -539,14 +539,13 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
   tests/parser/rules/Rule.test.ts    tests    src/parser/rules/Rule.ts
   ```
 
-- The frozen test projects, [tests/spaces/@spell/test/](tests/spaces/@spell/test/), pin every target's output:
-  [README-spell](README-spell.md#the-frozen-test-projects).
+- The frozen test projects, spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/),
+  pin every target's output, and their tests are spell-app's:  [README-spell](README-spell.md#the-frozen-test-projects).
 - The folders' own scripts, each named for its folder:
 
   | Script | What it does |
   | --- | --- |
   | `yarn spell:test:rules` | every rule module's tests;  `:bless` writes each test's output into its source |
-  | `yarn spell:test:fixtures` | the frozen test projects against their snapshots;  `:bless` rewrites them |
   | `yarn spell:gen:syntax` | regenerates the syntax table, `spellSyntax.json` |
   | `yarn spell:test:ui`, `spell:test:coverage` | Spell's tests in Vitest's UI, or with coverage |
   | `yarn core:gen:declarations` | regenerates the core's method list, `core.declarations.json5` |

@@ -2,7 +2,6 @@ import { describe, test, expect } from "vite-plus/test"
 
 import { PY } from "spell-lang/py"
 import { SP } from "spell-lang/spell"
-import { fixtureWords } from "spell-lang/spell/test"
 
 /** Declarations holding just `statements`, as a project's would. */
 function declarationsOf(...statements: SP.SpellDeclaration[]): SP.SpellDeclarationsData {
@@ -12,7 +11,8 @@ function declarationsOf(...statements: SP.SpellDeclaration[]): SP.SpellDeclarati
 /**
  * A project's words:  spell's wording of each member, by the name its compiled javascript uses --
  * what a runner's Thing Explorer labels things' members by.
- * - Each fixture's whole words file is pinned beside it:  `fixtures.test.ts`.
+ * - Each frozen test project's whole words file is pinned beside it, and Solitaire's checked here:
+ *   spell-app's `tests/spell/test/fixtures.test.ts` and `tests/spell/SpellWords.test.ts`.
  */
 describe("SpellWords", () => {
   test("a method by its wording, keyed by its compiled name:  the slots are back", () => {
@@ -132,30 +132,5 @@ describe("SpellWords", () => {
     expect(SP.SpellWords.isWordsFile("Solitaire.en.snapshot.js", "Solitaire")).toBe(false)
     expect(SP.SpellWords.isWordsFile("Klondike.en.js", "Solitaire")).toBe(false)
     expect(SP.SpellWords.isWordsFile("helpers.js", "Solitaire")).toBe(false)
-  })
-
-  test("Solitaire's:  every member of its types, by the names its javascript uses", () => {
-    const words = SP.SpellWords.read(fixtureWords("solitaire"))!
-    expect(Object.keys(words.types)).toEqual([
-      "Card",
-      "Deck",
-      "Pile",
-      "Game",
-      "StockPile",
-      "DiscardPile",
-      "Foundation",
-      "Tableau"
-    ])
-    expect(words.types.Card).toMatchObject({
-      moveToPile: "move (a card) to (a pile)",
-      turnOver: "turn (a card) over",
-      isFaceUp: "is face up",
-      isASuit: "is a (suit)",
-      shortRank: "short-rank"
-    })
-    expect(words.types.StockPile).toEqual({
-      canPickUpCard: "can pick up (a card)",
-      draw: "draw (a stock-pile)"
-    })
   })
 })

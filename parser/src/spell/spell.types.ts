@@ -92,7 +92,7 @@ export const EDITOR_PAGE_SUFFIX = ".editor.html"
 
 /**
  * End of a test fixture's snapshot file's name, e.g. `Solitaire.snapshot.js`:
- * its compiled output, which `spell-lang/spell/test`'s `fixtures.test.ts` checks against.
+ * its compiled output, which spell-app's `fixtures.test.ts` checks against.
  * - NEVER one of a project's own files:  the server leaves it out of the manifest, as `COMPILED_JS_SUFFIX`.
  */
 export const SNAPSHOT_JS_SUFFIX = ".snapshot.js"
@@ -252,11 +252,11 @@ export type ProjectPathList = string[]
 /**
  * Which folder an address's `SpellUrls.folderFor()` path is under.
  * Spaces' `environment` says where each one is:
- * - `builtins`:  the repo's built-in projects, spell-app's `spaces/` (`@spell/examples/...`)
- * - `tests`:  the repo's test projects, `tests/spaces/` (`@spell/test/...`)
+ * - `builtins`:  the `@spell` space's projects, spell-app's `spaces/`:  `@spell/examples/...`, and the test projects,
+ *   `@spell/test/...`
  * - `spaces`:  every person's and org's space, spell-spaces beside the main checkout (`@spell/owen@/...`)
  */
-export type SpaceFolderBase = "builtins" | "tests" | "spaces"
+export type SpaceFolderBase = "builtins" | "spaces"
 
 /**
  * A project group's ADDRESS, what its projects' addresses start with (epic `people-and-orgs` P4).

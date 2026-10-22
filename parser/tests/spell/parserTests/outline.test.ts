@@ -1,23 +1,8 @@
-import { describe, test, expect, vi } from "vite-plus/test"
+import { describe, test, expect } from "vite-plus/test"
 
-import {
-  core,
-  Thing,
-  List,
-  App,
-  on,
-  off,
-  once,
-  trigger,
-  positionOf,
-  position,
-  spellPosition,
-  endPosition,
-  withSpellPositions
-} from "spell-lang/core"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { loadFixtureProject, parseSpellProject } from "spell-lang/spell/test"
+import { parseSpellProject, runSpellFiles, type RunOptions } from "spell-lang/spell/test"
 
 /**
  * The OUTLINE style (epic page `outline-spell`):  a type's heading, `a card is a thing where:`, then a bulleted
@@ -968,64 +953,15 @@ describe("outline style", () => {
       expect(compile(["score is 0"])).toContain("const score = 0")
     })
   })
-
-  test("the outline Solitaire's cards pass their own tests, as today's cards do (P5)", () => {
-    // its deck, card and piles -- not the game itself, which starts an app
-    const files = loadFixtureProject("outline-solitaire").filter(({ path }) => !path.endsWith("Solitaire.spell"))
-    const lines: string[] = []
-    const console = core.console as unknown as Record<string, (...args: unknown[]) => void>
-    for (const method of ["log", "group", "groupCollapsed", "warn", "error", "info"].filter((it) => console[it])) {
-      vi.spyOn(console, method).mockImplementation((...args) => void lines.push(args.join(" ")))
-    }
-    runSpellFiles(files)("")
-    vi.restoreAllMocks()
-    expect(lines.filter((line) => line.includes("❌"))).toEqual([])
-    // 29:  since its deck deals its cards as it's made (`- to create it:`), it checks 52 cards once, not twice
-    expect(lines.filter((line) => line.includes("✅")).length).toBe(29)
-  })
 })
 
 /**
  * `lines` compiled, then RUN on `core`'s source, as `membership.test.ts` does:  a function of the names to return.
  * - Throws on a parse error.
+ * - `options.registered`:  its things register in `core.things` -- see `runSpellFiles()`.
  */
 function runSpell(lines: string[], options?: RunOptions) {
   return runSpellFiles([{ path: "/Test.spell", contents: lines.join("\n") }], options)
-}
-
-/** How `runSpell()` runs a program. */
-type RunOptions = {
-  /** `true`:  its things register in `core.things`, as a running program's do, e.g. for `every pile`.  Default:  not. */
-  registered?: boolean
-}
-
-/** `files`, a project, compiled then RUN -- see `runSpell()`. */
-function runSpellFiles(sources: Array<{ path: string; contents: string }>, { registered = false }: RunOptions = {}) {
-  const { files } = parseSpellProject(sources)
-  const errors = files.flatMap((file) => file.errors)
-  if (errors.length) throw new Error(`parse errors:\n${JSON.stringify(errors, null, 2)}`)
-  const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const code = SP.SpellProject.combineCompiled(parts)
-    .split("\n")
-    .filter((line) => !line.startsWith("import "))
-    .join("\n")
-    .replace(/^export /gm, "")
-  return (names: string) => {
-    // each top-level variable by spell's name, e.g. `first_pile`:  compiled javascript calls it `firstPile`
-    const named = names
-      .split(/,\s*/)
-      .filter(Boolean)
-      .map((name) => `${name}: ${P.JSWriter.instance.nameOf(name)}`)
-    const body = `${code}\nreturn { ${named.join(", ")} }`
-    // `@spell/core`'s helpers it imports by name, e.g. `trigger()`, as the import it lost would give them
-    const imported = { on, off, once, trigger, positionOf, position, spellPosition, endPosition, withSpellPositions }
-    // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test
-    const fn = new Function("core", "Thing", "List", "App", ...Object.keys(imported), body)
-    const run = () => fn(core, Thing, List, App, ...Object.values(imported))
-    if (!registered) return core.things.quietly(run) as Record<string, unknown>
-    core.things.clear()
-    return run() as Record<string, unknown>
-  }
 }
 
 /**
