@@ -10,7 +10,7 @@ import { chromium, type Browser, type BrowserContextOptions, type Page } from "p
 
 import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
-import { SPELL_APP, SPELL_CLI } from "./spellApp.ts"
+import { KIT_ROOT, SPELL_CLI } from "./pageServer.ts"
 import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
 import { Terminal } from "spell-kit/element-tools/Terminal"
@@ -679,8 +679,8 @@ const SITE = join(PACKAGE, SITE_PAGES)
 /** Where the page server serves Spell UI's docs (the page server's `componentSets` setting). */
 const SITE_ADDRESS = "/components/ui"
 
-/** Where `spell server start` runs (spell-app's checkout), and the kit's `spell` that runs it (`spellApp.ts`). */
-const REPO = SPELL_APP
+/** Where `spell server start` runs (the kit's root), and the kit's `spell` that runs it (`pageServer.ts`). */
+const REPO = KIT_ROOT
 const SPELL = SPELL_CLI
 
 /** Default screenshot folder;  `results` is git-ignored. */

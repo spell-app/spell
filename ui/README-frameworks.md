@@ -406,8 +406,8 @@ PASS /src/tools/demo/fallback.html (every form control, working + failed)
     On the last run, opening it put all 1000 rows on the page in 22 ms of script and DOM work,
     and each keystroke of `united sta` took 5 ms or less of the same.
   - `compat-solid-1.9.html`:  the Solid 1.9 app, [above](#solid-2--one-solid-on-the-page-and-listeners-by-ref).
-  - `translate.html`:  a page in Spanish, `<html lang="es">`:
-    its `<ui-root>` loads the Spanish names, then each tag's family as it meets it (`<es-boton>`, `<es-tarjeta>`).
+  - `translate.html`:  a page in Spanish (`<html lang="es">`).
+    Its root loads the Spanish names, then each tag's family as it meets it (`<es-boton>`, `<es-tarjeta>`).
     - Spanish attributes and values, and the dropdown's own event, `es-cambio`
     - the texts in Spanish too:  "Cerrar"
   - `fallback.html`:  every form control, working and deliberately broken;

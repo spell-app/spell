@@ -130,8 +130,8 @@ export class RootLoader {
    * load its texts and switch the texts to it.
    * - `useLanguage("es")`:  `<es-boton>` works, and `UI.i18n` says "Cerrar".
    *   - The prefix is the language's code (`es`).
-   *   - `UI.vocabulary.defineComponents()` and `UI.i18n.registerDictionary()` do the work;  `UI.i18n.locale`
-   *     becomes `lang` as written (`es-MX`).
+   *   - The work is `UI.vocabulary.defineComponents()` and `UI.i18n.registerDictionary()`.
+   *   - `UI.i18n.locale` becomes `lang` as written (`es-MX`).
    * - Resolves at once for a language Spell UI doesn't ship (English included).
    * - The promise rejects if the dictionary can't be loaded, and stays rejected.
    */

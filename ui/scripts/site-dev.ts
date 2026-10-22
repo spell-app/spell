@@ -19,7 +19,7 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
-import { SPELL_APP, SPELL_CLI } from "spell-ui/tools/spellApp"
+import { KIT_ROOT, SPELL_CLI } from "spell-ui/tools/pageServer"
 import { Terminal } from "spell-kit/element-tools/Terminal"
 
 /** Spell UI's folder. */
@@ -43,13 +43,13 @@ function report(event: Rolldown.RolldownWatcherEvent): void {
 }
 
 /**
- * spell-app's page server origin, e.g. `http://127.0.0.1:54769` (`SPELL_APP`'s:  it serves this site).
+ * The kit's page server origin, e.g. `http://127.0.0.1:54769` (`KIT_ROOT`'s:  it serves this site).
  * - SIDE EFFECT:  `spell server start` starts it in the background if it isn't running
  * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
  */
 function ensurePageServer(): string {
   const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start"], {
-    cwd: SPELL_APP,
+    cwd: KIT_ROOT,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
     timeout: 60000

@@ -6,7 +6,7 @@ Today, only component packs use them:
 - `pack/repo/` -- a new pack, a repo of its own inside the kit, `spell-<name>/`:  `spell pack create <name> [--prefix x-]`
   - laid out as spell-brand is:  `package.json` with its `"spellPack"`, its own alias table, `src/`, `components/`
   - `pack/tests/` -- its first test, into the new repo's `tests/`
-- `pack/element/` -- one element in a pack, `components/<tag>/`:  `spell pack add <pack> <tag>`
+- `pack/element/` -- one element in a pack, `src/components/<tag>/`:  `spell pack add <pack> <tag>`
   - `pack/element-tests/` -- its test, into the pack repo's `tests/components/<tag>/`
 
 The code that reads them:  `createPack()` and `addElement()`, in [packCreate.ts](../src/packCreate.ts).
@@ -52,7 +52,7 @@ Three files are written another way:
 - `pack/repo/package.json.template` is MERGED into the pack's `package.json`, when there is one:
   - the keys it lacks are added (inside `scripts`, `devDependencies` and `spellPack` too, one by one)
   - its own values are kept
-- `pack/repo/components/index.ts.template` starts the pack's element list.
+- `pack/repo/src/components/index.ts.template` starts the pack's element list.
   `pack add` then adds one `export * from "./<tag>"` line to it per element.
 - `.yarnrc.yml` isn't a template:  it's the kit's own, without `yarnPath`, as every child repo's is.
 

@@ -1,7 +1,8 @@
 /**
  * Spell UI in Spanish:  `<es-boton primario color="rojo">` ~== `<ui-button primary color="red">`.
- * - `es`, the whole dictionary:  hand it to `UI.vocabulary.defineComponents({ prefix: "es", dictionary: es })`,
- *   and its texts to `UI.i18n.registerDictionary(es)`;  `<ui-root lang="es">` does both (`RootLoader.useLanguage()`).
+ * - `es`, the whole dictionary:  `<ui-root lang="es">` hands it to the runtime itself (`RootLoader.useLanguage()`).
+ *   - From code, its names:  `UI.vocabulary.defineComponents({ prefix: "es", dictionary: es })`
+ *   - and its texts:  `UI.i18n.registerDictionary(es)`
  * - Gathered from two kinds of file:
  *   - each tag's own, `UI<Name>.es.ts` beside its vocabulary:  its tag, the names only it uses, its texts, `aka`
  *   - this one:  the names several tags share (`size`, `ui-change`), the shared value sets (hues, sizes ...)

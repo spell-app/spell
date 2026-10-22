@@ -21,14 +21,14 @@ export async function packCreate(name: string, options: PackOptions = {}): Promi
   return CLI.EXIT.OK
 }
 
-/** `spell pack add <pack> <tag> [--no-build]`:  one element family, `components/<tag>/`, then the pack rebuilt. */
+/** `spell pack add <pack> <tag> [--no-build]`:  one element family, `src/components/<tag>/`, then the pack rebuilt. */
 export async function packAdd(pack: string, tag: string, options: PackOptions = {}): Promise<number> {
   const report = await addElement(kitRoot(), pack, tag, { build: options.build !== false })
   CLI.out(options.json ? JSON.stringify(report, null, 2) : scaffoldLines(report).join("\n"))
   return CLI.EXIT.OK
 }
 
-/** `spell pack build <pack>`:  `components/__pack/`:  the catalog from the vocabularies, the entry, the script. */
+/** `spell pack build <pack>`:  `src/components/__pack/`:  the catalog from the vocabularies, the entry, the script. */
 export async function packBuild(pack: string, options: PackOptions = {}): Promise<number> {
   const report = await buildPack(kitRoot(), pack)
   CLI.out(
@@ -39,7 +39,7 @@ export async function packBuild(pack: string, options: PackOptions = {}): Promis
   return CLI.EXIT.OK
 }
 
-/** `spell pack check [pack]`:  exits 1 when a pack's `components/__pack/` is stale;  no pack:  every pack in the kit. */
+/** `spell pack check [pack]`:  exits 1 when a pack's `src/components/__pack/` is stale;  no pack:  every pack in the kit. */
 export async function packCheck(pack: string | undefined, options: PackOptions = {}): Promise<number> {
   const root = kitRoot()
   const packs = pack ? [pack] : packNames(root)

@@ -1,6 +1,6 @@
 /**
- * Spell UI in Spanish:  every component named in Spanish at once (`defineComponents()`), its texts too;
- * `es-cambio` / `es-alternar` events are logged.
+ * Spell UI in Spanish:  every component named in Spanish at once (`defineComponents()`), its texts too.
+ * - `es-cambio` / `es-alternar` events are logged.
  */
 
 import { UI } from "spell-ui"

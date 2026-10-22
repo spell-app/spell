@@ -23,8 +23,9 @@ import { ValueSets } from "./ValueSets"
  *   - What a translated tag's `ElementDefinition` is built from (`UIButton.define("es-boton", es)`).
  *   - The English identity dictionary is the default.
  * - `canonicalize()` / `localize()` convert single names both ways, for attribute parsing and rendering.
- * - `defineComponents({ prefix, dictionary })`:  the page's language, the one call that names every component in it
- *   (`<es-boton>`), the ones defined already and every one defined after.
+ * - `defineComponents({ prefix, dictionary })`:  the page's language.
+ *   - The one call that names every component in it (`<es-boton>`):
+ *     the ones defined already, and every one defined after.
  *   - The runtime's `UI.vocabulary` is the page's registry:  the element layer hands it each component class
  *     as it's defined (`registerComponent()`), and this defines it under each page language too.
  * - Pure data, NO DOM:  the runtime's `UI.vocabulary` service wraps one of these.
@@ -233,7 +234,8 @@ export class Vocabulary {
   ////////////////
 
   /**
-   * Name every component in the page's language:  `defineComponents({ prefix: "es", dictionary: es })`
+   * Name every component in the page's language, e.g. Spanish:
+   * `defineComponents({ prefix: "es", dictionary: es })`
    * makes `<es-boton primario color="rojo">` a `<ui-button primary color="red">`.
    * - Every component the dictionary names a tag for (`dictionary.tags`), and no other:
    *   one defined already, now;  one defined later (a family loaded on demand), as it's defined.
