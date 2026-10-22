@@ -97,7 +97,7 @@ const ATTRIBUTE_KINDS: Record<string, DrawableAttribute["kind"]> = {
 }
 
 /** A declared type that's a thing's, e.g. `Pile`:  a class's name, where spell's own types are lowercase (`text`). */
-const THING_TYPE = /^[A-Z]/
+const THING_TYPE = /^\p{Lu}/u
 
 /** Attributes the page or Spell UI already means something by:  never a type's. */
 const TAKEN_ATTRIBUTES = new Set([

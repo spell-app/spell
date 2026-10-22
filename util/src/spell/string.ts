@@ -5,7 +5,7 @@
 import lowerFirst from "lodash/lowerFirst"
 import toLower from "lodash/toLower"
 import upperFirst from "lodash/upperFirst"
-import toSnakeCase from "lodash/snakeCase"
+import words from "lodash/words"
 import _pluralize from "pluralize"
 
 // Export some lodash string methods.
@@ -42,9 +42,21 @@ export const instanceCase = (text: string) => getExistingOrTransform(text, INSTA
 const toInstanceCase = (text: string) => singularize(`${text}`).toLowerCase()
 const INSTANCE_CASE: StringMap = {}
 
-/** Lodash `snakeCase` with memoization. */
+/**
+ * `text` in snake_case, with memoization:  `Short Names`, `shortNames` and `short-names` are all `short_names`.
+ * - Lodash's `snakeCase` without its `deburr()`:  an accent is part of the word (`corazón` stays `corazón`),
+ *   so a Spanish name never collides with its accent-less spelling (epic `spanish` Q2).
+ * - Words split as lodash splits them:  at spaces and punctuation, before a capital, around digits
+ *   (`it2` => `it_2`).
+ */
 export const snakeCase = (text: string) => getExistingOrTransform(text, SNAKE_CASE, toSnakeCase)
-export { toSnakeCase }
+/** Un-memoized version of `snakeCase()` -- call `snakeCase()` instead unless you need to bypass cache. */
+export const toSnakeCase = (text: string) =>
+  words(`${text}`.replace(APOSTROPHES, ""))
+    .map((word) => word.toLowerCase())
+    .join("_")
+/** Apostrophes lodash drops before splitting words:  `card's` => `cards`. */
+const APOSTROPHES = /['\u2019]/g
 const SNAKE_CASE: StringMap = {}
 
 /**
