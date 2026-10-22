@@ -1,18 +1,22 @@
 /**
- * `yarn site:dev`:  work on the Spell UI site live.  The page server (started if it isn't running) serves the pages
- * at `/components/ui/`;  the site bundle, `site/_assets/`, rebuilds on every source edit, and the page server's live reload
- * then reloads every open page.
- * - Why not a dev server:  the pages are static files loading ONE bundle (`yarn site:bundle`, which the page server
- *   runs when it starts, if stale);  this is that same build, watched, so what you see is what it builds.
- * - Starts with `yarn site:bundle` (clears `_assets/`, makes the `icon-packs` link, prints sizes), then Vite's watch
- *   build with the same config (`vite.site.config.ts`):  edits under `src/`, `components/` or `site/_src/` rebuild in seconds.
- * - Page edits (the site's pages, `docs/`:  `*.html`, `__parts/`) and new data (`docs/__data/`) need no rebuild:  the
- *   page server reloads them itself.
+ * `yarn site:dev`:  work on the Spell UI site live.
+ * - The page server (started if it isn't running) serves the pages at `/components/ui/`.
+ * - The site bundle, `site/_assets/`, rebuilds on every source edit,
+ *   and the page server's live reload then reloads every open page.
+ * - Why not a dev server:  the pages are static files loading ONE bundle
+ *   (`yarn site:bundle`, which the page server runs when it starts, if stale).
+ *   This is that same build, watched, so what you see is what it builds.
+ * - Starts with `yarn site:bundle` (clears `_assets/`, makes the `icon-packs` link, prints sizes),
+ *   then Vite's watch build with the same config (`vite.site.config.ts`):
+ *   edits under `src/`, `components/` or `site/_src/` rebuild in seconds.
+ * - Page edits (the site's pages, `docs/`:  `*.html`, `__parts/`) and new data (`docs/__data/`) need no rebuild:
+ *   the page server reloads them itself.
  * - NOT watched:  `site:data`, `site:index`, `site:kitchen` (a vocabulary, a family sheet's tokens, an example):
  *   rerun `yarn site:build` for those.
- * - A watch rebuild doesn't clear `_assets/`, so a chunk whose hash changed leaves its old file behind:  harmless,
- *   since `_assets/` isn't committed;  the page server's next start rebuilds it clean (its `site.js` is newer than
- *   the last recorded build, `spell-kit/server`'s `Bundle`).
+ * - A watch rebuild doesn't clear `_assets/`, so a chunk whose hash changed leaves its old file behind.
+ *   - Harmless, since `_assets/` isn't committed.
+ *   - The page server's next start rebuilds it clean:
+ *     its `site.js` is newer than the last recorded build (`spell-kit/server`'s `Bundle`).
  * - `Ctrl-C` stops the watch;  the page server keeps running (`spell server stop`).
  */
 import { execFileSync } from "node:child_process"
@@ -46,7 +50,8 @@ function report(event: Rolldown.RolldownWatcherEvent): void {
  * spell-app's page server origin, e.g. `http://127.0.0.1:54769` (`SPELL_APP`'s:  it serves this site).
  * - SIDE EFFECT:  `spell server start` starts it in the background if it isn't running
  * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
- * - `--root`, always:  run from a `yarn` script, the server would take the folder yarn ran in (`INIT_CWD`, Spell UI)
+ * - `--root`, always:  run from a `yarn` script,
+ *   the server would otherwise serve the folder yarn ran in (`INIT_CWD`:  Spell UI's)
  */
 function ensurePageServer(): string {
   const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start", "--root", SPELL_APP], {

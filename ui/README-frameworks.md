@@ -227,22 +227,24 @@ render(
 
 - **How:**  Solid 2 sets a prop it doesn't know with `setAttribute(name, value)`, the value as it is.
   Spell UI's elements take that over:  a function or object goes to a listener or a property.
-  - An element whose component hasn't loaded yet keeps them until it does, through a patch on the browser's
-    `setAttribute()` that only acts for a `ui-*` tag given a function or object.
-  - `<ui-root pure>` turns the patch off.  Then a function or object given before the component loads becomes text,
-    as in plain Solid:  give such values only to components already loaded.
+  - An element whose component hasn't loaded yet keeps them until it does:
+    a patch on the browser's `setAttribute()` holds them,
+    and acts only for a dashed tag not defined yet, given a function or object.
+  - `<ui-root pure>` turns the patch off.
+    Then a function or object given before the component loads becomes text, as in plain Solid:
+    give such values only to components already loaded.
   - Text for an attribute stays an attribute, as ever.
 - Not `onUIChange`:  Solid lowercases a camelCase handler's name, so it would listen for `uichange`.
-- Not `prop:` or `on:`:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
+- Neither namespace:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
 - **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.17.
-  Two copies of Solid on one page break silently:  two registries, two owners
-  ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
+  Two copies of Solid on one page break silently:
+  two registries, two owners ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
   - In Vite, that's `resolve.dedupe`:  `["solid-js", "@solidjs/web"]`, as every Spell build sets it.
 - Solid's context stops at the element:  each element draws in a Solid root of its own,
   so your providers don't reach inside.
-  Hand app data to the root instead, `<ui-root appContext={value}>` as above, an object:
-  how every component inside reads it, and when to set it, is on
-  [the front page's `<ui-root>`](README.md#ui-root-the-top-of-every-page).
+  - Hand app data to the root instead, as an object:  `<ui-root appContext={value}>`, as above.
+  - How every component inside reads it, and when to set it:
+    [the front page's `<ui-root>`](README.md#ui-root-the-top-of-every-page).
 
 <details>
 <summary>How the smoke page proves there's one Solid</summary>

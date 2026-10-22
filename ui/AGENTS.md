@@ -984,7 +984,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - No `on:` namespace, no `prop:` (epic `solid-17`).
     - A `ui-*` event:  `on-ui-change={f}`, the event's own name after `on-`.
     - Rich data as a plain prop, `options={[...]}`:  a function or object reaches the element as itself.
-    - Both through the kit's `RichAttributes` (`spell-kit/element`):
+    - Both through the kit's element framework, its `RichAttributes`:
       Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
   - A THIRD-PARTY Solid app does the same ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".

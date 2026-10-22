@@ -21,7 +21,9 @@ import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
  *     and `hook.read(el)` sees the app's value inside the component (`UIComponent.appContext`:
  *     a Solid context can't cross the custom-element boundary, epic `spell-element` Q9)
  *   - without the hook these report `n/a`
- * - Solid 2 notes:  no `on:` namespace any more;  signal writes happen only in event handlers (never in an owned scope).
+ * - Solid 2 notes:
+ *   - no `on:` namespace any more
+ *   - signal writes happen only in event handlers (never in an owned scope)
  */
 export function mount(root: HTMLElement, options: readonly Option[]): MountedApp {
   const hook = (globalThis as { __uiSolidIdentity?: SolidIdentityHook }).__uiSolidIdentity
