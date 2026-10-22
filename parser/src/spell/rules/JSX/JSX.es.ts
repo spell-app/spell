@@ -282,6 +282,13 @@ JSXEs.addRule(SpellJSX, {
           'h("es-boton", { class: "mano", onClick: () => core.console.log(1) }, () => card.rank)',
           '<es-boton class="mano" onClick={() => core.console.log(1)}>{card.rank}</es-boton>'
         ],
+        // a value that can change is set as the element's property, by its Spanish name:
+        // Spell UI names a Spanish tag's properties in Spanish (`discontinuo`, its `dashed`)
+        [
+          `<es-tarjeta discontinuo={el rank de la card}>Pila</es-tarjeta>`,
+          'h("es-tarjeta", { "prop:discontinuo": () => card.rank }, "Pila")',
+          "<es-tarjeta prop:discontinuo={card.rank}>Pila</es-tarjeta>"
+        ],
         // spell's own words inside one:  where a drawable list's items show, and a child's named place
         [
           `<es-tarjeta><h3 en="header">Pila</h3><hijos/></es-tarjeta>`,
