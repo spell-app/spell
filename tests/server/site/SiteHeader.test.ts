@@ -69,7 +69,9 @@ beforeAll(async () => {
   put(join(main, "docs", "own.html"))
   put(join(content, "guides", "guide.html"))
   put(join(main, "notes", "note.html"), "../site.js")
-  writeFileSync(join(main, "package.json"), JSON.stringify({ pageServer: { siteTabs: SERVED_TABS } }))
+  // the Kit tab's component set, served:  a tab naming only sets the server doesn't serve is left out
+  const componentSets = { kit: { name: "Kit", dir: "docs", assets: "docs" } }
+  writeFileSync(join(main, "package.json"), JSON.stringify({ pageServer: { siteTabs: SERVED_TABS, componentSets } }))
   server = await new PageServer({ root: main }).start({ port: 0, routes: false, pidFile: false })
   server.serveContent(content)
   browser = await chromium.launch()

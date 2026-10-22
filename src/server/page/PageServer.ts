@@ -6,12 +6,15 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { SRV, type ServedFile, type ServerInfo } from "spell-kit/server"
 import type { SiteTab } from "spell-kit/server/site/site.types"
 import {
+  BundleBuild,
+  COMPONENTS_PREFIX,
   PageEditor,
   besideFolders,
   componentSets,
   engineRoutes,
   folderUrl,
   isBeside,
+  kitRootOf,
   pageServerSettings,
   type ComponentSet,
   type EngineRoute,
@@ -30,7 +33,7 @@ import {
  *     `/api/server/live` and `/api/server/live.js`, live reload (`SRV.WebServer`)
  *   - `/api/files` -> `SRV.FileOperations`:  files and folders saved, made, moved, copied and deleted
  *   - `/api/pages` -> `PageEditor`:  a page's source, saving it, saving one section
- *   - both write only inside the root `package.json`'s `"pageServer"` `"writable"` folders (the shared content ones):
+ *   - both write only inside the settings' `"writable"` folders (the shared content ones):
  *     the content folder's, once it's served (`serveContent()`)
  *   - the rest come from route modules:
  *     - epics':  `/api/epics/...` and `/api/docs/...`
@@ -51,9 +54,12 @@ import {
  *     the worktrees beside the repo, and those left in the old `.claude/worktrees` (epic `epic-eject` J28)
  * - what pages are told (`window.SPELL_SERVER`):  the checkout, its branch, the edit API, the site header's tabs
  *   (the settings' `"siteTabs"`) ... and what route modules add (`addPageConfig()`), e.g. epics' airplane mode
- * - route modules (`RouteModule`) from the root `package.json`'s `"pageServer"` add the rest, e.g. the running epics,
- *   and what only one repo's page server does (spell-app's `spell-app/page-server`:  building its bundles ...)
+ * - route modules (`RouteModule`) from the settings (`"routes"`) add the rest, e.g. the running epics, the app's `/api`
+ * - the settings:  every installed repo's `"pageServer"` part, merged (`pageServerSettings()`, epic `repo-split` P16)
+ * - the bundles there (`"bundles"`) are built as it starts, if stale (`BundleBuild`):  they're never committed
  * - the page scripts there (`"pageScripts"`) go on every page, before `</body>` (`withPageScripts()`)
+ * - the local copies there (`"localCopies"`) stand in for the CDN files pages load (`withLocalCopies()`)
+ * - what's `"gone"` there answers "not found", though the content folder still holds it
  * - the ENGINE ROUTES there (`"engineRoutes"`):  URL prefixes served from a folder of the checkout
  *   (`engineRoutePath()`, epic `epic-eject` P7), e.g. `/_epic/assets/...`, from the epic engine through a link
  *   - under every worktree's address too (`/worktrees/<w>/templates/...`):  ONE copy, this checkout's
@@ -62,6 +68,7 @@ import {
  *   (epic `repo-split` P4).
  * - port:  `DEFAULT_PORT` (4747) if free, else any
  *   - the real one goes in `<root>/.spell-server.json`, where `spell server start` and the openers find it
+ * - its root:  the kit, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
  * - Run it with `spell server` (`page/cli.ts`), never by hand.
  */
 export class PageServer {
@@ -83,8 +90,15 @@ export class PageServer {
   /** the engine routes it serves, from the settings as it starts (`engineRoutes()`) */
   readonly engineRoutes: readonly EngineRoute[]
 
-  /** the site header's tabs every page is told (`SPELL_SERVER.siteTabs`), from the settings as it starts */
+  /**
+   * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`), from the settings as it starts
+   * - but a tab whose home is a component set's address (`/components/...`), none of whose `sets` it serves:
+   *   without spell-app, no App/UI tab;  the Brand tab, whose home is the content repo's, stays
+   */
   readonly siteTabs?: readonly SiteTab[]
+
+  /** the bundles' build as it starts (`BundleBuild`):  `start()` begins it, `stop()` ends it */
+  readonly bundles: BundleBuild
 
   /** run once listening, from route modules */
   private listenings: (() => unknown)[] = []
@@ -110,6 +124,9 @@ export class PageServer {
   /** the module scripts every page gets (`"pageScripts"`, `withPageScripts()`), from the settings as it starts */
   private readonly pageScripts: PageScript[]
 
+  /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
+  private readonly localCopies: [cdn: string, local: string][]
+
   constructor({ root, token }: { root: string; token?: string }) {
     this.root = resolve(root)
     this.pidFile = new SRV.PidFile(this.root)
@@ -121,17 +138,23 @@ export class PageServer {
       ...checkoutInfo(this.root)
     }
     const settings = this.settings()
-    const { writable, pageScripts = [], siteTabs } = settings
+    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
     this.pageScripts = pageScripts
-    this.siteTabs = siteTabs
+    this.localCopies = Object.entries(localCopies)
     this.componentSets = componentSets(settings)
     this.engineRoutes = engineRoutes(settings)
+    const served = new Set(this.componentSets.map((set) => set.prefix.slice(COMPONENTS_PREFIX.length + 1)))
+    // a tab whose home is a component set none of whose sets is served goes:  without spell-app, no App/UI
+    const unserved = (tab: SiteTab) =>
+      tab.path.startsWith(`${COMPONENTS_PREFIX}/`) && !tab.sets?.some((set) => served.has(set))
+    this.siteTabs = siteTabs?.filter((tab) => !unserved(tab))
+    this.bundles = new BundleBuild({ root: this.root })
     this.web = new SRV.WebServer({
       root: this.root,
       token,
       live: true,
       mounts: [{ prefix: "/", dir: this.root }],
-      html: [(page, served) => this.withPageScripts(page, served)],
+      html: [(page) => this.withLocalCopies(page), (page, served) => this.withPageScripts(page, served)],
       configure: (served) => ({
         root: this.root,
         branch: this.info.branch,
@@ -158,7 +181,12 @@ export class PageServer {
       (path) => engineRoutePath(path, this.engineRoutes)
     )
     const router = this.web.router
+    // a request for a bundle's missing file waits while the bundles build (`start()`)
+    router.use(this.bundles.wait)
     router.get("/", (_request, reply) => reply.redirect(DOCS_HOME))
+    // what moved out of the shared content folder, which still holds it for older checkouts:  no redirect (Q30)
+    for (const path of gone)
+      router.use(path, (_request, reply) => reply.status(404).send(`${path}/ moved out of the shared content`))
     // a component set's address without its slash:  with it, so its pages' relative links resolve
     // - the router takes a trailing `/` as optional, so the address WITH it passes on
     for (const set of this.componentSets)
@@ -175,9 +203,10 @@ export class PageServer {
   }
 
   /**
-   * Start watching, load the route modules, listen, write the pid file, then run route modules' `onListening`s.
+   * Start watching, build the stale bundles in the background, load the route modules, listen, write the pid file,
+   * then run route modules' `onListening`s.
    * - `port`:  wanted port (default `DEFAULT_PORT`);  taken:  any free one
-   * - `routes`:  load route modules (default `true`;  tests turn it off)
+   * - `routes`:  load route modules and build the bundles (default `true`;  tests turn it off)
    * - `pidFile`:  write `.spell-server.json` (default `true`)
    */
   async start({ port = DEFAULT_PORT, routes = true, pidFile = true }: StartOptions = {}): Promise<this> {
@@ -192,7 +221,10 @@ export class PageServer {
     // the engine routes' files at their routes too, so a page loading `/_epic/...` hot-reloads them
     for (const [route, folder] of Object.entries(settings.engineRoutes ?? {}))
       this.web.live!.watch(join(this.root, folder), { servedAt: route.endsWith("/") ? route : `${route}/` })
-    if (routes) for (const path of settings.routes ?? []) await this.loadRoutes(path)
+    if (routes) {
+      this.bundles.start()
+      for (const path of settings.routes ?? []) await this.loadRoutes(path)
+    }
     const { port: actual } = await this.web.listen({ port })
     this.info.port = actual
     if (pidFile) this.pidFile.write(this.info)
@@ -203,8 +235,9 @@ export class PageServer {
     return this
   }
 
-  /** stop:  route modules' stops, the pid file (if ours), the server */
+  /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
+    this.bundles.stop()
     for (const stop of this.stops) await Promise.resolve(stop()).catch(() => {})
     this.pidFile.removeIfOurs()
     await this.web.close()
@@ -215,11 +248,14 @@ export class PageServer {
    * - returns its info, `base` URL, and whether it was `launched` just now
    * - runs `page/cli.ts serve` under `tsx`, whatever the caller's folder,
    *   with the kit's node settings (`tsconfig.node.json`, `TSX_TSCONFIG_PATH`);  the route modules it loads
-   *   (spell-app's, spell-epic's) import by package name, as everything does
+   *   (each repo's) import by package name, as everything does
    * - its output goes to `<root>/.spell-server.log`
    * - what `spell server start`, the goals tools and the openers call
+   * - throws a `TypeError` when `root` isn't a kit's root:  the page server starts from the kit's root only
+   *   (`kitRootOf()`, epic `repo-split` P16)
    */
-  static ensure(root: string, port = DEFAULT_PORT) {
+  static ensure(_root: string, port = DEFAULT_PORT) {
+    const root = kitRootOf(_root)
     // its code:  the server's folder, and its route modules' folders;  a server older than them restarts (I5 of `skillz`)
     const routes = (pageServerSettings(root).routes ?? []).map((path) => dirname(join(root, path)))
     return new SRV.PidFile(root).ensure({
@@ -331,6 +367,14 @@ export class PageServer {
   }
 
   /**
+   * `page` with each CDN URL the settings give a local copy of (`"localCopies"`) pointing at that copy instead:
+   * pages load offline.
+   */
+  withLocalCopies(page: string): string {
+    return this.localCopies.reduce((html, [cdn, local]) => html.replaceAll(cdn, local), page)
+  }
+
+  /**
    * `page` with the settings' page scripts (`"pageScripts"`) before its `</body>` (at its end without one):
    * each one whose file exists, unless `served`'s path is under one of its `skip` prefixes.
    * - The settings are read as the server starts;  the files at each page, so a build that lands meanwhile counts.
@@ -356,7 +400,7 @@ export class PageServer {
     return this
   }
 
-  /** the root `package.json`'s `"pageServer"` field */
+  /** its settings:  every installed repo's `"pageServer"` part, merged (`pageServerSettings()`) */
   settings(): PageServerSettings {
     return pageServerSettings(this.root)
   }
@@ -431,17 +475,6 @@ const SERVER_API = SRV.SERVER_API
 export type StartOptions = { port?: number; routes?: boolean; pidFile?: boolean }
 
 /**
- * The checkout at `root`:  the folder holding `.git` at or above `start`.
- * - a worktree's `.git` is a FILE:  still its root
- */
-export function findRoot(start: string): string | undefined {
-  for (let dir = resolve(start); ; dir = dirname(dir)) {
-    if (existsSync(join(dir, ".git"))) return dir
-    if (dirname(dir) === dir) return undefined
-  }
-}
-
-/**
  * Branch and worktree name of the worktree `file` is in, when it's in worktrees' folder `worktrees`;  else `{}`.
  * - cached per worktree:  every page served asks
  */
@@ -490,7 +523,7 @@ export const DOCS_HOME = "/pages/index.html"
 const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
 /**
- * Folders the page server live-reloads when the root `package.json` names none:  the docs areas and their bundle.
+ * Folders the page server live-reloads when no settings part names any:  the docs areas.
  * - each relative to the checkout;  one it doesn't have is skipped
  * - the content folder's (`epics` ...) are the content folder's once it's served, which is watched whole
  *   (`serveContent()`):  named here for a checkout that still links them in

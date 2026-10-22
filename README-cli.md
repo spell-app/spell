@@ -269,7 +269,7 @@ They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `la
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
-  ([spell-lang's README-targets.md](spell-lang/README-targets.md)).
+  ([spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md)).
   A target with a type checker is checked once written, TypeScript by `tsc` and Python by `pyright`:
   its errors are listed, but don't fail the compile.
 - Warnings, e.g. a property with no type, are listed under the errors and never counted:
@@ -510,8 +510,8 @@ spell icon bell
 
 How the static render works:
 - Each `ui-*` element goes to light DOM, no shadow DOM, through Spell UI's static server render
-  ([src/static/](spell-ui/src/static/)), in a child process ([renderStatic.ts](spell-ui/src/cli/runner/renderStatic.ts))
-  on an SSR-only Vite server ([StaticRenderer.ts](spell-ui/src/tools/StaticRenderer.ts)).
+  ([src/static/](https://github.com/spell-app/spell-ui/tree/main/src/static)), in a child process ([renderStatic.ts](https://github.com/spell-app/spell-ui/blob/main/src/cli/runner/renderStatic.ts))
+  on an SSR-only Vite server ([StaticRenderer.ts](https://github.com/spell-app/spell-ui/blob/main/src/tools/StaticRenderer.ts)).
   - A child, because Spell UI's Solid JSX must compile for the server, which `tsx` can't.
   - Each run starts Vite and compiles every family:  one page took 2.1 seconds here, and several pages share one run.
 - Only the families in Spell UI's static catalog render:
@@ -575,7 +575,7 @@ How the static render works:
 The editor's commands:  make a project, open the editor on it, list the projects, build the VS Code extension.
 `spell app serve` is the one you'll type daily:  it brings up two servers,
 and `Ctrl-C` takes down only what it started.
-The editor itself:  [spell-app's README](spell-app/README.md).
+The editor itself:  [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md).
 
 | Command | What it does |
 | --- | --- |
@@ -643,7 +643,7 @@ its phases and items, the requests between sessions, the worktrees, windows and 
 
 It loads no Spell:  `epic --version` answers in 0.2 s, and `epic summary` in about 0.4.
 Claude Code sessions get it from the plugin;  your own terminal needs one link
-([spell-epic's README-adopting.md](spell-epic/README-adopting.md)).
+([spell-epic's README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md)).
 
 A verb names what it acts on with an address after it:
 
@@ -674,7 +674,7 @@ epic worktree merge-main
 - An unknown verb exits 1, listing the verbs;  a usage error exits 2.
 - The docs pages' tools are `epic`'s too, `epic pages <verb>`;
   `spell-app`'s root scripts reach it as `yarn epic`, and `yarn ask` for `epic ask`.
-- Every verb, by group, with what each takes:  [spell-epic's README-cli.md](spell-epic/README-cli.md).
+- Every verb, by group, with what each takes:  [spell-epic's README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md).
 
 ## Two more programs, for yarn scripts
 
@@ -754,7 +754,7 @@ Where it belongs and what to call it are the commands guide's call:  read it fir
 <summary>What a command list looks like, and how a command runs</summary>
 
 A command list is commander, like any program;  this is `spell app create`, trimmed from
-[spell-app's list](spell-app/src/cli/commands.ts):
+[spell-app's list](https://github.com/spell-app/spell-app/blob/main/src/cli/commands.ts):
 
 ```ts
 export default function appCommands(spell: Command): void {
@@ -847,10 +847,10 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - The tests:  the kit's in [tests/cli/](tests/cli/), each repo's commands' in that repo's `tests/cli/`.
   - The kit's run the real `spell` as separate processes, so a broken command list in any repo fails them.
   - `spell-app`'s include end-to-end runs of every language command, through the kit's bin.
-- The other repos' lists:  [spell-lang's](spell-lang/src/cli/commands.ts)
-  (the `language` hook's shape is its [cli.types.ts](spell-lang/src/cli/cli.types.ts)),
-  [Spell UI's](spell-ui/src/cli/commands.ts) ([its README-site.md](spell-ui/README-site.md)),
-  [spell-app's](spell-app/src/cli/commands.ts) and [its hooks](spell-app/src/cli/hooks.ts).
+- The other repos' lists:  [spell-lang's](https://github.com/spell-app/spell-lang/blob/main/src/cli/commands.ts)
+  (the `language` hook's shape is its [cli.types.ts](https://github.com/spell-app/spell-lang/blob/main/src/cli/cli.types.ts)),
+  [Spell UI's](https://github.com/spell-app/spell-ui/blob/main/src/cli/commands.ts) ([its README-site.md](https://github.com/spell-app/spell-ui/blob/main/README-site.md)),
+  [spell-app's](https://github.com/spell-app/spell-app/blob/main/src/cli/commands.ts) and [its hooks](https://github.com/spell-app/spell-app/blob/main/src/cli/hooks.ts).
 
 </details>
 
@@ -893,8 +893,8 @@ They're named in the command line's goals and the commands page's roadmap.
 
 - [README.md](README.md):  setup from zero, and the index of every page
 - [README-server.md](README-server.md):  what `spell server` and `spell app serve` start
-- [spell-epic's README-cli.md](spell-epic/README-cli.md):  every `epic` verb, in full
-- [spell-lang's README](spell-lang/README.md):  the language these commands read
+- [spell-epic's README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md):  every `epic` verb, in full
+- [spell-lang's README](https://github.com/spell-app/spell-lang/blob/main/README.md):  the language these commands read
 - [README-development.md](README-development.md):  the checks, the tests and the worktrees around them
 
 <details>

@@ -23,8 +23,8 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
     (`packages/ui/test/isolation.test.tsx`).
 - **Test APIs come from Vite+:**
   - `import { describe, expect, test, vi } from "vite-plus/test"` (`/browser`, `/browser-playwright` for browser
-    tests), never `vitest` itself:  lint rule `vite-plus/prefer-vite-plus-imports` (root `AGENTS.md` "Toolchain:
-    Vite+").
+    tests), never `vitest` itself:  lint rule `vite-plus/prefer-vite-plus-imports`
+    (the kit's `AGENTS.md` "Toolchain:  Vite+").
 - **Tests sit beside their module:**
   - `<module>.test.ts(x)` next to `<module>.ts(x)`:  `Router.ts` => `Router.test.ts`.  Cross-cutting tests in the
     package's `test/`.

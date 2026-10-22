@@ -1,0 +1,1081 @@
+##### spell --help
+Usage: spell [options] [command]
+
+Spell's command line:  every installed repo's commands, under one name.
+
+Options:
+  --all                                         a group of projects, e.g. @spell/library, means ALL its projects
+  --verbose                                     show a command's own logging, on stderr
+  -V, --version                                 each repo's version
+  -h, --help                                    display help for command
+
+spell-kit:
+  server                                        this checkout's page server:  docs, epic pages, the app's /api -- start all:  every web server
+  bundle [options] [names...]                   build the bundles the page server serves, built on demand, never committed (Spell UI's site ...)
+  commands [options] [verb]                     every yarn script, spell command and skill, against the commands page -- check exits 1 on a gap
+  wwod [options] [verb] [files...]              WWOD, the agents' rules:  check every citation and repo path in WWOD, AGENTS.md, CLAUDE.md and skills
+  pony [options] [words...]                     a pony in Spell's wizard hat, saying something -- yours, or one of its own
+  help [command...]                             show help -- for one command, e.g. spell help compile, spell help server start
+
+spell-lang:
+  compile [options] [projects...]               compile projects to <Project>.spell.js (and each *.editor.html to its <type-editor> module), or print a file's compiled javascript
+  lint [options] [projects...]                  list errors, one per line as path:line:col, exiting 1 if there are any -- a project's editor pages (*.editor.html) too, against its types
+  describe [options] [project] [name] [member]  what a file or project declares, as the Type Explorer shows it -- or all about ONE thing in it
+  run [options] [project]                       compile a project and run it -- one that shows a UI opens in your browser, until Ctrl-C
+  test [options] [projects...]                  run each `to test ...` in projects, reporting ✓ or ✗ -- exits 1 if any fail
+  watch [options] [projects...]                 recompile projects whenever their files change, showing their errors -- until q or Ctrl-C
+  format [options] [projects...]                tidy the whitespace of .spell files, as VS Code's Format Document does -- never in the test projects
+  speedtest [options] [module]                  time the parser's rule tests -- --against HEAD to compare with a commit
+  parse [options] <text>                        how spell reads a line:  its match tree, then the javascript it compiles to
+  repl [project]                                spell parse, a line at a time -- what a line declares, later lines know.  Piped:  reads stdin
+  explain [options] <word>                      what a word means to spell:  rules it names or starts -- and, --in a project, what it declares
+
+spell-ui:
+  icon [options] [query...]                     find Spell UI's icons by name, alias or keyword -- --open shows them in a browser
+  ssr [options] <pages...>                      ui-* pages as plain HTML for crawlers and no-JS readers:  page.static.html + ui.static.css
+  pack                                          component packs:  a repo's custom elements, loaded on demand by <ui-root> -- create, add, build, check
+  design                                        Spell's claude.ai design system:  build its files and bundle, check it, pull a board, track pushes
+
+spell-app:
+  app                                           the spell app:  a new project, the editor, the VS Code extension
+  projects [options] [group]                    list the project groups -- or, given one, the projects in it
+
+
+##### spell server --help
+Usage: spell server [options] [command]
+
+this checkout's page server:  docs, epic pages, the app's /api -- start all:
+every web server
+
+Options:
+  -h, --help       display help for command
+
+Commands:
+  local            run the page server in the foreground, until Ctrl-C
+  start [all]      start the page server in the background if it isn't running,
+                   and print where it is (JSON)
+  stop [which]     stop the page server -- all:  and the app's editor with it,
+                   even one left running
+  status           the running page server's details (JSON), or exit 1 when it
+                   isn't running
+  url <file>       start the page server if needed, then print the web address
+                   that serves <file>
+  prune [options]  stop the page and Vite servers whose checkout is gone, on any
+                   checkout
+  help [command]   display help for command
+
+Flags the page server takes, after any verb:  --root <dir> (the checkout), --port <n>, --spaces <dir>.
+spell app serve starts it too, and opens the editor on it.
+
+
+##### spell server local --help
+Usage: spell server local [options]
+
+run the page server in the foreground, until Ctrl-C
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell server start --help
+Usage: spell server start [options] [all]
+
+start the page server in the background if it isn't running, and print where it
+is (JSON)
+
+Arguments:
+  all         all:  every web server of the checkout -- page server, the app's
+              editor, Spell UI's site
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell server stop --help
+Usage: spell server stop [options] [which]
+
+stop the page server -- all:  and the app's editor with it, even one left
+running
+
+Arguments:
+  which       local (default):  the page server;  all:  every web server of the
+              checkout
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell server status --help
+Usage: spell server status [options]
+
+the running page server's details (JSON), or exit 1 when it isn't running
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell server url --help
+Usage: spell server url [options] <file>
+
+start the page server if needed, then print the web address that serves <file>
+
+Arguments:
+  file        a file of this checkout, or of the shared content folder
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell server prune --help
+Usage: spell server prune [options]
+
+stop the page and Vite servers whose checkout is gone, on any checkout
+
+Options:
+  --dry-run   only list them
+  -h, --help  display help for command
+
+
+##### spell bundle --help
+Usage: spell bundle [options] [command] [names...]
+
+build the bundles the page server serves, built on demand, never committed
+(Spell UI's site ...)
+
+Arguments:
+  names                       the bundles to build;  none:  every one
+
+Options:
+  --stale                     only the bundles whose sources changed since their
+                              last build
+  --json                      print the report as JSON
+  -h, --help                  display help for command
+
+Commands:
+  check [options] [names...]  say which bundles are out of date, and why --
+                              exits 1 if any are
+
+
+##### spell bundle check --help
+Usage: spell bundle check [options] [names...]
+
+say which bundles are out of date, and why -- exits 1 if any are
+
+Arguments:
+  names       the bundles to check;  none:  every one
+
+Options:
+  --json      print the report as JSON
+  -h, --help  display help for command
+
+
+##### spell commands --help
+Usage: spell commands [options] [verb]
+
+every yarn script, spell command and skill, against the commands page -- check
+exits 1 on a gap
+
+Arguments:
+  verb        list (default):  each command, ✓ if the page names it;  check:
+              only the gaps
+
+Options:
+  --json      print every command, and the gaps, as JSON
+  -h, --help  display help for command
+
+
+##### spell wwod --help
+Usage: spell wwod [options] [verb] [files...]
+
+WWOD, the agents' rules:  check every citation and repo path in WWOD, AGENTS.md,
+CLAUDE.md and skills
+
+Arguments:
+  verb        check (default)
+  files       more files to check, beyond the default set
+
+Options:
+  --json      print the report as JSON
+  -h, --help  display help for command
+
+
+##### spell pony --help
+Usage: spell pony [options] [words...]
+
+a pony in Spell's wizard hat, saying something -- yours, or one of its own
+
+Arguments:
+  words       what the pony says
+
+Options:
+  --gallop    her legs gallop:  in place in a terminal, else one stride's frames
+  -h, --help  display help for command
+
+
+##### spell compile --help
+Usage: spell compile [options] [projects...]
+
+compile projects to <Project>.spell.js (and each *.editor.html to its
+<type-editor> module), or print a file's compiled javascript
+
+Arguments:
+  projects         spell files, project folders, or addresses -- default the
+                   project here, else asks
+
+Options:
+  --stdout         print a project's compiled output instead of writing it
+  --target <name>  compile to this target too, e.g. ts/solid -- default the
+                   project file's "targets"
+  --force          recompile the projects it imports too, even those already
+                   compiled
+  --stale          compile only the projects whose build is missing or older
+                   than what it's built from
+  -h, --help       display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell lint --help
+Usage: spell lint [options] [projects...]
+
+list errors, one per line as path:line:col, exiting 1 if there are any -- a
+project's editor pages (*.editor.html) too, against its types
+
+Arguments:
+  projects    spell files, project folders, or addresses -- default the project
+              here, else asks
+
+Options:
+  --json      print errors as JSON
+  --fix       put the editor pages right:  drop gone properties, add new ones,
+              fix controls that don't fit
+  -h, --help  display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell describe --help
+Usage: spell describe [options] [project] [name] [member]
+
+what a file or project declares, as the Type Explorer shows it -- or all about
+ONE thing in it
+
+Arguments:
+  project      a spell file, project folder, or a project's address -- default
+               the project here, else asks
+  name         one thing to describe, e.g. Card, or "test card setup"
+  member       one of its members, e.g. color
+
+Options:
+  --inherited  list members types inherit, too
+  --compiled   show the javascript it compiles to, when describing one thing
+  --json       print the Type Explorer's own data
+  -h, --help   display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell run --help
+Usage: spell run [options] [project]
+
+compile a project and run it -- one that shows a UI opens in your browser, until
+Ctrl-C
+
+Arguments:
+  project          a spell file, project folder, or a project's address --
+                   default the project here, else asks
+
+Options:
+  --browser        open it in a browser even if it shows no UI
+  --no-browser     never open a browser:  just skip what needs one
+  --seed <n>       start the random numbers from this whole number (1 to
+                   2147483646):  the same deal every run
+  --target <name>  run it as `ts` or `py` compiles it -- a Python app that draws
+                   is served on Quart
+  -h, --help       display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell test --help
+Usage: spell test [options] [projects...]
+
+run each `to test ...` in projects, reporting ✓ or ✗ -- exits 1 if any fail
+
+Arguments:
+  projects       spell files, project folders, or addresses -- default the
+                 project here, else asks
+
+Options:
+  --name <text>  only tests whose names contain this, e.g. "deck creation"
+  --watch        run them again whenever a project changes -- spell watch --test
+  --seed <n>     start the random numbers from this whole number (1 to
+                 2147483646):  the same deal every run
+  -h, --help     display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell watch --help
+Usage: spell watch [options] [projects...]
+
+recompile projects whenever their files change, showing their errors -- until q
+or Ctrl-C
+
+Arguments:
+  projects       spell files, project folders, or addresses -- default the
+                 project here, else asks
+
+Options:
+  --check-only   re-check instead of recompiling:  writes nothing
+  --test         run each project's tests after each rebuild with no errors
+  --name <text>  with --test:  only tests whose names contain this
+  -h, --help     display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell format --help
+Usage: spell format [options] [projects...]
+
+tidy the whitespace of .spell files, as VS Code's Format Document does -- never
+in the test projects
+
+Arguments:
+  projects    spell files, project folders, or addresses -- default the project
+              here, else asks
+
+Options:
+  --check     write nothing:  list files that would change, exiting 1 if any
+              would
+  -h, --help  display help for command
+
+Projects:
+  Card.spell, ./path/to/Project        a spell file, or the project in a folder
+  @here                                the project in the current folder
+  @spell/library/cards, owen@spell/x   one project, by its address
+  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                               the project here -- or, outside one, asks, completing as you type
+
+
+##### spell speedtest --help
+Usage: spell speedtest [options] [module]
+
+time the parser's rule tests -- --against HEAD to compare with a commit
+
+Arguments:
+  module           only this module's rules, e.g. if
+
+Options:
+  --runs <count>   runs per side, each a fresh process (default: 3)
+  --against <ref>  time this git commit too, e.g. HEAD, in a temp worktree
+  --json           print each side's combined results as JSON
+  -h, --help       display help for command
+
+
+##### spell parse --help
+Usage: spell parse [options] <text>
+
+how spell reads a line:  its match tree, then the javascript it compiles to
+
+Arguments:
+  text            a line of spell, e.g. "print 1 + 2" -- several lines parse as
+                  a block
+
+Options:
+  --rule <name>   parse as this rule only, e.g. expression -- default statement,
+                  then expression
+  --in <project>  parse inside this project's scope, e.g. @spell/test/solitaire
+  --json          print the result as JSON
+  --tree          print the spell tree -- what it means -- not the match tree;
+                  with --json:  its data
+  --html          with --tree:  print it as a <ui-tree-diagram> for a docs page
+  -h, --help      display help for command
+
+
+##### spell repl --help
+Usage: spell repl [options] [project]
+
+spell parse, a line at a time -- what a line declares, later lines know.  Piped:
+reads stdin
+
+Arguments:
+  project     parse inside this project's scope, e.g. @spell/test/solitaire
+
+Options:
+  -h, --help  display help for command
+
+
+##### spell explain --help
+Usage: spell explain [options] <word>
+
+what a word means to spell:  rules it names or starts -- and, --in a project,
+what it declares
+
+Arguments:
+  word            e.g. print, repeat -- or, with --in, a type, property or
+                  method
+
+Options:
+  --in <project>  look in this project too, e.g. @spell/test/solitaire
+  --json          print what was found as JSON
+  -h, --help      display help for command
+
+
+##### spell icon --help
+Usage: spell icon [options] [query...]
+
+find Spell UI's icons by name, alias or keyword -- --open shows them in a
+browser
+
+Arguments:
+  query        words to look for, e.g. bell -- none:  every icon
+
+Options:
+  --pack <id>  only this pack:  fa7-free, fa7-brands or fomantic
+  --json       print the icons found as JSON
+  --open       show them as pictures in a browser, until Ctrl-C
+  -h, --help   display help for command
+
+
+##### spell ssr --help
+Usage: spell ssr [options] <pages...>
+
+ui-* pages as plain HTML for crawlers and no-JS readers:  page.static.html +
+ui.static.css
+
+Arguments:
+  pages                html pages, or folders of them -- writes each as
+                       <page>.static.html beside it
+
+Options:
+  -o, --output <path>  write the page here -- or, for several, into this folder
+  --inline-css         put each page's stylesheet in a <style> in the page, not
+                       the folder's ui.static.css
+  --css <file>         write ONE stylesheet, for every page, here (default:
+                       ui.static.css per folder)
+  --no-minify          leave the stylesheet readable
+  -h, --help           display help for command
+
+
+##### spell pack --help
+Usage: spell pack [options] [command]
+
+component packs:  a repo's custom elements, loaded on demand by <ui-root> --
+create, add, build, check
+
+Options:
+  -h, --help                  display help for command
+
+Commands:
+  create [options] <name>     make spell-<name>/, a component pack that is a
+                              repo of its own, laid out as spell-brand is
+  add [options] <pack> <tag>  add one element to a pack:  components/<tag>/, its
+                              test, its line in components/index.ts
+  build [options] <pack>      build a pack's components/__pack/:  its catalog,
+                              its entry, the script a page loads
+  check [options] [pack]      say whether a pack's components/__pack/ is current
+                              -- exits 1 when one is stale
+  help [command]              display help for command
+
+
+##### spell pack create --help
+Usage: spell pack create [options] <name>
+
+make spell-<name>/, a component pack that is a repo of its own, laid out as
+spell-brand is
+
+Arguments:
+  name               the pack's name, e.g. cards:  its repo is spell-cards
+
+Options:
+  --prefix <prefix>  every tag's prefix, e.g. card- (default the pack's own,
+                     else <name>-)
+  --no-build         write the files, don't build the pack
+  --json             print the report as JSON
+  -h, --help         display help for command
+
+
+##### spell pack add --help
+Usage: spell pack add [options] <pack> <tag>
+
+add one element to a pack:  components/<tag>/, its test, its line in
+components/index.ts
+
+Arguments:
+  pack        the pack, e.g. brand
+  tag         the element's tag, starting with the pack's prefix, e.g.
+              brand-card
+
+Options:
+  --no-build  write the files, don't build the pack
+  --json      print the report as JSON
+  -h, --help  display help for command
+
+
+##### spell pack build --help
+Usage: spell pack build [options] <pack>
+
+build a pack's components/__pack/:  its catalog, its entry, the script a page
+loads
+
+Arguments:
+  pack        the pack, e.g. brand
+
+Options:
+  --json      print the report as JSON
+  -h, --help  display help for command
+
+
+##### spell pack check --help
+Usage: spell pack check [options] [pack]
+
+say whether a pack's components/__pack/ is current -- exits 1 when one is stale
+
+Arguments:
+  pack        the pack, e.g. brand -- none:  every pack in the kit
+
+Options:
+  --json      print the report as JSON
+  -h, --help  display help for command
+
+
+##### spell design --help
+Usage: spell design [options] [command]
+
+Spell's claude.ai design system:  build its files and bundle, check it, pull a
+board, track pushes
+
+Options:
+  -h, --help         display help for command
+
+Commands:
+  build [args...]    write the design system's files:  --out <dir> (default
+                     build/design-system/)
+  bundle [args...]   write its bundle.js, spell-brand's:  --out <dir>,
+                     --skip-ui-build
+  check [args...]    prove the bundle is inlined and works on a Design board:
+                     [bundle] [outDir]
+  pull [args...]     pull a Design board as a page:  <board.dc.html> <page.html>
+  changed [args...]  what changed in the design system since it was last pushed
+  pushed [args...]   record that the design system was pushed to claude.ai
+  state [args...]    where the design system's push record stands
+  help [command]     display help for command
+
+
+##### spell design build --help
+node:internal/util/parse_args/parse_args:102
+      throw new ERR_PARSE_ARGS_UNKNOWN_OPTION(
+            ^
+
+TypeError [ERR_PARSE_ARGS_UNKNOWN_OPTION]: Unknown option '--help'
+    at checkOptionUsage (node:internal/util/parse_args/parse_args:102:13)
+    at node:internal/util/parse_args/parse_args:377:9
+    at Array.forEach (<anonymous>)
+    at parseArgs (node:internal/util/parse_args/parse_args:374:3)
+    at <anonymous> (/Users/owen/www/spell.worktrees/readme/spell-ui/scripts/design-build.ts:21:20)
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  code: 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
+}
+
+Node.js v24.21.0
+
+
+##### spell design bundle --help
+node:internal/util/parse_args/parse_args:102
+      throw new ERR_PARSE_ARGS_UNKNOWN_OPTION(
+            ^
+
+TypeError [ERR_PARSE_ARGS_UNKNOWN_OPTION]: Unknown option '--help'
+    at checkOptionUsage (node:internal/util/parse_args/parse_args:102:13)
+    at node:internal/util/parse_args/parse_args:377:9
+    at Array.forEach (<anonymous>)
+    at parseArgs (node:internal/util/parse_args/parse_args:374:3)
+    at <anonymous> (/Users/owen/www/spell.worktrees/readme/spell-brand/scripts/design-bundle.ts:42:20)
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  code: 'ERR_PARSE_ARGS_UNKNOWN_OPTION'
+}
+
+Node.js v24.21.0
+
+
+##### spell design check --help
+!! no bundle at /Users/owen/www/spell.worktrees/readme/--help:  run `yarn design:bundle` first
+
+
+##### spell design pull --help
+usage:  spell design pull <board.dc.html> <page.html> [--title ...] [--from <design link>]
+
+
+##### spell design changed --help
+0 changed, 146 removed (in /Users/owen/www/spell.worktrees/readme/packages/ui/build/design-system)
+  - project/README.md
+  - project/components/Accordion/README.md
+  - project/components/Accordion/preview.html
+  - project/components/Ad/README.md
+  - project/components/Ad/preview.html
+  - project/components/BrandBlob/README.md
+  - project/components/BrandBlob/preview.html
+  - project/components/BrandChecklist/README.md
+  - project/components/BrandChecklist/preview.html
+  - project/components/BrandColor/README.md
+  - project/components/BrandColor/preview.html
+  - project/components/BrandColorPicker/README.md
+  - project/components/BrandColorPicker/preview.html
+  - project/components/BrandColorRange/README.md
+  - project/components/BrandColorRange/preview.html
+  - project/components/BrandColorSet/README.md
+  - project/components/BrandColorSet/preview.html
+  - project/components/BrandComposer/README.md
+  - project/components/BrandComposer/preview.html
+  - project/components/BrandField/README.md
+  - project/components/BrandField/preview.html
+  - project/components/BrandFlourish/README.md
+  - project/components/BrandFlourish/preview.html
+  - project/components/BrandLogo/README.md
+  - project/components/BrandLogo/preview.html
+  - project/components/BrandPhone/README.md
+  - project/components/BrandPhone/preview.html
+  - project/components/Breadcrumb/README.md
+  - project/components/Breadcrumb/preview.html
+  - project/components/Button/README.md
+  - project/components/Button/preview.html
+  - project/components/Calendar/README.md
+  - project/components/Calendar/preview.html
+  - project/components/Card/README.md
+  - project/components/Card/preview.html
+  - project/components/Checkbox/README.md
+  - project/components/Checkbox/preview.html
+  - project/components/Code/README.md
+  - project/components/Code/preview.html
+  - project/components/Comment/README.md
+  - project/components/Comment/preview.html
+  - project/components/Container/README.md
+  - project/components/Container/preview.html
+  - project/components/Cover/preview.html
+  - project/components/Dimmer/README.md
+  - project/components/Dimmer/preview.html
+  - project/components/Divider/README.md
+  - project/components/Divider/preview.html
+  - project/components/Dropdown/README.md
+  - project/components/Dropdown/preview.html
+  - project/components/Embed/README.md
+  - project/components/Embed/preview.html
+  - project/components/Emoji/README.md
+  - project/components/Emoji/preview.html
+  - project/components/Feed/README.md
+  - project/components/Feed/preview.html
+  - project/components/Flag/README.md
+  - project/components/Flag/preview.html
+  - project/components/Flyout/README.md
+  - project/components/Flyout/preview.html
+  - project/components/Form/README.md
+  - project/components/Form/preview.html
+  - project/components/Grid/README.md
+  - project/components/Grid/preview.html
+  - project/components/Header/README.md
+  - project/components/Header/preview.html
+  - project/components/Icon/README.md
+  - project/components/Icon/preview.html
+  - project/components/Image/README.md
+  - project/components/Image/preview.html
+  - project/components/Include/README.md
+  - project/components/Include/preview.html
+  - project/components/Input/README.md
+  - project/components/Input/preview.html
+  - project/components/Item/README.md
+  - project/components/Item/preview.html
+  - project/components/Items/README.md
+  - project/components/Items/preview.html
+  - project/components/Label/README.md
+  - project/components/Label/preview.html
+  - project/components/List/README.md
+  - project/components/List/preview.html
+  - project/components/Loader/README.md
+  - project/components/Loader/preview.html
+  - project/components/Markdown/README.md
+  - project/components/Markdown/preview.html
+  - project/components/Menu/README.md
+  - project/components/Menu/preview.html
+  - project/components/Message/README.md
+  - project/components/Message/preview.html
+  - project/components/Modal/README.md
+  - project/components/Modal/preview.html
+  - project/components/Nag/README.md
+  - project/components/Nag/preview.html
+  - project/components/Panel/README.md
+  - project/components/Panel/preview.html
+  - project/components/Placeholder/README.md
+  - project/components/Placeholder/preview.html
+  - project/components/Popup/README.md
+  - project/components/Popup/preview.html
+  - project/components/Progress/README.md
+  - project/components/Progress/preview.html
+  - project/components/Rail/README.md
+  - project/components/Rail/preview.html
+  - project/components/Rating/README.md
+  - project/components/Rating/preview.html
+  - project/components/Reveal/README.md
+  - project/components/Reveal/preview.html
+  - project/components/Root/README.md
+  - project/components/Root/preview.html
+  - project/components/Search/README.md
+  - project/components/Search/preview.html
+  - project/components/Section/README.md
+  - project/components/Section/preview.html
+  - project/components/Segment/README.md
+  - project/components/Segment/preview.html
+  - project/components/Select/README.md
+  - project/components/Select/preview.html
+  - project/components/Shape/README.md
+  - project/components/Shape/preview.html
+  - project/components/Sidebar/README.md
+  - project/components/Sidebar/preview.html
+  - project/components/Slider/README.md
+  - project/components/Slider/preview.html
+  - project/components/Statistic/README.md
+  - project/components/Statistic/preview.html
+  - project/components/Step/README.md
+  - project/components/Step/preview.html
+  - project/components/Sticky/README.md
+  - project/components/Sticky/preview.html
+  - project/components/Tab/README.md
+  - project/components/Tab/preview.html
+  - project/components/Table/README.md
+  - project/components/Table/preview.html
+  - project/components/Text/README.md
+  - project/components/Text/preview.html
+  - project/components/Toast/README.md
+  - project/components/Toast/preview.html
+  - project/components/Transition/README.md
+  - project/components/Transition/preview.html
+  - project/components/Visibility/README.md
+  - project/components/Visibility/preview.html
+  - project/components/bundle.js
+  - project/components/index.d.ts
+  - project/design-system.json
+  - project/tokens.json
+
+
+##### spell design pushed --help
+recorded 0 files as pushed to https://claude.ai/artifact/HwojVscPQunr6wctZ57Kz6
+
+
+##### spell design state --help
+https://claude.ai/artifact/HwojVscPQunr6wctZ57Kz6  pushed 2026-10-22T01:19:54.053Z, 0 files
+
+
+##### spell app --help
+Usage: spell app [options] [command]
+
+the spell app:  a new project, the editor, the VS Code extension
+
+Options:
+  -h, --help                 display help for command
+
+Commands:
+  create [options] <name>    make a spell project:  <name>/__project.json5 and a
+                             starter <name>.spell
+  serve [options] [project]  run the spell app -- editor and server, which saves
+                             to disk -- and open it, until Ctrl-C
+  vscode [options]           the VS Code extension:  build its .vsix, install it
+                             into VS Code -- no verb does both
+  help [command]             display help for command
+
+
+##### spell app create --help
+Usage: spell app create [options] <name>
+
+make a spell project:  <name>/__project.json5 and a starter <name>.spell
+
+Arguments:
+  name           the project's name, e.g. Snake
+
+Options:
+  --in <folder>  make it in this folder -- default owen@spell's, your space in
+                 spell-spaces
+  -h, --help     display help for command
+
+
+##### spell app serve --help
+Usage: spell app serve [options] [project]
+
+run the spell app -- editor and server, which saves to disk -- and open it,
+until Ctrl-C
+
+Arguments:
+  project        open the editor on this, e.g.
+                 @spell/examples/drawable-solitaire -- default the project here,
+                 else the chooser
+
+Options:
+  --port <port>  the editor's port, for a page server this starts -- default
+                 3000, else any free one
+  --headless     don't open a browser:  just print the URL
+  -h, --help     display help for command
+
+
+##### spell app vscode --help
+Usage: spell app vscode [options] [command]
+
+the VS Code extension:  build its .vsix, install it into VS Code -- no verb does
+both
+
+Options:
+  --force            build or install even from a branch behind main (which
+                     downgrades every window)
+  -h, --help         display help for command
+
+Commands:
+  build [options]    build the extension's .vsix
+  install [options]  install the built .vsix into VS Code
+
+
+##### spell app vscode build --help
+Usage: spell app vscode build [options]
+
+build the extension's .vsix
+
+Options:
+  --force     even from a branch behind main
+  -h, --help  display help for command
+
+
+##### spell app vscode install --help
+Usage: spell app vscode install [options]
+
+install the built .vsix into VS Code
+
+Options:
+  --force     even from a branch behind main
+  -h, --help  display help for command
+
+
+##### spell projects --help
+Usage: spell projects [options] [group]
+
+list the project groups -- or, given one, the projects in it
+
+Arguments:
+  group       a project group, e.g. @spell/library or owen@spell
+
+Options:
+  --json      print the list as JSON
+  -h, --help  display help for command
+
+
+##### epic --help
+Usage: epic <verb> <epic>[#<id>] [arguments]
+
+Work with epics:  their pages (epics/<name>/), the pages Owen answers on,
+worktrees, sessions, windows, agents, airplane mode.
+
+Options:
+  -V, --version  the code this epic runs:  its commit, branch and checkout
+  -h, --help     display help for command
+
+Requests from other sessions:
+  send           send an epic a request:  Owen's words and screenshots;  no
+                 epic:  the tooling home
+  requests       every request sent to an epic, and where each went
+  file           file a request into a phase:  Owen's words and screenshots into
+                 its Requests field;  or, with no phase, mark where it went:
+                 "dropped:  done in P3"
+  home           the tooling home, the epic dev-tooling requests go to;  with an
+                 epic, set it
+  merge          a standing epic's phase onto main at once, fast-forward only;
+                 run in the main checkout
+
+Epic page:  making and reading:
+  new            make an epic page from the template;  --future:  an idea for
+                 later, not planned yet;  --saga:  the saga it serves
+  list           every epic:  in progress, future or done, where it runs, items
+                 not reviewed
+  summary        an epic's phases, the next one, its open questions, issues,
+                 caveats and todos
+  summaries      `summary --json` of each page, by path (worktrees' too), for
+                 /epics
+  items          what a review walks:  sections, counts, items, the queue
+  docs           the docs an epic wrote besides its page, and its changelog
+                 entry (for /docs-check)
+  decisions      what an epic's page settled:  phases' Done and Updated notes,
+                 items' answers
+  open           show an epic's page in VS Code's side bar:  Spell Docs, or with
+                 --review the Review tab
+  check          ids, #id links, phases, parts;  its links;  then the browser
+                 check
+
+Epic page:  phases:
+  add-phase      add a phase:  what's wrong (symptom), what changes;  --before N
+                 inserts it as PN
+  update         set a phase's or an item's fields, or the page's flags
+  updated        a change to a phase's plan:  an Update block at the end of its
+                 description
+  phase          set a phase's status;  done:  --done writes what was built
+  commit         list a commit under a phase or an item (replacing its entry
+                 there)
+  commits        every phase and item commit in the page's history, into their
+                 lists
+
+Epic page:  items:
+  add            add an item (J judgement, Q question, I issue, C caveat, T
+                 todo, V test, D decision)
+  calm           items not urgent (yellow), as the page's id chip does;  --loud:
+                 urgent (red) again
+  decide         answer a question:  the answer goes into it;  --option marks
+                 the chosen option
+  choose         an option Owen settled in conversation, on ANY item, recorded
+                 as the page's pick does:  chosen on its latest card set (--set
+                 N:  the Nth), the item answered / closed / reviewed, a Noted
+                 card
+  close          close an item:  done
+  reopen         open a closed or canceled item again
+  cancel         an item made moot by another decision:  struck through
+  details        write an agent's details or reply into an item;  --append adds
+                 it, --more under it
+  status         Claude's status card on an item:  underway (spinner on), done,
+                 or noted
+  restore        put earlier text (from git) into an item's Original Discussion
+  review         mark an item reviewed today;  the outcome goes in the log
+  defer          put an item off:  still not reviewed, dated
+  queue          work a review decided on, waiting to be done
+  unqueue        off the to-do list:  started, or dropped
+
+Epic page:  the review inbox:
+  inbox          the marks and comments Owen sends from the page, and how a
+                 review session takes them
+  test           Owen's test run:  the page in the Review tab, one test at a
+                 time, answered on the page;  --all:  every epic's;  --list:
+                 the open tests
+
+Epic page:  log and upkeep:
+  log            a timestamped line in the page's log
+  prompt         set the prompt that started the epic ("" removes it)
+  bedtime        a /bedtime run:  start turns bedtime mode on (changes stay
+                 green until reviewed), done off
+  overnight      an older page's Overnight report section (before 2026-10-05):
+                 gone, once read
+  backfill       items Owen already went through in past sessions:  a dry run
+                 unless --apply
+  convert        rewrite pages from the old markup into <epic-*> markup, into
+                 --out only
+  split          store a page as a skeleton plus part files;  --done:  every
+                 finished epic
+  join           a split page back into one file
+  migrate        bring pages up to today's markup, every step of their kind;
+                 safe to run again
+
+Sagas:
+  saga           the sagas (epics of epics):  their list in order, and the saga
+                 each epic serves
+
+Worktrees, sessions and parked work:
+  worktree       git worktrees:  the live sessions and where they work, where a
+                 name stands, merging main in
+  session        Claude Code sessions:  list, find, open in VS Code, title this
+                 one, mark finished ones ✅, digest a transcript
+  park           parked work:  the PARKED notes, what /wait-for could wait on,
+                 waiting for a name to finish
+  stock          take stock:  worktrees, branches, sessions, parked work, plans
+                 -- in process, hung or parked, dead
+
+Shared content:
+  shared         shared content:  docs pages, sagas and logs in the content
+                 folder, a repo beside the checkout, read from there;  a
+                 checkout links in only the folders its config names
+                 (sharedFolders)
+
+Windows and the page server:
+  window         VS Code windows per package and worktree:  open, close,
+                 handoff, show, stay-check ...
+  server         this checkout's page server;  start --all:  every web server
+                 (page server, editor, Spell UI)
+  hub            the machine's ONE epic server:  every registered repo's pages,
+                 the engine's assets, the epic routes
+  pages          the docs pages:  the home and list pages (index), a new page, a
+                 page's links, opening one, its writing
+  repo           the repos the epic server serves (~/.spell-epic/repos.json5):
+                 add, list, remove, default
+
+The repo's settings:
+  config         where this repo keeps its epic things (.epic/config.json5):  a
+                 value, or all of them
+  init           set this repo up for epics:  its .epic/config.json5, the
+                 content repo beside it, the links and their .gitignore lines;
+                 safe to run again
+
+Pages Owen answers on, agents, airplane mode:
+  ask            details pages:  a question explained on a page in VS Code's
+                 side bar, Owen answering on it
+  choices        choice pages:  a table of names Claude recommends, Owen's call
+                 on each
+  comments       comments Owen leaves on docs pages:  list, wait for, gather,
+                 mark and answer them
+  notes          page notes Owen left on docs pages (before comments):  list,
+                 answer, mark done
+  agents         the running-agents list of this epic (else this checkout):
+                 what each background agent is doing
+  airplane       airplane mode:  the docs worked on with no Claude, everything
+                 kept for /airplane land
+
+Commands:
+  help           show help -- for one verb, e.g. epic help update
+
+Naming what a verb acts on:
+  seo                 the epic's page, epics/seo/seo.plan.html
+  seo#J3              an item:  J3 (a comment on the page, seo#M3, too;  m3, cm3 read the same)
+  seo#P3              a phase:  P3, or by its id, seo#p-epic-migrate;  phase, updated and file take its name
+                      too:  seo#epic-migrate, "seo#Epic Migrate"
+  seo#J               a new item of that kind, for add:  epic add seo#J "Title"
+  SAGA:/epics         a saga's page, sagas/epics/epics.saga.html:  epic add SAGA:/epics#T "Title"
+  guides/x.html#M3    a comment on a docs page, for epic comments (and a page note, guides/x.html#n3)
+
+Examples:
+  epic summary seo
+  epic phase seo#P3 done --done "<ul><li>...</li></ul>"
+  epic update seo#P3 --goal "<p>...</p>" --estimate 2h
+  epic status seo#J3 underway "Writing the answer"
+  epic inbox seo wait
+
+epic <verb> --help says more about each;  an id always goes after a #, never as a word of its own.

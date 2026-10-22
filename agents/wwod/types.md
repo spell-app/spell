@@ -224,7 +224,8 @@ From:  original WWOD §11, root `AGENTS.md` "Functions", "Types / Exports" (type
   export type ProjectRootPath = `@${string}:${string}`
   ```
 
-- **Ambient globals used bare**, no import:  the toolchain's `spell-kit/toolchain/types` -- the list:  root `AGENTS.md` "Aliases and global types".
+- **Ambient globals used bare**, no import:  the toolchain's `spell-kit/toolchain/types` --
+  the list:  the kit's `src/toolchain/AGENTS.md` "Overview".
 
 - **Names assume the namespace:**
   - Assume references to types will be namespaced (WWOD §4), so don't repeat what the namespace already says:

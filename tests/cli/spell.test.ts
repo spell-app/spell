@@ -93,6 +93,31 @@ process.exit(3)
     expect(server(["prune", "--dry-run"])).toMatchObject({ args: ["prune", "--dry-run"] })
   })
 
+  // the command line finds the kit itself (`pageServerRoot()`, epic `repo-split` P16):  no `--root` added (I62's)
+  test("inside a kit:  its arguments verbatim, from any folder", () => {
+    const kit = join(temp, "kit")
+    const app = join(kit, "app")
+    mkdirSync(join(kit, "src", "server", "page"), { recursive: true })
+    mkdirSync(join(kit, "lower", ".git"), { recursive: true })
+    mkdirSync(join(app, ".git"), { recursive: true })
+    mkdirSync(join(kit, ".git"), { recursive: true })
+    writeFileSync(
+      join(kit, "src", "server", "page", "cli.ts"),
+      `console.log(JSON.stringify({ args: process.argv.slice(2) }))\n`
+    )
+    writeFileSync(join(kit, "tsconfig.node.json"), "{}")
+    writeFileSync(join(kit, "package.json"), `{ "type": "module" }`)
+    writeFileSync(join(kit, "repos.json5"), `{ repos: [{ name: "lower" }, { name: "app" }] }`)
+    writeFileSync(join(kit, "lower", "package.json"), `{ "name": "lower", "spell": {} }`)
+    writeFileSync(join(app, "package.json"), `{ "name": "app", "spell": {}, "pageServer": {} }`)
+    const run = (args: string[], cwd: string) =>
+      JSON.parse(spell(["server", ...args], cwd).stdout) as { args: string[] }
+    expect(run(["status"], kit).args).toEqual(["status"])
+    expect(run(["start"], join(kit, "lower")).args).toEqual(["start"])
+    expect(run(["status"], app).args).toEqual(["status"])
+    expect(run(["status", "--root", "."], kit).args).toEqual(["status", "--root", "."])
+  })
+
   test("stop, and stop local:  the page server's stop;  another word is a usage error", () => {
     expect(server(["stop"])).toMatchObject({ args: ["stop"] })
     expect(server(["stop", "local"])).toMatchObject({ args: ["stop"] })

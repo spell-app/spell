@@ -1,24 +1,26 @@
 import { existsSync, readFileSync, rmSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { join } from "node:path"
 
 import { SRV } from "spell-kit/server"
-import { PageServer, findRoot, pageServerSettings } from "spell-kit/server/page"
+import { PageServer, pageServerRoot, pageServerSettings } from "spell-kit/server/page"
 import { CLI } from "spell-kit/cli"
 
 /**
- * `spell server ...`:  this checkout's page server, and every web server of the checkout.
+ * `spell server ...`:  the kit's page server, and every web server of the kit.
  * - `pageServer()`:  `local`, `start`, `status`, `url <file>`, `prune`:  the page server's own command line
  *   (`src/server/page/cli.ts`), its arguments verbatim;  root `yarn server` runs the same file
  * - `startAll()`:  `spell server start all`
  * - `stopServers()`:  `spell server stop [local|all]`
+ * - Which server:  the kit's, from any folder of it (`pageServerRoot()`, epic `repo-split` P16)
  */
 
 /** The page server's command line, as `runTool()` runs it:  under `tsx`, with the kit's node settings. */
 const PAGE_SERVER_CLI: CLI.ToolSpec = { tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" }
 
 /**
- * Run the page server's own command line (`src/server/page/cli.ts`) with `args` verbatim, in the current folder:
- * its checkout is the one the current folder is in (`--root` says another).  Resolves to its exit code.
+ * Run the page server's own command line (`src/server/page/cli.ts`) with `args` verbatim, in the current folder;
+ * resolves to its exit code.
+ * - Its checkout:  the kit the folder is in, from any folder of it (`pageServerRoot()`);  `--root` says another.
  */
 export function pageServer(args: string[]): Promise<number> {
   return CLI.runTool(PAGE_SERVER_CLI, args)
@@ -31,10 +33,10 @@ export function pageServer(args: string[]): Promise<number> {
 /**
  * `spell server start all`:  start every web server of the checkout that isn't running, wait until each answers,
  * and print where they are.  What `/spell-serve` runs, and `/spell-docs` before it shows a page.
- * - Which checkout:  `serversRoot()`.
+ * - Which checkout:  the kit the current folder is in (`pageServerRoot()`).
  * - The PAGE SERVER:  docs, epic pages, the app's `/api`.  Started in the background if it isn't running.
  * - The EDITOR (Vite, the spell app):  the page server's child (spell-app's `EditorServer`), started once the page
- *   server listens;  this waits for its record, `.spell-server.editor.json`, to answer.
+ *   server listens;  this waits for its record, `.spell-server.editor.json` at the page server's root, to answer.
  *   Only where the page server's settings run spell-app's routes (`appRoutes`).
  * - SPELL UI's docs site:  static pages the page server itself serves at `/components/ui/`;  this checks its bundle
  *   answers (`/components/ui/_assets/site.js`:  not committed;  the page server builds it when it starts, if stale).
@@ -43,7 +45,7 @@ export function pageServer(args: string[]): Promise<number> {
  * - Was spell-app's `scripts/serve.mjs` (`yarn serve`) until epic `repo-split` P13.
  */
 export async function startAll(): Promise<number> {
-  const root = serversRoot()
+  const root = pageServerRoot(process.cwd())
   const settings = pageServerSettings(root)
   const page = await PageServer.ensure(root)
   const rows: ServerRow[] = [
@@ -58,32 +60,6 @@ export async function startAll(): Promise<number> {
   if (settings.componentSets?.ui) rows.push(await spellUIRow(page.base))
   CLI.out(serverLines(root, rows).join("\n"))
   return rows.some((row) => row.failed) ? CLI.EXIT.ERRORS : CLI.EXIT.OK
-}
-
-/**
- * The checkout whose servers `start all` and `stop all` mean:  the nearest folder from the current one up whose
- * `package.json` has page server settings (`"pageServer"`:  spell-app's);  else the first installed repo that has
- * them (`spell-app/`, from the kit's root);  else the nearest git checkout.
- */
-export function serversRoot(from = process.cwd()): string {
-  for (let dir = resolve(from); ; dir = dirname(dir)) {
-    if (hasPageServer(dir)) return dir
-    if (dirname(dir) === dir) break
-  }
-  const kit = CLI.findCheckout(CLI.KIT_MARKER, from)
-  const repo = CLI.spellRepos(kit).find((each) => hasPageServer(each.root))
-  return repo?.root ?? findRoot(from) ?? resolve(from)
-}
-
-/** Does `dir`'s `package.json` have page server settings? */
-function hasPageServer(dir: string): boolean {
-  const file = join(dir, "package.json")
-  if (!existsSync(file)) return false
-  try {
-    return "pageServer" in (JSON.parse(readFileSync(file, "utf8")) as object)
-  } catch {
-    return false
-  }
 }
 
 /** One server `start all` reports. */
@@ -149,16 +125,15 @@ const UI_TIMEOUT_MS = 130_000
 
 /**
  * `spell server stop [local|all]`:
- * - `local` (default):  the page server of the checkout the current folder is in, as `src/server/page/cli.ts stop`
- *   (its editor stops with it)
- * - `all`:  every web server `start all` starts (`serversRoot()`):  the page server, then the editor too, from its
+ * - `local` (default):  the kit's page server, as `src/server/page/cli.ts stop` (its editor stops with it)
+ * - `all`:  every web server `start all` starts (`pageServerRoot()`):  the page server, then the editor too, from its
  *   record, when it's still running;  e.g. after the page server died without stopping it (kill -9)
  * - Throws `CliError` for another word.
  */
 export async function stopServers(which = "local"): Promise<number> {
   if (which === "local") return pageServer(["stop"])
   if (which !== "all") throw new CLI.CliError(`stop what?  '${which}':  local (default) or all`)
-  const root = serversRoot()
+  const root = pageServerRoot(process.cwd())
   const stopped = await new SRV.PidFile(root).stop()
   CLI.out(`page server:  ${stopped ? "stopped" : "not running"}`)
   CLI.out(`editor:  ${stopEditor(root)}`)
