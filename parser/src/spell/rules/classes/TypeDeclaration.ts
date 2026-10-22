@@ -1,5 +1,7 @@
 import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
+import { Synonyms } from "spell-lang/spell/rules/expressions"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
@@ -84,11 +86,13 @@ export class TypeDeclaration<
    * - A type only STUBBED by an earlier mention, or left by an earlier parse of this statement, is claimed instead --
    *   see `P.TypeScope.claim()`.
    * - An IMPORTED one is declared again anyway, so `SP.SpellDeclarations.checkImportClashes()` can report it.
+   * - Its `gender`, from the article it's declared with, e.g. `feminine` for `una carta es una cosa`
+   *   (epic `spanish` P8):  see `genderOf()`.
    */
   declareType(match: P.Match, superType: string, { itemType }: { itemType?: P.Datatype } = {}): void {
     const { groups, scope } = TypeDeclaration.named(match)
     const name = `${groups.type.value}`
-    const options = { itemType, aka: groups.aka && `${groups.aka.value}` }
+    const options = { itemType, aka: groups.aka && `${groups.aka.value}`, gender: TypeDeclaration.genderOf(match) }
     // TODO: complain if existing type is set up differently!
     const existing = scope.types?.get(name)
     if (existing && !(existing.parentScope instanceof P.ImportScope)) {
@@ -99,6 +103,17 @@ export class TypeDeclaration<
       return
     }
     scope.types?.add({ name, superType, declaredBy: match, ...options })
+  }
+
+  /**
+   * The gender of the type `match` declares, read off its article, e.g. `feminine` for `una carta es una cosa`:
+   * see `SP.Language.genderOf()`.
+   * - `undefined` in English, whose articles have none, and for a declaration with no article first,
+   *   e.g. `solitario es una aplicación`.
+   */
+  static genderOf(match: P.Match): string | undefined {
+    const article = Synonyms.matchAt(match.scope, "indefinite_article", match.tokens)
+    return article && SP.Language.of(match.scope).genderOf(Synonyms.formOf(article))
   }
 
   /**

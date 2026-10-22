@@ -12,6 +12,7 @@
     {
       "type": "Carta",
       "superType": "Thing",
+      "gender": "feminine",
       "defined": "/Carta.spell:71-92"
     },
     {
@@ -284,6 +285,7 @@
     {
       "type": "Mazo",
       "superType": "List",
+      "gender": "masculine",
       "itemType": "Carta",
       "defined": "/Mazo.spell:65-95"
     },
@@ -334,6 +336,7 @@
     {
       "type": "Pila",
       "superType": "List",
+      "gender": "feminine",
       "itemType": "Carta",
       "defined": "/Pila.spell:18-49"
     },

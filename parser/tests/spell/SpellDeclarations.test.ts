@@ -13,8 +13,11 @@ import { loadFixtureProject, parseSpellProject, summarize, type SpellSourceFile 
  * - `code`:  that, markers out, as its `<Project>.spell.js`
  * - `declarations`:  as its `<Project>.declarations.json5`, read back as another project would
  */
-function compiledProject(files: SpellSourceFile[], options: { version?: string; exports?: string[] } = {}) {
-  const { scope, files: parsed } = parseSpellProject(files)
+function compiledProject(
+  files: SpellSourceFile[],
+  options: { version?: string; exports?: string[]; parentScope?: P.Scope } = {}
+) {
+  const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
   const marked = SP.SpellProject.combineCompiled(parts)
   const { code, declarations } = SP.SpellDeclarations.split(marked, scope, options)
@@ -461,5 +464,29 @@ describe("SpellDeclarations, a type's short name", () => {
       { from: "@spell/library/bank", declarations }
     ])
     expect(imports.types.get("accounts")?.name).toBe("BankAccount")
+  })
+})
+
+/** A type's gender, `una carta es una cosa` (epic `spanish` P8), in another project. */
+describe("SpellDeclarations, a type's gender", () => {
+  test("goes into its declarations, and its type has it in a project that imports it", () => {
+    const { declarations } = compiledProject(
+      [{ path: "/Cartas.spell", contents: "una carta es una cosa\nun mazo es una lista de cartas" }],
+      { parentScope: SP.spanish.rootScope }
+    )
+    const genders = declarations.statements.filter((it) => it.type).map(({ type, gender }) => [type, gender])
+    expect(genders).toEqual([
+      ["Carta", "feminine"],
+      ["Mazo", "masculine"]
+    ])
+    const imports = SP.SpellDeclarations.importScope(SP.spanish.rootScope, [
+      { from: "@spell/library/cartas", declarations }
+    ])
+    expect(imports.types.get("Carta")?.gender).toBe("feminine")
+  })
+
+  test("an English type has none:  its declaration says nothing of one", () => {
+    const { declarations } = compiledProject([{ path: "/Card.spell", contents: "a card is a thing" }])
+    expect(declarations.statements.find((it) => it.type === "Card")).not.toHaveProperty("gender")
   })
 })

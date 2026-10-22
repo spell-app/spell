@@ -664,6 +664,18 @@ A kind that says so is saved in a file of its own.
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
       - Only on a type the project declares, all of whose super-types are its own or spell's:
         an imported type's importer may give it anything (`MemberReadExpression.warnIfUndeclared()`, `noteIf()`).
+    - an article that doesn't agree with its noun (epic `spanish` P8), the ONE warning no rule notes:
+      - e.g. `a apple` => `Did you mean "an apple"?`;  Spanish's `el carta` => `¿Querías decir "la carta"?`
+      - `BlockLine` notes it on each line's statement, once committed:  `SP.SpellWarnings.noteArticles()`.
+        So a type the line declares already has its gender.
+      - An article is a form of the language's `indefinite_article` / `definite_article` word rule
+        (`Synonyms.matchAt()`, `Synonyms.formOf()`);  its noun the words after it, up to a structural word.
+      - What agrees is the language pack's:  `SP.Language.agreement(article, noun, type)`,
+        each pack's `agreement.ts` (`languages/en/`, `languages/es/`).
+        - English:  `a` / `an` by the noun's first sound;  needs no type.
+        - Spanish:  gender and number, only for a noun naming a type.
+          A type's gender is read off its declaration's article (`TypeDeclaration.genderOf()`, `P.TypeScope.gender`),
+          and kept in its declarations;  the built-in types' are in the Spanish pack.
   - Editors show them as `DiagnosticSeverity.Warning` (`SpellLanguageService.diagnostics()`).
   - `spell compile` lists them after its errors, never counting them:  see "Language server".
 

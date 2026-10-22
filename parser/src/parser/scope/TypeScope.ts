@@ -25,6 +25,14 @@ export class TypeScope extends BlockScope {
    * - Normalized to PascalCase, like `name`.
    */
   declare aka?: string
+  /**
+   * The grammatical gender its name has, in the language it was declared in -- `undefined` for none.
+   * - e.g. `feminine` for `una carta es una cosa`, read off its declaration's article (epic `spanish` P8):
+   *   the language pack's `genderOf()` says which.
+   * - English types have none.
+   * - Read when a later article must agree with it, e.g. `el carta` warns "`la carta`?" -- see `SP.Language.agreement()`.
+   */
+  declare gender?: string
   /** If true, the type was created as a stub. */
   declare stub?: boolean
   /**
@@ -90,20 +98,22 @@ export class TypeScope extends BlockScope {
   /**
    * `declaredBy` really declares us, with `superType`:  we were stubbed by an earlier mention (see `getOrStub()`),
    * or left by an earlier parse of the same statement (see `sameStatement()`).
-   * - Clears `stub`, takes `declaredBy`, `superType`, its short name (`aka`) and -- for a list type -- `itemType`.
+   * - Clears `stub`, takes `declaredBy`, `superType`, its short name (`aka`), its `gender` and -- for a list type --
+   *   `itemType`.
    *   Journaled, so incremental parsing can take that back.
    * - Changes THIS object, NOT `types.replace()`:  matches parsed so far point at it (`data.scopeType`),
    *   and it may already hold property `classVariables`.
    * - `superType` MUST be right:  a project's declarations read it -- see `SP.SpellDeclarations`.
    */
-  claim(declaredBy: P.Match, superType?: string, { itemType, valueKind, aka }: ClaimListOptions = {}): void {
+  claim(declaredBy: P.Match, superType?: string, { itemType, valueKind, aka, gender }: ClaimListOptions = {}): void {
     const previous = {
       stub: this.stub,
       declaredBy: this.declaredBy,
       superType: this.superType,
       itemType: this.itemType,
       valueKind: this.valueKind,
-      aka: this.aka
+      aka: this.aka,
+      gender: this.gender
     }
     const next = {
       stub: false,
@@ -111,7 +121,8 @@ export class TypeScope extends BlockScope {
       superType: superType && P.classCase(superType),
       itemType,
       valueKind,
-      aka: aka && P.classCase(aka)
+      aka: aka && P.classCase(aka),
+      gender
     }
     Object.assign(this, next)
     // now IT declares us -- see `ScopeList.noteDeclared()`
@@ -341,10 +352,12 @@ export class TypeScope extends BlockScope {
   }
 }
 
-/** What else `TypeScope.claim()` takes:  for a list type, a value kind, a short name -- each optional. */
+/** What else `TypeScope.claim()` takes:  for a list type, a value kind, a short name, a gender -- each optional. */
 export type ClaimListOptions = {
   /** See `TypeScope.aka`. */
   aka?: string
+  /** See `TypeScope.gender`. */
+  gender?: string
   /** What it holds, e.g. `Card`. */
   itemType?: P.Datatype
   /** Its values, if it's a value kind. */
@@ -381,6 +394,8 @@ export type TypeScopeProps = {
   superType?: string
   /** See `TypeScope.aka`. */
   aka?: string
+  /** See `TypeScope.gender`. */
+  gender?: string
   /** If true, the type was created as a stub. */
   stub?: boolean
   /** See `TypeScope.valueKind`. */

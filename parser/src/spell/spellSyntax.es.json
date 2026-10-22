@@ -1250,7 +1250,7 @@
           "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "A WORD RULE whose forms all mean the same to spell, e.g. `is_or_are`, `(is|are)` (epic `spanish` P3).",
           "syntaxes": [
             {
@@ -3276,7 +3276,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/TypeDeclaration.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "A statement declaring a type -- which may take an OUTLINE body: `a card is a thing where:`, then indented lines all about cards, e.g. `- it has a deck` (epic page `outline-spell`).",
           "syntaxes": [],
           "aliases": ["statement"]

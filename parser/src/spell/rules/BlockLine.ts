@@ -46,6 +46,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
   /**
    * SIDE EFFECT: calls `statement.rule.mutateScope()` on the parsed statement (and on any nested block's
    * errors are folded in too), so a locked-in statement can e.g. add variables to `scope` as it's parsed.
+   * - SIDE EFFECT:  then notes a warning on the statement for each article which doesn't agree with its noun,
+   *   e.g. `a apple` -- see `SP.SpellWarnings.noteArticles()`.
    */
   parse(scope: P.Scope, lines: P.Token[]): P.Match | undefined {
     const line = lines[0]
@@ -131,6 +133,8 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         const nextItem = lines[1]
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined
         const committed = commitStatement(statement, nextItem)
+        // once committed:  a type this line declares has its gender -- see `SpellWarnings.noteArticles()`
+        SP.SpellWarnings.noteArticles(statement)
         const nestedBlockMatch = committed.body
         lineBodyMark = committed.bodyMark
         fromBody = committed.fromBody

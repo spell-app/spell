@@ -137,7 +137,10 @@ export class SpellDeclarations {
     const constantOutputs: Record<string, string> = {}
     for (const item of mine) {
       if (item instanceof P.TypeScope) {
-        if (!item.stub) merge({ type: item.name, superType: item.superType, aka: item.aka, itemType: item.itemType })
+        if (!item.stub) {
+          const { name: type, superType, aka, gender, itemType } = item
+          merge({ type, superType, aka, gender, itemType })
+        }
       } else if (item instanceof P.ScopeMethod) {
         merge(SpellDeclarations.methodDeclaration(item))
       } else if (item instanceof P.ScopeVariable) {
@@ -278,8 +281,8 @@ export class SpellDeclarations {
       const declaredAt = SpellDeclarations.declaredAt(projectId, declaration.defined)
       if (declaration.type) {
         const runtimeName = declaration.type === original.type ? undefined : original.type
-        const { type, superType, aka, itemType } = declaration
-        const props = { name: type, superType, aka, itemType, runtimeName, declaredAt }
+        const { type, superType, aka, gender, itemType } = declaration
+        const props = { name: type, superType, aka, gender, itemType, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
@@ -696,6 +699,7 @@ const PROP_ORDER = [
   "type",
   "superType",
   "aka",
+  "gender",
   "property",
   "asWritten",
   "classVariable",

@@ -253,6 +253,10 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
       - The old names (`is`, `can`, `will`, `has`) stay as aliases:  declarations compiled before say them.
     - [`Synonyms`](rules/expressions/Synonyms.ts):  forms that all mean the same, e.g. `is_or_are`, and the articles,
       `indefinite_article`, `definite_article`.
+      - Which form a person wrote:  `Synonyms.formOf(match)`.
+        An article must agree with its noun, a warning when it doesn't (`a apple`, `el carta`):
+        the language pack says what agrees, `SP.Language.agreement()` (epic `spanish` P8;  "Warnings" in
+        [PARSING.md](PARSING.md)).
     - Code that meets a word OUTSIDE a parse of its rule (a lookahead, a person's quoted phrase) asks
       `Wording.reads(scope, "is_or_is_not", word)`, never `word === "is"`.
     - A translation registers its own under the same names:
