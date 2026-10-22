@@ -106,4 +106,4 @@ classes.addRule(DrawSide, {
 })
 
 /** What `draw_side` takes in its quotes:  `draw its front`, the side's name captured. */
-const DRAW_SIDE = /^draw its ([a-z][\w-]*(?: [a-z][\w-]*)*)$/i
+const DRAW_SIDE = /^draw its (\p{L}[\p{L}\p{M}\d_-]*(?: \p{L}[\p{L}\p{M}\d_-]*)*)$/iu

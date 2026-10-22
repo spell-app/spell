@@ -1770,7 +1770,7 @@
           "ruleNames": ["property"],
           "internal": false,
           "file": "spell/src/rules/properties/Property.ts",
-          "line": 15,
+          "line": 12,
           "purpose": "ONE word naming a property: initial-lower-case, not in `identifierBlacklist`.",
           "syntaxes": [],
           "aliases": []

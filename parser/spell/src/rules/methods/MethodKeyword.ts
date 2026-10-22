@@ -9,7 +9,7 @@ import type { MethodArgData } from "./methods.shared"
  *   its raw, unmodified text to the rule's rulex `syntax`.
  */
 export class MethodKeyword extends P.Pattern<never, MethodArgData> {
-  @proto static pattern = /^[a-zA-Z][\w-]*$/
+  @proto static pattern = P.ALPHANUMERIC_WORD_WITH_DASHES
   @proto static highlightAs: P.HighlightKind = "function"
 
   /** Convert dashes to underscores so e.g. `at-rest` becomes `at_rest` in the generated method name. */

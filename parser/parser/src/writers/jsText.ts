@@ -11,8 +11,8 @@
 // ## Identifiers
 ////////////////
 
-/** A string legal as a bare (unquoted) JS property name or identifier. */
-const LEGAL_IDENTIFIER = /^[a-zA-Z][\w$]*$/
+/** A string legal as a bare (unquoted) JS property name or identifier:  a letter in any script, then letters, digits, `_` or `$`. */
+const LEGAL_IDENTIFIER = /^\p{L}[\p{L}\p{M}\d_$]*$/u
 
 /** `true` if `value` can be used as a bare JS property / identifier name, without quoting. */
 export function isLegalIdentifier(value: string): boolean {

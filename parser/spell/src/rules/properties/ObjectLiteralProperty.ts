@@ -52,7 +52,7 @@ export class NamedObjectLiteralProperty extends ObjectLiteralProperty {
 
   /** Quick test:  two words, the second starting with a capital letter. */
   test(_scope: P.Scope, tokens: P.Token[], start = 0) {
-    return /^[A-Z]/.test(`${tokens[start + 1]?.value ?? ""}`)
+    return /^\p{Lu}/u.test(`${tokens[start + 1]?.value ?? ""}`)
   }
 }
 properties.addRule(NamedObjectLiteralProperty, {

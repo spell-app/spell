@@ -10,7 +10,7 @@ import { core } from "./core.parser"
  */
 export class KeywordRule extends P.Pattern {
   static ruleName = "keyword"
-  @proto static pattern = /^[a-zA-Z][\w-]*$/
+  @proto static pattern = P.ALPHANUMERIC_WORD_WITH_DASHES
 
   /** Converts dashes to underscores when compiling, so `abc-def` outputs as valid JS identifier `abc_def`. */
   mapValue<T = string>(value: string): T {

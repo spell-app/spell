@@ -73,7 +73,7 @@ export class JSWriter extends ProgramWriter {
     return code.replace(PROJECT_IMPORT, (_line, imported: string, from: string) => {
       const renamed = imported.split(/,\s*/).map((name) => {
         const [there, here = there] = name.split(/\s+as\s+/) as [string, string?]
-        const isClass = /^[A-Z]/.test(there)
+        const isClass = /^\p{Lu}/u.test(there)
         const [thereName, hereName] = isClass ? [there, here] : [this.nameOf(there), this.nameOf(here)]
         return thereName === hereName ? thereName : `${thereName} as ${hereName}`
       })

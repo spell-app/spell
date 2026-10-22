@@ -107,7 +107,7 @@ export function sendTrigger(name: string, details: Record<string, unknown> = {})
 
 /** `name` in snake case, as Python names a type's thing:  `DiscardPile` and `discardPile` are `discard_pile`. */
 function snakeCase(name: string): string {
-  return name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase()
+  return name.replace(/([\p{Ll}\d])(\p{Lu})/gu, "$1_$2").toLowerCase()
 }
 
 /**

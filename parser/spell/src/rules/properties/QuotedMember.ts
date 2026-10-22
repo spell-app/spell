@@ -73,4 +73,4 @@ properties.addRule(QuotedMember, {
 })
 
 /** A word `quoted_member` takes inside its quotes. */
-const QUOTED_MEMBER_WORD = /^[A-Za-z][\w-]*$/
+const QUOTED_MEMBER_WORD = P.ALPHANUMERIC_WORD_WITH_DASHES

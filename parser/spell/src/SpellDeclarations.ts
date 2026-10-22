@@ -775,7 +775,7 @@ function toLiteral(value: unknown): string {
 
 /** `key` bare if it's an identifier, else quoted, e.g. `ruleName` but `"is-a"`. */
 function literalKey(key: string): string {
-  return /^[A-Za-z_$][\w$]*$/.test(key) ? key : toLiteral(key)
+  return /^[\p{L}_$][\p{L}\p{M}\d_$]*$/u.test(key) ? key : toLiteral(key)
 }
 
 /**

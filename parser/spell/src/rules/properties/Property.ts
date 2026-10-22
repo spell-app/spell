@@ -3,9 +3,6 @@ import { P } from "$/parser"
 import { identifierBlacklist } from "$/spell/rules/identifier-blacklist"
 import { properties } from "./properties.parser"
 
-/** Property name:  single lower-case-initial word, dashes and numbers OK, e.g. `foo`, `foo-bar2`. */
-const LOWER_INITIAL_WORD = /^[a-z][\w-]*$/
-
 /**
  * `property` rule:  ONE word naming a property:  initial-lower-case, not in `identifierBlacklist`.
  * - What a LOOSE read takes, e.g. `the is-set-up of the deck` -- see `property_expression`.
@@ -13,7 +10,7 @@ const LOWER_INITIAL_WORD = /^[a-z][\w-]*$/
  * - `mapValue()` converts dashes to underscores, e.g. `foo-bar` compiles as `foo_bar`.
  */
 export class Property extends P.Pattern {
-  @proto static pattern = LOWER_INITIAL_WORD
+  @proto static pattern = P.LOWER_INITIAL_WORD_WITH_DASHES
   @proto static blacklist = identifierBlacklist
   @proto static highlightAs: P.HighlightKind = "property"
 

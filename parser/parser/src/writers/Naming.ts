@@ -141,7 +141,7 @@ export class Naming {
   static wordsOf(name: string): string[] {
     return name
       .split(/[_$]+/)
-      .flatMap((part) => part.split(/(?<=[a-z0-9])(?=[A-Z])/))
+      .flatMap((part) => part.split(P.CAMEL_WORD_BOUNDARY))
       .filter(Boolean)
   }
 }

@@ -78,7 +78,7 @@ export function kindFromDatatype(datatype: P.Datatype | RegExpConstructor | unde
   if (datatype === "text" || datatype === "character") return "text"
   if (datatype === "number" || datatype === "integer") return "number"
   if (datatype === "choice") return "choice"
-  return /^[A-Z]/.test(datatype) ? datatype : undefined
+  return /^\p{Lu}/u.test(datatype) ? datatype : undefined
 }
 
 /**
@@ -89,13 +89,17 @@ export function kindFromDatatype(datatype: P.Datatype | RegExpConstructor | unde
 export function kindOfType(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   if (typeof datatype !== "string" || !datatype || datatype.startsWith("list")) return undefined
   if (Object.hasOwn(BUILT_IN_KINDS, datatype)) return BUILT_IN_KINDS[datatype as P.Datatype]
-  return /^[A-Z]\w*$/.test(datatype) ? datatype : undefined
+  return /^\p{Lu}[\p{L}\p{M}\d_]*$/u.test(datatype) ? datatype : undefined
 }
 
 /** Is `datatype` one spell knows:  built in, a list, or a type in PascalCase?  See `kindOfType()`. */
 export function isKnownType(datatype: P.Datatype | RegExpConstructor | undefined): boolean {
   if (typeof datatype !== "string" || !datatype) return false
-  return datatype.startsWith("list") || Object.hasOwn(BUILT_IN_KINDS, datatype) || /^[A-Z][\w$]*$/.test(datatype)
+  return (
+    datatype.startsWith("list") ||
+    Object.hasOwn(BUILT_IN_KINDS, datatype) ||
+    /^\p{Lu}[\p{L}\p{M}\d_$]*$/u.test(datatype)
+  )
 }
 
 /** What each of spell's built-in datatypes holds, as `kindOfType()` says it. */
@@ -151,7 +155,7 @@ export function attributeName(tag: string, name: string, changes: boolean): stri
     const isProperty = !name.startsWith("on") && !name.includes("-") && !ATTRIBUTES_ONLY.has(name)
     return isProperty && changes ? `prop:${name}` : name
   }
-  if (!name.startsWith("on") && /[a-z][A-Z]/.test(name)) return name.toLowerCase()
+  if (!name.startsWith("on") && /\p{Ll}\p{Lu}/u.test(name)) return name.toLowerCase()
   return name
 }
 
@@ -177,7 +181,7 @@ export function importedClasses(code: string): Map<string, [string, string]> {
   for (const [, names, from] of code.matchAll(PROJECT_IMPORT)) {
     for (const name of names!.split(/,\s*/)) {
       const [there, here = there] = name.split(/\s+as\s+/) as [string, string?]
-      if (/^[A-Z]/.test(there)) imported.set(here, [from!, there])
+      if (/^\p{Lu}/u.test(there)) imported.set(here, [from!, there])
     }
   }
   return imported

@@ -158,8 +158,8 @@ function compiledName(writer: SpellWordsWriter, name: string): string {
   return IDENTIFIER.test(name) ? writer.nameOf(name) : name
 }
 
-/** Is it a javascript identifier, written bare? */
-const IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+/** Is it a javascript identifier, written bare?  Any script:  `corazón` is one. */
+const IDENTIFIER = /^[\p{L}_$][\p{L}\p{M}\d_$]*$/u
 
 /** `text` without the double quotes a method read as a property is named with:  `"is face up"` => `is face up`. */
 function unquoted(text: string): string {

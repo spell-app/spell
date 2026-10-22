@@ -13,7 +13,7 @@ import { classes } from "./classes.parser"
  */
 export class ThingName extends P.Pattern {
   @proto static matchGroup = "name"
-  @proto static pattern = /^[A-Z][\w-]*$/
+  @proto static pattern = P.UPPER_INITIAL_WORD_WITH_DASHES
 
   getAST(match: P.MatchFor<this>): P.ASTStringLiteral {
     return new P.ASTStringLiteral(match, { value: `${match.value}`, quote: '"' })

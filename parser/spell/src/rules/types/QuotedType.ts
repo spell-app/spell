@@ -59,4 +59,4 @@ types.addRule(QuotedType, {
 })
 
 /** What `quoted_type` takes inside its quotes:  one word, dashes OK. */
-const QUOTED_TYPE_NAME = /^[A-Za-z][\w-]*$/
+const QUOTED_TYPE_NAME = P.ALPHANUMERIC_WORD_WITH_DASHES
