@@ -50,7 +50,7 @@ class Card extends Thing {
   draw(): Drawing {
     drawCalls.set(this, (drawCalls.get(this) ?? 0) + 1)
     if (this.isBroken) throw new Error("this card is broken")
-    return h("span", { class: "card" }, () => `${this.rank} ${this.suit}`) as Drawing
+    return h("span", { class: "card" }, () => `${this.rank} ${this.suit}`) as unknown as Drawing
   }
 }
 
@@ -64,7 +64,7 @@ const madeNodes: Element[] = []
 class PlainCard extends Card {
   override draw(): Drawing {
     drawCalls.set(this, (drawCalls.get(this) ?? 0) + 1)
-    return h("i", { ref: (node: Element) => madeNodes.push(node) }, () => this.suit) as Drawing
+    return h("i", { ref: (node: Element) => madeNodes.push(node) }, () => this.suit) as unknown as Drawing
   }
 }
 
@@ -74,7 +74,7 @@ class PlainPile extends List<Card> {
     drawCalls.set(this, (drawCalls.get(this) ?? 0) + 1)
     return h("div", { class: "pile", ref: (node: Element) => madeNodes.push(node) }, () =>
       core.drawItems(this)
-    ) as Drawing
+    ) as unknown as Drawing
   }
 }
 
@@ -95,7 +95,7 @@ class HalfCard extends Card {
     const broken = () => {
       throw new Error("no face")
     }
-    return h("div", { class: "half" }, h(broken)) as Drawing
+    return h("div", { class: "half" }, h(broken)) as unknown as Drawing
   }
 }
 
@@ -111,7 +111,7 @@ class LiveCard extends Card {
 class Pile extends List<Card> {
   @drawn
   override draw(): Drawing {
-    return h("div", ...this.items.map((card) => () => card.draw())) as Drawing
+    return h("div", ...this.items.map((card) => () => card.draw())) as unknown as Drawing
   }
 }
 
@@ -184,6 +184,20 @@ describe("@drawn", () => {
     good.suit = "clubs"
     core.flush()
     expect(element.querySelector(".card")!.textContent).toBe("2 clubs")
+  })
+
+  test("a card added to a pile leaves a broken card's stand-in as it was:  not made again, not said again", () => {
+    const pile = new PlainPile()
+    pile.add(new PlainCard({ rank: "ace" }), new Card({ rank: 3, isBroken: true }))
+    draw(() => core.drawThing(pile))
+    const standIn = element.querySelector(".spell-draw-error")
+    expect(standIn).not.toBeNull()
+
+    pile.add(new PlainCard({ rank: 4, suit: "spades" }))
+    core.flush()
+    expect(element.querySelectorAll("i")).toHaveLength(2)
+    expect(element.querySelector(".spell-draw-error")).toBe(standIn)
+    expect(core.console.error).toHaveBeenCalledTimes(1)
   })
 
   test("drawThing() calls a @drawn draw() straight:  ONE boundary per thing, not two", () => {

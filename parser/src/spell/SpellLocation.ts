@@ -181,18 +181,6 @@ export class SpellLocation {
     return `/run/${SP.SpellUrls.encodeAddress(this.path)}`
   }
 
-  /**
-   * The address an app URL's tail names, after its `/edit/` or `/run/`, e.g. `@spell/examples/solitaire/Card.spell`.
-   * - Each part decoded on its own.
-   * - NOTE: says nothing of whether it's valid:  `new SpellLocation()` checks that.
-   */
-  static addressForUrl(tail: string): string {
-    return tail
-      .split("/")
-      .map((part) => decodeURIComponent(part))
-      .join("/")
-  }
-
   ////////////////
   // ## Get a path of the specified type or throw on invalid path.
   ////////////////
