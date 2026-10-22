@@ -248,7 +248,8 @@ export class ValueSets {
    * - `undefined` for free-form kinds (`string`, `number`, `json`, `width`, `keyOnly`).
    */
   static setFor(spec: AttributeSpec): ValueSetName | readonly string[] | undefined {
-    return spec.values ?? KIND_VALUES[spec.kind]
+    const kindValues: Partial<Record<AttributeKind, ValueSetName>> = KIND_VALUES
+    return spec.values ?? kindValues[spec.kind]
   }
 
   ////////////////
@@ -317,15 +318,18 @@ export class ValueSets {
 /** Columns of Fomantic's grid:  what a width counts out of (`width="4"` ~== a quarter). */
 const GRID_COLUMNS = 16
 
-/** Default value set per attribute kind, for `ValueSets.setFor()`. */
-const KIND_VALUES: Partial<Record<AttributeKind, ValueSetName>> = {
+/**
+ * Default value set per attribute kind, for `ValueSets.setFor()`.
+ * - `as const`:  `KindValueSets` reads it too, so `kind: "size"` types as the sizes.
+ */
+const KIND_VALUES = {
   color: "hues",
   size: "sizes",
   textAlign: "alignments",
   verticalAlign: "verticalAlignments",
   multiple: "devices",
   boolean: "booleans"
-}
+} as const satisfies Partial<Record<AttributeKind, ValueSetName>>
 
 /** `a/b` fraction of the full width. */
 const FRACTION = /^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/
@@ -336,11 +340,19 @@ const PERCENT = /^(\d+(?:\.\d+)?)\s*%$/
 /** Plain column count. */
 const NUMBER = /^\d+(?:\.\d+)?$/
 
+/** Each of `ValueSets`' sets by name => its values, as a union:  what `ValueSetValues` holds. */
+type ValuesBySet = { [Name in keyof ValueSets]: (typeof ValueSets)[Name][number] }
+
+/** `KIND_VALUES`' type, for `KindValueSets`:  an interface extends a named type only. */
+type KindDefaults = typeof KIND_VALUES
+
 /**
  * Spell UI's value sets and topics, added to spell-element's vocabulary types (where every set's vocabularies are
  * typed), so a vocabulary's `values: "hues"` and its `topics` are checked against this class.
+ * - And an attribute of a set reads as its values:  `this.size` is `"mini" | ... | "massive"`, not any text.
  */
 declare module "spell-kit/element/vocabulary.types" {
-  interface ValueSetNames extends Record<keyof ValueSets, true> {}
+  interface ValueSetValues extends ValuesBySet {}
+  interface KindValueSets extends KindDefaults {}
   interface TopicNames extends Record<(typeof ValueSets.topics)[number], true> {}
 }

@@ -326,6 +326,12 @@ export const SITE_PAGES = "docs"
 export const SITE_DATA = `${SITE_PAGES}/__data`
 
 /**
+ * Where a package's element families are, from its folder:  Spell UI's and the brand's alike,
+ * `src/components/<family>/` (every repo's code is under ONE `src/`, epic `repo-split` P14).
+ */
+export const COMPONENTS = "src/components"
+
+/**
  * Spell UI's docs site's BUILD, from the repo's root:  `site/`.
  * - `_src/`:  the bundle's entry;  `_assets/`:  the bundle (`yarn site:bundle`), never committed
  */
@@ -680,7 +686,8 @@ export type DesignSource = {
   group: string
   /** its site data, as its `yarn site:data` wrote it */
   data: SiteDataFile
-  /** where its family folders are, from Spell UI's folder (for `tokens.json`'s `meta`):  `../spell-brand/components` */
+  /** where its family folders are, from Spell UI's folder (for `tokens.json`'s `meta`):
+   * `../spell-brand/src/components` */
   componentsPath: string
   /** the files its cards are read from, from Spell UI's folder (for the same):  `../spell-brand/docs/brand-*.html` */
   docsPaths: string[]

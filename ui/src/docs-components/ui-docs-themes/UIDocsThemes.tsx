@@ -2,7 +2,6 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
-import type { UIDropdownAttributes } from "spell-ui/jsx"
 import {
   DOCS_PLAIN_THEME,
   type DocsLook,
@@ -359,9 +358,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         scrolling=""
         button=""
         inverted={this.inverted ? "" : undefined}
-        // HACK: `size` is checked against the sizes as it's read, but its type is `string`:
-        // the element core's attribute types don't know Spell UI's value sets
-        size={this.size as UIDropdownAttributes["size"]}
+        size={this.size}
         text={this.translationForKey("themeName")}
         value={this.chosenTheme}
         ref={(dropdown: HTMLElement) => dropdown.addEventListener("ui-change", (event) => this.onDropdownChange(event))}

@@ -5,7 +5,7 @@
  */
 import type {} from "spell-ui/jsx"
 
-/** What the types take:  a vocabulary's attributes, flags, values, HTML's globals, rich data. */
+/** What the types take:  a vocabulary's attributes, flags, values, HTML's globals, rich data as plain props. */
 export function allowed() {
   return (
     <>
@@ -14,6 +14,18 @@ export function allowed() {
       </ui-button>
       <ui-button basic={false} color="red" class="wide" id="save" onClick={() => {}} aria-label="Save" data-x="1" />
       <ui-button active-text="Following" inactive-text="Follow" toggle="" />
+      <ui-dropdown options={[{ value: "a" }]} />
+      <ui-dropdown value="a" open={true} />
+      <ui-root appContext={{ theme: "dark" }} />
+      <ui-code content="let x = 1" />
+    </>
+  )
+}
+
+/** Compiled spell's `prop:` names:  `@deprecated` (write the plain name), but still typed, as it still writes them. */
+export function compiledSpell() {
+  return (
+    <>
       <ui-dropdown prop:options={[{ value: "a" }]} />
       <ui-dropdown prop:value="a" prop:open={true} />
       <ui-root prop:appContext={{ theme: "dark" }} />
@@ -33,7 +45,7 @@ export function refused() {
       {/* @ts-expect-error:  a flag takes no text */}
       <ui-button basic="yes" />
       {/* @ts-expect-error:  a misspelt rich property */}
-      <ui-dropdown prop:optoins={[]} />
+      <ui-dropdown optoins={[]} />
       {/* @ts-expect-error:  a property takes its attribute's values */}
       <ui-button prop:size="enormous" />
       {/* @ts-expect-error:  only a source element shows `content` */}

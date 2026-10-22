@@ -357,13 +357,13 @@ export class ElementManifests {
 
   /**
    * One member per JSX name `tag`'s vocabulary gives, each with its docstring.
-   * - An attribute:  its name and each alias, typed by `jsxType()`;
-   *   and `prop:<property>`, the same type, to set the DOM element's property (a controlled `value`).
-   * - A rich (`json`) property:  its property name, and `prop:<property>`
-   *   - Solid 2 sets the plain name as an ATTRIBUTE today, so our JSX writes `prop:`;
-   *     the plain name is for once objects, arrays and functions go to the property (epic `solid-17`).
-   * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`):  their plain name, and `prop:<property>`.
-   * - An event:  `on-<event>` (`on-ui-change`), its listener, typed by `<name>EventMap` (epic `solid-17`'s shape).
+   * - An attribute:  its name and each alias, typed by `jsxType()`.
+   * - A rich (`json`) property:  its property name, `options={[...]}`:
+   *   a function or object given as a plain prop reaches the element whole (the kit's `RichAttributes`).
+   * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`):  their plain name.
+   * - Each of those also as `prop:<property>`, the same type, `@deprecated` (`deprecatedProp()`):
+   *   compiled spell still writes `prop:` on `<ui-*>` tags, and is checked against these types.
+   * - An event:  `on-<event>` (`on-ui-change`), its listener, typed by `<name>EventMap`.
    * - The first of two same names wins.
    */
   private static jsxAttributeMembers(tag: SiteTag, name: string): string[] {
@@ -386,22 +386,19 @@ export class ElementManifests {
           `  ${key}?: ${ElementManifests.jsxType(attribute)}`
         ])
       }
-      // its property too:  `prop:value={value()}` sets the DOM element's property (a controlled value)
-      const property = `prop:${attribute.property ?? ElementManifests.camel(attribute.name)}`
-      if (!members.has(property)) {
-        members.set(property, [
-          `  /** \`${attribute.name}\`, as the DOM element's property. */`,
-          `  "${property}"?: ${ElementManifests.jsxType(attribute)}`
-        ])
-      }
+      ElementManifests.deprecatedProp(
+        members,
+        attribute.property ?? ElementManifests.camel(attribute.name),
+        attribute.name,
+        [`\`${attribute.name}\`, as the DOM element's property.`],
+        ElementManifests.jsxType(attribute)
+      )
     }
     for (const { property, type, description, isFor } of JSX_SCRIPT_PROPERTIES) {
       if (!isFor(tag)) continue
-      for (const name of [property, `prop:${property}`]) {
-        if (members.has(name)) continue
-        const key = name === property ? name : JSON.stringify(name)
-        members.set(name, [...ElementManifests.docstring([description], "  "), `  ${key}?: ${type}`])
-      }
+      if (!members.has(property))
+        members.set(property, [...ElementManifests.docstring([description], "  "), `  ${property}?: ${type}`])
+      ElementManifests.deprecatedProp(members, property, property, [description], type)
     }
     for (const event of tag.events) {
       const prop = `on-${event.name}`
@@ -459,20 +456,37 @@ export class ElementManifests {
 
   /**
    * SIDE EFFECT:  adds a rich (`json`) property's two members to `members` (`jsxAttributeMembers()`):
-   * its plain name, and `prop:<property>`.
+   * its plain name, and `prop:<property>`, deprecated.
    */
   private static addRichProperty(members: Map<string, string[]>, property: string, description: string) {
-    const docs = [description, "- a JS property (rich data):  an object, array or function"]
+    const docs = [description, "- a JS property (rich data):  an object, array or function, given as it is"]
     members.set(property, [...ElementManifests.docstring(docs, "  "), `  ${property}?: unknown`])
-    members.set(`prop:${property}`, [
+    ElementManifests.deprecatedProp(members, property, property, docs, "unknown")
+  }
+
+  /**
+   * SIDE EFFECT:  adds `prop:<property>` to `members` (`jsxAttributeMembers()`), unless it's there:
+   * `docs`, then a `@deprecated` tag naming `plainName`, what to write instead.
+   * - Kept for compiled spell, which still writes `prop:` on `<ui-*>` tags (epic `solid-17`'s J12);
+   *   it goes once that's done (epic `intellisense`'s T2).
+   * - `@deprecated`, though WWOD's docstrings use no tags:  it's the editor's own signal,
+   *   drawn struck through, so people stop writing `prop:` by hand.
+   */
+  private static deprecatedProp(
+    members: Map<string, string[]>,
+    property: string,
+    plainName: string,
+    docs: string[],
+    type: string
+  ) {
+    const name = `prop:${property}`
+    if (members.has(name)) return
+    members.set(name, [
       ...ElementManifests.docstring(
-        [
-          ...docs,
-          `- goes once Solid 2 sets rich data on a dashed tag's property itself (epic \`solid-17\`):  then write \`${property}\``
-        ],
+        [...docs, `@deprecated write \`${plainName}\` -- \`prop:\` stays only for compiled spell`],
         "  "
       ),
-      `  "prop:${property}"?: unknown`
+      `  "${name}"?: ${type}`
     ])
   }
 
@@ -629,7 +643,7 @@ export type ElementManifestsProps = {
 const JSX_FILE = "src/jsx.ts"
 
 /**
- * The DOM elements' properties no vocabulary names, which JSX may set too:  `prop:<property>`.
+ * The DOM elements' properties no vocabulary names, which JSX may set too, by their plain name:  `appContext={...}`.
  * - The element core gives them to a kind of tag, so they're its script API, not attributes.
  *   - A vocabulary attribute would observe one (`app-context`),
  *     and give the component a getter over its base class's own member (`UIComponent.appContext`).
@@ -702,11 +716,11 @@ const JSX_HEADER = [
   " * - Values:",
   ' *   - a flag:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it',
   ' *   - other attributes take their text, a number as `{5}` or `"5"`',
-  " * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.",
-  " *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.",
+  " * - Rich data (an object, array or function), as a plain prop:  `options={[...]}`.",
+  " *   - It reaches the element whole, as its property.",
+  " *   - `prop:options`, and `prop:` for every attribute, are `@deprecated`:  only compiled spell writes them.",
   " * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.",
-  " *   - NOTE: typed only, for now:  Solid calls it once epic `solid-17` lands.",
-  " *     Until then, listen with `addEventListener()` from a `ref`.",
+  " *   - Solid hands the function to the element, which listens for the event.",
   ' *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),',
   ' *     whose `addEventListener("ui-toggle", ...)` types `event.detail`.',
   " *     So does a JSX `ref`'s element.",

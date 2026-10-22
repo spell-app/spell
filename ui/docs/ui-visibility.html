@@ -689,8 +689,8 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
-                  <ui-visibility once="false" ref={(el) => el.addEventListener("ui-bottom-visible", loadMore)}>
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+                  <ui-visibility once="false" on-ui-bottom-visible={loadMore}>
                     ...
                   </ui-visibility>
                 </script>

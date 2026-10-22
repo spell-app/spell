@@ -14,11 +14,11 @@
  * - Values:
  *   - a flag:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it
  *   - other attributes take their text, a number as `{5}` or `"5"`
- * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.
- *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.
+ * - Rich data (an object, array or function), as a plain prop:  `options={[...]}`.
+ *   - It reaches the element whole, as its property.
+ *   - `prop:options`, and `prop:` for every attribute, are `@deprecated`:  only compiled spell writes them.
  * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.
- *   - NOTE: typed only, for now:  Solid calls it once epic `solid-17` lands.
- *     Until then, listen with `addEventListener()` from a `ref`.
+ *   - Solid hands the function to the element, which listens for the event.
  *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),
  *     whose `addEventListener("ui-toggle", ...)` types `event.detail`.
  *     So does a JSX `ref`'s element.
@@ -121,42 +121,60 @@ export interface UIAccordionAttributes {
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
-  /** `styled`, as the DOM element's property. */
+  /**
+   * `styled`, as the DOM element's property.
+   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   */
   "prop:styled"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * The dark scheme, for a dark background.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * With `styled`:  no box, no rules between titles -- only the styled spacing and title colours.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Less padding around titles and content;  `compact="very"` less still (`very compact`).
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | "" | "very"
   /**
    * Indents each panel's content under its title, like a file tree (nested accordions line up).
    * - takes:  flag (present / absent)
    */
   tree?: boolean | ""
-  /** `tree`, as the DOM element's property. */
+  /**
+   * `tree`, as the DOM element's property.
+   * @deprecated write `tree` -- `prop:` stays only for compiled spell
+   */
   "prop:tree"?: boolean | ""
   /**
    * Only one panel open at a time (a `<details name>` group):  opening one closes the others.  `exclusive="no"` lets any number stay open.
@@ -164,7 +182,10 @@ export interface UIAccordionAttributes {
    * - default:  `true`
    */
   exclusive?: boolean | ""
-  /** `exclusive`, as the DOM element's property. */
+  /**
+   * `exclusive`, as the DOM element's property.
+   * @deprecated write `exclusive` -- `prop:` stays only for compiled spell
+   */
   "prop:exclusive"?: boolean | ""
   /**
    * The open panel closes when its title is activated;  `collapsible="no"` keeps one open.
@@ -172,49 +193,70 @@ export interface UIAccordionAttributes {
    * - default:  `true`
    */
   collapsible?: boolean | ""
-  /** `collapsible`, as the DOM element's property. */
+  /**
+   * `collapsible`, as the DOM element's property.
+   * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsible"?: boolean | ""
   /**
    * Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the first index counts.
    * - takes:  text
    */
   open?: string
-  /** `open`, as the DOM element's property. */
+  /**
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
+   */
   "prop:open"?: string
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -256,7 +298,10 @@ export interface UIAccordionAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -336,21 +381,30 @@ export interface UIActionsAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -392,7 +446,10 @@ export interface UIActionsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -465,7 +522,10 @@ export interface UIAdAttributes {
     | "top banner"
     | "half banner"
     | "large mobile banner"
-  /** `unit`, as the DOM element's property. */
+  /**
+   * `unit`, as the DOM element's property.
+   * @deprecated write `unit` -- `prop:` stays only for compiled spell
+   */
   "prop:unit"?:
     | "medium rectangle"
     | "large rectangle"
@@ -495,35 +555,50 @@ export interface UIAdAttributes {
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * A placeholder:  a grey box saying "Ad" (bare `test`), or the given text (`test="Your ad here"`).
    * - takes:  text
    */
   test?: string
-  /** `test`, as the DOM element's property. */
+  /**
+   * `test`, as the DOM element's property.
+   * @deprecated write `test` -- `prop:` stays only for compiled spell
+   */
   "prop:test"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -565,7 +640,10 @@ export interface UIAdAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -615,35 +693,50 @@ export interface UIAuthorAttributes {
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -685,7 +778,10 @@ export interface UIAuthorAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -735,35 +831,50 @@ export interface UIAvatarAttributes {
    * - takes:  text
    */
   src?: string
-  /** `src`, as the DOM element's property. */
+  /**
+   * `src`, as the DOM element's property.
+   * @deprecated write `src` -- `prop:` stays only for compiled spell
+   */
   "prop:src"?: string
   /**
    * Alternative text;  default `""` (decorative, the name is nearby).
    * - takes:  text
    */
   alt?: string
-  /** `alt`, as the DOM element's property. */
+  /**
+   * `alt`, as the DOM element's property.
+   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   */
   "prop:alt"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -805,7 +916,10 @@ export interface UIAvatarAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -855,49 +969,70 @@ export interface UIBreadcrumbAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`.
    * - takes:  text
    */
   divider?: string
-  /** `divider`, as the DOM element's property. */
+  /**
+   * `divider`, as the DOM element's property.
+   * @deprecated write `divider` -- `prop:` stays only for compiled spell
+   */
   "prop:divider"?: string
   /**
    * Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as `--ui-breadcrumb-divider-icon`.
    * - takes:  text
    */
   "divider-icon"?: string
-  /** `divider-icon`, as the DOM element's property. */
+  /**
+   * `divider-icon`, as the DOM element's property.
+   * @deprecated write `divider-icon` -- `prop:` stays only for compiled spell
+   */
   "prop:dividerIcon"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -939,7 +1074,10 @@ export interface UIBreadcrumbAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -989,42 +1127,60 @@ export interface UIBreadcrumbSectionAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * Renders a link (`<a>`) to this level.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -1066,7 +1222,10 @@ export interface UIBreadcrumbSectionAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -1127,7 +1286,10 @@ export interface UIButtonAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue;  fills the button (or its ring and text when `basic`).
@@ -1149,7 +1311,10 @@ export interface UIButtonAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -1171,189 +1336,270 @@ export interface UIButtonAttributes {
    * - takes:  flag (present / absent)
    */
   primary?: boolean | ""
-  /** `primary`, as the DOM element's property. */
+  /**
+   * `primary`, as the DOM element's property.
+   * @deprecated write `primary` -- `prop:` stays only for compiled spell
+   */
   "prop:primary"?: boolean | ""
   /**
    * Secondary emphasis:  the `secondary` brand colour.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
-  /** `secondary`, as the DOM element's property. */
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
   "prop:secondary"?: boolean | ""
   /**
    * Positive consequence:  the `positive` colour.
    * - takes:  flag (present / absent)
    */
   positive?: boolean | ""
-  /** `positive`, as the DOM element's property. */
+  /**
+   * `positive`, as the DOM element's property.
+   * @deprecated write `positive` -- `prop:` stays only for compiled spell
+   */
   "prop:positive"?: boolean | ""
   /**
    * Negative consequence:  the `negative` colour.
    * - takes:  flag (present / absent)
    */
   negative?: boolean | ""
-  /** `negative`, as the DOM element's property. */
+  /**
+   * `negative`, as the DOM element's property.
+   * @deprecated write `negative` -- `prop:` stays only for compiled spell
+   */
   "prop:negative"?: boolean | ""
   /**
    * Less pronounced:  transparent with a hairline ring.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Least pronounced:  text only, underlined on hover.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
-  /** `tertiary`, as the DOM element's property. */
+  /**
+   * `tertiary`, as the DOM element's property.
+   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
+   */
   "prop:tertiary"?: boolean | ""
   /**
    * For dark backgrounds:  an outline that fills on hover.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
-  /** `toggle`, as the DOM element's property. */
+  /**
+   * `toggle`, as the DOM element's property.
+   * @deprecated write `toggle` -- `prop:` stays only for compiled spell
+   */
   "prop:toggle"?: boolean | ""
   /**
    * Pressed / on;  with `toggle`, in the positive colour.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
    * - takes:  text
    */
   "active-text"?: string
-  /** `active-text`, as the DOM element's property. */
+  /**
+   * `active-text`, as the DOM element's property.
+   * @deprecated write `active-text` -- `prop:` stays only for compiled spell
+   */
   "prop:activeText"?: string
   /**
    * Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content.
    * - takes:  text
    */
   "inactive-text"?: string
-  /** `inactive-text`, as the DOM element's property. */
+  /**
+   * `inactive-text`, as the DOM element's property.
+   * @deprecated write `inactive-text` -- `prop:` stays only for compiled spell
+   */
   "prop:inactiveText"?: string
   /**
    * Can't be used;  dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows a spinner in place of the content;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Pill shaped;  round when it holds only an icon.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Reduced padding.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * No padding at all, as `compact` taken to none:  hugs its content.
    * - takes:  flag (present / absent)
    */
   unpadded?: boolean | ""
-  /** `unpadded`, as the DOM element's property. */
+  /**
+   * `unpadded`, as the DOM element's property.
+   * @deprecated write `unpadded` -- `prop:` stays only for compiled spell
+   */
   "prop:unpadded"?: boolean | ""
   /**
    * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.
    * - takes:  flag (present / absent)
    */
   wrapped?: boolean | ""
-  /** `wrapped`, as the DOM element's property. */
+  /**
+   * `wrapped`, as the DOM element's property.
+   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   */
   "prop:wrapped"?: boolean | ""
   /**
    * One line, cut off with `…` where it doesn't fit.  It needs a width to cut at:  `fluid`, a width of its own, or a narrow parent (it's never wider than that).
    * - takes:  flag (present / absent)
    */
   ellipsis?: boolean | ""
-  /** `ellipsis`, as the DOM element's property. */
+  /**
+   * `ellipsis`, as the DOM element's property.
+   * @deprecated write `ellipsis` -- `prop:` stays only for compiled spell
+   */
   "prop:ellipsis"?: boolean | ""
   /**
    * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `label`:  which side the label goes, `labeled` (end) or `labeled="left"`.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
    * Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`.
    * - takes:  flag, or `fade` · `vertical`
    */
   animated?: boolean | "" | "fade" | "vertical"
-  /** `animated`, as the DOM element's property. */
+  /**
+   * `animated`, as the DOM element's property.
+   * @deprecated write `animated` -- `prop:` stays only for compiled spell
+   */
   "prop:animated"?: boolean | "" | "fade" | "vertical"
   /**
    * Joined to the edge of a segment or another element:  `top`, `bottom`, `left` or `right`.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the `icon` class (square padding);  with `labeled` it becomes a `labeled icon` button.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`.
    * - takes:  `left` · `right`
    */
   "icon-position"?: "left" | "right"
-  /** `icon-position`, as the DOM element's property. */
+  /**
+   * `icon-position`, as the DOM element's property.
+   * @deprecated write `icon-position` -- `prop:` stays only for compiled spell
+   */
   "prop:iconPosition"?: "left" | "right"
   /**
    * Shorthand for the button's text, instead of the default slot;  slotted children win.
    * - takes:  text
    */
   content?: string
-  /** `content`, as the DOM element's property. */
+  /**
+   * `content`, as the DOM element's property.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
   "prop:content"?: string
   /**
    * Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`.
@@ -1361,63 +1607,90 @@ export interface UIButtonAttributes {
    * - default:  `button`
    */
   type?: "button" | "submit" | "reset"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "button" | "submit" | "reset"
   /**
    * Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in commands itself.
    * - takes:  text
    */
   commandfor?: string
-  /** `commandfor`, as the DOM element's property. */
+  /**
+   * `commandfor`, as the DOM element's property.
+   * @deprecated write `commandfor` -- `prop:` stays only for compiled spell
+   */
   "prop:commandFor"?: string
   /**
    * Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a `<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`).
    * - takes:  text
    */
   command?: string
-  /** `command`, as the DOM element's property. */
+  /**
+   * `command`, as the DOM element's property.
+   * @deprecated write `command` -- `prop:` stays only for compiled spell
+   */
   "prop:command"?: string
   /**
    * Renders a link (`<a>`) styled as a button.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * With `href`:  downloads the file instead of opening it, as the native `<a download>`;  a value names the saved file.
    * - takes:  text
    */
   download?: string
-  /** `download`, as the DOM element's property. */
+  /**
+   * `download`, as the DOM element's property.
+   * @deprecated write `download` -- `prop:` stays only for compiled spell
+   */
   "prop:download"?: string
   /**
    * Form field name submitted with the button's `value`.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form value submitted when this button submits the form.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -1459,7 +1732,10 @@ export interface UIButtonAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -1514,7 +1790,10 @@ export interface UIButtonsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every button in the group.
@@ -1536,7 +1815,10 @@ export interface UIButtonsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -1558,140 +1840,200 @@ export interface UIButtonsAttributes {
    * - takes:  flag (present / absent)
    */
   primary?: boolean | ""
-  /** `primary`, as the DOM element's property. */
+  /**
+   * `primary`, as the DOM element's property.
+   * @deprecated write `primary` -- `prop:` stays only for compiled spell
+   */
   "prop:primary"?: boolean | ""
   /**
    * Every button in the secondary colour.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
-  /** `secondary`, as the DOM element's property. */
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
   "prop:secondary"?: boolean | ""
   /**
    * Every button in the positive colour.
    * - takes:  flag (present / absent)
    */
   positive?: boolean | ""
-  /** `positive`, as the DOM element's property. */
+  /**
+   * `positive`, as the DOM element's property.
+   * @deprecated write `positive` -- `prop:` stays only for compiled spell
+   */
   "prop:positive"?: boolean | ""
   /**
    * Every button in the negative colour.
    * - takes:  flag (present / absent)
    */
   negative?: boolean | ""
-  /** `negative`, as the DOM element's property. */
+  /**
+   * `negative`, as the DOM element's property.
+   * @deprecated write `negative` -- `prop:` stays only for compiled spell
+   */
   "prop:negative"?: boolean | ""
   /**
    * Basic buttons inside one outer border.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Tertiary (text only) buttons.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
-  /** `tertiary`, as the DOM element's property. */
+  /**
+   * `tertiary`, as the DOM element's property.
+   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
+   */
   "prop:tertiary"?: boolean | ""
   /**
    * Inverted buttons, for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Icon-only buttons:  square padding.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: boolean | ""
   /**
    * With `icon`:  `labeled icon` buttons;  `labeled="right"` puts the icons at the end.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
    * Reduced padding.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Separate pill-shaped buttons.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * `active` buttons show in the positive colour.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
-  /** `toggle`, as the DOM element's property. */
+  /**
+   * `toggle`, as the DOM element's property.
+   * @deprecated write `toggle` -- `prop:` stays only for compiled spell
+   */
   "prop:toggle"?: boolean | ""
   /**
    * Stacks the buttons vertically.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Every button the same width, from the buttons themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Buttons wrap onto more rows.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
-  /** `wrapping`, as the DOM element's property. */
+  /**
+   * `wrapping`, as the DOM element's property.
+   * @deprecated write `wrapping` -- `prop:` stays only for compiled spell
+   */
   "prop:wrapping"?: boolean | ""
   /**
    * Separate buttons with gaps between them.
    * - takes:  flag (present / absent)
    */
   spaced?: boolean | ""
-  /** `spaced`, as the DOM element's property. */
+  /**
+   * `spaced`, as the DOM element's property.
+   * @deprecated write `spaced` -- `prop:` stays only for compiled spell
+   */
   "prop:spaced"?: boolean | ""
   /**
    * Stacks vertically on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * Joined to the edge of a segment:  `top`, `bottom`, `left` or `right`.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width="3"` => `three`) or `"equal"` (`equal width`).
@@ -1715,7 +2057,10 @@ export interface UIButtonsAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -1739,21 +2084,30 @@ export interface UIButtonsAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -1795,7 +2149,10 @@ export interface UIButtonsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -1867,7 +2224,10 @@ export interface UICalendarAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen cell, the range and the focus ring (a remap of `--ui-color`).
@@ -1889,7 +2249,10 @@ export interface UICalendarAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -1911,35 +2274,50 @@ export interface UICalendarAttributes {
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Tighter cells.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * The field takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Can't be used;  dimmed and inert, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
-  /** `open`, as the DOM element's property. */
+  /**
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
+   */
   "prop:open"?: boolean | ""
   /**
    * What it picks, and the ISO shape of `value`;  Fomantic's default `datetime`.
@@ -1947,14 +2325,20 @@ export interface UICalendarAttributes {
    * - default:  `datetime`
    */
   type?: "date" | "time" | "datetime" | "month" | "year"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "date" | "time" | "datetime" | "month" | "year"
   /**
    * The grid sits in the page (no field, no popup);  still a form control.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * Where the popup opens against the field;  it flips when there's no room.
@@ -1962,154 +2346,211 @@ export interface UICalendarAttributes {
    * - default:  `bottom left`
    */
   position?: "bottom left" | "bottom right" | "top left" | "top right"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "bottom left" | "bottom right" | "top left" | "top right"
   /**
    * Chosen value, ISO by `type`.  The ATTRIBUTE is the starting value (form reset restores it);  the property is current.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name;  submits the ISO value.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Shows its value but can't be changed;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * Text shown in the empty field;  its accessible name too.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * Earliest value that can be chosen, ISO by `type`.
    * - takes:  text
    */
   min?: string
-  /** `min`, as the DOM element's property. */
+  /**
+   * `min`, as the DOM element's property.
+   * @deprecated write `min` -- `prop:` stays only for compiled spell
+   */
   "prop:min"?: string
   /**
    * Latest value that can be chosen, ISO by `type`.
    * - takes:  text
    */
   max?: string
-  /** `max`, as the DOM element's property. */
+  /**
+   * `max`, as the DOM element's property.
+   * @deprecated write `max` -- `prop:` stays only for compiled spell
+   */
   "prop:max"?: string
   /**
    * Where the grid starts while there's no value (ISO);  default today.
    * - takes:  text
    */
   "initial-date"?: string
-  /** `initial-date`, as the DOM element's property. */
+  /**
+   * `initial-date`, as the DOM element's property.
+   * @deprecated write `initial-date` -- `prop:` stays only for compiled spell
+   */
   "prop:initialDate"?: string
   /**
    * First column of the day grid, `0` = Sunday ... `6`;  default from the locale's week info.
    * - takes:  number
    */
   "first-day-of-week"?: number | `${number}`
-  /** `first-day-of-week`, as the DOM element's property. */
+  /**
+   * `first-day-of-week`, as the DOM element's property.
+   * @deprecated write `first-day-of-week` -- `prop:` stays only for compiled spell
+   */
   "prop:firstDayOfWeek"?: number | `${number}`
   /**
    * BCP 47 locale for names, formats and the 12 / 24 hour clock;  default `UI.i18n.locale`.
    * - takes:  text
    */
   locale?: string
-  /** `locale`, as the DOM element's property. */
+  /**
+   * `locale`, as the DOM element's property.
+   * @deprecated write `locale` -- `prop:` stays only for compiled spell
+   */
   "prop:locale"?: string
   /**
    * Shows a Today (or Now) button under the grid.
    * - takes:  flag (present / absent)
    */
   today?: boolean | ""
-  /** `today`, as the DOM element's property. */
+  /**
+   * `today`, as the DOM element's property.
+   * @deprecated write `today` -- `prop:` stays only for compiled spell
+   */
   "prop:today"?: boolean | ""
   /**
    * Times stop at the hour:  no minute grid.
    * - takes:  flag (present / absent)
    */
   "disable-minute"?: boolean | ""
-  /** `disable-minute`, as the DOM element's property. */
+  /**
+   * `disable-minute`, as the DOM element's property.
+   * @deprecated write `disable-minute` -- `prop:` stays only for compiled spell
+   */
   "prop:disableMinute"?: boolean | ""
   /**
    * No month grid:  the day grid's title goes to years.
    * - takes:  flag (present / absent)
    */
   "disable-month"?: boolean | ""
-  /** `disable-month`, as the DOM element's property. */
+  /**
+   * `disable-month`, as the DOM element's property.
+   * @deprecated write `disable-month` -- `prop:` stays only for compiled spell
+   */
   "prop:disableMonth"?: boolean | ""
   /**
    * No year grid:  the month grid's title goes to days.
    * - takes:  flag (present / absent)
    */
   "disable-year"?: boolean | ""
-  /** `disable-year`, as the DOM element's property. */
+  /**
+   * `disable-year`, as the DOM element's property.
+   * @deprecated write `disable-year` -- `prop:` stays only for compiled spell
+   */
   "prop:disableYear"?: boolean | ""
   /**
    * Days of the previous / next month in the day grid can be chosen (else they're disabled).
    * - takes:  flag (present / absent)
    */
   "select-adjacent-days"?: boolean | ""
-  /** `select-adjacent-days`, as the DOM element's property. */
+  /**
+   * `select-adjacent-days`, as the DOM element's property.
+   * @deprecated write `select-adjacent-days` -- `prop:` stays only for compiled spell
+   */
   "prop:selectAdjacentDays"?: boolean | ""
   /**
    * Id of the calendar holding the START of a range:  this one is the end (min = its value).
    * - takes:  text
    */
   "start-calendar"?: string
-  /** `start-calendar`, as the DOM element's property. */
+  /**
+   * `start-calendar`, as the DOM element's property.
+   * @deprecated write `start-calendar` -- `prop:` stays only for compiled spell
+   */
   "prop:startCalendar"?: string
   /**
    * Id of the calendar holding the END of a range:  this one is the start (max = its value).
    * - takes:  text
    */
   "end-calendar"?: string
-  /** `end-calendar`, as the DOM element's property. */
+  /**
+   * `end-calendar`, as the DOM element's property.
+   * @deprecated write `end-calendar` -- `prop:` stays only for compiled spell
+   */
   "prop:endCalendar"?: string
   /**
    * Icon of the popup button;  default (or bare `icon`) `calendar`, `clock` for `time`.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * PROPERTY:  days that can't be chosen, as ISO date strings (`["2026-12-25"]`).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   disabledDates?: unknown
   /**
    * PROPERTY:  days that can't be chosen, as ISO date strings (`["2026-12-25"]`).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `disabledDates`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `disabledDates` -- `prop:` stays only for compiled spell
    */
   "prop:disabledDates"?: unknown
   /**
    * PROPERTY:  weekdays that can't be chosen, `0` = Sunday ... `6` (`[0, 6]` for weekends).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   disabledDaysOfWeek?: unknown
   /**
    * PROPERTY:  weekdays that can't be chosen, `0` = Sunday ... `6` (`[0, 6]` for weekends).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `disabledDaysOfWeek`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `disabledDaysOfWeek` -- `prop:` stays only for compiled spell
    */
   "prop:disabledDaysOfWeek"?: unknown
   /**
@@ -2117,14 +2558,20 @@ export interface UICalendarAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -2166,7 +2613,10 @@ export interface UICalendarAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -2236,7 +2686,10 @@ export interface UICardAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A coloured line along the bottom edge (a tinted fill when `basic`).
@@ -2258,7 +2711,10 @@ export interface UICardAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -2280,133 +2736,190 @@ export interface UICardAttributes {
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * Lifted off the page with a stronger shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Takes the width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Centred in its container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * No border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's.
    * - takes:  flag (present / absent)
    */
   dashed?: boolean | ""
-  /** `dashed`, as the DOM element's property. */
+  /**
+   * `dashed`, as the DOM element's property.
+   * @deprecated write `dashed` -- `prop:` stays only for compiled spell
+   */
   "prop:dashed"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Faded and inert;  a link card loses its `href`.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Dimmed under a spinner, announced as busy.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Makes the whole card a link (`<a>`).
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * Shorthand:  the header of a content block.
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shorthand:  metadata below the header.
    * - takes:  text
    */
   meta?: string
-  /** `meta`, as the DOM element's property. */
+  /**
+   * `meta`, as the DOM element's property.
+   * @deprecated write `meta` -- `prop:` stays only for compiled spell
+   */
   "prop:meta"?: string
   /**
    * Shorthand:  the description of the content block.
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * Shorthand:  extra content at the bottom (a footer).
    * - takes:  text
    */
   extra?: string
-  /** `extra`, as the DOM element's property. */
+  /**
+   * `extra`, as the DOM element's property.
+   * @deprecated write `extra` -- `prop:` stays only for compiled spell
+   */
   "prop:extra"?: string
   /**
    * Shorthand:  image URL, shown at the top (at the start when horizontal).
    * - takes:  text
    */
   image?: string
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: string
   /**
    * Alternative text of the `image` shorthand;  default `""` (decorative:  the card's text names it).
    * - takes:  text
    */
   alt?: string
-  /** `alt`, as the DOM element's property. */
+  /**
+   * `alt`, as the DOM element's property.
+   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   */
   "prop:alt"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -2448,7 +2961,10 @@ export interface UICardAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -2498,7 +3014,10 @@ export interface UICardsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Colour of every card in the group.
@@ -2520,7 +3039,10 @@ export interface UICardsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -2542,91 +3064,130 @@ export interface UICardsAttributes {
    * - takes:  `1`-`10`, a fraction (`1/4`) or a percentage
    */
   columns?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
-  /** `columns`, as the DOM element's property. */
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
   "prop:columns"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths).
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
-  /** `doubling`, as the DOM element's property. */
+  /**
+   * `doubling`, as the DOM element's property.
+   * @deprecated write `doubling` -- `prop:` stays only for compiled spell
+   */
   "prop:doubling"?: boolean | ""
   /**
    * One card per row in a narrow group (mobile widths).
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * What `stackable` and `doubling` measure:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * Centres each row of cards.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Every card horizontal.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * Every card raised.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * Every card rises on hover (a look;  links need `href`).
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Every card without border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Every card in the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -2668,7 +3229,10 @@ export interface UICardsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -2727,7 +3291,10 @@ export interface UICheckboxAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
@@ -2749,7 +3316,10 @@ export interface UICheckboxAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -2771,112 +3341,160 @@ export interface UICheckboxAttributes {
    * - takes:  `slider` · `toggle`
    */
   type?: "slider" | "toggle"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "slider" | "toggle"
   /**
    * Neither on nor off (a dash);  a click clears it, as natively.
    * - takes:  flag (present / absent)
    */
   indeterminate?: boolean | ""
-  /** `indeterminate`, as the DOM element's property. */
+  /**
+   * `indeterminate`, as the DOM element's property.
+   * @deprecated write `indeterminate` -- `prop:` stays only for compiled spell
+   */
   "prop:indeterminate"?: boolean | ""
   /**
    * No room for a label:  just the box.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
    */
   invisible?: boolean | ""
-  /** `invisible`, as the DOM element's property. */
+  /**
+   * `invisible`, as the DOM element's property.
+   * @deprecated write `invisible` -- `prop:` stays only for compiled spell
+   */
   "prop:invisible"?: boolean | ""
   /**
    * Box after the label, at the end of the line.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
-  /** `right-aligned`, as the DOM element's property. */
+  /**
+   * `right-aligned`, as the DOM element's property.
+   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   */
   "prop:rightAligned"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its state but can't be changed;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /** `selected`, as the DOM element's property. */
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
   "prop:selected"?: boolean | ""
   /**
    * Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`).
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Label text;  slotted content is the rich version.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Value submitted while unchosen:  `value="open" off-value="closed"`;  default its class's `defaultUnchosenValue`, else nothing, as a native checkbox.  Needs JavaScript:  a static server render submits nothing while unchosen.
    * - takes:  text
    */
   "off-value"?: string
-  /** `off-value`, as the DOM element's property. */
+  /**
+   * `off-value`, as the DOM element's property.
+   * @deprecated write `off-value` -- `prop:` stays only for compiled spell
+   */
   "prop:offValue"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -2918,7 +3536,10 @@ export interface UICheckboxAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -3020,7 +3641,10 @@ export interface UICodeAttributes {
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
@@ -3028,21 +3652,30 @@ export interface UICodeAttributes {
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
-  /** `load`, as the DOM element's property. */
+  /**
+   * `load`, as the DOM element's property.
+   * @deprecated write `load` -- `prop:` stays only for compiled spell
+   */
   "prop:load"?: "eager" | "visible" | "idle"
   /**
    * Language to colour it as:  a highlight.js name or alias (`ts`, `html`, `css`, `json`, `bash` ...), one the page registered with `UI.code` (e.g. `spell`, once the app's `<spell-code>` is loaded), or `text` for none.  Absent:  guessed from the code.
    * - takes:  text
    */
   language?: string
-  /** `language`, as the DOM element's property. */
+  /**
+   * `language`, as the DOM element's property.
+   * @deprecated write `language` -- `prop:` stays only for compiled spell
+   */
   "prop:language"?: string
   /**
    * Number the lines, in a gutter that wrapped lines don't run under.
    * - takes:  flag (present / absent)
    */
   "line-numbers"?: boolean | ""
-  /** `line-numbers`, as the DOM element's property. */
+  /**
+   * `line-numbers`, as the DOM element's property.
+   * @deprecated write `line-numbers` -- `prop:` stays only for compiled spell
+   */
   "prop:lineNumbers"?: boolean | ""
   /**
    * Number of the first line, with `line-numbers`.
@@ -3050,42 +3683,60 @@ export interface UICodeAttributes {
    * - default:  `1`
    */
   start?: number | `${number}`
-  /** `start`, as the DOM element's property. */
+  /**
+   * `start`, as the DOM element's property.
+   * @deprecated write `start` -- `prop:` stays only for compiled spell
+   */
   "prop:start"?: number | `${number}`
   /**
    * Wrap long lines;  default:  they scroll sideways.
    * - takes:  flag (present / absent)
    */
   wrap?: boolean | ""
-  /** `wrap`, as the DOM element's property. */
+  /**
+   * `wrap`, as the DOM element's property.
+   * @deprecated write `wrap` -- `prop:` stays only for compiled spell
+   */
   "prop:wrap"?: boolean | ""
   /**
    * A button that copies the code.
    * - takes:  flag (present / absent)
    */
   copy?: boolean | ""
-  /** `copy`, as the DOM element's property. */
+  /**
+   * `copy`, as the DOM element's property.
+   * @deprecated write `copy` -- `prop:` stays only for compiled spell
+   */
   "prop:copy"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -3127,7 +3778,10 @@ export interface UICodeAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -3170,6 +3824,7 @@ export interface UICodeAttributes {
   content?: string
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
    */
   "prop:content"?: string
   /**
@@ -3237,7 +3892,10 @@ export interface UIColumnAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -3276,7 +3934,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -3317,7 +3978,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width-mobile`, as the DOM element's property. */
+  /**
+   * `width-mobile`, as the DOM element's property.
+   * @deprecated write `width-mobile` -- `prop:` stays only for compiled spell
+   */
   "prop:widthMobile"?:
     | "1"
     | "2"
@@ -3358,7 +4022,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width-tablet`, as the DOM element's property. */
+  /**
+   * `width-tablet`, as the DOM element's property.
+   * @deprecated write `width-tablet` -- `prop:` stays only for compiled spell
+   */
   "prop:widthTablet"?:
     | "1"
     | "2"
@@ -3399,7 +4066,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width-computer`, as the DOM element's property. */
+  /**
+   * `width-computer`, as the DOM element's property.
+   * @deprecated write `width-computer` -- `prop:` stays only for compiled spell
+   */
   "prop:widthComputer"?:
     | "1"
     | "2"
@@ -3440,7 +4110,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width-large`, as the DOM element's property. */
+  /**
+   * `width-large`, as the DOM element's property.
+   * @deprecated write `width-large` -- `prop:` stays only for compiled spell
+   */
   "prop:widthLarge"?:
     | "1"
     | "2"
@@ -3481,7 +4154,10 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width-widescreen`, as the DOM element's property. */
+  /**
+   * `width-widescreen`, as the DOM element's property.
+   * @deprecated write `width-widescreen` -- `prop:` stays only for compiled spell
+   */
   "prop:widthWidescreen"?:
     | "1"
     | "2"
@@ -3505,70 +4181,100 @@ export interface UIColumnAttributes {
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * No gutter on the `left` / `right` side.
    * - takes:  `left` · `right`
    */
   attached?: "left" | "right"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: "left" | "right"
   /**
    * Centred in its line.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Fills the line's height;  its content grows.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
-  /** `stretched`, as the DOM element's property. */
+  /**
+   * `stretched`, as the DOM element's property.
+   * @deprecated write `stretched` -- `prop:` stays only for compiled spell
+   */
   "prop:stretched"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport).
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
-  /** `only`, as the DOM element's property. */
+  /**
+   * `only`, as the DOM element's property.
+   * @deprecated write `only` -- `prop:` stays only for compiled spell
+   */
   "prop:only"?: string
   /**
    * Aligns its text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Sits at the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -3610,7 +4316,10 @@ export interface UIColumnAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -3660,28 +4369,40 @@ export interface UICommentAttributes {
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -3723,7 +4444,10 @@ export interface UICommentAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -3773,56 +4497,80 @@ export interface UICommentsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A line down the left of each thread of replies.
    * - takes:  flag (present / absent)
    */
   threaded?: boolean | ""
-  /** `threaded`, as the DOM element's property. */
+  /**
+   * `threaded`, as the DOM element's property.
+   * @deprecated write `threaded` -- `prop:` stays only for compiled spell
+   */
   "prop:threaded"?: boolean | ""
   /**
    * Each comment's actions hidden until the comment is hovered (and shown to keyboard focus).
    * - takes:  flag (present / absent)
    */
   minimal?: boolean | ""
-  /** `minimal`, as the DOM element's property. */
+  /**
+   * `minimal`, as the DOM element's property.
+   * @deprecated write `minimal` -- `prop:` stays only for compiled spell
+   */
   "prop:minimal"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Hidden:  a thread of replies folded away.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -3864,7 +4612,10 @@ export interface UICommentsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -3914,28 +4665,40 @@ export interface UIComponentsAttributes {
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -3977,7 +4740,10 @@ export interface UIComponentsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4027,77 +4793,110 @@ export interface UIContainerAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Always the full width of the page.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * A fifth wider than the default container.
    * - takes:  flag (present / absent)
    */
   wide?: boolean | ""
-  /** `wide`, as the DOM element's property. */
+  /**
+   * `wide`, as the DOM element's property.
+   * @deprecated write `wide` -- `prop:` stays only for compiled spell
+   */
   "prop:wide"?: boolean | ""
   /**
    * Holds a grid:  widened by the grid's gutters so its columns line up with other containers.
    * - takes:  flag (present / absent)
    */
   grid?: boolean | ""
-  /** `grid`, as the DOM element's property. */
+  /**
+   * `grid`, as the DOM element's property.
+   * @deprecated write `grid` -- `prop:` stays only for compiled spell
+   */
   "prop:grid"?: boolean | ""
   /**
    * With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
-  /** `relaxed`, as the DOM element's property. */
+  /**
+   * `relaxed`, as the DOM element's property.
+   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   */
   "prop:relaxed"?: boolean | "" | "very"
   /**
    * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  Heights are tokens:  `--ui-container-scrolling-height` (mobile, 15em), `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * With `scrolling`:  people can drag its height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
-  /** `resizable`, as the DOM element's property. */
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
   "prop:resizable"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4139,7 +4938,10 @@ export interface UIContainerAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4189,56 +4991,80 @@ export interface UIContentAttributes {
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: boolean | ""
   /**
    * In a modal:  a capped height that scrolls.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4280,7 +5106,10 @@ export interface UIContentAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4330,28 +5159,40 @@ export interface UIDateAttributes {
    * - takes:  text
    */
   datetime?: string
-  /** `datetime`, as the DOM element's property. */
+  /**
+   * `datetime`, as the DOM element's property.
+   * @deprecated write `datetime` -- `prop:` stays only for compiled spell
+   */
   "prop:dateTime"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4393,7 +5234,10 @@ export interface UIDateAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4443,21 +5287,30 @@ export interface UIDescriptionAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4499,7 +5352,10 @@ export interface UIDescriptionAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4549,28 +5405,40 @@ export interface UIDetailAttributes {
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4612,7 +5480,10 @@ export interface UIDetailAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4688,56 +5559,80 @@ export interface UIDimmerAttributes {
    * - takes:  `medium` · `light` · `very light`
    */
   shade?: "medium" | "light" | "very light"
-  /** `shade`, as the DOM element's property. */
+  /**
+   * `shade`, as the DOM element's property.
+   * @deprecated write `shade` -- `prop:` stays only for compiled spell
+   */
   "prop:shade"?: "medium" | "light" | "very light"
   /**
    * Dims the whole page:  a modal dialog over the viewport.
    * - takes:  flag (present / absent)
    */
   page?: boolean | ""
-  /** `page`, as the DOM element's property. */
+  /**
+   * `page`, as the DOM element's property.
+   * @deprecated write `page` -- `prop:` stays only for compiled spell
+   */
   "prop:page"?: boolean | ""
   /**
    * A light dimmer (dark text), where the default is dark.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Blurs and greys what's behind it (`backdrop-filter`).
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
-  /** `blurring`, as the DOM element's property. */
+  /**
+   * `blurring`, as the DOM element's property.
+   * @deprecated write `blurring` -- `prop:` stays only for compiled spell
+   */
   "prop:blurring"?: boolean | ""
   /**
    * Fomantic's CSS-only dimmer;  the element's look is the same.
    * - takes:  flag (present / absent)
    */
   simple?: boolean | ""
-  /** `simple`, as the DOM element's property. */
+  /**
+   * `simple`, as the DOM element's property.
+   * @deprecated write `simple` -- `prop:` stays only for compiled spell
+   */
   "prop:simple"?: boolean | ""
   /**
    * Never shows.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Its content at the `top` or `bottom` instead of the middle (`top aligned`).
    * - takes:  `top` · `bottom`
    */
   "vertical-align"?: "top" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "bottom"
   /**
    * Shows by itself:  `hover` while the pointer is over its parent (or focus is inside), `click` when the parent is clicked.  Default:  only `visible` shows it.
    * - takes:  `hover` · `click`
    */
   "show-on"?: "hover" | "click"
-  /** `show-on`, as the DOM element's property. */
+  /**
+   * `show-on`, as the DOM element's property.
+   * @deprecated write `show-on` -- `prop:` stays only for compiled spell
+   */
   "prop:showOn"?: "hover" | "click"
   /**
    * What hides it, as `<dialog closedby>`:  `any` -- a click on the dimmer (not its content) or Escape (a page dimmer) -- the default;  `closerequest` -- Escape only;  `none` -- only `visible`.  A `hover` dimmer ignores clicks.  Read when it shows.
@@ -4745,21 +5640,30 @@ export interface UIDimmerAttributes {
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
-  /** `closedby`, as the DOM element's property. */
+  /**
+   * `closedby`, as the DOM element's property.
+   * @deprecated write `closedby` -- `prop:` stays only for compiled spell
+   */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -4801,7 +5705,10 @@ export interface UIDimmerAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -4873,7 +5780,10 @@ export interface UIDividerAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the rule and the text.
@@ -4895,7 +5805,10 @@ export interface UIDividerAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -4917,84 +5830,120 @@ export interface UIDividerAttributes {
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * A vertical rule with optional text, centred in a `position: relative` owner (segment, grid).
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  Renamed because `hidden` hides every element, as the platform's does.
    * - takes:  flag (present / absent)
    */
   spacer?: boolean | ""
-  /** `spacer`, as the DOM element's property. */
+  /**
+   * `spacer`, as the DOM element's property.
+   * @deprecated write `spacer` -- `prop:` stays only for compiled spell
+   */
   "prop:spacer"?: boolean | ""
   /**
    * No space above or below.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * Clears floated content above it.
    * - takes:  flag (present / absent)
    */
   clearing?: boolean | ""
-  /** `clearing`, as the DOM element's property. */
+  /**
+   * `clearing`, as the DOM element's property.
+   * @deprecated write `clearing` -- `prop:` stays only for compiled spell
+   */
   "prop:clearing"?: boolean | ""
   /**
    * More space, to divide sections of content.
    * - takes:  flag (present / absent)
    */
   section?: boolean | ""
-  /** `section`, as the DOM element's property. */
+  /**
+   * `section`, as the DOM element's property.
+   * @deprecated write `section` -- `prop:` stays only for compiled spell
+   */
   "prop:section"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Icon name, shown before the text.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -5036,7 +5985,10 @@ export interface UIDividerAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -5122,7 +6074,10 @@ export interface UIDropdownAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills a `button` dropdown;  accents a selection's focus border and labels.
@@ -5144,7 +6099,10 @@ export interface UIDropdownAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -5166,175 +6124,250 @@ export interface UIDropdownAttributes {
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Looks like a form `<select>`.
    * - takes:  flag (present / absent)
    */
   selection?: boolean | ""
-  /** `selection`, as the DOM element's property. */
+  /**
+   * `selection`, as the DOM element's property.
+   * @deprecated write `selection` -- `prop:` stays only for compiled spell
+   */
   "prop:selection"?: boolean | ""
   /**
    * Filters the options by typing;  the trigger is an `<input>`.
    * - takes:  flag (present / absent)
    */
   search?: boolean | ""
-  /** `search`, as the DOM element's property. */
+  /**
+   * `search`, as the DOM element's property.
+   * @deprecated write `search` -- `prop:` stays only for compiled spell
+   */
   "prop:search"?: boolean | ""
   /**
    * Chooses several values, shown as labels.
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
-  /** `multiple`, as the DOM element's property. */
+  /**
+   * `multiple`, as the DOM element's property.
+   * @deprecated write `multiple` -- `prop:` stays only for compiled spell
+   */
   "prop:multiple"?: boolean | ""
   /**
    * Sits inside running text.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * The menu floats further away, with a stronger shadow.
    * - takes:  flag (present / absent)
    */
   floating?: boolean | ""
-  /** `floating`, as the DOM element's property. */
+  /**
+   * `floating`, as the DOM element's property.
+   * @deprecated write `floating` -- `prop:` stays only for compiled spell
+   */
   "prop:floating"?: boolean | ""
   /**
    * Looks like a button (`UIButton.css`).
    * - takes:  flag (present / absent)
    */
   button?: boolean | ""
-  /** `button`, as the DOM element's property. */
+  /**
+   * `button`, as the DOM element's property.
+   * @deprecated write `button` -- `prop:` stays only for compiled spell
+   */
   "prop:button"?: boolean | ""
   /**
    * A labeled icon button:  the `icon` in its own block, no caret.  Use with `button`.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | ""
   /**
    * No minimum width;  the menu sizes to its items.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * The menu scrolls after a fixed height.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | ""
   /**
    * Opens above (the menu still flips when there's no room).
    * - takes:  flag (present / absent)
    */
   upward?: boolean | ""
-  /** `upward`, as the DOM element's property. */
+  /**
+   * `upward`, as the DOM element's property.
+   * @deprecated write `upward` -- `prop:` stays only for compiled spell
+   */
   "prop:upward"?: boolean | ""
   /**
    * Opens on hover / focus, with no script and no popover.
    * - takes:  flag (present / absent)
    */
   simple?: boolean | ""
-  /** `simple`, as the DOM element's property. */
+  /**
+   * `simple`, as the DOM element's property.
+   * @deprecated write `simple` -- `prop:` stays only for compiled spell
+   */
   "prop:simple"?: boolean | ""
   /**
    * Shows a clear button while there's a value.
    * - takes:  flag (present / absent)
    */
   clearable?: boolean | ""
-  /** `clearable`, as the DOM element's property. */
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
   "prop:clearable"?: boolean | ""
   /**
    * Can't be used;  dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy, e.g. fetching options;  the caret spins.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shows its value but can't be changed;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * A selection menu that never scrolls.
    * - takes:  flag (present / absent)
    */
   unlimited?: boolean | ""
-  /** `unlimited`, as the DOM element's property. */
+  /**
+   * `unlimited`, as the DOM element's property.
+   * @deprecated write `unlimited` -- `prop:` stays only for compiled spell
+   */
   "prop:unlimited"?: boolean | ""
   /**
    * A `scrolling` menu people can resize vertically.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
-  /** `resizable`, as the DOM element's property. */
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
   "prop:resizable"?: boolean | ""
   /**
    * A shorter selection menu (3/4 height).
    * - takes:  flag (present / absent)
    */
   short?: boolean | ""
-  /** `short`, as the DOM element's property. */
+  /**
+   * `short`, as the DOM element's property.
+   * @deprecated write `short` -- `prop:` stays only for compiled spell
+   */
   "prop:short"?: boolean | ""
   /**
    * A much shorter selection menu (1/2 height).
    * - takes:  flag (present / absent)
    */
   "very-short"?: boolean | ""
-  /** `very-short`, as the DOM element's property. */
+  /**
+   * `very-short`, as the DOM element's property.
+   * @deprecated write `very-short` -- `prop:` stays only for compiled spell
+   */
   "prop:veryShort"?: boolean | ""
   /**
    * A longer selection menu (2x height).
    * - takes:  flag (present / absent)
    */
   long?: boolean | ""
-  /** `long`, as the DOM element's property. */
+  /**
+   * `long`, as the DOM element's property.
+   * @deprecated write `long` -- `prop:` stays only for compiled spell
+   */
   "prop:long"?: boolean | ""
   /**
    * A much longer selection menu (3x height).
    * - takes:  flag (present / absent)
    */
   "very-long"?: boolean | ""
-  /** `very-long`, as the DOM element's property. */
+  /**
+   * `very-long`, as the DOM element's property.
+   * @deprecated write `very-long` -- `prop:` stays only for compiled spell
+   */
   "prop:veryLong"?: boolean | ""
   /**
    * The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
-  /** `open`, as the DOM element's property. */
+  /**
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
+   */
   "prop:open"?: boolean | ""
   /**
    * An arrow on the menu pointing at the dropdown;  the value says where the menu's arrow sits (`top left` => below, arrow at its top left).  Pointing menus never flip.
@@ -5351,7 +6384,10 @@ export interface UIDropdownAttributes {
     | "bottom"
     | "bottom left"
     | "bottom right"
-  /** `pointing`, as the DOM element's property. */
+  /**
+   * `pointing`, as the DOM element's property.
+   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
+   */
   "prop:pointing"?:
     | boolean
     | ""
@@ -5368,7 +6404,10 @@ export interface UIDropdownAttributes {
    * - takes:  `2`-`5`, a fraction (`1/4`) or a percentage
    */
   columnar?: "2" | "3" | "4" | "5" | (string & {})
-  /** `columnar`, as the DOM element's property. */
+  /**
+   * `columnar`, as the DOM element's property.
+   * @deprecated write `columnar` -- `prop:` stays only for compiled spell
+   */
   "prop:columnar"?: "2" | "3" | "4" | "5" | (string & {})
   /**
    * Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`).
@@ -5376,56 +6415,80 @@ export interface UIDropdownAttributes {
    * - default:  `right`
    */
   direction?: "left" | "right"
-  /** `direction`, as the DOM element's property. */
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
   "prop:direction"?: "left" | "right"
   /**
    * Icon name for a `labeled` dropdown's icon block.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Text shown while nothing is chosen.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Text shown for the current value, e.g. before `options` arrive.  Property only by default.
    * - takes:  text
    */
   text?: string
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: string
   /**
    * Form field name;  `multiple` submits one entry per value.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * `search`:  offers the query as a new option.
    * - takes:  flag (present / absent)
    */
   "allow-additions"?: boolean | ""
-  /** `allow-additions`, as the DOM element's property. */
+  /**
+   * `allow-additions`, as the DOM element's property.
+   * @deprecated write `allow-additions` -- `prop:` stays only for compiled spell
+   */
   "prop:allowAdditions"?: boolean | ""
   /**
    * `search`:  characters to type before the menu filters.
@@ -5433,38 +6496,50 @@ export interface UIDropdownAttributes {
    * - default:  `0`
    */
   "min-characters"?: number | `${number}`
-  /** `min-characters`, as the DOM element's property. */
+  /**
+   * `min-characters`, as the DOM element's property.
+   * @deprecated write `min-characters` -- `prop:` stays only for compiled spell
+   */
   "prop:minCharacters"?: number | `${number}`
   /**
    * `multiple`:  the most values that can be chosen.
    * - takes:  number
    */
   "max-selections"?: number | `${number}`
-  /** `max-selections`, as the DOM element's property. */
+  /**
+   * `max-selections`, as the DOM element's property.
+   * @deprecated write `max-selections` -- `prop:` stays only for compiled spell
+   */
   "prop:maxSelections"?: number | `${number}`
   /**
    * Message when nothing matches;  default the translated `noResults` text.
    * - takes:  text
    */
   "no-results-text"?: string
-  /** `no-results-text`, as the DOM element's property. */
+  /**
+   * `no-results-text`, as the DOM element's property.
+   * @deprecated write `no-results-text` -- `prop:` stays only for compiled spell
+   */
   "prop:noResultsText"?: string
   /**
    * Label of the add item, with `{value}`;  default the translated `addItem` text.
    * - takes:  text
    */
   "addition-text"?: string
-  /** `addition-text`, as the DOM element's property. */
+  /**
+   * `addition-text`, as the DOM element's property.
+   * @deprecated write `addition-text` -- `prop:` stays only for compiled spell
+   */
   "prop:additionText"?: string
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   options?: unknown
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `options`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `options` -- `prop:` stays only for compiled spell
    */
   "prop:options"?: unknown
   /**
@@ -5472,7 +6547,10 @@ export interface UIDropdownAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -5514,7 +6592,10 @@ export interface UIDropdownAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -5613,42 +6694,60 @@ export interface UIEmbedAttributes {
    * - takes:  `youtube` · `vimeo`
    */
   source?: "youtube" | "vimeo"
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: "youtube" | "vimeo"
   /**
    * The video's id at `source` (Fomantic's `data-id`).
    * - takes:  text
    */
   "video-id"?: string
-  /** `video-id`, as the DOM element's property. */
+  /**
+   * `video-id`, as the DOM element's property.
+   * @deprecated write `video-id` -- `prop:` stays only for compiled spell
+   */
   "prop:videoId"?: string
   /**
    * Any `http(s)` URL to frame, instead of `source` + `video-id`;  a YouTube / Vimeo one gets their player parameters.
    * - takes:  text
    */
   url?: string
-  /** `url`, as the DOM element's property. */
+  /**
+   * `url`, as the DOM element's property.
+   * @deprecated write `url` -- `prop:` stays only for compiled spell
+   */
   "prop:url"?: string
   /**
    * Image shown (and clicked) before the frame loads.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * What it is, e.g. `Product tour`:  names the play button (`Play Product tour`) and the frame.  Default `alt`, else `video` / `embedded content`.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Fomantic's placeholder `alt`;  used as `label` when there is none.
    * - takes:  text
    */
   alt?: string
-  /** `alt`, as the DOM element's property. */
+  /**
+   * `alt`, as the DOM element's property.
+   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   */
   "prop:alt"?: string
   /**
    * Icon over the placeholder;  bare `icon` (or `"true"`) keeps the default, `icon="false"` shows none.
@@ -5656,14 +6755,20 @@ export interface UIEmbedAttributes {
    * - default:  `circle-play`
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Shape of the box;  `16:9` (widescreen) is the default.
    * - takes:  `16:9` · `4:3` · `21:9` · `square`
    */
   "aspect-ratio"?: "16:9" | "4:3" | "21:9" | "square"
-  /** `aspect-ratio`, as the DOM element's property. */
+  /**
+   * `aspect-ratio`, as the DOM element's property.
+   * @deprecated write `aspect-ratio` -- `prop:` stays only for compiled spell
+   */
   "prop:aspectRatio"?: "16:9" | "4:3" | "21:9" | "square"
   /**
    * The video plays as soon as the frame loads:  the click on the placeholder already asked for it.
@@ -5671,24 +6776,30 @@ export interface UIEmbedAttributes {
    * - default:  `true`
    */
   autoplay?: boolean | ""
-  /** `autoplay`, as the DOM element's property. */
+  /**
+   * `autoplay`, as the DOM element's property.
+   * @deprecated write `autoplay` -- `prop:` stays only for compiled spell
+   */
   "prop:autoplay"?: boolean | ""
   /**
    * Keep the player's own branding (Fomantic's `brandedUI`).
    * - takes:  flag (present / absent)
    */
   "branded-ui"?: boolean | ""
-  /** `branded-ui`, as the DOM element's property. */
+  /**
+   * `branded-ui`, as the DOM element's property.
+   * @deprecated write `branded-ui` -- `prop:` stays only for compiled spell
+   */
   "prop:brandedUI"?: boolean | ""
   /**
    * Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   parameters?: unknown
   /**
    * Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `parameters`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `parameters` -- `prop:` stays only for compiled spell
    */
   "prop:parameters"?: unknown
   /**
@@ -5696,28 +6807,40 @@ export interface UIEmbedAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -5759,7 +6882,10 @@ export interface UIEmbedAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -5820,49 +6946,70 @@ export interface UIEmojiAttributes {
    * - takes:  `small` · `medium` · `large` · `big`
    */
   size?: "small" | "medium" | "large" | "big"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "small" | "medium" | "large" | "big"
   /**
    * The emoji's name in the page's name set:  by default its CLDR shortcode (Unicode's name, `thumbs_up`, `grinning_face_with_smiling_eyes`, `flag_united_states`);  with `<ui-root emoji="fomantic">`, Fomantic's name (`thumbsup`, `smile`, `flag_us`).  The words may be joined any way:  `thumbs up`, `thumbs-up`, `thumbsUp`, `thumbsup` (and `:smile:`, any case).
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Accessible name (`role=img`), when the emoji stands for something else;  bare `label` hides it (decorative).  Default:  the character's own Unicode name, read by assistive tech.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Clickable look:  a pointer cursor.  The page adds the control.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Spins (a still glyph under reduced motion).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -5904,7 +7051,10 @@ export interface UIEmojiAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -5969,7 +7119,10 @@ export interface UIFeedEventAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -5991,49 +7144,70 @@ export interface UIFeedEventAttributes {
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Image URL, shown round as the label (decorative, `alt=""`).
    * - takes:  text
    */
   image?: string
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: string
   /**
    * Short text in a circle as the label, e.g. an initial (Fomantic's `data-text`).
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Its number / text circle outlined instead of filled.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6075,7 +7249,10 @@ export interface UIFeedEventAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6125,28 +7302,40 @@ export interface UIExtraAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6188,7 +7377,10 @@ export interface UIExtraAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6238,7 +7430,10 @@ export interface UIFeedAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the events' number circles (`ordered`) and connecting line (`connected`).
@@ -6260,7 +7455,10 @@ export interface UIFeedAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -6282,56 +7480,80 @@ export interface UIFeedAttributes {
    * - takes:  flag (present / absent)
    */
   connected?: boolean | ""
-  /** `connected`, as the DOM element's property. */
+  /**
+   * `connected`, as the DOM element's property.
+   * @deprecated write `connected` -- `prop:` stays only for compiled spell
+   */
   "prop:connected"?: boolean | ""
   /**
    * Numbers the events, in a circle where the label goes.  Renders `<ol>`.
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
-  /** `ordered`, as the DOM element's property. */
+  /**
+   * `ordered`, as the DOM element's property.
+   * @deprecated write `ordered` -- `prop:` stays only for compiled spell
+   */
   "prop:ordered"?: boolean | ""
   /**
    * A rule between events.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
-  /** `divided`, as the DOM element's property. */
+  /**
+   * `divided`, as the DOM element's property.
+   * @deprecated write `divided` -- `prop:` stays only for compiled spell
+   */
   "prop:divided"?: boolean | ""
   /**
    * Ordered:  outlined number circles instead of filled ones.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6373,7 +7595,10 @@ export interface UIFeedAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6423,42 +7648,60 @@ export interface UIFieldAttributes {
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * A value shown at the end of the label row (`100%`, `+8°`);  `slot="output"` is the rich version.
    * - takes:  text
    */
   output?: string
-  /** `output`, as the DOM element's property. */
+  /**
+   * `output`, as the DOM element's property.
+   * @deprecated write `output` -- `prop:` stays only for compiled spell
+   */
   "prop:output"?: string
   /**
    * An error, as a line under the control, and the `error` state.  `<ui-form>`'s validation shows its own there.
    * - takes:  text
    */
   error?: string
-  /** `error`, as the DOM element's property. */
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
   "prop:error"?: string
   /**
    * Field state:  tints its label and controls.  An error shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * When a change to the control is written to the bound value:  `immediately`;  `delayed`, after a pause in typing (300ms;  `delayed 100` for 100ms);  or `on leave`, when the cursor leaves the field.
@@ -6466,24 +7709,30 @@ export interface UIFieldAttributes {
    * - default:  `immediately`
    */
   apply?: string
-  /** `apply`, as the DOM element's property. */
+  /**
+   * `apply`, as the DOM element's property.
+   * @deprecated write `apply` -- `prop:` stays only for compiled spell
+   */
   "prop:apply"?: string
   /**
    * The things being edited disagree on this value:  the control shows blank, with a `Mixed` placeholder.  Set by the form;  writing a value clears it.
    * - takes:  flag (present / absent)
    */
   mixed?: boolean | ""
-  /** `mixed`, as the DOM element's property. */
+  /**
+   * `mixed`, as the DOM element's property.
+   * @deprecated write `mixed` -- `prop:` stays only for compiled spell
+   */
   "prop:mixed"?: boolean | ""
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -6491,28 +7740,40 @@ export interface UIFieldAttributes {
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * Marks the label with an asterisk (validation is `rules` / `required`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Shows the value;  it can't be changed.  Nests like `disabled`:  set on a group, it reaches each field.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readonly"?: boolean | ""
   /**
    * Dimmed and not usable (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Width in a row of fields:  columns (`4` of 16), fractions (`1/4`) or percentages (`25%`).
@@ -6536,7 +7797,10 @@ export interface UIFieldAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -6560,14 +7824,20 @@ export interface UIFieldAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6609,7 +7879,10 @@ export interface UIFieldAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6659,70 +7932,100 @@ export interface UIFieldsAttributes {
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Fields and their labels on one line.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * Fields stacked under one label (radio / checkbox groups).
    * - takes:  flag (present / absent)
    */
   grouped?: boolean | ""
-  /** `grouped`, as the DOM element's property. */
+  /**
+   * `grouped`, as the DOM element's property.
+   * @deprecated write `grouped` -- `prop:` stays only for compiled spell
+   */
   "prop:grouped"?: boolean | ""
   /**
    * Never stacks on a narrow form.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * Marks every field label (or the group label) with an asterisk.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Every field dimmed and not usable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Every field the same width, from the fields themselves (no count):  an equal share of the row each (Fomantic's `equal width fields`;  ~== `widths="equal"`).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  fields per row, sharing it equally (`widths="2"` => `two fields`);  `"equal"` => any number (`equal width`).
    * - takes:  `2`-`10`, a fraction (`1/4`) or a percentage
    */
   widths?: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
-  /** `widths`, as the DOM element's property. */
+  /**
+   * `widths`, as the DOM element's property.
+   * @deprecated write `widths` -- `prop:` stays only for compiled spell
+   */
   "prop:widths"?: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6764,7 +8067,10 @@ export interface UIFieldsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6814,35 +8120,50 @@ export interface UIFlagAttributes {
    * - takes:  `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * ISO 3166-1 alpha-2 code in any case (`fr`, `US`), or one of Fomantic's names and aliases (`france`, `united states`, `america`, `uk`, `england`, `pride` ...), see `FLAG_ALIASES`.
    * - takes:  text
    */
   country?: string
-  /** `country`, as the DOM element's property. */
+  /**
+   * `country`, as the DOM element's property.
+   * @deprecated write `country` -- `prop:` stays only for compiled spell
+   */
   "prop:country"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -6884,7 +8205,10 @@ export interface UIFlagAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -6973,28 +8297,40 @@ export interface UIFlyoutAttributes {
    * - default:  `left`
    */
   position?: "left" | "right" | "top" | "bottom"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "left" | "right" | "top" | "bottom"
   /**
    * The whole viewport wide.
    * - takes:  flag (present / absent)
    */
   fullscreen?: boolean | ""
-  /** `fullscreen`, as the DOM element's property. */
+  /**
+   * `fullscreen`, as the DOM element's property.
+   * @deprecated write `fullscreen` -- `prop:` stays only for compiled spell
+   */
   "prop:fullscreen"?: boolean | ""
   /**
    * The dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Blurs and greys the page behind its dimmer.
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
-  /** `blurring`, as the DOM element's property. */
+  /**
+   * `blurring`, as the DOM element's property.
+   * @deprecated write `blurring` -- `prop:` stays only for compiled spell
+   */
   "prop:blurring"?: boolean | ""
   /**
    * Width of a `left` / `right` flyout:  Fomantic's words (`very thin`, `thin`, `wide`, `very wide`) or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).
@@ -7018,7 +8354,10 @@ export interface UIFlyoutAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -7042,7 +8381,10 @@ export interface UIFlyoutAttributes {
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
-  /** `closable`, as the DOM element's property. */
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
   "prop:closable"?: boolean | ""
   /**
    * What dismisses it, as `<dialog closedby>`:  `any` -- Escape or a click on the dimmer (default);  `closerequest` -- Escape only;  `none` -- only its own buttons.  Read when it opens.
@@ -7050,42 +8392,60 @@ export interface UIFlyoutAttributes {
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
-  /** `closedby`, as the DOM element's property. */
+  /**
+   * `closedby`, as the DOM element's property.
+   * @deprecated write `closedby` -- `prop:` stays only for compiled spell
+   */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version.
    * - takes:  text
    */
   content?: string
-  /** `content`, as the DOM element's property. */
+  /**
+   * `content`, as the DOM element's property.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
   "prop:content"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -7127,7 +8487,10 @@ export interface UIFlyoutAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -7267,56 +8630,80 @@ export interface UIFormAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Every row of fields shares its width equally.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
-  /** `equal-width`, as the DOM element's property. */
+  /**
+   * `equal-width`, as the DOM element's property.
+   * @deprecated write `equal-width` -- `prop:` stays only for compiled spell
+   */
   "prop:equalWidth"?: boolean | ""
   /**
    * For dark backgrounds:  light labels.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed behind a spinner, not usable.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Nothing inside can be used (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Rows of fields never stack on narrow forms.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * What its rows of fields stack by:  `container` (the default) -- the form's own width;  `page` -- the screen's, as in Fomantic.  Its `<ui-fields>` follow it.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * When fields validate:  `immediately`, as each changes;  `on leave`, as the cursor leaves each;  or only `on save` (a submit, or `save()`).  A field showing an error always validates again as it changes.
@@ -7324,7 +8711,10 @@ export interface UIFormAttributes {
    * - default:  `on save`
    */
   validate?: "immediately" | "on leave" | "on save"
-  /** `validate`, as the DOM element's property. */
+  /**
+   * `validate`, as the DOM element's property.
+   * @deprecated write `validate` -- `prop:` stays only for compiled spell
+   */
   "prop:validateOn"?: "immediately" | "on leave" | "on save"
   /**
    * When edits land in the bound `value`:  `immediately`;  or `on save`, all together on `save()`, while `cancel()` drops them (`:state(changed)` while any are held).  Each field's own `apply` says when it takes an edit.
@@ -7332,17 +8722,20 @@ export interface UIFormAttributes {
    * - default:  `immediately`
    */
   apply?: "immediately" | "on save"
-  /** `apply`, as the DOM element's property. */
+  /**
+   * `apply`, as the DOM element's property.
+   * @deprecated write `apply` -- `prop:` stays only for compiled spell
+   */
   "prop:apply"?: "immediately" | "on save"
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -7351,24 +8744,30 @@ export interface UIFormAttributes {
    * - default:  `true`
    */
   "error-focus"?: boolean | ""
-  /** `error-focus`, as the DOM element's property. */
+  /**
+   * `error-focus`, as the DOM element's property.
+   * @deprecated write `error-focus` -- `prop:` stays only for compiled spell
+   */
   "prop:errorFocus"?: boolean | ""
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
    */
   "prevent-leaving"?: boolean | ""
-  /** `prevent-leaving`, as the DOM element's property. */
+  /**
+   * `prevent-leaving`, as the DOM element's property.
+   * @deprecated write `prevent-leaving` -- `prop:` stays only for compiled spell
+   */
   "prop:preventLeaving"?: boolean | ""
   /**
    * The object the form is BOUND to:  each control with a `name` shows that property and writes it back as it changes, live both ways (Solid signals, reactive members, spell objects);  a control in a `<ui-repeat>` row binds to the row's item.  Unset:  nothing is bound.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   value?: unknown
   /**
    * The object the form is BOUND to:  each control with a `name` shows that property and writes it back as it changes, live both ways (Solid signals, reactive members, spell objects);  a control in a `<ui-repeat>` row binds to the row's item.  Unset:  nothing is bound.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `value`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
    */
   "prop:value"?: unknown
   /**
@@ -7376,14 +8775,20 @@ export interface UIFormAttributes {
    * - takes:  flag (present / absent)
    */
   debug?: boolean | ""
-  /** `debug`, as the DOM element's property. */
+  /**
+   * `debug`, as the DOM element's property.
+   * @deprecated write `debug` -- `prop:` stays only for compiled spell
+   */
   "prop:debug"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -7425,7 +8830,10 @@ export interface UIFormAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -7535,7 +8943,10 @@ export interface UIGridAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `columns`, as the DOM element's property. */
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
   "prop:columns"?:
     | "1"
     | "2"
@@ -7559,133 +8970,190 @@ export interface UIGridAttributes {
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
-  /** `equal-width`, as the DOM element's property. */
+  /**
+   * `equal-width`, as the DOM element's property.
+   * @deprecated write `equal-width` -- `prop:` stays only for compiled spell
+   */
   "prop:equalWidth"?: boolean | ""
   /**
    * Hairlines between columns;  `divided="vertically"` between rows instead.
    * - takes:  flag, or `vertically`
    */
   divided?: boolean | "" | "vertically"
-  /** `divided`, as the DOM element's property. */
+  /**
+   * `divided`, as the DOM element's property.
+   * @deprecated write `divided` -- `prop:` stays only for compiled spell
+   */
   "prop:divided"?: boolean | "" | "vertically"
   /**
    * A table-like box with hairlines between every cell;  `"internally"` drops the outer box.
    * - takes:  flag, or `internally`
    */
   celled?: boolean | "" | "internally"
-  /** `celled`, as the DOM element's property. */
+  /**
+   * `celled`, as the DOM element's property.
+   * @deprecated write `celled` -- `prop:` stays only for compiled spell
+   */
   "prop:celled"?: boolean | "" | "internally"
   /**
    * Keeps its outer gutters inside its box;  `horizontally` / `vertically` for one axis.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   padded?: boolean | "" | "horizontally" | "vertically"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Wider gutters;  `relaxed="very"` wider still.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
-  /** `relaxed`, as the DOM element's property. */
+  /**
+   * `relaxed`, as the DOM element's property.
+   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   */
   "prop:relaxed"?: boolean | "" | "very"
   /**
    * Narrower gutters and row spacing;  `compact="very"` narrower still.
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | "" | "very"
   /**
    * Centres its columns in each line.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Columns fill the line's height;  their content grows.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
-  /** `stretched`, as the DOM element's property. */
+  /**
+   * `stretched`, as the DOM element's property.
+   * @deprecated write `stretched` -- `prop:` stays only for compiled spell
+   */
   "prop:stretched"?: boolean | ""
   /**
    * One full-width column per line when the grid is narrow.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * Halves the column count at tablet and mobile widths.
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
-  /** `doubling`, as the DOM element's property. */
+  /**
+   * `doubling`, as the DOM element's property.
+   * @deprecated write `doubling` -- `prop:` stays only for compiled spell
+   */
   "prop:doubling"?: boolean | ""
   /**
    * On a dark surface:  dividers in their on-dark tone.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport), e.g. `only="mobile tablet"`.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
-  /** `only`, as the DOM element's property. */
+  /**
+   * `only`, as the DOM element's property.
+   * @deprecated write `only` -- `prop:` stays only for compiled spell
+   */
   "prop:only"?: string
   /**
    * Reverses the column order at these grid widths, e.g. `reversed="mobile tablet vertically"`.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `mobile vertically` · `tablet vertically` · `computer vertically`
    */
   reversed?: string
-  /** `reversed`, as the DOM element's property. */
+  /**
+   * `reversed`, as the DOM element's property.
+   * @deprecated write `reversed` -- `prop:` stays only for compiled spell
+   */
   "prop:reversed"?: string
   /**
    * What `stackable`, `doubling`, `reversed` and per-device widths measure:  `container` (the default) -- the grid's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).  Rows and columns follow their grid.
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * Aligns every column's text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns every column to the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -7727,7 +9195,10 @@ export interface UIGridAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -7777,14 +9248,20 @@ export interface UIHeaderAttributes {
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
-  /** `level`, as the DOM element's property. */
+  /**
+   * `level`, as the DOM element's property.
+   * @deprecated write `level` -- `prop:` stays only for compiled spell
+   */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Content header size relative to the surrounding text, `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text (and of a `dividing` rule).
@@ -7806,7 +9283,10 @@ export interface UIHeaderAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -7828,98 +9308,140 @@ export interface UIHeaderAttributes {
    * - takes:  flag (present / absent)
    */
   sub?: boolean | ""
-  /** `sub`, as the DOM element's property. */
+  /**
+   * `sub`, as the DOM element's property.
+   * @deprecated write `sub` -- `prop:` stays only for compiled spell
+   */
   "prop:sub"?: boolean | ""
   /**
    * Icon header:  a large slotted icon centred above the text.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: boolean | ""
   /**
    * A rule below it.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * In a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
-  /** `block`, as the DOM element's property. */
+  /**
+   * `block`, as the DOM element's property.
+   * @deprecated write `block` -- `prop:` stays only for compiled spell
+   */
   "prop:block"?: boolean | ""
   /**
    * Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * With `attached`:  no line where it meets the segment.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
-  /** `seamless`, as the DOM element's property. */
+  /**
+   * `seamless`, as the DOM element's property.
+   * @deprecated write `seamless` -- `prop:` stays only for compiled spell
+   */
   "prop:seamless"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * No padding.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme, for it and its parts.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a header.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -7961,7 +9483,10 @@ export interface UIHeaderAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8011,7 +9536,10 @@ export interface UIIconAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the glyph;  with `inverted` `circular` / `bordered`, the disc.
@@ -8033,7 +9561,10 @@ export interface UIIconAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -8055,98 +9586,140 @@ export interface UIIconAttributes {
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own.
    * - takes:  flag (present / absent)
    */
   outline?: boolean | ""
-  /** `outline`, as the DOM element's property. */
+  /**
+   * `outline`, as the DOM element's property.
+   * @deprecated write `outline` -- `prop:` stays only for compiled spell
+   */
   "prop:outline"?: boolean | ""
   /**
    * Accessible name:  makes the icon an image (`role=img`, `aria-label`).  Without it the icon is decorative and hidden from assistive technology.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds;  fills a `circular` / `bordered` icon.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Spins, e.g. a `spinner` or `circle-notch` glyph.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * No gap after the glyph and no extra width.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * Clickable look:  dimmed until hovered, pointer cursor.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Inside a circular ring.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Inside a square ring.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Mirrored:  `flipped` / `horizontally`, or `vertically`.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   flipped?: boolean | "" | "horizontally" | "vertically"
-  /** `flipped`, as the DOM element's property. */
+  /**
+   * `flipped`, as the DOM element's property.
+   * @deprecated write `flipped` -- `prop:` stays only for compiled spell
+   */
   "prop:flipped"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Turned a quarter:  `rotated` / `clockwise`, `counterclockwise`, or `halfway` (180°).
    * - takes:  flag, or `clockwise` · `counterclockwise` · `halfway`
    */
   rotated?: boolean | "" | "clockwise" | "counterclockwise" | "halfway"
-  /** `rotated`, as the DOM element's property. */
+  /**
+   * `rotated`, as the DOM element's property.
+   * @deprecated write `rotated` -- `prop:` stays only for compiled spell
+   */
   "prop:rotated"?: boolean | "" | "clockwise" | "counterclockwise" | "halfway"
   /**
    * Inside `<ui-icons>`:  a small badge on a corner of the group;  bare `corner` is bottom right.
    * - takes:  flag, or `top left` · `top right` · `bottom left` · `bottom right`
    */
   corner?: boolean | "" | "top left" | "top right" | "bottom left" | "bottom right"
-  /** `corner`, as the DOM element's property. */
+  /**
+   * `corner`, as the DOM element's property.
+   * @deprecated write `corner` -- `prop:` stays only for compiled spell
+   */
   "prop:corner"?: boolean | "" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -8188,7 +9761,10 @@ export interface UIIconAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8238,63 +9814,90 @@ export interface UIIconsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Accessible name for the combined glyph (`role=img`);  without it the group is decorative.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * The whole group spins.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * No gap after the group.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * Inside a circular ring, the first icon centred.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Inside a square ring, the first icon centred.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * A filled `circular` / `bordered` ring, for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -8336,7 +9939,10 @@ export interface UIIconsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8386,133 +9992,190 @@ export interface UIImageAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A small circle sitting in a line of text.
    * - takes:  flag (present / absent)
    */
   avatar?: boolean | ""
-  /** `avatar`, as the DOM element's property. */
+  /**
+   * `avatar`, as the DOM element's property.
+   * @deprecated write `avatar` -- `prop:` stays only for compiled spell
+   */
   "prop:avatar"?: boolean | ""
   /**
    * A hairline border, for images with white edges.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * A block centred in its container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Cropped to a circle (a pill when not square).
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Faded:  shown as unavailable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Fills its container's width.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Sits inline in running text instead of as a block.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * Softly rounded corners.
    * - takes:  flag (present / absent)
    */
   rounded?: boolean | ""
-  /** `rounded`, as the DOM element's property. */
+  /**
+   * `rounded`, as the DOM element's property.
+   * @deprecated write `rounded` -- `prop:` stays only for compiled spell
+   */
   "prop:rounded"?: boolean | ""
   /**
    * Floats `left` or `right` of the text.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Room from the text around it:  both sides, or `spaced="left"` / `"right"` only.
    * - takes:  flag, or `left` · `right`
    */
   spaced?: boolean | "" | "left" | "right"
-  /** `spaced`, as the DOM element's property. */
+  /**
+   * `spaced`, as the DOM element's property.
+   * @deprecated write `spaced` -- `prop:` stays only for compiled spell
+   */
   "prop:spaced"?: boolean | "" | "left" | "right"
   /**
    * Aligns `top`, `middle` or `bottom` against the text (or, in a group, the row).
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Image URL, as the native `<img src>`.
    * - takes:  text
    */
   src?: string
-  /** `src`, as the DOM element's property. */
+  /**
+   * `src`, as the DOM element's property.
+   * @deprecated write `src` -- `prop:` stays only for compiled spell
+   */
   "prop:src"?: string
   /**
    * Text alternative, as the native `<img alt>`;  `alt=""` marks the image decorative.
    * - takes:  text
    */
   alt?: string
-  /** `alt`, as the DOM element's property. */
+  /**
+   * `alt`, as the DOM element's property.
+   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   */
   "prop:alt"?: string
   /**
    * Intrinsic width in px, as the native `<img width>`:  reserves space before load.  NOT the column `width` grammar;  size variations still set the rendered width.
    * - takes:  number
    */
   width?: number | `${number}`
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?: number | `${number}`
   /**
    * Intrinsic height in px, as the native `<img height>`:  reserves space before load.
    * - takes:  number
    */
   height?: number | `${number}`
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: number | `${number}`
   /**
    * When to load, as the native `<img loading>`.
    * - takes:  `eager` · `lazy`
    */
   loading?: "eager" | "lazy"
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: "eager" | "lazy"
   /**
    * Renders a link (`<a>`) around the image.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -8554,7 +10217,10 @@ export interface UIImageAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8604,84 +10270,120 @@ export interface UIImagesAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Every image a small circle.
    * - takes:  flag (present / absent)
    */
   avatar?: boolean | ""
-  /** `avatar`, as the DOM element's property. */
+  /**
+   * `avatar`, as the DOM element's property.
+   * @deprecated write `avatar` -- `prop:` stays only for compiled spell
+   */
   "prop:avatar"?: boolean | ""
   /**
    * Every image with a hairline border.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Rows centred in the container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Every image cropped to a circle.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * The whole group faded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Every image fills the group's width, one per row.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Every image with softly rounded corners.
    * - takes:  flag (present / absent)
    */
   rounded?: boolean | ""
-  /** `rounded`, as the DOM element's property. */
+  /**
+   * `rounded`, as the DOM element's property.
+   * @deprecated write `rounded` -- `prop:` stays only for compiled spell
+   */
   "prop:rounded"?: boolean | ""
   /**
    * Floats the group `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Aligns the images of a row `top`, `middle` (default) or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -8723,7 +10425,10 @@ export interface UIImagesAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8813,7 +10518,10 @@ export interface UIIncludeAttributes {
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
@@ -8821,42 +10529,60 @@ export interface UIIncludeAttributes {
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
-  /** `load`, as the DOM element's property. */
+  /**
+   * `load`, as the DOM element's property.
+   * @deprecated write `load` -- `prop:` stays only for compiled spell
+   */
   "prop:load"?: "eager" | "visible" | "idle"
   /**
    * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Put the included markup in the element's LIGHT DOM, so the page's stylesheets style it.  Default:  a shadow root, where only inherited values (fonts, colours, `--ui-*` tokens) reach it.
    * - takes:  flag (present / absent)
    */
   "page-styles"?: boolean | ""
-  /** `page-styles`, as the DOM element's property. */
+  /**
+   * `page-styles`, as the DOM element's property.
+   * @deprecated write `page-styles` -- `prop:` stays only for compiled spell
+   */
   "prop:pageStyles"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -8898,7 +10624,10 @@ export interface UIIncludeAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -8941,6 +10670,7 @@ export interface UIIncludeAttributes {
   content?: string
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
    */
   "prop:content"?: string
   /**
@@ -9004,7 +10734,10 @@ export interface UIInputAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of a `file` input's choose-file button (Fomantic colours only file inputs).
@@ -9026,7 +10759,10 @@ export interface UIInputAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -9048,84 +10784,120 @@ export interface UIInputAttributes {
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * No box:  text only, e.g. inside a menu or header.
    * - takes:  flag (present / absent)
    */
   transparent?: boolean | ""
-  /** `transparent`, as the DOM element's property. */
+  /**
+   * `transparent`, as the DOM element's property.
+   * @deprecated write `transparent` -- `prop:` stays only for compiled spell
+   */
   "prop:transparent"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Busy:  the icon becomes a spinner (with or without `icon`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Shows its value but can't be edited;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * `left` puts the icon at the start (`left icon`);  default the end.
    * - takes:  `left`
    */
   "icon-position"?: "left"
-  /** `icon-position`, as the DOM element's property. */
+  /**
+   * `icon-position`, as the DOM element's property.
+   * @deprecated write `icon-position` -- `prop:` stays only for compiled spell
+   */
   "prop:iconPosition"?: "left"
   /**
    * Where the label sits:  bare => before the field, `right` => after it, `corner` / `left corner` => folded over a corner.  Implied (bare) by a `label` shorthand or slot.
    * - takes:  flag, or `right` · `corner` · `left corner`
    */
   labeled?: boolean | "" | "right" | "corner" | "left corner"
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | "" | "right" | "corner" | "left corner"
   /**
    * Joined buttons (slot `action`):  bare => after the field, `left` => before it.  Implied by the slot.
    * - takes:  flag, or `left`
    */
   action?: boolean | "" | "left"
-  /** `action`, as the DOM element's property. */
+  /**
+   * `action`, as the DOM element's property.
+   * @deprecated write `action` -- `prop:` stays only for compiled spell
+   */
   "prop:action"?: boolean | "" | "left"
   /**
    * Icon name, drawn inside the field;  the root gets `icon`.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Label text, joined to the field;  an ICON name with `labeled="corner"` / `"left corner"`;  the `label` slot is the rich version.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Native input type;  `file` also adds the `file` class.
@@ -9147,7 +10919,10 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?:
     | "text"
     | "password"
@@ -9168,108 +10943,150 @@ export interface UIInputAttributes {
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * Constraint:  must not be empty (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Constraint:  a regular expression the whole value must match.
    * - takes:  text
    */
   pattern?: string
-  /** `pattern`, as the DOM element's property. */
+  /**
+   * `pattern`, as the DOM element's property.
+   * @deprecated write `pattern` -- `prop:` stays only for compiled spell
+   */
   "prop:pattern"?: string
   /**
    * Constraint:  lowest number / date.
    * - takes:  text
    */
   min?: string
-  /** `min`, as the DOM element's property. */
+  /**
+   * `min`, as the DOM element's property.
+   * @deprecated write `min` -- `prop:` stays only for compiled spell
+   */
   "prop:min"?: string
   /**
    * Constraint:  highest number / date.
    * - takes:  text
    */
   max?: string
-  /** `max`, as the DOM element's property. */
+  /**
+   * `max`, as the DOM element's property.
+   * @deprecated write `max` -- `prop:` stays only for compiled spell
+   */
   "prop:max"?: string
   /**
    * Constraint:  granularity of a number / date.
    * - takes:  text
    */
   step?: string
-  /** `step`, as the DOM element's property. */
+  /**
+   * `step`, as the DOM element's property.
+   * @deprecated write `step` -- `prop:` stays only for compiled spell
+   */
   "prop:step"?: string
   /**
    * Constraint:  fewest characters (checked once someone has edited it).
    * - takes:  number
    */
   minlength?: number | `${number}`
-  /** `minlength`, as the DOM element's property. */
+  /**
+   * `minlength`, as the DOM element's property.
+   * @deprecated write `minlength` -- `prop:` stays only for compiled spell
+   */
   "prop:minLength"?: number | `${number}`
   /**
    * Constraint:  most characters.
    * - takes:  number
    */
   maxlength?: number | `${number}`
-  /** `maxlength`, as the DOM element's property. */
+  /**
+   * `maxlength`, as the DOM element's property.
+   * @deprecated write `maxlength` -- `prop:` stays only for compiled spell
+   */
   "prop:maxLength"?: number | `${number}`
   /**
    * `email` / `file`:  accepts several values.
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
-  /** `multiple`, as the DOM element's property. */
+  /**
+   * `multiple`, as the DOM element's property.
+   * @deprecated write `multiple` -- `prop:` stays only for compiled spell
+   */
   "prop:multiple"?: boolean | ""
   /**
    * `file`:  accepted file types.
    * - takes:  text
    */
   accept?: string
-  /** `accept`, as the DOM element's property. */
+  /**
+   * `accept`, as the DOM element's property.
+   * @deprecated write `accept` -- `prop:` stays only for compiled spell
+   */
   "prop:accept"?: string
   /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
    */
   autocomplete?: string
-  /** `autocomplete`, as the DOM element's property. */
+  /**
+   * `autocomplete`, as the DOM element's property.
+   * @deprecated write `autocomplete` -- `prop:` stays only for compiled spell
+   */
   "prop:autocomplete"?: string
   /**
    * Virtual keyboard hint, forwarded to the native input.  `decimal` / `numeric` also give the number look (right-aligned, tabular figures), as `type="number"` does.
    * - takes:  `none` · `text` · `decimal` · `numeric` · `tel` · `search` · `email` · `url`
    */
   inputmode?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url"
-  /** `inputmode`, as the DOM element's property. */
+  /**
+   * `inputmode`, as the DOM element's property.
+   * @deprecated write `inputmode` -- `prop:` stays only for compiled spell
+   */
   "prop:inputMode"?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url"
   /**
    * Fomantic validation rules checked with the native constraints:  `"email"`, `["notEmpty", "minLength[6]"]` or rule objects (`ValidationRule`).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Fomantic validation rules checked with the native constraints:  `"email"`, `["notEmpty", "minLength[6]"]` or rule objects (`ValidationRule`).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -9277,7 +11094,10 @@ export interface UIInputAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -9319,7 +11139,10 @@ export interface UIInputAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -9394,7 +11217,10 @@ export interface UIItemAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -9416,91 +11242,130 @@ export interface UIItemAttributes {
    * - takes:  `left` · `right`
    */
   position?: "left" | "right"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "left" | "right"
   /**
    * Value;  defaults to `text`.  Ordered list:  shown as the marker.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Dropdown:  text;  defaults to the text content.
    * - takes:  text
    */
   text?: string
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: string
   /**
    * Dropdown:  secondary text, shown at the end.
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * Icon name, shown before the text.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.
    * - takes:  text
    */
   image?: string
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: string
   /**
    * Dropdown:  country code, shown as a flag before the text.
    * - takes:  text
    */
   flag?: string
-  /** `flag`, as the DOM element's property. */
+  /**
+   * `flag`, as the DOM element's property.
+   * @deprecated write `flag` -- `prop:` stays only for compiled spell
+   */
   "prop:flag"?: string
   /**
    * List / menu:  renders a link (`<a>`).
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Can't be chosen or followed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /** `selected`, as the DOM element's property. */
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
   "prop:selected"?: boolean | ""
   /**
    * Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).
@@ -9508,21 +11373,30 @@ export interface UIItemAttributes {
    * - default:  `item`
    */
   type?: "item" | "header" | "divider"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "item" | "header" | "divider"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -9564,7 +11438,10 @@ export interface UIItemAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -9614,70 +11491,100 @@ export interface UIItemsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule between items.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
-  /** `divided`, as the DOM element's property. */
+  /**
+   * `divided`, as the DOM element's property.
+   * @deprecated write `divided` -- `prop:` stays only for compiled spell
+   */
   "prop:divided"?: boolean | ""
   /**
    * More space between items;  `relaxed="very"` even more.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
-  /** `relaxed`, as the DOM element's property. */
+  /**
+   * `relaxed`, as the DOM element's property.
+   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   */
   "prop:relaxed"?: boolean | "" | "very"
   /**
    * Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Keeps the image beside the content in a narrow group (mobile widths), where items otherwise stack.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * What stacking and the tablet image width measure:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -9719,7 +11626,10 @@ export interface UIItemsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -9779,7 +11689,10 @@ export interface UILabelAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue;  fills the label (its ring and text when `basic`).
@@ -9801,7 +11714,10 @@ export interface UILabelAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -9823,175 +11739,250 @@ export interface UILabelAttributes {
    * - takes:  text
    */
   image?: string
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: string
   /**
    * Shaped like a price tag.
    * - takes:  flag (present / absent)
    */
   tag?: boolean | ""
-  /** `tag`, as the DOM element's property. */
+  /**
+   * `tag`, as the DOM element's property.
+   * @deprecated write `tag` -- `prop:` stays only for compiled spell
+   */
   "prop:tag"?: boolean | ""
   /**
    * A triangle on the owner's top corner holding an icon:  `corner` (end) or `corner="left"`.
    * - takes:  flag, or `left` · `right`
    */
   corner?: boolean | "" | "left" | "right"
-  /** `corner`, as the DOM element's property. */
+  /**
+   * `corner`, as the DOM element's property.
+   * @deprecated write `corner` -- `prop:` stays only for compiled spell
+   */
   "prop:corner"?: boolean | "" | "left" | "right"
   /**
    * A ribbon pulled past the owner's start edge;  `ribbon="right"` past its end edge.
    * - takes:  flag, or `right`
    */
   ribbon?: boolean | "" | "right"
-  /** `ribbon`, as the DOM element's property. */
+  /**
+   * `ribbon`, as the DOM element's property.
+   * @deprecated write `ribbon` -- `prop:` stays only for compiled spell
+   */
   "prop:ribbon"?: boolean | "" | "right"
   /**
    * An arrow pointing at related content:  `pointing` (above), `below`, `left` or `right`.
    * - takes:  flag, or `above` · `below` · `left` · `right`
    */
   pointing?: boolean | "" | "above" | "below" | "left" | "right"
-  /** `pointing`, as the DOM element's property. */
+  /**
+   * `pointing`, as the DOM element's property.
+   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
+   */
   "prop:pointing"?: boolean | "" | "above" | "below" | "left" | "right"
   /**
    * Floats over the owner's top end corner, e.g. a count on a menu item;  `left` / `bottom` move it.
    * - takes:  flag, or `left` · `bottom` · `bottom left`
    */
   floating?: boolean | "" | "left" | "bottom" | "bottom left"
-  /** `floating`, as the DOM element's property. */
+  /**
+   * `floating`, as the DOM element's property.
+   * @deprecated write `floating` -- `prop:` stays only for compiled spell
+   */
   "prop:floating"?: boolean | "" | "left" | "bottom" | "bottom left"
   /**
    * Less pronounced:  an outline on the surface colour.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's.
    * - takes:  flag (present / absent)
    */
   tinted?: boolean | ""
-  /** `tinted`, as the DOM element's property. */
+  /**
+   * `tinted`, as the DOM element's property.
+   * @deprecated write `tinted` -- `prop:` stays only for compiled spell
+   */
   "prop:tinted"?: boolean | ""
   /**
    * Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`.
    * - takes:  flag, or `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
    */
   attached?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
    * A fixed-width tag before a line of text, e.g. in a list.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * A round badge.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * With `circular`:  an empty dot.
    * - takes:  flag (present / absent)
    */
   empty?: boolean | ""
-  /** `empty`, as the DOM element's property. */
+  /**
+   * `empty`, as the DOM element's property.
+   * @deprecated write `empty` -- `prop:` stays only for compiled spell
+   */
   "prop:empty"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Centres its content.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * A form field's validation message:  the negative colour on the surface, wins over `color`.
    * - takes:  flag (present / absent)
    */
   prompt?: boolean | ""
-  /** `prompt`, as the DOM element's property. */
+  /**
+   * `prompt`, as the DOM element's property.
+   * @deprecated write `prompt` -- `prop:` stays only for compiled spell
+   */
   "prop:prompt"?: boolean | ""
   /**
    * Selected / on.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Icon name, shown before the text;  with no text the label gets the `icon` class (icon centred).
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Shorthand for a dimmer second value after the text, e.g. a count.
    * - takes:  text
    */
   detail?: string
-  /** `detail`, as the DOM element's property. */
+  /**
+   * `detail`, as the DOM element's property.
+   * @deprecated write `detail` -- `prop:` stays only for compiled spell
+   */
   "prop:detail"?: string
   /**
    * Shows a delete icon button;  clicking it dispatches `ui-remove`.
    * - takes:  flag (present / absent)
    */
   removable?: boolean | ""
-  /** `removable`, as the DOM element's property. */
+  /**
+   * `removable`, as the DOM element's property.
+   * @deprecated write `removable` -- `prop:` stays only for compiled spell
+   */
   "prop:removable"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a label.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -10033,7 +12024,10 @@ export interface UILabelAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -10089,7 +12083,10 @@ export interface UILabelsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every label in the group.
@@ -10111,7 +12108,10 @@ export interface UILabelsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -10133,84 +12133,120 @@ export interface UILabelsAttributes {
    * - takes:  flag (present / absent)
    */
   tag?: boolean | ""
-  /** `tag`, as the DOM element's property. */
+  /**
+   * `tag`, as the DOM element's property.
+   * @deprecated write `tag` -- `prop:` stays only for compiled spell
+   */
   "prop:tag"?: boolean | ""
   /**
    * Every label basic (outlined).
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Every label tinted (the colour's soft fill and text).
    * - takes:  flag (present / absent)
    */
   tinted?: boolean | ""
-  /** `tinted`, as the DOM element's property. */
+  /**
+   * `tinted`, as the DOM element's property.
+   * @deprecated write `tinted` -- `prop:` stays only for compiled spell
+   */
   "prop:tinted"?: boolean | ""
   /**
    * Every label a round badge.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Every label a fixed-width tag.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * Every label an image label.
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: boolean | ""
   /**
    * Every label full width.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Every label centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Every label for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Every label dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -10252,7 +12288,10 @@ export interface UILabelsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -10311,126 +12350,180 @@ export interface UIListAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Marks each item with a bullet.
    * - takes:  flag (present / absent)
    */
   bulleted?: boolean | ""
-  /** `bulleted`, as the DOM element's property. */
+  /**
+   * `bulleted`, as the DOM element's property.
+   * @deprecated write `bulleted` -- `prop:` stays only for compiled spell
+   */
   "prop:bulleted"?: boolean | ""
   /**
    * Numbers each item (`1.`, `1.1` in a sub-list);  an item's `value` replaces its number.  Renders `<ol>`.
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
-  /** `ordered`, as the DOM element's property. */
+  /**
+   * `ordered`, as the DOM element's property.
+   * @deprecated write `ordered` -- `prop:` stays only for compiled spell
+   */
   "prop:ordered"?: boolean | ""
   /**
    * Ordered:  a dot follows each number (`1.`).
    * - takes:  flag (present / absent)
    */
   suffixed?: boolean | ""
-  /** `suffixed`, as the DOM element's property. */
+  /**
+   * `suffixed`, as the DOM element's property.
+   * @deprecated write `suffixed` -- `prop:` stays only for compiled spell
+   */
   "prop:suffixed"?: boolean | ""
   /**
    * Items are links:  muted until hovered, the selected one strongest.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Items are choices:  `<button>`s with a hover background, `ui-select` on activation.
    * - takes:  flag (present / absent)
    */
   selection?: boolean | ""
-  /** `selection`, as the DOM element's property. */
+  /**
+   * `selection`, as the DOM element's property.
+   * @deprecated write `selection` -- `prop:` stays only for compiled spell
+   */
   "prop:selection"?: boolean | ""
   /**
    * Items indent when hovered.
    * - takes:  flag (present / absent)
    */
   animated?: boolean | ""
-  /** `animated`, as the DOM element's property. */
+  /**
+   * `animated`, as the DOM element's property.
+   * @deprecated write `animated` -- `prop:` stays only for compiled spell
+   */
   "prop:animated"?: boolean | ""
   /**
    * Items sit in a row.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * A rule between items.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
-  /** `divided`, as the DOM element's property. */
+  /**
+   * `divided`, as the DOM element's property.
+   * @deprecated write `divided` -- `prop:` stays only for compiled spell
+   */
   "prop:divided"?: boolean | ""
   /**
    * A rule around every item.
    * - takes:  flag (present / absent)
    */
   celled?: boolean | ""
-  /** `celled`, as the DOM element's property. */
+  /**
+   * `celled`, as the DOM element's property.
+   * @deprecated write `celled` -- `prop:` stays only for compiled spell
+   */
   "prop:celled"?: boolean | ""
   /**
    * More space between items;  `relaxed="very"` even more.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
-  /** `relaxed`, as the DOM element's property. */
+  /**
+   * `relaxed`, as the DOM element's property.
+   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   */
   "prop:relaxed"?: boolean | "" | "very"
   /**
    * No horizontal item padding;  a `selection` list's hover background reaches past its edges.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Aligns each item's icon, image and content:  `top` (default), `middle` or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -10472,7 +12565,10 @@ export interface UIListAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -10527,7 +12623,10 @@ export interface UILoaderAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the turning arc.
@@ -10549,7 +12648,10 @@ export interface UILoaderAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -10571,77 +12673,110 @@ export interface UILoaderAttributes {
    * - takes:  `slow` · `fast`
    */
   speed?: "slow" | "fast"
-  /** `speed`, as the DOM element's property. */
+  /**
+   * `speed`, as the DOM element's property.
+   * @deprecated write `speed` -- `prop:` stays only for compiled spell
+   */
   "prop:speed"?: "slow" | "fast"
   /**
    * Hidden, even when `visible`.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows the slotted text below the spinner.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Sits in the text flow instead of centred over its positioned container.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * With `inline`:  a block of its own, centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Unsure how long it'll take:  turns backwards, slower.
    * - takes:  flag (present / absent)
    */
   indeterminate?: boolean | ""
-  /** `indeterminate`, as the DOM element's property. */
+  /**
+   * `indeterminate`, as the DOM element's property.
+   * @deprecated write `indeterminate` -- `prop:` stays only for compiled spell
+   */
   "prop:indeterminate"?: boolean | ""
   /**
    * Two opposite arcs.
    * - takes:  flag (present / absent)
    */
   double?: boolean | ""
-  /** `double`, as the DOM element's property. */
+  /**
+   * `double`, as the DOM element's property.
+   * @deprecated write `double` -- `prop:` stays only for compiled spell
+   */
   "prop:double"?: boolean | ""
   /**
    * Two arcs that stretch and chase each other.
    * - takes:  flag (present / absent)
    */
   elastic?: boolean | ""
-  /** `elastic`, as the DOM element's property. */
+  /**
+   * `elastic`, as the DOM element's property.
+   * @deprecated write `elastic` -- `prop:` stays only for compiled spell
+   */
   "prop:elastic"?: boolean | ""
   /**
    * For dark backgrounds:  a white arc on a faint track.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -10683,7 +12818,10 @@ export interface UILoaderAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -10773,7 +12911,10 @@ export interface UIMarkdownAttributes {
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
@@ -10781,21 +12922,30 @@ export interface UIMarkdownAttributes {
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
-  /** `load`, as the DOM element's property. */
+  /**
+   * `load`, as the DOM element's property.
+   * @deprecated write `load` -- `prop:` stays only for compiled spell
+   */
   "prop:load"?: "eager" | "visible" | "idle"
   /**
    * Text size, as Fomantic's sizes;  default `medium`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A single newline is a line break, as in GitHub comments;  default off, as in GitHub files.
    * - takes:  flag (present / absent)
    */
   breaks?: boolean | ""
-  /** `breaks`, as the DOM element's property. */
+  /**
+   * `breaks`, as the DOM element's property.
+   * @deprecated write `breaks` -- `prop:` stays only for compiled spell
+   */
   "prop:breaks"?: boolean | ""
   /**
    * Levels to shift headings by, e.g. `1`:  `#` becomes `<h2>`, to sit under the page's own heading.  Property `headingLevelOffset`:  `headingOffset` is WebKit's native `headingoffset`.
@@ -10803,49 +12953,70 @@ export interface UIMarkdownAttributes {
    * - default:  `0`
    */
   "heading-offset"?: number | `${number}`
-  /** `heading-offset`, as the DOM element's property. */
+  /**
+   * `heading-offset`, as the DOM element's property.
+   * @deprecated write `heading-offset` -- `prop:` stays only for compiled spell
+   */
   "prop:headingLevelOffset"?: number | `${number}`
   /**
    * Drop the text's leading `#` title (an `h1` first thing in the text), e.g. when the page shows its own headline above a README.  The text itself is unchanged:  `content`, `save()` and the editor keep it.
    * - takes:  flag (present / absent)
    */
   "skip-title"?: boolean | ""
-  /** `skip-title`, as the DOM element's property. */
+  /**
+   * `skip-title`, as the DOM element's property.
+   * @deprecated write `skip-title` -- `prop:` stays only for compiled spell
+   */
   "prop:skipTitle"?: boolean | ""
   /**
    * Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` writes it.
    * - takes:  flag (present / absent)
    */
   editable?: boolean | ""
-  /** `editable`, as the DOM element's property. */
+  /**
+   * `editable`, as the DOM element's property.
+   * @deprecated write `editable` -- `prop:` stays only for compiled spell
+   */
   "prop:editable"?: boolean | ""
   /**
    * Sanitize the rendered markup with DOMPurify (its own lazy chunk, loaded only then):  no scripts, event handlers or `javascript:` links.  Set it for text you didn't write;  without it, raw HTML is kept as written.
    * - takes:  flag (present / absent)
    */
   sanitized?: boolean | ""
-  /** `sanitized`, as the DOM element's property. */
+  /**
+   * `sanitized`, as the DOM element's property.
+   * @deprecated write `sanitized` -- `prop:` stays only for compiled spell
+   */
   "prop:sanitized"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -10887,7 +13058,10 @@ export interface UIMarkdownAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -10930,6 +13104,7 @@ export interface UIMarkdownAttributes {
   content?: string
   /**
    * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
    */
   "prop:content"?: string
   /**
@@ -10989,7 +13164,10 @@ export interface UIMenuAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
@@ -11011,7 +13189,10 @@ export interface UIMenuAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -11033,175 +13214,250 @@ export interface UIMenuAttributes {
    * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
    */
   appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
-  /** `appearance`, as the DOM element's property. */
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
   "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
    */
   position?: "left" | "right" | "center"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "left" | "right" | "center"
   /**
    * De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
-  /** `secondary`, as the DOM element's property. */
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
   "prop:secondary"?: boolean | ""
   /**
    * The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance="pointing"`.
    * - takes:  flag (present / absent)
    */
   pointing?: boolean | ""
-  /** `pointing`, as the DOM element's property. */
+  /**
+   * `pointing`, as the DOM element's property.
+   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
+   */
   "prop:pointing"?: boolean | ""
   /**
    * Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance="tabular"`.
    * - takes:  flag (present / absent)
    */
   tabular?: boolean | ""
-  /** `tabular`, as the DOM element's property. */
+  /**
+   * `tabular`, as the DOM element's property.
+   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
+   */
   "prop:tabular"?: boolean | ""
   /**
    * Plain text items, no box.  Alias of `appearance="text"`.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Items stacked top to bottom.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * Page links:  compact, centred items.
    * - takes:  flag (present / absent)
    */
   pagination?: boolean | ""
-  /** `pagination`, as the DOM element's property. */
+  /**
+   * `pagination`, as the DOM element's property.
+   * @deprecated write `pagination` -- `prop:` stays only for compiled spell
+   */
   "prop:pagination"?: boolean | ""
   /**
    * Icon-only items.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: boolean | ""
   /**
    * Labeled icon items:  a large icon above each item's text.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | ""
   /**
    * Every item is interactive:  a `<button>` with the link hover.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Stacks its items on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * Centred in its container, items centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * No dividers between items.
    * - takes:  flag (present / absent)
    */
   borderless?: boolean | ""
-  /** `borderless`, as the DOM element's property. */
+  /**
+   * `borderless`, as the DOM element's property.
+   * @deprecated write `borderless` -- `prop:` stays only for compiled spell
+   */
   "prop:borderless"?: boolean | ""
   /**
    * Only as wide as its items.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Items wrap onto more lines when they don't fit.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
-  /** `wrapping`, as the DOM element's property. */
+  /**
+   * `wrapping`, as the DOM element's property.
+   * @deprecated write `wrapping` -- `prop:` stays only for compiled spell
+   */
   "prop:wrapping"?: boolean | ""
   /**
    * With `wrapping`:  square corners where the lines meet.
    * - takes:  flag (present / absent)
    */
   wrapped?: boolean | ""
-  /** `wrapped`, as the DOM element's property. */
+  /**
+   * `wrapped`, as the DOM element's property.
+   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   */
   "prop:wrapped"?: boolean | ""
   /**
    * The dark scheme;  with `color`, filled with the colour.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Floats beside the content;  `right` floats right.
    * - takes:  flag, or `left` · `right`
    */
   floated?: boolean | "" | "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: boolean | "" | "left" | "right"
   /**
    * No item padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   fixed?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /** `fixed`, as the DOM element's property. */
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
   "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   alignment?: "fluid" | "left" | "center" | "right"
-  /** `alignment`, as the DOM element's property. */
+  /**
+   * `alignment`, as the DOM element's property.
+   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   */
   "prop:alignment"?: "fluid" | "left" | "center" | "right"
   /**
    * Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  divides the width evenly between N items (`items="3"` => `three item`);  `items="equal"` => `equal width` (Fomantic's, ~== `equal alignment="fluid"`).
@@ -11225,7 +13481,10 @@ export interface UIMenuAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `items`, as the DOM element's property. */
+  /**
+   * `items`, as the DOM element's property.
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
+   */
   "prop:items"?:
     | "1"
     | "2"
@@ -11249,28 +13508,40 @@ export interface UIMenuAttributes {
    * - takes:  flag (present / absent)
    */
   interactive?: boolean | ""
-  /** `interactive`, as the DOM element's property. */
+  /**
+   * `interactive`, as the DOM element's property.
+   * @deprecated write `interactive` -- `prop:` stays only for compiled spell
+   */
   "prop:interactive"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -11312,7 +13583,10 @@ export interface UIMenuAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -11378,7 +13652,10 @@ export interface UIMessageAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a tinted surface, border and text.
@@ -11400,7 +13677,10 @@ export interface UIMessageAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -11422,91 +13702,130 @@ export interface UIMessageAttributes {
    * - takes:  `positive` · `negative` · `error` · `info` · `success` · `warning`
    */
   state?: "positive" | "negative" | "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "positive" | "negative" | "error" | "info" | "success" | "warning"
   /**
    * Lifted off the page with a shadow.
    * - takes:  flag (present / absent)
    */
   floating?: boolean | ""
-  /** `floating`, as the DOM element's property. */
+  /**
+   * `floating`, as the DOM element's property.
+   * @deprecated write `floating` -- `prop:` stays only for compiled spell
+   */
   "prop:floating"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Centres its text (and its icon with the content).
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * The dark scheme;  a coloured one keeps its hue in the text.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Joined edge to edge with the segment or form below;  `bottom` joins the one above.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Aligns its text `center` or `right`.
    * - takes:  `center` · `right`
    */
   "text-align"?: "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "center" | "right"
   /**
    * Icon name, shown large beside the content;  the root gets the `icon` class.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message.
    * - takes:  flag (present / absent)
    */
   dismissible?: boolean | ""
-  /** `dismissible`, as the DOM element's property. */
+  /**
+   * `dismissible`, as the DOM element's property.
+   * @deprecated write `dismissible` -- `prop:` stays only for compiled spell
+   */
   "prop:dismissible"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -11548,7 +13867,10 @@ export interface UIMessageAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -11606,21 +13928,30 @@ export interface UIMetaAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -11662,7 +13993,10 @@ export interface UIMetaAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -11750,56 +14084,80 @@ export interface UIModalAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * No box:  light text straight on the dimmer.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * The dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Nearly the whole viewport wide.
    * - takes:  flag (present / absent)
    */
   fullscreen?: boolean | ""
-  /** `fullscreen`, as the DOM element's property. */
+  /**
+   * `fullscreen`, as the DOM element's property.
+   * @deprecated write `fullscreen` -- `prop:` stays only for compiled spell
+   */
   "prop:fullscreen"?: boolean | ""
   /**
    * With `fullscreen`:  covers the whole viewport, edge to edge (`overlay fullscreen`).
    * - takes:  flag (present / absent)
    */
   overlay?: boolean | ""
-  /** `overlay`, as the DOM element's property. */
+  /**
+   * `overlay`, as the DOM element's property.
+   * @deprecated write `overlay` -- `prop:` stays only for compiled spell
+   */
   "prop:overlay"?: boolean | ""
   /**
    * Scrolls inside itself when taller than the viewport.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | ""
   /**
    * Pinned near the `top` or `bottom` of the viewport instead of centred (`top aligned`).
    * - takes:  `top` · `bottom`
    */
   "vertical-align"?: "top" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "bottom"
   /**
    * Shows a close icon (Fomantic's `closeIcon` setting).  `closable="false"` is also Fomantic's `closable: false` setting:  no icon AND `closedby="none"` (Escape and the dimmer do nothing), unless `closedby` is set, which wins for dismissal.  Absent:  no icon, dismissed by `closedby` (default `any`).
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
-  /** `closable`, as the DOM element's property. */
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
   "prop:closable"?: boolean | ""
   /**
    * What dismisses it, as `<dialog closedby>` (Fomantic's `closable` setting, in three steps):  `any` -- Escape or a click on the dimmer (default);  `closerequest` -- Escape only;  `none` -- only its own buttons.  Read when it opens;  when set, it wins over `closable="false"`.
@@ -11807,42 +14165,60 @@ export interface UIModalAttributes {
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
-  /** `closedby`, as the DOM element's property. */
+  /**
+   * `closedby`, as the DOM element's property.
+   * @deprecated write `closedby` -- `prop:` stays only for compiled spell
+   */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version.
    * - takes:  text
    */
   content?: string
-  /** `content`, as the DOM element's property. */
+  /**
+   * `content`, as the DOM element's property.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
   "prop:content"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -11884,7 +14260,10 @@ export interface UIModalAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -11988,7 +14367,10 @@ export interface UINagAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a filled bar in that colour.
@@ -12010,7 +14392,10 @@ export interface UINagAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -12032,28 +14417,40 @@ export interface UINagAttributes {
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Fixed to the viewport edge, over the page.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
-  /** `fixed`, as the DOM element's property. */
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
   "prop:fixed"?: boolean | ""
   /**
    * Over the page content at its edge (absolute), instead of pushing it down.
    * - takes:  flag (present / absent)
    */
   overlay?: boolean | ""
-  /** `overlay`, as the DOM element's property. */
+  /**
+   * `overlay`, as the DOM element's property.
+   * @deprecated write `overlay` -- `prop:` stays only for compiled spell
+   */
   "prop:overlay"?: boolean | ""
   /**
    * At the bottom edge instead of the top.
    * - takes:  flag (present / absent)
    */
   bottom?: boolean | ""
-  /** `bottom`, as the DOM element's property. */
+  /**
+   * `bottom`, as the DOM element's property.
+   * @deprecated write `bottom` -- `prop:` stays only for compiled spell
+   */
   "prop:bottom"?: boolean | ""
   /**
    * Shows the close icon;  `closable="false"` for a nag only script (or `display-time`) closes.
@@ -12061,14 +14458,20 @@ export interface UINagAttributes {
    * - default:  `true`
    */
   closable?: boolean | ""
-  /** `closable`, as the DOM element's property. */
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
   "prop:closable"?: boolean | ""
   /**
    * Remembers the dismissal under this name, in `storage`;  without one nothing is stored.
    * - takes:  text
    */
   key?: string
-  /** `key`, as the DOM element's property. */
+  /**
+   * `key`, as the DOM element's property.
+   * @deprecated write `key` -- `prop:` stays only for compiled spell
+   */
   "prop:key"?: string
   /**
    * What a dismissal stores;  a stored `key` with another value doesn't count.
@@ -12076,7 +14479,10 @@ export interface UINagAttributes {
    * - default:  `dismiss`
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Where the dismissal is stored:  `localStorage`, `sessionStorage` or a cookie (Fomantic's default).
@@ -12084,7 +14490,10 @@ export interface UINagAttributes {
    * - default:  `cookie`
    */
   storage?: "local" | "session" | "cookie"
-  /** `storage`, as the DOM element's property. */
+  /**
+   * `storage`, as the DOM element's property.
+   * @deprecated write `storage` -- `prop:` stays only for compiled spell
+   */
   "prop:storage"?: "local" | "session" | "cookie"
   /**
    * Days a dismissal lasts (`local` and `cookie`);  `0` never expires.
@@ -12092,21 +14501,30 @@ export interface UINagAttributes {
    * - default:  `30`
    */
   expires?: number | `${number}`
-  /** `expires`, as the DOM element's property. */
+  /**
+   * `expires`, as the DOM element's property.
+   * @deprecated write `expires` -- `prop:` stays only for compiled spell
+   */
   "prop:expires"?: number | `${number}`
   /**
    * Shows even when dismissed before (stores nothing new either).
    * - takes:  flag (present / absent)
    */
   persist?: boolean | ""
-  /** `persist`, as the DOM element's property. */
+  /**
+   * `persist`, as the DOM element's property.
+   * @deprecated write `persist` -- `prop:` stays only for compiled spell
+   */
   "prop:persist"?: boolean | ""
   /**
    * Milliseconds before it hides itself (not a dismissal:  nothing is stored);  absent / `0`:  stays.
    * - takes:  number
    */
   "display-time"?: number | `${number}`
-  /** `display-time`, as the DOM element's property. */
+  /**
+   * `display-time`, as the DOM element's property.
+   * @deprecated write `display-time` -- `prop:` stays only for compiled spell
+   */
   "prop:displayTime"?: number | `${number}`
   /**
    * Cookie `path`.
@@ -12114,49 +14532,70 @@ export interface UINagAttributes {
    * - default:  `/`
    */
   path?: string
-  /** `path`, as the DOM element's property. */
+  /**
+   * `path`, as the DOM element's property.
+   * @deprecated write `path` -- `prop:` stays only for compiled spell
+   */
   "prop:path"?: string
   /**
    * Cookie `domain`.
    * - takes:  text
    */
   domain?: string
-  /** `domain`, as the DOM element's property. */
+  /**
+   * `domain`, as the DOM element's property.
+   * @deprecated write `domain` -- `prop:` stays only for compiled spell
+   */
   "prop:domain"?: string
   /**
    * Cookie `secure`.
    * - takes:  flag (present / absent)
    */
   secure?: boolean | ""
-  /** `secure`, as the DOM element's property. */
+  /**
+   * `secure`, as the DOM element's property.
+   * @deprecated write `secure` -- `prop:` stays only for compiled spell
+   */
   "prop:secure"?: boolean | ""
   /**
    * Cookie `samesite`.
    * - takes:  `lax` · `strict` · `none`
    */
   samesite?: "lax" | "strict" | "none"
-  /** `samesite`, as the DOM element's property. */
+  /**
+   * `samesite`, as the DOM element's property.
+   * @deprecated write `samesite` -- `prop:` stays only for compiled spell
+   */
   "prop:sameSite"?: "lax" | "strict" | "none"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -12198,7 +14637,10 @@ export interface UINagAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -12264,28 +14706,40 @@ export interface UIOrAttributes {
    * - takes:  text
    */
   text?: string
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -12327,7 +14781,10 @@ export interface UIOrAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -12423,70 +14880,100 @@ export interface UIPanelAttributes {
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
-  /** `level`, as the DOM element's property. */
+  /**
+   * `level`, as the DOM element's property.
+   * @deprecated write `level` -- `prop:` stays only for compiled spell
+   */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
-  /** `badge`, as the DOM element's property. */
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
   "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
-  /** `collapsible`, as the DOM element's property. */
+  /**
+   * `collapsible`, as the DOM element's property.
+   * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
-  /** `fold-icon`, as the DOM element's property. */
+  /**
+   * `fold-icon`, as the DOM element's property.
+   * @deprecated write `fold-icon` -- `prop:` stays only for compiled spell
+   */
   "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
-  /** `sticky`, as the DOM element's property. */
+  /**
+   * `sticky`, as the DOM element's property.
+   * @deprecated write `sticky` -- `prop:` stays only for compiled spell
+   */
   "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
@@ -12494,7 +14981,10 @@ export interface UIPanelAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the whole panel:  the header band, the box, the border and the sub-head bands (sub-panels follow it).  None:  `primary`.  Any hue, including one a theme adds (`spell-brand`'s `accent`, Polished Ivory).
@@ -12516,7 +15006,10 @@ export interface UIPanelAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -12538,133 +15031,190 @@ export interface UIPanelAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
-  /** `block`, as the DOM element's property. */
+  /**
+   * `block`, as the DOM element's property.
+   * @deprecated write `block` -- `prop:` stays only for compiled spell
+   */
   "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
-  /** `styled`, as the DOM element's property. */
+  /**
+   * `styled`, as the DOM element's property.
+   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   */
   "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -12706,7 +15256,10 @@ export interface UIPanelAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -12794,35 +15347,50 @@ export interface UIPlaceholderAttributes {
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -12864,7 +15432,10 @@ export interface UIPlaceholderAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -12914,28 +15485,40 @@ export interface UIPlaceholderHeaderAttributes {
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
-  /** `image`, as the DOM element's property. */
+  /**
+   * `image`, as the DOM element's property.
+   * @deprecated write `image` -- `prop:` stays only for compiled spell
+   */
   "prop:image"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -12977,7 +15560,10 @@ export interface UIPlaceholderHeaderAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13029,35 +15615,50 @@ export interface UIPlaceholderImageAttributes {
    * - takes:  flag (present / absent)
    */
   square?: boolean | ""
-  /** `square`, as the DOM element's property. */
+  /**
+   * `square`, as the DOM element's property.
+   * @deprecated write `square` -- `prop:` stays only for compiled spell
+   */
   "prop:square"?: boolean | ""
   /**
    * A 4:3 block as wide as its container;  wins over `square` if both are set.
    * - takes:  flag (present / absent)
    */
   rectangular?: boolean | ""
-  /** `rectangular`, as the DOM element's property. */
+  /**
+   * `rectangular`, as the DOM element's property.
+   * @deprecated write `rectangular` -- `prop:` stays only for compiled spell
+   */
   "prop:rectangular"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -13099,7 +15700,10 @@ export interface UIPlaceholderImageAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13149,28 +15753,40 @@ export interface UIPlaceholderLineAttributes {
    * - takes:  `full` · `very long` · `long` · `medium` · `short` · `very short`
    */
   length?: "full" | "very long" | "long" | "medium" | "short" | "very short"
-  /** `length`, as the DOM element's property. */
+  /**
+   * `length`, as the DOM element's property.
+   * @deprecated write `length` -- `prop:` stays only for compiled spell
+   */
   "prop:length"?: "full" | "very long" | "long" | "medium" | "short" | "very short"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -13212,7 +15828,10 @@ export interface UIPlaceholderLineAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13262,21 +15881,30 @@ export interface UIPlaceholderParagraphAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -13318,7 +15946,10 @@ export interface UIPlaceholderParagraphAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13386,7 +16017,10 @@ export interface UIPopupAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills the popup (and its arrow), with a readable text colour.
@@ -13408,7 +16042,10 @@ export interface UIPopupAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -13430,49 +16067,70 @@ export interface UIPopupAttributes {
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Always its maximum width (`wide` / `very wide` widen it).
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
-  /** `fixed`, as the DOM element's property. */
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
   "prop:fixed"?: boolean | ""
   /**
    * No maximum width:  as wide as its content, e.g. a grid.
    * - takes:  flag (present / absent)
    */
   flowing?: boolean | ""
-  /** `flowing`, as the DOM element's property. */
+  /**
+   * `flowing`, as the DOM element's property.
+   * @deprecated write `flowing` -- `prop:` stays only for compiled spell
+   */
   "prop:flowing"?: boolean | ""
   /**
    * As wide as its target.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * The opposite scheme:  dark on a light page.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Busy:  a spinner over faded content.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * A wider maximum width;  `wide="very"` wider still (`very wide`).
    * - takes:  flag, or `very`
    */
   wide?: boolean | "" | "very"
-  /** `wide`, as the DOM element's property. */
+  /**
+   * `wide`, as the DOM element's property.
+   * @deprecated write `wide` -- `prop:` stays only for compiled spell
+   */
   "prop:wide"?: boolean | "" | "very"
   /**
    * Where it sits against its target:  `top left` (default) ... `right center`, `left top` ... `right bottom` (beside, lined up with its top / bottom edge).  It flips to the other side when there's no room.
@@ -13492,7 +16150,10 @@ export interface UIPopupAttributes {
     | "left bottom"
     | "right top"
     | "right bottom"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?:
     | "top left"
     | "top center"
@@ -13512,28 +16173,40 @@ export interface UIPopupAttributes {
    * - default:  `hover`
    */
   "open-on"?: "hover" | "focus" | "click" | "manual"
-  /** `open-on`, as the DOM element's property. */
+  /**
+   * `open-on`, as the DOM element's property.
+   * @deprecated write `open-on` -- `prop:` stays only for compiled spell
+   */
   "prop:openOn"?: "hover" | "focus" | "click" | "manual"
   /**
    * Id of the target, in the popup's own tree;  without it, the previous element sibling.
    * - takes:  text
    */
   for?: string
-  /** `for`, as the DOM element's property. */
+  /**
+   * `for`, as the DOM element's property.
+   * @deprecated write `for` -- `prop:` stays only for compiled spell
+   */
   "prop:htmlFor"?: string
   /**
    * Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.
    * - takes:  text
    */
   content?: string
-  /** `content`, as the DOM element's property. */
+  /**
+   * `content`, as the DOM element's property.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
   "prop:content"?: string
   /**
    * `hover`:  the popup stays open while the pointer is over it, so it can be reached and its text read or selected -- on by default, as WCAG 1.4.13 (Content on Hover or Focus) asks for.  `hoverable="false"` is Fomantic's `hoverable: false` (its default):  it closes as the pointer leaves the target, after `hide-delay`.
@@ -13541,7 +16214,10 @@ export interface UIPopupAttributes {
    * - default:  `true`
    */
   hoverable?: boolean | ""
-  /** `hoverable`, as the DOM element's property. */
+  /**
+   * `hoverable`, as the DOM element's property.
+   * @deprecated write `hoverable` -- `prop:` stays only for compiled spell
+   */
   "prop:hoverable"?: boolean | ""
   /**
    * `hover`:  ms before it shows.
@@ -13549,7 +16225,10 @@ export interface UIPopupAttributes {
    * - default:  `50`
    */
   "show-delay"?: number | `${number}`
-  /** `show-delay`, as the DOM element's property. */
+  /**
+   * `show-delay`, as the DOM element's property.
+   * @deprecated write `show-delay` -- `prop:` stays only for compiled spell
+   */
   "prop:showDelay"?: number | `${number}`
   /**
    * `hover`:  ms before it hides.
@@ -13557,17 +16236,20 @@ export interface UIPopupAttributes {
    * - default:  `70`
    */
   "hide-delay"?: number | `${number}`
-  /** `hide-delay`, as the DOM element's property. */
+  /**
+   * `hide-delay`, as the DOM element's property.
+   * @deprecated write `hide-delay` -- `prop:` stays only for compiled spell
+   */
   "prop:hideDelay"?: number | `${number}`
   /**
    * The target as a PROPERTY (an `Element`);  wins over `for`.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   target?: unknown
   /**
    * The target as a PROPERTY (an `Element`);  wins over `for`.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `target`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
    */
   "prop:target"?: unknown
   /**
@@ -13575,14 +16257,20 @@ export interface UIPopupAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -13624,7 +16312,10 @@ export interface UIPopupAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13700,7 +16391,10 @@ export interface UIProgressAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the bar.
@@ -13722,7 +16416,10 @@ export interface UIProgressAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -13744,91 +16441,130 @@ export interface UIProgressAttributes {
    * - takes:  `success` · `warning` · `error`
    */
   state?: "success" | "warning" | "error"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "success" | "warning" | "error"
   /**
    * With `indeterminate`:  a `slow` or `fast` animation;  absent is normal.
    * - takes:  `slow` · `fast`
    */
   speed?: "slow" | "fast"
-  /** `speed`, as the DOM element's property. */
+  /**
+   * `speed`, as the DOM element's property.
+   * @deprecated write `speed` -- `prop:` stays only for compiled spell
+   */
   "prop:speed"?: "slow" | "fast"
   /**
    * Shows activity:  a pulse runs along the bar.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * No background behind the bar.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Dimmed, animations stopped.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * The bar's colour follows the percentage, red through green.
    * - takes:  flag (present / absent)
    */
   indicating?: boolean | ""
-  /** `indicating`, as the DOM element's property. */
+  /**
+   * `indicating`, as the DOM element's property.
+   * @deprecated write `indicating` -- `prop:` stays only for compiled spell
+   */
   "prop:indicating"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * The bar grows from the right;  its text sits at its left end.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
-  /** `right-aligned`, as the DOM element's property. */
+  /**
+   * `right-aligned`, as the DOM element's property.
+   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   */
   "prop:rightAligned"?: boolean | ""
   /**
    * Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one.
    * - takes:  flag, or `filling` · `sliding` · `swinging`
    */
   indeterminate?: boolean | "" | "filling" | "sliding" | "swinging"
-  /** `indeterminate`, as the DOM element's property. */
+  /**
+   * `indeterminate`, as the DOM element's property.
+   * @deprecated write `indeterminate` -- `prop:` stays only for compiled spell
+   */
   "prop:indeterminate"?: boolean | "" | "filling" | "sliding" | "swinging"
   /**
    * A thin line joined to the edge of the content above (`bottom`, bare) or below (`top`).
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Amount done:  a number, or a comma list for several bars.  A share of `total`, else a percentage.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * What `value` counts up to;  unset, `value` is a percentage.
    * - takes:  number
    */
   total?: number | `${number}`
-  /** `total`, as the DOM element's property. */
+  /**
+   * `total`, as the DOM element's property.
+   * @deprecated write `total` -- `prop:` stays only for compiled spell
+   */
   "prop:total"?: number | `${number}`
   /**
    * Percentage done, bypassing `value` / `total`;  a comma list for several bars.
    * - takes:  text
    */
   percent?: string
-  /** `percent`, as the DOM element's property. */
+  /**
+   * `percent`, as the DOM element's property.
+   * @deprecated write `percent` -- `prop:` stays only for compiled spell
+   */
   "prop:percent"?: string
   /**
    * Decimal places shown in texts.
@@ -13836,42 +16572,60 @@ export interface UIProgressAttributes {
    * - default:  `0`
    */
   precision?: number | `${number}`
-  /** `precision`, as the DOM element's property. */
+  /**
+   * `precision`, as the DOM element's property.
+   * @deprecated write `precision` -- `prop:` stays only for compiled spell
+   */
   "prop:precision"?: number | `${number}`
   /**
    * Text inside the bar:  `percent` (`45%`) or `ratio` (`9 of 20`, needs `total`);  unset, none.
    * - takes:  `percent` · `ratio`
    */
   "bar-text"?: "percent" | "ratio"
-  /** `bar-text`, as the DOM element's property. */
+  /**
+   * `bar-text`, as the DOM element's property.
+   * @deprecated write `bar-text` -- `prop:` stays only for compiled spell
+   */
   "prop:barText"?: "percent" | "ratio"
   /**
    * Hue per bar, space or comma separated, e.g. `red green blue`;  each wins over `color`.
    * - takes:  text
    */
   "bar-colors"?: string
-  /** `bar-colors`, as the DOM element's property. */
+  /**
+   * `bar-colors`, as the DOM element's property.
+   * @deprecated write `bar-colors` -- `prop:` stays only for compiled spell
+   */
   "prop:barColors"?: string
   /**
    * Label under the bar;  `{percent}`, `{value}`, `{total}`, `{left}` are filled in.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -13913,7 +16667,10 @@ export interface UIProgressAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -13984,63 +16741,90 @@ export interface UIPropertyAttributes {
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type.
    * - takes:  text
    */
   as?: string
-  /** `as`, as the DOM element's property. */
+  /**
+   * `as`, as the DOM element's property.
+   * @deprecated write `as` -- `prop:` stays only for compiled spell
+   */
   "prop:as"?: string
   /**
    * Where its choices come from, when not the schema's:  a source the page added (`UI.propertyControls.addChoices()`), or a list, `a, b, c`.
    * - takes:  text
    */
   options?: string
-  /** `options`, as the DOM element's property. */
+  /**
+   * `options`, as the DOM element's property.
+   * @deprecated write `options` -- `prop:` stays only for compiled spell
+   */
   "prop:options"?: string
   /**
    * The label, in the label row;  `slot="label"` is the rich version.  Names the control for screen readers.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * A value shown at the end of the label row (`100%`, `+8°`);  `slot="output"` is the rich version.
    * - takes:  text
    */
   output?: string
-  /** `output`, as the DOM element's property. */
+  /**
+   * `output`, as the DOM element's property.
+   * @deprecated write `output` -- `prop:` stays only for compiled spell
+   */
   "prop:output"?: string
   /**
    * An error, as a line under the control, and the `error` state.  `<ui-form>`'s validation shows its own there.
    * - takes:  text
    */
   error?: string
-  /** `error`, as the DOM element's property. */
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
   "prop:error"?: string
   /**
    * Field state:  tints its label and controls.  An error shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * When a change to the control is written to the bound value:  `immediately`;  `delayed`, after a pause in typing (300ms;  `delayed 100` for 100ms);  or `on leave`, when the cursor leaves the field.
@@ -14048,24 +16832,30 @@ export interface UIPropertyAttributes {
    * - default:  `immediately`
    */
   apply?: string
-  /** `apply`, as the DOM element's property. */
+  /**
+   * `apply`, as the DOM element's property.
+   * @deprecated write `apply` -- `prop:` stays only for compiled spell
+   */
   "prop:apply"?: string
   /**
    * The things being edited disagree on this value:  the control shows blank, with a `Mixed` placeholder.  Set by the form;  writing a value clears it.
    * - takes:  flag (present / absent)
    */
   mixed?: boolean | ""
-  /** `mixed`, as the DOM element's property. */
+  /**
+   * `mixed`, as the DOM element's property.
+   * @deprecated write `mixed` -- `prop:` stays only for compiled spell
+   */
   "prop:mixed"?: boolean | ""
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -14073,28 +16863,40 @@ export interface UIPropertyAttributes {
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * Marks the label with an asterisk (validation is `rules` / `required`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Shows the value;  it can't be changed.  Nests like `disabled`:  set on a group, it reaches each field.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readonly"?: boolean | ""
   /**
    * Dimmed and not usable (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Width in a row of fields:  columns (`4` of 16), fractions (`1/4`) or percentages (`25%`).
@@ -14118,7 +16920,10 @@ export interface UIPropertyAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -14142,14 +16947,20 @@ export interface UIPropertyAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -14191,7 +17002,10 @@ export interface UIPropertyAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -14348,24 +17162,24 @@ export interface UIPropertyEditorEventMap {
 export interface UIPropertyEditorAttributes {
   /**
    * What it edits, described:  a tag (`ui-button`:  its vocabulary), a schema the page added (`UI.propertyControls.addSchema()`), or, as a property, a `PropertySchema` or a component vocabulary.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   schema?: unknown
   /**
    * What it edits, described:  a tag (`ui-button`:  its vocabulary), a schema the page added (`UI.propertyControls.addSchema()`), or, as a property, a `PropertySchema` or a component vocabulary.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `schema`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `schema` -- `prop:` stays only for compiled spell
    */
   "prop:schema"?: unknown
   /**
    * The thing it edits, or a LIST of things (edited at once:  a property shows the value they agree on).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   value?: unknown
   /**
    * The thing it edits, or a LIST of things (edited at once:  a property shows the value they agree on).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `value`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
    */
   "prop:value"?: unknown
   /**
@@ -14373,91 +17187,130 @@ export interface UIPropertyEditorAttributes {
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the layout page is used.
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readonly"?: boolean | ""
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text
    */
   output?: string
-  /** `output`, as the DOM element's property. */
+  /**
+   * `output`, as the DOM element's property.
+   * @deprecated write `output` -- `prop:` stays only for compiled spell
+   */
   "prop:output"?: string
   /**
    * An error under the title, and the `error` state.
    * - takes:  text
    */
   error?: string
-  /** `error`, as the DOM element's property. */
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
   "prop:error"?: string
   /**
    * Size of everything inside, `mini` ... `massive`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Every row of fields shares its width equally.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
-  /** `equal-width`, as the DOM element's property. */
+  /**
+   * `equal-width`, as the DOM element's property.
+   * @deprecated write `equal-width` -- `prop:` stays only for compiled spell
+   */
   "prop:equalWidth"?: boolean | ""
   /**
    * For dark backgrounds:  light labels.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed behind a spinner, not usable.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Nothing inside can be used (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Rows of fields never stack on narrow forms.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * What its rows of fields stack by:  `container` (the default) -- the form's own width;  `page` -- the screen's, as in Fomantic.  Its `<ui-fields>` follow it.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * When fields validate:  `immediately`, as each changes;  `on leave`, as the cursor leaves each;  or only `on save` (a submit, or `save()`).  A field showing an error always validates again as it changes.
@@ -14465,7 +17318,10 @@ export interface UIPropertyEditorAttributes {
    * - default:  `on save`
    */
   validate?: "immediately" | "on leave" | "on save"
-  /** `validate`, as the DOM element's property. */
+  /**
+   * `validate`, as the DOM element's property.
+   * @deprecated write `validate` -- `prop:` stays only for compiled spell
+   */
   "prop:validateOn"?: "immediately" | "on leave" | "on save"
   /**
    * When edits land in the bound `value`:  `immediately`;  or `on save`, all together on `save()`, while `cancel()` drops them (`:state(changed)` while any are held).  Each field's own `apply` says when it takes an edit.
@@ -14473,17 +17329,20 @@ export interface UIPropertyEditorAttributes {
    * - default:  `immediately`
    */
   apply?: "immediately" | "on save"
-  /** `apply`, as the DOM element's property. */
+  /**
+   * `apply`, as the DOM element's property.
+   * @deprecated write `apply` -- `prop:` stays only for compiled spell
+   */
   "prop:apply"?: "immediately" | "on save"
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -14492,91 +17351,130 @@ export interface UIPropertyEditorAttributes {
    * - default:  `true`
    */
   "error-focus"?: boolean | ""
-  /** `error-focus`, as the DOM element's property. */
+  /**
+   * `error-focus`, as the DOM element's property.
+   * @deprecated write `error-focus` -- `prop:` stays only for compiled spell
+   */
   "prop:errorFocus"?: boolean | ""
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
    */
   "prevent-leaving"?: boolean | ""
-  /** `prevent-leaving`, as the DOM element's property. */
+  /**
+   * `prevent-leaving`, as the DOM element's property.
+   * @deprecated write `prevent-leaving` -- `prop:` stays only for compiled spell
+   */
   "prop:preventLeaving"?: boolean | ""
   /**
    * Show the bound `value` (else `values`) as JSON below the form, live.
    * - takes:  flag (present / absent)
    */
   debug?: boolean | ""
-  /** `debug`, as the DOM element's property. */
+  /**
+   * `debug`, as the DOM element's property.
+   * @deprecated write `debug` -- `prop:` stays only for compiled spell
+   */
   "prop:debug"?: boolean | ""
   /**
    * Title text;  a slotted `slot="label"` is the rich version (code, links).
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
-  /** `level`, as the DOM element's property. */
+  /**
+   * `level`, as the DOM element's property.
+   * @deprecated write `level` -- `prop:` stays only for compiled spell
+   */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
-  /** `badge`, as the DOM element's property. */
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
   "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
-  /** `collapsible`, as the DOM element's property. */
+  /**
+   * `collapsible`, as the DOM element's property.
+   * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
-  /** `fold-icon`, as the DOM element's property. */
+  /**
+   * `fold-icon`, as the DOM element's property.
+   * @deprecated write `fold-icon` -- `prop:` stays only for compiled spell
+   */
   "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
-  /** `sticky`, as the DOM element's property. */
+  /**
+   * `sticky`, as the DOM element's property.
+   * @deprecated write `sticky` -- `prop:` stays only for compiled spell
+   */
   "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
@@ -14584,7 +17482,10 @@ export interface UIPropertyEditorAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
@@ -14606,7 +17507,10 @@ export interface UIPropertyEditorAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -14628,91 +17532,130 @@ export interface UIPropertyEditorAttributes {
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
-  /** `block`, as the DOM element's property. */
+  /**
+   * `block`, as the DOM element's property.
+   * @deprecated write `block` -- `prop:` stays only for compiled spell
+   */
   "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
-  /** `styled`, as the DOM element's property. */
+  /**
+   * `styled`, as the DOM element's property.
+   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   */
   "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -14754,7 +17697,10 @@ export interface UIPropertyEditorAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -14953,105 +17899,150 @@ export interface UIPropertyGroupAttributes {
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readonly"?: boolean | ""
   /**
    * Its state:  tints its title.  A property in it failing validation shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text
    */
   output?: string
-  /** `output`, as the DOM element's property. */
+  /**
+   * `output`, as the DOM element's property.
+   * @deprecated write `output` -- `prop:` stays only for compiled spell
+   */
   "prop:output"?: string
   /**
    * An error under the title, and the `error` state.
    * - takes:  text
    */
   error?: string
-  /** `error`, as the DOM element's property. */
+  /**
+   * `error`, as the DOM element's property.
+   * @deprecated write `error` -- `prop:` stays only for compiled spell
+   */
   "prop:error"?: string
   /**
    * Title text;  a slotted `slot="label"` is the rich version (code, links).
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
-  /** `level`, as the DOM element's property. */
+  /**
+   * `level`, as the DOM element's property.
+   * @deprecated write `level` -- `prop:` stays only for compiled spell
+   */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
-  /** `badge`, as the DOM element's property. */
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
   "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
-  /** `collapsible`, as the DOM element's property. */
+  /**
+   * `collapsible`, as the DOM element's property.
+   * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
-  /** `fold-icon`, as the DOM element's property. */
+  /**
+   * `fold-icon`, as the DOM element's property.
+   * @deprecated write `fold-icon` -- `prop:` stays only for compiled spell
+   */
   "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
-  /** `sticky`, as the DOM element's property. */
+  /**
+   * `sticky`, as the DOM element's property.
+   * @deprecated write `sticky` -- `prop:` stays only for compiled spell
+   */
   "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
@@ -15059,7 +18050,10 @@ export interface UIPropertyGroupAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
@@ -15081,7 +18075,10 @@ export interface UIPropertyGroupAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -15103,119 +18100,170 @@ export interface UIPropertyGroupAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
-  /** `block`, as the DOM element's property. */
+  /**
+   * `block`, as the DOM element's property.
+   * @deprecated write `block` -- `prop:` stays only for compiled spell
+   */
   "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
-  /** `styled`, as the DOM element's property. */
+  /**
+   * `styled`, as the DOM element's property.
+   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   */
   "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -15257,7 +18305,10 @@ export interface UIPropertyGroupAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -15357,21 +18408,30 @@ export interface UIPushableAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -15413,7 +18473,10 @@ export interface UIPushableAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -15463,21 +18526,30 @@ export interface UIPusherAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -15519,7 +18591,10 @@ export interface UIPusherAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -15578,7 +18653,10 @@ export interface UIRadioAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
@@ -15600,7 +18678,10 @@ export interface UIRadioAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -15622,98 +18703,140 @@ export interface UIRadioAttributes {
    * - takes:  `slider` · `toggle`
    */
   type?: "slider" | "toggle"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "slider" | "toggle"
   /**
    * No room for a label:  just the box.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | ""
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
    */
   invisible?: boolean | ""
-  /** `invisible`, as the DOM element's property. */
+  /**
+   * `invisible`, as the DOM element's property.
+   * @deprecated write `invisible` -- `prop:` stays only for compiled spell
+   */
   "prop:invisible"?: boolean | ""
   /**
    * Box after the label, at the end of the line.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
-  /** `right-aligned`, as the DOM element's property. */
+  /**
+   * `right-aligned`, as the DOM element's property.
+   * @deprecated write `right-aligned` -- `prop:` stays only for compiled spell
+   */
   "prop:rightAligned"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its state but can't be changed;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /** `selected`, as the DOM element's property. */
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
   "prop:selected"?: boolean | ""
   /**
    * Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`).
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Label text;  slotted content is the rich version.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -15755,7 +18878,10 @@ export interface UIRadioAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -15810,63 +18936,90 @@ export interface UIRailAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Side:  `left` or `right` of its container.
    * - takes:  `left` · `right`
    */
   position?: "left" | "right"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "left" | "right"
   /**
    * Inside its container's edge instead of outside it.
    * - takes:  flag (present / absent)
    */
   internal?: boolean | ""
-  /** `internal`, as the DOM element's property. */
+  /**
+   * `internal`, as the DOM element's property.
+   * @deprecated write `internal` -- `prop:` stays only for compiled spell
+   */
   "prop:internal"?: boolean | ""
   /**
    * A vertical rule between the rail and its container.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * Flush against its container:  no gap.
    * - takes:  flag (present / absent)
    */
   attached?: boolean | ""
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | ""
   /**
    * Closer to its container:  `close` (1em away), `close="very"` (0.5em away).
    * - takes:  flag, or `very`
    */
   close?: boolean | "" | "very"
-  /** `close`, as the DOM element's property. */
+  /**
+   * `close`, as the DOM element's property.
+   * @deprecated write `close` -- `prop:` stays only for compiled spell
+   */
   "prop:close"?: boolean | "" | "very"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -15908,7 +19061,10 @@ export interface UIRailAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -15967,7 +19123,10 @@ export interface UIRatingAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled icons.
@@ -15989,7 +19148,10 @@ export interface UIRatingAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -16011,14 +19173,20 @@ export interface UIRatingAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * Icon name, e.g. `star` (default), `heart`.
@@ -16026,7 +19194,10 @@ export interface UIRatingAttributes {
    * - default:  `star`
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * How many icons (Fomantic's default:  4).
@@ -16034,49 +19205,70 @@ export interface UIRatingAttributes {
    * - default:  `4`
    */
   "max-rating"?: number | `${number}`
-  /** `max-rating`, as the DOM element's property. */
+  /**
+   * `max-rating`, as the DOM element's property.
+   * @deprecated write `max-rating` -- `prop:` stays only for compiled spell
+   */
   "prop:maxRating"?: number | `${number}`
   /**
    * Rating, `0` (none) ... `max-rating`;  a fraction shows a partly filled icon.  Attribute:  the starting (and reset) value;  property:  the live value.
    * - takes:  number
    */
   value?: number | `${number}`
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: number | `${number}`
   /**
    * Choosing the current rating again clears it (as do Backspace / Delete);  always, with one icon.
    * - takes:  flag (present / absent)
    */
   clearable?: boolean | ""
-  /** `clearable`, as the DOM element's property. */
+  /**
+   * `clearable`, as the DOM element's property.
+   * @deprecated write `clearable` -- `prop:` stays only for compiled spell
+   */
   "prop:clearable"?: boolean | ""
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  a rating must be given.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -16118,7 +19310,10 @@ export interface UIRatingAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -16170,13 +19365,13 @@ export interface UIRatingJSXAttributes
 export interface UIRepeatAttributes {
   /**
    * The list to repeat over, given as a property:  any iterable (an array, a `Set`, spell's `List`), followed as it changes.  Set, it wins over `name`.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   items?: unknown
   /**
    * The list to repeat over, given as a property:  any iterable (an array, a `Set`, spell's `List`), followed as it changes.  Set, it wins over `name`.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `items`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
    */
   "prop:items"?: unknown
   /**
@@ -16184,28 +19379,40 @@ export interface UIRepeatAttributes {
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -16247,7 +19454,10 @@ export interface UIRepeatAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -16297,77 +19507,110 @@ export interface UIRevealAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * The visible content fades out.
    * - takes:  flag (present / absent)
    */
   fade?: boolean | ""
-  /** `fade`, as the DOM element's property. */
+  /**
+   * `fade`, as the DOM element's property.
+   * @deprecated write `fade` -- `prop:` stays only for compiled spell
+   */
   "prop:fade"?: boolean | ""
   /**
    * The visible content moves out:  left (bare), `right`, `up` or `down`.
    * - takes:  flag, or `right` · `up` · `down`
    */
   move?: boolean | "" | "right" | "up" | "down"
-  /** `move`, as the DOM element's property. */
+  /**
+   * `move`, as the DOM element's property.
+   * @deprecated write `move` -- `prop:` stays only for compiled spell
+   */
   "prop:move"?: boolean | "" | "right" | "up" | "down"
   /**
    * The visible content rotates away around a bottom corner:  right (bare) or `left`.
    * - takes:  flag, or `left` · `right`
    */
   rotate?: boolean | "" | "left" | "right"
-  /** `rotate`, as the DOM element's property. */
+  /**
+   * `rotate`, as the DOM element's property.
+   * @deprecated write `rotate` -- `prop:` stays only for compiled spell
+   */
   "prop:rotate"?: boolean | "" | "left" | "right"
   /**
    * Both contents slide:  left (bare), `right`, `up` or `down`.
    * - takes:  flag, or `right` · `up` · `down`
    */
   slide?: boolean | "" | "right" | "up" | "down"
-  /** `slide`, as the DOM element's property. */
+  /**
+   * `slide`, as the DOM element's property.
+   * @deprecated write `slide` -- `prop:` stays only for compiled spell
+   */
   "prop:slide"?: boolean | "" | "right" | "up" | "down"
   /**
    * No delay before the transition starts.
    * - takes:  flag (present / absent)
    */
   instant?: boolean | ""
-  /** `instant`, as the DOM element's property. */
+  /**
+   * `instant`, as the DOM element's property.
+   * @deprecated write `instant` -- `prop:` stays only for compiled spell
+   */
   "prop:instant"?: boolean | ""
   /**
    * Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Renamed because `visible` shows or hides every element.
    * - takes:  flag (present / absent)
    */
   unclipped?: boolean | ""
-  /** `unclipped`, as the DOM element's property. */
+  /**
+   * `unclipped`, as the DOM element's property.
+   * @deprecated write `unclipped` -- `prop:` stays only for compiled spell
+   */
   "prop:unclipped"?: boolean | ""
   /**
    * Revealed now, without hover or focus.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `active`, as the DOM element's property. */
+  /**
+   * `active`, as the DOM element's property.
+   * @deprecated write `active` -- `prop:` stays only for compiled spell
+   */
   "prop:active"?: boolean | ""
   /**
    * Never reveals.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -16409,7 +19652,10 @@ export interface UIRevealAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -16477,14 +19723,20 @@ export interface UIRootAttributes {
    * - default:  `skeleton`
    */
   display?: "skeleton" | "when-ready" | "immediately"
-  /** `display`, as the DOM element's property. */
+  /**
+   * `display`, as the DOM element's property.
+   * @deprecated write `display` -- `prop:` stays only for compiled spell
+   */
   "prop:display"?: "skeleton" | "when-ready" | "immediately"
   /**
    * A loader with this message while components load (bare `loading`:  the default text).  Not with `immediately`.
    * - takes:  text
    */
   loading?: string
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: string
   /**
    * Longest wait before showing the content anyway:  `5s`, `500ms`, or milliseconds.  A component that didn't load fires `ui-error` and shows its native fallback.
@@ -16492,91 +19744,130 @@ export interface UIRootAttributes {
    * - default:  `5s`
    */
   timeout?: string
-  /** `timeout`, as the DOM element's property. */
+  /**
+   * `timeout`, as the DOM element's property.
+   * @deprecated write `timeout` -- `prop:` stays only for compiled spell
+   */
   "prop:timeout"?: string
   /**
    * Colour scheme of everything inside.
    * - takes:  `light` · `dark`
    */
   theme?: "light" | "dark"
-  /** `theme`, as the DOM element's property. */
+  /**
+   * `theme`, as the DOM element's property.
+   * @deprecated write `theme` -- `prop:` stays only for compiled spell
+   */
   "prop:theme"?: "light" | "dark"
   /**
    * Size of everything inside, `mini` ... `massive`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins.
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).
    * - takes:  text
    */
   width?: string
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?: string
   /**
    * Height as a CSS length or `window` (the viewport's, following a phone's address bar).
    * - takes:  text
    */
   height?: string
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: string
   /**
    * Icon packs for everything inside, comma-separated:  built-in ids (`fa7-free`, `fa7-brands`, `fomantic`) or `pack.js` URLs, later wins.  Added over the outer root's packs (or the page's).
    * - takes:  text
    */
   icons?: string
-  /** `icons`, as the DOM element's property. */
+  /**
+   * `icons`, as the DOM element's property.
+   * @deprecated write `icons` -- `prop:` stays only for compiled spell
+   */
   "prop:icons"?: string
   /**
    * Emoji names for everything inside:  `cldr` (the default) or `fomantic`.
    * - takes:  `cldr` · `fomantic`
    */
   emoji?: "cldr" | "fomantic"
-  /** `emoji`, as the DOM element's property. */
+  /**
+   * `emoji`, as the DOM element's property.
+   * @deprecated write `emoji` -- `prop:` stays only for compiled spell
+   */
   "prop:emoji"?: "cldr" | "fomantic"
   /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text
    */
   assets?: string
-  /** `assets`, as the DOM element's property. */
+  /**
+   * `assets`, as the DOM element's property.
+   * @deprecated write `assets` -- `prop:` stays only for compiled spell
+   */
   "prop:assets"?: string
   /**
    * Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A full-page app shell.  On iOS the keyboard can cover fields near the bottom.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
-  /** `fixed`, as the DOM element's property. */
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
   "prop:fixed"?: boolean | ""
   /**
    * Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.
    * - takes:  flag (present / absent)
    */
   pure?: boolean | ""
-  /** `pure`, as the DOM element's property. */
+  /**
+   * `pure`, as the DOM element's property.
+   * @deprecated write `pure` -- `prop:` stays only for compiled spell
+   */
   "prop:pure"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -16618,7 +19909,10 @@ export interface UIRootAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -16661,6 +19955,7 @@ export interface UIRootAttributes {
   appContext?: unknown
   /**
    * Your app's own value for every component inside (a theme, a store ...):  each reads it as `appContext`.  Set it before or after the components load.
+   * @deprecated write `appContext` -- `prop:` stays only for compiled spell
    */
   "prop:appContext"?: unknown
   /**
@@ -16702,7 +19997,10 @@ export interface UIRowAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -16741,7 +20039,10 @@ export interface UIRowAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `columns`, as the DOM element's property. */
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
   "prop:columns"?:
     | "1"
     | "2"
@@ -16765,98 +20066,140 @@ export interface UIRowAttributes {
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
-  /** `equal-width`, as the DOM element's property. */
+  /**
+   * `equal-width`, as the DOM element's property.
+   * @deprecated write `equal-width` -- `prop:` stays only for compiled spell
+   */
   "prop:equalWidth"?: boolean | ""
   /**
    * Hairlines between its columns.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
-  /** `divided`, as the DOM element's property. */
+  /**
+   * `divided`, as the DOM element's property.
+   * @deprecated write `divided` -- `prop:` stays only for compiled spell
+   */
   "prop:divided"?: boolean | ""
   /**
    * Wider gutters;  `relaxed="very"` wider still.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
-  /** `relaxed`, as the DOM element's property. */
+  /**
+   * `relaxed`, as the DOM element's property.
+   * @deprecated write `relaxed` -- `prop:` stays only for compiled spell
+   */
   "prop:relaxed"?: boolean | "" | "very"
   /**
    * Centres its columns.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
-  /** `centered`, as the DOM element's property. */
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
   "prop:centered"?: boolean | ""
   /**
    * Columns fill the row's height.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
-  /** `stretched`, as the DOM element's property. */
+  /**
+   * `stretched`, as the DOM element's property.
+   * @deprecated write `stretched` -- `prop:` stays only for compiled spell
+   */
   "prop:stretched"?: boolean | ""
   /**
    * Stacks its columns when the grid is narrow.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * Halves its column count at tablet and mobile widths.
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
-  /** `doubling`, as the DOM element's property. */
+  /**
+   * `doubling`, as the DOM element's property.
+   * @deprecated write `doubling` -- `prop:` stays only for compiled spell
+   */
   "prop:doubling"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport).
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
-  /** `only`, as the DOM element's property. */
+  /**
+   * `only`, as the DOM element's property.
+   * @deprecated write `only` -- `prop:` stays only for compiled spell
+   */
   "prop:only"?: string
   /**
    * Reverses its columns at these grid widths.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer`
    */
   reversed?: string
-  /** `reversed`, as the DOM element's property. */
+  /**
+   * `reversed`, as the DOM element's property.
+   * @deprecated write `reversed` -- `prop:` stays only for compiled spell
+   */
   "prop:reversed"?: string
   /**
    * Aligns its columns' text.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns its columns to the `top`, `middle` or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -16898,7 +20241,10 @@ export interface UIRowAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -16985,140 +20331,200 @@ export interface UISearchAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Results in named groups (`category` of each result).
    * - takes:  flag (present / absent)
    */
   category?: boolean | ""
-  /** `category`, as the DOM element's property. */
+  /**
+   * `category`, as the DOM element's property.
+   * @deprecated write `category` -- `prop:` stays only for compiled spell
+   */
   "prop:category"?: boolean | ""
   /**
    * `category`:  each group's name above its results, not beside them.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * Takes the full width of its container;  so do the results.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * The results scroll after a fixed height.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | ""
   /**
    * `scrolling`:  people can resize the results vertically.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
-  /** `resizable`, as the DOM element's property. */
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
   "prop:resizable"?: boolean | ""
   /**
    * The results scroll after a shorter height.
    * - takes:  flag (present / absent)
    */
   short?: boolean | ""
-  /** `short`, as the DOM element's property. */
+  /**
+   * `short`, as the DOM element's property.
+   * @deprecated write `short` -- `prop:` stays only for compiled spell
+   */
   "prop:short"?: boolean | ""
   /**
    * The results scroll after a much shorter height.
    * - takes:  flag (present / absent)
    */
   "very-short"?: boolean | ""
-  /** `very-short`, as the DOM element's property. */
+  /**
+   * `very-short`, as the DOM element's property.
+   * @deprecated write `very-short` -- `prop:` stays only for compiled spell
+   */
   "prop:veryShort"?: boolean | ""
   /**
    * The results scroll after a longer height.
    * - takes:  flag (present / absent)
    */
   long?: boolean | ""
-  /** `long`, as the DOM element's property. */
+  /**
+   * `long`, as the DOM element's property.
+   * @deprecated write `long` -- `prop:` stays only for compiled spell
+   */
   "prop:long"?: boolean | ""
   /**
    * The results scroll after a much longer height.
    * - takes:  flag (present / absent)
    */
   "very-long"?: boolean | ""
-  /** `very-long`, as the DOM element's property. */
+  /**
+   * `very-long`, as the DOM element's property.
+   * @deprecated write `very-long` -- `prop:` stays only for compiled spell
+   */
   "prop:veryLong"?: boolean | ""
   /**
    * Which edge the results line up with:  `right` => `right aligned` (they extend to the left).
    * - takes:  `left` · `right`
    */
   aligned?: "left" | "right"
-  /** `aligned`, as the DOM element's property. */
+  /**
+   * `aligned`, as the DOM element's property.
+   * @deprecated write `aligned` -- `prop:` stays only for compiled spell
+   */
   "prop:aligned"?: "left" | "right"
   /**
    * Busy:  the icon spins.  Also shown while a remote query runs.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Can't be used;  dimmed, and left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be typed in, and the results never open;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
-  /** `open`, as the DOM element's property. */
+  /**
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
+   */
   "prop:open"?: boolean | ""
   /**
    * Placeholder text of the input.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * The input's text:  the query, or a chosen result's title.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name:  submits the input's text.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  the input can't be empty.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`.
    * - takes:  text
    */
   url?: string
-  /** `url`, as the DOM element's property. */
+  /**
+   * `url`, as the DOM element's property.
+   * @deprecated write `url` -- `prop:` stays only for compiled spell
+   */
   "prop:url"?: string
   /**
    * Characters to type before a search runs.
@@ -17126,7 +20532,10 @@ export interface UISearchAttributes {
    * - default:  `1`
    */
   "min-characters"?: number | `${number}`
-  /** `min-characters`, as the DOM element's property. */
+  /**
+   * `min-characters`, as the DOM element's property.
+   * @deprecated write `min-characters` -- `prop:` stays only for compiled spell
+   */
   "prop:minCharacters"?: number | `${number}`
   /**
    * The most results shown (before categories);  `0` for no limit.
@@ -17134,7 +20543,10 @@ export interface UISearchAttributes {
    * - default:  `7`
    */
   "max-results"?: number | `${number}`
-  /** `max-results`, as the DOM element's property. */
+  /**
+   * `max-results`, as the DOM element's property.
+   * @deprecated write `max-results` -- `prop:` stays only for compiled spell
+   */
   "prop:maxResults"?: number | `${number}`
   /**
    * Remote:  ms to wait after typing stops before querying (a newer query aborts an older one).
@@ -17142,7 +20554,10 @@ export interface UISearchAttributes {
    * - default:  `200`
    */
   "search-delay"?: number | `${number}`
-  /** `search-delay`, as the DOM element's property. */
+  /**
+   * `search-delay`, as the DOM element's property.
+   * @deprecated write `search-delay` -- `prop:` stays only for compiled spell
+   */
   "prop:searchDelay"?: number | `${number}`
   /**
    * Local matching (`SearchMatch`):  a word START always matches;  then `exact` anywhere, `fuzzy` in order, `prefix` nothing more, `some` any word, `all` every word.
@@ -17150,7 +20565,10 @@ export interface UISearchAttributes {
    * - default:  `exact`
    */
   "full-text-search"?: "exact" | "fuzzy" | "prefix" | "some" | "all"
-  /** `full-text-search`, as the DOM element's property. */
+  /**
+   * `full-text-search`, as the DOM element's property.
+   * @deprecated write `full-text-search` -- `prop:` stays only for compiled spell
+   */
   "prop:fullTextSearch"?: "exact" | "fuzzy" | "prefix" | "some" | "all"
   /**
    * Local:  the result fields searched, a comma / space list.
@@ -17158,28 +20576,40 @@ export interface UISearchAttributes {
    * - default:  `title description`
    */
   "search-fields"?: string
-  /** `search-fields`, as the DOM element's property. */
+  /**
+   * `search-fields`, as the DOM element's property.
+   * @deprecated write `search-fields` -- `prop:` stays only for compiled spell
+   */
   "prop:searchFields"?: string
   /**
    * Local:  `a` matches `á`.
    * - takes:  flag (present / absent)
    */
   "ignore-diacritics"?: boolean | ""
-  /** `ignore-diacritics`, as the DOM element's property. */
+  /**
+   * `ignore-diacritics`, as the DOM element's property.
+   * @deprecated write `ignore-diacritics` -- `prop:` stays only for compiled spell
+   */
   "prop:ignoreDiacritics"?: boolean | ""
   /**
    * Marks the query in titles and descriptions (`<mark>`).
    * - takes:  flag (present / absent)
    */
   "highlight-matches"?: boolean | ""
-  /** `highlight-matches`, as the DOM element's property. */
+  /**
+   * `highlight-matches`, as the DOM element's property.
+   * @deprecated write `highlight-matches` -- `prop:` stays only for compiled spell
+   */
   "prop:highlightMatches"?: boolean | ""
   /**
    * Highlights the first result as results arrive.
    * - takes:  flag (present / absent)
    */
   "select-first-result"?: boolean | ""
-  /** `select-first-result`, as the DOM element's property. */
+  /**
+   * `select-first-result`, as the DOM element's property.
+   * @deprecated write `select-first-result` -- `prop:` stays only for compiled spell
+   */
   "prop:selectFirstResult"?: boolean | ""
   /**
    * Shows the no-results message;  `false` shows nothing instead.
@@ -17187,17 +20617,20 @@ export interface UISearchAttributes {
    * - default:  `true`
    */
   "show-no-results"?: boolean | ""
-  /** `show-no-results`, as the DOM element's property. */
+  /**
+   * `show-no-results`, as the DOM element's property.
+   * @deprecated write `show-no-results` -- `prop:` stays only for compiled spell
+   */
   "prop:showNoResults"?: boolean | ""
   /**
    * Local results as a PROPERTY:  `SearchResult[]` (`{ title, description, image, price, category, url }`).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   source?: unknown
   /**
    * Local results as a PROPERTY:  `SearchResult[]` (`{ title, description, image, price, category, url }`).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `source`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
    */
   "prop:source"?: unknown
   /**
@@ -17205,7 +20638,10 @@ export interface UISearchAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -17247,7 +20683,10 @@ export interface UISearchAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -17376,70 +20815,100 @@ export interface UISectionAttributes {
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
-  /** `hint`, as the DOM element's property. */
+  /**
+   * `hint`, as the DOM element's property.
+   * @deprecated write `hint` -- `prop:` stays only for compiled spell
+   */
   "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
-  /** `level`, as the DOM element's property. */
+  /**
+   * `level`, as the DOM element's property.
+   * @deprecated write `level` -- `prop:` stays only for compiled spell
+   */
   "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
-  /** `badge`, as the DOM element's property. */
+  /**
+   * `badge`, as the DOM element's property.
+   * @deprecated write `badge` -- `prop:` stays only for compiled spell
+   */
   "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
-  /** `collapsible`, as the DOM element's property. */
+  /**
+   * `collapsible`, as the DOM element's property.
+   * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
-  /** `collapsed`, as the DOM element's property. */
+  /**
+   * `collapsed`, as the DOM element's property.
+   * @deprecated write `collapsed` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
-  /** `fold-icon`, as the DOM element's property. */
+  /**
+   * `fold-icon`, as the DOM element's property.
+   * @deprecated write `fold-icon` -- `prop:` stays only for compiled spell
+   */
   "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
-  /** `sticky`, as the DOM element's property. */
+  /**
+   * `sticky`, as the DOM element's property.
+   * @deprecated write `sticky` -- `prop:` stays only for compiled spell
+   */
   "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
@@ -17447,7 +20916,10 @@ export interface UISectionAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
@@ -17469,7 +20941,10 @@ export interface UISectionAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -17491,133 +20966,190 @@ export interface UISectionAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
-  /** `dividing`, as the DOM element's property. */
+  /**
+   * `dividing`, as the DOM element's property.
+   * @deprecated write `dividing` -- `prop:` stays only for compiled spell
+   */
   "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
-  /** `block`, as the DOM element's property. */
+  /**
+   * `block`, as the DOM element's property.
+   * @deprecated write `block` -- `prop:` stays only for compiled spell
+   */
   "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
-  /** `bordered`, as the DOM element's property. */
+  /**
+   * `bordered`, as the DOM element's property.
+   * @deprecated write `bordered` -- `prop:` stays only for compiled spell
+   */
   "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
-  /** `styled`, as the DOM element's property. */
+  /**
+   * `styled`, as the DOM element's property.
+   * @deprecated write `styled` -- `prop:` stays only for compiled spell
+   */
   "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
-  /** `height`, as the DOM element's property. */
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
   "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
-  /** `source`, as the DOM element's property. */
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
   "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
-  /** `select`, as the DOM element's property. */
+  /**
+   * `select`, as the DOM element's property.
+   * @deprecated write `select` -- `prop:` stays only for compiled spell
+   */
   "prop:select"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -17659,7 +21191,10 @@ export interface UISectionAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -17749,28 +21284,40 @@ export interface UISectionsAttributes {
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
-  /** `collapsing`, as the DOM element's property. */
+  /**
+   * `collapsing`, as the DOM element's property.
+   * @deprecated write `collapsing` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsing"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -17812,7 +21359,10 @@ export interface UISectionsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -17862,7 +21412,10 @@ export interface UISegmentAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the top edge;  with `inverted`, the fill.  `primary` / `secondary` don't colour a segment.
@@ -17884,7 +21437,10 @@ export interface UISegmentAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -17906,161 +21462,230 @@ export interface UISegmentAttributes {
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * A page peeking out below;  `stacked="tall"` shows two.
    * - takes:  flag, or `tall`
    */
   stacked?: boolean | "" | "tall"
-  /** `stacked`, as the DOM element's property. */
+  /**
+   * `stacked`, as the DOM element's property.
+   * @deprecated write `stacked` -- `prop:` stays only for compiled spell
+   */
   "prop:stacked"?: boolean | "" | "tall"
   /**
    * A pile of rotated sheets behind it.
    * - takes:  flag (present / absent)
    */
   piled?: boolean | ""
-  /** `piled`, as the DOM element's property. */
+  /**
+   * `piled`, as the DOM element's property.
+   * @deprecated write `piled` -- `prop:` stays only for compiled spell
+   */
   "prop:piled"?: boolean | ""
   /**
    * A band of a page:  no box, a rule above.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * A tinted, centred block reserving room for content.
    * - takes:  flag (present / absent)
    */
   placeholder?: boolean | ""
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: boolean | ""
   /**
    * A round badge sized by its content.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * More padding;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * No box:  no background, border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Contains its floated children.
    * - takes:  flag (present / absent)
    */
   clearing?: boolean | ""
-  /** `clearing`, as the DOM element's property. */
+  /**
+   * `clearing`, as the DOM element's property.
+   * @deprecated write `clearing` -- `prop:` stays only for compiled spell
+   */
   "prop:clearing"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Less emphasis:  a tinted surface, muted text.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
-  /** `secondary`, as the DOM element's property. */
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
   "prop:secondary"?: boolean | ""
   /**
    * Least emphasis:  a darker tint, muted text.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
-  /** `tertiary`, as the DOM element's property. */
+  /**
+   * `tertiary`, as the DOM element's property.
+   * @deprecated write `tertiary` -- `prop:` stays only for compiled spell
+   */
   "prop:tertiary"?: boolean | ""
   /**
    * Joined edge to edge with the elements above / below;  bare `attached` sits in the middle.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * With `attached`:  no line where attached segments meet.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
-  /** `seamless`, as the DOM element's property. */
+  /**
+   * `seamless`, as the DOM element's property.
+   * @deprecated write `seamless` -- `prop:` stays only for compiled spell
+   */
   "prop:seamless"?: boolean | ""
   /**
    * The dark scheme;  everything inside follows (`color-scheme: dark`, `--ui-inverted`).
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Dims its content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * No padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
-  /** `fitted`, as the DOM element's property. */
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
   "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * With `scrolling`:  people can drag its height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
-  /** `resizable`, as the DOM element's property. */
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
   "prop:resizable"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18102,7 +21727,10 @@ export interface UISegmentAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -18152,98 +21780,140 @@ export interface UISegmentsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Side by side instead of stacked.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * With `horizontal`:  every segment the same width.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
-  /** `equal-width`, as the DOM element's property. */
+  /**
+   * `equal-width`, as the DOM element's property.
+   * @deprecated write `equal-width` -- `prop:` stays only for compiled spell
+   */
   "prop:equalWidth"?: boolean | ""
   /**
    * With `horizontal`:  segments wrap onto more rows.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
-  /** `wrapping`, as the DOM element's property. */
+  /**
+   * `wrapping`, as the DOM element's property.
+   * @deprecated write `wrapping` -- `prop:` stays only for compiled spell
+   */
   "prop:wrapping"?: boolean | ""
   /**
    * With `horizontal`:  stacks on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * Lifted off the page with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
-  /** `raised`, as the DOM element's property. */
+  /**
+   * `raised`, as the DOM element's property.
+   * @deprecated write `raised` -- `prop:` stays only for compiled spell
+   */
   "prop:raised"?: boolean | ""
   /**
    * A page peeking out below.
    * - takes:  flag, or `tall`
    */
   stacked?: boolean | "" | "tall"
-  /** `stacked`, as the DOM element's property. */
+  /**
+   * `stacked`, as the DOM element's property.
+   * @deprecated write `stacked` -- `prop:` stays only for compiled spell
+   */
   "prop:stacked"?: boolean | "" | "tall"
   /**
    * A pile of rotated sheets behind the group.
    * - takes:  flag (present / absent)
    */
   piled?: boolean | ""
-  /** `piled`, as the DOM element's property. */
+  /**
+   * `piled`, as the DOM element's property.
+   * @deprecated write `piled` -- `prop:` stays only for compiled spell
+   */
   "prop:piled"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * No box of its own.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * The dark scheme, for every segment in the group.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Dims the group under a spinner.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18285,7 +21955,10 @@ export interface UISegmentsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -18344,94 +22017,130 @@ export interface UISelectAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state, tinting the box and text.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * No minimum width:  as wide as its longest option.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Can't be used;  dimmed, and left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed (a change is undone);  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * Chooses several values:  a native list box (never the customizable picker).
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
-  /** `multiple`, as the DOM element's property. */
+  /**
+   * `multiple`, as the DOM element's property.
+   * @deprecated write `multiple` -- `prop:` stays only for compiled spell
+   */
   "prop:multiple"?: boolean | ""
   /**
    * Text of the empty first option shown while nothing is chosen.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name;  `multiple` submits one entry per value.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   options?: unknown
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `options`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `options` -- `prop:` stays only for compiled spell
    */
   "prop:options"?: unknown
   /**
@@ -18439,14 +22148,20 @@ export interface UISelectAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18488,7 +22203,10 @@ export interface UISelectAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -18552,14 +22270,20 @@ export interface UIShapeAttributes {
    * - takes:  flag (present / absent)
    */
   cube?: boolean | ""
-  /** `cube`, as the DOM element's property. */
+  /**
+   * `cube`, as the DOM element's property.
+   * @deprecated write `cube` -- `prop:` stays only for compiled spell
+   */
   "prop:cube"?: boolean | ""
   /**
    * Sides of text, inline:  a word that flips to another.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Index of the side shown (from 0).  Controlled:  changing it flips (`direction` says which way) to that side.
@@ -18567,7 +22291,10 @@ export interface UIShapeAttributes {
    * - default:  `0`
    */
   "active-index"?: number | `${number}`
-  /** `active-index`, as the DOM element's property. */
+  /**
+   * `active-index`, as the DOM element's property.
+   * @deprecated write `active-index` -- `prop:` stays only for compiled spell
+   */
   "prop:activeIndex"?: number | `${number}`
   /**
    * Which way it turns (Fomantic's `flip up` ...) when `active-index` changes, `next()` / `previous()` run or `flip()` gets no direction.
@@ -18575,35 +22302,50 @@ export interface UIShapeAttributes {
    * - default:  `left`
    */
   direction?: "up" | "down" | "left" | "right" | "over" | "back"
-  /** `direction`, as the DOM element's property. */
+  /**
+   * `direction`, as the DOM element's property.
+   * @deprecated write `direction` -- `prop:` stays only for compiled spell
+   */
   "prop:direction"?: "up" | "down" | "left" | "right" | "over" | "back"
   /**
    * Length of a flip:  ms (`600`) or a CSS time (`0.6s`);  default Fomantic's 0.6s.
    * - takes:  text
    */
   duration?: string
-  /** `duration`, as the DOM element's property. */
+  /**
+   * `duration`, as the DOM element's property.
+   * @deprecated write `duration` -- `prop:` stays only for compiled spell
+   */
   "prop:duration"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18645,7 +22387,10 @@ export interface UIShapeAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -18700,21 +22445,30 @@ export interface UISideAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18756,7 +22510,10 @@ export interface UISideAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -18833,7 +22590,10 @@ export interface UISidebarAttributes {
    * - default:  `left`
    */
   position?: "left" | "right" | "top" | "bottom"
-  /** `position`, as the DOM element's property. */
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
   "prop:position"?: "left" | "right" | "top" | "bottom"
   /**
    * Width of a `left` / `right` sidebar:  Fomantic's words -- `very thin` (60px), `thin` (150px), 260px by default, `wide` (350px), `very wide` (475px) -- or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).
@@ -18857,7 +22617,10 @@ export interface UISidebarAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `width`, as the DOM element's property. */
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
   "prop:width"?:
     | "1"
     | "2"
@@ -18881,28 +22644,40 @@ export interface UISidebarAttributes {
    * - takes:  `overlay` · `push` · `scale down` · `uncover` · `slide along` · `slide out`
    */
   transition?: "overlay" | "push" | "scale down" | "uncover" | "slide along" | "slide out"
-  /** `transition`, as the DOM element's property. */
+  /**
+   * `transition`, as the DOM element's property.
+   * @deprecated write `transition` -- `prop:` stays only for compiled spell
+   */
   "prop:transition"?: "overlay" | "push" | "scale down" | "uncover" | "slide along" | "slide out"
   /**
    * A dark panel (put an `inverted` menu in it).
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Blurs the dimmed page beside it.
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
-  /** `blurring`, as the DOM element's property. */
+  /**
+   * `blurring`, as the DOM element's property.
+   * @deprecated write `blurring` -- `prop:` stays only for compiled spell
+   */
   "prop:blurring"?: boolean | ""
   /**
    * Part of the page, not a modal:  an `<aside>` landmark;  the page beside it is neither dimmed nor inert, focus doesn't move, and nothing but `visible` hides it.
    * - takes:  flag (present / absent)
    */
   persistent?: boolean | ""
-  /** `persistent`, as the DOM element's property. */
+  /**
+   * `persistent`, as the DOM element's property.
+   * @deprecated write `persistent` -- `prop:` stays only for compiled spell
+   */
   "prop:persistent"?: boolean | ""
   /**
    * What hides a modal sidebar, as `<dialog closedby>`:  `any` -- Escape or a click on the page beside it (default);  `closerequest` -- Escape only;  `none` -- only `visible`.  Read when it shows.
@@ -18910,28 +22685,40 @@ export interface UISidebarAttributes {
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
-  /** `closedby`, as the DOM element's property. */
+  /**
+   * `closedby`, as the DOM element's property.
+   * @deprecated write `closedby` -- `prop:` stays only for compiled spell
+   */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -18973,7 +22760,10 @@ export interface UISidebarAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -19061,7 +22851,10 @@ export interface UISliderAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled track (and of `basic` thumbs).
@@ -19083,7 +22876,10 @@ export interface UISliderAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -19105,84 +22901,120 @@ export interface UISliderAttributes {
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Can't be used:  dimmed, not focusable, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * Thumbs show only while the slider is hovered or focused.
    * - takes:  flag (present / absent)
    */
   hover?: boolean | ""
-  /** `hover`, as the DOM element's property. */
+  /**
+   * `hover`, as the DOM element's property.
+   * @deprecated write `hover` -- `prop:` stays only for compiled spell
+   */
   "prop:hover"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Labels along the track, at the steps.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
-  /** `labeled`, as the DOM element's property. */
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
   "prop:labeled"?: boolean | ""
   /**
    * Two thumbs:  `value` .. `end`.  The form gets two entries under `name`.
    * - takes:  flag (present / absent)
    */
   range?: boolean | ""
-  /** `range`, as the DOM element's property. */
+  /**
+   * `range`, as the DOM element's property.
+   * @deprecated write `range` -- `prop:` stays only for compiled spell
+   */
   "prop:range"?: boolean | ""
   /**
    * Runs from the right (or, `vertical`, from the bottom).
    * - takes:  flag (present / absent)
    */
   reversed?: boolean | ""
-  /** `reversed`, as the DOM element's property. */
+  /**
+   * `reversed`, as the DOM element's property.
+   * @deprecated write `reversed` -- `prop:` stays only for compiled spell
+   */
   "prop:reversed"?: boolean | ""
   /**
    * Thumbs follow the pointer smoothly;  values still snap.
    * - takes:  flag (present / absent)
    */
   smooth?: boolean | ""
-  /** `smooth`, as the DOM element's property. */
+  /**
+   * `smooth`, as the DOM element's property.
+   * @deprecated write `smooth` -- `prop:` stays only for compiled spell
+   */
   "prop:smooth"?: boolean | ""
   /**
    * A tick at every step (or `tick-step`):  through the track with `labeled`;  alone, a short tick under the track, no numbers (as a native range's tick marks).
    * - takes:  flag (present / absent)
    */
   ticked?: boolean | ""
-  /** `ticked`, as the DOM element's property. */
+  /**
+   * `ticked`, as the DOM element's property.
+   * @deprecated write `ticked` -- `prop:` stays only for compiled spell
+   */
   "prop:ticked"?: boolean | ""
   /**
    * Upright, filling the host's height;  min at the top.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.
    * - takes:  `bottom` · `right`
    */
   aligned?: "bottom" | "right"
-  /** `aligned`, as the DOM element's property. */
+  /**
+   * `aligned`, as the DOM element's property.
+   * @deprecated write `aligned` -- `prop:` stays only for compiled spell
+   */
   "prop:aligned"?: "bottom" | "right"
   /**
    * Lowest value.
@@ -19190,7 +23022,10 @@ export interface UISliderAttributes {
    * - default:  `0`
    */
   min?: number | `${number}`
-  /** `min`, as the DOM element's property. */
+  /**
+   * `min`, as the DOM element's property.
+   * @deprecated write `min` -- `prop:` stays only for compiled spell
+   */
   "prop:min"?: number | `${number}`
   /**
    * Highest value (Fomantic's default:  20).
@@ -19198,7 +23033,10 @@ export interface UISliderAttributes {
    * - default:  `20`
    */
   max?: number | `${number}`
-  /** `max`, as the DOM element's property. */
+  /**
+   * `max`, as the DOM element's property.
+   * @deprecated write `max` -- `prop:` stays only for compiled spell
+   */
   "prop:max"?: number | `${number}`
   /**
    * Values snap to multiples of it from `min`;  `0`:  any.
@@ -19206,38 +23044,50 @@ export interface UISliderAttributes {
    * - default:  `1`
    */
   step?: number | `${number}`
-  /** `step`, as the DOM element's property. */
+  /**
+   * `step`, as the DOM element's property.
+   * @deprecated write `step` -- `prop:` stays only for compiled spell
+   */
   "prop:step"?: number | `${number}`
   /**
    * Labels and ticks every this much from `min` (e.g. `20` on `0` ... `200`), instead of every `step`;  values still snap to `step`.
    * - takes:  number
    */
   "tick-step"?: number | `${number}`
-  /** `tick-step`, as the DOM element's property. */
+  /**
+   * `tick-step`, as the DOM element's property.
+   * @deprecated write `tick-step` -- `prop:` stays only for compiled spell
+   */
   "prop:tickStep"?: number | `${number}`
   /**
    * The (first) thumb's value, default `min`.  Attribute:  the starting (and reset) value;  property:  the live one.
    * - takes:  number
    */
   value?: number | `${number}`
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: number | `${number}`
   /**
    * `range`:  the second thumb's value, default `max`.  Attribute / property as `value`.
    * - takes:  number
    */
   end?: number | `${number}`
-  /** `end`, as the DOM element's property. */
+  /**
+   * `end`, as the DOM element's property.
+   * @deprecated write `end` -- `prop:` stays only for compiled spell
+   */
   "prop:end"?: number | `${number}`
   /**
    * Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   stepLabels?: unknown
   /**
    * Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `stepLabels`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `stepLabels` -- `prop:` stays only for compiled spell
    */
   "prop:stepLabels"?: unknown
   /**
@@ -19245,28 +23095,40 @@ export interface UISliderAttributes {
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Form validation:  a value must be chosen, by the page (`value`, a range's `end`) or by moving a thumb.  Unset, the thumb rests at `min` but counts as no value (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -19308,7 +23170,10 @@ export interface UISliderAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -19368,7 +23233,10 @@ export interface UIStatisticAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the value.
@@ -19390,7 +23258,10 @@ export interface UIStatisticAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -19412,70 +23283,100 @@ export interface UIStatisticAttributes {
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme, a white value.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Floats to the `left` / `right` of the content after it.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
-  /** `floated`, as the DOM element's property. */
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
   "prop:floated"?: "left" | "right"
   /**
    * Shorthand for a `<ui-value>`:  the number (or word) shown.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * The `value` shorthand is a WORD (`text value`):  smaller, bold, at least two lines tall.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Shorthand for the label below the value.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -19517,7 +23418,10 @@ export interface UIStatisticAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -19567,7 +23471,10 @@ export interface UIStatisticsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every value in the group.
@@ -19589,7 +23496,10 @@ export interface UIStatisticsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -19611,63 +23521,90 @@ export interface UIStatisticsAttributes {
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
-  /** `horizontal`, as the DOM element's property. */
+  /**
+   * `horizontal`, as the DOM element's property.
+   * @deprecated write `horizontal` -- `prop:` stays only for compiled spell
+   */
   "prop:horizontal"?: boolean | ""
   /**
    * Every statistic for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Below 768px of the group's width (or the screen's:  `stack-with`), one statistic per row, full width.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | ""
   /**
    * What `stackable` measures:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * Every statistic the same width, from the statistics themselves (no count):  one row, an equal share of it each (the group spans its row).  Not with `horizontal` (a column).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  divides each row evenly between N statistics (`widths="3"` => `three statistics`), wrapping after N.
    * - takes:  `1`-`10`, a fraction (`1/4`) or a percentage
    */
   widths?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
-  /** `widths`, as the DOM element's property. */
+  /**
+   * `widths`, as the DOM element's property.
+   * @deprecated write `widths` -- `prop:` stays only for compiled spell
+   */
   "prop:widths"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -19709,7 +23646,10 @@ export interface UIStatisticsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -19774,7 +23714,10 @@ export interface UIStepAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -19796,77 +23739,110 @@ export interface UIStepAttributes {
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /** `selected`, as the DOM element's property. */
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
   "prop:selected"?: boolean | ""
   /**
    * Done:  its icon (or number) becomes a check.
    * - takes:  flag (present / absent)
    */
   completed?: boolean | ""
-  /** `completed`, as the DOM element's property. */
+  /**
+   * `completed`, as the DOM element's property.
+   * @deprecated write `completed` -- `prop:` stays only for compiled spell
+   */
   "prop:completed"?: boolean | ""
   /**
    * Not available yet:  dimmed, and a link step isn't followed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
-  /** `link`, as the DOM element's property. */
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
   "prop:link"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a step.
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
-  /** `target`, as the DOM element's property. */
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
   "prop:target"?: string
   /**
    * Icon name, before the content.
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Shorthand for the title (Fomantic's `.title`).
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Shorthand for the description under the title.
    * - takes:  text
    */
   description?: string
-  /** `description`, as the DOM element's property. */
+  /**
+   * `description`, as the DOM element's property.
+   * @deprecated write `description` -- `prop:` stays only for compiled spell
+   */
   "prop:description"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -19908,7 +23884,10 @@ export interface UIStepAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -19958,7 +23937,10 @@ export interface UIStepsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Circular steps:  hue of the rings of the current and completed steps (default the positive colour).
@@ -19980,7 +23962,10 @@ export interface UIStepsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -20002,98 +23987,140 @@ export interface UIStepsAttributes {
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
-  /** `ordered`, as the DOM element's property. */
+  /**
+   * `ordered`, as the DOM element's property.
+   * @deprecated write `ordered` -- `prop:` stays only for compiled spell
+   */
   "prop:ordered"?: boolean | ""
   /**
    * Stacked top to bottom;  `vertical="right"` for a group on the right of its content (arrow at left).
    * - takes:  flag, or `right`
    */
   vertical?: boolean | "" | "right"
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | "" | "right"
   /**
    * Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
-  /** `circular`, as the DOM element's property. */
+  /**
+   * `circular`, as the DOM element's property.
+   * @deprecated write `circular` -- `prop:` stays only for compiled spell
+   */
   "prop:circular"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Every step the same width, from the steps themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Joined to a segment below (`attached`, `"top"`) or above (`"bottom"`), overlapping its border.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Never stacks;  by default steps stack below 768px of the group's width (or the screen's:  `stack-with`).
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * `stackable="tablet"`:  stacks below 992px (of the group's width, or the screen's), not just 768px.
    * - takes:  `tablet`
    */
   stackable?: "tablet"
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: "tablet"
   /**
    * What stacking (and `stackable="tablet"`) measures:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
-  /** `stack-with`, as the DOM element's property. */
+  /**
+   * `stack-with`, as the DOM element's property.
+   * @deprecated write `stack-with` -- `prop:` stays only for compiled spell
+   */
   "prop:stackWith"?: "container" | "page"
   /**
    * Older, count-based alias of `equal fluid`:  divides the group evenly between N steps (`widths="3"` => `three steps`).
    * - takes:  `1`-`8`, a fraction (`1/4`) or a percentage
    */
   widths?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | (string & {})
-  /** `widths`, as the DOM element's property. */
+  /**
+   * `widths`, as the DOM element's property.
+   * @deprecated write `widths` -- `prop:` stays only for compiled spell
+   */
   "prop:widths"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | (string & {})
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -20135,7 +24162,10 @@ export interface UIStepsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -20200,7 +24230,10 @@ export interface UIStickyAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * Pixels between the bottom edge and the content stuck there (with `pushing`).
@@ -20208,35 +24241,50 @@ export interface UIStickyAttributes {
    * - default:  `0`
    */
   "bottom-offset"?: number | `${number}`
-  /** `bottom-offset`, as the DOM element's property. */
+  /**
+   * `bottom-offset`, as the DOM element's property.
+   * @deprecated write `bottom-offset` -- `prop:` stays only for compiled spell
+   */
   "prop:bottomOffset"?: number | `${number}`
   /**
    * Also sticks to the BOTTOM edge:  content below the fold stays in view there until the page reaches it.
    * - takes:  flag (present / absent)
    */
   pushing?: boolean | ""
-  /** `pushing`, as the DOM element's property. */
+  /**
+   * `pushing`, as the DOM element's property.
+   * @deprecated write `pushing` -- `prop:` stays only for compiled spell
+   */
   "prop:pushing"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -20278,7 +24326,10 @@ export interface UIStickyAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -20338,21 +24389,30 @@ export interface UISummaryAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -20394,7 +24454,10 @@ export interface UISummaryAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -20453,21 +24516,30 @@ export interface UITabAttributes {
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Text of its tab;  default its `value`.  Also names the pane.
    * - takes:  text
    */
   label?: string
-  /** `label`, as the DOM element's property. */
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
   "prop:label"?: string
   /**
    * Icon on its tab (a Font Awesome name).
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * The pane shown first, when the tabs have no `value`;  alone (no `<ui-tabs>`), shows it.  Alias:  `active`.
@@ -20479,56 +24551,80 @@ export interface UITabAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
-  /** `selected`, as the DOM element's property. */
+  /**
+   * `selected`, as the DOM element's property.
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
   "prop:selected"?: boolean | ""
   /**
    * Its tab can't be selected (skipped by the arrow keys).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  a spinner in place of the content.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with `first: true` to fill it yourself).
    * - takes:  flag (present / absent)
    */
   lazy?: boolean | ""
-  /** `lazy`, as the DOM element's property. */
+  /**
+   * `lazy`, as the DOM element's property.
+   * @deprecated write `lazy` -- `prop:` stays only for compiled spell
+   */
   "prop:lazy"?: boolean | ""
   /**
    * Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * No segment box;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * A dark pane;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -20570,7 +24666,10 @@ export interface UITabAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -20635,7 +24734,10 @@ export interface UITableAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Coloured top edge;  with `inverted`, a coloured fill.
@@ -20657,7 +24759,10 @@ export interface UITableAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -20679,147 +24784,210 @@ export interface UITableAttributes {
    * - takes:  flag (present / absent)
    */
   celled?: boolean | ""
-  /** `celled`, as the DOM element's property. */
+  /**
+   * `celled`, as the DOM element's property.
+   * @deprecated write `celled` -- `prop:` stays only for compiled spell
+   */
   "prop:celled"?: boolean | ""
   /**
    * As narrow as its content (`width: auto`).
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
-  /** `collapsing`, as the DOM element's property. */
+  /**
+   * `collapsing`, as the DOM element's property.
+   * @deprecated write `collapsing` -- `prop:` stays only for compiled spell
+   */
   "prop:collapsing"?: boolean | ""
   /**
    * First column is a definition column;  blank corner.
    * - takes:  flag (present / absent)
    */
   definition?: boolean | ""
-  /** `definition`, as the DOM element's property. */
+  /**
+   * `definition`, as the DOM element's property.
+   * @deprecated write `definition` -- `prop:` stays only for compiled spell
+   */
   "prop:definition"?: boolean | ""
   /**
    * `table-layout: fixed`;  overflowing cell text is cut with `…`.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
-  /** `fixed`, as the DOM element's property. */
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
   "prop:fixed"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * With `scrolling`:  people can drag the height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
-  /** `resizable`, as the DOM element's property. */
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
   "prop:resizable"?: boolean | ""
   /**
    * Body rows highlight on hover.
    * - takes:  flag (present / absent)
    */
   selectable?: boolean | ""
-  /** `selectable`, as the DOM element's property. */
+  /**
+   * `selectable`, as the DOM element's property.
+   * @deprecated write `selectable` -- `prop:` stays only for compiled spell
+   */
   "prop:selectable"?: boolean | ""
   /**
    * No wrapping:  every cell's text stays on one line (`single line`).
    * - takes:  flag (present / absent)
    */
   "single-line"?: boolean | ""
-  /** `single-line`, as the DOM element's property. */
+  /**
+   * `single-line`, as the DOM element's property.
+   * @deprecated write `single-line` -- `prop:` stays only for compiled spell
+   */
   "prop:singleLine"?: boolean | ""
   /**
    * Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic's `class="disabled"`).
    * - takes:  flag (present / absent)
    */
   sortable?: boolean | ""
-  /** `sortable`, as the DOM element's property. */
+  /**
+   * `sortable`, as the DOM element's property.
+   * @deprecated write `sortable` -- `prop:` stays only for compiled spell
+   */
   "prop:sortable"?: boolean | ""
   /**
    * Every other body row is tinted.
    * - takes:  flag (present / absent)
    */
   striped?: boolean | ""
-  /** `striped`, as the DOM element's property. */
+  /**
+   * `striped`, as the DOM element's property.
+   * @deprecated write `striped` -- `prop:` stays only for compiled spell
+   */
   "prop:striped"?: boolean | ""
   /**
    * Collapsed borders, for `rowspan` / `colspan` headers.
    * - takes:  flag (present / absent)
    */
   structured?: boolean | ""
-  /** `structured`, as the DOM element's property. */
+  /**
+   * `structured`, as the DOM element's property.
+   * @deprecated write `structured` -- `prop:` stays only for compiled spell
+   */
   "prop:structured"?: boolean | ""
   /**
    * Never stacks rows into blocks, even on a viewport below 768px.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
-  /** `unstackable`, as the DOM element's property. */
+  /**
+   * `unstackable`, as the DOM element's property.
+   * @deprecated write `unstackable` -- `prop:` stays only for compiled spell
+   */
   "prop:unstackable"?: boolean | ""
   /**
    * `basic`:  no header fill;  `basic="very"`:  no outer border or edge padding either.
    * - takes:  flag, or `very`
    */
   basic?: boolean | "" | "very"
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | "" | "very"
   /**
    * `compact` / `compact="very"`:  less cell padding.
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | "" | "very"
   /**
    * `padded` / `padded="very"`:  more cell padding.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
-  /** `padded`, as the DOM element's property. */
+  /**
+   * `padded`, as the DOM element's property.
+   * @deprecated write `padded` -- `prop:` stays only for compiled spell
+   */
   "prop:padded"?: boolean | "" | "very"
   /**
    * Joins a segment or another table:  `attached` (middle), `top` or `bottom`.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable="tablet"` also below 992px.  `stack-by="container"` follows the table's OWN width instead.
    * - takes:  flag, or `tablet`
    */
   stackable?: boolean | "" | "tablet"
-  /** `stackable`, as the DOM element's property. */
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
   "prop:stackable"?: boolean | "" | "tablet"
   /**
    * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
    * - takes:  `viewport` · `container` · `none`
    */
   "stack-by"?: "viewport" | "container" | "none"
-  /** `stack-by`, as the DOM element's property. */
+  /**
+   * `stack-by`, as the DOM element's property.
+   * @deprecated write `stack-by` -- `prop:` stays only for compiled spell
+   */
   "prop:stackBy"?: "viewport" | "container" | "none"
   /**
    * Caps the height and scrolls, head and foot stuck;  `short` / `very short` / `long` / `very long` change the cap.  The scroller becomes a focusable, named region.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `scrolling`, as the DOM element's property. */
+  /**
+   * `scrolling`, as the DOM element's property.
+   * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
+   */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * Like `scrolling`, both ways, with nothing stuck;  same height steps.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   overflowing?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /** `overflowing`, as the DOM element's property. */
+  /**
+   * `overflowing`, as the DOM element's property.
+   * @deprecated write `overflowing` -- `prop:` stays only for compiled spell
+   */
   "prop:overflowing"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * Sticky parts:  `stuck="head"` (the `thead`), `foot`, `first` / `last` column;  several at once, e.g. `stuck="head first"`.
    * - takes:  space-separated:  `head` · `foot` · `first` · `last`
    */
   stuck?: string
-  /** `stuck`, as the DOM element's property. */
+  /**
+   * `stuck`, as the DOM element's property.
+   * @deprecated write `stuck` -- `prop:` stays only for compiled spell
+   */
   "prop:stuck"?: string
   /**
    * Equal-width column count, `1` ... `16` (or `1/4`, `25%`):  `four column`.
@@ -20843,7 +25011,10 @@ export interface UITableAttributes {
     | "15"
     | "16"
     | (string & {})
-  /** `columns`, as the DOM element's property. */
+  /**
+   * `columns`, as the DOM element's property.
+   * @deprecated write `columns` -- `prop:` stays only for compiled spell
+   */
   "prop:columns"?:
     | "1"
     | "2"
@@ -20867,56 +25038,71 @@ export interface UITableAttributes {
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
-  /** `text-align`, as the DOM element's property. */
+  /**
+   * `text-align`, as the DOM element's property.
+   * @deprecated write `text-align` -- `prop:` stays only for compiled spell
+   */
   "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Vertical alignment of every cell.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
-  /** `vertical-align`, as the DOM element's property. */
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
   "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Index of the sorted column (0-based, counting `colspan`s);  set by people's clicks unless the app controls it.
    * - takes:  number
    */
   "sort-column"?: number | `${number}`
-  /** `sort-column`, as the DOM element's property. */
+  /**
+   * `sort-column`, as the DOM element's property.
+   * @deprecated write `sort-column` -- `prop:` stays only for compiled spell
+   */
   "prop:sortColumn"?: number | `${number}`
   /**
    * Direction of `sort-column`;  a newly sorted column starts `ascending`.
    * - takes:  `ascending` · `descending`
    */
   "sort-direction"?: "ascending" | "descending"
-  /** `sort-direction`, as the DOM element's property. */
+  /**
+   * `sort-direction`, as the DOM element's property.
+   * @deprecated write `sort-direction` -- `prop:` stays only for compiled spell
+   */
   "prop:sortDirection"?: "ascending" | "descending"
   /**
    * Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  Off, the app sorts its own rows.
    * - takes:  flag (present / absent)
    */
   "client-sort"?: boolean | ""
-  /** `client-sort`, as the DOM element's property. */
+  /**
+   * `client-sort`, as the DOM element's property.
+   * @deprecated write `client-sort` -- `prop:` stays only for compiled spell
+   */
   "prop:clientSort"?: boolean | ""
   /**
    * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   columnDefs?: unknown
   /**
    * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `columnDefs`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `columnDefs` -- `prop:` stays only for compiled spell
    */
   "prop:columnDefs"?: unknown
   /**
    * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rows?: unknown
   /**
    * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rows`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rows` -- `prop:` stays only for compiled spell
    */
   "prop:rows"?: unknown
   /**
@@ -20924,21 +25110,30 @@ export interface UITableAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -20980,7 +25175,10 @@ export interface UITableAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -21046,7 +25244,10 @@ export interface UITabsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the selected tab (`segmented`:  its fill;  default the primary colour).
@@ -21068,7 +25269,10 @@ export interface UITabsAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -21090,98 +25294,140 @@ export interface UITabsAttributes {
    * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
    */
   appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
-  /** `appearance`, as the DOM element's property. */
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
   "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
   /**
    * Tabs drawn as file-folder tabs (Fomantic's classic tab look).  Alias of `appearance="tabular"`.
    * - takes:  flag (present / absent)
    */
   tabular?: boolean | ""
-  /** `tabular`, as the DOM element's property. */
+  /**
+   * `tabular`, as the DOM element's property.
+   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
+   */
   "prop:tabular"?: boolean | ""
   /**
    * The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance="pointing"`.
    * - takes:  flag (present / absent)
    */
   pointing?: boolean | ""
-  /** `pointing`, as the DOM element's property. */
+  /**
+   * `pointing`, as the DOM element's property.
+   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
+   */
   "prop:pointing"?: boolean | ""
   /**
    * De-emphasized tabs:  no box.  Alias of `appearance="secondary"`.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
-  /** `secondary`, as the DOM element's property. */
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
   "prop:secondary"?: boolean | ""
   /**
    * Plain text tabs.  Alias of `appearance="text"`.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * The dark scheme for the tabs and the panes.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
-  /** `vertical`, as the DOM element's property. */
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
   "prop:vertical"?: boolean | ""
   /**
    * The tab menu takes the full width (or, vertical, its column's).
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * The tab menu is only as wide as its tabs (Fomantic's `compact` menu).
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `vertical`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   alignment?: "fluid" | "left" | "center" | "right"
-  /** `alignment`, as the DOM element's property. */
+  /**
+   * `alignment`, as the DOM element's property.
+   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   */
   "prop:alignment"?: "fluid" | "left" | "center" | "right"
   /**
    * Every tab the same width, from the tabs themselves (no count):  with `alignment="fluid"` an equal share of the row each;  otherwise each as wide as the widest.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
-  /** `equal`, as the DOM element's property. */
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
   "prop:equal"?: boolean | ""
   /**
    * Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
-  /** `basic`, as the DOM element's property. */
+  /**
+   * `basic`, as the DOM element's property.
+   * @deprecated write `basic` -- `prop:` stays only for compiled spell
+   */
   "prop:basic"?: boolean | ""
   /**
    * Joins the tab menu and the panes edge to edge:  bare or `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `attached="bottom"` puts them below.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
-  /** `attached`, as the DOM element's property. */
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * `automatic`:  moving focus with the arrow keys selects the tab (APG's default).  `manual`:  arrows only move focus;  Enter / Space select.
@@ -21189,35 +25435,50 @@ export interface UITabsAttributes {
    * - default:  `automatic`
    */
   activation?: "automatic" | "manual"
-  /** `activation`, as the DOM element's property. */
+  /**
+   * `activation`, as the DOM element's property.
+   * @deprecated write `activation` -- `prop:` stays only for compiled spell
+   */
   "prop:activation"?: "automatic" | "manual"
   /**
    * Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.
    * - takes:  flag (present / absent)
    */
   history?: boolean | ""
-  /** `history`, as the DOM element's property. */
+  /**
+   * `history`, as the DOM element's property.
+   * @deprecated write `history` -- `prop:` stays only for compiled spell
+   */
   "prop:history"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -21259,7 +25520,10 @@ export interface UITabsAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -21315,7 +25579,10 @@ export interface UITextAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text.
@@ -21337,7 +25604,10 @@ export interface UITextAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -21359,35 +25629,50 @@ export interface UITextAttributes {
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * The hue as it reads on a dark surface.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Faded:  shown as unavailable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -21429,7 +25714,10 @@ export interface UITextAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -21493,115 +25781,160 @@ export interface UITextareaAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
-  /** `size`, as the DOM element's property. */
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state, tinting the box, text and placeholder.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
-  /** `state`, as the DOM element's property. */
+  /**
+   * `state`, as the DOM element's property.
+   * @deprecated write `state` -- `prop:` stays only for compiled spell
+   */
   "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * No box:  text only.
    * - takes:  flag (present / absent)
    */
   transparent?: boolean | ""
-  /** `transparent`, as the DOM element's property. */
+  /**
+   * `transparent`, as the DOM element's property.
+   * @deprecated write `transparent` -- `prop:` stays only for compiled spell
+   */
   "prop:transparent"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
-  /** `fluid`, as the DOM element's property. */
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
   "prop:fluid"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Shows its value but can't be edited;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
-  /** `readonly`, as the DOM element's property. */
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
   "prop:readOnly"?: boolean | ""
   /**
    * Value.  Attribute:  the starting (and reset) value;  property:  the live value.
    * - takes:  text
    */
   value?: string
-  /** `value`, as the DOM element's property. */
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
   "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
-  /** `name`, as the DOM element's property. */
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
   "prop:name"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
    */
   placeholder?: string
-  /** `placeholder`, as the DOM element's property. */
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
   "prop:placeholder"?: string
   /**
    * Constraint:  must not be empty (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
-  /** `required`, as the DOM element's property. */
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
   "prop:required"?: boolean | ""
   /**
    * Constraint:  fewest characters (checked once someone has edited it).
    * - takes:  number
    */
   minlength?: number | `${number}`
-  /** `minlength`, as the DOM element's property. */
+  /**
+   * `minlength`, as the DOM element's property.
+   * @deprecated write `minlength` -- `prop:` stays only for compiled spell
+   */
   "prop:minLength"?: number | `${number}`
   /**
    * Constraint:  most characters.
    * - takes:  number
    */
   maxlength?: number | `${number}`
-  /** `maxlength`, as the DOM element's property. */
+  /**
+   * `maxlength`, as the DOM element's property.
+   * @deprecated write `maxlength` -- `prop:` stays only for compiled spell
+   */
   "prop:maxLength"?: number | `${number}`
   /**
    * Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).
    * - takes:  number
    */
   rows?: number | `${number}`
-  /** `rows`, as the DOM element's property. */
+  /**
+   * `rows`, as the DOM element's property.
+   * @deprecated write `rows` -- `prop:` stays only for compiled spell
+   */
   "prop:rows"?: number | `${number}`
   /**
    * Autofill hint, forwarded to the native textarea.
    * - takes:  text
    */
   autocomplete?: string
-  /** `autocomplete`, as the DOM element's property. */
+  /**
+   * `autocomplete`, as the DOM element's property.
+   * @deprecated write `autocomplete` -- `prop:` stays only for compiled spell
+   */
   "prop:autocomplete"?: string
   /**
    * Fomantic validation rules checked with the native constraints (`ValidationRule`s).
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   rules?: unknown
   /**
    * Fomantic validation rules checked with the native constraints (`ValidationRule`s).
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `rules`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `rules` -- `prop:` stays only for compiled spell
    */
   "prop:rules"?: unknown
   /**
@@ -21609,14 +25942,20 @@ export interface UITextareaAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -21658,7 +25997,10 @@ export interface UITextareaAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -21720,28 +26062,40 @@ export interface UITitleAttributes {
    * - takes:  text
    */
   href?: string
-  /** `href`, as the DOM element's property. */
+  /**
+   * `href`, as the DOM element's property.
+   * @deprecated write `href` -- `prop:` stays only for compiled spell
+   */
   "prop:href"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -21783,7 +26137,10 @@ export interface UITitleAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -21865,7 +26222,10 @@ export interface UIToastAttributes {
    * - takes:  `info` · `success` · `warning` · `error` · `neutral`
    */
   type?: "info" | "success" | "warning" | "error" | "neutral"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "info" | "success" | "warning" | "error" | "neutral"
   /**
    * Hue:  a filled toast in that colour.
@@ -21887,7 +26247,10 @@ export interface UIToastAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -21909,35 +26272,50 @@ export interface UIToastAttributes {
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Bold first line (Fomantic's `title`).
    * - takes:  text
    */
   header?: string
-  /** `header`, as the DOM element's property. */
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
   "prop:header"?: string
   /**
    * Body text;  slotted content follows it.
    * - takes:  text
    */
   message?: string
-  /** `message`, as the DOM element's property. */
+  /**
+   * `message`, as the DOM element's property.
+   * @deprecated write `message` -- `prop:` stays only for compiled spell
+   */
   "prop:message"?: string
   /**
    * Icon name beside the content;  bare `icon` (or `"true"`, as frameworks write it) uses the type's own (info, check, warning, cross).
    * - takes:  icon name
    */
   icon?: string
-  /** `icon`, as the DOM element's property. */
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
   "prop:icon"?: string
   /**
    * Shows a close icon (Fomantic's `closeIcon`).
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
-  /** `closable`, as the DOM element's property. */
+  /**
+   * `closable`, as the DOM element's property.
+   * @deprecated write `closable` -- `prop:` stays only for compiled spell
+   */
   "prop:closable"?: boolean | ""
   /**
    * A click anywhere on it closes it (Fomantic's `closeOnClick`);  off anyway with `closable`, actions or form controls inside.
@@ -21945,28 +26323,40 @@ export interface UIToastAttributes {
    * - default:  `true`
    */
   "close-on-click"?: boolean | ""
-  /** `close-on-click`, as the DOM element's property. */
+  /**
+   * `close-on-click`, as the DOM element's property.
+   * @deprecated write `close-on-click` -- `prop:` stays only for compiled spell
+   */
   "prop:closeOnClick"?: boolean | ""
   /**
    * Milliseconds before it closes itself;  absent or `0` keeps it until closed;  `auto` ~== reading time (120 words a minute, at least a second).  `UI.toast()` defaults to `3000`.
    * - takes:  text
    */
   "display-time"?: string
-  /** `display-time`, as the DOM element's property. */
+  /**
+   * `display-time`, as the DOM element's property.
+   * @deprecated write `display-time` -- `prop:` stays only for compiled spell
+   */
   "prop:displayTime"?: string
   /**
    * Shows a bar counting the display time down, at the `top` or `bottom` (Fomantic's `showProgress`).
    * - takes:  `top` · `bottom`
    */
   progress?: "top" | "bottom"
-  /** `progress`, as the DOM element's property. */
+  /**
+   * `progress`, as the DOM element's property.
+   * @deprecated write `progress` -- `prop:` stays only for compiled spell
+   */
   "prop:progress"?: "top" | "bottom"
   /**
    * The bar fills up instead of emptying.
    * - takes:  flag (present / absent)
    */
   "progress-up"?: boolean | ""
-  /** `progress-up`, as the DOM element's property. */
+  /**
+   * `progress-up`, as the DOM element's property.
+   * @deprecated write `progress-up` -- `prop:` stays only for compiled spell
+   */
   "prop:progressUp"?: boolean | ""
   /**
    * Pauses the countdown while the pointer is over it.  Focus inside ALWAYS pauses it.
@@ -21974,7 +26364,10 @@ export interface UIToastAttributes {
    * - default:  `true`
    */
   "pause-on-hover"?: boolean | ""
-  /** `pause-on-hover`, as the DOM element's property. */
+  /**
+   * `pause-on-hover`, as the DOM element's property.
+   * @deprecated write `pause-on-hover` -- `prop:` stays only for compiled spell
+   */
   "prop:pauseOnHover"?: boolean | ""
   /**
    * A fixed width (350px);  `compact="false"` sizes it to its content.
@@ -21982,35 +26375,50 @@ export interface UIToastAttributes {
    * - default:  `true`
    */
   compact?: boolean | ""
-  /** `compact`, as the DOM element's property. */
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
   "prop:compact"?: boolean | ""
   /**
    * Layout words of the `actions` slot (Fomantic's `classActions`):  `basic` (no bar), `left` (aligned left), `attached` (joined below, or `attached top` above), `vertical` (a column beside the content).
    * - takes:  `basic` · `left` · `attached` · `vertical` · `top` · `bottom`
    */
   actions?: "basic" | "left" | "attached" | "vertical" | "top" | "bottom"
-  /** `actions`, as the DOM element's property. */
+  /**
+   * `actions`, as the DOM element's property.
+   * @deprecated write `actions` -- `prop:` stays only for compiled spell
+   */
   "prop:actions"?: "basic" | "left" | "attached" | "vertical" | "top" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -22052,7 +26460,10 @@ export interface UIToastAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -22149,21 +26560,30 @@ export interface UITransitionAttributes {
    * - takes:  text
    */
   duration?: string
-  /** `duration`, as the DOM element's property. */
+  /**
+   * `duration`, as the DOM element's property.
+   * @deprecated write `duration` -- `prop:` stays only for compiled spell
+   */
   "prop:duration"?: string
   /**
    * A new animation stops the running one instead of waiting for it (Fomantic's `queue: false`).
    * - takes:  flag (present / absent)
    */
   interrupt?: boolean | ""
-  /** `interrupt`, as the DOM element's property. */
+  /**
+   * `interrupt`, as the DOM element's property.
+   * @deprecated write `interrupt` -- `prop:` stays only for compiled spell
+   */
   "prop:interrupt"?: boolean | ""
   /**
    * Queue the same animation twice in a row (Fomantic's `allowRepeats`);  by default it's dropped.
    * - takes:  flag (present / absent)
    */
   "allow-repeats"?: boolean | ""
-  /** `allow-repeats`, as the DOM element's property. */
+  /**
+   * `allow-repeats`, as the DOM element's property.
+   * @deprecated write `allow-repeats` -- `prop:` stays only for compiled spell
+   */
   "prop:allowRepeats"?: boolean | ""
   /**
    * Hue of a `pulsating` ring.
@@ -22185,7 +26605,10 @@ export interface UITransitionAttributes {
     | "brown"
     | "grey"
     | "black"
-  /** `color`, as the DOM element's property. */
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
   "prop:color"?:
     | "primary"
     | "secondary"
@@ -22207,49 +26630,70 @@ export interface UITransitionAttributes {
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
-  /** `inline`, as the DOM element's property. */
+  /**
+   * `inline`, as the DOM element's property.
+   * @deprecated write `inline` -- `prop:` stays only for compiled spell
+   */
   "prop:inline"?: boolean | ""
   /**
    * A `pulsating` ring for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
-  /** `inverted`, as the DOM element's property. */
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
   "prop:inverted"?: boolean | ""
   /**
    * Repeats every animation until removed.
    * - takes:  flag (present / absent)
    */
   looping?: boolean | ""
-  /** `looping`, as the DOM element's property. */
+  /**
+   * `looping`, as the DOM element's property.
+   * @deprecated write `looping` -- `prop:` stays only for compiled spell
+   */
   "prop:looping"?: boolean | ""
   /**
    * A ring pulsing out of the box (with `looping`, forever).
    * - takes:  flag (present / absent)
    */
   pulsating?: boolean | ""
-  /** `pulsating`, as the DOM element's property. */
+  /**
+   * `pulsating`, as the DOM element's property.
+   * @deprecated write `pulsating` -- `prop:` stays only for compiled spell
+   */
   "prop:pulsating"?: boolean | ""
   /**
    * Pauses the running animation.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -22291,7 +26735,10 @@ export interface UITransitionAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -22355,13 +26802,13 @@ export interface UITransitionJSXAttributes
 export interface UITreeDiagramAttributes {
   /**
    * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type="application/json">` child.  Set a NEW tree to redraw.
-   * - a JS property (rich data):  an object, array or function
+   * - a JS property (rich data):  an object, array or function, given as it is
    */
   tree?: unknown
   /**
    * The tree to draw, a `TreeDiagramNode`:  `label`, and optional `detail`, `slot`, `title` and `children`.  A JS property (JSON in the attribute);  wins over a `<script type="application/json">` child.  Set a NEW tree to redraw.
-   * - a JS property (rich data):  an object, array or function
-   * - goes once Solid 2 sets rich data on a dashed tag's property itself (epic `solid-17`):  then write `tree`
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `tree` -- `prop:` stays only for compiled spell
    */
   "prop:tree"?: unknown
   /**
@@ -22369,21 +26816,30 @@ export interface UITreeDiagramAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -22425,7 +26881,10 @@ export interface UITreeDiagramAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -22475,28 +26934,40 @@ export interface UIValueAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
-  /** `text`, as the DOM element's property. */
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
   "prop:text"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -22538,7 +27009,10 @@ export interface UIValueAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"
@@ -22633,14 +27107,20 @@ export interface UIVisibilityAttributes {
    * - default:  `true`
    */
   once?: boolean | ""
-  /** `once`, as the DOM element's property. */
+  /**
+   * `once`, as the DOM element's property.
+   * @deprecated write `once` -- `prop:` stays only for compiled spell
+   */
   "prop:once"?: boolean | ""
   /**
    * Events fire at every check while their condition holds (each crossing, not every scrolled pixel).
    * - takes:  flag (present / absent)
    */
   continuous?: boolean | ""
-  /** `continuous`, as the DOM element's property. */
+  /**
+   * `continuous`, as the DOM element's property.
+   * @deprecated write `continuous` -- `prop:` stays only for compiled spell
+   */
   "prop:continuous"?: boolean | ""
   /**
    * Pixels below the viewport top that count as the screen top, e.g. under a fixed menu.
@@ -22648,14 +27128,20 @@ export interface UIVisibilityAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
-  /** `offset`, as the DOM element's property. */
+  /**
+   * `offset`, as the DOM element's property.
+   * @deprecated write `offset` -- `prop:` stays only for compiled spell
+   */
   "prop:offset"?: number | `${number}`
   /**
    * `image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`).
    * - takes:  `image`
    */
   type?: "image"
-  /** `type`, as the DOM element's property. */
+  /**
+   * `type`, as the DOM element's property.
+   * @deprecated write `type` -- `prop:` stays only for compiled spell
+   */
   "prop:type"?: "image"
   /**
    * `type="image"`:  that animation's ms.
@@ -22663,28 +27149,40 @@ export interface UIVisibilityAttributes {
    * - default:  `1000`
    */
   duration?: number | `${number}`
-  /** `duration`, as the DOM element's property. */
+  /**
+   * `duration`, as the DOM element's property.
+   * @deprecated write `duration` -- `prop:` stays only for compiled spell
+   */
   "prop:duration"?: number | `${number}`
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
-  /** `disabled`, as the DOM element's property. */
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
   "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
-  /** `loading`, as the DOM element's property. */
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
   "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
-  /** `visible`, as the DOM element's property. */
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
   "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
@@ -22726,7 +27224,10 @@ export interface UIVisibilityAttributes {
     | "jiggle"
     | "glow"
     | "none"
-  /** `animation`, as the DOM element's property. */
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
   "prop:animation"?:
     | "fade"
     | "fade up"

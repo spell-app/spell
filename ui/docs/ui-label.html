@@ -854,7 +854,7 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-label removable ref={(el) => el.addEventListener("ui-remove", () => removeTag(tag))}>
+                  <ui-label removable on-ui-remove={() => removeTag(tag)}>
                     {tag}
                   </ui-label>
                 </script>

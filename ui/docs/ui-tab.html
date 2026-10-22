@@ -601,12 +601,12 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-tabs
                     tabular
                     attached
                     value={tab()}
-                    ref={(el) => el.addEventListener("ui-change", (e) => setTab(e.detail.value))}
+                    on-ui-change={(e) => setTab(e.detail.value)}
                   >
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>

@@ -473,12 +473,12 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-dimmer
                     page
-                    prop:visible={busy()}
+                    visible={busy()}
                     aria-label="Saving"
-                    ref={(el) => el.addEventListener("ui-close", () => setBusy(false))}
+                    on-ui-close={() => setBusy(false)}
                   >
                     ...
                   </ui-dimmer>

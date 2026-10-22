@@ -1007,7 +1007,9 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
     - `spell-ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
       - the `ref`'s element knows its tag's events, `event.detail` too
-      - `on-ui-change`, one prop per event, typed:  Solid calls it once epic `solid-17` lands
+      - `on-ui-change`, one prop per event, typed
+      - rich data by its plain name (`options`);  its `prop:` name is typed too, `@deprecated`:
+        only compiled Spell still writes it
     - So an event's `detail` in its vocabulary is TypeScript.
       A Spell UI type it names goes in `JSX_DETAIL_TYPES` ([the element manifests](src/tools/ElementManifests.ts)),
       else `yarn site:data` throws.

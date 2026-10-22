@@ -715,14 +715,12 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-modal
-                    prop:visible={open()}
+                    visible={open()}
                     header="Delete?"
-                    ref={(el) => {
-                      el.addEventListener("ui-close", () => setOpen(false))
-                      el.addEventListener("ui-approve", remove)
-                    }}
+                    on-ui-close={() => setOpen(false)}
+                    on-ui-approve={remove}
                   >
                     ...
                   </ui-modal>

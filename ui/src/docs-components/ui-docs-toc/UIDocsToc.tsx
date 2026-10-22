@@ -154,9 +154,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
 
   /** `size`, else the default (an empty or unknown `size` too). */
   private get menuSize(): UIMenuAttributes["size"] {
-    // HACK: `size` is checked against the sizes as it's read, but its type is `string`:
-    // the element core's attribute types don't know Spell UI's value sets
-    return (this.size || DEFAULT_SIZE) as UIMenuAttributes["size"]
+    return this.size || DEFAULT_SIZE
   }
 
   ////////////////

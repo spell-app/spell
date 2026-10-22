@@ -28,7 +28,7 @@ describe("ElementManifests.jsxOutput()", () => {
 })
 
 describe("ElementManifests.jsxTypes()", () => {
-  test("types every component tag in Solid's JSX, its rich data by name and as `prop:`", () => {
+  test("types every component tag in Solid's JSX, its rich data by name, and `prop:` deprecated", () => {
     const text = new ElementManifests({ data: DATA, packageFolder: UI }).jsxTypes()
     for (const tag of DATA.components) expect(text).toContain(`"${tag.tag}": `)
     expect(text).not.toContain('"ui-docs-')
@@ -36,6 +36,7 @@ describe("ElementManifests.jsxTypes()", () => {
     expect(text).toContain("export interface UIButtonJSXAttributes")
     expect(text).toContain("  options?: unknown")
     expect(text).toContain('  "prop:options"?: unknown')
+    expect(text).toContain("   * @deprecated write `options` -- `prop:` stays only for compiled spell\n   */\n  \"prop:options\"")
   })
 
   test("types every tag's events:  its own map, `on-<event>`, and the DOM's maps", () => {

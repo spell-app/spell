@@ -310,12 +310,13 @@ import type {} from "spell-ui/jsx"
 - HTML's global attributes (`class`, `id`, `slot`, `onClick`, `aria-*` ...) stay allowed.
 - A name with a dash in it (`data-*`) is never checked:  TypeScript lets any through.
 - Flags:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it.
-- Rich data goes to the property:  `prop:options={[...]}`.
-- Any attribute can be set as its property too, typed the same:
-  `prop:value={value()}`, the controlled value of a form control.
-- So can the few properties no attribute stands for:
-  - `prop:appContext` on `<ui-root>`:  your app's value, which every component inside reads
-  - `prop:content` on the elements that show a file (`<ui-code>`, `<ui-markdown>`, `<ui-include>`):  the text shown
+- Rich data is a plain prop:  `options={[...]}`.
+  It reaches the element whole, as its property (Solid's "How", above).
+- So are the few properties no attribute stands for:
+  - `appContext` on `<ui-root>`:  your app's value, which every component inside reads
+  - `content` on the elements that show a file (`<ui-code>`, `<ui-markdown>`, `<ui-include>`):  the text shown
+- Each attribute and property is typed as `prop:<name>` too, struck through in your editor (`@deprecated`):
+  only compiled Spell still writes `prop:`.  Write the plain name.
 - It augments `@solidjs/web/types/jsx.js`, not `@solidjs/web`, which only re-exports `JSX`.
 - Other frameworks' JSX (React's, Preact's):  no types yet;  declare the tags in your own program.
 
@@ -331,8 +332,7 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
 ```
 
 - In JSX:  `on-` plus the event's name, `on-ui-change`, one per event the tag sends.
-  - **Typed only, for now:  Solid calls it once Solid's custom event props land (epic `solid-17`).**
-    Until then, listen from a `ref`, as above.
+  - Solid hands your function to the element, which listens for that event (Solid's "How", above).
   - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the app's VS Code extension warns on it.
 - In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` that knows its own events,
   and so does a JSX `ref`'s element.

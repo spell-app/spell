@@ -237,8 +237,8 @@
             <ui-section id="usage-from-script" label="From script" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `tree` on the element. In Solid, pass it as a property with `prop:tree` (a plain attribute would
-                  be a string).
+                  Set `tree` on the element. In Solid, pass it as a plain prop, `tree={...}`:  the element takes the
+                  object whole, as its property.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -260,7 +260,7 @@
                   import type { TreeDiagramNode } from "spell-ui"
 
                   function ParseTree(props: { tree: TreeDiagramNode }) {
-                    return <ui-tree-diagram prop:tree={props.tree} />
+                    return <ui-tree-diagram tree={props.tree} />
                   }
                 </script>
               </ui-code>

@@ -1088,8 +1088,8 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
-                  <ui-list selection ref={(el) => el.addEventListener("ui-select", (event) => setChoice(event.detail.value))}>
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+                  <ui-list selection on-ui-select={(event) => setChoice(event.detail.value)}>
                     ...
                   </ui-list>
                 </script>
