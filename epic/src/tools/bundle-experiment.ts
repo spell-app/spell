@@ -68,6 +68,7 @@ async function bundle(entry: string, out: string) {
   await build({
     ...base,
     configFile: false,
+    plugins: [...base.plugins, keepSideEffects(dirname(entry))],
     root: dirname(entry),
     logLevel: "warn",
     publicDir: false,
@@ -113,4 +114,22 @@ async function bundle(entry: string, out: string) {
   const command = `yarn tsx src/tools/bundle-experiment.ts ${relative(resolve(DOCS, ".."), entry)}`
   const banner = `/* GENERATED -- do not edit:  \`${command}\` (from spell-epic's root) */`
   writeFileSync(out, `${banner}\n${readFileSync(out, "utf8")}`)
+}
+
+/**
+ * A Vite plugin:  every file in the guide's `folder` keeps its side effects (`UICounter.define()`).
+ * - The content folder has no `package.json`, so the nearest one is the kit's (the content repo sits inside it):
+ *   its `sideEffects` list doesn't name the guide's files, and the build dropped them, `<ui-counter>` undefined.
+ * - On the resolved module, since that beats Rolldown's `treeshake.moduleSideEffects`.
+ */
+function keepSideEffects(folder: string) {
+  return {
+    name: "spell-epic:experiment-side-effects",
+    enforce: "pre" as const,
+    async resolveId(this: any, source: string, importer: string | undefined, options: Record<string, unknown>) {
+      if (!importer?.startsWith(folder)) return null
+      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true })
+      return resolved?.id.startsWith(folder) ? { ...resolved, moduleSideEffects: true } : resolved
+    }
+  }
 }
