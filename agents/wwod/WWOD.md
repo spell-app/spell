@@ -547,6 +547,13 @@ Their long before / afters are in `agents/wwod/writing.md`.
     - a grammar fenced block, for a folder that parses something (URLs, paths ...)
     - numbered "Adding a new X" recipe, "Deferred" section
   - every page ends with "See also";  `yarn readme:check`, at the kit's root, checks the links, captions and names
+  - written in the README VOICE, spell-epic's `voices/readme.md` (epic `readme` P12):  proof first, the
+    reader's own tools as the contrast, every claim with its edge, one home per fact.  Spell's additions, which
+    `yarn readme:check` enforces:
+    - "Spell" capitalised in prose, like a name;  lowercase only in code (the command, `.spell`, package names)
+    - an internal repo is never named:  not in text, tables, pictures or a "needs" list
+    - a link into another of Spell's repos is its GitHub URL (`https://github.com/spell-app/<repo>/blob/main/...`)
+    - a card shown as an example is the owner's outline card (the kit's `docs/drafts/card-example/`)
   - in-flight design notes go in an epic page (`epics/`), not beside the README
   - NOT:  a `README.md` in each package folder -- they were folded into the repos' pages and deleted (epic
     `readme` Q5).
