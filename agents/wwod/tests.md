@@ -6,7 +6,7 @@ From:  original WWOD §22 "Tests".
 SEE ALSO, per package (runners, helpers, fixtures stay there):
 - `packages/ui/AGENTS.md` -- real-browser tests, `ElementFixture.settle()` / `tick()`, `yarn test:visual`
 - `packages/spell/AGENTS.md` -- tests read ONLY the frozen projects in `projects/test/`;  rule `tests` blocks
-- `packages/server/AGENTS.md` -- `$/server/test/serve`:  real HTTP, never `fetch`
+- `packages/server/AGENTS.md` -- `spell-kit/server/test/serve`:  real HTTP, never `fetch`
 - `packages/cli/AGENTS.md` "Tests", `packages/app/AGENTS.md` (node vs `*.browser.test.tsx`)
 
 ## 20. Tests
@@ -29,16 +29,16 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
   - `<module>.test.ts(x)` next to `<module>.ts(x)`:  `Router.ts` => `Router.test.ts`.  Cross-cutting tests in the
     package's `test/`.
   - The test is renamed with its module (below, "Tests follow the logic").
-  - Shared helpers come from the package's test entry point:  `$/parser/test`, `$/spell/test`, `$/ui/test-helpers/...`,
-    `$/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell-kit/test-helpers/...`
+  - Shared helpers come from the package's test entry point:  `spell-lang/parser/test`, `spell-lang/spell/test`, `spell-ui/test-helpers/...`,
+    `spell-kit/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell-kit/test-helpers/...`
     (`ElementFixture`, `A11y` ...).
 - **Hand-rolled fakes over mock libraries:**
   - Hooks objects of `vi.fn()`:  `const hooks = { onChange: vi.fn() }`.
   - `vi.mock()` only to cut a module seam, e.g. `vi.mock("./loadRuntime", ...)`
     (`packages/app/src/runner/runner.browser.test.tsx`).  When the test imports the module under test
     dynamically, `vi.mock()` comes before the `await import(...)`.
-  - Mock paths follow the import rules:  `./peer` in the same folder, else `$/name/...`, e.g.
-    `vi.mock("$/app/runner/shadowStyles", ...)` (`packages/app/src/spellEditor/spellEditor.browser.test.tsx`).
+  - Mock paths follow the import rules:  `./peer` in the same folder, else `<package>/...`, e.g.
+    `vi.mock("spell-app/app/runner/shadowStyles", ...)` (`packages/app/src/spellEditor/spellEditor.browser.test.tsx`).
   - UPPERCASE fixture consts at module level:  `BOMB`, `OWNER_VOCABULARY`, `REAL_DATA`.
   - Factory helpers as function declarations, e.g. `owned(items)` in
     `packages/ui/components/ui-item/UIItem.test.tsx`.
@@ -93,7 +93,7 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
     names.
 - **Reusable suites are exported, parameterized functions:**
   - One function runs the same checks over each implementation or module, e.g.
-    `unitTestModuleRules(parser, moduleName)` (`$/parser/test`).
+    `unitTestModuleRules(parser, moduleName)` (`spell-lang/parser/test`).
   - Runner-agnostic case tables when the cases outlive the runner, e.g. `FALLBACK_CASES`
     (`packages/ui/test/fallback.cases.ts`).
   - Gate a long suite by a level argument (`"smoke" | "all"`);  namespace its fixtures with a unique test id so runs

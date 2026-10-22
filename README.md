@@ -1,80 +1,342 @@
 # Spell
 
-Spell is a programming language written in plain English, and the environment around it:
-an editor that runs your program as you type, a command line, a library of web components,
-and the tooling that lets people and coding agents build it all together.
-This repo is THE KIT, `spell-kit`:  the root every other Spell repo is cloned into, and the code they all stand on.
-
-If you've used React and a compiler, you have what you need to find your way around.
-
 ```spell
-a card is a thing
-cards have a suit as one of clubs, diamonds, hearts or spades
-the color of a card is red if its suit is either diamonds or hearts otherwise it is black
+a "card" is a drawable thing:
+	- its "suit" is one of clubs, diamonds, hearts or spades
+	- its "color" is:
+		red if its suit is diamonds or hearts
+		black otherwise
+
+	- its "rank" is one of ace, 2 ... 10, jack, queen, king
+	- it "is a face card" if its rank is jack, queen or king
+	- it "is a (rank)"
+	- it "is the (rank) of (suit)"
 ```
 
-_Real spell, from the Solitaire example:  it compiles to JavaScript, TypeScript or Python._
+_A playing card, in Spell's outline style:  a name, then what's true of it.  It compiles as written._
 
-## The aspiration
+You just read a program.
+Nobody taught you its syntax, and you could explain it to a friend.
 
-- People who don't program can READ, change and make real software, in plain English.
-- An AI writes spell, and you can read what it wrote:  checking and changing it is how you learn to write your own.
-  This is the direction, not a feature yet.
-- One language, many targets:  English in;  JavaScript, TypeScript and Python out today.
-  The language:  [spell-lang's README](spell-lang/README.md).
-- An environment where you build by moving things around, not only by typing:  coming.
-  The editor today:  [spell-app's README](spell-app/README.md).
+That isn't pseudo-code, and it isn't a prompt.
+A rule-based parser reads it the same way every time:  no model guessing what you meant.
 
-## The six repos
+To you, that's a playing card.
+To the compiler, it's a class called `Card`, and each bullet became a member of it:
+- `suit` and `rank`, properties with a fixed list of values, where `2 ... 10` means what you'd think
+- `color`, worked out from the suit each time it's read, so there's nothing to keep in step
+- `isAFaceCard`, a question the card answers yes or no
+- `isARank(rank)` and `isTheRankOfSuit(rank, suit)`, from the two sentences with blanks in them:
+  each blank is named after a property, so the compiler wrote the method bodies too
+- and `drawable` makes each card an element of its own on the page, `<solitaire-card>`
 
-Spell is six git repos, each ONE npm package named after it.
-The kit is checked out first;  the other five are cloned INSIDE it, and all six share one install.
-
-![The six Spell repos stacked by what they use:  spell-app on top, spell-brand and spell-epic on spell-ui, spell-lang and spell-ui on the kit, whose folders are util, toolchain, server, element and cli](docs/images/six-repos.svg)
-
-_Every arrow points down:  a repo uses only what's below it._
+The quotes mark new words, which the parser learns as it reads.
+From here on, a program can say `if the card is a queen`, and that compiles to `if (card.isARank("queen"))`.
 
 <details>
-<summary>As text</summary>
+<summary>What those sentences compile to, in JavaScript, TypeScript and Python</summary>
 
-```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart BT
-  kit["spell-kit<br/>util · toolchain · server · element · cli"]
-  lang["spell-lang<br/>the language"] --> kit
-  ui["spell-ui<br/>the ui-* elements"] --> kit
-  brand["spell-brand<br/>the brand"] --> ui
-  epic["spell-epic<br/>epics and sagas"] --> ui
-  app["spell-app<br/>the editor"] --> lang
-  app --> brand
-  app --> ui
-  app -. runs .-> epic
-  %% the Spell look:  yarn mermaid:pretty
-  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
-  classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
-  class kit,lang,ui,brand,epic,app repo
+The whole output, unchanged, for a project named `solitaire` (hence `<solitaire-card>`):
+`spell compile --stdout`, and the same with `--target ts/solid` and `--target py`.
+
+<details>
+<summary>JavaScript</summary>
+
+```js
+import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+
+export class Card extends Drawable {
+  static elementTag = core.defineElement(this, "solitaire")
+
+  // - its "suit" is one of clubs, diamonds, hearts or spades
+  static Suits = ["clubs", "diamonds", "hearts", "spades"]
+  static { this.declareProp("suit", { oneOf: Card.Suits }) }
+  get suit() { return this.getProp("suit") }
+  set suit(value) { this.setProp("suit", value) }
+
+  get color() {
+    if (core.includes(["diamonds", "hearts"], this.suit)) return "red"
+    return "black"
+  }
+
+  // - its "rank" is one of ace, 2 ... 10, jack, queen, king
+  static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"]
+  static { this.declareProp("rank", { oneOf: Card.Ranks }) }
+  get rank() { return this.getProp("rank") }
+  set rank(value) { this.setProp("rank", value) }
+
+  get isAFaceCard() {
+    return core.includes(["jack", "queen", "king"], this.rank)
+  }
+
+  isARank(rank) {
+    return this.rank === rank
+  }
+
+  isTheRankOfSuit(rank, suit) {
+    return this.rank === rank && this.suit === suit
+  }
+}
 ```
 
 </details>
 
-| Repo | What it is | Its README |
-| --- | --- | --- |
-| spell-kit | the bottom of every repo:  shared helpers, the toolchain, the page server, the element framework, the command line's base;  and the one install | this page |
-| spell-lang | the language:  a rule-based parser, spell's rules, the runtime compiled spell runs on, and its writers for JavaScript, TypeScript and Python | [spell-lang/README.md](spell-lang/README.md) |
-| spell-ui | Spell UI:  web components for any page or framework, loaded on demand | [spell-ui/README.md](spell-ui/README.md) |
-| spell-brand | the brand's theme, pack and assets;  being reworked | -- |
-| spell-epic | epics and sagas:  plan on a page, build in a worktree, review on the page;  a Claude Code plugin | [spell-epic/README.md](spell-epic/README.md) |
-| spell-app | the Spell app:  the live editor, spaces for projects, the language server, the VS Code extension | [spell-app/README.md](spell-app/README.md) |
+<details>
+<summary>TypeScript</summary>
+
+```ts
+import { core, Thing, List, App, Drawable, DrawableList, prop } from "@spell/core"
+import { E, SpellElement } from "@spell/elements"
+
+export type Suit = (typeof Card.Suits)[number]
+export type Rank = (typeof Card.Ranks)[number]
+
+export class Card extends Drawable {
+  static elementTag = core.defineElement(this, "solitaire")
+
+  // - its "suit" is one of clubs, diamonds, hearts or spades
+  static Suits = ["clubs", "diamonds", "hearts", "spades"] as const
+  @prop({ oneOf: () => Card.Suits })
+  accessor suit!: Suit
+
+  get color() {
+    if (core.includes(["diamonds", "hearts"], this.suit)) return "red"
+    return "black"
+  }
+
+  // - its "rank" is one of ace, 2 ... 10, jack, queen, king
+  static Ranks = ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"] as const
+  @prop({ oneOf: () => Card.Ranks })
+  accessor rank!: Rank
+
+  get isAFaceCard() {
+    return core.includes(["jack", "queen", "king"], this.rank)
+  }
+
+  isARank(rank: Rank) {
+    return this.rank === rank
+  }
+
+  isTheRankOfSuit(rank: Rank, suit: Suit) {
+    return this.rank === rank && this.suit === suit
+  }
+}
+
+/**
+ * `<solitaire-card>`:  a card, drawn in its own element, e.g. by `draw the card`.
+ * - The page defines its tag with this class:  `core.useElement()`, below.
+ * - Its attributes are its card's properties;  its methods call its card's.
+ * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.
+ */
+export class CardElement extends SpellElement<Card> {
+  @E.proto static vocabulary = SpellElement.vocabularyFor("solitaire-card", "card", [
+    { name: "suit", kind: "string", description: "Its suit." },
+    { name: "rank", kind: "string", description: "Its rank." }
+  ])
+
+  isARank(rank: Rank) {
+    return this.currentThing?.isARank(rank)
+  }
+
+  isTheRankOfSuit(rank: Rank, suit: Suit) {
+    return this.currentThing?.isTheRankOfSuit(rank, suit)
+  }
+}
+core.useElement(Card, CardElement)
+
+// each drawable type's tag, for the JSX
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      /** `CardElement` */
+      "solitaire-card": HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Python</summary>
+
+```python
+from __future__ import annotations
+
+from typing import Any
+
+from spell_core import Drawable, prop
+
+
+class Card(Drawable):
+    # - its "suit" is one of clubs, diamonds, hearts or spades
+    SUITS = ("clubs", "diamonds", "hearts", "spades")
+    suit = prop(one_of=SUITS)
+
+    @property
+    def color(self) -> Any:
+        if self.suit in ["diamonds", "hearts"]:
+            return "red"
+        return "black"
+
+    # - its "rank" is one of ace, 2 ... 10, jack, queen, king
+    RANKS = ("ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king")
+    rank = prop(one_of=RANKS)
+
+    @property
+    def is_a_face_card(self) -> bool:
+        return self.rank in ["jack", "queen", "king"]
+
+    def is_a_rank(self, rank: Any) -> bool:
+        return self.rank == rank
+
+    def is_the_rank_of_suit(self, rank: Any, suit: Any) -> bool:
+        return self.rank == rank and self.suit == suit
+```
+
+</details>
+
+What to notice:
+- **`get color()` is the whole of "its color".**
+  No `useMemo`, no dependency array, no field to go stale:  the color is read from the suit, every time.
+- **Nobody wrote `isTheRankOfSuit()`'s body.**
+  `return this.rank === rank && this.suit === suit` is the compiler's, worked out from the names of the blanks.
+- **A fifth suit is caught three times, three ways.**
+  Spell won't read it:  `spell lint` answers a `suit is stars` with `Don't understand "suit is stars"`.
+  TypeScript turns each list into a type, `Suit` and `Rank`, and the blanks get them too,
+  so `card.suit = "stars"` and `card.isTheRankOfSuit("knight", "spades")` both fail the type check.
+  And `oneOf: Card.Suits` checks once more as the JavaScript runs, but only warns, and keeps the value anyway.
+- **Python gets Python's names, and Python's words.**
+  `is_a_face_card` and `is_the_rank_of_suit`, a `SUITS` tuple, `@property` on the color;
+  and `core.includes(["diamonds", "hearts"], this.suit)` became `self.suit in ["diamonds", "hearts"]`.
+  `spell_core` comes in only for what Python has no word of its own for:  `Drawable` and `prop`.
+- **One word, `drawable`, wrote a second class.**  In TypeScript, `CardElement` is the `<solitaire-card>` tag:
+  its vocabulary lists its attributes, its methods ask its card,
+  and the `declare module` block at the end teaches JSX the tag.
+  The `solitaire` in the tag is the project's name.
+- **The types thin out at the edges.**
+  Python's `color` comes out `-> Any`, and so do its blanks, where TypeScript says `Rank` and `Suit`;
+  and JSX takes any attribute at all on `<solitaire-card>` (`[attribute: string]: unknown`).
+
+</details>
+
+Spell is the language you just read, plain English that runs, and the environment around it:
+an editor that runs your program as you type, a command line, a library of web components,
+and the tooling that lets people and coding agents build it all together.
+
+This repo is the kit, `spell-kit`:
+the root every other Spell repo is cloned into, and the code they all stand on.
+If you've used React and a compiler, you have what you need to find your way around.
+Here to run it?  [Skip to setup](#setup-from-zero).
+
+## If you know React, three things move
+
+You know components, props and a build step.
+Spell has all three;  they just live where you wouldn't look first.
+
+### The program is English, and the compiler runs in the browser
+
+In a React project, the build step is a dev server in a terminal, and the source is for programmers.
+In Spell's editor, the PAGE compiles your sentences to JavaScript two seconds after you stop typing,
+and runs them right beside the text.
+
+- Fast Refresh keeps your component's state across an edit.
+  Spell keeps what the program MADE:  change a rule mid-game, and the cards stay on the table.
+- The clever part is underneath:  a parser that knows no language at all.
+  Each rule is a class with a syntax string, written in [Rulex](spell-lang/README-rulex.md);
+  no grammar file, no generated code.
+  [GitHub's Markdown](spell-lang/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
+- Not yet:  any human language but English.
+  🌱 Spanish is next, for the same programs:  the rules can take a second language's words, but none are written yet.
+
+### A component is a real element on the page
+
+A React component is a function the framework calls;  the page never holds it.
+Here, `<ui-button>` is a node the page holds, like `<video>`:
+attributes, properties and events on the outside, a component behind it drawing into its shadow root.
+
+- It renders ONCE.
+  After that, Solid updates only the text node or attribute that read a changed value:  no second render, no diff.
+  A thousand `<ui-button>`s are built, rendered and ready in about 80 ms (the median of the last recorded run).
+- So it works from plain HTML and from any framework, React included, with no wrapper,
+  and each element is its own error boundary.
+- [Spell UI](spell-ui/README.md) is about sixty families of these, on [the kit's element framework](README-element.md).
+  A page imports ONE, `<ui-root>`, and it loads each of the others the first time the page uses it.
+- Your program's things are elements too:  that `drawable` card draws as its own `<solitaire-card>`.
+- The catch:  Spell UI isn't on npm yet (below, "Coming").
+
+### The packages are source, all the way down
+
+Five repos, each one npm package, and none is published for the others to use.
+They're cloned into one checkout with one install, so each runs the others' SOURCE.
+
+- No `npm link` dance, no publish-to-test, no second copy of Solid.
+- Edit a file in one repo, and every repo above it runs your edit:  the dev server, the tests and node all read source.
+- The one exception is the type check, which reads type declarations (`.d.ts` files) instead.
+  The three repos others import, the kit, spell-lang and spell-ui, build them from their own source,
+  and `yarn ts` rebuilds them on its way up, lowest repo first.
+- The cost:  today, everything runs from a checkout of the kit.
+
+## Where it's going
+
+The editor and the compiler are the means;  the end is software that people who don't program can read.
+Ask people who don't program about a computer that takes plain English,
+and you hear what a 2017 talk on Spell heard from all of them:
+_"Why doesn't it do that already???"_
+
+- People who don't program can READ, change and make real software, in plain English.
+- An AI writes Spell, and you can read what it wrote:  checking and changing it is how you learn to write your own.
+  This is the direction, not a feature yet.
+  - Why it matters:  if the AI wrote JavaScript, a person who doesn't program can't check it, so they run it and hope.
+    If it wrote Spell, they read it, find the sentence that's wrong, and change it.
+  - English-like languages were tried before:  COBOL and AppleScript were easy to read, hard to write.
+    Now an AI does the writing, so code a person can read is worth more than it was, not less.
+- One language, many targets:  English in;  JavaScript, TypeScript and Python out today.
+  The language:  [spell-lang's README](spell-lang/README.md).
+- 🌱 An environment where you build by moving things around, not only by typing:  coming.
+  The editor today:  [spell-app's README](spell-app/README.md).
+
+Where that stands, plainly:
+- **Real today:**  the language and its three target languages, the editor that runs as you type,
+  and a game that survives an edit.  Each one is a command on this page.
+- **Not yet:  the editor has no AI of its own.**
+  Today a coding agent writes Spell like any other code, and you read it.
+
+## The five repos
+
+The kit is checked out first, and the other four are cloned inside it.
+
+![Five Spell repos stacked by what they use:  spell-app on top uses spell-lang and spell-ui and runs spell-epic;  spell-epic uses spell-ui;  spell-lang and spell-ui use the kit, whose folders are util, toolchain, server, element and cli](docs/images/repos.svg)
+
+_The kit is under every repo.  The dashed arrow is spell-app's page server running spell-epic's routes:
+it never imports a line of them._
+
+Why five, and not one:  each repo is one thing, with its own tests and its own CI, and the arrows stay honest.
+`yarn clone` brings a repo only what it needs, so an import that climbs fails right there.
+
+| Repo | What it is |
+| --- | --- |
+| spell-kit, this one | the bottom of every repo:  shared helpers, the toolchain, the page server, the element framework, the command line's base;  and the one install |
+| [spell-lang](spell-lang/README.md) | the language:  a rule-based parser, Spell's rules, the runtime compiled programs run on, and its writers for JavaScript, TypeScript and Python |
+| [spell-ui](spell-ui/README.md) | Spell UI:  web components for any page or framework, loaded on demand |
+| [spell-epic](spell-epic/README.md) | epics and sagas:  plan on a page, build in a worktree, review on the page;  a Claude Code plugin |
+| [spell-app](spell-app/README.md) | the Spell app:  the live editor, spaces for projects, the language server, the VS Code extension |
 
 - The kit is always there;  `yarn clone` brings the rest, each with the repos it needs ([repos.json5](repos.json5)).
-- Each child repo is its own git repo, git-ignored here:  `git status` in the kit shows only the kit's files;
-  run git in the repo you mean, `git -C spell-ui status`.
-- No publish step:  every repo uses the others' SOURCE, through the one install.
+- Each child repo is its own git repo, git-ignored here, and this catches everybody once:
+  `git status` in the kit shows only the kit's files;  run git in the repo you mean, `git -C spell-ui status`.
+
+---
+
+**From here down, it's the manual:**
+setup, things to try, the kit's folders, the commands, the house style, and every README.
 
 ## Setup from zero
 
-You need git, a GitHub login (an SSH key, or `gh auth login`), and a terminal.
-Every command below runs from the folder it names;  what it prints when it worked is under it.
+You need git and a terminal.
+The repos are public, so an SSH key on GitHub is optional:  without one, everything clones over HTTPS.
+Every command below runs from the folder it names, and what it prints when it works is under it:
+the versions and counts will have moved on by the time you run it.
 
 1. Install Node 24.11 or later, from nodejs.org or a version manager (`nvm install 24`).
 
@@ -84,13 +346,17 @@ Every command below runs from the folder it names;  what it prints when it worke
    ```
 
 2. Turn on yarn.
-   Node ships corepack, which hands every `yarn` command to the version the kit pins (4.18.0, committed in the
-   repo).
+   You never install yarn itself:  corepack hands every `yarn` command to the version the kit pins,
+   4.18.0, committed in the repo under `.yarn/releases/`.
 
    ```sh
    corepack enable
    # (prints nothing)
    ```
+
+   - Node 24 ships corepack.
+     If your shell says `corepack: command not found` (later Node versions stopped shipping it),
+     `npm install -g corepack` first.
 
 3. Clone the kit, and install.
 
@@ -98,12 +364,11 @@ Every command below runs from the folder it names;  what it prints when it worke
    git clone git@github.com:spell-app/spell-kit.git ~/www/spell
    cd ~/www/spell
    yarn install          # the kit's own packages:  no child repos yet
-   # ...
    # ➤ YN0086: │ Some peer dependencies are incorrectly met by your project; ...
-   # ...
    # ➤ YN0000: · Done with warnings in 0s 469ms
    ```
 
+   - No SSH key?  Clone `https://github.com/spell-app/spell-kit.git` instead.
    - The peer-dependency warnings (`YN0060`, `YN0002`, `YN0086`) are expected:
      Vite+ stands in for Vite under its own version number.
    - A first install downloads every package, so it takes minutes, not half a second.
@@ -114,6 +379,10 @@ Every command below runs from the folder it names;  what it prints when it worke
    ```sh
    cd ~/www/spell
    yarn clone
+   # == cloning spell-lang  (git@github.com:spell-app/spell-lang.git, its default branch)
+   # ...  and the same for each repo, then the links and the one install:
+   # spell-lang/agents -> ../agents  (the kit's WWOD and the logs)
+   # == yarn install:  one install over every repo
    ```
 
 5. Install the browser the tests run in, and check the kit works.
@@ -122,31 +391,25 @@ Every command below runs from the folder it names;  what it prints when it worke
    cd ~/www/spell
    yarn playwright install chromium
    yarn kit:test
-   # ... each folder's Vitest run, then:
-   # ==================== test
-   #
-   # toolchain      passed
-   # util           passed
-   # server         passed
-   # assembler      passed
-   # element        passed
-   # element/tools  passed
-   # tools          passed
+   # ... one Vitest run, a project per folder of src/, then:
+   #  Test Files  55 passed (55)
+   #       Tests  610 passed (610)
    ```
 
-6. See what's cloned.
+6. Put `spell` on your `PATH`.
+   It links into the first folder on your `PATH` that it can write to
+   ([README-cli.md](README-cli.md#setting-it-up) has the rest).
 
    ```sh
-   yarn repos
-   # ✓ spell-lang     -
-   # ✓ spell-ui       -
-   # ✓ spell-brand    spell-ui
-   # ✓ spell-epic     spell-ui
-   # ✓ spell-app      spell-lang, spell-brand, spell-ui, spell-epic (runs)
+   cd ~/www/spell
+   yarn cli:install
+   # Linked /Users/<you>/.local/bin/spell -> /Users/<you>/www/spell/bin/spell.mjs
    ```
 
-7. Put `spell` on your PATH, for the command line:  [README-cli.md](README-cli.md), "Setup".
-8. For the Python target and the Python tests:  `uv`, which fetches the Python each project pins (3.12 or later).
+   - Had `spell` already, from an older checkout?  Run it again:  the link holds the full path it points at.
+
+7. For the Python target and the Python tests:  [uv](https://docs.astral.sh/uv/) (`brew install uv`, or its installer),
+   which fetches the Python each project pins (3.12 or later).
 
 <details>
 <summary>Only part of it</summary>
@@ -155,17 +418,16 @@ Clone only what you're working on;  `yarn clone` brings what it needs too, and t
 
 ```sh
 yarn clone spell-ui      # spell-ui alone
-yarn clone spell-app     # spell-app, and spell-lang, spell-brand, spell-ui, spell-epic
+yarn clone spell-app     # spell-app, and every repo it needs or runs
 ```
 
+- The language commands (`spell parse`, `spell run` ...) need spell-app:  for now, they find projects the app's way.
+  Without it, each one stops and says `Clone spell-app:  yarn clone spell-app`.
 - `yarn clone` clones over SSH, and over HTTPS (GitHub's login, `gh auth setup-git`) when SSH is refused.
-- Its flags (CI's):
-  - `--branch <name>`:  each repo at that branch where it has one, else its default branch
-  - `--https`:  skip SSH
-  - `--shallow`:  only the last commit
-  - `--no-install`:  clone only
+- Its flags, which CI uses:  `--branch <name>` (each repo at that branch where it has one, else its default branch),
+  `--https` (skip SSH), `--shallow` (only the last commit), `--no-install` (clone only).
 - Run it again after `repos.json5` gains a repo:  it clones only what's missing.
-- Every install links each child repo's `agents` folder to the kit's:
+- Every install links each child repo's `agents` folder to the kit's (spell-epic's excepted):
   so a checkout made without `yarn clone` (an epic's worktree, CI) has them too.
 - A partial clone rewrites the kit's `yarn.lock`, which lists every repo:  leave that change uncommitted.
 - A child repo on its own, with no kit around it (`git clone spell-ui && yarn install`), isn't supported:
@@ -177,43 +439,36 @@ yarn clone spell-app     # spell-app, and spell-lang, spell-brand, spell-ui, spe
 <summary>Where everything ends up</summary>
 
 ```text
-~/www/spell/                    the kit (git repo spell-kit):  util/ toolchain/ server/ element/ cli/ tests/ tools/ agents/
+~/www/spell/                    the kit (git repo spell-kit):  src/ tests/ bin/ scripts/ tools/ agents/
 ~/www/spell/spell-lang/         each child repo:  its own git repo, git-ignored by the kit
 ~/www/spell/spell-ui/
-~/www/spell/spell-brand/
 ~/www/spell/spell-epic/
 ~/www/spell/spell-app/
 ~/www/spell/node_modules/       the ONE install:  node_modules/spell-kit links to the kit, each spell-* is a workspace
 ~/www/spell/dist-types/         built declarations, for the type checks (git-ignored)
 ~/www/spell/spell.epics/        the content folder:  guides, epic pages, sagas, the logs (yours, local only)
-~/www/spell/spell.spaces/       your own spell projects:  a plain folder
+~/www/spell/spell.spaces/       your own Spell projects:  a plain folder
 ~/www/spell.worktrees/<epic>/   an epic's worktree of the kit, with a worktree of each child repo inside
 ```
 
 - `~/www/spell` is the convention every example on these pages uses.
-- The dot in `spell.epics` and `spell.spaces` keeps them out of the `"spell-*"` workspaces:  they're data, not code.
+- Git ignores everything in the kit's folder but the kit's own files:
+  the child repos, both data folders, `dist-types/` and `node_modules/`.
+- The two dotted folders are yours, and `yarn clone` never touches them;
+  the dot keeps them out of the `"spell-*"` workspaces, because they're data, not code.
+  - `spell.epics/` is a git repo of its own, on your machine.
+    The docs site needs it;  the repos, their tests and these pages don't, so someone new starts without one.
+  - `spell.spaces/` is a plain folder, where the editor reads and saves your projects.
 
 </details>
 
-<details>
-<summary>What's not cloned</summary>
+## Things to try:  from one line to the whole editor
 
-Two folders beside the repos are yours, and `yarn clone` never touches them:
-- `spell.epics/`, the CONTENT FOLDER:  the guides, the epic pages, the sagas and the three logs,
-  in a git repo of its own that lives on your machine.
-  - The docs site needs it;  the repos and their tests don't.
-  - Someone new starts without one:  the READMEs stand on their own.
-- `spell.spaces/`:  your own spell projects, a plain folder the editor reads and saves.
+Each of these runs as soon as setup is done, and what it printed on a real run is under it.
+They work outward:  one line, one program, the same program in Python, the editor, then the components.
 
-</details>
-
-## Things to try
-
-Each of these runs as soon as setup is done.
-What it printed on a real run is under it.
-
-Read how spell understands a line ([spell-lang's README-spell.md](spell-lang/README-spell.md)):
-its match tree, then the JavaScript it compiles to.
+**One line, and how Spell reads it** ([spell-lang's README-spell.md](spell-lang/README-spell.md)):
+most of us never meet our compiler, but this one shows its work.
 
 ```sh
 spell parse "print 1 + 2 * 3"
@@ -233,7 +488,14 @@ spell parse "print 1 + 2 * 3"
 # core.console.log(1 + 2 * 3)
 ```
 
-Run an example program under node ([README-cli.md](README-cli.md)):
+That's its match tree:  each indented line is a rule that matched, inside the one that holds it.
+The last line is the JavaScript it compiles to.
+
+**A whole program, under node** ([README-cli.md](README-cli.md)).
+[FizzBuzz.spell](spell-app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
+a loop from 1 to 100, an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz
+([spell-lang's front page](spell-lang/README.md#fizzbuzz) has all eight, beside what they compile to).
+Run it;  a program with a UI would open in your browser, and `--no-browser` skips anything that needs one.
 
 ```sh
 spell run @spell/examples/fizzbuzz --no-browser
@@ -247,7 +509,12 @@ spell run @spell/examples/fizzbuzz --no-browser
 # 15 fizzbuzz
 ```
 
-Compile the same program to Python, and print it ([spell-lang's README-targets.md](spell-lang/README-targets.md)):
+**The same program, in Python** ([spell-lang's README-targets.md](spell-lang/README-targets.md)).
+Not a word-for-word port, but line for line, the way a person would write it:
+"for each number from 1 to 100" comes out as `range(1, 101)`, and each "otherwise if" as an `elif`.
+
+<details>
+<summary><code>spell compile @spell/examples/fizzbuzz --target py --stdout</code>, and what it printed</summary>
 
 ```sh
 spell compile @spell/examples/fizzbuzz --target py --stdout
@@ -270,9 +537,10 @@ spell compile @spell/examples/fizzbuzz --target py --stdout
 # play_fizzbuzz()
 ```
 
-Open the editor on Solitaire:  it runs the program as you type ([spell-app's README-app.md](spell-app/README-app.md)).
-- It opens a browser;  `--headless` only prints the address.
-- Ctrl-C stops it.
+</details>
+
+**The editor, on Solitaire:**  it runs the program as you type ([spell-app's README-app.md](spell-app/README-app.md)).
+It opens a browser (`--headless` only prints the address);  Ctrl-C stops it.
 
 ```sh
 spell app serve @spell/examples/drawable-solitaire --headless
@@ -282,11 +550,46 @@ spell app serve @spell/examples/drawable-solitaire --headless
 # http://localhost:3000/edit/@spell/examples/drawable-solitaire
 ```
 
+Two servers come up:  the page server on 4747, with the docs, epics, goals and Spell UI;  and the editor on 3000.
+When the page server is already running, its line ends "(already running)".
+
 ![The Spell editor:  Card.spell on the left, Klondike Solitaire running on the right, the compiled JavaScript and the program's output below](docs/images/spell-editor.png)
 
-- When the page server is already running, its line ends "(already running)".
+_The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-Every Spell UI element on one page, as plain class markup beside the elements ([spell-ui's README](spell-ui/README.md)):
+This game's [Card.spell](spell-app/spaces/@spell/examples/drawable-solitaire/Card.spell) is written in sentences,
+not an outline, and Spell reads both:
+`the color of a card is red if its suit is either diamonds or hearts otherwise it is black`.
+The game deals itself as it opens.
+Find that line, and argue with it:  change `diamonds or hearts` to `clubs or spades`.
+- Two seconds later the clubs and spades on the table turn red, every card still where you left it:
+  the game in progress carries over to the new version.  Restart starts afresh.
+- Further down the same file is its test, in English too:  `expect the color of the card to be black`,
+  for the queen of spades.
+  You've just made it wrong:  save the file (⌘S, or Ctrl-S), and `spell test` says which check broke, and why.
+- The example is a file in spell-app's repo, so put it back when you're done arguing:
+  `git -C spell-app restore spaces/@spell/examples`.
+
+<details>
+<summary>What <code>spell test</code> says about your change</summary>
+
+```sh
+spell test @spell/examples/drawable-solitaire
+# ...
+# ✗ test card setup  (22 checks)
+#     ❌ Unexpected: `the color of the card` should be `black` but is actually `red`
+# ✓ test deck creation  (6 checks)
+#
+# 1 passed, 1 failed
+```
+
+- Before your change it says `2 passed`, and `spell test` exits 1 on a failure, so a script can tell.
+- The `# ...` is two warnings about the game's own Solitaire.spell, there either way.
+
+</details>
+
+**Every Spell UI example on one page**, the plain class markup on the left, the elements on the right
+([spell-ui's README](spell-ui/README.md)):
 
 ```sh
 cd ~/www/spell/spell-ui
@@ -297,162 +600,111 @@ yarn dev
 #   ➜  Network: use --host to expose
 ```
 
-- It opens the demo page, `/tools/demo/index.html`, in your browser;  the port may be the next free one.
+- It opens [the demo page](spell-ui/src/tools/demo/index.html), at `/src/tools/demo/index.html`, in your browser;
+  the port may be the next free one.
 
-## The kit's own folders
+## What the kit itself holds
 
-The kit is ONE npm package, `spell-kit`, made of five folders of code:
-each is its own TypeScript program, and each has a page.
+The kit is the floor every repo stands on:  the code the other four share, so none of them keeps a copy.
+It's one npm package, `spell-kit`, with its code under one `src/`, a folder for each part.
+
+In a React app, `@/components/Button` means whatever your config says it means.
+Here a file's import name is its address:  the package's name, then its path under `src/`, with no extension.
+So `spell-kit/util/string` is [string.ts](src/util/string.ts), from every repo and from the kit's own files,
+with nothing to look up and no `../` to count
+([README-development.md](README-development.md#one-name-per-file-from-every-repo)).
 
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
-| [util/](util/) | `spell-kit/util` | the helpers every repo shares:  standard decorators, class, string and DOM helpers, the reactive engine, spell's own utilities, node-only JSON5 | [README-util.md](README-util.md) |
-| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | what every repo's checks share:  the lint and format rules, the decorator pre-pass, declarations, `spell-folders` | [README-toolchain.md](README-toolchain.md) |
-| [server/](server/) | `spell-kit/server` | the page server:  every page on one port, live reload, editing in place, and the steps a tool runs to write a page | [README-server.md](README-server.md) |
-| [element/](element/) | `spell-kit/element` | the element framework every set of web components is written on;  its build tools and test helpers | [README-element.md](README-element.md) |
-| [cli/](cli/) | `spell-kit/cli` | the `spell` command line's base:  arguments, help, finding each repo's commands;  the kit's own commands (`spell server`, `spell bundle` ...) | [README-cli.md](README-cli.md) |
+| [src/util/](src/util/) | `spell-kit/util` | the helpers every repo shares:  decorators, strings, the reactive engine, a `fetch` that throws | [README-util.md](README-util.md) |
+| [src/toolchain/](src/toolchain/) | `spell-kit/toolchain/...` | what every repo's checks and builds share:  the lint and format rules, the decorator pre-pass, the TypeScript settings and declarations, the resolver every esbuild build uses | [README-toolchain.md](README-toolchain.md) |
+| [src/server/](src/server/) | `spell-kit/server` | the page server, and the steps a tool runs to write a page:  links, formatting, bundles, data files | [README-server.md](README-server.md) |
+| [src/element/](src/element/) | `spell-kit/element` | the element framework every set of web components is written on | [README-element.md](README-element.md) |
+| [src/element-tools/](src/element-tools/) | `spell-kit/element-tools/...` | the elements' build tools:  the pack build, the root catalog, their Vite settings | [README-element.md](README-element.md) |
+| [src/test-helpers/](src/test-helpers/) | `spell-kit/test-helpers/...` | the test helpers every set of elements' tests use | [README-element.md](README-element.md) |
+| [src/cli/](src/cli/) | `spell-kit/cli` | the `spell` command's base:  arguments, help, every repo's commands, and the kit's own | [README-cli.md](README-cli.md) |
+| [tests/](tests/) | -- | the tests, at the same paths as the code:  [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts) | [README-development.md](README-development.md) |
+| [bin/](bin/) | -- | the kit's programs:  `spell`, `spell-pack`, `spell-types` | [README-cli.md](README-cli.md) |
+| [scripts/](scripts/) | -- | what `yarn cli:install` and `yarn favicon` run | -- |
+| [tools/](tools/) | -- | <ul><li>[repos.ts](tools/repos.ts):  `yarn clone`, `pull`, `status`, `repos`, and the checks over every repo</li><li>[readme-check.ts](tools/readme-check.ts) and [mermaid-pretty.ts](tools/mermaid-pretty.ts):  the READMEs' check, and their pictures' look ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules))</li></ul> | [README-development.md](README-development.md) |
+| [agents/](agents/) | -- | WWOD, the house style, and links to the three logs | [README-agents.md](README-agents.md) |
+| the root | -- | <ul><li>[package.json](package.json):  the one package, its `exports`, its child repos as workspaces, its scripts</li><li>the settings:  `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `.yarnrc.yml`</li><li>[CI](.github/workflows/checks.yml), and [the epic settings](.epic/config.json5)</li></ul> | [README-toolchain.md](README-toolchain.md) |
 
-And the glue that makes six repos one checkout:
-- the ONE install:  `yarn install` runs here, never in a child repo, and links `node_modules/spell-kit` to the kit
-- the list of child repos, lowest first, with what each needs:  [repos.json5](repos.json5)
-- [the commands over them](tools/repos.ts):  `clone`, `pull`, `status`, `repos`, and the checks over every repo
-
-<details>
-<summary>Until repo-split P14 lands</summary>
-
-- The page-writing steps (links, formatting, bundles built on demand, data files) are their own folder today,
-  [assembler/](assembler/), imported as `spell-kit/assembler`:  [README-server.md](README-server.md) covers them.
-- Inside a repo, files import each other by short alias names from the repo's alias table;
-  other repos already import by package name.
-
-</details>
-
-<details>
-<summary>Every file the kit tracks besides its folders</summary>
-
-| File | What it is |
-| --- | --- |
-| [package.json](package.json) | the ONE package `spell-kit`:  its `exports`;  `"workspaces": ["spell-*"]`, every child repo;  `"spellTypes"` and `"spellFolders"`, its folders;  the `resolutions` (one Solid);  the scripts |
-| [tsconfig.base.json](tsconfig.base.json) | the kit's TypeScript settings, which every folder's extends |
-| [vite.config.ts](vite.config.ts) | the kit's lint and format settings, what `vp check` and the editor read |
-| `yarn.lock`, [.yarnrc.yml](.yarnrc.yml), `.yarn/releases/` | the one lockfile;  the one catalog of tool versions;  the yarn release |
-| [repos.json5](repos.json5) | the child repos, lowest first:  name, git URL, which repos each needs |
-| [tools/repos.ts](tools/repos.ts) | what `clone`, `pull`, `status`, `repos`, the checks over every repo and the `postinstall` run |
-| [tools/readme-check.ts](tools/readme-check.ts), [tools/mermaid-pretty.ts](tools/mermaid-pretty.ts) | the READMEs' check and the Mermaid look:  `yarn readme:check`, `yarn mermaid:pretty`;  `tools/` is a folder of the kit's checks, its tests in `tests/tools/` |
-| [.github/workflows/checks.yml](.github/workflows/checks.yml) | the kit's CI |
-| [agents/](agents/) | WWOD, the house style, and links to the three logs in the content folder |
-| [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md) | the rules for working on the kit and across repos |
-| [.epic/config.json5](.epic/config.json5) | the epic settings, for a session working here |
-| [docs/images/](docs/images/) | the pictures on these pages |
-
-And the folders git ignores here:
-
-| Folder | What it is |
-| --- | --- |
-| `spell-lang/`, `spell-ui/`, `spell-brand/`, `spell-epic/`, `spell-app/` | the child repos |
-| `spell.epics/` | the content folder:  its own git repo, local only |
-| `spell.spaces/` | your own projects |
-| `dist-types/` | the kit's built declarations, for the repos above it |
-| `node_modules/` | the one install |
-
-</details>
+Two more things make five repos one checkout.
+[repos.json5](repos.json5) lists the child repos, lowest first, with what each needs.
+And the ONE install runs here, never in a child repo:
+its `postinstall` links `node_modules/spell-kit` back to the kit, since yarn links the root package nowhere by itself.
 
 ## The command line
 
-Three commands cover everything:
-- `spell`:  write, run and understand programs (`spell run`, `spell compile`, `spell parse` ...), and the repo tools
-  (`spell server`, `spell pack` ...);  each repo adds its own commands
-- `epic`:  the epic pages, their worktrees and their reviews, from spell-epic
-- `yarn`:  each repo's own scripts, run in that repo's folder
+You'll type three commands, and the job tells you which.
 
-Every command, by what it's for:  [README-cli.md](README-cli.md).
+| Command | What it's for | For example |
+| --- | --- | --- |
+| `spell` | writing, running and explaining programs, and the tools for working on Spell | `spell run`, `spell lint`, `spell server`, `spell app serve` |
+| `epic` | the epic pages, their worktrees and their reviews:  spell-epic's | `epic --help`, `epic summary <epic>` |
+| `yarn` | each repo's own scripts, in that repo's folder | `yarn test`;  `yarn dev` in spell-ui |
 
-## Working on it
+`spell` grows with your checkout.
+Nobody installs its verbs:  each repo you clone brings its own, so leave a repo out and its commands aren't there.
+[README-cli.md](README-cli.md) lists every one under the repo that adds it
+([the kit](README-cli.md#the-kit), [spell-lang](README-cli.md#spell-lang), [spell-ui](README-cli.md#spell-ui),
+[spell-app](README-cli.md#spell-app)), and `epic` [beside them](README-cli.md#epic).
 
+## Working on it:  two repos, two commits, no publish
+
+This is where five repos stop sounding like overhead.
 Day to day, from the kit's root:
 
 ```sh
-yarn kit:review       # the kit's own finishing pass:  ts, lint, format, tests of its folders
 yarn pull             # git pull --ff-only in every child repo
-yarn status           # each child repo's branch and changes;  a clean one in one line
-yarn repos            # the list:  which are cloned, and what each needs
-yarn ts               # the kit's, then every repo's type check, lowest first:
-                      #   each builds the declarations the ones above read
-yarn test             # the kit's tests, then every repo's
-yarn lint             # the kit's lint, then every repo's
-yarn review           # the kit's finishing pass, then every repo's
+yarn status           # each child repo's branch and up to 12 changed files;  a clean one in one line
+yarn repos            # which repos are cloned, and what each needs
+yarn kit:review       # the kit's own finishing pass:  ts, lint:fix, format, test
+yarn ts               # the type check:  the kit's, then every repo's, lowest first
+yarn test             # the tests, the same way
+yarn lint             # the lint, the same way
+yarn review           # the finishing pass over every repo:  the one to run before you commit
 ```
 
-- The kit's checks one at a time:
-  `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`.
-- In a child repo, its own scripts:  `cd spell-ui && yarn test`.
-  One folder of a repo with several (spell-lang, spell-app):  `cd spell-lang && yarn spell-folders test core`.
-- Tests live in `tests/<folder>/`, at the same paths as the code they test:
-  [Router.test.ts](tests/server/src/Router.test.ts) tests the server's [Router.ts](server/src/Router.ts).
-- A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
-  No publish, no version bump:  every repo uses the others' source, through this one install.
-- Working across several repos at once ([README-development.md](README-development.md)):
-  an epic's worktree puts every repo on one branch.
-- CI:  every repo has one workflow, run on a push to `main` and on pull requests
-  ([README-toolchain.md](README-toolchain.md), "CI").
-  A child repo's checks it inside the kit, with the repos it needs, at the same-named branch.
+So each repo is checked after the ones it stands on, and every repo runs, failed or not:
+the summary at the end names the ones that failed.
 
-<details>
-<summary>Every yarn script at the kit's root, one line each</summary>
+A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
+Nothing is published in between, no version bump, no canary build:
+the repo above runs the lower one's source through this one install, so it's running your change already.
+Mind one gap:  a change to the kit runs only the kit's CI, which checks the kit alone,
+so your `yarn review` is the only check of the repos above it.
 
-| Script | What |
-| --- | --- |
-| `yarn install` | the ONE install;  its `postinstall` links `node_modules/spell-kit` and each child repo's `agents` |
-| `yarn clone [repo ...]` | clone what's missing (and what it needs), then one install |
-| `yarn pull` | `git pull --ff-only` in every cloned child repo |
-| `yarn status` | each child repo's branch, ahead / behind, and up to 12 changed files |
-| `yarn repos` | the list:  a check mark when cloned, and what each needs |
-| `yarn ts`, `test`, `lint`, `review` | the check over the kit, then every cloned repo, lowest first;  every repo runs, with a summary at the end |
-| `yarn kit:ts` | the kit's declarations, then every folder's type check |
-| `yarn kit:test` | every kit folder's tests |
-| `yarn kit:lint`, `kit:lint:fix` | every kit folder's lint (warnings fail) |
-| `yarn kit:format`, `kit:format:check` | every kit folder's formatting |
-| `yarn kit:review` | `kit:ts`, `kit:lint:fix`, `kit:format`, `kit:test`, then "REVIEW PASSED" |
-| `yarn spell <command>` | the `spell` command, without installing it ([README-cli.md](README-cli.md)) |
-| `yarn cli:install` | puts `spell` on your `PATH` |
-| `yarn server <verb>` | `spell server`:  the page server's command line, on the kit's own checkout ([README-server.md](README-server.md)) |
-| `yarn favicon [--hat 0.74]` | regenerate Spell's favicon from the hat mark |
-| `yarn readme:check [page ...]` | the READMEs' check over every repo's pages:  links and headings, captions, stale names;  exits 1 on a finding |
-| `yarn mermaid:pretty [page ...]` | gives every Mermaid picture on the pages the Spell look, in place |
+The rest is [README-development.md](README-development.md):
+one folder's tests, an epic's worktree that puts every repo on one branch,
+CI that pairs the repos by branch name, and every script of every repo.
 
-</details>
-
-<details>
-<summary>CI, in words</summary>
-
-- The kit's workflow runs on a push to `main`, a pull request, or by hand:
-  - Node 24 and yarn, one install with no child repo cloned, Playwright's Chromium
-  - then `kit:ts`, `kit:lint` and `kit:test`
-- A child repo's:
-  - the kit at the branch under test (else `main`), the repo inside it
-  - the repos it needs, cloned at the same-named branch where they have one
-  - then its `yarn ts`, `yarn lint`, `yarn test`
-- So a change across repos is checked together when every repo's branch has the same name.
-- The repos are public:  no token needed.
-
-</details>
-
-## WWOD and agents
+## WWOD, the house style
 
 The house style every repo shares is WWOD, "What Would Owen Do?":  how code, comments and docs are written here.
+Most style guides wait to be looked up.
+This one is read FIRST, by every coding agent before it touches a file;
+and it's there for you when you wonder why the code looks the way it does.
+
 It lives in [agents/wwod/](agents/wwod/):  seven universal sections in [WWOD.md](agents/wwod/WWOD.md),
 and a spoke per topic (writing, types, classes, Solid, CSS, tests ...).
+Three of its rules, for the flavour:
+- "Throw typed errors;  NEVER return error unions"
+- "Delete a field, option or export nothing reads"
+- "Break lines at phrases, not at the column", which is why this page's lines end where they do
 
 Spell is built with Claude Code today, set up so an agent finds the rules before the code.
-It reads, in this order:
-1. `CLAUDE.md`, which loads the cross-model `AGENTS.md` (Codex reads that directly)
-2. the `AGENTS.md` of the kit, then of the repo, then of the folder it's working in
-3. WWOD, then the spoke for what it's touching
-
-More:  [README-agents.md](README-agents.md).
+As a session starts, the kit's [CLAUDE.md](CLAUDE.md) loads [AGENTS.md](AGENTS.md) and WWOD;
+the repo's and the folder's rules come in where it works, and WWOD's spoke for the task before it writes.
+The rules are plain Markdown, and Codex reads the same `AGENTS.md` files.
+The tooling around them is Claude Code's alone, for now:  the epic plugin, with its skills and hooks
+(🌱 the same for other agents is coming).
+The whole order, the logs agents keep, and the plugin:  [README-agents.md](README-agents.md).
 
 ## 🌱 Coming
 
+Two things that would make this page shorter, and neither is here yet:
 - npm packages:  `npm install spell-ui` in any project, and a `spell` that installs without a checkout.
   Today everything runs from this checkout.
 - A public website for Spell, its docs and its components.
@@ -460,47 +712,52 @@ More:  [README-agents.md](README-agents.md).
 
 ## Every README
 
-Every page, by repo.
-A repo's `README.md` is its front page;  the `README-<topic>.md` pages beside it go deep on one folder or topic.
+Every page of every repo, a row each, with what you'll find on it.
+A repo's `README.md` is its front page;  each `README-<topic>.md` beside it goes deep on one folder or topic.
+The links into a child repo work in a checkout, where it's cloned inside the kit;  on GitHub, they land nowhere.
 
-| Repo | Pages |
+| Page | What's on it |
 | --- | --- |
-| the kit | [README.md](README.md) (this page) · [README-util.md](README-util.md) · [README-toolchain.md](README-toolchain.md) · [README-server.md](README-server.md) · [README-element.md](README-element.md) · [README-cli.md](README-cli.md) · [README-development.md](README-development.md) · [README-vscode.md](README-vscode.md) · [README-agents.md](README-agents.md) |
-| spell-lang | [README.md](spell-lang/README.md) · [README-parser.md](spell-lang/README-parser.md) · [README-rulex.md](spell-lang/README-rulex.md) · [README-markdown.md](spell-lang/README-markdown.md) · [README-spell.md](spell-lang/README-spell.md) · [README-core.md](spell-lang/README-core.md) · [README-targets.md](spell-lang/README-targets.md) |
-| spell-ui | [README.md](spell-ui/README.md) · [README-components.md](spell-ui/README-components.md) · [README-migrating.md](spell-ui/README-migrating.md) · [README-runtime.md](spell-ui/README-runtime.md) · [README-themes.md](spell-ui/README-themes.md) · [README-frameworks.md](spell-ui/README-frameworks.md) · [README-site.md](spell-ui/README-site.md) |
-| spell-epic | [README.md](spell-epic/README.md) · [README-pages.md](spell-epic/README-pages.md) · [README-skills.md](spell-epic/README-skills.md) · [README-cli.md](spell-epic/README-cli.md) · [README-vscode.md](spell-epic/README-vscode.md) · [README-adopting.md](spell-epic/README-adopting.md) |
-| spell-app | [README.md](spell-app/README.md) · [README-app.md](spell-app/README-app.md) · [README-spaces.md](spell-app/README-spaces.md) · [README-examples.md](spell-app/README-examples.md) · [README-lsp.md](spell-app/README-lsp.md) · [README-page-server.md](spell-app/README-page-server.md) |
-
-- The kit's pages, one line each:
-  - [README-util.md](README-util.md):  the helpers every repo shares
-  - [README-toolchain.md](README-toolchain.md):  what every repo's checks share
-  - [README-server.md](README-server.md):  the page server
-  - [README-element.md](README-element.md):  the element framework
-  - [README-cli.md](README-cli.md):  the command line, over every repo
-  - [README-development.md](README-development.md):  working on Spell day to day
-  - [README-vscode.md](README-vscode.md):  Spell in VS Code
-  - [README-agents.md](README-agents.md):  working with coding agents
-- The child repos' pages link up here;
-  the links into a child repo work in a checkout, where it's cloned inside the kit.
-
-<details>
-<summary>Where Spell came from, in three lines</summary>
-
-- Spell was one repository until 2026-09, all its packages in one tree.
-- Then it was split into six repos, each one package, with its history kept.
-- The kit is what three of them became:  the shared helpers and toolchain, the server, and the element framework,
-  merged back in as its folders.
-
-</details>
+| [README.md](README.md) | <ul><li>this page:  a card in Spell, and what it compiles to</li><li>where Spell is going;  the five repos</li><li>setup from zero, and five things to try</li><li>the kit's folders, the command line, WWOD, and this index</li></ul> |
+| [README-util.md](README-util.md) | <ul><li>the helpers every repo shares, and when lodash is the better answer</li><li>one import name over three layers;  the generic helpers lodash has no shape for</li><li>Spell cells, the reactive engine:  a read after a write is always fresh</li><li>Spell's own:  a fetch that throws, files that load themselves;  JSON5 with its comments kept, for node</li></ul> |
+| [README-toolchain.md](README-toolchain.md) | <ul><li>Vite+:  one dependency pins every tool</li><li>lint and format settings imported like code;  the house's own lint rules, and the READMEs' check</li><li>every tool reads source but the type check:  declarations</li><li>standard decorators, lowered first;  the four checks;  CI</li></ul> |
+| [README-server.md](README-server.md) | <ul><li>the page server, by contrast with Vite and Express:  one port, every checkout</li><li>five flows, a picture each, from a request to live reload and editing a section in place</li><li>writing a page:  links, formatting, bundles built on demand, data files</li><li>settings and route modules;  safety;  `spell server` and `spell bundle`</li></ul> |
+| [README-element.md](README-element.md) | <ul><li>custom elements on Solid 2, mapped from React</li><li>what every element gets without asking;  making one, in eight steps</li><li>nothing loads up front:  packs and `<ui-root>`</li><li>styling through the shadow root;  testing in a real browser;  the build tools, and what it costs</li></ul> |
+| [README-cli.md](README-cli.md) | <ul><li>setting up `spell`;  naming projects by path, address or group</li><li>every command, under the repo that brings it</li><li>`epic`, and two more programs for yarn scripts</li><li>output and exit codes, what writes files;  how a command is built</li></ul> |
+| [README-development.md](README-development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with three differences;  the checks, and what "done" means</li><li>tests in a second tree;  one import name per file</li><li>working across repos with an epic;  CI by branch name;  where to change what;  the papercuts;  every script</li></ul> |
+| [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk;  what it does for a `.spell` file</li><li>two extensions you build, the rest from the Marketplace;  the settings the repos ship</li><li>Spell Epic:  the pages beside your code</li><li>windows and worktrees;  working on the extensions</li></ul> |
+| [README-agents.md](README-agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>the epic plugin, its skills and hooks;  what's Claude-specific, and 🌱 other agents</li></ul> |
+| [spell-lang/README.md](spell-lang/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>languages in, targets out;  the pipeline, and its pieces</li><li>try it in two minutes;  the language commands</li><li>how Spell reads a line;  🌱 Spanish, WebAssembly, mixins</li></ul> |
+| [spell-lang/README-parser.md](spell-lang/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>parsers for other languages;  testing rules;  what it costs</li></ul> |
+| [spell-lang/README-rulex.md](spell-lang/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say, and when it compiles;  the cheat sheet</li></ul> |
+| [spell-lang/README-markdown.md](spell-lang/README-markdown.md) | <ul><li>Markdown on Spell's parser:  a heading is a rule, not a regular expression</li><li>three functions, six options</li><li>exact, but slower and bigger than marked;  who draws with it</li><li>the spec as its scoreboard</li></ul> |
+| [spell-lang/README-spell.md](spell-lang/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module;  the compiler</li><li>the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [spell-lang/README-core.md](spell-lang/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's</li><li>its pieces;  three things a reader trips on</li><li>who may import it:  one copy per running app</li></ul> |
+| [spell-lang/README-targets.md](spell-lang/README-targets.md) | <ul><li>one program, four targets, and what each costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in Python's own words</li><li>choosing a target;  🌱 WebAssembly</li></ul> |
+| [spell-ui/README.md](spell-ui/README.md) | <ul><li>Spell UI in thirty seconds</li><li>`<ui-root>`, component packs and page-level CSS</li><li>the families;  from a framework;  other ways to load</li><li>installing, and 🌱 npm;  where it comes from</li></ul> |
+| [spell-ui/README-components.md](spell-ui/README-components.md) | <ul><li>a family is a folder, and the root does the importing</li><li>when two families look alike</li><li>the catalogue of every family</li><li>how a family is laid out;  written from the docs site's data</li></ul> |
+| [spell-ui/README-frameworks.md](spell-ui/README-frameworks.md) | <ul><li>the contract:  four rules every element keeps</li><li>plain JavaScript, React 19, Vue 3 and Solid 2;  Svelte, Angular and Preact</li><li>types in your editor and your JSX</li><li>using it today, with an import map;  what the smoke pages prove</li></ul> |
+| [spell-ui/README-migrating.md](spell-ui/README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React</li><li>your classes moved inside:  a whole card, three ways</li><li>every class word becomes an attribute, and what changes under the words</li><li>moving a page by hand today;  🌱 the migration tool</li></ul> |
+| [spell-ui/README-runtime.md](spell-ui/README-runtime.md) | <ul><li>one runtime per page, not one per tree</li><li>eighteen services, one field each</li><li>vocabularies and localization, icons, styles</li><li>the static render;  Spell UI's half of the element core</li></ul> |
+| [spell-ui/README-themes.md](spell-ui/README-themes.md) | <ul><li>theming, by contrast with MUI and Tailwind</li><li>what ships:  tokens, dark mode and the themes</li><li>four recipes</li><li>🌱 picking and making themes</li></ul> |
+| [spell-ui/README-site.md](spell-ui/README-site.md) | <ul><li>the docs site, viewed with one command</li><li>a page is its head and one `main`;  writing one</li><li>the scripts and the tools</li><li>Spell UI's `spell` commands</li></ul> |
+| [spell-epic/README.md](spell-epic/README.md) | <ul><li>epics and sagas:  an epic's life, by contrast with tickets, pull requests and chat</li><li>try it:  a small epic, start to finish</li><li>the words, and the ids you can say;  a page you act on</li><li>in VS Code;  the commands and skills;  beyond Spell</li></ul> |
+| [spell-epic/README-pages.md](spell-epic/README-pages.md) | <ul><li>your first review, in four moves</li><li>an epic page's sections, header and toolbar</li><li>a review round:  marks, comments, test runs, colours</li><li>the other pages;  the `<epic-*>` elements</li></ul> |
+| [spell-epic/README-skills.md](spell-epic/README-skills.md) | <ul><li>seventeen skills you type, eight hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>what the hooks do, and when</li><li>two names for every skill in Claude Code</li></ul> |
+| [spell-epic/README-cli.md](spell-epic/README-cli.md) | <ul><li>the `epic` command:  six verbs you'll actually type</li><li>an address is a page and an id</li><li>one copy of the code;  a session wakes when its `wait` exits</li><li>every verb, by group;  where it stops</li></ul> |
+| [spell-epic/README-vscode.md](spell-epic/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands</li><li>two views, each a page that stays</li><li>which server answers;  the window bridge</li><li>working on it</li></ul> |
+| [spell-epic/README-adopting.md](spell-epic/README-adopting.md) | <ul><li>epics in a repo that isn't Spell:  four steps and an extension</li><li>the content folder, the config file, the worktrees</li><li>your own AGENTS.md;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
+| [spell-app/README.md](spell-app/README.md) | <ul><li>the Spell app:  the live loop, from a keystroke to the app changing</li><li>spaces:  every project has an owner and an address</li><li>what you can do today, and the ambition</li><li>the example apps;  its folders;  working on it</li></ul> |
+| [spell-app/README-app.md](spell-app/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places</li><li>the editor:  one object behind every pane</li><li>the builds;  App UI, a page for every component</li></ul> |
+| [spell-app/README-examples.md](spell-app/README-examples.md) | <ul><li>five example apps, simplest first, and the four parts of each</li><li>walkthroughs:  FizzBuzz, Todos, Outline Solitaire</li><li>ideas for your own;  the frozen test projects</li></ul> |
+| [spell-app/README-spaces.md](spell-app/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses, like `@spell/examples/drawable-solitaire`</li><li>setting up your own;  the models and the servers, Python's too</li><li>people and orgs;  🌱 sign-in and sharing</li></ul> |
+| [spell-app/README-lsp.md](spell-app/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 a `spell lsp` command, and the service moving to spell-lang</li></ul> |
+| [spell-app/README-page-server.md](spell-app/README-page-server.md) | <ul><li>what spell-app adds to the kit's page server, and who answers on its port</li><li>its own module:  bundles, and pages that load on a plane</li><li>adding a route;  running it</li><li>its settings, key by key</li></ul> |
 
 ## See also
 
-- [AGENTS.md](AGENTS.md):  the rules for working on the kit and across repos
-- [README-development.md](README-development.md):  working on Spell day to day
-- [README-cli.md](README-cli.md):  every command
-- [spell-lang](spell-lang/README.md), [spell-ui](spell-ui/README.md), [spell-epic](spell-epic/README.md),
-  [spell-app](spell-app/README.md):  the child repos' front pages
-- Also beside it:
-  [README-agents.md](README-agents.md) · [README-element.md](README-element.md) ·
-  [README-server.md](README-server.md) · [README-toolchain.md](README-toolchain.md) ·
-  [README-util.md](README-util.md) · [README-vscode.md](README-vscode.md)
+- [AGENTS.md](AGENTS.md):  the rules for working on the kit and across repos, before you change a line
+- [README-development.md](README-development.md):  once you're set up, how the work goes day to day
+- [spell-lang's README](spell-lang/README.md):  the language, if the card hooked you
+- [spell-app's README](spell-app/README.md):  the editor, if the cards on the table did
+- [README-cli.md](README-cli.md):  every command, once you've outgrown the five things you tried

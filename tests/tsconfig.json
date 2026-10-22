@@ -1,0 +1,14 @@
+{
+  // The kit's tests, ONE TypeScript program over `tests/`:  the node program's settings, with the browser program's
+  // JSX (element's tests are Solid) and the browser tests' types.
+  // - They import what they test by its package name and path under `src/` (`spell-kit/element/UIComponent`).
+  // - The glue tools' tests import `tools/` by path:  it's outside `src/`, never imported by name.
+  "extends": "../tsconfig.node.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": ["node", "vite/client", "spell-kit/toolchain/types"]
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "tools/fixtures"]
+}
