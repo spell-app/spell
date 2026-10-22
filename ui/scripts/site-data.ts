@@ -3,7 +3,8 @@
  * (the icon browser's search terms), and keep `docs/__data/pages.json5` complete (see `src/tools/SiteDataBuilder.ts`);  and
  * `search.json5` (every page's sections, for `<ui-docs-search>`), read from the pages beside it.
  * - Also, from the same data, the editors' element descriptions (`src/tools/ElementManifests.ts`):
- *   `custom-elements.json` (a Custom Elements Manifest) and `html-custom-data.json` (VS Code's `html.customData`);
+ *   `custom-elements.json` (a Custom Elements Manifest), `html-custom-data.json` (VS Code's `html.customData`)
+ *   and `css-custom-data.json` (its `css.customData`);
  *   and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`).
  * - All COMMITTED:  the docs pages fetch them as they are,
  *   with no build step.  Rerun after changing a vocabulary, a family's sheet (its tokens), `pages.json5` or a page's

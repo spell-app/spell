@@ -320,7 +320,7 @@ export const SITE_PAGES = "docs"
  * Spell UI's docs site's DATA, from `packages/ui/`:  `docs/__data/`.
  * - GENERATED, committed (`yarn site:data`):
  *   - `components.json5`, `icons.json5`, `search.json5`
- *   - `custom-elements.json`, `html-custom-data.json`
+ *   - `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`
  * - hand-kept:  `pages.json5`, the per-family facts they're built from
  */
 export const SITE_DATA = `${SITE_PAGES}/__data`
@@ -728,4 +728,24 @@ export type HtmlCustomData = {
     description: { kind: "markdown"; value: string }
     attributes: { name: string; description: { kind: "markdown"; value: string }; values?: { name: string }[] }[]
   }[]
+}
+
+/** VS Code's CSS custom data, version 1.1:  only the fields we write. */
+export type CssCustomData = {
+  /** `1.1` */
+  version: number
+  /** every family's CSS custom properties (`--ui-button-radius`):  completed as property names, with hover docs */
+  properties: CssCustomDataEntry[]
+  /** every part name, as `::part(<name>)`:  for any tag, as VS Code can't tell which tag a selector names */
+  pseudoElements: CssCustomDataEntry[]
+  /** every custom state, as `:state(<name>)`:  for any tag, likewise */
+  pseudoClasses: CssCustomDataEntry[]
+}
+
+/** One entry of VS Code's CSS custom data:  its name and markdown docs. */
+export type CssCustomDataEntry = {
+  /** as typed:  `--ui-button-radius`, `::part(icon)`, `:state(open)` */
+  name: string
+  /** hover and completion docs */
+  description: { kind: "markdown"; value: string }
 }

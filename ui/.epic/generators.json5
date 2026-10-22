@@ -13,7 +13,10 @@
   "generators": [
     {
       "name": "Spell UI site data",
-      "outputs": ["docs/__data/{components,icons,search}.json5", "docs/__data/{custom-elements,html-custom-data}.json"],
+      "outputs": [
+        "docs/__data/{components,icons,search}.json5",
+        "docs/__data/{custom-elements,html-custom-data,css-custom-data}.json"
+      ],
       "cwd": ".",
       "run": ["yarn", "site:data"]
     }

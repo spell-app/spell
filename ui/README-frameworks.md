@@ -276,16 +276,19 @@ The docs site's [getting-started page](docs/getting-started.html) has a one-line
 
 ## Types:  your editor knows every tag, and Solid's JSX does too
 
-Spell UI ships what an editor reads, three files describing all 104 tags:
+Spell UI ships what an editor reads, four files describing all 104 tags:
 
 - [`custom-elements.json`](docs/__data/custom-elements.json), a Custom Elements Manifest (schema 2.1.0),
   named by `package.json`'s `"customElements"`:
   every tag's attributes, properties, events, slots, parts, custom states and CSS custom properties
 - [`html-custom-data.json`](docs/__data/html-custom-data.json), VS Code's HTML data:
   autocomplete and hover docs for `<ui-*>` in HTML files
+- [`css-custom-data.json`](docs/__data/css-custom-data.json), VS Code's CSS data:
+  every `--ui-*` custom property, part (`::part(icon)`) and custom state (`:state(open)`) in CSS files,
+  with hover docs
 - [`spell-ui/jsx`](src/jsx.ts), the JSX types for Solid 2:
   autocomplete, hover docs and checks for `<ui-*>` in `.tsx` files
-- `yarn site:data` writes all three, from the same vocabularies as everything else.
+- `yarn site:data` writes all four, from the same vocabularies as everything else.
 
 For Solid's JSX, import the types once, in any file of your program:
 

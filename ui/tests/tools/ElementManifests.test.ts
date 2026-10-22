@@ -99,6 +99,24 @@ describe("ElementManifests.htmlCustomData()", () => {
   })
 })
 
+describe("ElementManifests.cssCustomData()", () => {
+  test("gives VS Code every family's custom properties, and every part and custom state by name", () => {
+    const custom = new ElementManifests({ data: DATA, packageFolder: UI }).cssCustomData()
+    const tokens = DATA.components
+      .filter((tag) => tag.main)
+      .flatMap((tag) => DATA.families[tag.folder]!.tokens.map((token) => token.name))
+    expect(custom.properties.map((property) => property.name).toSorted(compare)).toEqual(
+      [...new Set(tokens)].toSorted(compare)
+    )
+    expect(
+      custom.properties.find((property) => property.name === "--ui-button-padding-block")?.description.value
+    ).toMatch(/`<ui-button>`'s token\.  Default:  `.+`/)
+    const open = custom.pseudoClasses.find((state) => state.name === ":state(open)")!
+    expect(open.description.value).toContain("- `<ui-dropdown>`:  ")
+    expect(custom.pseudoElements.map((part) => part.name)).toContain("::part(icon)")
+  })
+})
+
 describe("ElementManifests.pascal()", () => {
   test("names a tag's class, `ui-` dropped", () => {
     expect(ElementManifests.pascal("ui-breadcrumb-section")).toBe("BreadcrumbSection")

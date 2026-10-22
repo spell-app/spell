@@ -1,26 +1,37 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import type { SiteAttribute, SiteDataFile, SiteEvent, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import type {
+  SiteAttribute,
+  SiteDataFile,
+  SiteEvent,
+  SiteNamed,
+  SiteTag
+} from "spell-ui/docs-components/docs-components.types"
 import { SRV } from "spell-kit/server"
-import type { CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
+import type { CssCustomData, CssCustomDataEntry, CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
 
 import { FamilyFiles } from "./FamilyFiles.ts"
 
 /****************
  * ### `ElementManifests`
  * The editors' element descriptions, from the site data (`docs/__data/components.json5`, every vocabulary):
- * the two STANDARD ones, and the JSX types.
+ * the STANDARD ones, and the JSX types.
  * - `custom-elements.json`:  a Custom Elements Manifest (schema 2.1),
  *   what web-component tools read (Storybook, linters, IDE plugins, Claude)
  *   - `package.json`'s `customElements` points at it
  * - `html-custom-data.json`:  VS Code's HTML custom data (`html.customData`),
  *   autocomplete and hover docs for every `<ui-*>` tag, attribute and value in any `.html` file
- *   - the repo's `.vscode/settings.json` loads it
+ *   - the repo's `.vscode/settings.json` loads it, and the kit's, and every epic's window
+ * - `css-custom-data.json`:  VS Code's CSS custom data (`css.customData`), for any `.css` file:
+ *   - every family's custom properties (`--ui-button-radius`), completed as property names, with hover docs
+ *   - every part, as `::part(icon)`, and every custom state, as `:state(open)`
+ *     - for ANY selector:  VS Code can't tell which tag a selector names, so each one's docs list the tags that have it
+ *   - loaded beside the HTML data
  * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events as TypeScript types for Solid's JSX,
  *   so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
  * - Written by `yarn site:data`, and committed:  editors read them with no build.
- *   - The two manifests beside `components.json5`;  the JSX types in `src/`, as code imports them.
+ *   - The three data files beside `components.json5`;  the JSX types in `src/`, as code imports them.
  *   - `tests/tools/ElementManifests.test.ts` fails while they're stale.
  * - All list COMPONENT tags only, not the doc-only `<ui-docs-*>`.
  * - Why not the `custom-elements-manifest analyze` script (`yarn manifest`):
@@ -53,13 +64,14 @@ export class ElementManifests {
   }
 
   /**
-   * Both files as `yarn site:data` writes them, `[path, text]`, into `dataFolder` (`docs/__data/`).
+   * The three data files as `yarn site:data` writes them, `[path, text]`, into `dataFolder` (`docs/__data/`).
    * - `JSON.stringify(..., 2)`:  oxfmt skips a set's `docs/__data/`, so the bytes stay ours and the staleness test can compare.
    */
   outputs(dataFolder: string): [file: string, text: string][] {
     return [
       [join(dataFolder, "custom-elements.json"), JSON.stringify(this.customElements(), null, 2) + "\n"],
-      [join(dataFolder, "html-custom-data.json"), JSON.stringify(this.htmlCustomData(), null, 2) + "\n"]
+      [join(dataFolder, "html-custom-data.json"), JSON.stringify(this.htmlCustomData(), null, 2) + "\n"],
+      [join(dataFolder, "css-custom-data.json"), JSON.stringify(this.cssCustomData(), null, 2) + "\n"]
     ]
   }
 
@@ -115,6 +127,65 @@ export class ElementManifests {
           )
       }))
     }
+  }
+
+  /**
+   * VS Code's CSS custom data:  every family's custom properties, every part and every custom state.
+   * - Properties:  each family's tokens, by its main tag, with its default and the family's tag in the docs.
+   * - Parts and states, by name (`::part(icon)`, `:state(open)`), A-Z:
+   *   VS Code offers them after ANY selector, so each one's docs list the tags that have it, and what it is on each.
+   */
+  cssCustomData(): CssCustomData {
+    const properties = new Map<string, CssCustomDataEntry>()
+    for (const tag of this.data.components) {
+      if (!tag.main) continue
+      for (const token of this.data.families[tag.folder]?.tokens ?? []) {
+        if (properties.has(token.name)) continue
+        const lines = [token.description ?? "", "", `\`<${tag.tag}>\`'s token.  Default:  \`${token.default}\``]
+        properties.set(token.name, ElementManifests.cssEntry(token.name, lines.join("\n").trim()))
+      }
+    }
+    return {
+      version: 1.1,
+      properties: [...properties.values()],
+      pseudoElements: this.cssNamed(
+        (tag) => tag.parts,
+        (name) => `::part(${name})`,
+        "Part"
+      ),
+      pseudoClasses: this.cssNamed(
+        (tag) => tag.states,
+        (name) => `:state(${name})`,
+        "Custom state"
+      )
+    }
+  }
+
+  /**
+   * One CSS custom data entry per distinct name `namedOf()` gives, A-Z (`cssCustomData()`):
+   * written by `nameFor()`, its docs `<kind> of` each tag with it, and what it is there.
+   */
+  private cssNamed(
+    namedOf: (tag: SiteTag) => readonly SiteNamed[],
+    nameFor: (name: string) => string,
+    kind: string
+  ): CssCustomDataEntry[] {
+    const byName = new Map<string, string[]>()
+    for (const tag of this.data.components) {
+      for (const named of namedOf(tag)) {
+        const lines = byName.get(named.name) ?? []
+        lines.push(`- \`<${tag.tag}>\`:  ${named.description}`)
+        byName.set(named.name, lines)
+      }
+    }
+    return [...byName.keys()]
+      .sort()
+      .map((name) => ElementManifests.cssEntry(nameFor(name), [`${kind} of:`, "", ...byName.get(name)!].join("\n")))
+  }
+
+  /** A CSS custom data entry:  `name`, with `markdown` as its docs. */
+  private static cssEntry(name: string, markdown: string): CssCustomDataEntry {
+    return { name, description: { kind: "markdown", value: markdown } }
   }
 
   ////////////////
