@@ -4,6 +4,11 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 import { AnswerForm, type ListenLine, type SendFill } from "spell-epic/answers"
+import {
+  SEND_ASKED,
+  type SendAskedDetail,
+  type SendState
+} from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
 
 import { epicSendVocabulary } from "./EpicSend.en"
 
@@ -15,16 +20,18 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-send>`:  a details page's Send (epic `epic-workflow` P12), in its sticky header.
  * - Draws the page's `AnswerForm`:
  *   - where the answer stands:  "Not sent", "Changes not sent", "Sent 10/8/26 14:34 · 5 of 17 decided"
- *   - the round Send, blue as every Send is, by the fill rule (`templates/epics/plan-doc.md`, "Colours"):
- *     a grey outline with nothing to send, dashed with changes not sent, an outline once sent;
- *     never solid, since the page can't tell when Claude is done with it
+ *   - Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20), blue as every Send is, by the fill rule
+ *     (`templates/epics/plan-doc.md`, "Colours"):  a grey outline with nothing to send, dashed with changes not sent,
+ *     an outline once sent;  never solid, since the page can't tell when Claude is done with it
+ *     - countdown on:  the answer goes by itself 2 minutes after Owen stops;  off, the plane is filled until pressed
  *   - the draft's save, muted beside them ("draft saved 14:04";  epic `epic-workflow` P18)
  *     - a save that FAILED, on its own line under them, in red, bold (epic `epic-engine` P15):  never cut short by the
  *       side bar's width;  the browser still keeps the draft, and the form tries again every 3s
  *   - after Send, who hears it (epic `epic-engine` r6):  "repo-split is listening" with a green dot (a session's
  *     `epic ask wait`), or "nobody is waiting yet" (`AnswerForm.listenLine`)
  *   - why the last send failed, under them;  or, sent with nobody waiting, that it's saved for Claude's next look
- * - A click sends the whole page (`AnswerForm.send()`):  partial answers too, again whenever Owen likes.
+ * - A press, or the countdown running out, sends the whole page (`AnswerForm.send()`):  partial answers too, again
+ *   whenever Owen likes.
  * - SIDE EFFECT:  as it connects, the page's form reads back the answer already sent (`AnswerForm.load()`), and any
  *   draft newer than it, which every question and box shows;  and saves the draft as the page goes away
  *   (`AnswerForm.watch()`).
@@ -126,18 +133,13 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
               {this.draftLine.text}
             </span>
           </Show>
-          <ui-button
+          <epic-send-buttons
             class={SEND}
             part={this.partForName("send")}
-            basic=""
-            circular=""
-            icon="paper plane"
-            color={this.fill === "rest" ? undefined : "blue"}
+            state={SEND_STATES_OF[this.fill]}
             data-fill={this.fill}
-            loading={this.isSending ? "" : undefined}
-            aria-label={this.translationForKey("send")}
-            title={this.translationForKey("sendTip")}
-            onClick={this.onSend}
+            busy={this.isSending ? "" : undefined}
+            send-tip={this.translationForKey("sendTip")}
           />
           <Show when={this.listenLine.text}>
             <span
@@ -169,8 +171,10 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
     )
   }
 
-  /** Send, clicked. */
-  private readonly onSend = () => {
+  /** Send asked for (`<epic-send-buttons>`):  a press, or the countdown running out;  the whole page goes. */
+  @E.on(SEND_ASKED, { target: "renderRoot" })
+  protected onSendAsked(event: CustomEvent<SendAskedDetail>) {
+    event.stopPropagation()
     void this.form?.send()
   }
 }
@@ -187,3 +191,6 @@ const SEND = "send"
 const ERROR = "error"
 const WHO = "who"
 const NOTICE = "notice"
+
+/** The group's state for each fill of the form's (`<epic-send-buttons>` `state`). */
+const SEND_STATES_OF: Record<SendFill, SendState> = { rest: "idle", pending: "unsent", sent: "sent" }

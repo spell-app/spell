@@ -440,12 +440,17 @@ class PageComments {
   /**
    * The page header's SEND (epic `epic-workflow` P13):  a docs page's comments go to the session of the epic the page
    * belongs to, as an epic page's do with its Send.
-   * - a pill:  the paper plane, "Send" and how many comments wait for it;  blue by the fill rule (`templates/epics/
+   * - Send and its countdown, the epics pack's `<epic-send-buttons>` (epic `epic-engine` P20), as an epic page's header
+   *   draws it:  the paper plane with how many comments wait for it, blue by the fill rule (`templates/epics/
    *   plan-doc.md`, "Colours"):  grey outline with nothing waiting, dashed while some aren't sent, outlined once sent
+   *   - the wand:  countdown mode;  on, the comments go by themselves 2 minutes after Owen stops typing, clicking and
+   *     scrolling;  off, the plane is filled blue until he presses it
+   *   - drawn anew with the comments, the countdown kept:  it's the page's, not the element's
    * - beside it, who is listening:  "python-target is listening", or nobody (then Send wakes the epic's session);
    *   a page no epic owns:  the standing epic `feedback`'s (epic `epic-engine` T9), "feedback is listening", or
    *   "nobody is listening:  Send wakes feedback" (`whoLabel()`)
-   * - a click sends (`POST /api/docs/comments/send`), and a toast says what went where
+   * - a press, or the countdown running out (`epic-send-asked`), sends (`POST /api/docs/comments/send`), and a toast
+   *   says what went where
    * - drawn again with the comments;  none on an epic page, or from a server without it
    */
   drawSend() {
@@ -456,13 +461,8 @@ class PageComments {
     if (!head || !send) return
     const unsent = send.unsent.length
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
-    const button = iconButton("paper plane", sendWords(send, state), { size: "tiny" })
-    button.classList.add("spell-send-button")
-    button.append(
-      el("span", {}, state === "sent" ? "Sent" : "Send"),
-      unsent ? el("span", { class: "spell-send-count" }, String(unsent)) : ""
-    )
-    button.addEventListener("click", () => void this.sendNow())
+    const button = el(SEND_BUTTONS_TAG, { state, count: unsent || undefined, "send-tip": sendWords(send, state) })
+    button.addEventListener(SEND_ASKED, () => void this.sendNow())
     const who = el(
       "span",
       { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", title: whoWords(send) },
@@ -1061,7 +1061,7 @@ class PageComments {
       }
       noteToast(how === "skip" ? "Skipped:  nothing more to do" : "Done:  that's good", "success", {
         displayTime: UNDO_MS,
-        actions: [{ text: "Undo", icon: "rotate left", class: "basic", click: undo }]
+        actions: [{ text: "Undo", icon: "rotate left", click: undo }]
       })
     } catch (error) {
       noteToast(`Couldn't close the thread:  ${error.message}`, "error")
@@ -1270,7 +1270,7 @@ class PageComments {
       }
       noteToast("Comment deleted", "success", {
         displayTime: UNDO_MS,
-        actions: was ? [{ text: "Undo", icon: "rotate left", class: "basic", click: undo }] : undefined
+        actions: was ? [{ text: "Undo", icon: "rotate left", click: undo }] : undefined
       })
     } catch (error) {
       noteToast(`Couldn't delete the comment:  ${error.message}`, "error")
@@ -1631,6 +1631,10 @@ function firstContentChild(section) {
 const THREADS_TAG = "epic-threads"
 const THREAD_TAG = "epic-thread"
 const PANE_TAG = "epic-comment-pane"
+const SEND_BUTTONS_TAG = "epic-send-buttons"
+
+/** `<epic-send-buttons>`' ask to send:  a press on its plane, or its countdown running out. */
+const SEND_ASKED = "epic-send-asked"
 
 /** The room a thread's header leaves on its right for a corner bullhorn above it (`makeRoom()`;  `EpicThread.css`). */
 const HEAD_ROOM = "--epic-thread-head-room"

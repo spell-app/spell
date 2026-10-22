@@ -98,6 +98,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-text-box": { type: "comment", for: "q1-B", placeholder: "Comment on B", label: "Comment on B · Blue" },
   "epic-test-run": { all: true },
   "epic-send": {},
+  "epic-send-buttons": { state: "unsent", sendTip: "Send 2 marks to Claude", count: 2, busy: true },
   "epic-choice-rows": { stacked: true, noFile: true },
   "epic-choice-row": {
     name: "q1-A-7",

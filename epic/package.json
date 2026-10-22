@@ -240,6 +240,11 @@
       "types": "./dist-types/src/tool/migrations/index.d.ts",
       "default": "./src/tool/migrations/index.ts"
     },
+    "./components/epic-send-buttons": {
+      "spell-epic-source": "./src/components/epic-send-buttons/index.ts",
+      "types": "./dist-types/src/components/epic-send-buttons/index.d.ts",
+      "default": "./src/components/epic-send-buttons/index.ts"
+    },
     "./*": {
       "spell-epic-source": [
         "./src/*.ts",

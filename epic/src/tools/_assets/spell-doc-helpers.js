@@ -188,15 +188,32 @@ export function growField(field) {
 
 /**
  * A toast through `UI.toast()`;  the console when toasts aren't there.
- * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`ToastAction`s:  `{ text, icon, class, click }`)
+ * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`ToastAction`s:  `{ text, icon, click }`)
+ * - a toast with buttons looks like one without (epic `epic-engine` P20;  Owen, 2026-10-22:  "make the 'comment
+ *   deleted' toast not ugly, matching the styles of the other toasts"):  each button on the toast's own line, at
+ *   its end, on its colour (`TOAST_ACTIONS`), never a second band under it
  */
 export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
+  const buttons = actions?.map((action) => ({ class: TOAST_ACTION_CLASS, ...action }))
   try {
-    window.SpellUI.UI.toast({ message, type, position: "bottom right", displayTime, showIcon: true, actions })
+    window.SpellUI.UI.toast({
+      message,
+      type,
+      position: "bottom right",
+      displayTime,
+      showIcon: true,
+      ...(buttons && { actions: buttons, classActions: TOAST_ACTIONS })
+    })
   } catch {
     console.info(message)
   }
 }
+
+/** A toast's buttons:  a column at its end, no bar of their own (Spell UI's `classActions`). */
+const TOAST_ACTIONS = "basic vertical"
+
+/** Each toast button's look:  an outline on the toast's own colour, as short as the toast's line. */
+const TOAST_ACTION_CLASS = "basic inverted compact"
 
 /**
  * POST `body` as JSON to page-server route `url`, with the page server's token;  returns its answer.

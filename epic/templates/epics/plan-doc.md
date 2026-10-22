@@ -353,8 +353,7 @@ On an item's line, ONE group, in this order:
 2. Revisit (history), blue
 3. Make Todo (list check), green
 
-Then, APART from the group, Do Now (the magic wand, as the header's Review Now:  Owen, 2026-10-09;  it was a paper
-plane), blue: it replaces Add Details Now on the line, and the note box's "now". An item Claude has answered or done
+Then, APART from the group, Do Now (the magic wand:  Owen, 2026-10-09;  it was a paper plane), blue: it replaces Add Details Now on the line, and the note box's "now". An item Claude has answered or done
 keeps the three-button group, so Owen can still approve it.
 
 The NOTE BOX (every one but a todo's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
@@ -501,8 +500,8 @@ Owen can ask for a NEW todo or question from the page: the `+` in the page heade
 end of the Todos and Questions sections, opens a small form (todo or question, title, note, what it's about). It
 waits in the inbox as a mark under its own key, `new1`, `new2` ... (`{ action: "new", kind, title, note?, near? }`,
 `POST new`), drawn at the end of its section until made (Edit, Remove), and goes with the next send like any mark.
-All of it works with no session listening: the marks wait, dashed, until Send, Review Now or Do Now wakes the epic
-(below).
+All of it works with no session listening: the marks wait, dashed, until Send (or its countdown) or Do Now wakes the
+epic (below).
 
 Owen's TEST RUN (epic `epic-engine` P4): the page steps him through the epic's open tests one at a time, in the
 Review tab ("Start testing" on the To test section, or `epic test <name>`;  `epic test --all` for every epic's, in
@@ -513,11 +512,14 @@ any other:
   `POST shot`);  `skip` (it no longer applies);  `notnow` (he can't do it yet)
 - only on a test;  `epic inbox <name>` and `wait` print each with its result, note and screenshot
 
-Review Now (the page header's wand, beside Send; epic `windows-and-review` P4): sends every mark AND turns each
-revisit waiting (unsent, or sent and still to talk over) into a request for now (`POST send { now: true }`,
-`ReviewInbox.reviewNow()`): the listening session answers them all at once, by background agents, into the items.
+COUNTDOWN MODE (the page header's wand, beside Send; epic `epic-engine` P20, in place of `windows-and-review` P4's
+Review Now): on by default, it sends 2 minutes after Owen stops typing, clicking and scrolling, a ring draining round
+the wand. That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into
+a request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did: the listening session
+answers them all at once, by background agents, into the items. Off, the paper plane is filled blue until he presses
+it. Typing in a note box turns its Revisit on at the first key (`ReviewClient.saveTyped()`), the box staying open.
 
-WAKING the epic (epic `epic-workflow` P16): Send, Review Now or Do Now pressed while NO session listens makes the page
+WAKING the epic (epic `epic-workflow` P16): Send (or its countdown) or Do Now while NO session listens makes the page
 server wake the epic, inside that request (no process runs while Owen isn't working; `ReviewStart.changeAndWake()`):
 
 - who, first match wins: the ONE running session titled for the epic (`🚧 <epic>`) gets `/epic review <epic>` typed

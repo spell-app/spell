@@ -66,6 +66,24 @@ export const NOTICE_MS = 6000
 export const FOCUS_HOLD_MS = 3000
 
 /**
+ * How long Owen leaves the page alone before countdown mode sends what's waiting (`SendCountdown`;  epic
+ * `epic-engine` P20:  "2 minutes of inactivity from me").
+ */
+export const COUNTDOWN_MS = 120_000
+
+/** How often a running countdown ticks:  its ring drains a step, and it checks whether time is up. */
+export const COUNTDOWN_TICK_MS = 1000
+
+/**
+ * localStorage key of countdown mode, for every page this browser shows:  `"off"` while it's off;
+ * anything else, or nothing, on (decision Q6:  on by default, remembered per viewer).
+ */
+export const COUNTDOWN_KEY = "epic-send-countdown"
+
+/** What counts as Owen at work on the page, so the countdown starts again:  typing, clicking, scrolling. */
+export const ACTIVITY_EVENTS = ["keydown", "pointerdown", "wheel", "input", "scroll"] as const
+
+/**
  * localStorage key prefix of a page's note-box backups:  `spell-revisit:<path>`, `{ [item id]: text }`.
  * - the SAME key as the old runtime's (`spell-doc-runtime.js` `REVISIT_KEY_PREFIX`):  a note half-typed on a page
  *   the old runtime drew is handed to the inbox here (`ReviewClient.adoptBackups()`)
