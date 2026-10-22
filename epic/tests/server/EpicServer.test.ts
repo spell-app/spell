@@ -250,8 +250,20 @@ describe("EpicServer", () => {
     expect(server.fileFor("/nope.html")).toBeUndefined()
   })
 
-  test("its route modules are spell-epic's own files", () => {
+  test("its route modules are spell-epic's own files:  its part of the page server's settings", () => {
+    expect(ROUTE_MODULES.length).toBeGreaterThan(0)
     for (const path of ROUTE_MODULES) expect(existsSync(join(ENGINE, path)), path).toBe(true)
+  })
+
+  // epic `repo-split` P16:  the kit's page server swaps the CDN's highlight.js by spell-epic's settings, the epic server
+  // by `HIGHLIGHT_JS`:  the same two URLs
+  test("its highlight.js swap is the one its settings give the kit's page server (`localCopies`)", async () => {
+    const { readFileSync } = await import("node:fs")
+    const { HIGHLIGHT_JS } = await import("spell-epic/server/server.types")
+    const json = JSON.parse(readFileSync(join(ENGINE, "package.json"), "utf8")) as {
+      pageServer: { localCopies: Record<string, string> }
+    }
+    expect(json.pageServer.localCopies).toEqual({ [HIGHLIGHT_JS.cdn]: HIGHLIGHT_JS.local })
   })
 
   // epic `epic-eject` I11:  only the route modules' folders counted, so a change elsewhere in `src/` kept the old server

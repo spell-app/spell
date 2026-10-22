@@ -3,7 +3,14 @@ import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { SRV, type Handler, type ServedFile } from "spell-kit/server"
-import { componentSets, PageEditor, pageServerSettings, type PageConfig, type RouteModule } from "spell-kit/server/page"
+import {
+  componentSets,
+  PageEditor,
+  pageServerSettings,
+  repoSettings,
+  type PageConfig,
+  type RouteModule
+} from "spell-kit/server/page"
 import type { SiteTab } from "spell-kit/server/site/site.types"
 import { resolvedFile } from "spell-kit/toolchain/sourceNames"
 
@@ -417,17 +424,16 @@ export class EpicServer {
 
   /**
    * Build the default repo's bundles whose sources changed since their last build, in the background, with that
-   * checkout's OWN build:  its `spell-app/page-server`'s `BundleBuild` (`spell bundle --stale`, with its
-   * own CLI;  epic `epic-engine` P8, r8), loaded from the checkout, never a dependency of spell-epic's (spell-app is
-   * above spell-epic:  it RUNS spell-epic, epic `epic-engine` P10).
+   * checkout's OWN build:  the `BundleBuild` of the kit its install resolves (`spell-kit/server/page`;  `spell bundle
+   * --stale`, with its own CLI;  epic `epic-engine` P8, r8), loaded from the checkout, so the build is that
+   * checkout's code, not this one's (spell-app's `page-server` held it until epic `repo-split` P16).
    * - the bundles:  that checkout's settings' `"bundles"`, Spell UI's site bundle among them, which every component
    *   set's pages load at `_assets/` (`epicUiMounts()`, `componentSetMounts()`)
    * - so the epic server never waits for spell-app's page server to build it:  only those two build it
    * - a request for a missing file of one waits while it runs (`BundleBuild.wait`):  a set's page opened at once
    *   still gets its bundle;  live reload reloads the pages once it's written (the set mounts are watched)
    * - its output goes to the server's log, `bundles:  ...`;  `stop()` ends it
-   * - NEVER throws:  a checkout without the page-server package or the CLI builds nothing, a failed build leaves the
-   *   old bundle
+   * - NEVER throws:  a checkout without the kit or the CLI builds nothing, a failed build leaves the old bundle
    */
   private async buildBundles(): Promise<void> {
     const checkout = this.defaultRepo?.checkout
@@ -596,23 +602,13 @@ const ENGINE_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
 const EPIC_BIN = join(ENGINE_ROOT, "bin", "epic")
 
 /**
- * The route modules, from spell-epic's checkout, in the order spell-app's page server loads them
- * (its root `package.json`'s `"pageServer"` `"routes"`, the epic ones):
- * pages Owen answers on, comments, the review loop, new epics and favourites, epic links, the running epics,
- * agents, side-bar links, airplane mode.
+ * The route modules, from spell-epic's checkout, in the order the kit's page server loads them:
+ * spell-epic's part of its settings, `"pageServer": { "routes" }` in its `package.json` (epic `repo-split` P16;
+ * `pageServerSettings()`), read here, never a second list.
+ * - pages Owen answers on, comments, the review loop, new epics and favourites, epic links, the running epics,
+ *   agents, side-bar links, airplane mode
  */
-export const ROUTE_MODULES = [
-  "src/tools/detailsRoutes.ts",
-  "src/tools/choicesRoutes.ts",
-  "src/tools/commentsRoutes.ts",
-  "src/tool/reviewRoutes.ts",
-  "src/tool/epicRoutes.ts",
-  "src/tool/linkRoutes.ts",
-  "src/list/runningRoutes.ts",
-  "src/tools/agentRoutes.ts",
-  "src/tools/showRoutes.ts",
-  "src/tools/airplaneRoutes.ts"
-] as const
+export const ROUTE_MODULES: readonly string[] = repoSettings(ENGINE_ROOT)?.routes ?? []
 
 /**
  * Folders whose code, when newer than a running server, makes `ensure()` restart it
@@ -621,15 +617,15 @@ export const ROUTE_MODULES = [
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
  * - the server package's, `spell-kit/server` (the kit's `src/server/`), where Node's resolver finds it (`packageDir()`)
- *   - not the default repo's page-server package (`buildBundles()`):  spell-app's own, a change there needs a restart
+ *   - not the default repo's own kit (`buildBundles()`):  a change there needs a restart
  */
 export const SOURCES = [
   join(ENGINE_ROOT, "src"),
   ...[packageDir("spell-kit/server")].filter((dir) => dir !== undefined)
 ]
 
-/** The package holding the default repo's own bundle build (`BundleBuild`):  spell-app's, from its checkout. */
-const PAGE_SERVER = "spell-app/page-server"
+/** The package holding the default repo's own bundle build (`BundleBuild`):  its kit's page server, from its checkout. */
+const PAGE_SERVER = "spell-kit/server/page"
 
 /** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
@@ -649,8 +645,9 @@ const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
  */
 const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
-/** What the epic server uses of a checkout's `BundleBuild` (`spell-app/page-server`'s, loaded at run time). */
+/** What the epic server uses of a checkout's `BundleBuild` (`spell-kit/server/page`'s, loaded at run time). */
 type BundleBuilder = { readonly wait: Handler; start(): unknown; stop(): void }
 
 /** `BundleBuild` itself:  `new BundleBuild({ root })`. */
 type BundleBuilderClass = new (props: { root: string }) => BundleBuilder
+
