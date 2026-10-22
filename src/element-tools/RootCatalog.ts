@@ -5,9 +5,11 @@ import { VocabularyFiles } from "./VocabularyFiles.ts"
 
 /****************
  * ### `RootCatalog`
- * What `<ui-root>` needs of each tag BEFORE that tag's family loads -- its folder (which family to import) and its
- * skeleton (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`) -- read
- * from the vocabulary FILES.
+ * What `<ui-root>` needs of each tag BEFORE that tag's family loads, read from the vocabulary FILES:
+ * - its folder:  which family to import
+ * - its skeleton (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`)
+ * - its attribute names, aliases too, and whether it's a form control (`formControl`):
+ *   the root defines the tag up front with them (`DOMElement.defineEarly()`, epic `solid-17` P7)
  * - Every `<Name>.en.ts` of every family folder (`VocabularyFiles`), every export with a `tag` and `attributes`:
  *   the way `ComponentDefinitions` reads them, without Vite's `import.meta.glob`.  A vocabulary without a skeleton
  *   writes no `skeleton` key.
@@ -27,8 +29,13 @@ export class RootCatalog {
     const entries: Record<string, RootCatalogEntry> = {}
     for (const root of roots) {
       for (const { folder, vocabulary } of await VocabularyFiles.read(root)) {
-        entries[vocabulary.tag] =
-          vocabulary.skeleton === undefined ? { folder } : { folder, skeleton: SkeletonText.parse(vocabulary.skeleton) }
+        const attributes = vocabulary.attributes.flatMap(({ name, aliases = [] }) => [name, ...aliases])
+        entries[vocabulary.tag] = {
+          folder,
+          ...(vocabulary.skeleton === undefined ? {} : { skeleton: SkeletonText.parse(vocabulary.skeleton) }),
+          attributes,
+          ...(vocabulary.formControl ? { formControl: true as const } : {})
+        }
       }
     }
     return entries
@@ -47,4 +54,9 @@ export class RootCatalog {
  * - Its own, not imported:  the kit imports nothing of Spell UI, and `UIRoot.types.ts` imports `spell-ui/core` (types),
  *   which would drag the element files (JSX) into every caller's type check.
  */
-export type RootCatalogEntry = { readonly folder: string; readonly skeleton?: SkeletonSpec }
+export type RootCatalogEntry = {
+  readonly folder: string
+  readonly skeleton?: SkeletonSpec
+  readonly attributes?: readonly string[]
+  readonly formControl?: true
+}

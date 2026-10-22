@@ -1,9 +1,11 @@
 import {
   createEffect,
   createMemo,
+  createRoot,
   createSignal,
   getObserver,
   getOwner,
+  runWithOwner,
   untrack,
   type Accessor,
   type Signal
@@ -76,6 +78,19 @@ export class Reactive {
   ////////////////
   // ## The record
   ////////////////
+
+  /**
+   * Run `fn` in a Solid root of its OWN, which lives until the `dispose` it's handed is called.
+   * - Returns what `fn` does.
+   * - Safe ANYWHERE, an effect's callback too:
+   *   made under `OWN_ROOTS`, an owner that holds nothing and never goes.
+   *   - A plain `createRoot()` in an effect's callback throws since Solid rc.17 (`PRIMITIVE_IN_EFFECT_CALLBACK`).
+   *   - The browser runs an element's `connectedCallback()` inside one whenever Solid inserts the element.
+   * - No context reaches inside:  not the caller's, not an app's.
+   */
+  static ownRoot<T>(fn: (dispose: () => void) => T): T {
+    return runWithOwner(OWN_ROOTS, () => createRoot(fn))
+  }
 
   /** `instance`'s record, made on first use. */
   static recordOf(instance: object): ReactiveRecord {
@@ -182,8 +197,8 @@ export class Reactive {
    *   it reacts to the members it names, never to what else it reads.
    * - The method runs only when a member's VALUE changed (`===`, member by member):
    *   a memo with `equals` sits between the reads and the effect.
-   *   - Why:  Solid 2 (rc.13) runs an effect's apply on EVERY re-run of its compute, equal value or not,
-   *     and a getter or `@derived` member tracks the sources UNDER it,
+   *   - Why:  Solid 2 runs an effect's apply on EVERY re-run of its compute, equal value or not
+   *     (documented since rc.17), and a getter or `@derived` member tracks the sources UNDER it,
    *     so its effect re-runs whenever any of them moves.
    *   - Skipping inside the apply would be too late:  Solid has run the previous cleanup by then.
    */
@@ -1345,3 +1360,9 @@ const ATTRIBUTE_PREFIX = "attribute:"
 
 /** Prefix of a raw attribute's key in `ReactiveRecord.sources`. */
 const RAW_PREFIX = "raw:"
+
+/**
+ * The owner every `Reactive.ownRoot()` is made under:  made once, as this file loads, and never disposed.
+ * - Holds no context and no state:  only there so a root made inside an effect's callback has an owner.
+ */
+const OWN_ROOTS = createRoot(() => getOwner())
