@@ -11,6 +11,11 @@
 // - No `yarn.lock`:  the top repo `spell` holds the one install for every repo.
 {
   "generators": [
-    { "name": "spell syntax table", "outputs": ["spell/spellSyntax.json"], "cwd": ".", "run": ["yarn", "spell:gen:syntax"] }
+    {
+      "name": "spell syntax table",
+      "outputs": ["src/spell/spellSyntax.json"],
+      "cwd": ".",
+      "run": ["yarn", "spell:gen:syntax"]
+    }
   ]
 }

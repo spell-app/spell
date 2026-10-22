@@ -12,54 +12,70 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in th
   (no `yarn.lock` here), and [its AGENTS.md](../AGENTS.md) has the rules across repos.
 - ONE npm package, `spell-lang` (epic `repo-split` P11, Q36;  unscoped):  its root [package.json](package.json), one
   version.
-  - Its `exports` name every entry the five folders offer, each under its folder's name:
-    `spell-lang/parser`, `spell-lang/core/model`, `spell-lang/spell/test` ...
+  - ALL its code is under ONE [src/](src/), a folder each (below);  a file's import name is the package's name, then
+    its path under `src/`, no extension (epic `repo-split` P14, Q47):
+    - `spell-lang/parser` (a folder's barrel, its `index.ts`), `spell-lang/parser/rules/Rule`, `spell-lang/core/model`
+    - the SAME name inside this repo and from every other:  no `$/` aliases, no `#` imports, no `../`;
+      same-folder peers stay `./Peer`
+  - Its `exports` map every name to its file, each with spell-lang's own condition, `spell-lang-source`:
+    - one wildcard entry, `"./*"`, for every file
+    - an explicit entry for each folder barrel other repos import (`./parser`, `./parser/rulex`, `./spell/test` ...):
+      `tsx` won't load a folder through the wildcard from another repo
+    - TypeScript in this repo reads its own names as SOURCE (the condition, in [tsconfig.json](tsconfig.json)), and
+      another repo's as their built declarations (`types`).
+    - Vite, Vitest, `tsx` and oxlint read the source (`default`), adding the extension themselves.
   - The folders have NO `package.json` of their own:  their dependencies are the root's.
-  - Each folder is still its own TypeScript program, with its own `tsconfig.json`, `vite.config.ts` and
-    `vitest.config.ts`.
-  - Its `"spellTypes"` lists the five:  their declarations are built folder by folder into ONE `dist-types/` at the
-    repo's root (`dist-types/parser/src/index.d.ts` ...).
-  - Its `"spellFolders"` lists each folder's checks, lowest first (below, "Commands").
-- `$/` aliases are for inside this repo ([tsconfig.base.json](tsconfig.base.json));  another repo's package is imported
-  by its npm name (`spell-kit/...`, `spell-ui/...`), an entry of its `package.json` `exports`.
+  - TypeScript sees two programs, both built into `dist-types/` (git-ignored) by the kit's `spell-types`, for the
+    repos above (its `"spellTypes"`):
+    - [tsconfig.json](tsconfig.json):  the browser-safe code, `parser`, `markdown`, `core`, `py`'s writers and `spell`
+    - [tsconfig.node.json](tsconfig.node.json):  what needs node:  the cli, spell's `node/` and `test/`, the parser's
+      test helpers, core's declarations writer, the scripts and configs
+  - ONE [vite.config.ts](vite.config.ts) (lint, format) and ONE [vitest.config.ts](vitest.config.ts), a project per
+    folder.
+- Another repo's package is imported by its npm name too (`spell-kit/util`, `spell-ui/...`), an entry of its
+  `package.json` `exports`.
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/` (git-ignored here), made by the kit's every `yarn install` (its `postinstall`).
 
 ## Folders
 
 Each folder links to its own `AGENTS.md`:  read it before working there.
-- Entry:  how another repo imports it, an entry of `spell-lang`'s `exports`.
+- Import:  its barrel's name, the same from this repo and every other.
 
-| Folder | Entry | Alias | Namespace | What it is |
-| --- | --- | --- | --- | --- |
-| [parser](parser/AGENTS.md) | `spell-lang/parser` | `$/parser` | `P` | the generic rule-based parser;  Rulex is an opt-in side-effect import, `$/parser/rulex` (`spell-lang/parser/rulex` from another repo) |
-| [markdown](markdown/AGENTS.md) | `spell-lang/markdown` | `$/markdown` | `MD` | GitHub-flavoured markdown on the parser, drawing `ui-*` markup |
-| [core](core/AGENTS.md) | `spell-lang/core` | `$/core` | `SC` | the runtime compiled spell runs on |
-| [py](py/AGENTS.md) | `spell-lang/py` | `$/py` | `PY` | Python's writers (`ts/`) and `spell_core` (`core/`, a uv project) |
-| [spell](spell/AGENTS.md) | `spell-lang/spell` | `$/spell` | `SP` | the spell LANGUAGE on the parser, and `PARSING.md`;  its page for people is [README-spell.md](README-spell.md) |
+| Folder | Import | Namespace | What it is |
+| --- | --- | --- | --- |
+| [parser](src/parser/AGENTS.md) | `spell-lang/parser` | `P` | the generic rule-based parser;  Rulex is an opt-in side-effect import, `spell-lang/parser/rulex` |
+| [markdown](src/markdown/AGENTS.md) | `spell-lang/markdown` | `MD` | GitHub-flavoured markdown on the parser, drawing `ui-*` markup |
+| [core](src/core/AGENTS.md) | `spell-lang/core` | `SC` | the runtime compiled spell runs on |
+| [py](src/py/AGENTS.md) | `spell-lang/py` | `PY` | Python's writers (its TypeScript) and `spell_core` (`core/`, a uv project) |
+| [spell](src/spell/AGENTS.md) | `spell-lang/spell` | `SP` | the spell LANGUAGE on the parser, and `PARSING.md`;  its page for people is [README-spell.md](README-spell.md) |
+| [cli](src/cli/AGENTS.md) | `spell-lang/cli` | | the language's `spell` commands (`commands.ts`), and their types |
+
+- Outside `src/`, and never imported:  `tests/`, `scripts/` (markdown's spec tools), `docs/` (images, and spell's old
+  notes in `docs/spell/`), the configs.
 
 ## Tests
 
-- Every folder's tests live in `tests/<folder>/`, at the same path as the code they test
-  (`tests/parser/src/...` tests `parser/src/...`), with their snapshots and test data.
-- Each folder's Vitest finds them (its config's `dir`);  a `tsconfig.json` in each tests folder gives them the
-  folder's own settings and the aliases.
+- Every folder's tests live in `tests/<folder>/`, at the same path as the code they test under `src/`
+  (`tests/parser/rules/Rule.test.ts` tests `src/parser/rules/Rule.ts`), with their snapshots and test data.
+  - They import by package name too:  `import { P } from "spell-lang/parser"`.
+- [vitest.config.ts](vitest.config.ts) has a project per folder, over its tests;  [tests/tsconfig.json](tests/tsconfig.json)
+  checks them with node's settings.
+- `tests/spaces/`:  the frozen test projects ([README-spell](README-spell.md#the-frozen-test-projects)).
+- `tests/py/core/tests/`:  `spell_core`'s pytest tests.
 
 ## Commands
 
-At the repo's root, each runs its check folder by folder, lowest first, through the kit's `spell-folders` (its
-`"spellFolders"`;  epic `repo-split` P11):
+At the repo's root, each over the whole repo:
 
 ```sh
-yarn ts               # the declarations (the repos' below, then its own), then each folder's other tsc passes
-yarn test             # each folder's Vitest (and py's pytest)
-yarn lint             # each folder's oxlint (and py's ruff);  lint:fix fixes what it can
-yarn format           # each folder's oxfmt (and ruff format);  format:check only checks
+yarn ts               # the declarations (the repos below, then this one's two programs), then the tests' tsc
+yarn test             # Vitest, a project per folder, then py's pytest
+yarn lint             # oxlint over src, tests and scripts, then py's ruff;  lint:fix fixes what it can
+yarn format           # oxfmt, then ruff format;  format:check only checks
 yarn review           # the finishing pass:  ts, lint:fix, format, test
 ```
 
-- One folder's, or a few:  name them, `yarn spell-folders test parser core`.
-- The folders have no scripts of their own:  `yarn test` in one runs the whole repo's (yarn finds the root's
-  `package.json`).  A folder's tools directly, in it:  `yarn vp test run`, `yarn vp lint src`.
+- One folder's tests:  `yarn vp test run --project parser` (`parser`, `markdown`, `core`, `py`, `spell`, `cli`).
 - A folder's own scripts are the root's, prefixed with its name:
   - `markdown:spec:update`
   - `core:gen:declarations`

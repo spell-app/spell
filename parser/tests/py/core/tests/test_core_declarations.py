@@ -20,12 +20,13 @@ from spell_core import core
 REPO = Path(__file__).parents[4]
 
 # The JavaScript core's method list:  see `coreDeclarations.ts`.
-DECLARATIONS: dict[str, Any] = json.loads((REPO / "core" / "core.declarations.json5").read_text(encoding="utf-8"))
+DECLARATIONS_FILE = REPO / "src" / "core" / "core.declarations.json5"
+DECLARATIONS: dict[str, Any] = json.loads(DECLARATIONS_FILE.read_text(encoding="utf-8"))
 
 # What spell_core doesn't have yet, by the JavaScript name, grouped by why:
-# `not_ported_yet.json5`, in spell_core's folder (`py/core/`).
+# `not_ported_yet.json5`, in spell_core's folder (`src/py/core/`).
 # The core reference page reads it too.  Take a name out as it's ported.
-NOT_PORTED_YET_FILE = REPO / "py" / "core" / "not_ported_yet.json5"
+NOT_PORTED_YET_FILE = REPO / "src" / "py" / "core" / "not_ported_yet.json5"
 NOT_PORTED_YET: set[str] = {
     name for group in json.loads(NOT_PORTED_YET_FILE.read_text(encoding="utf-8"))["groups"] for name in group["names"]
 }
