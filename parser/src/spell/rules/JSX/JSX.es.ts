@@ -6,6 +6,10 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - Tags and attributes stay as written, the web's and Spell UI's (`<div>`, `<ui-button>`);
  *   only spell's own words are Spanish:  `<hijos/>` for the web's `<slot/>`, `en="header"` for `slot="header"`.
+ * - Spell UI's Spanish tags stay as written too, with their Spanish attributes and values:
+ *   `<es-boton tamano="grande">` draws `h("es-boton", { tamano: "grande" })` (epic `spanish` P9).
+ *   - The page knows them once Spanish is on:  `<ui-root lang="es">` defines every component as `es-*` too.
+ *   - So spell needs none of Spell UI's Spanish words, which it can't import.
  */
 import { P } from "spell-lang/parser"
 import { SpellParser } from "spell-lang/spell/SpellParser"
@@ -256,6 +260,33 @@ JSXEs.addRule(SpellJSX, {
           `<div className="pile"><hijos name="header"/><hijos/></div>`,
           ['h("div", { class: "pile" },', '  h("slot", { name: "header" }),', '  h("slot")', ")"],
           ['<div class="pile">', '  <slot name="header" />', "  <slot />", "</div>"]
+        ]
+      ]
+    },
+    {
+      title: "Spell UI in Spanish:  <es-*> tags, their attributes and values as written",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        [`<es-tarjeta>Hola</es-tarjeta>`, 'h("es-tarjeta", "Hola")', "<es-tarjeta>Hola</es-tarjeta>"],
+        [
+          `<es-boton primario color="rojo" tamano="grande">Jugar</es-boton>`,
+          'h("es-boton", { primario: true, color: "rojo", tamano: "grande" }, "Jugar")',
+          '<es-boton primario={true} color="rojo" tamano="grande">Jugar</es-boton>'
+        ],
+        // a handler, a value from the program, a class
+        [
+          `<es-boton onClick={imprimir 1} className="mano">{el rank de la card}</es-boton>`,
+          'h("es-boton", { class: "mano", onClick: () => core.console.log(1) }, () => card.rank)',
+          '<es-boton class="mano" onClick={() => core.console.log(1)}>{card.rank}</es-boton>'
+        ],
+        // spell's own words inside one:  where a drawable list's items show, and a child's named place
+        [
+          `<es-tarjeta><h3 en="header">Pila</h3><hijos/></es-tarjeta>`,
+          ['h("es-tarjeta",', '  h("h3", { slot: "header" }, "Pila"),', '  h("slot")', ")"],
+          ["<es-tarjeta>", '  <h3 slot="header">Pila</h3>', "  <slot />", "</es-tarjeta>"]
         ]
       ]
     },

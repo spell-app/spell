@@ -183,6 +183,12 @@ classesEs.addRule(CreateType, {
           drawableClass("Card", "Drawable"),
           [...drawableClass("Card", "Drawable"), ...drawableElement("Card", "card")]
         ],
+        // a Spanish name:  its element is named from it, `<test-classes-carta>`, as English's `<test-classes-card>`
+        [
+          "una carta es una cosa dibujable",
+          drawableClass("Carta", "Drawable"),
+          [...drawableClass("Carta", "Drawable"), ...drawableElement("Carta", "carta")]
+        ],
         [
           "una card es un dibujable",
           drawableClass("Card", "Drawable"),
