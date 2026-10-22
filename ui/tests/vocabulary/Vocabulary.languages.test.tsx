@@ -41,6 +41,28 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
     expect(toggles).toEqual([true])
   })
 
+  it("names a Spanish tag's properties in Spanish:  `discontinuo` is `dashed`, by attribute and by property", async () => {
+    await import("spell-ui/components/ui-card")
+    const cardRoot = (host: DOMElement) => host.shadowRoot!.querySelector("[part~=card]")!
+    const byAttribute = await ElementFixture.render<DOMElement>(`<es-tarjeta discontinuo></es-tarjeta>`)
+    expect(cardRoot(byAttribute).className).toBe("ui dashed card")
+    // what spell's JSX writes for a value that can change, `prop:discontinuo`:  the element's own property
+    const byProperty = await ElementFixture.render<DOMElement & Record<string, unknown>>(`<es-tarjeta></es-tarjeta>`)
+    expect("discontinuo" in byProperty).toBe(true)
+    expect("dashed" in byProperty).toBe(false)
+    byProperty.discontinuo = true
+    await ElementFixture.tick()
+    expect(byProperty.discontinuo).toBe(true)
+    expect(byProperty.hasAttribute("discontinuo")).toBe(true)
+    expect(cardRoot(byProperty).className).toBe("ui dashed card")
+    // a dashed name's property is camelCase, as English's:  `sin-relleno` => `sinRelleno`
+    const button = await ElementFixture.render<DOMElement & Record<string, unknown>>(`<es-boton>Guardar</es-boton>`)
+    button.sinRelleno = true
+    button.primario = true
+    await ElementFixture.tick()
+    expect(buttonClasses(button)).toBe("ui primary unpadded button")
+  })
+
   it("defines a family loaded afterwards as it's defined", async () => {
     expect(customElements.get("es-etiqueta")).toBeUndefined()
     await import("spell-ui/components/ui-label")
