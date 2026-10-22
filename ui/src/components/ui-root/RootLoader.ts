@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 import { ComponentPacks } from "spell-ui/components/ui-components/ComponentPacks"
 import { ROOT_CATALOG } from "./UIRoot.catalog"
 import type { RootCatalogEntry } from "./UIRoot.types"
@@ -21,6 +21,14 @@ import type { RootCatalogEntry } from "./UIRoot.types"
  */
 const FAMILIES = import.meta.glob(["../*/index.ts", "!../ui-root/index.ts"])
 
+/**
+ * The languages Spell UI ships, by language code:  each a lazy chunk of its whole dictionary.
+ * - `<ui-root lang="es">` (or the document's `lang`) loads it, and names every tag in it (`useLanguage()`).
+ */
+const LANGUAGES: Readonly<Record<string, () => Promise<E.Dictionary>>> = {
+  es: () => import("spell-ui/components/components.es").then(({ es }) => es)
+}
+
 /****************
  * ### `RootLoader`
  * Tag => family => `import()`, once per family for the whole page (every root shares the loads).
@@ -32,6 +40,8 @@ const FAMILIES = import.meta.glob(["../*/index.ts", "!../ui-root/index.ts"])
  * - Component packs' tags (`<ui-components source>`) aren't imported here:
  *   a pack defines them all as its script registers it (`ComponentPacks`);
  *   this only answers for them (`entryOf()`, `undefinedTags()`).
+ * - A page language's tags load the same way (`<es-boton>` => `ui-button`'s family),
+ *   once a root has picked the language (`useLanguage()`).
  * - Static:  the loads are page-wide, shared by every root (and the docs site's router).
  ****************/
 export class RootLoader {
@@ -41,18 +51,27 @@ export class RootLoader {
   /** Folder => importer of its barrel, for the families a bundle added (`add()`).  Page-wide. */
   private static readonly added = new Map<string, () => Promise<unknown>>()
 
+  /** A page language's tag => the canonical tag it stands for (`es-boton` => `ui-button`).  Page-wide. */
+  private static readonly translatedTags = new Map<string, string>()
+
+  /** Language code => its load, started once (`useLanguage()`).  Page-wide. */
+  private static readonly languages = new Map<string, Promise<void>>()
+
   ////////////////
   // ## Tags
   ////////////////
 
   /** The folder (family) that defines `tag`;  `undefined` for a tag no family defines. */
   static folderFor(tag: string): string | undefined {
-    return Object.hasOwn(ROOT_CATALOG, tag) ? ROOT_CATALOG[tag].folder : undefined
+    return RootLoader.catalogEntry(tag)?.folder
   }
 
-  /** What a root knows about `tag` before it's defined:  Spell UI's catalog, else a registered pack's. */
+  /**
+   * What a root knows about `tag` before it's defined:  Spell UI's catalog (a page language's tag too),
+   * else a registered pack's.
+   */
   static entryOf(tag: string): RootCatalogEntry | undefined {
-    return Object.hasOwn(ROOT_CATALOG, tag) ? ROOT_CATALOG[tag] : ComponentPacks.entryOf(tag)
+    return RootLoader.catalogEntry(tag) ?? ComponentPacks.entryOf(tag)
   }
 
   /**
@@ -63,7 +82,8 @@ export class RootLoader {
     const tags = new Set<string>()
     // not defined, or defined early and pending:  its family hasn't loaded either way
     for (const { localName } of root.querySelectorAll(E.DOMElement.notAttached)) {
-      if (localName.startsWith(TAG_PREFIX) || ComponentPacks.owns(localName) || alsoLoads?.(localName)) {
+      const isOurs = localName.startsWith(TAG_PREFIX) || RootLoader.translatedTags.has(localName)
+      if (isOurs || ComponentPacks.owns(localName) || alsoLoads?.(localName)) {
         tags.add(localName)
       }
     }
@@ -120,6 +140,44 @@ export class RootLoader {
   }
 
   ////////////////
+  // ## Languages
+  ////////////////
+
+  /** Does Spell UI ship language `lang` (`es`, or `es-MX`'s `es`)?  English needs nothing:  it's built in. */
+  static hasLanguage(lang: string): boolean {
+    return Object.hasOwn(LANGUAGES, RootLoader.languageOf(lang))
+  }
+
+  /**
+   * Make `lang` the page's language, once:  load its dictionary, define every component in it,
+   * load its texts and switch the texts to it.
+   * - `useLanguage("es")`:  `<es-boton>` works, and `UI.i18n` says "Cerrar".
+   *   - The prefix is the language's code (`es`).
+   *   - The work is `UI.vocabulary.defineComponents()` and `UI.i18n.registerDictionary()`.
+   *   - `UI.i18n.locale` becomes `lang` as written (`es-MX`).
+   * - Resolves at once for a language Spell UI doesn't ship (English included).
+   * - The promise rejects if the dictionary can't be loaded, and stays rejected.
+   */
+  static useLanguage(lang: string): Promise<void> {
+    const code = RootLoader.languageOf(lang)
+    const loadDictionary = Object.hasOwn(LANGUAGES, code) ? LANGUAGES[code] : undefined
+    if (!loadDictionary) return Promise.resolve()
+    let load = RootLoader.languages.get(code)
+    if (!load) {
+      load = Promise.all([loadDictionary(), UI.load()]).then(([dictionary, ui]) => {
+        for (const [canonical, name] of Object.entries(dictionary.tags ?? {})) {
+          RootLoader.translatedTags.set(`${code}-${name}`, canonical)
+        }
+        ui.vocabulary.defineComponents({ prefix: code, dictionary })
+        ui.i18n.registerDictionary(dictionary)
+        ui.i18n.locale = lang
+      })
+      RootLoader.languages.set(code, load)
+    }
+    return load
+  }
+
+  ////////////////
   // ## Adding
   ////////////////
 
@@ -138,6 +196,17 @@ export class RootLoader {
   ////////////////
   // ## Internal
   ////////////////
+
+  /** Spell UI's catalog entry for `tag`, or for the canonical tag a page language's tag stands for. */
+  private static catalogEntry(tag: string): RootCatalogEntry | undefined {
+    const canonical = RootLoader.translatedTags.get(tag) ?? tag
+    return Object.hasOwn(ROOT_CATALOG, canonical) ? ROOT_CATALOG[canonical] : undefined
+  }
+
+  /** `es-MX` => `es`:  the language, without its region. */
+  private static languageOf(lang: string): string {
+    return lang.split("-")[0]!.toLowerCase()
+  }
 
   /** The error for a folder no glob or `add()` knows. */
   private static noFamily(folder: string): Error {

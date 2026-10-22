@@ -1,4 +1,5 @@
 import { once } from "spell-ui/util"
+import type { Dictionary } from "spell-ui/vocabulary"
 
 import {
   EN_STRINGS,
@@ -70,6 +71,18 @@ export class I18n {
     let scopes = this.scoped.get(locale)
     if (!scopes) this.scoped.set(locale, (scopes = new Map()))
     scopes.set(scope, { ...scopes.get(scope), ...pack })
+  }
+
+  /**
+   * Register a translation's texts under its language:  its shared `texts`, then each component's own, scoped by tag.
+   * - `registerDictionary(es)` ~== `register("es", es.texts)`, then `register("es", texts, tag)` per component.
+   * - Its names are `UI.vocabulary`'s (`defineComponents()`):  this reads only the texts.
+   */
+  registerDictionary(dictionary: Dictionary) {
+    if (dictionary.texts) this.register(dictionary.lang, dictionary.texts)
+    for (const [tag, { texts }] of Object.entries(dictionary.components ?? {})) {
+      if (texts) this.register(dictionary.lang, texts, tag)
+    }
   }
 
   /**

@@ -900,6 +900,18 @@
   },
   "packageManager": "yarn@4.18.0",
   "customElements": "./docs/__data/custom-elements.json",
+  "pageServer": {
+    "bundles": [
+      "site/_assets"
+    ],
+    "componentSets": {
+      "ui": {
+        "name": "Spell UI",
+        "dir": "docs",
+        "assets": "site/_assets"
+      }
+    }
+  },
   "spell": {
     "commands": "./src/cli/commands.ts"
   },

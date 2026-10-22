@@ -1,16 +1,18 @@
 /**
- * Translation demo:  the same components registered under Spanish names with `define(tag, dictionary)`;
- * `ie-cambio` / `ie-alternar` events are logged.
+ * Spell UI in Spanish:  every component named in Spanish at once (`defineComponents()`), its texts too.
+ * - `es-cambio` / `es-alternar` events are logged.
  */
 
-import { UIButton, UIDropdown } from "spell-ui"
-import { es } from "spell-ui/test-helpers/dictionary.es"
+import { UI } from "spell-ui"
+import { es } from "spell-ui/components/components.es"
 
-UIButton.define("ie-boton", es)
-UIDropdown.define("ie-desplegable", es)
+const ui = await UI.load()
+ui.vocabulary.defineComponents({ prefix: "es", dictionary: es })
+ui.i18n.registerDictionary(es)
+ui.i18n.locale = "es"
 
 const log = document.getElementById("log")!
-for (const name of ["ie-cambio", "ie-alternar"]) {
+for (const name of ["es-cambio", "es-alternar"]) {
   document.addEventListener(name, (event) => {
     log.textContent += `${name} ${JSON.stringify((event as CustomEvent).detail, ["value", "active"])}\n`
   })

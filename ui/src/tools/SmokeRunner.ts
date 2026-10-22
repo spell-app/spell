@@ -11,16 +11,18 @@ import { Terminal } from "spell-kit/element-tools/Terminal"
 
 /****************
  * ### `SmokeRunner`
- * Runs the import-map smoke pages in headless chromium, against the BUILT `dist/` and the vendored peers, and
- * writes `smoke-results.json`.
+ * Runs the import-map smoke pages in headless chromium, against the BUILT `dist/` and the vendored peers,
+ * and writes `smoke-results.json`.
  * - ONE static server (`StaticServer`), no Vite dev server, mounting repo folders at their own names:
  *   - `/dist/`, `/vendor/` -- the library build and the vendored peers (`yarn vendor`)
  *   - `/src/tools/` -- host pages (`frameworks/*.html`), the compiled Solid host app, the extra pages
- *   - `/src/test-helpers/` -- `PerfRun.ts` and the translation dictionary, transpiled on the fly
- * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell-ui/...` => `/dist/...`;  the Solid
- *   host app resolves `solid-js` / `@solidjs/web` through it too, so it shares one copy with the components.
- * - Pages:  the four hosts (`vanilla`, `react`, `vue`, `solid`), the perf page when a `perfAdapter` is given, then
- *   `pages`.  Each page publishes `window.smokeResult` (`PageResult`).
+ *   - `/src/test-helpers/` -- `PerfRun.ts`, transpiled on the fly
+ * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell-ui/...` => `/dist/...`.
+ *   - The Solid host app resolves `solid-js` / `@solidjs/web` through it too,
+ *     so it shares one copy with the components.
+ * - Pages, in order:
+ *   the four hosts (`vanilla`, `react`, `vue`, `solid`), the perf page when a `perfAdapter` is given, then `pages`.
+ *   - Each page publishes `window.smokeResult` (`PageResult`).
  * - Offline except the framework CDNs:  requests to any other host are aborted and reported as errors.
  ****************/
 export class SmokeRunner {
@@ -163,13 +165,14 @@ export type SmokeRunnerOptions = {
   /** where `smoke-results.json` goes, relative to `root` */
   results: string
   /**
-   * Import map entries:  the vendored peers (`vendor/importmap.json`) and `spell-ui`, `spell-ui/ui-<family>` =>
-   * `/dist/...`.
+   * Import map entries:
+   * the vendored peers (`vendor/importmap.json`), and `spell-ui`, `spell-ui/ui-<family>` => `/dist/...`.
    */
   importMap: ImportMap
   /**
-   * Module exporting `adapter: PerfAdapter` (e.g. `src/tools/smoke/perf-adapter.js`), relative to `root`;  mapped as
-   * `@spell/ui-tools/perf-adapter` for the perf page.  Omit to skip the perf page.
+   * Module exporting `adapter: PerfAdapter` (e.g. `src/tools/smoke/perf-adapter.js`), relative to `root`.
+   * - Mapped as `@spell/ui-tools/perf-adapter` for the perf page.
+   * - Omit to skip the perf page.
    */
   perfAdapter?: string
   /** extra pages, relative to `root` (under a mounted folder), each publishing `window.smokeResult` */

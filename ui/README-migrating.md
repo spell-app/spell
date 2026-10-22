@@ -353,8 +353,8 @@ Each family's docs page names what it leaves out, and why, in a short "Not porte
   - HTML5 state history on tabs
   - social buttons:  give a button a `color` and an icon instead
 - Fomantic's deprecated page grids (`ui page grid`):  put the grid in a `<ui-container grid>` instead.
-- Translated tag sets (`<ie-tarjeta>`, a card in Spanish):  designed, partly built
-  ([README-runtime.md](README-runtime.md)).
+- Translated tag sets:  Spanish is built (`<es-tarjeta>`, a card in Spanish).
+  No other language yet ([README-runtime.md](README-runtime.md)).
 
 </details>
 

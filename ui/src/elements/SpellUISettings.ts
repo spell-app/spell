@@ -49,8 +49,9 @@ export class SpellUISettings {
       converters: Converters,
       valuesFor: (spec) => ValueSets.setFor(spec),
       text: (key, params, tag) => UI.i18n.t(key, params, tag),
-      registerVocabulary(vocabulary, how) {
+      registerVocabulary(vocabulary, how, define) {
         if (how === "replace") UI.vocabulary.replace(vocabulary)
+        else if (define) UI.vocabulary.registerComponent(vocabulary, define)
         else UI.vocabulary.register(vocabulary)
       },
       registerTexts: (texts, tag) => UI.i18n.registerDefaults(texts, tag)
