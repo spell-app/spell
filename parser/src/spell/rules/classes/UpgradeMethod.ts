@@ -39,7 +39,7 @@ export class UpgradeMethod extends SpellStatement<"type|version|body?"> {
     if (!match) return undefined
     const version = Number(match.groups.version.value)
     if (!Number.isInteger(version) || version < 2) {
-      return SpellStatement.refuse(match, `An upgrade starts at version 2:  a file with no version is version 1`)
+      return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("upgrade-before-2"))
     }
     return match
   }

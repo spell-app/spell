@@ -127,6 +127,19 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         docstring: ID_DOCSTRING
       },
       {
+        words: "name",
+        kind: "property",
+        datatype: "text",
+        stored: true,
+        declarable: true,
+        docstring: md(
+          "What it's called, e.g. `the name of the pile` -- nothing until it's given one.",
+          '- Give it one when it\'s made, `a new pile with name = "stock"`, or later, `set the name of the pile to "stock"`.',
+          "- Every list has one, built in, but a type may still say so:  `a pile has a name as text`.",
+          "- One list by its name:  `tableau T1` is the tableau named `T1`."
+        )
+      },
+      {
         words: "length",
         kind: "property",
         datatype: "number",
@@ -565,6 +578,8 @@ export function typeName(written: string): P.Datatype {
  * - Each member with a `readAs` template, as a `P.ScopeVariable` holding it:
  *   `TypeScope.getMember()` finds it, for `the X of Y` / `its X`, and editors list it.
  *   - A `stored` member too, with no template:  it reads and sets like a declared property, e.g. `id`.
+ *     - Under the language's own words, if it has any, its `output` the member's name:
+ *       Spanish's `nombre` compiles to `.name`.
  *   - A member spelled only by built-in RULES (no `readAs`) is docs alone.
  * - Throws for a type the scope doesn't have, or a template `parseReadAsTemplate()` can't read.
  * - SIDE EFFECT:  changes the shared root's types, once -- `SpellParser.rootScope` calls it as it builds.
@@ -575,13 +590,19 @@ export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = S
     if (!type) throw new TypeError(`Built-in type '${entry.name}' isn't in the root scope:  see P.BUILT_IN_TYPES`)
     if (entry.itemType) type.itemType = entry.itemType
     for (const member of entry.members) {
-      if (member.stored) {
-        const { words, datatype, docstring } = member
-        type.variables.add({ name: builtInMemberName(words), datatype, docstring })
-        continue
-      }
       // the language's own words for it, e.g. Spanish's `largo` for `length`:  each reads the same
       const local = words.builtInMembers?.[member.words]
+      if (member.stored) {
+        const { datatype, docstring } = member
+        const output = builtInMemberName(member.words)
+        for (const said of local ?? [member.words]) {
+          const name = builtInMemberName(said)
+          // compiled by its own name:  Spanish's `nombre` reads and sets `.name`
+          const renamed = name !== output ? { output } : {}
+          type.variables.add({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, datatype, docstring })
+        }
+        continue
+      }
       if (local && member.readAs) {
         for (const said of local) {
           const name = builtInMemberName(said)
@@ -673,14 +694,37 @@ export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
 }
 
 /**
- * Is `name` a property every thing or list has, built in (a `stored` member), e.g. `id`?
- * - So no type may declare its own:  `a person has an id as text` is refused -- see `SpellStatement.refuseBuiltInType()`.
+ * The built-in `stored` member `words` names on `type` -- `undefined` if it has none.
+ * - e.g. `id` on a person, `name` on a pile -- or Spanish's `nombre`, the language's own word for it;
+ *   a card has no `name`, so it may declare any.
+ * - Found through the built-in type `type` comes from, e.g. `list` for a pile.
+ * - Its super-types not known yet (a stub):  only a member no type may declare, e.g. `id`, which every thing and
+ *   list has.
+ * - `name`:  how it compiles, e.g. `name` for `nombre`;  `on`:  the built-in type whose member it is, e.g. `list`.
+ * - Why:  a declaration of one is refused, unless it's `declarable` with the same datatype -- see
+ *   `SpellStatement.refuseBuiltInType()`.
+ * - A lookup:  call it WHILE PARSING.
  */
-export function isBuiltInStoredMember(name: string): boolean {
-  const memberName = builtInMemberName(name)
-  return BUILT_IN_TYPE_TABLE.some((entry) =>
-    entry.members.some((member) => member.stored && builtInMemberName(member.words) === memberName)
-  )
+export function builtInStoredMember(
+  type: P.TypeScope | undefined,
+  words: string
+): { member: SP.BuiltInMember; name: string; on: P.Datatype } | undefined {
+  const said = builtInMemberName(words)
+  const builtIns = type?.chain().filter(isBuiltInTypeScope) ?? []
+  for (const builtIn of builtIns) {
+    const variable = builtIn.variables.get(said, "LOCAL_ONLY")
+    if (!variable) continue
+    const name = variable.output ?? variable.name
+    const entry = BUILT_IN_TYPE_TABLE.find((it) => P.classCase(it.name) === builtIn.name)
+    const stored = entry?.members.find((member) => member.stored && builtInMemberName(member.words) === name)
+    if (stored) return { member: stored, name, on: entry!.name }
+  }
+  if (builtIns.length) return undefined
+  for (const entry of BUILT_IN_TYPE_TABLE) {
+    const member = entry.members.find((it) => it.stored && !it.declarable && builtInMemberName(it.words) === said)
+    if (member) return { member, name: said, on: entry.name }
+  }
+  return undefined
 }
 
 ////////////////

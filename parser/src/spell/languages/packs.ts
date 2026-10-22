@@ -5,6 +5,7 @@
  *     every rule English registers is registered again, in the same order, with a syntax and tests
  *   - every rule class a rules folder exports is registered by some `<module>.en.ts`
  *   - the pack's word tables have every table English has, and name every built-in type English does
+ *   - its parser messages have every key English's do (`SP.Language.parserMessages`)
  * - What it fixes:  `fixPackModule()` copies each missing registration from English, as a stub to translate.
  * - It reads the rule files as TEXT, not by loading them:  a registration's place in its file is what the fix needs,
  *   and a missing one is a line of code to write.
@@ -131,6 +132,7 @@ export function unregisteredRules(modules: PackModuleSource[]): UnregisteredRule
  * What `other`'s word tables lack, against English's.
  * - `words`:  every table English has (`SP.LanguageWords`), and every one of its `declarations`
  * - `typeWords`:  a word for every built-in type English has a word for (the words themselves differ)
+ * - `parserMessages`:  every key English's has, e.g. `dont-understand`:  one it lacks reads English
  * - `builtInMembers`:  each names a built-in member there is (`SP.BUILT_IN_TYPE_TABLE`), never a stale one
  */
 export function checkWords(english: SP.Language, other: SP.Language): WordProblem[] {
@@ -146,6 +148,9 @@ export function checkWords(english: SP.Language, other: SP.Language): WordProble
   const typesNamed = new Set(Object.values(other.typeWords))
   for (const type of new Set(Object.values(english.typeWords))) {
     if (!typesNamed.has(type)) problems.push({ table: "typeWords", key: type, problem: "missing" })
+  }
+  for (const key of Object.keys(english.parserMessages)) {
+    if (!(key in other.parserMessages)) problems.push({ table: "parserMessages", key, problem: "missing" })
   }
   const members = new Set(SP.BUILT_IN_TYPE_TABLE.flatMap((type) => type.members.map((member) => member.words)))
   for (const member of Object.keys(other.words.builtInMembers ?? {})) {

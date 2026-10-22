@@ -135,9 +135,8 @@ NumberToken    1
   - double-quoted text only, so a single quote can sit inside `isn't`
   - indentation matters at the start of a line
   - raw `css` and `markdown` blocks
-- Where it falls short:  Spell's words are the tokenizer's default, a letter from A to Z and then letters, digits,
-  `-` or `_`.
-  So `año` is three tokens, `a`, `ñ` and `o`;  markdown's tokenizer reads it as one word.
+- Spell's words are the tokenizer's default:  a letter in any script, then letters, accents, digits, `-` or `_`.
+  So `año`, `está` and `corazón` are one word each, as Spanish needs.
 
 <details>
 <summary>Every kind of token, and the settings</summary>
@@ -146,7 +145,7 @@ From [Tokens.ts](src/parser/tokenizer/Tokens.ts):
 
 | Token | What it holds |
 | --- | --- |
-| `WordToken` | a word:  a letter, then letters, digits, `-` or `_` (so `card-click` is one word) |
+| `WordToken` | a word:  a letter in any script, then letters, accents, digits, `-` or `_` (so `card-click` is one word) |
 | `NumberToken` | a number, its `value` a JavaScript number |
 | `SymbolToken` | ONE punctuation character:  `>=` is two, and the `Symbols` rule takes them as a run |
 | `TextToken` | quoted text, quotes included |
@@ -199,7 +198,8 @@ Rulex folded `(trigger|fire|send) event?` into a single Keywords rule._
 ### A real rule:  Spell's `trigger`
 
 The class says how the rule behaves;  each `addRule()` is one way to write it, with its own tests.
-From [Trigger.ts](src/spell/rules/events/Trigger.ts), trimmed of its docstring's bullets:
+From [Trigger.ts](src/spell/rules/events/Trigger.ts), trimmed of its docstring's bullets and a comment,
+then its English registrations, from [events.en.ts](src/spell/rules/events/events.en.ts):
 
 ```ts
 /**
@@ -215,6 +215,7 @@ export class Trigger extends SpellStatement<"eventName|props?"> {
     return new P.ASTCoreMethodInvocation(match, { methodName: "trigger", args })
   }
 }
+
 events.addRule(Trigger, {
   syntax: "(trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?",
   tests: [
@@ -241,18 +242,28 @@ events.addRule(Trigger, {
 - `SpellStatement<"eventName|props?">` names the groups its matches have, so `match.groups.props` is typed.
 - `syntax`, `tests` and the rule's name are NOT inherited:  share a syntax with a constant
   (Spell's `VARIABLE_SYNTAX`).
-- One rule class per file, the file named for the class.
+- One rule class per file, the file named for the class;
+  its registrations sit with the rest of its module's, one file per human language:
+  `events.en.ts` for English, `events.es.ts` for Spanish.
 
 The command line reads the same registrations back:
 
 ```sh
 spell explain trigger
-# trigger  (trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?
-# e.g. trigger card-click
-#
-# trigger  (trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?
-# e.g. fire event card click with card = 1
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+trigger  (trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?
+e.g. trigger card-click
+
+trigger  (trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?
+e.g. fire event card click with card = 1
+```
+
+</details>
 
 ### The kinds of rule
 
@@ -273,7 +284,8 @@ The docstring of [the `Rule` class](src/parser/rules/Rule.ts) shows all five way
 
 ### Registration and ties
 
-- A module's rules register as its files load, so the order of its index file IS the registration order.
+- A module's rules register as its registration file loads (Spell's `<module>.en.ts`),
+  so the order of that file IS the registration order.
 - A rule with several syntaxes is registered once per syntax;  the registrations merge into a `Group` under its name,
   as `trigger`'s did above.
 - That order matters only at a tie:  when two rules match the same words equally well,
@@ -290,19 +302,27 @@ A parse hands back a tree you can read, not a yes or a no.
 
 ```sh
 spell parse "fire event card click with card = 1"
-# statement › trigger  fire event card click with card = 1
-#   Keywords  fire event
-#   eventName: event_words  card click
-#   Sequence  with card = 1
-#     Keyword  with
-#     props: object_literal_properties  card = 1
-#       object_literal_property  card = 1
-#         property › member_words  card
-#         Symbol  =
-#         value: operand › number  1
-#
-# trigger("card-click", { card: 1 })
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+statement › trigger  fire event card click with card = 1
+  Keywords  fire event
+  eventName: event_words  card click
+  Sequence  with card = 1
+    Keyword  with
+    props: object_literal_properties  card = 1
+      object_literal_property  card = 1
+        property › member_words  card
+        Symbol  =
+        value: operand › number  1
+
+trigger("card-click", { card: 1 })
+```
+
+</details>
 
 - Each line is a match:  its rule, then the text it took.
   `statement › trigger` is the `trigger` rule, the one the `statement` choice kept.
@@ -346,15 +366,23 @@ so the lines around it still compile:
 
 ```sh
 spell parse $'print 1\nflibber the jabberwock\nprint 2'
-# ...
-#   line  flibber the jabberwock
-#     parse_error  flibber the jabberwock
-# ...
-#
-# core.console.log(1)
-# /* PARSE ERROR: Don't understand "flibber the jabberwock" */
-# core.console.log(2)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+  line  flibber the jabberwock
+    parse_error  flibber the jabberwock
+...
+
+core.console.log(1)
+/* PARSE ERROR: Don't understand "flibber the jabberwock" */
+core.console.log(2)
+```
+
+</details>
 
 ### How a choice is settled
 
@@ -367,7 +395,7 @@ A `Choice` tries EVERY alternative, then keeps:
   read by its one expression rule, not by priority.
 - Nothing reports a tie.
   Two rules that match the same words equally well don't warn you;  the earlier one wins,
-  so the order of a module's index file is part of its grammar.
+  so the order of a module's registration file is part of its grammar.
 - The code:  `getBestMatch()`, in [Choice.ts](src/parser/rules/Choice.ts).
 
 ### How earlier lines teach later ones
@@ -395,30 +423,46 @@ On its own, a line about a card face up means nothing:
 
 ```sh
 spell parse "print the card is face up"
-# Doesn't parse as statement or expression
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Doesn't parse as statement or expression
+```
+
+</details>
 
 Three lines earlier, it does.
 Here's the whole program in one parse, and the end of what it prints:
 
 ```sh
 spell parse $'a card is a thing\na card has a direction as either up or down\na card "is face up" if its direction is up\nset the card to a new card\nprint the card is face up'
-# ...
-#   /*! SPELL: DECLARES {
-#     syntax: "{operator:is} face up", output: "is_face_up", rule: "method_postfix", of: "Card",
-#     kind: "method", name: '"is face up"', returns: "choice",
-#   } */
-#   get isFaceUp() {
-#     return this.direction == "up"
-#   }
-# }
-# export const card = new Card()
-# core.console.log(card.isFaceUp)
 ```
 
+<details>
+<summary>Output</summary>
+
+```text
+...
+  /*! SPELL: DECLARES {
+    syntax: "{operator:is_or_is_not} face up", output: "is_face_up", rule: "method_postfix",
+    of: "Card", kind: "method", name: '"is face up"', returns: "choice",
+  } */
+  get isFaceUp() {
+    return this.direction == "up"
+  }
+}
+export const card = new Card()
+core.console.log(card.isFaceUp)
+```
+
+</details>
+
 - The third line's quoted phrase became a rule while it parsed, and the comment above `isFaceUp` shows its syntax,
-  written by Spell in Rulex:  `{operator:is} face up`.
-  `{operator:is}` takes `is not` and `isn't` too, so `the card is not face up` reads as well
+  written by Spell in Rulex:  `{operator:is_or_is_not} face up`.
+  `{operator:is_or_is_not}` takes `is not` and `isn't` too, so `the card is not face up` reads as well
   ([more syntaxes Spell writes](README-rulex.md#your-program-writes-rulex-too)).
 - That `SPELL: DECLARES` comment is a marker, never written to disk:
   a compile takes each one back out into the project's declarations, so a project that imports this one gets the
@@ -463,15 +507,23 @@ Our line's:
 
 ```sh
 spell parse --tree "fire event card click with card = 1"
-# Core trigger
-#   args: Text "card-click"
-#   args: Object literal  Object
-#     properties: Object literal property
-#       property: Name card
-#       value: Number 1
-#
-# trigger("card-click", { card: 1 })
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+Core trigger
+  args: Text "card-click"
+  args: Object literal  Object
+    properties: Object literal property
+      property: Name card
+      value: Number 1
+
+trigger("card-click", { card: 1 })
+```
+
+</details>
 
 - `card click` is already `"card-click"`:  the rule decided the event's name, so no writer has to.
 - 84 classes of node, from `ASTNode` down, in [AST.ts](src/parser/ast/AST.ts).
@@ -560,9 +612,9 @@ A new language takes five pieces.
    - Markdown's ([MarkdownTokenizer.ts](src/markdown/MarkdownTokenizer.ts)) makes every character but a letter or
      a digit a symbol of its own, so a Rulex count like `#{1,6}` counts `#`s
      ([what it makes of a line](README-markdown.md#a-heading-is-a-rule-not-a-regular-expression)).
-2. **Rule modules:**  a parser per module, one rule class per file, an index file whose order is the registration order.
+2. **Rule modules:**  a parser per module, one rule class per file, and the registrations in an order that breaks ties.
    - Spell's are the folders of [src/spell/rules/](src/spell/rules/), each with its own parser,
-     combined into one by `spellParser.import(...)`.
+     combined into one by `spellParser.import(...)`;  each folder's `<module>.en.ts` registers its rules, in order.
    - Markdown's line rules are one file, [lineRules.ts](src/markdown/blocks/lineRules.ts), its heading one class
      registered twice.
 3. **What scope records:**  if a line can teach later lines words, its rule's `mutateScope()` records them.
@@ -647,27 +699,50 @@ From [Parser.ts](src/parser/Parser.ts);  each does nothing, or the simplest thin
 
 </details>
 
-### 🌱 Spell in another human language
+### Spell in another human language
 
-It would start the same way:  its own syntax strings, registered on Spell's SAME rule classes.
+Spanish is the worked example:  its own syntax strings, registered on Spell's SAME rule classes.
 - That's why `addRule()` takes only a syntax and its tests:  the class is reusable.
-- Words with negated forms are registered word by word.
-  English's `is`, from [Negatable.ts](src/spell/rules/expressions/Negatable.ts):
+- Each folder of rules registers its English in `<folder>.en.ts`, and its Spanish in `<folder>.es.ts`,
+  the same rules in the same order.
+- Words with negated forms are WORD RULES, registered word by word.
+  English's `is`, from [expressions.en.ts](src/spell/rules/expressions/expressions.en.ts),
+  and Spanish's, from [expressions.es.ts](src/spell/rules/expressions/expressions.es.ts):
 
   ```ts
-  expressions.addRule(Negatable.specialize({ ruleName: "is" }), { syntax: "(is|(negated:is not|isn't|isnt))" })
+  expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
+    syntax: "(is|(negated:is not|isn't|isnt))"
+  })
+  expressionsEs.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
+    syntax: "(es|está|esta|(negated:no es|no está|no esta))"
+  })
   ```
 
-  A Spanish one would add `(es|(negated:no es))`, as `es`.
-- A type's words are Spell's vocabulary, handed to the parser:  a translation brings its own.
-- Where it stands:  no second language's words are written yet,
-  and Spell's tokenizer would first need markdown's idea of a word (above, "Tokens").
+  A rule asks which form matched (`Negatable.isNegated()`), never which word.
+- A language's other words (its type words, its plurals, its messages) are its LANGUAGE PACK,
+  in [src/spell/languages/](src/spell/languages/), and a project picks its language with `"language": "es"`.
+  - A type's words are Spell's vocabulary, handed to the parser:  each pack brings its own.
+- A third language is a third file per folder, and a pack.
+  `spell lang packs check` compares each pack against English, module by module, and says what it still lacks:
+
+  ```sh
+  spell lang packs check
+  ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  Spanish (es):  complete, 19 modules
+  ```
+
+  </details>
 
 ## Testing rules
 
 A rule's tests sit beside its syntax, in the same `addRule()` call:
 each is an input, and what each writer makes of it.
-Spell's `plus`, from [Plus.ts](src/spell/rules/math/Plus.ts):
+Spell's `plus`, from [math.en.ts](src/spell/rules/math/math.en.ts):
 
 ```ts
 math.addRule(Plus, {
@@ -706,8 +781,9 @@ math.addRule(Plus, {
 
 ### Adding a rule
 
-A rule is one new file:  its class, the `addRule()` calls after it with their tests,
-and its line in the module's index file, whose order breaks ties.
+A rule is one new file, its class, exported from the module's index file;
+then its `addRule()` calls, with their tests, in the module's `<module>.en.ts`, whose order breaks ties,
+and again in Spanish's `<module>.es.ts`.
 Spell's recipe for that, step by step, with a whole rule to copy from:  [README-spell](README-spell.md#adding-a-rule).
 
 ## What it costs

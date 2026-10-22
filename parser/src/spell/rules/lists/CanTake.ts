@@ -5,8 +5,8 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
 import { type GuardOperands } from "./lists.shared"
 
 /**
- * `can_take` rule:  `{list} can take {thing}` -- would the list take it, moved there?  Its guard says:
- * `a tableau can take a card if: ...`.  Yes, if it has none.
+ * `can_take` rule:  `{list} can take {thing}` -- would the list take it, moved there?
+ * - Its guard says:  `a tableau can take a card if: ...`.  Yes, if it has none.
  * - `add` ~== `take`;  `can't`, `cannot` for the opposite.
  * - Compiles to `core.canTake(tableau, card)`.
  */

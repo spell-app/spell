@@ -1,7 +1,7 @@
 /**
  * The `variables` rules in English:  each rule's syntax and its tests, registered on the `variables` module's parser.
  * - The rule CLASSES are their own files, beside this one:  what a rule does, whatever the language.
- * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
+ * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `variables.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
@@ -69,7 +69,7 @@ variables.addRule(KnownVariable, {
       compileAs: "known_variable", // TODO: "expression"
       beforeEach(scope: P.Scope) {
         // `Scope.variables` is typed narrowly (`ScopeList<ScopeVariable>`);
-        // the concrete `BlockScope` accepts a plain name string too -- see report.
+        // the concrete `BlockScope` accepts a plain name string too
         const { variables } = scope as P.BlockScope
         variables.add("thing")
         variables.add("bank-account")

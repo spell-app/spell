@@ -2,10 +2,12 @@
  * How Spanish's articles agree with their noun, for spell's Spanish pack (epic `spanish` P8):
  * in gender and number, `la carta`, `los mazos`, `unas cartas`.
  * - `el carta` warns "la carta"?, `un cartas` "unas cartas"?:  see `SP.Language.agreement()`.
- * - A type's gender is read off its declaration's article:  `una carta es una cosa` is feminine, `un mazo ...`
- *   masculine (`genderOf()`).  The built-in types' are in `BUILT_IN_GENDERS`, e.g. `lista`.
+ * - A type's gender is read off its declaration's article (`genderOf()`):
+ *   `una carta es una cosa` is feminine, `un mazo ...` masculine.
+ *   The built-in types' are in `BUILT_IN_GENDERS`, e.g. `lista`.
  * - Its number is the noun's as written:  `cartas` is plural.
  * - Only a noun naming a type:  a word spell knows no gender for (`un trébol`, a value) never warns.
+ * - A message's example takes its article from the same table (`article()`):  `una carta tiene ...`.
  * - NOT the contractions `al` and `del`, nor a feminine noun taking `el` before a stressed `a` (`el agua`).
  */
 import { P } from "spell-lang/parser"
@@ -31,9 +33,25 @@ export const spanishAgreement: SP.ArticleAgreement = {
     return ARTICLES[article]?.[1]
   },
 
-  warning(phrase) {
-    return `¿Querías decir "${phrase}"?`
+  article(kind, noun, type) {
+    const word = noun.replace(/^["']|["']$/g, "")
+    const gender = type?.gender ?? BUILT_IN_GENDERS[P.singularize(word)] ?? guessedGender(word)
+    return Object.keys(ARTICLES).find((each) => {
+      const [eachKind, eachGender, eachNumber] = ARTICLES[each]!
+      return eachKind === kind && eachGender === gender && eachNumber === "singular"
+    })!
   }
+}
+
+/**
+ * The gender a Spanish noun most likely has, by its ending, for a message's example:  `una dirección`, `un rango`.
+ * - Feminine:  `-a`, `-ión`, `-dad`, `-tad`, `-tud`, `-umbre`;  else masculine.
+ * - Only a guess, for a word naming no type (a property):  `el día`, `el mapa` guess wrong.
+ * - Its first word, singular, for a name of several:  `palos cortos` is `palo`'s, `nombres-de-cartas` `nombre`'s.
+ */
+function guessedGender(noun: string): Gender {
+  const first = P.singularize(noun.split(/[\s-]+/)[0] ?? noun)
+  return /(a|i[oó]n|dad|tad|tud|umbre)$/i.test(first) ? "feminine" : "masculine"
 }
 
 /** Each article's kind, gender and number:  `la` is the definite, feminine, singular one. */

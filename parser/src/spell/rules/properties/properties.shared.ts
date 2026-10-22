@@ -7,7 +7,10 @@ import { P } from "spell-lang/parser"
 
 /** What `its_*` rules stash on their matches. */
 export type ItsMatchData = {
-  /** `it` in scope when parsed, or `NONE` => means `this`.  Looked up THEN, not in `getAST()` -- see `SpellIdentifier`. */
+  /**
+   * `it` in scope when parsed, or `NONE` => means `this`.
+   * - Looked up THEN, not in `getAST()` -- see `SpellIdentifier`.
+   */
   itVar?: P.ScopeVariable | typeof NONE
 }
 

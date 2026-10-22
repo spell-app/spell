@@ -1,6 +1,6 @@
 /**
- * The `types` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `types` parser
- * (epic `spanish`).
+ * The `types` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `types` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `types.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -106,8 +106,8 @@ typesEs.addRule(KnownType, {
   tests: [
     {
       beforeEach(scope: P.Scope) {
-        // `Scope.types` is typed narrowly (`ScopeList<TypeScope>`); the concrete `RootScope` accepts
-        // plain `TypeScopeProps` too
+        // `Scope.types` is typed narrowly (`ScopeList<TypeScope>`):
+        // the concrete `RootScope` accepts plain `TypeScopeProps` too
         const { types } = scope as P.RootScope
         types.add({ name: "Carta" })
         types.add({ name: "Cuenta-Bancaria", aka: "cuenta" })

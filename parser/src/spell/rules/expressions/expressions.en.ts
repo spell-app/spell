@@ -1,7 +1,8 @@
 /**
- * The `expressions` rules in English:  each rule's syntax and its tests, registered on the `expressions` module's parser.
+ * The `expressions` rules in English:
+ * each rule's syntax and its tests, registered on the `expressions` module's parser.
  * - The rule CLASSES are their own files, beside this one:  what a rule does, whatever the language.
- * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
+ * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `expressions.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
@@ -38,7 +39,8 @@ import { UnicodeLiteral } from "./UnicodeLiteral"
 ////////////////
 
 // Use `{is_or_is_not}` in a syntax for every form of `is`, including `isn't`;  plain `is` for just the word.
-// Each keeps its old name as an alias (`is`, `can`, `will`, `has`):  declarations compiled before epic `spanish` say it.
+// Each keeps its old name as an alias (`is`, `can`, `will`, `has`):
+// declarations compiled before epic `spanish` say it.
 expressions.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
   syntax: "(is|(negated:is not|isn't|isnt))"
 })
@@ -65,7 +67,8 @@ expressions.addRule(Negatable.specialize({ ruleName: "has_or_has_not", alias: "h
 expressions.addRule(Synonyms.specialize({ ruleName: "indefinite_article" }), { syntax: "(a|an)" })
 expressions.addRule(Synonyms.specialize({ ruleName: "definite_article" }), { syntax: "the" })
 
-// `is` or `are` after a property's quoted name, its subject left out:  `- "color" is red`, `- piles are a list of piles`
+// `is` or `are` after a property's quoted name, its subject left out:
+// `- "color" is red`, `- piles are a list of piles`
 expressions.addRule(Synonyms.specialize({ ruleName: "is_or_are" }), { syntax: "(is|are)/i" })
 
 // The verbs an outline body's line may start with after `it`:  `it has a deck`, `it belongs to a game`

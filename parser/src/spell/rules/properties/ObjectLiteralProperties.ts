@@ -1,8 +1,8 @@
 import { P } from "spell-lang/parser"
 
 /**
- * `object_literal_properties` rule:  object literal -- creates an object with one or more property values,
- *   e.g. `foo = 1 and bar is 2`.
+ * `object_literal_properties` rule:  object literal --
+ * creates an object with one or more property values, e.g. `foo = 1 and bar is 2`.
  */
 export class ObjectLiteralProperties extends P.Repeat {
   getAST(match: P.MatchFor<this>) {

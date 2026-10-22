@@ -1,5 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { rawTextOf } from "spell-lang/spell/rules/JSX/JSX.shared"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
@@ -37,10 +38,11 @@ export class CSSBlock extends P.TokenType<never, CSSBlockData> {
     if (!match) return undefined
     const type = scope instanceof P.SubjectScope ? scope.subjectType : undefined
     if (!type || !isDrawableType(type)) {
-      const where = type
-        ? `"${type.name}" isn't drawable:  say "a ... is a drawable thing"`
-        : "put it in a type's outline"
-      return SpellStatement.refuse(match, `Only a drawable type has its own <css>:  ${where}`)
+      const language = SP.Language.of(scope)
+      const message = type
+        ? language.parserMessage("css-not-drawable", { type: type.name })
+        : language.parserMessage("css-outside-outline")
+      return SpellStatement.refuse(match, message)
     }
     match.data.typeName = type.name
     match.data.css = rawTextOf(element)

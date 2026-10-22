@@ -68,8 +68,8 @@ export const Priority = {
 /**
  * How many of `words`' words, from the first, `isDeclared` -- the most that are.
  * - e.g. 2 for `short rank` in `short rank plus`;  0 if none.
- * - For a rule taking `member_words` greedily which wants only what a type declares:  it re-parses with that many,
- *   e.g. `its short rank + 1`, `card suits includes x`.
+ * - For a rule taking `member_words` greedily which wants only what a type declares:
+ *   it re-parses with that many, e.g. `its short rank + 1`, `card suits includes x`.
  */
 export function declaredPrefix(words: P.Match, isDeclared: (words: string) => boolean): number {
   const raw = words.tokens.map((token) => `${token.value}`)

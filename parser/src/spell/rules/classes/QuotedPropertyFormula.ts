@@ -1,5 +1,6 @@
 import { proto, upperFirst } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
@@ -47,22 +48,22 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
     if (match.groups.sources) return QuotedPropertyFormula.resolveSources(match)
     // more after the phrase, e.g. `it "is face up" if ...`:  not ours, a `quoted_type_expression`
     if (tokens.slice(match.length).join("").trim()) return undefined
-    const typeWords = SpellStatement.subjectWords(match) ?? "thing"
+    const language = SP.Language.of(scope)
     if (!phrase.includes("(")) {
-      return SpellStatement.refuse(
-        match,
-        `"${phrase}" has no blank:  put the word that varies in parens, e.g. "is a (suit)", ` +
-          `or say when it's true, "${phrase}" if ...`
-      )
+      return SpellStatement.refuse(match, language.parserMessage("phrase-without-blank", { phrase }))
     }
-    const inferred = QuotedPropertyFormula.inferPlaceholders(alias, getKnownType(match.groups.type))
+    const type = getKnownType(match.groups.type)
+    const inferred = QuotedPropertyFormula.inferPlaceholders(alias, type)
     if (!inferred) return undefined
     if ("unlisted" in inferred) {
-      return SpellStatement.refuse(
-        match,
-        `"(${inferred.unlisted})" names no property of a ${typeWords} with a list of values, ` +
-          `e.g. its "suit" is one of clubs, diamonds, hearts or spades`
-      )
+      const typeWords = SpellStatement.subjectWords(match) ?? language.wordFor("thing")
+      const aType = language.withArticle("indefinite", typeWords, type)
+      const message = language.parserMessage("blank-without-values", {
+        word: inferred.unlisted,
+        type: typeWords,
+        aType
+      })
+      return SpellStatement.refuse(match, message)
     }
     match.data.inferred = inferred
     return match
@@ -81,11 +82,11 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
       const name = `${(source.groups.property as P.Match | undefined)?.value}`
       const listed = QuotedPropertyFormula.listedProperty(type, [name, P.singularize(name)])
       if (!listed) {
-        return SpellStatement.refuse(
-          match,
-          `"its ${name}" isn't a property of a ${match.groups.type.raw} with a list of values, ` +
-            `e.g. its "suit" is one of clubs, diamonds, hearts or spades`
-        )
+        const language = SP.Language.of(match.scope)
+        const typeWords = `${match.groups.type.raw}`
+        const aType = language.withArticle("indefinite", typeWords, type)
+        const message = language.parserMessage("source-without-values", { name, type: typeWords, aType })
+        return SpellStatement.refuse(match, message)
       }
       sources.push(listed)
     }
@@ -115,11 +116,17 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
    * See `SpellStatement.getLongForm()`.
    */
   getLongForm(match: P.MatchFor<this>): string | undefined {
-    const typeWords = SpellStatement.subjectWords(match)
+    const params = SpellStatement.longFormParams(match)
     const { inferred } = match.data
-    if (!typeWords || !inferred) return super.getLongForm(match)
-    const sources = inferred.sources.map((source) => `its ${P.pluralize(source)}`).join(" and ")
-    return `a ${typeWords} "${inferred.words.join(" ")}" for ${sources}`
+    if (!params || !inferred) return super.getLongForm(match)
+    const language = SP.Language.of(match.scope)
+    const sources = inferred.sources
+      .map((source) => {
+        const plural = P.Inflector.using(language.inflector, () => P.pluralize(source))
+        return language.parserMessage("long-form-source", { plural })
+      })
+      .join(language.parserMessage("long-form-and"))
+    return language.parserMessage("long-form-phrase-for", { ...params, phrase: inferred.words.join(" "), sources })
   }
 
   /**

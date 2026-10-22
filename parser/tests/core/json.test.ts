@@ -48,12 +48,7 @@ class Card extends Thing {
 class Pile extends List<Card> {
   static instanceType = Card
   static exclusive = true
-  get name() {
-    return this.getProp("name")
-  }
-  set name(value) {
-    this.setProp("name", value)
-  }
+  // its `name`:  every list's, built in (epic `spanish` P15)
 }
 
 class StockPile extends Pile {}

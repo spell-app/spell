@@ -53,7 +53,7 @@ export const RULES = "(,? which must {rule:must_rule})? {nested_statements}?"
  */
 export class DefinePropertyHas extends SpellStatement<
   "type|property|specifier?|rule?|body?",
-  { valueType?: P.TypeScope }
+  { valueType?: P.TypeScope; builtInName?: string }
 > {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
@@ -61,6 +61,8 @@ export class DefinePropertyHas extends SpellStatement<
 
   /**
    * Refused on a built-in type -- see `SpellStatement.refuseBuiltInType()`.
+   * - A built-in member a type may declare again, e.g. a list's `name`, in the language's own words
+   *   (`nombre`):  notes the member's name, `data.builtInName`, which it declares and compiles to.
    * - Notes the type its specifier names, e.g. `Suit` for `its "suit" is a suit`:
    *   if it's a VALUE kind, its setter checks against its list -- see `value_kind`.
    *   - The type's RECORD, read when compiling, as a call reads `data.method.returns`.
@@ -74,7 +76,19 @@ export class DefinePropertyHas extends SpellStatement<
     const valueType = specifier?.datatype ? scope.types?.get(specifier.datatype) : undefined
     if (valueType) match.data.valueType = valueType
     DefinePropertyHas.warnUntyped(match)
-    return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+    const { type, property } = match.groups
+    const refused = SpellStatement.refuseBuiltInType(match, type, property, specifier?.datatype)
+    if (refused !== match) return refused
+    // a built-in member in the language's own words, e.g. Spanish's `una pila tiene un nombre como texto`:
+    // it declares the member, `name`, not a property of its own
+    const builtIn = SP.builtInStoredMember(scope.types?.get(`${type.value}`), `${property.value}`)
+    if (builtIn && builtIn.name !== property.value) match.data.builtInName = builtIn.name
+    return match
+  }
+
+  /** Name of the property `match` declares, as it compiles:  its words', or the built-in member's it names. */
+  static propertyName(match: P.MatchFor<DefinePropertyHas>): string {
+    return match.data.builtInName ?? `${match.groups.property.value}`
   }
 
   /**
@@ -88,13 +102,15 @@ export class DefinePropertyHas extends SpellStatement<
     const { property, specifier } = match.groups
     const words = property.raw ?? `${property.value}`
     const said = match.inputText.trim()
+    const language = SP.Language.of(match.scope)
     if (!specifier) {
-      const example = `${said} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-      SP.SpellWarnings.note(match, `Say what "${words}" is, e.g. "${example}"`)
+      const type = SP.SpellWarnings.exampleType(match.scope, words)
+      SP.SpellWarnings.note(match, language.parserMessage("untyped-property", { name: words, line: said, type }))
     } else if (specifier.datatype === "list") {
       const items = SP.SpellWarnings.exampleItemType(match.scope, words)
-      const example = `${said.slice(0, said.length - specifier.inputText.trim().length)}as a new list of ${items}`
-      SP.SpellWarnings.note(match, `Say what "${words}" holds, e.g. "${example}"`)
+      // the line up to its specifier:  `a todos-app has tasks`
+      const line = said.slice(0, said.length - specifier.inputText.trim().length).trimEnd()
+      SP.SpellWarnings.note(match, language.parserMessage("untyped-list-property", { name: words, line, items }))
     }
   }
 
@@ -106,9 +122,10 @@ export class DefinePropertyHas extends SpellStatement<
     const typeName = type.value
     const typeScope = P.TypeScope.getOrStub(scope, typeName, match)
     // what its specifier says it holds, e.g. `text`, `choice`, `thing` for `as a new thing`
-    typeScope.declareProperty(`${property.value}`, match, { asWritten: property.raw, datatype: specifier?.datatype })
+    const name = DefinePropertyHas.propertyName(match)
+    typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype })
     const rule = match.groups.rule as P.MatchFor<MustRule> | undefined
-    if (rule) typeScope.addPropertyRules(`${property.value}`, [MustRule.ruleOf(rule)], match)
+    if (rule) typeScope.addPropertyRules(name, [MustRule.ruleOf(rule)], match)
 
     // If there is a specifier as enumerated values, add rules to match it
     if (specifierAST instanceof P.ASTEnumeration) {
@@ -147,8 +164,9 @@ export class DefinePropertyHas extends SpellStatement<
   mutateScopeFromBody(match: P.Match): string | undefined {
     const rules = DefinePropertyHas.rulesOf(match as P.MatchFor<DefinePropertyHas>)
     if (!rules.length) return undefined
-    const { type, property } = (match as P.MatchFor<DefinePropertyHas>).groups
-    P.TypeScope.getOrStub(match.scope, `${type.value}`, match).addPropertyRules(`${property.value}`, rules, match)
+    const { type } = (match as P.MatchFor<DefinePropertyHas>).groups
+    const name = DefinePropertyHas.propertyName(match as P.MatchFor<DefinePropertyHas>)
+    P.TypeScope.getOrStub(match.scope, `${type.value}`, match).addPropertyRules(name, rules, match)
     return JSON.stringify(rules)
   }
 
@@ -177,23 +195,26 @@ export class DefinePropertyHas extends SpellStatement<
    * - the same with the subject left out (epic page `outline-spell`, P8):  `"rank" is a number`
    */
   getLongForm(match: P.Match): string | undefined {
-    const typeWords = SpellStatement.subjectWords(match)
+    const params = SpellStatement.longFormParams(match)
     const { type, property, specifier } = match.groups as { type: P.Match; property: P.Match; specifier?: P.Match }
     // `its "rank" is ...`, or `"rank" is ...`:  NOT `it has ...` / `has ...`, which say it as the sentence style does
     const isItsForm = type.is(SubjectIts) || (!type.length && property.start === match.start)
-    if (!typeWords || !isItsForm) return super.getLongForm(match)
+    if (!params || !isItsForm) return super.getLongForm(match)
+    const language = SP.Language.of(match.scope)
+    const propertyWords = `${property.raw}`
+    const has = { ...params, property: propertyWords, aProperty: language.withArticle("indefinite", propertyWords) }
     const said = specifier?.inputText.trim()
+    if (!said) return language.parserMessage("long-form-has", has)
     // an enumeration with no `either` / `one of`:  no words before its list
-    const isBareList =
-      specifier?.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start
-    const as = !said
-      ? ""
-      : isBareList
-        ? ` as one of ${said}`
-        : specifier!.is(OutlineSpecifierList)
-          ? ` as ${said.replace(/^a (?!new\b)/i, "a new ")}`
-          : ` as ${said}`
-    return `a ${typeWords} has a ${property.raw}${as}`
+    if (specifier!.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start) {
+      return language.parserMessage("long-form-has-one-of", { ...has, values: said })
+    }
+    // `a list of people`, which a sentence says `as a new list of people`
+    if (specifier!.is(OutlineSpecifierList)) {
+      const items = `${(specifier.groups.instanceType as P.Match).raw}`
+      return language.parserMessage("long-form-has-list", { ...has, items })
+    }
+    return language.parserMessage("long-form-has-as", { ...has, specifier: said })
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
@@ -247,7 +268,7 @@ export class DefinePropertyHas extends SpellStatement<
     statements.push(
       new P.ASTReactiveProperty(match, {
         type: typeAST,
-        property: `${property.value}`,
+        property: DefinePropertyHas.propertyName(match),
         check: check.properties.length ? check : undefined,
         initializer
       })

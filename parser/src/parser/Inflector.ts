@@ -56,8 +56,9 @@ export class Inflector {
 
   /**
    * `text` as a type's name:  singular, in PascalCase, e.g. `bank-accounts` => `BankAccount`.
-   * - Words are split at a dash or an underscore:  `bank-account`, `bank_account` and `Bank_Account`
-   *   all name `BankAccount`.  (spell joins a name of several words with dashes first:  `SpellType.joined()`.)
+   * - Words are split at a dash or an underscore:
+   *   `bank-account`, `bank_account` and `Bank_Account` all name `BankAccount`.
+   *   (spell joins a name of several words with dashes first:  `SpellType.joined()`.)
    * - A word's own capitals stay:  `DrawableList` is itself.
    * - spell's ONE name for a type (epic `drawable-thing` P11);  each output language writes it its own way --
    *   see `P.Naming`.

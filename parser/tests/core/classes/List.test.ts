@@ -402,6 +402,26 @@ describe("JSON (output-targets Q49)", () => {
     expect(pile.filter(() => true).id).not.toBe(pile.id)
   })
 
+  test("its `name` (epic `spanish` P15):  built in, nothing until given, then a prop like any, settable and tracked", () => {
+    const pile = new Pile({}).append(ranked("A"))
+    expect(pile.name).toBeUndefined()
+    expect(Object.keys(pile.toJSON())).toEqual(["$type", "$items"])
+    expect(new Pile({ name: "stock" }).name).toBe("stock")
+    const seen: Array<string | undefined> = []
+    const stop = observe(() => seen.push(pile.name))
+    pile.name = "discards"
+    stop()
+    expect(seen).toEqual([undefined, "discards"])
+    expect(pile.keys()).toEqual(["name"])
+    expect(JSON.parse(JSON.stringify(pile))).toEqual({
+      $type: "Pile",
+      name: "discards",
+      $items: [{ $type: "RankedCard", rank: "A" }]
+    })
+    // declared as text, so a value of another type warns, as any declared prop's does
+    expect(List.schema.info("name")).toEqual({ type: "text" })
+  })
+
   test('neither `"$type"` nor `"$items"` is a prop:  `keys()` lists only its own', () => {
     const deck = new NamedDeck({ name: "spare" }).append(ranked("A"))
     JSON.stringify(deck)

@@ -2,8 +2,8 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 
 /**
- * `type_specifier_instance` rule:  `as a new thing` / `as a new list of tasks` -- specifies a property's
- * default/initializer value as a `new_thing` or `new_list` expression.
+ * `type_specifier_instance` rule:  `as a new thing` / `as a new list of tasks` --
+ * specifies a property's default/initializer value as a `new_thing` or `new_list` expression.
  * - A list says what it holds there, e.g. `a todos-app has a property tasks as a new list of tasks`:
  *   no list type needed (epic `output-targets`, I7).
  * - Compiles (via `getAST()`) to the nested `NewInstanceExpression`, e.g. `new Thing()`, `new List(...)`.

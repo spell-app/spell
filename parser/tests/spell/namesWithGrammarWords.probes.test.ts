@@ -7,8 +7,9 @@ import { parseSpellProject } from "spell-lang/spell/test"
 /**
  * LEDGER of names of several words holding one of spell's grammar words (epic `spanish` P14):
  * `card in play`, `side of play`, `way to go`, `carta de juego`, `fecha de nacimiento`.
- * - A grammar word:  one on the language's identifier blacklist (`in`, `of`, `the`, `to` ...;  `de`, `en`, `la` ...),
- *   or, for a member, one of its stop words (`SP.LanguageWords`).
+ * - A grammar word:
+ *   - one on the language's identifier blacklist:  `in`, `of`, `the`, `to` ...;  `de`, `en`, `la` ...
+ *   - or, for a member, one of its stop words (`SP.LanguageWords`)
  * - One inline snapshot per probe:  what each line compiles to, then its parse errors.
  *   - What works, and what doesn't yet, both pinned:  a change to either shows here.
  *   - The epic page's P14 has the table, with why each one left is left.
@@ -270,11 +271,11 @@ describe("names with grammar words", () => {
           // una persona tiene una fecha
           get fecha() { return this.getProp("fecha") }
           set fecha(value) { this.setProp("fecha", value) }
-          /* PARSE ERROR: Don't understand "de nacimiento como texto" */
+          /* PARSE ERROR: No entiendo "de nacimiento como texto" */
         }
         export const p = new Persona()
         core.console.log(p.nacimiento.fecha)
-        ERROR 2:28 Don't understand "de nacimiento como texto""
+        ERROR 2:28 No entiendo "de nacimiento como texto""
       `)
     })
   })

@@ -5,7 +5,8 @@ import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
  * `create_type` rule:  `a card is a thing` -- declares `type` as a new class extending `superType`.
- * - Its name may be several words, with a short name:  `a bank account aka account is a thing` -- see `TypeDeclaration`.
+ * - Its name may be several words, with a short name (see `TypeDeclaration`):
+ *   `a bank account aka account is a thing`
  * - `Priority.declaration`, so this wins over other `{type} is {type}` -ish statement rules.
  * - SIDE EFFECT: adds `type` to `scope.types`, unless it's already defined (no redefinition/merge) --
  *   see `TypeDeclaration.declareType()`.

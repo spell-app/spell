@@ -22,14 +22,17 @@ export const SPELL_TAG_WORDS = "spell_jsx_tag"
 
 /**
  * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
- * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot)`:  `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`,
- *   "put me in the frame's `header` children".
+ * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot)`:
+ *   `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`, "put me in the frame's `header` children".
  * - On any tag, renamed as the attribute is parsed (`SpellJSXAttribute`).
  * - The web's own `slot="header"` keeps working.
  */
 export const SPELL_ATTRIBUTE_WORDS = "spell_jsx_attribute"
 
-/** What spell's own JSX words may mean:  the web's names they become, `SPELL_TAG_WORDS`' and `SPELL_ATTRIBUTE_WORDS`' meanings. */
+/**
+ * What spell's own JSX words may mean:
+ * the web's names they become, `SPELL_TAG_WORDS`' and `SPELL_ATTRIBUTE_WORDS`' meanings.
+ */
 export const SPELL_JSX_MEANINGS = ["slot"]
 
 /**
@@ -65,7 +68,10 @@ export type JSXMatchData = {
   attributes?: Array<P.Match | undefined>
   /** (`jsxAttribute`) Normalized attribute name. */
   attribute?: string
-  /** (`jsxAttribute`) The web's name for it:  `slot` for spell's own `in` (`SPELL_ATTRIBUTE_WORDS`), else `attribute`. */
+  /**
+   * (`jsxAttribute`) The web's name for it:
+   * `slot` for spell's own `in` (`SPELL_ATTRIBUTE_WORDS`), else `attribute`.
+   */
   webAttribute?: string
   /** (`jsxElement`) The web's tag:  `slot` for spell's own `children` (`SPELL_TAG_WORDS`), else the tag as written. */
   tagName?: string

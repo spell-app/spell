@@ -5,6 +5,7 @@
  * - By the noun's first letter, with a few exceptions it can't hear:  `an hour`, `a unicorn`, `a user`, `a one`.
  * - Needs no type:  `a apple` warns though no type is called `apple`.
  * - `the` agrees with everything;  English types have no gender.
+ * - The same rule picks a message's example's article (`article()`):  `an apple has ...`.
  */
 import type { SP } from "spell-lang/spell"
 
@@ -16,8 +17,9 @@ export const englishAgreement: SP.ArticleAgreement = {
     return wanted === article ? undefined : wanted
   },
 
-  warning(phrase) {
-    return `Did you mean "${phrase}"?`
+  article(kind, noun) {
+    if (kind === "definite") return "the"
+    return startsWithVowelSound(noun) ? "an" : "a"
   }
 }
 

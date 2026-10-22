@@ -6,9 +6,9 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
  * `backwards_if` rule:  postfix ternary, `{expr} if {condition} (else|otherwise) {expr}`.
  * - English word order ("do X if Y else Z"), rather than `condition ? then : else`.
  * - e.g. `1 if bar else 2`
- * - `expression_suffix`: `lhs` (the value before `if`) is supplied by `CompoundExpression`'s
- *   shunting-yard; this rule's own `syntax` only spells out `operator` (actually the *condition*
- *   expression here) and the trailing `rhs` expression.
+ * - An `expression_suffix`:  `lhs` (the value before `if`) is supplied by `CompoundExpression`'s shunting-yard.
+ *   This rule's own `syntax` only spells out `operator` (actually the *condition* expression here)
+ *   and the trailing `rhs` expression.
  * - Compiles to `P.ASTTernaryExpression`.
  */
 export class BackwardsIf extends InfixOperatorSuffix<"operator|expression"> {

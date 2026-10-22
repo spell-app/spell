@@ -8,7 +8,12 @@ import { SpellStatement } from "spell-lang/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
 /** The words for a literal's type, by its rule, e.g. `a number` for `0` -- see `warnIfAlwaysTheSame()`. */
-const LITERAL_TYPES: Record<string, string> = { number: "a number", text: "text", boolean: "yes or no" }
+/** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
+const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
+  number: "example-number",
+  text: "example-text",
+  boolean: "example-yes-or-no"
+}
 
 /**
  * `property_value_getter` rule:  `the value of a card is:` -- defines a property getter whose body is an inline
@@ -49,14 +54,16 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
    */
   private warnIfAlwaysTheSame(match: P.MatchFor<this>): void {
     const body = this.getBody(match)
-    const typeWords = LITERAL_TYPES[`${body?.rule.name}`]
-    if (!body || !typeWords || !SpellStatement.subjectWords(match)) return
+    const literalType = LITERAL_TYPES[`${body?.rule.name}`]
+    if (!body || !literalType || !SpellStatement.subjectWords(match)) return
     const name = match.groups.property.raw
     const { superType } = getKnownType(match.groups.type)
     if (superType && match.scope.getType(superType)?.getMember(`${match.groups.property.value}`)) return
+    const language = SP.Language.of(match.scope)
+    const type = language.parserMessage(literalType)
     SP.SpellWarnings.note(
       match,
-      `${name} is always ${body.inputText.trim()}:  to give it a type, write "${name} is ${typeWords}"`
+      language.parserMessage("always-the-same", { name: `${name}`, value: body.inputText.trim(), type })
     )
   }
 

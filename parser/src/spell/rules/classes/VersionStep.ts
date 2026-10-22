@@ -1,5 +1,6 @@
 import { camelCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
@@ -25,7 +26,7 @@ export class VersionStep extends SpellStatement<"type|version|from|to?|drops?"> 
     if (!match) return undefined
     const version = VersionStep.versionOf(match)
     if (!Number.isInteger(version) || version < 2) {
-      return SpellStatement.refuse(match, `A version step starts at version 2:  a file with no version is version 1`)
+      return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("version-step-before-2"))
     }
     return match
   }

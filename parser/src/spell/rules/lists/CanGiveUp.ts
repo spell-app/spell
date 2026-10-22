@@ -5,8 +5,8 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
 import { type GuardOperands } from "./lists.shared"
 
 /**
- * `can_give_up` rule:  `{list} can give up {thing}` -- would the list give it up, moved elsewhere?  Its guard says:
- * `a stock-pile can give up a card if: ...`.  Yes, if it has none.
+ * `can_give_up` rule:  `{list} can give up {thing}` -- would the list give it up, moved elsewhere?
+ * - Its guard says:  `a stock-pile can give up a card if: ...`.  Yes, if it has none.
  * - `release` ~== `remove` ~== `give up` ~== `let go of`;  `can't`, `cannot` for the opposite.
  * - Compiles to `core.canGiveUp(stock, card)`.
  */

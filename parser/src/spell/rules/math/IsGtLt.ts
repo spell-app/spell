@@ -3,8 +3,8 @@ import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix, Precedence, Wording } from "spell-lang/spell/rules/expressions"
 
 /**
- * `is_gt_lt` rule:  `is greater than`, `is less than`, optionally `... or equal to`,
- * e.g. `salary is greater than expenses`.
+ * `is_gt_lt` rule:  `is greater than` or `is less than`, optionally `... or equal to`.
+ * - e.g. `salary is greater than expenses`
  * - TODO: is *not* greater than???
  * - `getOperator()` maps what `operator` means (`is_greater_or_less_than`) to an operator:
  *   `greater` / `less` / `at_least` / `at_most` => `greater than` / `less than` / `at least` / `at most`.

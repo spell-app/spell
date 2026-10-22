@@ -8,8 +8,8 @@ import { Wording } from "./Wording"
  * A word and its negated forms, e.g. `is_or_is_not`:  `(is|(negated:is not|isn't|isnt))`.
  * - The commonest WORD RULE (`Wording`):  its one meaning is `negated`.
  *   So a rule reads "not" from the match (`isNegated()`), never from the words, in any language.
- * - Negated forms are the ones in a `negated` group.  So order doesn't matter, and there may be several positive
- *   forms, e.g. `(has|have|(negated:does not have))`.
+ * - Negated forms are the ones in a `negated` group.
+ *   So order doesn't matter, and there may be several positive forms, e.g. `(has|have|(negated:does not have))`.
  * - Registered once per word, named for both its forms, e.g. `Negatable.specialize({ ruleName: "is_or_is_not" })`;
  *   a translation registers its own under the same name, e.g. `(es|está|(negated:no es|no está))`.
  * - The English ones:  `is_or_is_not`, `is_or_is_not_a`, `can_or_cannot`, `will_or_will_not`, `has_or_has_not`,

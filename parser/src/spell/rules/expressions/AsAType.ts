@@ -5,8 +5,8 @@ import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
 
 /**
- * `as_a_type` rule:  `as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer`
- *   -- casts value to `string`/`number`/`fraction`/`integer`/`text`.
+ * `as_a_type` rule:  `as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.
+ * - e.g. `1 as a string`, `1.4 as an integer`
  * - The type is read through the language's own type words (`SP.Language.typeWords`), so no English word is read here:
  *   `string` and Spanish's `cadena` both mean `text`.
  * - `text` wraps output in a template-literal `${...}` via `BackTickExpression`.

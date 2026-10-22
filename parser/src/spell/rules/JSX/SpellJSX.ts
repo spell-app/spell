@@ -49,8 +49,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
-    const tagError = P.ASTJSXElement.tagError(element.tagName)
-    if (tagError) match.data.error = SP.spellParser.createParseError(scope, [element], tagError)
+    if (P.ASTJSXElement.tagError(element.tagName)) {
+      const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
+      match.data.error = SP.spellParser.createParseError(scope, [element], message)
+    }
     return match
   }
 

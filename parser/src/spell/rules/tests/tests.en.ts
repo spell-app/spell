@@ -1,7 +1,7 @@
 /**
  * The `tests` rules in English:  each rule's syntax and its tests, registered on the `tests` module's parser.
  * - The rule CLASSES are their own files, beside this one:  what a rule does, whatever the language.
- * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
+ * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `tests.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
@@ -17,8 +17,8 @@ tests.addRule(ExpectTest, {
   tests: [
     {
       beforeEach(scope: P.Scope) {
-        // `Scope.compile()`'s `ruleName` has no default even though the `Parser.compile()` it delegates
-        // to defaults it to `"block"` -- see report. Pass it explicitly to match the original behavior.
+        // `Scope.compile()`'s `ruleName` has no default,
+        // though the `Parser.compile()` it calls defaults it to `"block"`:  so it's passed here
         scope.compile(`it = a new thing with rank = "queen", is-face-up = yes`, "block")
         scope.compile("my-list is a new list", "block")
       },
@@ -42,8 +42,8 @@ tests.addRule(ExpectTest, {
   tests: [
     {
       beforeEach(scope: P.Scope) {
-        // `Scope.compile()`'s `ruleName` has no default even though the `Parser.compile()` it delegates
-        // to defaults it to `"block"` -- see report. Pass it explicitly to match the original behavior.
+        // `Scope.compile()`'s `ruleName` has no default,
+        // though the `Parser.compile()` it calls defaults it to `"block"`:  so it's passed here
         scope.compile(`it = a new thing with rank = "queen", is-face-up = yes`, "block")
         scope.compile("my-list is a new list", "block")
       },

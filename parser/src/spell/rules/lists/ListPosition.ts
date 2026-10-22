@@ -29,11 +29,12 @@ export class ListPosition extends SpellExpression<"thing|list?", { kindType?: P.
     if (!kindType || (!kindType.valueKind && !kindType.stub)) return undefined
     match.data.kindType = kindType
     // a stub may turn out not to be a kind, once the project has parsed:  then it's no position at all
-    SP.SpellWarnings.noteIf(
-      match,
-      `"${match.inputText.trim()}":  a ${kindType.instanceName} isn't a kind's value;  say which list, "... in ..."`,
-      () => !kindType.valueKind
-    )
+    const message = SP.Language.of(scope).parserMessage("position-not-a-kind", {
+      text: match.inputText.trim(),
+      kind: kindType.instanceName,
+      aKind: SP.Language.of(scope).withArticle("indefinite", kindType.instanceName, kindType)
+    })
+    SP.SpellWarnings.noteIf(match, message, () => !kindType.valueKind)
     return match
   }
 

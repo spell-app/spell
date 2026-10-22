@@ -1,6 +1,6 @@
 /**
- * The `lists` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `lists` parser
- * (epic `spanish`).
+ * The `lists` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `lists` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `lists.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -907,7 +907,7 @@ listsEs.addRule(RepeatNTimes.specialize({ counterName: "número" }), {
           input: ["repetir 3 veces: imprimir 1", "\timprimir el número"],
           js: [
             "core.map(core.countTo(3), (número) => core.console.log(número))",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
+            "/* PARSE ERROR: Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo */"
           ]
         }
       ]

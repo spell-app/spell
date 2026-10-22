@@ -9,6 +9,7 @@ import { spanishAgreement } from "./agreement"
 import { spanishInflector } from "./inflector"
 import { spanishMessages } from "./messages"
 import { spanishParser } from "./parser"
+import { spanishParserMessages } from "./parserMessages"
 import { spanishTypeWords, spanishWords } from "./words"
 
 /** Spanish's language pack. */
@@ -21,6 +22,7 @@ export const spanish = SP.Language.register(
     typeWords: spanishTypeWords,
     words: spanishWords,
     messages: spanishMessages,
+    parserMessages: spanishParserMessages,
     articles: spanishAgreement
   })
 )

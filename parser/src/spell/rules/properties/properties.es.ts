@@ -1,6 +1,6 @@
 /**
- * The `properties` rules in Spanish:  each rule's syntax and its tests, registered on Spanish's own `properties` parser
- * (epic `spanish`).
+ * The `properties` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `properties` parser.
  * - The rule CLASSES are their own files, beside this one, shared with every language.
  * - Registered in the same order as `properties.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
@@ -76,7 +76,8 @@ propertiesEs.addRule(PropertyExpression, {
   syntax: "(el|la|los|las)? {property:member_words} (de|del) {expression:operand}",
   tests: [
     {
-      // Spanish names here:  Spanish's inflector makes English's `suit` plural as `suites`, and `cards` a type of its own
+      // Spanish names here:
+      // Spanish's inflector makes English's `suit` plural as `suites`, and `cards` a type of its own
       title: "resolved:  what the type declares",
       compileAs: "expression",
       beforeEach(scope: P.Scope) {

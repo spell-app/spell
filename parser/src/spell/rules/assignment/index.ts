@@ -1,8 +1,10 @@
 /**
  * The `assignment` rule module:  assignment and returning values.
- * - One rule per file, each registering itself on `assignment` (`assignment.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `assignment.en.ts` registers them on `assignment` (`assignment.parser.ts`),
+ *   and each other language's `assignment.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./assignment.parser"
 export * from "./AssignmentStatement"

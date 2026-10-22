@@ -25,8 +25,9 @@ export class SavedInline extends SpellStatement<"type"> {
     const { type } = match.groups
     const { scopeType } = type.data as { scopeType?: unknown }
     if (scopeType instanceof P.TypeScope && SP.isBuiltInTypeScope(scopeType)) {
-      const typeName = SP.typeName(`${type.value}`)
-      return SpellStatement.refuse(match, `Can't save ${typeName} inline:  it's built in, and every project shares it`)
+      const language = SP.Language.of(scope)
+      const typeName = language.wordFor(SP.typeName(`${type.value}`))
+      return SpellStatement.refuse(match, language.parserMessage("cant-save-built-in-inline", { type: typeName }))
     }
     return match
   }

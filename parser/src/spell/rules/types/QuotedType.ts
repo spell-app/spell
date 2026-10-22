@@ -4,8 +4,8 @@ import { SP } from "spell-lang/spell"
 import { SpellType } from "./SpellType"
 
 /**
- * `quoted_type` rule:  a type's name in quotes, where it's being declared:  `a "card" is a thing where:`
- * -- the outline style's "quotes teach a new word" (epic page `outline-spell`).
+ * `quoted_type` rule:  a type's name in quotes, where it's being declared,
+ * e.g. `a "card" is a thing where:` -- the outline style's "quotes teach a new word" (epic page `outline-spell`).
  * - e.g. `"card"` in `a "card" is a thing where:`
  * - One word (dashes OK) inside straight quotes, not blacklisted;  a `SpellType` match like `card` would be.
  * - Or several, up to `SpellType.MAX_NAME_WORDS`, blacklisted ones too, but not first or last (epic `spanish` P14):
@@ -41,7 +41,8 @@ export class QuotedType extends SpellType {
   }
 
   /**
-   * The name inside `token`'s quotes, its words a space apart, if it's a text token holding just that -- else `undefined`.
+   * The name inside `token`'s quotes, its words a space apart,
+   * if it's a text token holding just that -- else `undefined`.
    * - Its first and last word not on `blacklist`:  see class docs.
    */
   private static nameOf(token: P.Token | undefined, blacklist: P.IdentifierBlacklist | undefined): string | undefined {

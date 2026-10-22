@@ -5,8 +5,13 @@ so the grammar reads as one language.
 - `spell lang packs fix es --ai` hands this page to `claude` with each rule it translates.
 - A new word chosen for a rule belongs here too.
 
-Where a keyword has a written accent, the syntax accepts it WITHOUT the accent too (Owen's pick):  `(sí|si)`,
-`(número|numero)`, `(está|esta)`, `(más|mas)`, `(después|despues)`.  Names people choose keep their accents.
+Where a keyword has a written accent, the syntax accepts it WITHOUT the accent too (Owen's pick):
+
+```text
+(sí|si)   (número|numero)   (está|esta)   (más|mas)   (después|despues)
+```
+
+Names people choose keep their accents.
 
 ## Small words
 
@@ -98,21 +103,38 @@ Where a keyword has a written accent, the syntax accepts it WITHOUT the accent t
 
 ## Rules for translating a module
 
-1. For every registration in `<module>.en.ts`, write ONE in `<module>.es.ts`, same class, SAME ORDER, on the Spanish
-   module parser that file exports (`<module>Es`).
-2. Word rules (`Negatable`, `Wording`, `Synonyms` and their `specialize(...)`):  register the SAME rule names with
-   Spanish forms, the same named groups (meanings).
-3. Tests:  translate each test's INPUT;  keep a person's own names (`thing`, `other`, `theList`, `Card`) as English
-   did, so the expected `js` / `ts` stay EXACTLY the English test's.  Translate only spell's own words.
-   - Where the compiled names come FROM the words (a quoted phrase `"está boca arriba"` => `estáBocaArriba`), the
-     output follows the Spanish words:  write what the writers really write, and check it reads right.
+1. For every registration in `<module>.en.ts`, write ONE in `<module>.es.ts`:
+   - the same class, in the SAME ORDER
+   - on the Spanish module parser that file exports (`<module>Es`)
+2. Word rules:  register the SAME rule names with Spanish forms, and the same named groups (meanings).
+   - `Negatable`
+   - `Wording`
+   - `Synonyms`
+   - and their `specialize(...)`
+3. Tests:  translate each test's INPUT, and only spell's own words.
+   - Keep a person's own names as English did (`thing`, `other`, `theList`, `Card`):
+     so the expected `js` / `ts` stay EXACTLY the English test's.
+   - Where the compiled names come FROM the words, the output follows the Spanish words:
+     a quoted phrase `"está boca arriba"` => `estáBocaArriba`.
+     Write what the writers really write, and check it reads right.
 4. Spanish word order:  adjectives after the noun don't matter to the parser (a name is looked up whole);
    ordinals still come first (`la primera carta`).
 5. Gender agreement isn't checked (P8 warns):  accept every article form.
-6. If a rule CLASS reads or writes an English word in its code (the guard test, `tests/spell/languages/noEnglishInRules.test.ts`,
-   only catches reads), make it a word rule registered in BOTH `.en.ts` and `.es.ts`, keeping English's output identical.
-7. Tests for a module:  `tests/spell/rules/es/<module>/<module>.test.ts`, as the English one, calling
-   `unitTestModuleRules(SP.spanish.parser, "<module>", ...)` (`SP` from `spell-lang/spell`).
-8. A Spanish phrasing you had to choose that a native speaker might choose differently:  a CALM judgement call,
-   `epic add spanish#J "<title>" --calm --details "<p>chose ... over ... because ...</p>"` (run from
-   /Users/owen/www/spell.worktrees/spanish).
+6. If a rule CLASS reads or writes an English word in its code:
+   make it a word rule, registered in BOTH `.en.ts` and `.es.ts`, keeping English's output identical.
+   - The guard test only catches reads:
+     [noEnglishInRules.test.ts](../../../../tests/spell/languages/noEnglishInRules.test.ts).
+7. Tests for a module, as the English one's:
+   a file of their own, calling the Spanish parser (`SP` from `spell-lang/spell`):
+
+   ```text
+   tests/spell/rules/es/<module>/<module>.test.ts
+   unitTestModuleRules(SP.spanish.parser, "<module>", ...)
+   ```
+
+8. A Spanish phrasing you had to choose, which a native speaker might choose differently:
+   a CALM judgement call, run from /Users/owen/www/spell.worktrees/spanish:
+
+   ```sh
+   epic add spanish#J "<title>" --calm --details "<p>chose ... over ... because ...</p>"
+   ```

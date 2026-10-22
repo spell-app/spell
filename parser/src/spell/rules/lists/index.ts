@@ -3,9 +3,11 @@
  * iteration.
  * - NOTE: several rules capture a `{arg:singular_identifier}`/`{arg:plural_identifier}` classifier noun
  *   (e.g. `card`, `items`) that's matched for readability only and never read back out of `match.groups`.
- * - One rule per file, each registering itself on `lists` (`lists.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `lists.en.ts` registers them on `lists` (`lists.parser.ts`),
+ *   and each other language's `lists.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  * TODO: sort
  */
 export * from "./lists.parser"
