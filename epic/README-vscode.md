@@ -61,13 +61,13 @@ else, today.
 - It starts with every window (`onStartupFinished`), since every window needs its bridge;
   and on a `vscode://` link to it (`onUri`).
 - Both extensions side by side, and how windows and worktrees are laid out:
-  [the kit's README-vscode.md](../README-vscode.md).
+  [the kit's README-vscode.md](https://github.com/spell-app/spell-kit/blob/main/README-vscode.md).
 
 </details>
 
 ## Install it:  three commands and a reload
 
-Run the kit's install first ([setup from zero](../README.md#setup-from-zero)):
+Run the kit's install first ([setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)):
 the bundler, and the kit's own code that goes into the bundle, come from there.
 The extension adds a small install of its own, because it's a yarn project apart, with its own lockfile:
 
@@ -110,7 +110,7 @@ and its fallback server loses the engine's scripts and styles.
   then reload the windows.
 - From spell-epic's root instead:  `yarn vscode:package`, then `code --install-extension vscode/spell-epic.vsix`.
 - In an epic's worktree, `vscode/`'s own install is done for you:
-  the kit's epic settings list it in `extraInstalls` ([.epic/config.json5](../.epic/config.json5)).
+  the kit's epic settings list it in `extraInstalls` ([.epic/config.json5](https://github.com/spell-app/spell-kit/blob/main/.epic/config.json5)).
 
 <details>
 <summary>What's in the .vsix, and what's built into it</summary>
@@ -437,7 +437,7 @@ yarn test:vscode
 - [README-cli.md](README-cli.md#windows-and-the-page-server):  every `epic window`, `epic hub` and `epic pages` verb
 - [README-adopting.md](README-adopting.md):  the extension as one step of setting up a repo that isn't Spell, and the
   epic server in full
-- [The kit's README-vscode.md](../README-vscode.md):  Spell's language extension beside this one, and how window files
+- [The kit's README-vscode.md](https://github.com/spell-app/spell-kit/blob/main/README-vscode.md):  Spell's language extension beside this one, and how window files
   and worktrees are laid out
 
 <details>
