@@ -131,9 +131,10 @@ a section named like a WWOD rule EXTENDS it, and says so, "As WWOD §4, plus:".
     one at a plugin's root draws a warning from `claude plugin validate`.
 
 <details>
-<summary>The Claude-only rules in spell-app's CLAUDE.md</summary>
+<summary>The Claude-only rules in the kit's CLAUDE.md</summary>
 
-spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then adds what only Claude Code can do:
+[The kit's `CLAUDE.md`](CLAUDE.md) loads its `AGENTS.md` and WWOD, then adds what only Claude Code can do, for every
+repo:
 
 1. Narrate each step in the order it actually happens,
    and bold anything in the change that has drifted from what was last asked for.
@@ -149,8 +150,8 @@ spell-app's `CLAUDE.md` loads its `AGENTS.md` and WWOD, as the kit's does, then 
 6. A reply that closes out the session's work ends with `*You can close this tab*`, when nothing is left for it,
    and asks whether to run `/isolate done` if its worktree is still there.
 
-- The catch:  the kit's own `CLAUDE.md` has none of these,
-  so a session that never opens a file in spell-app never reads them.
+- Every session reads them, in any repo:
+  a child repo's `CLAUDE.md` points up to the kit's, which Claude Code loads from the folder above.
 
 </details>
 
@@ -231,8 +232,8 @@ In the checkout:
 | enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [spell-epic's README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md) |
 | merge `main` in with `epic worktree merge-main` | a bare `git merge main`:  it line-merges the generated files the command rebuilds from the merged source | [README-development.md](README-development.md#working-across-repos--one-epic-one-branch-name) |
 | remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](https://github.com/spell-app/spell-epic/blob/main/AGENTS.md) |
-| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [spell-app's AGENTS.md](https://github.com/spell-app/spell-app/blob/main/AGENTS.md), "Shared content" |
-| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | spell-app's AGENTS.md, "Worktrees" |
+| leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](AGENTS.md#shared-content), "Shared content" |
+| open a worktree's window with `epic window open` | `code --add`, `--remove` or `-r`:  they can restart the window's extensions, the Claude panel and its session with them | [the kit's AGENTS.md](AGENTS.md#worktrees), "Worktrees" |
 
 In the code:
 
