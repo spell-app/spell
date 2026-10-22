@@ -20,9 +20,10 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
   - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
   - the plugin's parts at the root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
-- [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`:
-  its links to spell-app's files (`../ui/...`, `../../agents/...`) mean what are now spell-ui's (`../spell-ui/`) and the
-  content folder's (`../spell.epics/agents/`).
+- [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
+  - Its links lead from where it is now:  the content folder's pages through `../../spell.epics/`,
+    the kit's and the other repos' files by their folders (`../../spell-ui/`, `../../agents/`).
+  - Some of its prose still speaks from spell-app's checkout, which serves the content folder's pages.
 - Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), IN FULL first.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
