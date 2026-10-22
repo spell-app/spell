@@ -63,8 +63,9 @@ export class TSWriter extends JSWriter {
 
   /**
    * TypeScript for spell's built-in datatypes (`P.BUILT_IN_TYPES`).
-   * - `list`:  `any`, marked -- `@spell/core`'s `List` doesn't say what it holds, and spell sets properties on lists
-   *   (`the name of the cards`), which a `List` can't have.
+   * - `list`:  `any`, marked
+   *   - `@spell/core`'s `List` doesn't say what it holds
+   *   - and spell sets properties on lists (`the name of the cards`), which a `List` can't have
    */
   static TYPES: Record<P.Datatype, string> = {
     text: "string",
@@ -80,8 +81,8 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * While writing a drawing in Solid's shapes:  its locals that became accessors, by TypeScript name, e.g.
-   * `className`:  each read is a call, `className()`.
+   * While writing a drawing in Solid's shapes:  its locals that became accessors, by TypeScript name,
+   * e.g. `className`:  each read is a call, `className()`.
    */
   private accessors = new Set<string>()
   /** While writing a drawing:  handlers it uses more than once, written once as a local, by their text => its name. */
@@ -384,8 +385,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * An arrow's parameter:  typed when spell knows its type (`(card: Card) =>`), else bare, for TypeScript to type
-   * from what it's passed to, e.g. `core.map(core.getRange(1, 7), (number) => ...)`:  a `number`.
+   * An arrow's parameter:  typed when spell knows its type (`(card: Card) =>`),
+   * else bare, for TypeScript to type from what it's passed to.
+   * - e.g. `core.map(core.getRange(1, 7), (number) => ...)`:  a `number`
    * - So no `UNKNOWN` marker:  unlike a method's own parameter,
    *   an arrow is always passed somewhere that says what it gets (a `core` helper, a handler).
    */
@@ -449,8 +451,8 @@ export class TSWriter extends JSWriter {
 
   /**
    * `return value`, bare -- JSX on several lines in parentheses;  in a loop's body, a bare one is `continue`.
-   * - In a getter that says early what nothing means (`if (this.isEmpty) return 0`), a value that may be nothing
-   *   falls back to it:  `return this.lastItem?.value ?? 0`.
+   * - In a getter that says early what nothing means (`if (this.isEmpty) return 0`),
+   *   a value that may be nothing falls back to it:  `return this.lastItem?.value ?? 0`.
    */
   ASTReturnStatement(node: P.ASTReturnStatement): string {
     if (!node.value) return this.returnContinues ? "continue" : "return"
@@ -478,8 +480,8 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * `method`'s parameter its body destructures first, e.g. a method's named arguments, and what spell knows of
-   * them:  `{ title: string }` -- `undefined` if none, or spell knows nothing of them.
+   * `method`'s parameter its body destructures first, e.g. a method's named arguments,
+   * and what spell knows of them:  `{ title: string }` -- `undefined` if none, or spell knows nothing of them.
    * - SIDE EFFECT:  that destructuring is written untyped, as its parameter says -- see `typedByParam`.
    */
   destructuredParam(method: P.ASTMethodDefinition): { arg: P.ASTVariableExpression; shape: string } | undefined {
@@ -510,8 +512,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * A method's parameter named for a property of its class:  that property's type, e.g. `isASuit(suit: Suit)` for
-   * `a card "is a (suit)" for its suits` -- the slot ranges over a card's suits.  `undefined` if there's none.
+   * A method's parameter named for a property of its class:  that property's type.
+   * - e.g. `isASuit(suit: Suit)` for `a card "is a (suit)" for its suits`:  the slot ranges over a card's suits
+   * - `undefined` if there's none
    */
   slotType(arg: P.ASTVariableExpression): string | undefined {
     const property = this.project.propertyOf(this.currentClass, arg.name)
@@ -572,8 +575,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * What goes above class `node`:  a type for one value of each of its lists of values, e.g.
-   * `export type Rank = (typeof Card.Ranks)[number]` -- the list itself is in the class, `static Ranks = [...] as const`.
+   * What goes above class `node`:
+   * a type for one value of each of its lists of values, e.g. `export type Rank = (typeof Card.Ranks)[number]`.
+   * - The list itself is in the class:  `static Ranks = [...] as const`.
    * - `""` if it has none.
    */
   classPrefix(node: P.ASTClassDeclaration): string {
@@ -637,8 +641,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * In its class's body:  `@prop(info) accessor rank!: Rank` -- the same runtime shape as javascript's
-   * `declareProp()` and accessor pair.  Its name is spell's:  a property is data a program prints.
+   * In its class's body:  `@prop(info) accessor rank!: Rank`.
+   * - The same runtime shape as javascript's `declareProp()` and accessor pair.
+   * - Its name is spell's:  a property is data a program prints.
    */
   ASTReactivePropertyAsMember(node: P.ASTReactiveProperty): string {
     // one that replaces a member of a class above, e.g. a joker's `color` property for a card's `color` getter:
@@ -715,8 +720,8 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * From outside its class (one another project declares):  first an `interface` merged with its class, so
-   * TypeScript knows it's there.
+   * From outside its class (one another project declares):  first an `interface` merged with its class,
+   * so TypeScript knows it's there.
    */
   ASTReactiveProperty(node: P.ASTReactiveProperty): string {
     const member = `${this.write(node.property)}: ${this.propertyType(node) ?? TSWriter.UNKNOWN}`
@@ -724,9 +729,10 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * From outside its class (one another project declares), by TypeScript's name:  first an `interface` merged with
-   * its class -- a getter `readonly` -- then `Card.prototype.play = function (...) {...}`, or for a getter
-   * `Object.defineProperty(Card.prototype, "isFaceUp", {...})`.
+   * From outside its class (one another project declares), by TypeScript's name:
+   * - first an `interface` merged with its class, a getter `readonly`
+   * - then `Card.prototype.play = function (...) {...}`,
+   *   or for a getter `Object.defineProperty(Card.prototype, "isFaceUp", {...})`
    */
   ASTPropertyDefinition(node: P.ASTPropertyDefinition): string {
     const name = this.nameOf(node.property.value)
@@ -766,8 +772,8 @@ export class TSWriter extends JSWriter {
 
   /**
    * `export interface Card { member }`:  merges with `export class Card`, wherever it is in the file.
-   * - A class from ANOTHER project, imported, can't merge this way (`TS2440`):  `module()` makes it a `declare module`
-   *   block in that project's module.
+   * - A class from ANOTHER project, imported, can't merge this way (`TS2440`):
+   *   `module()` makes it a `declare module` block in that project's module.
    */
   mergedInterface(typeName: string, member: string): string {
     return `export interface ${this.typeNameOf(typeName)} { ${member} }`
@@ -938,7 +944,7 @@ export class TSWriter extends JSWriter {
    * Each drawable type's tag, declared for the program's JSX (epic `drawable-thing` I7):
    * so a tag written by hand, e.g. `<solitaire-pile>`, type-checks.
    * - Loose:  HTML attributes, plus any attribute or `prop:` its element defines.
-   *   (Spell UI's own `<ui-*>` tags are typed exactly, by `spell-ui/jsx`.)
+   *   - Not so Spell UI's own `<ui-*>` tags:  `spell-ui/jsx` types those exactly.
    */
   private elementTagsDeclaration(): string {
     const tags = [...this.elementTags].map(
@@ -1040,8 +1046,9 @@ export class TSWriter extends JSWriter {
   ////////////////
 
   /**
-   * A list says what it holds:  `a deck is a list of cards` => `class Deck extends List<Card>`, from its
-   * `static instanceType = Card`.  So `core.getItemAt(deck, 1)` is a `Card | undefined`.
+   * A list says what it holds, from its `static instanceType = Card`:
+   * `a deck is a list of cards` => `class Deck extends List<Card>`.
+   * - So `core.getItemAt(deck, 1)` is a `Card | undefined`.
    * - A drawable list too:  `class Pile extends DrawableList<Card>`.
    */
   superTypeOf(node: P.ASTClassDeclaration): string {
@@ -1065,8 +1072,9 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * What a new list holds, in TypeScript's words:  `string` for `a new list of text`, `Pile` for `a new list of
-   * piles`;  `undefined` for a list that doesn't say, or anything else made.
+   * What a new list holds, in TypeScript's words.
+   * - `string` for `a new list of text`, `Pile` for `a new list of piles`
+   * - `undefined` for a list that doesn't say, or anything else made
    */
   newListItemType(node: P.ASTNewInstanceExpression): string | undefined {
     const itemType = newListItemName(node)
@@ -1141,8 +1149,8 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * SIDE EFFECT:  notes each handler `shape`'s elements use more than once in `sharedHandlers`, under a name not in
-   * `taken`, e.g. `click` for an `onClick`.  Returns their lines, `const click = () => ...`.
+   * The lines of each handler `shape`'s elements use more than once:  `const click = () => ...`.
+   * - SIDE EFFECT:  notes each in `sharedHandlers`, under a name not in `taken`, e.g. `click` for an `onClick`.
    */
   private shareHandlers(shape: DrawingShape, taken: Set<string>): string[] {
     const handlers = new Map<string, { name: string; count: number }>()

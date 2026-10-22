@@ -22,14 +22,15 @@ export const CODE_FOLDERS = (() => {
 /**
  * The editor app's source folder (`src/app/` in spell-app), when it's installed beside spell-lang;  else `undefined`.
  * - The `ts/solid` target's check reads its types (`typecheck()`):  compiled spell's elements ARE the app's.
- * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none, and the checks that need it skip
- *   (epic `repo-split` C11).
+ * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none,
+ *   and the checks that need it skip themselves (epic `repo-split` C11).
  */
 export const APP_DIR: string | undefined = installedPackage("spell-app", "src/app")
 
 /**
- * The real folder of installed package `name` (found up from spell's own folder, in `node_modules`), or of its folder
- * `sub` (`spell-app`'s `src/app/`, epic `repo-split` P14:  one package, its code under one `src/`);  else `undefined`.
+ * The real folder of installed package `name`, or of its folder `sub`;  else `undefined`.
+ * - Found up from spell's own folder, in `node_modules`.
+ * - `sub`:  e.g. `spell-app`'s `src/app/` (epic `repo-split` P14:  one package, its code under one `src/`)
  */
 function installedPackage(name: string, sub = ""): string | undefined {
   for (let folder = CODE_FOLDERS.srcDir; ; folder = dirname(folder)) {
@@ -121,8 +122,8 @@ function nodeModulesDir(): string {
  * `<ui-*>` tags' JSX types:  Spell UI's, exact (`spell-ui/jsx`, generated from its vocabularies), as the app uses them.
  * - So compiled spell's `<ui-button size="enormous">` is an error, as it is in the app's own code.
  * - Written into the checked folder as a file of its own (`UI_JSX_FILE`), naming them by package:
- *   spell-lang never imports Spell UI, a repo above it;  the folder finds it as it finds the app,
- *   installed beside spell-lang, through its `node_modules` link.
+ *   spell-lang never imports Spell UI, a repo above it.
+ *   - The folder finds Spell UI as it finds the app:  installed beside spell-lang, through its `node_modules` link.
  * - Types only:  nothing of Spell UI's runs here.
  */
 const UI_JSX_TYPES = `import type {} from "spell-ui/jsx"\n`
@@ -138,13 +139,13 @@ const SPELL_ELEMENTS_SOURCE = "runner/spellElements.ts"
 
 /**
  * A `tsconfig.json` checking `names`, with `@spell/core` pointing at `core`'s source.
- * - spell-lang's settings (its root `tsconfig.json`), plus Solid's JSX and `<ui-*>`'s JSX types (`UI_JSX_FILE`) --
- *   see `typecheck()`.
+ * - spell-lang's settings (its root `tsconfig.json`),
+ *   plus Solid's JSX and `<ui-*>`'s JSX types (`UI_JSX_FILE`):  see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
  * - ONE core:  the app's own imports of `spell-lang/core` go to the same source,
  *   by spell-lang's own condition (`spell-lang-source`, in the settings it extends).
- * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations, through the
- *   folder's `node_modules` link (epic `repo-split` I12).
+ * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations,
+ *   through the folder's `node_modules` link (epic `repo-split` I12).
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
   const { coreDir } = CODE_FOLDERS
@@ -163,8 +164,8 @@ function tsconfig(names: string[], projects: Record<string, string>) {
       lib: ["ES2023", "DOM", "DOM.Iterable"],
       jsx: "preserve",
       jsxImportSource: "@solidjs/web",
-      // the repo's global types (`Prettify` ...), through the folder's `node_modules` link;  `vite/client`:  `core`
-      // uses none of it (the toolchain's types bring it all the same)
+      // the repo's global types (`Prettify` ...), through the folder's `node_modules` link
+      // - `vite/client`:  not named, as `core` uses none of it (the toolchain's types bring it all the same)
       // NO `typeRoots`:  found by package name, through the folder's `node_modules` link and the kit's `exports`
       types: ["node", "spell-kit/toolchain/types"],
       noUnusedLocals: false
@@ -200,7 +201,8 @@ function inTscFolder<T>(
 }
 
 /**
- * `tsc`'s error lines for the project in `folder`, run there, so a file's are `Solitaire.tsx(...)`;  none if clean.
+ * `tsc`'s error lines for the project in `folder`;  none if clean.
+ * - Run there, so a file's lines start with its bare name:  `Solitaire.tsx(...)`.
  */
 function runTsc(folder: string): string[] {
   try {
