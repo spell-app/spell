@@ -814,6 +814,8 @@ A kind that says so is saved in a file of its own.
 - Editors:  hovering an outline line shows **Reads as**, the sentence style's words for it.
   - That's each rule's `SpellStatement.getLongForm()`.
   - default:  the subject spelled out, `it has a deck` => `a card has a deck`
+    - the type's words as its declaration wrote them, `a stock pile`, never its name run together
+    - its first line only:  a body stays as written, `a stock pile can take a card if:`
   - `define_property_has`, `belongs_to_one` and `quoted_property_formula` say their own
   - Compiling the long forms gives the same javascript as the outline (`outline.test.ts`).
 - A line starting `it` / `its` OUTSIDE a type's body says so.

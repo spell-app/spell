@@ -137,5 +137,29 @@ describe("testing spell module classes, in Spanish", () => {
           .join("\n")
       expect(withoutComments(code)).toBe(withoutComments(compiled("long-forms-es-outline", OUTLINE).code))
     })
+
+    test("a guard's long form:  its type's words as written, its first line only (J97)", () => {
+      const lines = [
+        "una carta es una cosa",
+        'una "pila de reserva" es una lista de cartas donde:',
+        "\t- nunca puede tomar una carta",
+        "\t- puede soltar una carta si: la carta es su última carta",
+        "\t- puede tomar una carta si:",
+        "\t\tsi está vacía",
+        "\t\t\tdevolver sí",
+        "\t\tdevolver no"
+      ]
+      const block = SP.spanish.parser.getScope("long-forms-es-guards").parse(lines.join("\n"), "block")!
+      const typeLine = block.matched[1] as P.Match
+      const body = (typeLine.data.statement as P.Match).data.body as P.Match
+      const longForms = body.matched
+        .map((line) => (line as P.Match).data.statement as P.Match | undefined)
+        .map((statement) => statement && (statement.rule as SP.SpellStatement).getLongForm(statement))
+      expect(longForms).toEqual([
+        "una pila de reserva nunca puede tomar una carta",
+        "una pila de reserva puede soltar una carta si: la carta es su última carta",
+        "una pila de reserva puede tomar una carta si:"
+      ])
+    })
   })
 })

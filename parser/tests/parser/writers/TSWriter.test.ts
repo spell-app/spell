@@ -416,6 +416,36 @@ describe("TSWriter", () => {
     expect(project.write(core("isEmpty", [piles()]))).toBe("allPiles.isEmpty")
   })
 
+  test("an item of a filtered list is the list's own, typed by it:  no type argument on the filter (J97)", () => {
+    const core = (methodName: string, args: P.ASTExpression[], datatype?: string) =>
+      new P.ASTCoreMethodInvocation(match, { methodName, args, datatype })
+    const everyPile = () => core("everyThing", [new P.ASTTypeExpression(match, { name: "Pile" })])
+    const keep = new P.ASTMethodDefinition(match, {
+      inline: true,
+      args: [new P.ASTVariableExpression(match, { name: "pile", datatype: "Pile" })],
+      body: new P.ASTPropertyExpression(match, {
+        object: new P.ASTVariableExpression(match, { name: "pile" }),
+        property: "droppable"
+      })
+    })
+    // `Pile` is one of spell's `List`s, so the filtered piles are one too
+    const pile = new P.ASTTypeExpression(match, { name: "Pile" })
+    const superType = new P.ASTTypeExpression(match, { name: "List" })
+    const project = writer.forProject([[new P.ASTClassDeclaration(match, { type: pile, superType, members: [] })]])
+    const first = new P.ASTAssignmentStatement(match, {
+      thing: new P.ASTVariableExpression(match, { name: "end_pile" }),
+      value: core(
+        "getItemAt",
+        [core("filter", [everyPile(), keep], "Pile"), new P.ASTNumericLiteral(match, 1)],
+        "Pile"
+      ),
+      isNewVariable: true
+    })
+    expect(project.write(first)).toBe(
+      "const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => pile.droppable).firstItem"
+    )
+  })
+
   test("comparisons:  === where both sides are alike, a choice bare, nothing === undefined", () => {
     const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
     const is = (lhs: P.ASTExpression, rhs: P.ASTExpression) =>

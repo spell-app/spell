@@ -433,8 +433,13 @@ export class TSWriter extends JSWriter {
       const type = typeof datatype === "string" && !datatype.startsWith("list") ? this.typeFor(datatype) : undefined
       if (!type) return `${declared} = ${written}`
       // an item read says its type as a type argument, still maybe nothing:  `core.getItemAt<Card>(...)`
-      if (JSWriter.ITEM_READS.has((inner as P.ASTScopedMethodInvocation).methodName)) {
-        return `${declared} = ${written.replace(/^core\.(\w+)\(/, `core.$1<${type}>(`)}`
+      // - only when it's still the item read's own call:  an item of a filtered list is the list's own,
+      //   `core.filter(...).firstItem`, typed by the list already (`core.filter<Card>` would lose it)
+      const { methodName } = inner as P.ASTScopedMethodInvocation
+      if (JSWriter.ITEM_READS.has(methodName)) {
+        const itemRead = `core.${methodName}(`
+        if (!written.startsWith(itemRead)) return `${declared} = ${written}`
+        return `${declared} = core.${methodName}<${type}>(${written.slice(itemRead.length)}`
       }
       return `${declared} = ${written} as ${type}`
     }
@@ -996,6 +1001,7 @@ export class TSWriter extends JSWriter {
     "isStill",
     "isVisible",
     "keepThingAndElementAgreeing",
+    "loadSpellUIFamilies",
     "missingText",
     "nameAfterHandedThing",
     "on",

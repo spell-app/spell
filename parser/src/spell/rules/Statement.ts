@@ -348,11 +348,15 @@ export class SpellStatement<
   /**
    * The words for the type an outline body is about, e.g. `card`, if `match`'s subject is that body's `it` / `its`,
    * or left out (`subject_implied`) -- else `undefined`.  See `getLongForm()`.
+   * - As its declaration wrote them, e.g. `stock pile` for `a "stock pile" is a pile where:`;
+   *   the subject's own `raw` is the type's name run together, `stockpile`.
    */
   static subjectWords(match: P.Match): string | undefined {
     const { subject } = SpellStatement.subjectOf(match)
-    if (!subject || !P.SubjectScope.of(match.scope) || !subject.is(SubjectRule)) return undefined
-    return `${subject.raw}`
+    const subjectScope = P.SubjectScope.of(match.scope)
+    if (!subject || !subjectScope || !subject.is(SubjectRule)) return undefined
+    const declared = (subjectScope.declaredBy?.groups as { type?: P.Match } | undefined)?.type
+    return `${declared?.raw ?? subject.raw}`
   }
 
   /**
@@ -366,9 +370,16 @@ export class SpellStatement<
     return { subject: holder.type, property: holder.property }
   }
 
-  /** `match`'s source text, up to the end of its first line. */
+  /**
+   * `match`'s source text, up to the end of its first line.
+   * - By its tokens' lines:  a body's line breaks aren't in its `inputText`, just their indents.
+   */
   static firstLineOf(match: P.Match): string {
-    return match.inputText.split("\n")[0]!.trimEnd()
+    const { line } = match
+    return match.tokens
+      .filter((token) => token.line === line)
+      .join("")
+      .trimEnd()
   }
 
   /**

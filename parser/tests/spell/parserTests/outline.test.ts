@@ -946,6 +946,26 @@ describe("outline style", () => {
       expect(compile(outline(""))).toBe(compile(sentences))
     })
 
+    test("a guard's long form:  its type's words as written, its first line only (J97)", () => {
+      const outline = [
+        "a card is a thing",
+        'a "stock pile" is a list of cards where:',
+        "\t- it can never take a card",
+        "\t- can give up a card if: the card is its last card",
+        "\t- it can take a card if:",
+        "\t\tif it is empty",
+        "\t\t\treturn yes",
+        "\t\treturn no"
+      ]
+      const { files } = parseSpellProject([{ path: "/test.spell", contents: outline.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      expect(longFormsOf(files[0]!.match!)).toEqual([
+        "a stock pile can never take a card",
+        "a stock pile can give up a card if: the card is its last card",
+        "a stock pile can take a card if:"
+      ])
+    })
+
     test('`"x" is ...` is a property, not a phrase:  a getter, or a type', () => {
       const compiled = compile(["a card is a thing where:", '\t- "rank" is a number', '\t- "double" is: its rank * 2'])
       expect(compiled).toContain('this.declareProp("rank", { type: "number" })')
