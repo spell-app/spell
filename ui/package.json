@@ -812,7 +812,7 @@
     "clean": "rm -rf ./.cache ./build ./dist ./dist-types ./coverage ./test-results ./vendor ./results ./src/tools/frameworks/solid/dist",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p ./tests && tsc -p ./tests/cli && tsc -p ./tests/jsx && echo '<< TSC PASSED\\n'",
+    "ts": "echo '>>>>>>>>>>>\\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p ./tests && tsc -p ./tests/cli && echo '<< TSC PASSED\\n'",
     "lint": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts site/_src && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\\n'",
     "lint:fix": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT --fix' && vp lint --fix src scripts site/_src && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\\n'",
     "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
@@ -905,7 +905,6 @@
   },
   "spellTypes": [
     "tsconfig.json",
-    "tsconfig.node.json",
-    "tsconfig.jsx.json"
+    "tsconfig.node.json"
   ]
 }

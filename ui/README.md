@@ -531,7 +531,7 @@ each example's plain class markup on the left, the same example as elements on t
 | [scripts/](scripts/) | one file per yarn script, named for it (`site:data` → `site-data.ts`);  what they share is in `src/tools/` |
 | [docs/](docs/) | the docs site's PAGES, a component set served at `/components/ui/`:  `*.html`, `__parts/`, `__data/` |
 | [site/](site/) | the docs site's BUILD:  the bundle's entry (`_src/`) and the bundle (`_assets/`, git-ignored) |
-| [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json), [tsconfig.jsx.json](tsconfig.jsx.json) | the browser code's TypeScript settings, the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs), and the generated JSX types' (`src/jsx.ts`, a program of their own):  no aliases, every file by its package name |
+| [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the browser code's TypeScript settings (the generated JSX types, `src/jsx.ts`, too) and the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs):  no aliases, every file by its package name |
 | [vite.config.ts](vite.config.ts), [vitest.config.ts](vitest.config.ts), [vite.site.config.ts](vite.site.config.ts) | the library build (its families in `COMPONENTS`), the tests (two projects, `ssr` and `browser`), the docs site's bundle |
 | `results/` | what the tools write (git-ignored) |
 | *(none:  `spell-app`'s [`<spell-code>`](https://github.com/spell-app/spell-app/tree/main/src/app/components/spell-code))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |

@@ -12,6 +12,7 @@
  * - Values:  a flag is `basic`, `basic={true}` or `basic=""`, and `basic={false}` removes it;
  *   other attributes take their text, a number as `{5}` or `"5"`.
  * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.
+ *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.
  * - Component tags only, not the docs site's `<ui-docs-*>`.
  * - Type-only:  no code, nothing at run time.
  */
@@ -28,78 +29,143 @@ export interface UIAccordionAttributes {
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
+  /** `styled`, as the DOM element's property. */
+  "prop:styled"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * The dark scheme, for a dark background.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * With `styled`:  no box, no rules between titles -- only the styled spacing and title colours.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Less padding around titles and content;  `compact="very"` less still (`very compact`).
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | "" | "very"
   /**
    * Indents each panel's content under its title, like a file tree (nested accordions line up).
    * - takes:  flag (present / absent)
    */
   tree?: boolean | ""
+  /** `tree`, as the DOM element's property. */
+  "prop:tree"?: boolean | ""
   /**
    * Only one panel open at a time (a `<details name>` group):  opening one closes the others.  `exclusive="no"` lets any number stay open.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   exclusive?: boolean | ""
+  /** `exclusive`, as the DOM element's property. */
+  "prop:exclusive"?: boolean | ""
   /**
    * The open panel closes when its title is activated;  `collapsible="no"` keeps one open.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   collapsible?: boolean | ""
+  /** `collapsible`, as the DOM element's property. */
+  "prop:collapsible"?: boolean | ""
   /**
    * Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the first index counts.
    * - takes:  text
    */
   open?: string
+  /** `open`, as the DOM element's property. */
+  "prop:open"?: string
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -148,21 +214,64 @@ export interface UIActionsAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -234,36 +343,108 @@ export interface UIAdAttributes {
     | "top banner"
     | "half banner"
     | "large mobile banner"
+  /** `unit`, as the DOM element's property. */
+  "prop:unit"?:
+    | "medium rectangle"
+    | "large rectangle"
+    | "vertical rectangle"
+    | "small rectangle"
+    | "half page"
+    | "square"
+    | "small square"
+    | "button"
+    | "square button"
+    | "small button"
+    | "skyscraper"
+    | "wide skyscraper"
+    | "leaderboard"
+    | "large leaderboard"
+    | "mobile leaderboard"
+    | "billboard"
+    | "panorama"
+    | "netboard"
+    | "banner"
+    | "vertical banner"
+    | "top banner"
+    | "half banner"
+    | "large mobile banner"
   /**
    * Centred in its container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * A placeholder:  a grey box saying "Ad" (bare `test`), or the given text (`test="Your ad here"`).
    * - takes:  text
    */
   test?: string
+  /** `test`, as the DOM element's property. */
+  "prop:test"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -311,31 +492,78 @@ export interface UIAuthorAttributes {
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -384,31 +612,78 @@ export interface UIAvatarAttributes {
    * - takes:  text
    */
   src?: string
+  /** `src`, as the DOM element's property. */
+  "prop:src"?: string
   /**
    * Alternative text;  default `""` (decorative, the name is nearby).
    * - takes:  text
    */
   alt?: string
+  /** `alt`, as the DOM element's property. */
+  "prop:alt"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -457,41 +732,92 @@ export interface UIBreadcrumbAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`.
    * - takes:  text
    */
   divider?: string
+  /** `divider`, as the DOM element's property. */
+  "prop:divider"?: string
   /**
    * Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as `--ui-breadcrumb-divider-icon`.
    * - takes:  text
    */
   "divider-icon"?: string
+  /** `divider-icon`, as the DOM element's property. */
+  "prop:dividerIcon"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -540,36 +866,85 @@ export interface UIBreadcrumbSectionAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * Renders a link (`<a>`) to this level.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -618,6 +993,8 @@ export interface UIButtonAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue;  fills the button (or its ring and text when `basic`).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -638,192 +1015,318 @@ export interface UIButtonAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Primary emphasis:  the `primary` brand colour.
    * - takes:  flag (present / absent)
    */
   primary?: boolean | ""
+  /** `primary`, as the DOM element's property. */
+  "prop:primary"?: boolean | ""
   /**
    * Secondary emphasis:  the `secondary` brand colour.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
+  /** `secondary`, as the DOM element's property. */
+  "prop:secondary"?: boolean | ""
   /**
    * Positive consequence:  the `positive` colour.
    * - takes:  flag (present / absent)
    */
   positive?: boolean | ""
+  /** `positive`, as the DOM element's property. */
+  "prop:positive"?: boolean | ""
   /**
    * Negative consequence:  the `negative` colour.
    * - takes:  flag (present / absent)
    */
   negative?: boolean | ""
+  /** `negative`, as the DOM element's property. */
+  "prop:negative"?: boolean | ""
   /**
    * Less pronounced:  transparent with a hairline ring.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Least pronounced:  text only, underlined on hover.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
+  /** `tertiary`, as the DOM element's property. */
+  "prop:tertiary"?: boolean | ""
   /**
    * For dark backgrounds:  an outline that fills on hover.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
+  /** `toggle`, as the DOM element's property. */
+  "prop:toggle"?: boolean | ""
   /**
    * Pressed / on;  with `toggle`, in the positive colour.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * Fomantic's `state` behaviour:  the text while `active` (`Following`), instead of the content.  With either state text the label carries the state, so a `toggle` drops `aria-pressed` (WAI-ARIA APG).
    * - takes:  text
    */
   "active-text"?: string
+  /** `active-text`, as the DOM element's property. */
+  "prop:activeText"?: string
   /**
    * Fomantic's `state` behaviour:  the text while NOT `active` (`Follow`), instead of the content.
    * - takes:  text
    */
   "inactive-text"?: string
+  /** `inactive-text`, as the DOM element's property. */
+  "prop:inactiveText"?: string
   /**
    * Can't be used;  dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows a spinner in place of the content;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Pill shaped;  round when it holds only an icon.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Reduced padding.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * No padding at all, as `compact` taken to none:  hugs its content.
    * - takes:  flag (present / absent)
    */
   unpadded?: boolean | ""
+  /** `unpadded`, as the DOM element's property. */
+  "prop:unpadded"?: boolean | ""
   /**
    * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.
    * - takes:  flag (present / absent)
    */
   wrapped?: boolean | ""
+  /** `wrapped`, as the DOM element's property. */
+  "prop:wrapped"?: boolean | ""
   /**
    * One line, cut off with `…` where it doesn't fit.  It needs a width to cut at:  `fluid`, a width of its own, or a narrow parent (it's never wider than that).
    * - takes:  flag (present / absent)
    */
   ellipsis?: boolean | ""
+  /** `ellipsis`, as the DOM element's property. */
+  "prop:ellipsis"?: boolean | ""
   /**
    * With `icon`:  the icon in its own block, `labeled` (start) or `labeled="right"`.  With `label`:  which side the label goes, `labeled` (end) or `labeled="left"`.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | "" | "left" | "right"
   /**
    * Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`.
    * - takes:  flag, or `fade` · `vertical`
    */
   animated?: boolean | "" | "fade" | "vertical"
+  /** `animated`, as the DOM element's property. */
+  "prop:animated"?: boolean | "" | "fade" | "vertical"
   /**
    * Joined to the edge of a segment or another element:  `top`, `bottom`, `left` or `right`.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Icon name (Font Awesome, Fomantic aliases allowed).  With no text content the button gets the `icon` class (square padding);  with `labeled` it becomes a `labeled icon` button.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Which side of the text the icon goes:  `left` (default) or `right` (Fomantic's `right` icon, e.g. `Next →`), spaced by `--ui-button-icon-spacing`.  A `labeled` icon block takes its side from `labeled`.
    * - takes:  `left` · `right`
    */
   "icon-position"?: "left" | "right"
+  /** `icon-position`, as the DOM element's property. */
+  "prop:iconPosition"?: "left" | "right"
   /**
    * Shorthand for the button's text, instead of the default slot;  slotted children win.
    * - takes:  text
    */
   content?: string
+  /** `content`, as the DOM element's property. */
+  "prop:content"?: string
   /**
    * Shorthand for a joined label, e.g. a count;  renders `ui labeled button` around the button.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Form behaviour, as the native `<button type>`;  `submit` calls `form.requestSubmit()`.
    * - takes:  `button` · `submit` · `reset`
    * - default:  `button`
    */
   type?: "button" | "submit" | "reset"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "button" | "submit" | "reset"
   /**
    * Invoker commands, as the native `<button commandfor>`:  the id of the element `command` acts on, looked up in the button's own tree (the inner `<button>` gets it as `commandForElement`, since a shadow button can't see a light-DOM id).  Without browser support (`UI.browser.supports.invokers`) a click runs the built-in commands itself.
    * - takes:  text
    */
   commandfor?: string
+  /** `commandfor`, as the DOM element's property. */
+  "prop:commandFor"?: string
   /**
    * Invoker commands, as the native `<button command>`:  `show-modal` / `close` / `request-close` on a `<dialog>`, `show-popover` / `hide-popover` / `toggle-popover` on a popover, or a custom `--name` that the target hears as a `command` event (`<ui-modal>` answers `--show`, `--close`, `--toggle`).
    * - takes:  text
    */
   command?: string
+  /** `command`, as the DOM element's property. */
+  "prop:command"?: string
   /**
    * Renders a link (`<a>`) styled as a button.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * With `href`:  downloads the file instead of opening it, as the native `<a download>`;  a value names the saved file.
    * - takes:  text
    */
   download?: string
+  /** `download`, as the DOM element's property. */
+  "prop:download"?: string
   /**
    * Form field name submitted with the button's `value`.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form value submitted when this button submits the form.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -872,6 +1375,8 @@ export interface UIButtonsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every button in the group.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -892,106 +1397,163 @@ export interface UIButtonsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Every button in the primary colour.
    * - takes:  flag (present / absent)
    */
   primary?: boolean | ""
+  /** `primary`, as the DOM element's property. */
+  "prop:primary"?: boolean | ""
   /**
    * Every button in the secondary colour.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
+  /** `secondary`, as the DOM element's property. */
+  "prop:secondary"?: boolean | ""
   /**
    * Every button in the positive colour.
    * - takes:  flag (present / absent)
    */
   positive?: boolean | ""
+  /** `positive`, as the DOM element's property. */
+  "prop:positive"?: boolean | ""
   /**
    * Every button in the negative colour.
    * - takes:  flag (present / absent)
    */
   negative?: boolean | ""
+  /** `negative`, as the DOM element's property. */
+  "prop:negative"?: boolean | ""
   /**
    * Basic buttons inside one outer border.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Tertiary (text only) buttons.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
+  /** `tertiary`, as the DOM element's property. */
+  "prop:tertiary"?: boolean | ""
   /**
    * Inverted buttons, for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Icon-only buttons:  square padding.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: boolean | ""
   /**
    * With `icon`:  `labeled icon` buttons;  `labeled="right"` puts the icons at the end.
    * - takes:  flag, or `left` · `right`
    */
   labeled?: boolean | "" | "left" | "right"
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | "" | "left" | "right"
   /**
    * Reduced padding.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Separate pill-shaped buttons.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * `active` buttons show in the positive colour.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
+  /** `toggle`, as the DOM element's property. */
+  "prop:toggle"?: boolean | ""
   /**
    * Stacks the buttons vertically.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Every button the same width, from the buttons themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Buttons wrap onto more rows.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
+  /** `wrapping`, as the DOM element's property. */
+  "prop:wrapping"?: boolean | ""
   /**
    * Separate buttons with gaps between them.
    * - takes:  flag (present / absent)
    */
   spaced?: boolean | ""
+  /** `spaced`, as the DOM element's property. */
+  "prop:spaced"?: boolean | ""
   /**
    * Stacks vertically on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * Joined to the edge of a segment:  `top`, `bottom`, `left` or `right`.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Older, count-based alias of `equal fluid`:  equal-width buttons filling the row, a count (`width="3"` => `three`) or `"equal"` (`equal width`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -1014,26 +1576,88 @@ export interface UIButtonsAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -1082,6 +1706,8 @@ export interface UICalendarAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen cell, the range and the focus ring (a remap of `--ui-color`).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -1102,138 +1728,207 @@ export interface UICalendarAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Tighter cells.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * The field takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Can't be used;  dimmed and inert, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
+  /** `open`, as the DOM element's property. */
+  "prop:open"?: boolean | ""
   /**
    * What it picks, and the ISO shape of `value`;  Fomantic's default `datetime`.
    * - takes:  `date` · `time` · `datetime` · `month` · `year`
    * - default:  `datetime`
    */
   type?: "date" | "time" | "datetime" | "month" | "year"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "date" | "time" | "datetime" | "month" | "year"
   /**
    * The grid sits in the page (no field, no popup);  still a form control.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * Where the popup opens against the field;  it flips when there's no room.
    * - takes:  `bottom left` · `bottom right` · `top left` · `top right`
    * - default:  `bottom left`
    */
   position?: "bottom left" | "bottom right" | "top left" | "top right"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "bottom left" | "bottom right" | "top left" | "top right"
   /**
    * Chosen value, ISO by `type`.  The ATTRIBUTE is the starting value (form reset restores it);  the property is current.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name;  submits the ISO value.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Shows its value but can't be changed;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * Text shown in the empty field;  its accessible name too.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * Earliest value that can be chosen, ISO by `type`.
    * - takes:  text
    */
   min?: string
+  /** `min`, as the DOM element's property. */
+  "prop:min"?: string
   /**
    * Latest value that can be chosen, ISO by `type`.
    * - takes:  text
    */
   max?: string
+  /** `max`, as the DOM element's property. */
+  "prop:max"?: string
   /**
    * Where the grid starts while there's no value (ISO);  default today.
    * - takes:  text
    */
   "initial-date"?: string
+  /** `initial-date`, as the DOM element's property. */
+  "prop:initialDate"?: string
   /**
    * First column of the day grid, `0` = Sunday ... `6`;  default from the locale's week info.
    * - takes:  number
    */
   "first-day-of-week"?: number | `${number}`
+  /** `first-day-of-week`, as the DOM element's property. */
+  "prop:firstDayOfWeek"?: number | `${number}`
   /**
    * BCP 47 locale for names, formats and the 12 / 24 hour clock;  default `UI.i18n.locale`.
    * - takes:  text
    */
   locale?: string
+  /** `locale`, as the DOM element's property. */
+  "prop:locale"?: string
   /**
    * Shows a Today (or Now) button under the grid.
    * - takes:  flag (present / absent)
    */
   today?: boolean | ""
+  /** `today`, as the DOM element's property. */
+  "prop:today"?: boolean | ""
   /**
    * Times stop at the hour:  no minute grid.
    * - takes:  flag (present / absent)
    */
   "disable-minute"?: boolean | ""
+  /** `disable-minute`, as the DOM element's property. */
+  "prop:disableMinute"?: boolean | ""
   /**
    * No month grid:  the day grid's title goes to years.
    * - takes:  flag (present / absent)
    */
   "disable-month"?: boolean | ""
+  /** `disable-month`, as the DOM element's property. */
+  "prop:disableMonth"?: boolean | ""
   /**
    * No year grid:  the month grid's title goes to days.
    * - takes:  flag (present / absent)
    */
   "disable-year"?: boolean | ""
+  /** `disable-year`, as the DOM element's property. */
+  "prop:disableYear"?: boolean | ""
   /**
    * Days of the previous / next month in the day grid can be chosen (else they're disabled).
    * - takes:  flag (present / absent)
    */
   "select-adjacent-days"?: boolean | ""
+  /** `select-adjacent-days`, as the DOM element's property. */
+  "prop:selectAdjacentDays"?: boolean | ""
   /**
    * Id of the calendar holding the START of a range:  this one is the end (min = its value).
    * - takes:  text
    */
   "start-calendar"?: string
+  /** `start-calendar`, as the DOM element's property. */
+  "prop:startCalendar"?: string
   /**
    * Id of the calendar holding the END of a range:  this one is the start (max = its value).
    * - takes:  text
    */
   "end-calendar"?: string
+  /** `end-calendar`, as the DOM element's property. */
+  "prop:endCalendar"?: string
   /**
    * Icon of the popup button;  default (or bare `icon`) `calendar`, `clock` for `time`.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * PROPERTY:  days that can't be chosen, as ISO date strings (`["2026-12-25"]`).
    * - a JS property (rich data):  an object, array or function
@@ -1261,16 +1956,57 @@ export interface UICalendarAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -1319,6 +2055,8 @@ export interface UICardAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A coloured line along the bottom edge (a tinted fill when `basic`).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -1339,106 +2077,198 @@ export interface UICardAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Image and content side by side;  the extra content spans the bottom.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * Lifted off the page with a stronger shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Takes the width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Centred in its container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * No border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's.
    * - takes:  flag (present / absent)
    */
   dashed?: boolean | ""
+  /** `dashed`, as the DOM element's property. */
+  "prop:dashed"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Faded and inert;  a link card loses its `href`.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Dimmed under a spinner, announced as busy.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Makes the whole card a link (`<a>`).
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * Shorthand:  the header of a content block.
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shorthand:  metadata below the header.
    * - takes:  text
    */
   meta?: string
+  /** `meta`, as the DOM element's property. */
+  "prop:meta"?: string
   /**
    * Shorthand:  the description of the content block.
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * Shorthand:  extra content at the bottom (a footer).
    * - takes:  text
    */
   extra?: string
+  /** `extra`, as the DOM element's property. */
+  "prop:extra"?: string
   /**
    * Shorthand:  image URL, shown at the top (at the start when horizontal).
    * - takes:  text
    */
   image?: string
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: string
   /**
    * Alternative text of the `image` shorthand;  default `""` (decorative:  the card's text names it).
    * - takes:  text
    */
   alt?: string
+  /** `alt`, as the DOM element's property. */
+  "prop:alt"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -1486,6 +2316,8 @@ export interface UICardsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Colour of every card in the group.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -1506,76 +2338,156 @@ export interface UICardsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Cards per row, `1` ... `10` (`columns="3"` => `three cards`);  default a fixed card width.
    * - takes:  `1`-`10`, a fraction (`1/4`) or a percentage
    */
   columns?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
+  /** `columns`, as the DOM element's property. */
+  "prop:columns"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * With `columns`:  fewer cards per row in a narrow group (tablet, mobile widths).
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
+  /** `doubling`, as the DOM element's property. */
+  "prop:doubling"?: boolean | ""
   /**
    * One card per row in a narrow group (mobile widths).
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * What `stackable` and `doubling` measure:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * Centres each row of cards.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Every card horizontal.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * Every card raised.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * Every card rises on hover (a look;  links need `href`).
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Every card without border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Every card in the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -1623,6 +2535,8 @@ export interface UICheckboxAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -1643,91 +2557,177 @@ export interface UICheckboxAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Look:  a `toggle` switch or a `slider`;  default a box.  Toggles and sliders are `role=switch`.
    * - takes:  `slider` · `toggle`
    */
   type?: "slider" | "toggle"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "slider" | "toggle"
   /**
    * Neither on nor off (a dash);  a click clears it, as natively.
    * - takes:  flag (present / absent)
    */
   indeterminate?: boolean | ""
+  /** `indeterminate`, as the DOM element's property. */
+  "prop:indeterminate"?: boolean | ""
   /**
    * No room for a label:  just the box.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
    */
   invisible?: boolean | ""
+  /** `invisible`, as the DOM element's property. */
+  "prop:invisible"?: boolean | ""
   /**
    * Box after the label, at the end of the line.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
+  /** `right-aligned`, as the DOM element's property. */
+  "prop:rightAligned"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its state but can't be changed;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
+  /** `selected`, as the DOM element's property. */
+  "prop:selected"?: boolean | ""
   /**
    * Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`).
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Label text;  slotted content is the rich version.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Value submitted while unchosen:  `value="open" off-value="closed"`;  default its class's `defaultUnchosenValue`, else nothing, as a native checkbox.  Needs JavaScript:  a static server render submits nothing while unchosen.
    * - takes:  text
    */
   "off-value"?: string
+  /** `off-value`, as the DOM element's property. */
+  "prop:offValue"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -1776,53 +2776,73 @@ export interface UICodeAttributes {
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
    * - takes:  `eager` · `visible` · `idle`
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
+  /** `load`, as the DOM element's property. */
+  "prop:load"?: "eager" | "visible" | "idle"
   /**
    * Language to colour it as:  a highlight.js name or alias (`ts`, `html`, `css`, `json`, `bash` ...), one the page registered with `UI.code` (e.g. `spell`, once the app's `<spell-code>` is loaded), or `text` for none.  Absent:  guessed from the code.
    * - takes:  text
    */
   language?: string
+  /** `language`, as the DOM element's property. */
+  "prop:language"?: string
   /**
    * Number the lines, in a gutter that wrapped lines don't run under.
    * - takes:  flag (present / absent)
    */
   "line-numbers"?: boolean | ""
+  /** `line-numbers`, as the DOM element's property. */
+  "prop:lineNumbers"?: boolean | ""
   /**
    * Number of the first line, with `line-numbers`.
    * - takes:  number
    * - default:  `1`
    */
   start?: number | `${number}`
+  /** `start`, as the DOM element's property. */
+  "prop:start"?: number | `${number}`
   /**
    * Wrap long lines;  default:  they scroll sideways.
    * - takes:  flag (present / absent)
    */
   wrap?: boolean | ""
+  /** `wrap`, as the DOM element's property. */
+  "prop:wrap"?: boolean | ""
   /**
    * A button that copies the code.
    * - takes:  flag (present / absent)
    */
   copy?: boolean | ""
+  /** `copy`, as the DOM element's property. */
+  "prop:copy"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
@@ -1863,6 +2883,47 @@ export interface UICodeAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  "prop:content"?: string
 }
 
 /** `<ui-code>` in JSX:  its own attributes, and HTML's global ones. */
@@ -1890,11 +2951,47 @@ export interface UIColumnAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Width in columns of 16:  `4`, `1/4` or `25%`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */
   width?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
     | "1"
     | "2"
     | "3"
@@ -1934,11 +3031,49 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width-mobile`, as the DOM element's property. */
+  "prop:widthMobile"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Width while the grid is 768px ... 991px wide.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */
   "width-tablet"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /** `width-tablet`, as the DOM element's property. */
+  "prop:widthTablet"?:
     | "1"
     | "2"
     | "3"
@@ -1978,11 +3113,49 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width-computer`, as the DOM element's property. */
+  "prop:widthComputer"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Width while the grid is 1200px ... 1919px wide.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */
   "width-large"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /** `width-large`, as the DOM element's property. */
+  "prop:widthLarge"?:
     | "1"
     | "2"
     | "3"
@@ -2022,61 +3195,137 @@ export interface UIColumnAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width-widescreen`, as the DOM element's property. */
+  "prop:widthWidescreen"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Pushed to the `left` or `right` end.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * No gutter on the `left` / `right` side.
    * - takes:  `left` · `right`
    */
   attached?: "left" | "right"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: "left" | "right"
   /**
    * Centred in its line.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Fills the line's height;  its content grows.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
+  /** `stretched`, as the DOM element's property. */
+  "prop:stretched"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport).
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
+  /** `only`, as the DOM element's property. */
+  "prop:only"?: string
   /**
    * Aligns its text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Sits at the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2125,26 +3374,71 @@ export interface UICommentAttributes {
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2193,46 +3487,99 @@ export interface UICommentsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A line down the left of each thread of replies.
    * - takes:  flag (present / absent)
    */
   threaded?: boolean | ""
+  /** `threaded`, as the DOM element's property. */
+  "prop:threaded"?: boolean | ""
   /**
    * Each comment's actions hidden until the comment is hovered (and shown to keyboard focus).
    * - takes:  flag (present / absent)
    */
   minimal?: boolean | ""
+  /** `minimal`, as the DOM element's property. */
+  "prop:minimal"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Hidden:  a thread of replies folded away.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2281,26 +3628,71 @@ export interface UIComponentsAttributes {
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2349,61 +3741,120 @@ export interface UIContainerAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Always the full width of the page.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * A fifth wider than the default container.
    * - takes:  flag (present / absent)
    */
   wide?: boolean | ""
+  /** `wide`, as the DOM element's property. */
+  "prop:wide"?: boolean | ""
   /**
    * Holds a grid:  widened by the grid's gutters so its columns line up with other containers.
    * - takes:  flag (present / absent)
    */
   grid?: boolean | ""
+  /** `grid`, as the DOM element's property. */
+  "prop:grid"?: boolean | ""
   /**
    * With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
+  /** `relaxed`, as the DOM element's property. */
+  "prop:relaxed"?: boolean | "" | "very"
   /**
    * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  Heights are tokens:  `--ui-container-scrolling-height` (mobile, 15em), `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * With `scrolling`:  people can drag its height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
+  /** `resizable`, as the DOM element's property. */
+  "prop:resizable"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2452,46 +3903,99 @@ export interface UIContentAttributes {
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: boolean | ""
   /**
    * In a modal:  a capped height that scrolls.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2540,26 +4044,71 @@ export interface UIDateAttributes {
    * - takes:  text
    */
   datetime?: string
+  /** `datetime`, as the DOM element's property. */
+  "prop:dateTime"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2607,21 +4156,64 @@ export interface UIDescriptionAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2670,26 +4262,71 @@ export interface UIDetailAttributes {
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2738,62 +4375,121 @@ export interface UIDimmerAttributes {
    * - takes:  `medium` · `light` · `very light`
    */
   shade?: "medium" | "light" | "very light"
+  /** `shade`, as the DOM element's property. */
+  "prop:shade"?: "medium" | "light" | "very light"
   /**
    * Dims the whole page:  a modal dialog over the viewport.
    * - takes:  flag (present / absent)
    */
   page?: boolean | ""
+  /** `page`, as the DOM element's property. */
+  "prop:page"?: boolean | ""
   /**
    * A light dimmer (dark text), where the default is dark.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Blurs and greys what's behind it (`backdrop-filter`).
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
+  /** `blurring`, as the DOM element's property. */
+  "prop:blurring"?: boolean | ""
   /**
    * Fomantic's CSS-only dimmer;  the element's look is the same.
    * - takes:  flag (present / absent)
    */
   simple?: boolean | ""
+  /** `simple`, as the DOM element's property. */
+  "prop:simple"?: boolean | ""
   /**
    * Never shows.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Its content at the `top` or `bottom` instead of the middle (`top aligned`).
    * - takes:  `top` · `bottom`
    */
   "vertical-align"?: "top" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "bottom"
   /**
    * Shows by itself:  `hover` while the pointer is over its parent (or focus is inside), `click` when the parent is clicked.  Default:  only `visible` shows it.
    * - takes:  `hover` · `click`
    */
   "show-on"?: "hover" | "click"
+  /** `show-on`, as the DOM element's property. */
+  "prop:showOn"?: "hover" | "click"
   /**
    * What hides it, as `<dialog closedby>`:  `any` -- a click on the dimmer (not its content) or Escape (a page dimmer) -- the default;  `closerequest` -- Escape only;  `none` -- only `visible`.  A `hover` dimmer ignores clicks.  Read when it shows.
    * - takes:  `any` · `closerequest` · `none`
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
+  /** `closedby`, as the DOM element's property. */
+  "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2842,6 +4538,8 @@ export interface UIDividerAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the rule and the text.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -2862,71 +4560,149 @@ export interface UIDividerAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Text (or an icon) between two horizontal rules.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * A vertical rule with optional text, centred in a `position: relative` owner (segment, grid).
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  Renamed because `hidden` hides every element, as the platform's does.
    * - takes:  flag (present / absent)
    */
   spacer?: boolean | ""
+  /** `spacer`, as the DOM element's property. */
+  "prop:spacer"?: boolean | ""
   /**
    * No space above or below.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * Clears floated content above it.
    * - takes:  flag (present / absent)
    */
   clearing?: boolean | ""
+  /** `clearing`, as the DOM element's property. */
+  "prop:clearing"?: boolean | ""
   /**
    * More space, to divide sections of content.
    * - takes:  flag (present / absent)
    */
   section?: boolean | ""
+  /** `section`, as the DOM element's property. */
+  "prop:section"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Icon name, shown before the text.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -2975,6 +4751,8 @@ export interface UIDropdownAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills a `button` dropdown;  accents a selection's focus border and labels.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -2995,131 +4773,198 @@ export interface UIDropdownAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Form state, tinting the box, text and menu.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Looks like a form `<select>`.
    * - takes:  flag (present / absent)
    */
   selection?: boolean | ""
+  /** `selection`, as the DOM element's property. */
+  "prop:selection"?: boolean | ""
   /**
    * Filters the options by typing;  the trigger is an `<input>`.
    * - takes:  flag (present / absent)
    */
   search?: boolean | ""
+  /** `search`, as the DOM element's property. */
+  "prop:search"?: boolean | ""
   /**
    * Chooses several values, shown as labels.
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
+  /** `multiple`, as the DOM element's property. */
+  "prop:multiple"?: boolean | ""
   /**
    * Sits inside running text.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * The menu floats further away, with a stronger shadow.
    * - takes:  flag (present / absent)
    */
   floating?: boolean | ""
+  /** `floating`, as the DOM element's property. */
+  "prop:floating"?: boolean | ""
   /**
    * Looks like a button (`UIButton.css`).
    * - takes:  flag (present / absent)
    */
   button?: boolean | ""
+  /** `button`, as the DOM element's property. */
+  "prop:button"?: boolean | ""
   /**
    * A labeled icon button:  the `icon` in its own block, no caret.  Use with `button`.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | ""
   /**
    * No minimum width;  the menu sizes to its items.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * The menu scrolls after a fixed height.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | ""
   /**
    * Opens above (the menu still flips when there's no room).
    * - takes:  flag (present / absent)
    */
   upward?: boolean | ""
+  /** `upward`, as the DOM element's property. */
+  "prop:upward"?: boolean | ""
   /**
    * Opens on hover / focus, with no script and no popover.
    * - takes:  flag (present / absent)
    */
   simple?: boolean | ""
+  /** `simple`, as the DOM element's property. */
+  "prop:simple"?: boolean | ""
   /**
    * Shows a clear button while there's a value.
    * - takes:  flag (present / absent)
    */
   clearable?: boolean | ""
+  /** `clearable`, as the DOM element's property. */
+  "prop:clearable"?: boolean | ""
   /**
    * Can't be used;  dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy, e.g. fetching options;  the caret spins.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shows its value but can't be changed;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * A selection menu that never scrolls.
    * - takes:  flag (present / absent)
    */
   unlimited?: boolean | ""
+  /** `unlimited`, as the DOM element's property. */
+  "prop:unlimited"?: boolean | ""
   /**
    * A `scrolling` menu people can resize vertically.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
+  /** `resizable`, as the DOM element's property. */
+  "prop:resizable"?: boolean | ""
   /**
    * A shorter selection menu (3/4 height).
    * - takes:  flag (present / absent)
    */
   short?: boolean | ""
+  /** `short`, as the DOM element's property. */
+  "prop:short"?: boolean | ""
   /**
    * A much shorter selection menu (1/2 height).
    * - takes:  flag (present / absent)
    */
   "very-short"?: boolean | ""
+  /** `very-short`, as the DOM element's property. */
+  "prop:veryShort"?: boolean | ""
   /**
    * A longer selection menu (2x height).
    * - takes:  flag (present / absent)
    */
   long?: boolean | ""
+  /** `long`, as the DOM element's property. */
+  "prop:long"?: boolean | ""
   /**
    * A much longer selection menu (3x height).
    * - takes:  flag (present / absent)
    */
   "very-long"?: boolean | ""
+  /** `very-long`, as the DOM element's property. */
+  "prop:veryLong"?: boolean | ""
   /**
    * The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
+  /** `open`, as the DOM element's property. */
+  "prop:open"?: boolean | ""
   /**
    * An arrow on the menu pointing at the dropdown;  the value says where the menu's arrow sits (`top left` => below, arrow at its top left).  Pointing menus never flip.
    * - takes:  flag, or `top` · `top left` · `top right` · `left` · `right` · `bottom` · `bottom left` · `bottom right`
@@ -3135,73 +4980,111 @@ export interface UIDropdownAttributes {
     | "bottom"
     | "bottom left"
     | "bottom right"
+  /** `pointing`, as the DOM element's property. */
+  "prop:pointing"?:
+    | boolean
+    | ""
+    | "top"
+    | "top left"
+    | "top right"
+    | "left"
+    | "right"
+    | "bottom"
+    | "bottom left"
+    | "bottom right"
   /**
    * Lays the menu items out in columns:  `columnar="3"` => `three column`.
    * - takes:  `2`-`5`, a fraction (`1/4`) or a percentage
    */
   columnar?: "2" | "3" | "4" | "5" | (string & {})
+  /** `columnar`, as the DOM element's property. */
+  "prop:columnar"?: "2" | "3" | "4" | "5" | (string & {})
   /**
    * Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`).
    * - takes:  `left` · `right`
    * - default:  `right`
    */
   direction?: "left" | "right"
+  /** `direction`, as the DOM element's property. */
+  "prop:direction"?: "left" | "right"
   /**
    * Icon name for a `labeled` dropdown's icon block.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Text shown while nothing is chosen.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Text shown for the current value, e.g. before `options` arrive.  Property only by default.
    * - takes:  text
    */
   text?: string
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: string
   /**
    * Form field name;  `multiple` submits one entry per value.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * `search`:  offers the query as a new option.
    * - takes:  flag (present / absent)
    */
   "allow-additions"?: boolean | ""
+  /** `allow-additions`, as the DOM element's property. */
+  "prop:allowAdditions"?: boolean | ""
   /**
    * `search`:  characters to type before the menu filters.
    * - takes:  number
    * - default:  `0`
    */
   "min-characters"?: number | `${number}`
+  /** `min-characters`, as the DOM element's property. */
+  "prop:minCharacters"?: number | `${number}`
   /**
    * `multiple`:  the most values that can be chosen.
    * - takes:  number
    */
   "max-selections"?: number | `${number}`
+  /** `max-selections`, as the DOM element's property. */
+  "prop:maxSelections"?: number | `${number}`
   /**
    * Message when nothing matches;  default the translated `noResults` text.
    * - takes:  text
    */
   "no-results-text"?: string
+  /** `no-results-text`, as the DOM element's property. */
+  "prop:noResultsText"?: string
   /**
    * Label of the add item, with `{value}`;  default the translated `addItem` text.
    * - takes:  text
    */
   "addition-text"?: string
+  /** `addition-text`, as the DOM element's property. */
+  "prop:additionText"?: string
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function
@@ -3218,11 +5101,50 @@ export interface UIDropdownAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3271,53 +5193,73 @@ export interface UIEmbedAttributes {
    * - takes:  `youtube` · `vimeo`
    */
   source?: "youtube" | "vimeo"
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: "youtube" | "vimeo"
   /**
    * The video's id at `source` (Fomantic's `data-id`).
    * - takes:  text
    */
   "video-id"?: string
+  /** `video-id`, as the DOM element's property. */
+  "prop:videoId"?: string
   /**
    * Any `http(s)` URL to frame, instead of `source` + `video-id`;  a YouTube / Vimeo one gets their player parameters.
    * - takes:  text
    */
   url?: string
+  /** `url`, as the DOM element's property. */
+  "prop:url"?: string
   /**
    * Image shown (and clicked) before the frame loads.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * What it is, e.g. `Product tour`:  names the play button (`Play Product tour`) and the frame.  Default `alt`, else `video` / `embedded content`.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Fomantic's placeholder `alt`;  used as `label` when there is none.
    * - takes:  text
    */
   alt?: string
+  /** `alt`, as the DOM element's property. */
+  "prop:alt"?: string
   /**
    * Icon over the placeholder;  bare `icon` (or `"true"`) keeps the default, `icon="false"` shows none.
    * - takes:  icon name
    * - default:  `circle-play`
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Shape of the box;  `16:9` (widescreen) is the default.
    * - takes:  `16:9` · `4:3` · `21:9` · `square`
    */
   "aspect-ratio"?: "16:9" | "4:3" | "21:9" | "square"
+  /** `aspect-ratio`, as the DOM element's property. */
+  "prop:aspectRatio"?: "16:9" | "4:3" | "21:9" | "square"
   /**
    * The video plays as soon as the frame loads:  the click on the placeholder already asked for it.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   autoplay?: boolean | ""
+  /** `autoplay`, as the DOM element's property. */
+  "prop:autoplay"?: boolean | ""
   /**
    * Keep the player's own branding (Fomantic's `brandedUI`).
    * - takes:  flag (present / absent)
    */
   "branded-ui"?: boolean | ""
+  /** `branded-ui`, as the DOM element's property. */
+  "prop:brandedUI"?: boolean | ""
   /**
    * Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute).
    * - a JS property (rich data):  an object, array or function
@@ -3334,26 +5276,71 @@ export interface UIEmbedAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3401,41 +5388,92 @@ export interface UIEmojiAttributes {
    * - takes:  `small` · `medium` · `large` · `big`
    */
   size?: "small" | "medium" | "large" | "big"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "small" | "medium" | "large" | "big"
   /**
    * The emoji's name in the page's name set:  by default its CLDR shortcode (Unicode's name, `thumbs_up`, `grinning_face_with_smiling_eyes`, `flag_united_states`);  with `<ui-root emoji="fomantic">`, Fomantic's name (`thumbsup`, `smile`, `flag_us`).  The words may be joined any way:  `thumbs up`, `thumbs-up`, `thumbsUp`, `thumbsup` (and `:smile:`, any case).
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Accessible name (`role=img`), when the emoji stands for something else;  bare `label` hides it (decorative).  Default:  the character's own Unicode name, read by assistive tech.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Clickable look:  a pointer cursor.  The page adds the control.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Spins (a still glyph under reduced motion).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3498,46 +5536,114 @@ export interface UIFeedEventAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Icon name, shown as the label.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Image URL, shown round as the label (decorative, `alt=""`).
    * - takes:  text
    */
   image?: string
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: string
   /**
    * Short text in a circle as the label, e.g. an initial (Fomantic's `data-text`).
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Its number / text circle outlined instead of filled.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3586,26 +5692,71 @@ export interface UIExtraAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3653,6 +5804,8 @@ export interface UIFeedAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the events' number circles (`ordered`) and connecting line (`connected`).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -3673,51 +5826,121 @@ export interface UIFeedAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * A line joins each event's label to the next.
    * - takes:  flag (present / absent)
    */
   connected?: boolean | ""
+  /** `connected`, as the DOM element's property. */
+  "prop:connected"?: boolean | ""
   /**
    * Numbers the events, in a circle where the label goes.  Renders `<ol>`.
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
+  /** `ordered`, as the DOM element's property. */
+  "prop:ordered"?: boolean | ""
   /**
    * A rule between events.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
+  /** `divided`, as the DOM element's property. */
+  "prop:divided"?: boolean | ""
   /**
    * Ordered:  outlined number circles instead of filled ones.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3765,42 +5988,58 @@ export interface UIFieldAttributes {
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * A value shown at the end of the label row (`100%`, `+8°`);  `slot="output"` is the rich version.
    * - takes:  text
    */
   output?: string
+  /** `output`, as the DOM element's property. */
+  "prop:output"?: string
   /**
    * An error, as a line under the control, and the `error` state.  `<ui-form>`'s validation shows its own there.
    * - takes:  text
    */
   error?: string
+  /** `error`, as the DOM element's property. */
+  "prop:error"?: string
   /**
    * Field state:  tints its label and controls.  An error shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * When a change to the control is written to the bound value:  `immediately`;  `delayed`, after a pause in typing (300ms;  `delayed 100` for 100ms);  or `on leave`, when the cursor leaves the field.
    * - takes:  text
    * - default:  `immediately`
    */
   apply?: string
+  /** `apply`, as the DOM element's property. */
+  "prop:apply"?: string
   /**
    * The things being edited disagree on this value:  the control shows blank, with a `Mixed` placeholder.  Set by the form;  writing a value clears it.
    * - takes:  flag (present / absent)
    */
   mixed?: boolean | ""
+  /** `mixed`, as the DOM element's property. */
+  "prop:mixed"?: boolean | ""
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
    * - a JS property (rich data):  an object, array or function
@@ -3817,21 +6056,29 @@ export interface UIFieldAttributes {
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * Marks the label with an asterisk (validation is `rules` / `required`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Shows the value;  it can't be changed.  Nests like `disabled`:  set on a group, it reaches each field.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readonly"?: boolean | ""
   /**
    * Dimmed and not usable (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Width in a row of fields:  columns (`4` of 16), fractions (`1/4`) or percentages (`25%`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -3854,21 +6101,81 @@ export interface UIFieldAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -3916,56 +6223,113 @@ export interface UIFieldsAttributes {
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Fields and their labels on one line.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * Fields stacked under one label (radio / checkbox groups).
    * - takes:  flag (present / absent)
    */
   grouped?: boolean | ""
+  /** `grouped`, as the DOM element's property. */
+  "prop:grouped"?: boolean | ""
   /**
    * Never stacks on a narrow form.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * Marks every field label (or the group label) with an asterisk.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Every field dimmed and not usable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Every field the same width, from the fields themselves (no count):  an equal share of the row each (Fomantic's `equal width fields`;  ~== `widths="equal"`).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  fields per row, sharing it equally (`widths="2"` => `two fields`);  `"equal"` => any number (`equal width`).
    * - takes:  `2`-`10`, a fraction (`1/4`) or a percentage
    */
   widths?: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
+  /** `widths`, as the DOM element's property. */
+  "prop:widths"?: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4014,31 +6378,78 @@ export interface UIFlagAttributes {
    * - takes:  `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * ISO 3166-1 alpha-2 code in any case (`fr`, `US`), or one of Fomantic's names and aliases (`france`, `united states`, `america`, `uk`, `england`, `pride` ...), see `FLAG_ALIASES`.
    * - takes:  text
    */
   country?: string
+  /** `country`, as the DOM element's property. */
+  "prop:country"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4087,21 +6498,29 @@ export interface UIFlyoutAttributes {
    * - default:  `left`
    */
   position?: "left" | "right" | "top" | "bottom"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "left" | "right" | "top" | "bottom"
   /**
    * The whole viewport wide.
    * - takes:  flag (present / absent)
    */
   fullscreen?: boolean | ""
+  /** `fullscreen`, as the DOM element's property. */
+  "prop:fullscreen"?: boolean | ""
   /**
    * The dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Blurs and greys the page behind its dimmer.
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
+  /** `blurring`, as the DOM element's property. */
+  "prop:blurring"?: boolean | ""
   /**
    * Width of a `left` / `right` flyout:  Fomantic's words (`very thin`, `thin`, `wide`, `very wide`) or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -4124,47 +6543,117 @@ export interface UIFlyoutAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Shows a close icon (Fomantic's `closeIcon` setting).  `closable="false"` is also Fomantic's `closable: false` setting:  no icon AND `closedby="none"`, unless `closedby` is set, which wins for dismissal.
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
+  /** `closable`, as the DOM element's property. */
+  "prop:closable"?: boolean | ""
   /**
    * What dismisses it, as `<dialog closedby>`:  `any` -- Escape or a click on the dimmer (default);  `closerequest` -- Escape only;  `none` -- only its own buttons.  Read when it opens.
    * - takes:  `any` · `closerequest` · `none`
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
+  /** `closedby`, as the DOM element's property. */
+  "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version.
    * - takes:  text
    */
   content?: string
+  /** `content`, as the DOM element's property. */
+  "prop:content"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4213,53 +6702,73 @@ export interface UIFormAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Every row of fields shares its width equally.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
+  /** `equal-width`, as the DOM element's property. */
+  "prop:equalWidth"?: boolean | ""
   /**
    * For dark backgrounds:  light labels.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed behind a spinner, not usable.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Nothing inside can be used (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Rows of fields never stack on narrow forms.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * What its rows of fields stack by:  `container` (the default) -- the form's own width;  `page` -- the screen's, as in Fomantic.  Its `<ui-fields>` follow it.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * When fields validate:  `immediately`, as each changes;  `on leave`, as the cursor leaves each;  or only `on save` (a submit, or `save()`).  A field showing an error always validates again as it changes.
    * - takes:  `immediately` · `on leave` · `on save`
    * - default:  `on save`
    */
   validate?: "immediately" | "on leave" | "on save"
+  /** `validate`, as the DOM element's property. */
+  "prop:validateOn"?: "immediately" | "on leave" | "on save"
   /**
    * When edits land in the bound `value`:  `immediately`;  or `on save`, all together on `save()`, while `cancel()` drops them (`:state(changed)` while any are held).  Each field's own `apply` says when it takes an edit.
    * - takes:  `immediately` · `on save`
    * - default:  `immediately`
    */
   apply?: "immediately" | "on save"
+  /** `apply`, as the DOM element's property. */
+  "prop:apply"?: "immediately" | "on save"
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
    * - a JS property (rich data):  an object, array or function
@@ -4277,11 +6786,15 @@ export interface UIFormAttributes {
    * - default:  `true`
    */
   "error-focus"?: boolean | ""
+  /** `error-focus`, as the DOM element's property. */
+  "prop:errorFocus"?: boolean | ""
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
    */
   "prevent-leaving"?: boolean | ""
+  /** `prevent-leaving`, as the DOM element's property. */
+  "prop:preventLeaving"?: boolean | ""
   /**
    * The object the form is BOUND to:  each control with a `name` shows that property and writes it back as it changes, live both ways (Solid signals, reactive members, spell objects);  a control in a `<ui-repeat>` row binds to the row's item.  Unset:  nothing is bound.
    * - a JS property (rich data):  an object, array or function
@@ -4298,16 +6811,57 @@ export interface UIFormAttributes {
    * - takes:  flag (present / absent)
    */
   debug?: boolean | ""
+  /** `debug`, as the DOM element's property. */
+  "prop:debug"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4372,106 +6926,200 @@ export interface UIGridAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `columns`, as the DOM element's property. */
+  "prop:columns"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Columns share each line equally;  same as `columns="equal"`.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
+  /** `equal-width`, as the DOM element's property. */
+  "prop:equalWidth"?: boolean | ""
   /**
    * Hairlines between columns;  `divided="vertically"` between rows instead.
    * - takes:  flag, or `vertically`
    */
   divided?: boolean | "" | "vertically"
+  /** `divided`, as the DOM element's property. */
+  "prop:divided"?: boolean | "" | "vertically"
   /**
    * A table-like box with hairlines between every cell;  `"internally"` drops the outer box.
    * - takes:  flag, or `internally`
    */
   celled?: boolean | "" | "internally"
+  /** `celled`, as the DOM element's property. */
+  "prop:celled"?: boolean | "" | "internally"
   /**
    * Keeps its outer gutters inside its box;  `horizontally` / `vertically` for one axis.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   padded?: boolean | "" | "horizontally" | "vertically"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Wider gutters;  `relaxed="very"` wider still.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
+  /** `relaxed`, as the DOM element's property. */
+  "prop:relaxed"?: boolean | "" | "very"
   /**
    * Narrower gutters and row spacing;  `compact="very"` narrower still.
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | "" | "very"
   /**
    * Centres its columns in each line.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Columns fill the line's height;  their content grows.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
+  /** `stretched`, as the DOM element's property. */
+  "prop:stretched"?: boolean | ""
   /**
    * One full-width column per line when the grid is narrow.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * Halves the column count at tablet and mobile widths.
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
+  /** `doubling`, as the DOM element's property. */
+  "prop:doubling"?: boolean | ""
   /**
    * On a dark surface:  dividers in their on-dark tone.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport), e.g. `only="mobile tablet"`.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
+  /** `only`, as the DOM element's property. */
+  "prop:only"?: string
   /**
    * Reverses the column order at these grid widths, e.g. `reversed="mobile tablet vertically"`.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `mobile vertically` · `tablet vertically` · `computer vertically`
    */
   reversed?: string
+  /** `reversed`, as the DOM element's property. */
+  "prop:reversed"?: string
   /**
    * What `stackable`, `doubling`, `reversed` and per-device widths measure:  `container` (the default) -- the grid's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).  Rows and columns follow their grid.
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * Aligns every column's text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns every column to the `top`, `middle` or `bottom` of its line.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4519,11 +7167,15 @@ export interface UIHeaderAttributes {
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
+  /** `level`, as the DOM element's property. */
+  "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Content header size relative to the surrounding text, `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text (and of a `dividing` rule).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -4544,81 +7196,163 @@ export interface UIHeaderAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * A sub heading:  small, uppercase.  Inside a header, its sub header.
    * - takes:  flag (present / absent)
    */
   sub?: boolean | ""
+  /** `sub`, as the DOM element's property. */
+  "prop:sub"?: boolean | ""
   /**
    * Icon header:  a large slotted icon centred above the text.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: boolean | ""
   /**
    * A rule below it.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * In a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
+  /** `block`, as the DOM element's property. */
+  "prop:block"?: boolean | ""
   /**
    * Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * With `attached`:  no line where it meets the segment.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
+  /** `seamless`, as the DOM element's property. */
+  "prop:seamless"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center`, `right` or `justified`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * No padding.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * Dimmed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme, for it and its parts.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a header.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4667,6 +7401,8 @@ export interface UIIconAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the glyph;  with `inverted` `circular` / `bordered`, the disc.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -4687,81 +7423,163 @@ export interface UIIconAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  Dashes ~== spaces, so Font Awesome's `circle-check` works too.  See `notes/icons.md`.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own.
    * - takes:  flag (present / absent)
    */
   outline?: boolean | ""
+  /** `outline`, as the DOM element's property. */
+  "prop:outline"?: boolean | ""
   /**
    * Accessible name:  makes the icon an image (`role=img`, `aria-label`).  Without it the icon is decorative and hidden from assistive technology.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds;  fills a `circular` / `bordered` icon.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Spins, e.g. a `spinner` or `circle-notch` glyph.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * No gap after the glyph and no extra width.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * Clickable look:  dimmed until hovered, pointer cursor.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Inside a circular ring.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Inside a square ring.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Mirrored:  `flipped` / `horizontally`, or `vertically`.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   flipped?: boolean | "" | "horizontally" | "vertically"
+  /** `flipped`, as the DOM element's property. */
+  "prop:flipped"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Turned a quarter:  `rotated` / `clockwise`, `counterclockwise`, or `halfway` (180°).
    * - takes:  flag, or `clockwise` · `counterclockwise` · `halfway`
    */
   rotated?: boolean | "" | "clockwise" | "counterclockwise" | "halfway"
+  /** `rotated`, as the DOM element's property. */
+  "prop:rotated"?: boolean | "" | "clockwise" | "counterclockwise" | "halfway"
   /**
    * Inside `<ui-icons>`:  a small badge on a corner of the group;  bare `corner` is bottom right.
    * - takes:  flag, or `top left` · `top right` · `bottom left` · `bottom right`
    */
   corner?: boolean | "" | "top left" | "top right" | "bottom left" | "bottom right"
+  /** `corner`, as the DOM element's property. */
+  "prop:corner"?: boolean | "" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4809,51 +7627,106 @@ export interface UIIconsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Accessible name for the combined glyph (`role=img`);  without it the group is decorative.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * The whole group spins.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * No gap after the group.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * Inside a circular ring, the first icon centred.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Inside a square ring, the first icon centred.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * A filled `circular` / `bordered` ring, for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -4901,101 +7774,176 @@ export interface UIImageAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A small circle sitting in a line of text.
    * - takes:  flag (present / absent)
    */
   avatar?: boolean | ""
+  /** `avatar`, as the DOM element's property. */
+  "prop:avatar"?: boolean | ""
   /**
    * A hairline border, for images with white edges.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * A block centred in its container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Cropped to a circle (a pill when not square).
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Faded:  shown as unavailable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Fills its container's width.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Sits inline in running text instead of as a block.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * Softly rounded corners.
    * - takes:  flag (present / absent)
    */
   rounded?: boolean | ""
+  /** `rounded`, as the DOM element's property. */
+  "prop:rounded"?: boolean | ""
   /**
    * Floats `left` or `right` of the text.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Room from the text around it:  both sides, or `spaced="left"` / `"right"` only.
    * - takes:  flag, or `left` · `right`
    */
   spaced?: boolean | "" | "left" | "right"
+  /** `spaced`, as the DOM element's property. */
+  "prop:spaced"?: boolean | "" | "left" | "right"
   /**
    * Aligns `top`, `middle` or `bottom` against the text (or, in a group, the row).
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Image URL, as the native `<img src>`.
    * - takes:  text
    */
   src?: string
+  /** `src`, as the DOM element's property. */
+  "prop:src"?: string
   /**
    * Text alternative, as the native `<img alt>`;  `alt=""` marks the image decorative.
    * - takes:  text
    */
   alt?: string
+  /** `alt`, as the DOM element's property. */
+  "prop:alt"?: string
   /**
    * Intrinsic width in px, as the native `<img width>`:  reserves space before load.  NOT the column `width` grammar;  size variations still set the rendered width.
    * - takes:  number
    */
   width?: number | `${number}`
+  /** `width`, as the DOM element's property. */
+  "prop:width"?: number | `${number}`
   /**
    * Intrinsic height in px, as the native `<img height>`:  reserves space before load.
    * - takes:  number
    */
   height?: number | `${number}`
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: number | `${number}`
   /**
    * When to load, as the native `<img loading>`.
    * - takes:  `eager` · `lazy`
    */
   loading?: "eager" | "lazy"
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: "eager" | "lazy"
   /**
    * Renders a link (`<a>`) around the image.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5043,66 +7991,127 @@ export interface UIImagesAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Every image a small circle.
    * - takes:  flag (present / absent)
    */
   avatar?: boolean | ""
+  /** `avatar`, as the DOM element's property. */
+  "prop:avatar"?: boolean | ""
   /**
    * Every image with a hairline border.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Rows centred in the container.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Every image cropped to a circle.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * The whole group faded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Every image fills the group's width, one per row.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Every image with softly rounded corners.
    * - takes:  flag (present / absent)
    */
   rounded?: boolean | ""
+  /** `rounded`, as the DOM element's property. */
+  "prop:rounded"?: boolean | ""
   /**
    * Floats the group `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Aligns the images of a row `top`, `middle` (default) or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5151,37 +8160,51 @@ export interface UIIncludeAttributes {
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
    * - takes:  `eager` · `visible` · `idle`
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
+  /** `load`, as the DOM element's property. */
+  "prop:load"?: "eager" | "visible" | "idle"
   /**
    * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Put the included markup in the element's LIGHT DOM, so the page's stylesheets style it.  Default:  a shadow root, where only inherited values (fonts, colours, `--ui-*` tokens) reach it.
    * - takes:  flag (present / absent)
    */
   "page-styles"?: boolean | ""
+  /** `page-styles`, as the DOM element's property. */
+  "prop:pageStyles"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
@@ -5222,6 +8245,47 @@ export interface UIIncludeAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  "prop:content"?: string
 }
 
 /** `<ui-include>` in JSX:  its own attributes, and HTML's global ones. */
@@ -5235,6 +8299,8 @@ export interface UIInputAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of a `file` input's choose-file button (Fomantic colours only file inputs).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -5255,66 +8321,107 @@ export interface UIInputAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Form state, tinting the box, text and placeholder.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * No box:  text only, e.g. inside a menu or header.
    * - takes:  flag (present / absent)
    */
   transparent?: boolean | ""
+  /** `transparent`, as the DOM element's property. */
+  "prop:transparent"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Busy:  the icon becomes a spinner (with or without `icon`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Shows its value but can't be edited;  submitted with the form (unlike `disabled`).
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * `left` puts the icon at the start (`left icon`);  default the end.
    * - takes:  `left`
    */
   "icon-position"?: "left"
+  /** `icon-position`, as the DOM element's property. */
+  "prop:iconPosition"?: "left"
   /**
    * Where the label sits:  bare => before the field, `right` => after it, `corner` / `left corner` => folded over a corner.  Implied (bare) by a `label` shorthand or slot.
    * - takes:  flag, or `right` · `corner` · `left corner`
    */
   labeled?: boolean | "" | "right" | "corner" | "left corner"
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | "" | "right" | "corner" | "left corner"
   /**
    * Joined buttons (slot `action`):  bare => after the field, `left` => before it.  Implied by the slot.
    * - takes:  flag, or `left`
    */
   action?: boolean | "" | "left"
+  /** `action`, as the DOM element's property. */
+  "prop:action"?: boolean | "" | "left"
   /**
    * Icon name, drawn inside the field;  the root gets `icon`.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Label text, joined to the field;  an ICON name with `labeled="corner"` / `"left corner"`;  the `label` slot is the rich version.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Native input type;  `file` also adds the `file` class.
    * - takes:  `text` · `password` · `email` · `number` · `search` · `url` · `tel` · `date` · `datetime-local` · `time` · `month` · `week` · `color` · `file`
@@ -5335,76 +8442,120 @@ export interface UIInputAttributes {
     | "week"
     | "color"
     | "file"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?:
+    | "text"
+    | "password"
+    | "email"
+    | "number"
+    | "search"
+    | "url"
+    | "tel"
+    | "date"
+    | "datetime-local"
+    | "time"
+    | "month"
+    | "week"
+    | "color"
+    | "file"
   /**
    * Value.  Attribute:  the starting (and reset) value;  property:  the live value, like a native input.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * Constraint:  must not be empty (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Constraint:  a regular expression the whole value must match.
    * - takes:  text
    */
   pattern?: string
+  /** `pattern`, as the DOM element's property. */
+  "prop:pattern"?: string
   /**
    * Constraint:  lowest number / date.
    * - takes:  text
    */
   min?: string
+  /** `min`, as the DOM element's property. */
+  "prop:min"?: string
   /**
    * Constraint:  highest number / date.
    * - takes:  text
    */
   max?: string
+  /** `max`, as the DOM element's property. */
+  "prop:max"?: string
   /**
    * Constraint:  granularity of a number / date.
    * - takes:  text
    */
   step?: string
+  /** `step`, as the DOM element's property. */
+  "prop:step"?: string
   /**
    * Constraint:  fewest characters (checked once someone has edited it).
    * - takes:  number
    */
   minlength?: number | `${number}`
+  /** `minlength`, as the DOM element's property. */
+  "prop:minLength"?: number | `${number}`
   /**
    * Constraint:  most characters.
    * - takes:  number
    */
   maxlength?: number | `${number}`
+  /** `maxlength`, as the DOM element's property. */
+  "prop:maxLength"?: number | `${number}`
   /**
    * `email` / `file`:  accepts several values.
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
+  /** `multiple`, as the DOM element's property. */
+  "prop:multiple"?: boolean | ""
   /**
    * `file`:  accepted file types.
    * - takes:  text
    */
   accept?: string
+  /** `accept`, as the DOM element's property. */
+  "prop:accept"?: string
   /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
    */
   autocomplete?: string
+  /** `autocomplete`, as the DOM element's property. */
+  "prop:autocomplete"?: string
   /**
    * Virtual keyboard hint, forwarded to the native input.  `decimal` / `numeric` also give the number look (right-aligned, tabular figures), as `type="number"` does.
    * - takes:  `none` · `text` · `decimal` · `numeric` · `tel` · `search` · `email` · `url`
    */
   inputmode?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url"
+  /** `inputmode`, as the DOM element's property. */
+  "prop:inputMode"?: "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url"
   /**
    * Fomantic validation rules checked with the native constraints:  `"email"`, `["notEmpty", "minLength[6]"]` or rule objects (`ValidationRule`).
    * - a JS property (rich data):  an object, array or function
@@ -5421,11 +8572,50 @@ export interface UIInputAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5488,92 +8678,178 @@ export interface UIItemAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Menu:  `right` pushes the item (and what follows) to the far end.
    * - takes:  `left` · `right`
    */
   position?: "left" | "right"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "left" | "right"
   /**
    * Value;  defaults to `text`.  Ordered list:  shown as the marker.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Dropdown:  text;  defaults to the text content.
    * - takes:  text
    */
   text?: string
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: string
   /**
    * Dropdown:  secondary text, shown at the end.
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * Icon name, shown before the text.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view.
    * - takes:  text
    */
   image?: string
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: string
   /**
    * Dropdown:  country code, shown as a flag before the text.
    * - takes:  text
    */
   flag?: string
+  /** `flag`, as the DOM element's property. */
+  "prop:flag"?: string
   /**
    * List / menu:  renders a link (`<a>`).
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * List / menu:  interactive without `href` -- renders a `<button>`, with the link hover.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Can't be chosen or followed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Chosen:  the dropdown's value, the list's / menu's current item (`aria-current`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
+  /** `selected`, as the DOM element's property. */
+  "prop:selected"?: boolean | ""
   /**
    * Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
   type?: "item" | "header" | "divider"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "item" | "header" | "divider"
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5621,56 +8897,113 @@ export interface UIItemsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule between items.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
+  /** `divided`, as the DOM element's property. */
+  "prop:divided"?: boolean | ""
   /**
    * More space between items;  `relaxed="very"` even more.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
+  /** `relaxed`, as the DOM element's property. */
+  "prop:relaxed"?: boolean | "" | "very"
   /**
    * Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Keeps the image beside the content in a narrow group (mobile widths), where items otherwise stack.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * What stacking and the tablet image width measure:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Faded and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5718,6 +9051,8 @@ export interface UILabelAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue;  fills the label (its ring and text when `basic`).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -5738,136 +9073,240 @@ export interface UILabelAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Image label:  a photo flush with the start edge (class `image`).  Presence (`""`, bare `image`) means an image label styled around a slotted `<img>`;  a non-empty value is the `src` of the label's own `img.image` child.
    * - takes:  text
    */
   image?: string
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: string
   /**
    * Shaped like a price tag.
    * - takes:  flag (present / absent)
    */
   tag?: boolean | ""
+  /** `tag`, as the DOM element's property. */
+  "prop:tag"?: boolean | ""
   /**
    * A triangle on the owner's top corner holding an icon:  `corner` (end) or `corner="left"`.
    * - takes:  flag, or `left` · `right`
    */
   corner?: boolean | "" | "left" | "right"
+  /** `corner`, as the DOM element's property. */
+  "prop:corner"?: boolean | "" | "left" | "right"
   /**
    * A ribbon pulled past the owner's start edge;  `ribbon="right"` past its end edge.
    * - takes:  flag, or `right`
    */
   ribbon?: boolean | "" | "right"
+  /** `ribbon`, as the DOM element's property. */
+  "prop:ribbon"?: boolean | "" | "right"
   /**
    * An arrow pointing at related content:  `pointing` (above), `below`, `left` or `right`.
    * - takes:  flag, or `above` · `below` · `left` · `right`
    */
   pointing?: boolean | "" | "above" | "below" | "left" | "right"
+  /** `pointing`, as the DOM element's property. */
+  "prop:pointing"?: boolean | "" | "above" | "below" | "left" | "right"
   /**
    * Floats over the owner's top end corner, e.g. a count on a menu item;  `left` / `bottom` move it.
    * - takes:  flag, or `left` · `bottom` · `bottom left`
    */
   floating?: boolean | "" | "left" | "bottom" | "bottom left"
+  /** `floating`, as the DOM element's property. */
+  "prop:floating"?: boolean | "" | "left" | "bottom" | "bottom left"
   /**
    * Less pronounced:  an outline on the surface colour.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's.
    * - takes:  flag (present / absent)
    */
   tinted?: boolean | ""
+  /** `tinted`, as the DOM element's property. */
+  "prop:tinted"?: boolean | ""
   /**
    * Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`.
    * - takes:  flag, or `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
    */
   attached?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
    * A fixed-width tag before a line of text, e.g. in a list.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * A round badge.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * With `circular`:  an empty dot.
    * - takes:  flag (present / absent)
    */
   empty?: boolean | ""
+  /** `empty`, as the DOM element's property. */
+  "prop:empty"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Centres its content.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * A form field's validation message:  the negative colour on the surface, wins over `color`.
    * - takes:  flag (present / absent)
    */
   prompt?: boolean | ""
+  /** `prompt`, as the DOM element's property. */
+  "prop:prompt"?: boolean | ""
   /**
    * Selected / on.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Icon name, shown before the text;  with no text the label gets the `icon` class (icon centred).
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Shorthand for a dimmer second value after the text, e.g. a count.
    * - takes:  text
    */
   detail?: string
+  /** `detail`, as the DOM element's property. */
+  "prop:detail"?: string
   /**
    * Shows a delete icon button;  clicking it dispatches `ui-remove`.
    * - takes:  flag (present / absent)
    */
   removable?: boolean | ""
+  /** `removable`, as the DOM element's property. */
+  "prop:removable"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a label.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -5915,6 +9354,8 @@ export interface UILabelsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every label in the group.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -5935,71 +9376,149 @@ export interface UILabelsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Every label shaped like a price tag.
    * - takes:  flag (present / absent)
    */
   tag?: boolean | ""
+  /** `tag`, as the DOM element's property. */
+  "prop:tag"?: boolean | ""
   /**
    * Every label basic (outlined).
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Every label tinted (the colour's soft fill and text).
    * - takes:  flag (present / absent)
    */
   tinted?: boolean | ""
+  /** `tinted`, as the DOM element's property. */
+  "prop:tinted"?: boolean | ""
   /**
    * Every label a round badge.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Every label a fixed-width tag.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * Every label an image label.
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: boolean | ""
   /**
    * Every label full width.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Every label centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Every label for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Every label dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6048,96 +9567,169 @@ export interface UIListAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Marks each item with a bullet.
    * - takes:  flag (present / absent)
    */
   bulleted?: boolean | ""
+  /** `bulleted`, as the DOM element's property. */
+  "prop:bulleted"?: boolean | ""
   /**
    * Numbers each item (`1.`, `1.1` in a sub-list);  an item's `value` replaces its number.  Renders `<ol>`.
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
+  /** `ordered`, as the DOM element's property. */
+  "prop:ordered"?: boolean | ""
   /**
    * Ordered:  a dot follows each number (`1.`).
    * - takes:  flag (present / absent)
    */
   suffixed?: boolean | ""
+  /** `suffixed`, as the DOM element's property. */
+  "prop:suffixed"?: boolean | ""
   /**
    * Items are links:  muted until hovered, the selected one strongest.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Items are choices:  `<button>`s with a hover background, `ui-select` on activation.
    * - takes:  flag (present / absent)
    */
   selection?: boolean | ""
+  /** `selection`, as the DOM element's property. */
+  "prop:selection"?: boolean | ""
   /**
    * Items indent when hovered.
    * - takes:  flag (present / absent)
    */
   animated?: boolean | ""
+  /** `animated`, as the DOM element's property. */
+  "prop:animated"?: boolean | ""
   /**
    * Items sit in a row.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * A rule between items.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
+  /** `divided`, as the DOM element's property. */
+  "prop:divided"?: boolean | ""
   /**
    * A rule around every item.
    * - takes:  flag (present / absent)
    */
   celled?: boolean | ""
+  /** `celled`, as the DOM element's property. */
+  "prop:celled"?: boolean | ""
   /**
    * More space between items;  `relaxed="very"` even more.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
+  /** `relaxed`, as the DOM element's property. */
+  "prop:relaxed"?: boolean | "" | "very"
   /**
    * No horizontal item padding;  a `selection` list's hover background reaches past its edges.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Aligns each item's icon, image and content:  `top` (default), `middle` or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6185,6 +9777,8 @@ export interface UILoaderAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the turning arc.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -6205,66 +9799,142 @@ export interface UILoaderAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Spin `slow` or `fast`;  absent is normal.
    * - takes:  `slow` · `fast`
    */
   speed?: "slow" | "fast"
+  /** `speed`, as the DOM element's property. */
+  "prop:speed"?: "slow" | "fast"
   /**
    * Hidden, even when `visible`.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows the slotted text below the spinner.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Sits in the text flow instead of centred over its positioned container.
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * With `inline`:  a block of its own, centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Unsure how long it'll take:  turns backwards, slower.
    * - takes:  flag (present / absent)
    */
   indeterminate?: boolean | ""
+  /** `indeterminate`, as the DOM element's property. */
+  "prop:indeterminate"?: boolean | ""
   /**
    * Two opposite arcs.
    * - takes:  flag (present / absent)
    */
   double?: boolean | ""
+  /** `double`, as the DOM element's property. */
+  "prop:double"?: boolean | ""
   /**
    * Two arcs that stretch and chase each other.
    * - takes:  flag (present / absent)
    */
   elastic?: boolean | ""
+  /** `elastic`, as the DOM element's property. */
+  "prop:elastic"?: boolean | ""
   /**
    * For dark backgrounds:  a white arc on a faint track.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6313,58 +9983,80 @@ export interface UIMarkdownAttributes {
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
    * - takes:  `eager` · `visible` · `idle`
    * - default:  `eager`
    */
   load?: "eager" | "visible" | "idle"
+  /** `load`, as the DOM element's property. */
+  "prop:load"?: "eager" | "visible" | "idle"
   /**
    * Text size, as Fomantic's sizes;  default `medium`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A single newline is a line break, as in GitHub comments;  default off, as in GitHub files.
    * - takes:  flag (present / absent)
    */
   breaks?: boolean | ""
+  /** `breaks`, as the DOM element's property. */
+  "prop:breaks"?: boolean | ""
   /**
    * Levels to shift headings by, e.g. `1`:  `#` becomes `<h2>`, to sit under the page's own heading.  Property `headingLevelOffset`:  `headingOffset` is WebKit's native `headingoffset`.
    * - takes:  number
    * - default:  `0`
    */
   "heading-offset"?: number | `${number}`
+  /** `heading-offset`, as the DOM element's property. */
+  "prop:headingLevelOffset"?: number | `${number}`
   /**
    * Drop the text's leading `#` title (an `h1` first thing in the text), e.g. when the page shows its own headline above a README.  The text itself is unchanged:  `content`, `save()` and the editor keep it.
    * - takes:  flag (present / absent)
    */
   "skip-title"?: boolean | ""
+  /** `skip-title`, as the DOM element's property. */
+  "prop:skipTitle"?: boolean | ""
   /**
    * Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` writes it.
    * - takes:  flag (present / absent)
    */
   editable?: boolean | ""
+  /** `editable`, as the DOM element's property. */
+  "prop:editable"?: boolean | ""
   /**
    * Sanitize the rendered markup with DOMPurify (its own lazy chunk, loaded only then):  no scripts, event handlers or `javascript:` links.  Set it for text you didn't write;  without it, raw HTML is kept as written.
    * - takes:  flag (present / absent)
    */
   sanitized?: boolean | ""
+  /** `sanitized`, as the DOM element's property. */
+  "prop:sanitized"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
@@ -6405,6 +10097,47 @@ export interface UIMarkdownAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  "prop:content"?: string
 }
 
 /** `<ui-markdown>` in JSX:  its own attributes, and HTML's global ones. */
@@ -6418,6 +10151,8 @@ export interface UIMenuAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -6438,131 +10173,198 @@ export interface UIMenuAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance="pointing" secondary` ~== `secondary pointing`.
    * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
    */
   appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  /** `appearance`, as the DOM element's property. */
+  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
    */
   position?: "left" | "right" | "center"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "left" | "right" | "center"
   /**
    * De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
+  /** `secondary`, as the DOM element's property. */
+  "prop:secondary"?: boolean | ""
   /**
    * The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance="pointing"`.
    * - takes:  flag (present / absent)
    */
   pointing?: boolean | ""
+  /** `pointing`, as the DOM element's property. */
+  "prop:pointing"?: boolean | ""
   /**
    * Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance="tabular"`.
    * - takes:  flag (present / absent)
    */
   tabular?: boolean | ""
+  /** `tabular`, as the DOM element's property. */
+  "prop:tabular"?: boolean | ""
   /**
    * Plain text items, no box.  Alias of `appearance="text"`.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Items stacked top to bottom.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * Page links:  compact, centred items.
    * - takes:  flag (present / absent)
    */
   pagination?: boolean | ""
+  /** `pagination`, as the DOM element's property. */
+  "prop:pagination"?: boolean | ""
   /**
    * Icon-only items.
    * - takes:  flag (present / absent)
    */
   icon?: boolean | ""
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: boolean | ""
   /**
    * Labeled icon items:  a large icon above each item's text.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | ""
   /**
    * Every item is interactive:  a `<button>` with the link hover.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Stacks its items on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * Centred in its container, items centred.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * No dividers between items.
    * - takes:  flag (present / absent)
    */
   borderless?: boolean | ""
+  /** `borderless`, as the DOM element's property. */
+  "prop:borderless"?: boolean | ""
   /**
    * Only as wide as its items.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Items wrap onto more lines when they don't fit.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
+  /** `wrapping`, as the DOM element's property. */
+  "prop:wrapping"?: boolean | ""
   /**
    * With `wrapping`:  square corners where the lines meet.
    * - takes:  flag (present / absent)
    */
   wrapped?: boolean | ""
+  /** `wrapped`, as the DOM element's property. */
+  "prop:wrapped"?: boolean | ""
   /**
    * The dark scheme;  with `color`, filled with the colour.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Floats beside the content;  `right` floats right.
    * - takes:  flag, or `left` · `right`
    */
   floated?: boolean | "" | "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: boolean | "" | "left" | "right"
   /**
    * No item padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Fixed to an edge of the viewport.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   fixed?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /** `fixed`, as the DOM element's property. */
+  "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   alignment?: "fluid" | "left" | "center" | "right"
+  /** `alignment`, as the DOM element's property. */
+  "prop:alignment"?: "fluid" | "left" | "center" | "right"
   /**
    * Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  divides the width evenly between N items (`items="3"` => `three item`);  `items="equal"` => `equal width` (Fomantic's, ~== `equal alignment="fluid"`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -6585,31 +10387,95 @@ export interface UIMenuAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `items`, as the DOM element's property. */
+  "prop:items"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
    */
   interactive?: boolean | ""
+  /** `interactive`, as the DOM element's property. */
+  "prop:interactive"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6657,6 +10523,8 @@ export interface UIMessageAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a tinted surface, border and text.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -6677,76 +10545,156 @@ export interface UIMessageAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Consequence, tinting it like a colour.
    * - takes:  `positive` · `negative` · `error` · `info` · `success` · `warning`
    */
   state?: "positive" | "negative" | "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "positive" | "negative" | "error" | "info" | "success" | "warning"
   /**
    * Lifted off the page with a shadow.
    * - takes:  flag (present / absent)
    */
   floating?: boolean | ""
+  /** `floating`, as the DOM element's property. */
+  "prop:floating"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Centres its text (and its icon with the content).
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * The dark scheme;  a coloured one keeps its hue in the text.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Joined edge to edge with the segment or form below;  `bottom` joins the one above.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Aligns its text `center` or `right`.
    * - takes:  `center` · `right`
    */
   "text-align"?: "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "center" | "right"
   /**
    * Icon name, shown large beside the content;  the root gets the `icon` class.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message.
    * - takes:  flag (present / absent)
    */
   dismissible?: boolean | ""
+  /** `dismissible`, as the DOM element's property. */
+  "prop:dismissible"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6795,21 +10743,64 @@ export interface UIMetaAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6857,77 +10848,142 @@ export interface UIModalAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * No box:  light text straight on the dimmer.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * The dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Nearly the whole viewport wide.
    * - takes:  flag (present / absent)
    */
   fullscreen?: boolean | ""
+  /** `fullscreen`, as the DOM element's property. */
+  "prop:fullscreen"?: boolean | ""
   /**
    * With `fullscreen`:  covers the whole viewport, edge to edge (`overlay fullscreen`).
    * - takes:  flag (present / absent)
    */
   overlay?: boolean | ""
+  /** `overlay`, as the DOM element's property. */
+  "prop:overlay"?: boolean | ""
   /**
    * Scrolls inside itself when taller than the viewport.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | ""
   /**
    * Pinned near the `top` or `bottom` of the viewport instead of centred (`top aligned`).
    * - takes:  `top` · `bottom`
    */
   "vertical-align"?: "top" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "bottom"
   /**
    * Shows a close icon (Fomantic's `closeIcon` setting).  `closable="false"` is also Fomantic's `closable: false` setting:  no icon AND `closedby="none"` (Escape and the dimmer do nothing), unless `closedby` is set, which wins for dismissal.  Absent:  no icon, dismissed by `closedby` (default `any`).
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
+  /** `closable`, as the DOM element's property. */
+  "prop:closable"?: boolean | ""
   /**
    * What dismisses it, as `<dialog closedby>` (Fomantic's `closable` setting, in three steps):  `any` -- Escape or a click on the dimmer (default);  `closerequest` -- Escape only;  `none` -- only its own buttons.  Read when it opens;  when set, it wins over `closable="false"`.
    * - takes:  `any` · `closerequest` · `none`
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
+  /** `closedby`, as the DOM element's property. */
+  "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shorthand for a content block of text;  a slotted `<ui-content>` is the rich version.
    * - takes:  text
    */
   content?: string
+  /** `content`, as the DOM element's property. */
+  "prop:content"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -6975,6 +11031,8 @@ export interface UINagAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  a filled bar in that colour.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -6995,106 +11053,196 @@ export interface UINagAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Light instead of dark;  a coloured one takes its tint.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Fixed to the viewport edge, over the page.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
+  /** `fixed`, as the DOM element's property. */
+  "prop:fixed"?: boolean | ""
   /**
    * Over the page content at its edge (absolute), instead of pushing it down.
    * - takes:  flag (present / absent)
    */
   overlay?: boolean | ""
+  /** `overlay`, as the DOM element's property. */
+  "prop:overlay"?: boolean | ""
   /**
    * At the bottom edge instead of the top.
    * - takes:  flag (present / absent)
    */
   bottom?: boolean | ""
+  /** `bottom`, as the DOM element's property. */
+  "prop:bottom"?: boolean | ""
   /**
    * Shows the close icon;  `closable="false"` for a nag only script (or `display-time`) closes.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   closable?: boolean | ""
+  /** `closable`, as the DOM element's property. */
+  "prop:closable"?: boolean | ""
   /**
    * Remembers the dismissal under this name, in `storage`;  without one nothing is stored.
    * - takes:  text
    */
   key?: string
+  /** `key`, as the DOM element's property. */
+  "prop:key"?: string
   /**
    * What a dismissal stores;  a stored `key` with another value doesn't count.
    * - takes:  text
    * - default:  `dismiss`
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Where the dismissal is stored:  `localStorage`, `sessionStorage` or a cookie (Fomantic's default).
    * - takes:  `local` · `session` · `cookie`
    * - default:  `cookie`
    */
   storage?: "local" | "session" | "cookie"
+  /** `storage`, as the DOM element's property. */
+  "prop:storage"?: "local" | "session" | "cookie"
   /**
    * Days a dismissal lasts (`local` and `cookie`);  `0` never expires.
    * - takes:  number
    * - default:  `30`
    */
   expires?: number | `${number}`
+  /** `expires`, as the DOM element's property. */
+  "prop:expires"?: number | `${number}`
   /**
    * Shows even when dismissed before (stores nothing new either).
    * - takes:  flag (present / absent)
    */
   persist?: boolean | ""
+  /** `persist`, as the DOM element's property. */
+  "prop:persist"?: boolean | ""
   /**
    * Milliseconds before it hides itself (not a dismissal:  nothing is stored);  absent / `0`:  stays.
    * - takes:  number
    */
   "display-time"?: number | `${number}`
+  /** `display-time`, as the DOM element's property. */
+  "prop:displayTime"?: number | `${number}`
   /**
    * Cookie `path`.
    * - takes:  text
    * - default:  `/`
    */
   path?: string
+  /** `path`, as the DOM element's property. */
+  "prop:path"?: string
   /**
    * Cookie `domain`.
    * - takes:  text
    */
   domain?: string
+  /** `domain`, as the DOM element's property. */
+  "prop:domain"?: string
   /**
    * Cookie `secure`.
    * - takes:  flag (present / absent)
    */
   secure?: boolean | ""
+  /** `secure`, as the DOM element's property. */
+  "prop:secure"?: boolean | ""
   /**
    * Cookie `samesite`.
    * - takes:  `lax` · `strict` · `none`
    */
   samesite?: "lax" | "strict" | "none"
+  /** `samesite`, as the DOM element's property. */
+  "prop:sameSite"?: "lax" | "strict" | "none"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7142,26 +11290,71 @@ export interface UIOrAttributes {
    * - takes:  text
    */
   text?: string
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7209,57 +11402,79 @@ export interface UIPanelAttributes {
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
+  /** `level`, as the DOM element's property. */
+  "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
+  /** `badge`, as the DOM element's property. */
+  "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
+  /** `collapsible`, as the DOM element's property. */
+  "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
+  /** `fold-icon`, as the DOM element's property. */
+  "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
+  /** `sticky`, as the DOM element's property. */
+  "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * Hue of the whole panel:  the header band, the box, the border and the sub-head bands (sub-panels follow it).  None:  `primary`.  Any hue, including one a theme adds (`spell-brand`'s `accent`, Polished Ivory).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -7280,106 +11495,198 @@ export interface UIPanelAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
+  /** `block`, as the DOM element's property. */
+  "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
+  /** `styled`, as the DOM element's property. */
+  "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7427,31 +11734,78 @@ export interface UIPlaceholderAttributes {
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7500,26 +11854,71 @@ export interface UIPlaceholderHeaderAttributes {
    * - takes:  flag (present / absent)
    */
   image?: boolean | ""
+  /** `image`, as the DOM element's property. */
+  "prop:image"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7568,31 +11967,78 @@ export interface UIPlaceholderImageAttributes {
    * - takes:  flag (present / absent)
    */
   square?: boolean | ""
+  /** `square`, as the DOM element's property. */
+  "prop:square"?: boolean | ""
   /**
    * A 4:3 block as wide as its container;  wins over `square` if both are set.
    * - takes:  flag (present / absent)
    */
   rectangular?: boolean | ""
+  /** `rectangular`, as the DOM element's property. */
+  "prop:rectangular"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7641,26 +12087,71 @@ export interface UIPlaceholderLineAttributes {
    * - takes:  `full` · `very long` · `long` · `medium` · `short` · `very short`
    */
   length?: "full" | "very long" | "long" | "medium" | "short" | "very short"
+  /** `length`, as the DOM element's property. */
+  "prop:length"?: "full" | "very long" | "long" | "medium" | "short" | "very short"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7709,21 +12200,64 @@ export interface UIPlaceholderParagraphAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7772,6 +12306,8 @@ export interface UIPopupAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue:  fills the popup (and its arrow), with a readable text colour.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -7792,41 +12328,72 @@ export interface UIPopupAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * No pointing arrow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Always its maximum width (`wide` / `very wide` widen it).
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
+  /** `fixed`, as the DOM element's property. */
+  "prop:fixed"?: boolean | ""
   /**
    * No maximum width:  as wide as its content, e.g. a grid.
    * - takes:  flag (present / absent)
    */
   flowing?: boolean | ""
+  /** `flowing`, as the DOM element's property. */
+  "prop:flowing"?: boolean | ""
   /**
    * As wide as its target.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * The opposite scheme:  dark on a light page.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Busy:  a spinner over faded content.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * A wider maximum width;  `wide="very"` wider still (`very wide`).
    * - takes:  flag, or `very`
    */
   wide?: boolean | "" | "very"
+  /** `wide`, as the DOM element's property. */
+  "prop:wide"?: boolean | "" | "very"
   /**
    * Where it sits against its target:  `top left` (default) ... `right center`, `left top` ... `right bottom` (beside, lined up with its top / bottom edge).  It flips to the other side when there's no room.
    * - takes:  `top left` · `top center` · `top right` · `bottom left` · `bottom center` · `bottom right` · `left center` · `right center` · `left top` · `left bottom` · `right top` · `right bottom`
@@ -7845,45 +12412,73 @@ export interface UIPopupAttributes {
     | "left bottom"
     | "right top"
     | "right bottom"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?:
+    | "top left"
+    | "top center"
+    | "top right"
+    | "bottom left"
+    | "bottom center"
+    | "bottom right"
+    | "left center"
+    | "right center"
+    | "left top"
+    | "left bottom"
+    | "right top"
+    | "right bottom"
   /**
    * What opens it:  `hover` (also keyboard focus), `focus`, `click` (toggles;  a non-modal dialog), or `manual` (only `visible`).
    * - takes:  `hover` · `focus` · `click` · `manual`
    * - default:  `hover`
    */
   "open-on"?: "hover" | "focus" | "click" | "manual"
+  /** `open-on`, as the DOM element's property. */
+  "prop:openOn"?: "hover" | "focus" | "click" | "manual"
   /**
    * Id of the target, in the popup's own tree;  without it, the previous element sibling.
    * - takes:  text
    */
   for?: string
+  /** `for`, as the DOM element's property. */
+  "prop:htmlFor"?: string
   /**
    * Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.
    * - takes:  text
    */
   content?: string
+  /** `content`, as the DOM element's property. */
+  "prop:content"?: string
   /**
    * `hover`:  the popup stays open while the pointer is over it, so it can be reached and its text read or selected -- on by default, as WCAG 1.4.13 (Content on Hover or Focus) asks for.  `hoverable="false"` is Fomantic's `hoverable: false` (its default):  it closes as the pointer leaves the target, after `hide-delay`.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   hoverable?: boolean | ""
+  /** `hoverable`, as the DOM element's property. */
+  "prop:hoverable"?: boolean | ""
   /**
    * `hover`:  ms before it shows.
    * - takes:  number
    * - default:  `50`
    */
   "show-delay"?: number | `${number}`
+  /** `show-delay`, as the DOM element's property. */
+  "prop:showDelay"?: number | `${number}`
   /**
    * `hover`:  ms before it hides.
    * - takes:  number
    * - default:  `70`
    */
   "hide-delay"?: number | `${number}`
+  /** `hide-delay`, as the DOM element's property. */
+  "prop:hideDelay"?: number | `${number}`
   /**
    * The target as a PROPERTY (an `Element`);  wins over `for`.
    * - a JS property (rich data):  an object, array or function
@@ -7900,16 +12495,57 @@ export interface UIPopupAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -7957,6 +12593,8 @@ export interface UIProgressAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the bar.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -7977,107 +12615,199 @@ export interface UIProgressAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Outcome, tinting bar and label;  stops the animations.  Without it a single bar turns `success` at 100%.
    * - takes:  `success` · `warning` · `error`
    */
   state?: "success" | "warning" | "error"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "success" | "warning" | "error"
   /**
    * With `indeterminate`:  a `slow` or `fast` animation;  absent is normal.
    * - takes:  `slow` · `fast`
    */
   speed?: "slow" | "fast"
+  /** `speed`, as the DOM element's property. */
+  "prop:speed"?: "slow" | "fast"
   /**
    * Shows activity:  a pulse runs along the bar.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * No background behind the bar.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Dimmed, animations stopped.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * The bar's colour follows the percentage, red through green.
    * - takes:  flag (present / absent)
    */
   indicating?: boolean | ""
+  /** `indicating`, as the DOM element's property. */
+  "prop:indicating"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * The bar grows from the right;  its text sits at its left end.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
+  /** `right-aligned`, as the DOM element's property. */
+  "prop:rightAligned"?: boolean | ""
   /**
    * Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one.
    * - takes:  flag, or `filling` · `sliding` · `swinging`
    */
   indeterminate?: boolean | "" | "filling" | "sliding" | "swinging"
+  /** `indeterminate`, as the DOM element's property. */
+  "prop:indeterminate"?: boolean | "" | "filling" | "sliding" | "swinging"
   /**
    * A thin line joined to the edge of the content above (`bottom`, bare) or below (`top`).
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Amount done:  a number, or a comma list for several bars.  A share of `total`, else a percentage.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * What `value` counts up to;  unset, `value` is a percentage.
    * - takes:  number
    */
   total?: number | `${number}`
+  /** `total`, as the DOM element's property. */
+  "prop:total"?: number | `${number}`
   /**
    * Percentage done, bypassing `value` / `total`;  a comma list for several bars.
    * - takes:  text
    */
   percent?: string
+  /** `percent`, as the DOM element's property. */
+  "prop:percent"?: string
   /**
    * Decimal places shown in texts.
    * - takes:  number
    * - default:  `0`
    */
   precision?: number | `${number}`
+  /** `precision`, as the DOM element's property. */
+  "prop:precision"?: number | `${number}`
   /**
    * Text inside the bar:  `percent` (`45%`) or `ratio` (`9 of 20`, needs `total`);  unset, none.
    * - takes:  `percent` · `ratio`
    */
   "bar-text"?: "percent" | "ratio"
+  /** `bar-text`, as the DOM element's property. */
+  "prop:barText"?: "percent" | "ratio"
   /**
    * Hue per bar, space or comma separated, e.g. `red green blue`;  each wins over `color`.
    * - takes:  text
    */
   "bar-colors"?: string
+  /** `bar-colors`, as the DOM element's property. */
+  "prop:barColors"?: string
   /**
    * Label under the bar;  `{percent}`, `{value}`, `{total}`, `{left}` are filled in.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8126,57 +12856,79 @@ export interface UIPropertyAttributes {
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, `range`, `checkbox`, `toggle`, `color`, `editor`, or one a page added.  None:  the default for its type.
    * - takes:  text
    */
   as?: string
+  /** `as`, as the DOM element's property. */
+  "prop:as"?: string
   /**
    * Where its choices come from, when not the schema's:  a source the page added (`UI.propertyControls.addChoices()`), or a list, `a, b, c`.
    * - takes:  text
    */
   options?: string
+  /** `options`, as the DOM element's property. */
+  "prop:options"?: string
   /**
    * The label, in the label row;  `slot="label"` is the rich version.  Names the control for screen readers.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * Text under the control;  `slot="hint"` is the rich version.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * A value shown at the end of the label row (`100%`, `+8°`);  `slot="output"` is the rich version.
    * - takes:  text
    */
   output?: string
+  /** `output`, as the DOM element's property. */
+  "prop:output"?: string
   /**
    * An error, as a line under the control, and the `error` state.  `<ui-form>`'s validation shows its own there.
    * - takes:  text
    */
   error?: string
+  /** `error`, as the DOM element's property. */
+  "prop:error"?: string
   /**
    * Field state:  tints its label and controls.  An error shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * When a change to the control is written to the bound value:  `immediately`;  `delayed`, after a pause in typing (300ms;  `delayed 100` for 100ms);  or `on leave`, when the cursor leaves the field.
    * - takes:  text
    * - default:  `immediately`
    */
   apply?: string
+  /** `apply`, as the DOM element's property. */
+  "prop:apply"?: string
   /**
    * The things being edited disagree on this value:  the control shows blank, with a `Mixed` placeholder.  Set by the form;  writing a value clears it.
    * - takes:  flag (present / absent)
    */
   mixed?: boolean | ""
+  /** `mixed`, as the DOM element's property. */
+  "prop:mixed"?: boolean | ""
   /**
    * Validation rules for this field's control, in `<ui-form rules>`'s shape (`"email"`, `["notEmpty", "minLength[6]"]`);  added to the form's own rules for it.
    * - a JS property (rich data):  an object, array or function
@@ -8193,21 +12945,29 @@ export interface UIPropertyAttributes {
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * Marks the label with an asterisk (validation is `rules` / `required`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Shows the value;  it can't be changed.  Nests like `disabled`:  set on a group, it reaches each field.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readonly"?: boolean | ""
   /**
    * Dimmed and not usable (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Width in a row of fields:  columns (`4` of 16), fractions (`1/4`) or percentages (`25%`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -8230,21 +12990,81 @@ export interface UIPropertyAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8315,78 +13135,108 @@ export interface UIPropertyEditorAttributes {
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the layout page is used.
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readonly"?: boolean | ""
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text
    */
   output?: string
+  /** `output`, as the DOM element's property. */
+  "prop:output"?: string
   /**
    * An error under the title, and the `error` state.
    * - takes:  text
    */
   error?: string
+  /** `error`, as the DOM element's property. */
+  "prop:error"?: string
   /**
    * Size of everything inside, `mini` ... `massive`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state:  shows the `<ui-message>`s of that state inside.  Failed validation sets `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Every row of fields shares its width equally.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
+  /** `equal-width`, as the DOM element's property. */
+  "prop:equalWidth"?: boolean | ""
   /**
    * For dark backgrounds:  light labels.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Busy:  dimmed behind a spinner, not usable.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Nothing inside can be used (`inert`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Rows of fields never stack on narrow forms.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * What its rows of fields stack by:  `container` (the default) -- the form's own width;  `page` -- the screen's, as in Fomantic.  Its `<ui-fields>` follow it.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * When fields validate:  `immediately`, as each changes;  `on leave`, as the cursor leaves each;  or only `on save` (a submit, or `save()`).  A field showing an error always validates again as it changes.
    * - takes:  `immediately` · `on leave` · `on save`
    * - default:  `on save`
    */
   validate?: "immediately" | "on leave" | "on save"
+  /** `validate`, as the DOM element's property. */
+  "prop:validateOn"?: "immediately" | "on leave" | "on save"
   /**
    * When edits land in the bound `value`:  `immediately`;  or `on save`, all together on `save()`, while `cancel()` drops them (`:state(changed)` while any are held).  Each field's own `apply` says when it takes an edit.
    * - takes:  `immediately` · `on save`
    * - default:  `immediately`
    */
   apply?: "immediately" | "on save"
+  /** `apply`, as the DOM element's property. */
+  "prop:apply"?: "immediately" | "on save"
   /**
    * Validation rules by field name (or id), Fomantic's `fields` shape:  `{ email: "email", password: ["notEmpty", "minLength[6]"], name: { rules: [{ type: "notEmpty", prompt: "..." }], optional: true } }`.
    * - a JS property (rich data):  an object, array or function
@@ -8404,72 +13254,100 @@ export interface UIPropertyEditorAttributes {
    * - default:  `true`
    */
   "error-focus"?: boolean | ""
+  /** `error-focus`, as the DOM element's property. */
+  "prop:errorFocus"?: boolean | ""
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
    */
   "prevent-leaving"?: boolean | ""
+  /** `prevent-leaving`, as the DOM element's property. */
+  "prop:preventLeaving"?: boolean | ""
   /**
    * Show the bound `value` (else `values`) as JSON below the form, live.
    * - takes:  flag (present / absent)
    */
   debug?: boolean | ""
+  /** `debug`, as the DOM element's property. */
+  "prop:debug"?: boolean | ""
   /**
    * Title text;  a slotted `slot="label"` is the rich version (code, links).
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
+  /** `level`, as the DOM element's property. */
+  "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
+  /** `badge`, as the DOM element's property. */
+  "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
+  /** `collapsible`, as the DOM element's property. */
+  "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
+  /** `fold-icon`, as the DOM element's property. */
+  "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
+  /** `sticky`, as the DOM element's property. */
+  "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -8490,76 +13368,156 @@ export interface UIPropertyEditorAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
+  /** `block`, as the DOM element's property. */
+  "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
+  /** `styled`, as the DOM element's property. */
+  "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8608,82 +13566,114 @@ export interface UIPropertyGroupAttributes {
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Shows every value;  nothing can be changed.  Reaches every property in it.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readonly"?: boolean | ""
   /**
    * Its state:  tints its title.  A property in it failing validation shows `error` on top.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * A value at the end of the title bar;  `slot="output"`.
    * - takes:  text
    */
   output?: string
+  /** `output`, as the DOM element's property. */
+  "prop:output"?: string
   /**
    * An error under the title, and the `error` state.
    * - takes:  text
    */
   error?: string
+  /** `error`, as the DOM element's property. */
+  "prop:error"?: string
   /**
    * Title text;  a slotted `slot="label"` is the rich version (code, links).
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
+  /** `level`, as the DOM element's property. */
+  "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
+  /** `badge`, as the DOM element's property. */
+  "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
+  /** `collapsible`, as the DOM element's property. */
+  "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
+  /** `fold-icon`, as the DOM element's property. */
+  "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
+  /** `sticky`, as the DOM element's property. */
+  "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -8704,96 +13694,184 @@ export interface UIPropertyGroupAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
+  /** `block`, as the DOM element's property. */
+  "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
+  /** `styled`, as the DOM element's property. */
+  "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8842,21 +13920,64 @@ export interface UIPushableAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8905,21 +14026,64 @@ export interface UIPusherAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -8968,6 +14132,8 @@ export interface UIRadioAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -8988,81 +14154,163 @@ export interface UIRadioAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Look:  a `toggle` or `slider` radio;  default the round radio box.
    * - takes:  `slider` · `toggle`
    */
   type?: "slider" | "toggle"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "slider" | "toggle"
   /**
    * No room for a label:  just the box.
    * - takes:  flag (present / absent)
    */
   fitted?: boolean | ""
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | ""
   /**
    * No box:  the LABEL is the control, bordered while unchosen and tinted when chosen.
    * - takes:  flag (present / absent)
    */
   invisible?: boolean | ""
+  /** `invisible`, as the DOM element's property. */
+  "prop:invisible"?: boolean | ""
   /**
    * Box after the label, at the end of the line.
    * - takes:  flag (present / absent)
    */
   "right-aligned"?: boolean | ""
+  /** `right-aligned`, as the DOM element's property. */
+  "prop:rightAligned"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its state but can't be changed;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
+  /** `selected`, as the DOM element's property. */
+  "prop:selected"?: boolean | ""
   /**
    * Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`).
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  must be chosen (a radio:  one of its group).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Label text;  slotted content is the rich version.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9110,51 +14358,106 @@ export interface UIRailAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Side:  `left` or `right` of its container.
    * - takes:  `left` · `right`
    */
   position?: "left" | "right"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "left" | "right"
   /**
    * Inside its container's edge instead of outside it.
    * - takes:  flag (present / absent)
    */
   internal?: boolean | ""
+  /** `internal`, as the DOM element's property. */
+  "prop:internal"?: boolean | ""
   /**
    * A vertical rule between the rail and its container.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * Flush against its container:  no gap.
    * - takes:  flag (present / absent)
    */
   attached?: boolean | ""
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | ""
   /**
    * Closer to its container:  `close` (1em away), `close="very"` (0.5em away).
    * - takes:  flag, or `very`
    */
   close?: boolean | "" | "very"
+  /** `close`, as the DOM element's property. */
+  "prop:close"?: boolean | "" | "very"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9202,6 +14505,8 @@ export interface UIRatingAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled icons.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -9222,63 +14527,137 @@ export interface UIRatingAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Can't be used:  left out of the form, not focusable.  Shows its value.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * Icon name, e.g. `star` (default), `heart`.
    * - takes:  icon name
    * - default:  `star`
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * How many icons (Fomantic's default:  4).
    * - takes:  number
    * - default:  `4`
    */
   "max-rating"?: number | `${number}`
+  /** `max-rating`, as the DOM element's property. */
+  "prop:maxRating"?: number | `${number}`
   /**
    * Rating, `0` (none) ... `max-rating`;  a fraction shows a partly filled icon.  Attribute:  the starting (and reset) value;  property:  the live value.
    * - takes:  number
    */
   value?: number | `${number}`
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: number | `${number}`
   /**
    * Choosing the current rating again clears it (as do Backspace / Delete);  always, with one icon.
    * - takes:  flag (present / absent)
    */
   clearable?: boolean | ""
+  /** `clearable`, as the DOM element's property. */
+  "prop:clearable"?: boolean | ""
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  a rating must be given.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9338,26 +14717,71 @@ export interface UIRepeatAttributes {
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9406,61 +14830,120 @@ export interface UIRevealAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * The visible content fades out.
    * - takes:  flag (present / absent)
    */
   fade?: boolean | ""
+  /** `fade`, as the DOM element's property. */
+  "prop:fade"?: boolean | ""
   /**
    * The visible content moves out:  left (bare), `right`, `up` or `down`.
    * - takes:  flag, or `right` · `up` · `down`
    */
   move?: boolean | "" | "right" | "up" | "down"
+  /** `move`, as the DOM element's property. */
+  "prop:move"?: boolean | "" | "right" | "up" | "down"
   /**
    * The visible content rotates away around a bottom corner:  right (bare) or `left`.
    * - takes:  flag, or `left` · `right`
    */
   rotate?: boolean | "" | "left" | "right"
+  /** `rotate`, as the DOM element's property. */
+  "prop:rotate"?: boolean | "" | "left" | "right"
   /**
    * Both contents slide:  left (bare), `right`, `up` or `down`.
    * - takes:  flag, or `right` · `up` · `down`
    */
   slide?: boolean | "" | "right" | "up" | "down"
+  /** `slide`, as the DOM element's property. */
+  "prop:slide"?: boolean | "" | "right" | "up" | "down"
   /**
    * No delay before the transition starts.
    * - takes:  flag (present / absent)
    */
   instant?: boolean | ""
+  /** `instant`, as the DOM element's property. */
+  "prop:instant"?: boolean | ""
   /**
    * Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Renamed because `visible` shows or hides every element.
    * - takes:  flag (present / absent)
    */
   unclipped?: boolean | ""
+  /** `unclipped`, as the DOM element's property. */
+  "prop:unclipped"?: boolean | ""
   /**
    * Revealed now, without hover or focus.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `active`, as the DOM element's property. */
+  "prop:active"?: boolean | ""
   /**
    * Never reveals.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9510,72 +14993,100 @@ export interface UIRootAttributes {
    * - default:  `skeleton`
    */
   display?: "skeleton" | "when-ready" | "immediately"
+  /** `display`, as the DOM element's property. */
+  "prop:display"?: "skeleton" | "when-ready" | "immediately"
   /**
    * A loader with this message while components load (bare `loading`:  the default text).  Not with `immediately`.
    * - takes:  text
    */
   loading?: string
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: string
   /**
    * Longest wait before showing the content anyway:  `5s`, `500ms`, or milliseconds.  A component that didn't load fires `ui-error` and shows its native fallback.
    * - takes:  text
    * - default:  `5s`
    */
   timeout?: string
+  /** `timeout`, as the DOM element's property. */
+  "prop:timeout"?: string
   /**
    * Colour scheme of everything inside.
    * - takes:  `light` · `dark`
    */
   theme?: "light" | "dark"
+  /** `theme`, as the DOM element's property. */
+  "prop:theme"?: "light" | "dark"
   /**
    * Size of everything inside, `mini` ... `massive`.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * What stacking layouts inside measure (`stackable`, `doubling` ... on grids, cards, steps, forms, items, statistics;  tables' `stack-by`):  `container` -- each element's own width (their default);  `page` -- the screen's, as in Fomantic.  Sets the `--ui-stack-with` token;  an element's own `stack-with` wins.
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root is a box that scrolls its own content, in a region named by the host's `aria-label` (name each one when a page has several).
    * - takes:  text
    */
   width?: string
+  /** `width`, as the DOM element's property. */
+  "prop:width"?: string
   /**
    * Height as a CSS length or `window` (the viewport's, following a phone's address bar).
    * - takes:  text
    */
   height?: string
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: string
   /**
    * Icon packs for everything inside, comma-separated:  built-in ids (`fa7-free`, `fa7-brands`, `fomantic`) or `pack.js` URLs, later wins.  Added over the outer root's packs (or the page's).
    * - takes:  text
    */
   icons?: string
+  /** `icons`, as the DOM element's property. */
+  "prop:icons"?: string
   /**
    * Emoji names for everything inside:  `cldr` (the default) or `fomantic`.
    * - takes:  `cldr` · `fomantic`
    */
   emoji?: "cldr" | "fomantic"
+  /** `emoji`, as the DOM element's property. */
+  "prop:emoji"?: "cldr" | "fomantic"
   /**
    * Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  default:  beside the library.
    * - takes:  text
    */
   assets?: string
+  /** `assets`, as the DOM element's property. */
+  "prop:assets"?: string
   /**
    * Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A full-page app shell.  On iOS the keyboard can cover fields near the bottom.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
+  /** `fixed`, as the DOM element's property. */
+  "prop:fixed"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
@@ -9616,6 +15127,47 @@ export interface UIRootAttributes {
     | "jiggle"
     | "glow"
     | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Your app's own value for every component inside (a theme, a store ...):  each reads it as `appContext`.  Set it before or after the components load.
+   */
+  "prop:appContext"?: unknown
 }
 
 /** `<ui-root>` in JSX:  its own attributes, and HTML's global ones. */
@@ -9628,6 +15180,23 @@ export interface UIRowAttributes {
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
    */
   color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
     | "primary"
     | "secondary"
     | "red"
@@ -9665,81 +15234,165 @@ export interface UIRowAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `columns`, as the DOM element's property. */
+  "prop:columns"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Columns share the line equally;  same as `columns="equal"`.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
+  /** `equal-width`, as the DOM element's property. */
+  "prop:equalWidth"?: boolean | ""
   /**
    * Hairlines between its columns.
    * - takes:  flag (present / absent)
    */
   divided?: boolean | ""
+  /** `divided`, as the DOM element's property. */
+  "prop:divided"?: boolean | ""
   /**
    * Wider gutters;  `relaxed="very"` wider still.
    * - takes:  flag, or `very`
    */
   relaxed?: boolean | "" | "very"
+  /** `relaxed`, as the DOM element's property. */
+  "prop:relaxed"?: boolean | "" | "very"
   /**
    * Centres its columns.
    * - takes:  flag (present / absent)
    */
   centered?: boolean | ""
+  /** `centered`, as the DOM element's property. */
+  "prop:centered"?: boolean | ""
   /**
    * Columns fill the row's height.
    * - takes:  flag (present / absent)
    */
   stretched?: boolean | ""
+  /** `stretched`, as the DOM element's property. */
+  "prop:stretched"?: boolean | ""
   /**
    * Stacks its columns when the grid is narrow.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * Halves its column count at tablet and mobile widths.
    * - takes:  flag (present / absent)
    */
   doubling?: boolean | ""
+  /** `doubling`, as the DOM element's property. */
+  "prop:doubling"?: boolean | ""
   /**
    * Shown only on these devices (by the viewport).
    * - takes:  space-separated:  `mobile` · `tablet` · `computer` · `large screen` · `widescreen`
    */
   only?: string
+  /** `only`, as the DOM element's property. */
+  "prop:only"?: string
   /**
    * Reverses its columns at these grid widths.
    * - takes:  space-separated:  `mobile` · `tablet` · `computer`
    */
   reversed?: string
+  /** `reversed`, as the DOM element's property. */
+  "prop:reversed"?: string
   /**
    * Aligns its columns' text.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Aligns its columns to the `top`, `middle` or `bottom`.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -9787,152 +15440,210 @@ export interface UISearchAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Results in named groups (`category` of each result).
    * - takes:  flag (present / absent)
    */
   category?: boolean | ""
+  /** `category`, as the DOM element's property. */
+  "prop:category"?: boolean | ""
   /**
    * `category`:  each group's name above its results, not beside them.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * Takes the full width of its container;  so do the results.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * The results scroll after a fixed height.
    * - takes:  flag (present / absent)
    */
   scrolling?: boolean | ""
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | ""
   /**
    * `scrolling`:  people can resize the results vertically.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
+  /** `resizable`, as the DOM element's property. */
+  "prop:resizable"?: boolean | ""
   /**
    * The results scroll after a shorter height.
    * - takes:  flag (present / absent)
    */
   short?: boolean | ""
+  /** `short`, as the DOM element's property. */
+  "prop:short"?: boolean | ""
   /**
    * The results scroll after a much shorter height.
    * - takes:  flag (present / absent)
    */
   "very-short"?: boolean | ""
+  /** `very-short`, as the DOM element's property. */
+  "prop:veryShort"?: boolean | ""
   /**
    * The results scroll after a longer height.
    * - takes:  flag (present / absent)
    */
   long?: boolean | ""
+  /** `long`, as the DOM element's property. */
+  "prop:long"?: boolean | ""
   /**
    * The results scroll after a much longer height.
    * - takes:  flag (present / absent)
    */
   "very-long"?: boolean | ""
+  /** `very-long`, as the DOM element's property. */
+  "prop:veryLong"?: boolean | ""
   /**
    * Which edge the results line up with:  `right` => `right aligned` (they extend to the left).
    * - takes:  `left` · `right`
    */
   aligned?: "left" | "right"
+  /** `aligned`, as the DOM element's property. */
+  "prop:aligned"?: "left" | "right"
   /**
    * Busy:  the icon spins.  Also shown while a remote query runs.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Can't be used;  dimmed, and left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be typed in, and the results never open;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
+  /** `open`, as the DOM element's property. */
+  "prop:open"?: boolean | ""
   /**
    * Placeholder text of the input.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * The input's text:  the query, or a chosen result's title.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name:  submits the input's text.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  the input can't be empty.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Remote results:  a `UI.api` URL template with `{query}`, e.g. `/api/search?q={query}`.
    * - takes:  text
    */
   url?: string
+  /** `url`, as the DOM element's property. */
+  "prop:url"?: string
   /**
    * Characters to type before a search runs.
    * - takes:  number
    * - default:  `1`
    */
   "min-characters"?: number | `${number}`
+  /** `min-characters`, as the DOM element's property. */
+  "prop:minCharacters"?: number | `${number}`
   /**
    * The most results shown (before categories);  `0` for no limit.
    * - takes:  number
    * - default:  `7`
    */
   "max-results"?: number | `${number}`
+  /** `max-results`, as the DOM element's property. */
+  "prop:maxResults"?: number | `${number}`
   /**
    * Remote:  ms to wait after typing stops before querying (a newer query aborts an older one).
    * - takes:  number
    * - default:  `200`
    */
   "search-delay"?: number | `${number}`
+  /** `search-delay`, as the DOM element's property. */
+  "prop:searchDelay"?: number | `${number}`
   /**
    * Local matching (`SearchMatch`):  a word START always matches;  then `exact` anywhere, `fuzzy` in order, `prefix` nothing more, `some` any word, `all` every word.
    * - takes:  `exact` · `fuzzy` · `prefix` · `some` · `all`
    * - default:  `exact`
    */
   "full-text-search"?: "exact" | "fuzzy" | "prefix" | "some" | "all"
+  /** `full-text-search`, as the DOM element's property. */
+  "prop:fullTextSearch"?: "exact" | "fuzzy" | "prefix" | "some" | "all"
   /**
    * Local:  the result fields searched, a comma / space list.
    * - takes:  text
    * - default:  `title description`
    */
   "search-fields"?: string
+  /** `search-fields`, as the DOM element's property. */
+  "prop:searchFields"?: string
   /**
    * Local:  `a` matches `á`.
    * - takes:  flag (present / absent)
    */
   "ignore-diacritics"?: boolean | ""
+  /** `ignore-diacritics`, as the DOM element's property. */
+  "prop:ignoreDiacritics"?: boolean | ""
   /**
    * Marks the query in titles and descriptions (`<mark>`).
    * - takes:  flag (present / absent)
    */
   "highlight-matches"?: boolean | ""
+  /** `highlight-matches`, as the DOM element's property. */
+  "prop:highlightMatches"?: boolean | ""
   /**
    * Highlights the first result as results arrive.
    * - takes:  flag (present / absent)
    */
   "select-first-result"?: boolean | ""
+  /** `select-first-result`, as the DOM element's property. */
+  "prop:selectFirstResult"?: boolean | ""
   /**
    * Shows the no-results message;  `false` shows nothing instead.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   "show-no-results"?: boolean | ""
+  /** `show-no-results`, as the DOM element's property. */
+  "prop:showNoResults"?: boolean | ""
   /**
    * Local results as a PROPERTY:  `SearchResult[]` (`{ title, description, image, price, category, url }`).
    * - a JS property (rich data):  an object, array or function
@@ -9949,11 +15660,50 @@ export interface UISearchAttributes {
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10002,57 +15752,79 @@ export interface UISectionAttributes {
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.
    * - takes:  text
    */
   hint?: string
+  /** `hint`, as the DOM element's property. */
+  "prop:hint"?: string
   /**
    * Heading level of the title (`<h1>` ... `<h6>`);  default:  the enclosing section's level + 1, else 2 (under the page's `h1`).
    * - takes:  `1` · `2` · `3` · `4` · `5` · `6`
    */
   level?: "1" | "2" | "3" | "4" | "5" | "6"
+  /** `level`, as the DOM element's property. */
+  "prop:level"?: "1" | "2" | "3" | "4" | "5" | "6"
   /**
    * Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.
    * - takes:  text
    */
   badge?: string
+  /** `badge`, as the DOM element's property. */
+  "prop:badge"?: string
   /**
    * A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot="description"` is the rich version (bold words, line breaks).
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible="false"` opts out there.
    * - takes:  flag (present / absent)
    */
   collapsible?: boolean | ""
+  /** `collapsible`, as the DOM element's property. */
+  "prop:collapsible"?: boolean | ""
   /**
    * Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
+  /** `collapsed`, as the DOM element's property. */
+  "prop:collapsed"?: boolean | ""
   /**
    * With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).
    * - takes:  `start` · `end`
    */
   "fold-icon"?: "start" | "end"
+  /** `fold-icon`, as the DOM element's property. */
+  "prop:foldIcon"?: "start" | "end"
   /**
    * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
    * - takes:  flag (present / absent)
    */
   sticky?: boolean | ""
+  /** `sticky`, as the DOM element's property. */
+  "prop:sticky"?: boolean | ""
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * Hue of the title (and of the rule or box edge).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -10073,106 +15845,198 @@ export interface UISectionAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * A rule under the title.
    * - takes:  flag (present / absent)
    */
   dividing?: boolean | ""
+  /** `dividing`, as the DOM element's property. */
+  "prop:dividing"?: boolean | ""
   /**
    * The title bar in a tinted box.
    * - takes:  flag (present / absent)
    */
   block?: boolean | ""
+  /** `block`, as the DOM element's property. */
+  "prop:block"?: boolean | ""
   /**
    * A box around the section, as a segment.
    * - takes:  flag (present / absent)
    */
   bordered?: boolean | ""
+  /** `bordered`, as the DOM element's property. */
+  "prop:bordered"?: boolean | ""
   /**
    * Boxed as a styled accordion:  a tinted title bar over padded content.
    * - takes:  flag (present / absent)
    */
   styled?: boolean | ""
+  /** `styled`, as the DOM element's property. */
+  "prop:styled"?: boolean | ""
   /**
    * With a box:  lifted with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * No box, rule or tint, whatever else is set.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Less padding and space around the title.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * More padding in the content;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * The content has a capped height and scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`).
    * - takes:  text
    */
   height?: string
+  /** `height`, as the DOM element's property. */
+  "prop:height"?: string
   /**
    * Aligns the TITLE `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Dims the content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert;  can't be folded.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * URL of an HTML file whose `<body>` is the content, fetched the first time it opens (at once when it starts open);  same origin only.  Any content already there is a placeholder the file replaces.  `load()` fetches it now, `reload()` again.
    * - takes:  text
    */
   source?: string
+  /** `source`, as the DOM element's property. */
+  "prop:source"?: string
   /**
    * With `source`:  a CSS selector;  only its first match in the file becomes the content.
    * - takes:  text
    */
   select?: string
+  /** `select`, as the DOM element's property. */
+  "prop:select"?: string
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10221,26 +16085,71 @@ export interface UISectionsAttributes {
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
+  /** `collapsing`, as the DOM element's property. */
+  "prop:collapsing"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10289,6 +16198,8 @@ export interface UISegmentAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the top edge;  with `inverted`, the fill.  `primary` / `secondary` don't colour a segment.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -10309,126 +16220,226 @@ export interface UISegmentAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Lifted off the page with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * A page peeking out below;  `stacked="tall"` shows two.
    * - takes:  flag, or `tall`
    */
   stacked?: boolean | "" | "tall"
+  /** `stacked`, as the DOM element's property. */
+  "prop:stacked"?: boolean | "" | "tall"
   /**
    * A pile of rotated sheets behind it.
    * - takes:  flag (present / absent)
    */
   piled?: boolean | ""
+  /** `piled`, as the DOM element's property. */
+  "prop:piled"?: boolean | ""
   /**
    * A band of a page:  no box, a rule above.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * A tinted, centred block reserving room for content.
    * - takes:  flag (present / absent)
    */
   placeholder?: boolean | ""
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: boolean | ""
   /**
    * A round badge sized by its content.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * More padding;  `padded="very"` for even more.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * No box:  no background, border or shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Contains its floated children.
    * - takes:  flag (present / absent)
    */
   clearing?: boolean | ""
+  /** `clearing`, as the DOM element's property. */
+  "prop:clearing"?: boolean | ""
   /**
    * Floats `left` or `right`.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Aligns its text `left`, `center` or `right`.
    * - takes:  `left` · `center` · `right`
    */
   "text-align"?: "left" | "center" | "right"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right"
   /**
    * Less emphasis:  a tinted surface, muted text.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
+  /** `secondary`, as the DOM element's property. */
+  "prop:secondary"?: boolean | ""
   /**
    * Least emphasis:  a darker tint, muted text.
    * - takes:  flag (present / absent)
    */
   tertiary?: boolean | ""
+  /** `tertiary`, as the DOM element's property. */
+  "prop:tertiary"?: boolean | ""
   /**
    * Joined edge to edge with the elements above / below;  bare `attached` sits in the middle.
    * - takes:  flag, or `top` · `bottom` · `left` · `right`
    */
   attached?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
    * With `attached`:  no line where attached segments meet.
    * - takes:  flag (present / absent)
    */
   seamless?: boolean | ""
+  /** `seamless`, as the DOM element's property. */
+  "prop:seamless"?: boolean | ""
   /**
    * The dark scheme;  everything inside follows (`color-scheme: dark`, `--ui-inverted`).
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Dims its content under a spinner;  `aria-busy`.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * No padding;  `horizontally` / `vertically` keep the other axis' padding.
    * - takes:  flag, or `horizontally` · `vertically`
    */
   fitted?: boolean | "" | "horizontally" | "vertically"
+  /** `fitted`, as the DOM element's property. */
+  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
   /**
    * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * With `scrolling`:  people can drag its height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
+  /** `resizable`, as the DOM element's property. */
+  "prop:resizable"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10477,76 +16488,141 @@ export interface UISegmentsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Side by side instead of stacked.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * With `horizontal`:  every segment the same width.
    * - takes:  flag (present / absent)
    */
   "equal-width"?: boolean | ""
+  /** `equal-width`, as the DOM element's property. */
+  "prop:equalWidth"?: boolean | ""
   /**
    * With `horizontal`:  segments wrap onto more rows.
    * - takes:  flag (present / absent)
    */
   wrapping?: boolean | ""
+  /** `wrapping`, as the DOM element's property. */
+  "prop:wrapping"?: boolean | ""
   /**
    * With `horizontal`:  stacks on mobile.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * Lifted off the page with a shadow.
    * - takes:  flag (present / absent)
    */
   raised?: boolean | ""
+  /** `raised`, as the DOM element's property. */
+  "prop:raised"?: boolean | ""
   /**
    * A page peeking out below.
    * - takes:  flag, or `tall`
    */
   stacked?: boolean | "" | "tall"
+  /** `stacked`, as the DOM element's property. */
+  "prop:stacked"?: boolean | "" | "tall"
   /**
    * A pile of rotated sheets behind the group.
    * - takes:  flag (present / absent)
    */
   piled?: boolean | ""
+  /** `piled`, as the DOM element's property. */
+  "prop:piled"?: boolean | ""
   /**
    * Only as wide as its content.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * No box of its own.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * The dark scheme, for every segment in the group.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Dims the group under a spinner.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Dimmed and inert.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10595,61 +16671,85 @@ export interface UISelectAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state, tinting the box and text.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * No minimum width:  as wide as its longest option.
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme's colours.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Can't be used;  dimmed, and left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed (a change is undone);  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * Chooses several values:  a native list box (never the customizable picker).
    * - takes:  flag (present / absent)
    */
   multiple?: boolean | ""
+  /** `multiple`, as the DOM element's property. */
+  "prop:multiple"?: boolean | ""
   /**
    * Text of the empty first option shown while nothing is chosen.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name;  `multiple` submits one entry per value.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  a value must be chosen.
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function
@@ -10666,16 +16766,57 @@ export interface UISelectAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10724,48 +16865,101 @@ export interface UIShapeAttributes {
    * - takes:  flag (present / absent)
    */
   cube?: boolean | ""
+  /** `cube`, as the DOM element's property. */
+  "prop:cube"?: boolean | ""
   /**
    * Sides of text, inline:  a word that flips to another.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Index of the side shown (from 0).  Controlled:  changing it flips (`direction` says which way) to that side.
    * - takes:  number
    * - default:  `0`
    */
   "active-index"?: number | `${number}`
+  /** `active-index`, as the DOM element's property. */
+  "prop:activeIndex"?: number | `${number}`
   /**
    * Which way it turns (Fomantic's `flip up` ...) when `active-index` changes, `next()` / `previous()` run or `flip()` gets no direction.
    * - takes:  `up` · `down` · `left` · `right` · `over` · `back`
    * - default:  `left`
    */
   direction?: "up" | "down" | "left" | "right" | "over" | "back"
+  /** `direction`, as the DOM element's property. */
+  "prop:direction"?: "up" | "down" | "left" | "right" | "over" | "back"
   /**
    * Length of a flip:  ms (`600`) or a CSS time (`0.6s`);  default Fomantic's 0.6s.
    * - takes:  text
    */
   duration?: string
+  /** `duration`, as the DOM element's property. */
+  "prop:duration"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10813,21 +17007,64 @@ export interface UISideAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10876,6 +17113,8 @@ export interface UISidebarAttributes {
    * - default:  `left`
    */
   position?: "left" | "right" | "top" | "bottom"
+  /** `position`, as the DOM element's property. */
+  "prop:position"?: "left" | "right" | "top" | "bottom"
   /**
    * Width of a `left` / `right` sidebar:  Fomantic's words -- `very thin` (60px), `thin` (150px), 260px by default, `wide` (350px), `very wide` (475px) -- or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -10898,52 +17137,124 @@ export interface UISidebarAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `width`, as the DOM element's property. */
+  "prop:width"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * How it appears (Fomantic's animations):  over the page, pushing it, shrinking it, from under it ...  Default:  `uncover` on the left / right, `overlay` at the top / bottom.
    * - takes:  `overlay` · `push` · `scale down` · `uncover` · `slide along` · `slide out`
    */
   transition?: "overlay" | "push" | "scale down" | "uncover" | "slide along" | "slide out"
+  /** `transition`, as the DOM element's property. */
+  "prop:transition"?: "overlay" | "push" | "scale down" | "uncover" | "slide along" | "slide out"
   /**
    * A dark panel (put an `inverted` menu in it).
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Blurs the dimmed page beside it.
    * - takes:  flag (present / absent)
    */
   blurring?: boolean | ""
+  /** `blurring`, as the DOM element's property. */
+  "prop:blurring"?: boolean | ""
   /**
    * Part of the page, not a modal:  an `<aside>` landmark;  the page beside it is neither dimmed nor inert, focus doesn't move, and nothing but `visible` hides it.
    * - takes:  flag (present / absent)
    */
   persistent?: boolean | ""
+  /** `persistent`, as the DOM element's property. */
+  "prop:persistent"?: boolean | ""
   /**
    * What hides a modal sidebar, as `<dialog closedby>`:  `any` -- Escape or a click on the page beside it (default);  `closerequest` -- Escape only;  `none` -- only `visible`.  Read when it shows.
    * - takes:  `any` · `closerequest` · `none`
    * - default:  `any`
    */
   closedby?: "any" | "closerequest" | "none"
+  /** `closedby`, as the DOM element's property. */
+  "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -10992,6 +17303,8 @@ export interface UISliderAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the filled track (and of `basic` thumbs).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -11012,99 +17325,152 @@ export interface UISliderAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Thumbs in the fill colour instead of white.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Can't be used:  dimmed, not focusable, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Shows its value but can't be changed;  still focusable and submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * Thumbs show only while the slider is hovered or focused.
    * - takes:  flag (present / absent)
    */
   hover?: boolean | ""
+  /** `hover`, as the DOM element's property. */
+  "prop:hover"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Labels along the track, at the steps.
    * - takes:  flag (present / absent)
    */
   labeled?: boolean | ""
+  /** `labeled`, as the DOM element's property. */
+  "prop:labeled"?: boolean | ""
   /**
    * Two thumbs:  `value` .. `end`.  The form gets two entries under `name`.
    * - takes:  flag (present / absent)
    */
   range?: boolean | ""
+  /** `range`, as the DOM element's property. */
+  "prop:range"?: boolean | ""
   /**
    * Runs from the right (or, `vertical`, from the bottom).
    * - takes:  flag (present / absent)
    */
   reversed?: boolean | ""
+  /** `reversed`, as the DOM element's property. */
+  "prop:reversed"?: boolean | ""
   /**
    * Thumbs follow the pointer smoothly;  values still snap.
    * - takes:  flag (present / absent)
    */
   smooth?: boolean | ""
+  /** `smooth`, as the DOM element's property. */
+  "prop:smooth"?: boolean | ""
   /**
    * A tick at every step (or `tick-step`):  through the track with `labeled`;  alone, a short tick under the track, no numbers (as a native range's tick marks).
    * - takes:  flag (present / absent)
    */
   ticked?: boolean | ""
+  /** `ticked`, as the DOM element's property. */
+  "prop:ticked"?: boolean | ""
   /**
    * Upright, filling the host's height;  min at the top.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * With `labeled`:  labels `bottom` (below the track) or, `vertical`, `right` of it.
    * - takes:  `bottom` · `right`
    */
   aligned?: "bottom" | "right"
+  /** `aligned`, as the DOM element's property. */
+  "prop:aligned"?: "bottom" | "right"
   /**
    * Lowest value.
    * - takes:  number
    * - default:  `0`
    */
   min?: number | `${number}`
+  /** `min`, as the DOM element's property. */
+  "prop:min"?: number | `${number}`
   /**
    * Highest value (Fomantic's default:  20).
    * - takes:  number
    * - default:  `20`
    */
   max?: number | `${number}`
+  /** `max`, as the DOM element's property. */
+  "prop:max"?: number | `${number}`
   /**
    * Values snap to multiples of it from `min`;  `0`:  any.
    * - takes:  number
    * - default:  `1`
    */
   step?: number | `${number}`
+  /** `step`, as the DOM element's property. */
+  "prop:step"?: number | `${number}`
   /**
    * Labels and ticks every this much from `min` (e.g. `20` on `0` ... `200`), instead of every `step`;  values still snap to `step`.
    * - takes:  number
    */
   "tick-step"?: number | `${number}`
+  /** `tick-step`, as the DOM element's property. */
+  "prop:tickStep"?: number | `${number}`
   /**
    * The (first) thumb's value, default `min`.  Attribute:  the starting (and reset) value;  property:  the live one.
    * - takes:  number
    */
   value?: number | `${number}`
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: number | `${number}`
   /**
    * `range`:  the second thumb's value, default `max`.  Attribute / property as `value`.
    * - takes:  number
    */
   end?: number | `${number}`
+  /** `end`, as the DOM element's property. */
+  "prop:end"?: number | `${number}`
   /**
    * Label per step, from `min` (e.g. `["XS", "S", "M"]`), also the spoken value;  default the numbers.
    * - a JS property (rich data):  an object, array or function
@@ -11121,26 +17487,71 @@ export interface UISliderAttributes {
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Form validation:  a value must be chosen, by the page (`value`, a range's `end`) or by moving a thumb.  Unset, the thumb rests at `min` but counts as no value (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11189,6 +17600,8 @@ export interface UIStatisticAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the value.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -11209,61 +17622,135 @@ export interface UIStatisticAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Value and label on one line.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme, a white value.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Floats to the `left` / `right` of the content after it.
    * - takes:  `left` · `right`
    */
   floated?: "left" | "right"
+  /** `floated`, as the DOM element's property. */
+  "prop:floated"?: "left" | "right"
   /**
    * Shorthand for a `<ui-value>`:  the number (or word) shown.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * The `value` shorthand is a WORD (`text value`):  smaller, bold, at least two lines tall.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Shorthand for the label below the value.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11312,6 +17799,8 @@ export interface UIStatisticsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of every value in the group.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -11332,56 +17821,128 @@ export interface UIStatisticsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Statistics stacked, each with its label beside its value.
    * - takes:  flag (present / absent)
    */
   horizontal?: boolean | ""
+  /** `horizontal`, as the DOM element's property. */
+  "prop:horizontal"?: boolean | ""
   /**
    * Every statistic for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Below 768px of the group's width (or the screen's:  `stack-with`), one statistic per row, full width.
    * - takes:  flag (present / absent)
    */
   stackable?: boolean | ""
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | ""
   /**
    * What `stackable` measures:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * Every statistic the same width, from the statistics themselves (no count):  one row, an equal share of it each (the group spans its row).  Not with `horizontal` (a column).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Older, count-based alias of `equal`:  divides each row evenly between N statistics (`widths="3"` => `three statistics`), wrapping after N.
    * - takes:  `1`-`10`, a fraction (`1/4`) or a percentage
    */
   widths?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
+  /** `widths`, as the DOM element's property. */
+  "prop:widths"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | (string & {})
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11445,66 +18006,142 @@ export interface UIStepAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * The CURRENT step (`aria-current="step"`).  Alias:  `active`.  NOTE: Fomantic's word for it is `active`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
+  /** `selected`, as the DOM element's property. */
+  "prop:selected"?: boolean | ""
   /**
    * Done:  its icon (or number) becomes a check.
    * - takes:  flag (present / absent)
    */
   completed?: boolean | ""
+  /** `completed`, as the DOM element's property. */
+  "prop:completed"?: boolean | ""
   /**
    * Not available yet:  dimmed, and a link step isn't followed.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`.
    * - takes:  flag (present / absent)
    */
   link?: boolean | ""
+  /** `link`, as the DOM element's property. */
+  "prop:link"?: boolean | ""
   /**
    * Renders a link (`<a>`) styled as a step.
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Link target, with `href`.
    * - takes:  text
    */
   target?: string
+  /** `target`, as the DOM element's property. */
+  "prop:target"?: string
   /**
    * Icon name, before the content.
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Shorthand for the title (Fomantic's `.title`).
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Shorthand for the description under the title.
    * - takes:  text
    */
   description?: string
+  /** `description`, as the DOM element's property. */
+  "prop:description"?: string
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11552,6 +18189,8 @@ export interface UIStepsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Circular steps:  hue of the rings of the current and completed steps (default the positive colour).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -11572,81 +18211,163 @@ export interface UIStepsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Numbers each step;  a completed step shows a check instead.
    * - takes:  flag (present / absent)
    */
   ordered?: boolean | ""
+  /** `ordered`, as the DOM element's property. */
+  "prop:ordered"?: boolean | ""
   /**
    * Stacked top to bottom;  `vertical="right"` for a group on the right of its content (arrow at left).
    * - takes:  flag, or `right`
    */
   vertical?: boolean | "" | "right"
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | "" | "right"
   /**
    * Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.
    * - takes:  flag (present / absent)
    */
   circular?: boolean | ""
+  /** `circular`, as the DOM element's property. */
+  "prop:circular"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Every step the same width, from the steps themselves (no count):  each as wide as the widest;  with `fluid`, an equal share of the row each.  Not for `vertical` or `circular` steps (already alike).
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Joined to a segment below (`attached`, `"top"`) or above (`"bottom"`), overlapping its border.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Never stacks;  by default steps stack below 768px of the group's width (or the screen's:  `stack-with`).
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * `stackable="tablet"`:  stacks below 992px (of the group's width, or the screen's), not just 768px.
    * - takes:  `tablet`
    */
   stackable?: "tablet"
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: "tablet"
   /**
    * What stacking (and `stackable="tablet"`) measures:  `container` (the default) -- the group's own width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token decides (`<ui-root stack-with>`).
    * - takes:  `container` · `page`
    */
   "stack-with"?: "container" | "page"
+  /** `stack-with`, as the DOM element's property. */
+  "prop:stackWith"?: "container" | "page"
   /**
    * Older, count-based alias of `equal fluid`:  divides the group evenly between N steps (`widths="3"` => `three steps`).
    * - takes:  `1`-`8`, a fraction (`1/4`) or a percentage
    */
   widths?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | (string & {})
+  /** `widths`, as the DOM element's property. */
+  "prop:widths"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | (string & {})
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11695,37 +18416,86 @@ export interface UIStickyAttributes {
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * Pixels between the bottom edge and the content stuck there (with `pushing`).
    * - takes:  number
    * - default:  `0`
    */
   "bottom-offset"?: number | `${number}`
+  /** `bottom-offset`, as the DOM element's property. */
+  "prop:bottomOffset"?: number | `${number}`
   /**
    * Also sticks to the BOTTOM edge:  content below the fold stays in view there until the page reaches it.
    * - takes:  flag (present / absent)
    */
   pushing?: boolean | ""
+  /** `pushing`, as the DOM element's property. */
+  "prop:pushing"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11774,21 +18544,64 @@ export interface UISummaryAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11837,16 +18650,22 @@ export interface UITabAttributes {
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Text of its tab;  default its `value`.  Also names the pane.
    * - takes:  text
    */
   label?: string
+  /** `label`, as the DOM element's property. */
+  "prop:label"?: string
   /**
    * Icon on its tab (a Font Awesome name).
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * The pane shown first, when the tabs have no `value`;  alone (no `<ui-tabs>`), shows it.  Alias:  `active`.
    * - takes:  flag (present / absent)
@@ -11857,46 +18676,99 @@ export interface UITabAttributes {
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
+  /** `selected`, as the DOM element's property. */
+  "prop:selected"?: boolean | ""
   /**
    * Its tab can't be selected (skipped by the arrow keys).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  a spinner in place of the content.
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with `first: true` to fill it yourself).
    * - takes:  flag (present / absent)
    */
   lazy?: boolean | ""
+  /** `lazy`, as the DOM element's property. */
+  "prop:lazy"?: boolean | ""
   /**
    * Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * No segment box;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * A dark pane;  inside `<ui-tabs>`, the tabs decide.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -11944,6 +18816,8 @@ export interface UITableAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Coloured top edge;  with `inverted`, a coloured fill.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -11964,111 +18838,170 @@ export interface UITableAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Borders between cells.
    * - takes:  flag (present / absent)
    */
   celled?: boolean | ""
+  /** `celled`, as the DOM element's property. */
+  "prop:celled"?: boolean | ""
   /**
    * As narrow as its content (`width: auto`).
    * - takes:  flag (present / absent)
    */
   collapsing?: boolean | ""
+  /** `collapsing`, as the DOM element's property. */
+  "prop:collapsing"?: boolean | ""
   /**
    * First column is a definition column;  blank corner.
    * - takes:  flag (present / absent)
    */
   definition?: boolean | ""
+  /** `definition`, as the DOM element's property. */
+  "prop:definition"?: boolean | ""
   /**
    * `table-layout: fixed`;  overflowing cell text is cut with `…`.
    * - takes:  flag (present / absent)
    */
   fixed?: boolean | ""
+  /** `fixed`, as the DOM element's property. */
+  "prop:fixed"?: boolean | ""
   /**
    * For dark backgrounds:  the dark scheme.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * With `scrolling`:  people can drag the height.
    * - takes:  flag (present / absent)
    */
   resizable?: boolean | ""
+  /** `resizable`, as the DOM element's property. */
+  "prop:resizable"?: boolean | ""
   /**
    * Body rows highlight on hover.
    * - takes:  flag (present / absent)
    */
   selectable?: boolean | ""
+  /** `selectable`, as the DOM element's property. */
+  "prop:selectable"?: boolean | ""
   /**
    * No wrapping:  every cell's text stays on one line (`single line`).
    * - takes:  flag (present / absent)
    */
   "single-line"?: boolean | ""
+  /** `single-line`, as the DOM element's property. */
+  "prop:singleLine"?: boolean | ""
   /**
    * Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic's `class="disabled"`).
    * - takes:  flag (present / absent)
    */
   sortable?: boolean | ""
+  /** `sortable`, as the DOM element's property. */
+  "prop:sortable"?: boolean | ""
   /**
    * Every other body row is tinted.
    * - takes:  flag (present / absent)
    */
   striped?: boolean | ""
+  /** `striped`, as the DOM element's property. */
+  "prop:striped"?: boolean | ""
   /**
    * Collapsed borders, for `rowspan` / `colspan` headers.
    * - takes:  flag (present / absent)
    */
   structured?: boolean | ""
+  /** `structured`, as the DOM element's property. */
+  "prop:structured"?: boolean | ""
   /**
    * Never stacks rows into blocks, even on a viewport below 768px.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
+  /** `unstackable`, as the DOM element's property. */
+  "prop:unstackable"?: boolean | ""
   /**
    * `basic`:  no header fill;  `basic="very"`:  no outer border or edge padding either.
    * - takes:  flag, or `very`
    */
   basic?: boolean | "" | "very"
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | "" | "very"
   /**
    * `compact` / `compact="very"`:  less cell padding.
    * - takes:  flag, or `very`
    */
   compact?: boolean | "" | "very"
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | "" | "very"
   /**
    * `padded` / `padded="very"`:  more cell padding.
    * - takes:  flag, or `very`
    */
   padded?: boolean | "" | "very"
+  /** `padded`, as the DOM element's property. */
+  "prop:padded"?: boolean | "" | "very"
   /**
    * Joins a segment or another table:  `attached` (middle), `top` or `bottom`.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Rows become blocks on a viewport below 768px (the default, `stackable`);  `stackable="tablet"` also below 992px.  `stack-by="container"` follows the table's OWN width instead.
    * - takes:  flag, or `tablet`
    */
   stackable?: boolean | "" | "tablet"
+  /** `stackable`, as the DOM element's property. */
+  "prop:stackable"?: boolean | "" | "tablet"
   /**
    * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
    * - takes:  `viewport` · `container` · `none`
    */
   "stack-by"?: "viewport" | "container" | "none"
+  /** `stack-by`, as the DOM element's property. */
+  "prop:stackBy"?: "viewport" | "container" | "none"
   /**
    * Caps the height and scrolls, head and foot stuck;  `short` / `very short` / `long` / `very long` change the cap.  The scroller becomes a focusable, named region.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `scrolling`, as the DOM element's property. */
+  "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * Like `scrolling`, both ways, with nothing stuck;  same height steps.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   overflowing?: boolean | "" | "short" | "very short" | "long" | "very long"
+  /** `overflowing`, as the DOM element's property. */
+  "prop:overflowing"?: boolean | "" | "short" | "very short" | "long" | "very long"
   /**
    * Sticky parts:  `stuck="head"` (the `thead`), `foot`, `first` / `last` column;  several at once, e.g. `stuck="head first"`.
    * - takes:  space-separated:  `head` · `foot` · `first` · `last`
    */
   stuck?: string
+  /** `stuck`, as the DOM element's property. */
+  "prop:stuck"?: string
   /**
    * Equal-width column count, `1` ... `16` (or `1/4`, `25%`):  `four column`.
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
@@ -12091,31 +19024,60 @@ export interface UITableAttributes {
     | "15"
     | "16"
     | (string & {})
+  /** `columns`, as the DOM element's property. */
+  "prop:columns"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
   /**
    * Text alignment of every cell.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   "text-align"?: "left" | "center" | "right" | "justified"
+  /** `text-align`, as the DOM element's property. */
+  "prop:textAlign"?: "left" | "center" | "right" | "justified"
   /**
    * Vertical alignment of every cell.
    * - takes:  `top` · `middle` · `bottom`
    */
   "vertical-align"?: "top" | "middle" | "bottom"
+  /** `vertical-align`, as the DOM element's property. */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
   /**
    * Index of the sorted column (0-based, counting `colspan`s);  set by people's clicks unless the app controls it.
    * - takes:  number
    */
   "sort-column"?: number | `${number}`
+  /** `sort-column`, as the DOM element's property. */
+  "prop:sortColumn"?: number | `${number}`
   /**
    * Direction of `sort-column`;  a newly sorted column starts `ascending`.
    * - takes:  `ascending` · `descending`
    */
   "sort-direction"?: "ascending" | "descending"
+  /** `sort-direction`, as the DOM element's property. */
+  "prop:sortDirection"?: "ascending" | "descending"
   /**
    * Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  Off, the app sorts its own rows.
    * - takes:  flag (present / absent)
    */
   "client-sort"?: boolean | ""
+  /** `client-sort`, as the DOM element's property. */
+  "prop:clientSort"?: boolean | ""
   /**
    * Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys.
    * - a JS property (rich data):  an object, array or function
@@ -12143,21 +19105,64 @@ export interface UITableAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12205,6 +19210,8 @@ export interface UITabsAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the selected tab (`segmented`:  its fill;  default the primary colour).
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -12225,107 +19232,199 @@ export interface UITabsAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * The tab list's look, as `<ui-menu appearance>`:  `tabular` (file-folder tabs), `pointing`, `secondary`, `text`, `segmented` (a bordered group of joined tabs, the selected one filled:  a segmented control).  The booleans below are aliases.
    * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
    */
   appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  /** `appearance`, as the DOM element's property. */
+  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
   /**
    * Tabs drawn as file-folder tabs (Fomantic's classic tab look).  Alias of `appearance="tabular"`.
    * - takes:  flag (present / absent)
    */
   tabular?: boolean | ""
+  /** `tabular`, as the DOM element's property. */
+  "prop:tabular"?: boolean | ""
   /**
    * The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance="pointing"`.
    * - takes:  flag (present / absent)
    */
   pointing?: boolean | ""
+  /** `pointing`, as the DOM element's property. */
+  "prop:pointing"?: boolean | ""
   /**
    * De-emphasized tabs:  no box.  Alias of `appearance="secondary"`.
    * - takes:  flag (present / absent)
    */
   secondary?: boolean | ""
+  /** `secondary`, as the DOM element's property. */
+  "prop:secondary"?: boolean | ""
   /**
    * Plain text tabs.  Alias of `appearance="text"`.
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * The dark scheme for the tabs and the panes.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them.
    * - takes:  flag (present / absent)
    */
   vertical?: boolean | ""
+  /** `vertical`, as the DOM element's property. */
+  "prop:vertical"?: boolean | ""
   /**
    * The tab menu takes the full width (or, vertical, its column's).
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * The tab menu is only as wide as its tabs (Fomantic's `compact` menu).
    * - takes:  flag (present / absent)
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `vertical`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   alignment?: "fluid" | "left" | "center" | "right"
+  /** `alignment`, as the DOM element's property. */
+  "prop:alignment"?: "fluid" | "left" | "center" | "right"
   /**
    * Every tab the same width, from the tabs themselves (no count):  with `alignment="fluid"` an equal share of the row each;  otherwise each as wide as the widest.
    * - takes:  flag (present / absent)
    */
   equal?: boolean | ""
+  /** `equal`, as the DOM element's property. */
+  "prop:equal"?: boolean | ""
   /**
    * Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow.
    * - takes:  flag (present / absent)
    */
   basic?: boolean | ""
+  /** `basic`, as the DOM element's property. */
+  "prop:basic"?: boolean | ""
   /**
    * Joins the tab menu and the panes edge to edge:  bare or `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `attached="bottom"` puts them below.
    * - takes:  flag, or `top` · `bottom`
    */
   attached?: boolean | "" | "top" | "bottom"
+  /** `attached`, as the DOM element's property. */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
    * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * `automatic`:  moving focus with the arrow keys selects the tab (APG's default).  `manual`:  arrows only move focus;  Enter / Space select.
    * - takes:  `automatic` · `manual`
    * - default:  `automatic`
    */
   activation?: "automatic" | "manual"
+  /** `activation`, as the DOM element's property. */
+  "prop:activation"?: "automatic" | "manual"
   /**
    * Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and links to `#value` select the pane, and a page opened on `#value` starts there.
    * - takes:  flag (present / absent)
    */
   history?: boolean | ""
+  /** `history`, as the DOM element's property. */
+  "prop:history"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12373,6 +19472,8 @@ export interface UITextAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Hue of the text.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -12393,36 +19494,100 @@ export interface UITextAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * Semantic colour of a status message.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * The hue as it reads on a dark surface.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Faded:  shown as unavailable.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12470,76 +19635,106 @@ export interface UITextareaAttributes {
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
    * Form state, tinting the box, text and placeholder.
    * - takes:  `error` · `info` · `success` · `warning`
    */
   state?: "error" | "info" | "success" | "warning"
+  /** `state`, as the DOM element's property. */
+  "prop:state"?: "error" | "info" | "success" | "warning"
   /**
    * No box:  text only.
    * - takes:  flag (present / absent)
    */
   transparent?: boolean | ""
+  /** `transparent`, as the DOM element's property. */
+  "prop:transparent"?: boolean | ""
   /**
    * Takes the full width of its container.
    * - takes:  flag (present / absent)
    */
   fluid?: boolean | ""
+  /** `fluid`, as the DOM element's property. */
+  "prop:fluid"?: boolean | ""
   /**
    * Can't be used;  dimmed, left out of the form.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * For dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Shows its value but can't be edited;  still submitted.
    * - takes:  flag (present / absent)
    */
   readonly?: boolean | ""
+  /** `readonly`, as the DOM element's property. */
+  "prop:readOnly"?: boolean | ""
   /**
    * Value.  Attribute:  the starting (and reset) value;  property:  the live value.
    * - takes:  text
    */
   value?: string
+  /** `value`, as the DOM element's property. */
+  "prop:value"?: string
   /**
    * Form field name.
    * - takes:  text
    */
   name?: string
+  /** `name`, as the DOM element's property. */
+  "prop:name"?: string
   /**
    * Hint shown while empty.
    * - takes:  text
    */
   placeholder?: string
+  /** `placeholder`, as the DOM element's property. */
+  "prop:placeholder"?: string
   /**
    * Constraint:  must not be empty (`valueMissing`).
    * - takes:  flag (present / absent)
    */
   required?: boolean | ""
+  /** `required`, as the DOM element's property. */
+  "prop:required"?: boolean | ""
   /**
    * Constraint:  fewest characters (checked once someone has edited it).
    * - takes:  number
    */
   minlength?: number | `${number}`
+  /** `minlength`, as the DOM element's property. */
+  "prop:minLength"?: number | `${number}`
   /**
    * Constraint:  most characters.
    * - takes:  number
    */
   maxlength?: number | `${number}`
+  /** `maxlength`, as the DOM element's property. */
+  "prop:maxLength"?: number | `${number}`
   /**
    * Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).
    * - takes:  number
    */
   rows?: number | `${number}`
+  /** `rows`, as the DOM element's property. */
+  "prop:rows"?: number | `${number}`
   /**
    * Autofill hint, forwarded to the native textarea.
    * - takes:  text
    */
   autocomplete?: string
+  /** `autocomplete`, as the DOM element's property. */
+  "prop:autocomplete"?: string
   /**
    * Fomantic validation rules checked with the native constraints (`ValidationRule`s).
    * - a JS property (rich data):  an object, array or function
@@ -12556,16 +19751,57 @@ export interface UITextareaAttributes {
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12614,26 +19850,71 @@ export interface UITitleAttributes {
    * - takes:  text
    */
   href?: string
+  /** `href`, as the DOM element's property. */
+  "prop:href"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12681,6 +19962,8 @@ export interface UIToastAttributes {
    * - takes:  `info` · `success` · `warning` · `error` · `neutral`
    */
   type?: "info" | "success" | "warning" | "error" | "neutral"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "info" | "success" | "warning" | "error" | "neutral"
   /**
    * Hue:  a filled toast in that colour.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -12701,89 +19984,173 @@ export interface UIToastAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * The dark scheme;  a coloured one takes its light variant.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Bold first line (Fomantic's `title`).
    * - takes:  text
    */
   header?: string
+  /** `header`, as the DOM element's property. */
+  "prop:header"?: string
   /**
    * Body text;  slotted content follows it.
    * - takes:  text
    */
   message?: string
+  /** `message`, as the DOM element's property. */
+  "prop:message"?: string
   /**
    * Icon name beside the content;  bare `icon` (or `"true"`, as frameworks write it) uses the type's own (info, check, warning, cross).
    * - takes:  icon name
    */
   icon?: string
+  /** `icon`, as the DOM element's property. */
+  "prop:icon"?: string
   /**
    * Shows a close icon (Fomantic's `closeIcon`).
    * - takes:  flag (present / absent)
    */
   closable?: boolean | ""
+  /** `closable`, as the DOM element's property. */
+  "prop:closable"?: boolean | ""
   /**
    * A click anywhere on it closes it (Fomantic's `closeOnClick`);  off anyway with `closable`, actions or form controls inside.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   "close-on-click"?: boolean | ""
+  /** `close-on-click`, as the DOM element's property. */
+  "prop:closeOnClick"?: boolean | ""
   /**
    * Milliseconds before it closes itself;  absent or `0` keeps it until closed;  `auto` ~== reading time (120 words a minute, at least a second).  `UI.toast()` defaults to `3000`.
    * - takes:  text
    */
   "display-time"?: string
+  /** `display-time`, as the DOM element's property. */
+  "prop:displayTime"?: string
   /**
    * Shows a bar counting the display time down, at the `top` or `bottom` (Fomantic's `showProgress`).
    * - takes:  `top` · `bottom`
    */
   progress?: "top" | "bottom"
+  /** `progress`, as the DOM element's property. */
+  "prop:progress"?: "top" | "bottom"
   /**
    * The bar fills up instead of emptying.
    * - takes:  flag (present / absent)
    */
   "progress-up"?: boolean | ""
+  /** `progress-up`, as the DOM element's property. */
+  "prop:progressUp"?: boolean | ""
   /**
    * Pauses the countdown while the pointer is over it.  Focus inside ALWAYS pauses it.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   "pause-on-hover"?: boolean | ""
+  /** `pause-on-hover`, as the DOM element's property. */
+  "prop:pauseOnHover"?: boolean | ""
   /**
    * A fixed width (350px);  `compact="false"` sizes it to its content.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   compact?: boolean | ""
+  /** `compact`, as the DOM element's property. */
+  "prop:compact"?: boolean | ""
   /**
    * Layout words of the `actions` slot (Fomantic's `classActions`):  `basic` (no bar), `left` (aligned left), `attached` (joined below, or `attached top` above), `vertical` (a column beside the content).
    * - takes:  `basic` · `left` · `attached` · `vertical` · `top` · `bottom`
    */
   actions?: "basic" | "left" | "attached" | "vertical" | "top" | "bottom"
+  /** `actions`, as the DOM element's property. */
+  "prop:actions"?: "basic" | "left" | "attached" | "vertical" | "top" | "bottom"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12831,16 +20198,22 @@ export interface UITransitionAttributes {
    * - takes:  text
    */
   duration?: string
+  /** `duration`, as the DOM element's property. */
+  "prop:duration"?: string
   /**
    * A new animation stops the running one instead of waiting for it (Fomantic's `queue: false`).
    * - takes:  flag (present / absent)
    */
   interrupt?: boolean | ""
+  /** `interrupt`, as the DOM element's property. */
+  "prop:interrupt"?: boolean | ""
   /**
    * Queue the same animation twice in a row (Fomantic's `allowRepeats`);  by default it's dropped.
    * - takes:  flag (present / absent)
    */
   "allow-repeats"?: boolean | ""
+  /** `allow-repeats`, as the DOM element's property. */
+  "prop:allowRepeats"?: boolean | ""
   /**
    * Hue of a `pulsating` ring.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
@@ -12861,46 +20234,114 @@ export interface UITransitionAttributes {
     | "brown"
     | "grey"
     | "black"
+  /** `color`, as the DOM element's property. */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
   /**
    * An inline block around inline content (an image, a button).
    * - takes:  flag (present / absent)
    */
   inline?: boolean | ""
+  /** `inline`, as the DOM element's property. */
+  "prop:inline"?: boolean | ""
   /**
    * A `pulsating` ring for dark backgrounds.
    * - takes:  flag (present / absent)
    */
   inverted?: boolean | ""
+  /** `inverted`, as the DOM element's property. */
+  "prop:inverted"?: boolean | ""
   /**
    * Repeats every animation until removed.
    * - takes:  flag (present / absent)
    */
   looping?: boolean | ""
+  /** `looping`, as the DOM element's property. */
+  "prop:looping"?: boolean | ""
   /**
    * A ring pulsing out of the box (with `looping`, forever).
    * - takes:  flag (present / absent)
    */
   pulsating?: boolean | ""
+  /** `pulsating`, as the DOM element's property. */
+  "prop:pulsating"?: boolean | ""
   /**
    * Pauses the running animation.
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -12960,21 +20401,64 @@ export interface UITreeDiagramAttributes {
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -13023,26 +20507,71 @@ export interface UIValueAttributes {
    * - takes:  flag (present / absent)
    */
   text?: boolean | ""
+  /** `text`, as the DOM element's property. */
+  "prop:text"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"
@@ -13091,48 +20620,101 @@ export interface UIVisibilityAttributes {
    * - default:  `true`
    */
   once?: boolean | ""
+  /** `once`, as the DOM element's property. */
+  "prop:once"?: boolean | ""
   /**
    * Events fire at every check while their condition holds (each crossing, not every scrolled pixel).
    * - takes:  flag (present / absent)
    */
   continuous?: boolean | ""
+  /** `continuous`, as the DOM element's property. */
+  "prop:continuous"?: boolean | ""
   /**
    * Pixels below the viewport top that count as the screen top, e.g. under a fixed menu.
    * - takes:  number
    * - default:  `0`
    */
   offset?: number | `${number}`
+  /** `offset`, as the DOM element's property. */
+  "prop:offset"?: number | `${number}`
   /**
    * `image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`).
    * - takes:  `image`
    */
   type?: "image"
+  /** `type`, as the DOM element's property. */
+  "prop:type"?: "image"
   /**
    * `type="image"`:  that animation's ms.
    * - takes:  number
    * - default:  `1000`
    */
   duration?: number | `${number}`
+  /** `duration`, as the DOM element's property. */
+  "prop:duration"?: number | `${number}`
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */
   disabled?: boolean | ""
+  /** `disabled`, as the DOM element's property. */
+  "prop:disabled"?: boolean | ""
   /**
    * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
    * - takes:  flag (present / absent)
    */
   loading?: boolean | ""
+  /** `loading`, as the DOM element's property. */
+  "prop:loading"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
    */
   visible?: boolean | ""
+  /** `visible`, as the DOM element's property. */
+  "prop:visible"?: boolean | ""
   /**
    * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
    * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
    */
   animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /** `animation`, as the DOM element's property. */
+  "prop:animation"?:
     | "fade"
     | "fade up"
     | "fade down"

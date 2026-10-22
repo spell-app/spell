@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
+import type { UILabelAttributes } from "spell-ui/jsx"
 import {
   HeadingLevels,
   type HeadingBounds,
@@ -142,7 +143,12 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     if (!item.isGrouped) return <For each={item.sections}>{(section) => this.table(item, section)}</For>
     return (
       <section class={TAG_CLASS} part={this.partForName("tag")}>
-        <ui-header part={this.partForName("header")} id={item.tag.tag} level={String(this.headingLevel)} dividing="">
+        <ui-header
+          part={this.partForName("header")}
+          id={item.tag.tag}
+          level={HeadingLevels.attributeFor(this.headingLevel)}
+          dividing=""
+        >
           <a href={`#${item.tag.tag}`}>
             <code>{`<${item.tag.tag}>`}</code>
           </a>
@@ -164,7 +170,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
       <>
         <ui-header
           part={this.partForName("title")}
-          level={String(item.isGrouped ? this.headingLevel + 1 : this.headingLevel)}
+          level={HeadingLevels.attributeFor(item.isGrouped ? this.headingLevel + 1 : this.headingLevel)}
           size={SMALL}
         >
           {this.translationForKey(section.id)}
@@ -228,7 +234,8 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
         <ui-labels size="mini">
           <For each={ApiModel.labelsFor(cell)}>
             {(value) => (
-              <ui-label basic={cell.isSwatch ? undefined : ""} color={cell.isSwatch ? value : undefined}>
+              // a swatch's value is a hue's name, from the site data:  JSON, so TypeScript can't see which
+              <ui-label basic={cell.isSwatch ? undefined : ""} color={cell.isSwatch ? (value as UIHue) : undefined}>
                 {value}
               </ui-label>
             )}
@@ -330,6 +337,9 @@ const CAPTION_CLASS = "ui-caption"
 
 /** `size` of the table titles and the message. */
 const SMALL = "small"
+
+/** A hue's name, as `<ui-label color>` takes it. */
+type UIHue = UILabelAttributes["color"]
 
 /** `<ui-message>` `state` of a failed fetch. */
 const NEGATIVE = "negative"

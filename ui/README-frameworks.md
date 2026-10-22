@@ -299,6 +299,11 @@ import type {} from "spell-ui/jsx"
 - A name with a dash in it (`data-*`) is never checked:  TypeScript lets any through.
 - Flags:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it.
 - Rich data goes to the property:  `prop:options={[...]}`.
+- Any attribute can be set as its property too, typed the same:
+  `prop:value={value()}`, the controlled value of a form control.
+- So can the few properties no attribute stands for:
+  - `prop:appContext` on `<ui-root>`:  your app's value, which every component inside reads
+  - `prop:content` on the elements that show a file (`<ui-code>`, `<ui-markdown>`, `<ui-include>`):  the text shown
 - It augments `@solidjs/web/types/jsx.js`, not `@solidjs/web`, which only re-exports `JSX`.
 - Other frameworks' JSX (React's, Preact's):  no types yet;  declare the tags in your own program.
 

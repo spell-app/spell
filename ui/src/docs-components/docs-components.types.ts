@@ -7,26 +7,25 @@
  *   (and into docs' `spell-ui.js`, whose `<ui-root>` glob reaches these families too).
  * - The file is written by `yarn site:data` (`scripts/site-data.ts`, built by `src/tools/SiteDataBuilder.ts`)
  *   and committed;  its test (`tests/tools/SiteDataBuilder.test.ts`) fails while it's stale.
- * - Also the JSX types of the `<ui-*>` tags the docs elements render in their shadow roots (`DocsJSXTags`).
+ * - Also the JSX types of the `<ui-docs-*>` tags the docs elements render in their shadow roots (`DocsJSXTags`),
+ *   and the exact ones of every component tag they render (`spell-ui/jsx`).
  * - Runtime-light:
  *   types and constants only, plus the docs families' small pure helpers (`HeadingLevels`, `VocabularyTexts`).
  */
 
 import type { JSX } from "@solidjs/web"
+import type { UIHeaderAttributes } from "spell-ui/jsx"
 
 ////////////////
 // ## `<ui-*>` in JSX
 ////////////////
 
 /**
- * The `<ui-*>` tags a docs element may render in its JSX, each as loose attributes.
- * - Why:  `spell-ui`'s components build their shadow markup from native elements,
- *   so `ui` declares no JSX types for its own tags;  the docs elements are the first to COMPOSE widgets.
- * - Named tags, NOT `` [tag: `ui-${string}`] ``:  `app`'s `solid.types.ts` declares that index signature,
- *   and two identical index signatures in one program are an error (TS2374) the moment `app` compiles a file of ours.
- * - A docs element that renders another tag adds it here.
- *   - `ui-dropdown` too, which the Solid host app of the smoke pages renders (`src/tools/frameworks/solid/app.tsx`):
- *     its programs (the node tools', the tests') hold this file, so it takes the type from here, ONE declaration.
+ * The docs tags (`<ui-docs-*>`) a docs element may render in its JSX, each as loose attributes.
+ * - Every COMPONENT tag (`<ui-button>` ...) has exact types, generated:  `spell-ui/jsx`, imported here.
+ *   The docs tags aren't in that set, so they're named here.
+ * - Named tags, NOT `` [tag: `ui-${string}`] ``:  that would loosen every component tag too.
+ * - A docs element that renders another docs tag adds it here.
  * - Loose on purpose:  any attribute as a string, `prop:` for rich data;  a misspelt attribute isn't caught.
  */
 declare module "@solidjs/web/types/jsx.js" {
@@ -35,29 +34,12 @@ declare module "@solidjs/web/types/jsx.js" {
   }
 }
 
-/** Attributes of a `<ui-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute or `prop:`. */
+/** Attributes of a `<ui-docs-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute or `prop:`. */
 export type DocsJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
-/** Every `<ui-*>` tag the docs elements render in JSX. */
+/** Every `<ui-docs-*>` tag the docs elements render in JSX. */
 export type DocsJSXTags = {
-  "ui-button": DocsJSXAttributes
-  "ui-buttons": DocsJSXAttributes
-  "ui-code": DocsJSXAttributes
-  "ui-divider": DocsJSXAttributes
-  "ui-dropdown": DocsJSXAttributes
   "ui-docs-search": DocsJSXAttributes
-  "ui-header": DocsJSXAttributes
-  "ui-icon": DocsJSXAttributes
-  "ui-input": DocsJSXAttributes
-  "ui-item": DocsJSXAttributes
-  "ui-label": DocsJSXAttributes
-  "ui-labels": DocsJSXAttributes
-  "ui-markdown": DocsJSXAttributes
-  "ui-menu": DocsJSXAttributes
-  "ui-message": DocsJSXAttributes
-  "ui-popup": DocsJSXAttributes
-  "ui-segment": DocsJSXAttributes
-  "ui-table": DocsJSXAttributes
 }
 
 ////////////////
@@ -563,7 +545,16 @@ export class HeadingLevels {
     const level = Math.round(Number(value ?? bounds.fallback))
     return Number.isFinite(level) ? Math.min(bounds.max, Math.max(bounds.min, level)) : bounds.fallback
   }
+
+  /** `level` as `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`, rounded and clamped to a real heading. */
+  static attributeFor(level: number): HeadingLevelText {
+    // clamped to 1 ... 6 just above, which TypeScript can't follow
+    return String(Math.min(6, Math.max(1, Math.round(level)))) as HeadingLevelText
+  }
 }
+
+/** `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`. */
+export type HeadingLevelText = NonNullable<UIHeaderAttributes["level"]>
 
 /** What `VocabularyTexts` reads of a vocabulary:  its texts. */
 export type TextsVocabulary = {

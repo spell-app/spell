@@ -1,7 +1,0 @@
-{
-  // The JSX types' test (`spell-ui/jsx`):  Spell UI's browser settings, over this folder only, so its `<ui-*>` tags
-  // meet no loose declaration (`DocsJSXTags`)
-  "extends": "../../tsconfig.json",
-  "include": ["."],
-  "exclude": []
-}

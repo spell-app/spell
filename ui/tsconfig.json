@@ -23,6 +23,5 @@
   },
   "include": ["src", "site/_src"],
   // `site/`:  only `site/_src` (the site bundle's entry);  the rest is pages, data and the built bundle
-  // `src/jsx.ts`:  the JSX types, a program of their own (`tsconfig.jsx.json`)
-  "exclude": ["node_modules", "src/tools", "src/cli", "src/jsx.ts"]
+  "exclude": ["node_modules", "src/tools", "src/cli"]
 }

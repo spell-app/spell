@@ -103,7 +103,7 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
           <Show when={this.header}>
             <ui-header
               part={this.partForName("header")}
-              level={String(HeadingLevels.levelFor(this.level, LEVELS))}
+              level={HeadingLevels.attributeFor(HeadingLevels.levelFor(this.level, LEVELS))}
               size={this.variation ? "small" : undefined}
             >
               {this.header}

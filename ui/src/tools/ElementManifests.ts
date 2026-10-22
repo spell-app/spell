@@ -243,29 +243,23 @@ export class ElementManifests {
 
   /**
    * One member per JSX name `tag`'s vocabulary gives, each with its docstring.
-   * - An attribute:  its name and each alias, typed by `jsxType()`.
+   * - An attribute:  its name and each alias, typed by `jsxType()`;
+   *   and `prop:<property>`, the same type, to set the DOM element's property (a controlled `value`).
    * - A rich (`json`) property:  its property name, and `prop:<property>`
    *   - Solid 2 sets the plain name as an ATTRIBUTE today, so our JSX writes `prop:`;
    *     the plain name is for once objects, arrays and functions go to the property (epic `solid-17`).
+   * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`), as `prop:<property>` only.
    * - The first of two same names wins.
    */
   private static jsxAttributeMembers(tag: SiteTag): string[] {
     const members = new Map<string, string[]>()
     for (const attribute of tag.attributes) {
       if (attribute.kind === "json") {
-        const property = attribute.property ?? ElementManifests.camel(attribute.name)
-        const docs = [attribute.description, "- a JS property (rich data):  an object, array or function"]
-        members.set(property, [...ElementManifests.docstring(docs, "  "), `  ${property}?: unknown`])
-        members.set(`prop:${property}`, [
-          ...ElementManifests.docstring(
-            [
-              ...docs,
-              `- goes once Solid 2 sets rich data on a dashed tag's property itself (epic \`solid-17\`):  then write \`${property}\``
-            ],
-            "  "
-          ),
-          `  "prop:${property}"?: unknown`
-        ])
+        ElementManifests.addRichProperty(
+          members,
+          attribute.property ?? ElementManifests.camel(attribute.name),
+          attribute.description
+        )
         continue
       }
       for (const name of [attribute.name, ...(attribute.aliases ?? [])]) {
@@ -277,8 +271,40 @@ export class ElementManifests {
           `  ${key}?: ${ElementManifests.jsxType(attribute)}`
         ])
       }
+      // its property too:  `prop:value={value()}` sets the DOM element's property (a controlled value)
+      const property = `prop:${attribute.property ?? ElementManifests.camel(attribute.name)}`
+      if (!members.has(property)) {
+        members.set(property, [
+          `  /** \`${attribute.name}\`, as the DOM element's property. */`,
+          `  "${property}"?: ${ElementManifests.jsxType(attribute)}`
+        ])
+      }
+    }
+    for (const { property, type, description, isFor } of JSX_SCRIPT_PROPERTIES) {
+      const name = `prop:${property}`
+      if (!isFor(tag) || members.has(name)) continue
+      members.set(name, [...ElementManifests.docstring([description], "  "), `  "${name}"?: ${type}`])
     }
     return [...members.values()].flat()
+  }
+
+  /**
+   * SIDE EFFECT:  adds a rich (`json`) property's two members to `members` (`jsxAttributeMembers()`):
+   * its plain name, and `prop:<property>`.
+   */
+  private static addRichProperty(members: Map<string, string[]>, property: string, description: string) {
+    const docs = [description, "- a JS property (rich data):  an object, array or function"]
+    members.set(property, [...ElementManifests.docstring(docs, "  "), `  ${property}?: unknown`])
+    members.set(`prop:${property}`, [
+      ...ElementManifests.docstring(
+        [
+          ...docs,
+          `- goes once Solid 2 sets rich data on a dashed tag's property itself (epic \`solid-17\`):  then write \`${property}\``
+        ],
+        "  "
+      ),
+      `  "prop:${property}"?: unknown`
+    ])
   }
 
   /**
@@ -433,6 +459,40 @@ export type ElementManifestsProps = {
 /** The JSX types' file (`jsxOutput()`), from the package folder:  imported as `spell-ui/jsx`. */
 const JSX_FILE = "src/jsx.ts"
 
+/**
+ * The DOM elements' properties no vocabulary names, which JSX may set too:  `prop:<property>`.
+ * - The element core gives them to a kind of tag, so they're its script API, not attributes.
+ *   - A vocabulary attribute would observe one (`app-context`),
+ *     and give the component a getter over its base class's own member (`UIComponent.appContext`).
+ */
+const JSX_SCRIPT_PROPERTIES: readonly {
+  /** its property name */
+  property: string
+  /** its TypeScript type */
+  type: string
+  /** its hover docs */
+  description: string
+  /** whether `tag` has it */
+  isFor: (tag: SiteTag) => boolean
+}[] = [
+  {
+    property: "appContext",
+    type: "unknown",
+    description:
+      "Your app's own value for every component inside (a theme, a store ...):  each reads it as `appContext`.  " +
+      "Set it before or after the components load.",
+    isFor: (tag) => tag.tag === "ui-root"
+  },
+  {
+    property: "content",
+    type: "string",
+    description:
+      "The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.",
+    // a source element's (`DOMLoadableElement`):  it takes both of the shared `SourceAttributes`
+    isFor: (tag) => ["source", "load"].every((name) => tag.attributes.some((attribute) => attribute.name === name))
+  }
+]
+
 /** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
 const JSX_HEADER = [
   "/**",
@@ -449,6 +509,7 @@ const JSX_HEADER = [
   ' * - Values:  a flag is `basic`, `basic={true}` or `basic=""`, and `basic={false}` removes it;',
   ' *   other attributes take their text, a number as `{5}` or `"5"`.',
   " * - Rich data (an object, array or function) goes to a property:  `prop:options={...}`.",
+  " *   - Any attribute may be set as its property too, typed the same:  `prop:value={value()}`.",
   " * - Component tags only, not the docs site's `<ui-docs-*>`.",
   " * - Type-only:  no code, nothing at run time.",
   " */",

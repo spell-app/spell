@@ -164,8 +164,9 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `<ui-root>` knows them (`yarn gen:root` scans this folder too),
     but loads them only where the page's bundle called `DocsFamilies.add()`.
     - The site's bundle does;  the library's own `RootLoader` never does (epic `wwod-spell-ui`, I12).
-  - A family that renders other widgets in its shadow root imports their families in its barrel,
-    and adds their tags to `DocsJSXTags`.
+  - A family that renders other widgets in its shadow root imports their families in its barrel.
+    - Their JSX types:  a component tag's are generated (`spell-ui/jsx`);
+      a docs tag (`<ui-docs-search>`) goes in `DocsJSXTags`, loose, as the generated set leaves them out.
   - They read the site's data through `SiteData` ([the components data](docs/__data/components.json5)),
     NEVER the vocabularies.
   - The barrel's header says how to add one.
@@ -430,8 +431,8 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Written by `yarn site:data`;  with them, the editors' manifests:
     `custom-elements.json`, `html-custom-data.json`;
     and, in `src/`, the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`).
-    - The JSX types type-check in a program of their own ([tsconfig.jsx.json](tsconfig.jsx.json)), as do their test's
-      (`tests/jsx/`):  in Spell UI's main program they'd clash with the docs elements' loose `DocsJSXTags`.
+    - They type-check in Spell UI's main program, so its own JSX (the docs elements') uses them;
+      their test, `tests/jsx/`, in the tests' program.
   - Their shapes, `SiteDataFile` / `SiteIconsFile` / `SiteSearchFile`:
     [the docs components' types](src/docs-components/docs-components.types.ts).
   - And `pages.json5`, hand-kept per-family facts it reads:
