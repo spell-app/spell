@@ -3,7 +3,9 @@ import { statSync, watch, type FSWatcher } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import { SRV, type UpgradeHandler } from "spell-kit/server"
+import type { UpgradeHandler } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
 
 /**
  * Live reload over websockets:  watches folders, and tells every open page which file changed.
@@ -52,7 +54,7 @@ export class LiveReload {
     this.root = resolve(root)
     this.debounce = debounce
     if (heartbeat) {
-      this.beat = setInterval(() => this.write(SRV.pingFrame()), heartbeat)
+      this.beat = setInterval(() => this.write(pingFrame()), heartbeat)
       this.beat.unref()
     }
   }
@@ -67,8 +69,8 @@ export class LiveReload {
    * and adds it to the clients until it closes
    */
   events: UpgradeHandler = (raw, socket) => {
-    if (!SRV.acceptWebSocket(raw, socket)) return
-    socket.write(SRV.textFrame(JSON.stringify({ event: "hello", data: { run: this.run } })))
+    if (!acceptWebSocket(raw, socket)) return
+    socket.write(textFrame(JSON.stringify({ event: "hello", data: { run: this.run } })))
     this.clients.add(socket)
     socket.on("close", () => this.clients.delete(socket))
   }
@@ -127,7 +129,7 @@ export class LiveReload {
 
   /** send event `event` with JSON `data` to every page now */
   send(event: string, data: unknown): void {
-    this.write(SRV.textFrame(JSON.stringify({ event, data })))
+    this.write(textFrame(JSON.stringify({ event, data })))
   }
 
   /** stop watching, close every socket */

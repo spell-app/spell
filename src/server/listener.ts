@@ -3,13 +3,17 @@
  */
 import type { IncomingMessage, ServerResponse } from "node:http"
 
-import { SRV, type Handler } from "spell-kit/server"
+import type { Handler } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { Reply } from "./Reply"
+import { Request } from "./Request"
+import { HttpError } from "./server.types"
 
 /**
  * Options for `toListener()`.
  * - `onError`:  told of every failure that isn't an `HttpError` under 500, e.g. to log it
  */
-export type ListenerOptions = { onError?: (error: unknown, request: SRV.Request) => void }
+export type ListenerOptions = { onError?: (error: unknown, request: Request) => void }
 
 /**
  * A node request listener running `handler`.
@@ -20,19 +24,19 @@ export type ListenerOptions = { onError?: (error: unknown, request: SRV.Request)
  */
 export function toListener(handler: Handler, { onError }: ListenerOptions = {}) {
   return (raw: IncomingMessage, rawReply: ServerResponse): void => {
-    const request = new SRV.Request(raw)
-    const reply = new SRV.Reply(rawReply)
+    const request = new Request(raw)
+    const reply = new Reply(rawReply)
     handler(request, reply, (error) => {
       if (error === undefined) {
         if (!reply.headersSent)
           reply.status(404).type("text/plain; charset=utf-8").send(`Not found:  ${request.path}\n`)
         return
       }
-      const status = error instanceof SRV.HttpError ? error.status : 500
+      const status = error instanceof HttpError ? error.status : 500
       if (status >= 500) onError?.(error, request)
       if (reply.headersSent) return void rawReply.destroy()
       const body =
-        error instanceof SRV.HttpError && error.body !== undefined
+        error instanceof HttpError && error.body !== undefined
           ? error.body
           : { error: error instanceof Error ? error.message : JSON.stringify(error) }
       reply.status(status).set("Cache-Control", "no-store").json(body)

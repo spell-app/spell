@@ -4,7 +4,9 @@
  */
 import type { IncomingMessage } from "node:http"
 
-import { SRV, type Handler } from "spell-kit/server"
+import type { Handler } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { HttpError } from "./server.types"
 
 /**
  * How `parseBodies()` reads bodies.
@@ -46,7 +48,7 @@ export function parseBodies(options: BodyOptions = {}): Handler {
       try {
         request.body = parseJson(text)
       } catch (error) {
-        throw new SRV.HttpError(400, `bad JSON body:  ${(error as Error).message}`)
+        throw new HttpError(400, `bad JSON body:  ${(error as Error).message}`)
       }
     } else if (form) {
       const body: Record<string, string | string[]> = {}
@@ -67,13 +69,13 @@ export function parseBodies(options: BodyOptions = {}): Handler {
 export function readBody(raw: IncomingMessage, limit = DEFAULT_BODY_LIMIT): Promise<Buffer> {
   return new Promise((done, fail) => {
     const declared = Number(raw.headers["content-length"])
-    if (declared > limit) return fail(new SRV.HttpError(413, `body over ${limit} bytes`))
+    if (declared > limit) return fail(new HttpError(413, `body over ${limit} bytes`))
     let size = 0
     const chunks: Buffer[] = []
     raw.on("data", (chunk: Buffer) => {
       size += chunk.length
       if (size > limit) {
-        fail(new SRV.HttpError(413, `body over ${limit} bytes`))
+        fail(new HttpError(413, `body over ${limit} bytes`))
         raw.removeAllListeners("data")
         raw.resume()
       } else chunks.push(chunk)

@@ -1,4 +1,8 @@
-import { SRV, type Handler, type Next, type RouteParams } from "spell-kit/server"
+import type { Handler, Next, RouteParams } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { Reply } from "./Reply"
+import { Request } from "./Request"
+import { HttpError } from "./server.types"
 
 /**
  * Routes requests by method and path to handlers:  the part of Express's `Router` the app's `api.ts` uses.
@@ -142,7 +146,7 @@ function asHandler(routable: Routable): Handler {
  * Run `handlers` in turn, each passing on through `next()`;  after the last, `done()`.
  * - a throw or rejection ~== `next(error)`
  */
-export function runAll(handlers: Handler[], request: SRV.Request, reply: SRV.Reply, done: Next): void {
+export function runAll(handlers: Handler[], request: Request, reply: Reply, done: Next): void {
   let index = 0
   next()
 
@@ -211,6 +215,6 @@ function decodeParam(value: string): string {
   try {
     return decodeURIComponent(value)
   } catch {
-    throw new SRV.HttpError(400, `bad encoding in:  ${value}`)
+    throw new HttpError(400, `bad encoding in:  ${value}`)
   }
 }

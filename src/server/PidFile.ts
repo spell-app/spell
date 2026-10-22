@@ -2,7 +2,10 @@ import { spawn } from "node:child_process"
 import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
-import { SRV, type ServerInfo } from "spell-kit/server"
+import type { ServerInfo } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { HttpError } from "./server.types"
+import { SERVER_API } from "./WebServer"
 
 /**
  * The file where a background server says where it is, holding its `ServerInfo`:
@@ -52,7 +55,7 @@ export class PidFile {
     const base = `http://127.0.0.1:${info.port}`
     try {
       const answer = (await (
-        await fetch(`${base}${SRV.SERVER_API}`, { signal: AbortSignal.timeout(1000) })
+        await fetch(`${base}${SERVER_API}`, { signal: AbortSignal.timeout(1000) })
       ).json()) as ServerInfo
       return answer.root === this.root ? { ...answer, base } : undefined
     } catch {
@@ -93,7 +96,7 @@ export class PidFile {
       const status = await this.status()
       if (status) return { ...status, launched: true }
     }
-    throw new SRV.HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
+    throw new HttpError(503, `the server for ${this.root} didn't start in ${timeout / 1000}s:  see its log`)
   }
 
   /**

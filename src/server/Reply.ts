@@ -3,7 +3,8 @@ import { stat } from "node:fs/promises"
 import type { OutgoingHttpHeader, ServerResponse } from "node:http"
 import { basename, isAbsolute } from "node:path"
 
-import { SRV } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { typeFor, typeNamed } from "./mime"
 
 /**
  * The answer to one request:  the part of Express's `res` our handlers use, over node's `ServerResponse`.
@@ -60,7 +61,7 @@ export class Reply {
 
   /** set the content type:  a type (`text/javascript`) or a short name (`json`, `.html`);  chainable */
   type(type: string): this {
-    return this.set("Content-Type", SRV.typeNamed(type))
+    return this.set("Content-Type", typeNamed(type))
   }
 
   /**
@@ -117,7 +118,7 @@ export class Reply {
       if (!this.headersSent) this.status(404).type("text/plain; charset=utf-8").finish("Not found")
       return
     }
-    if (!this.get("Content-Type")) this.type(SRV.typeFor(path))
+    if (!this.get("Content-Type")) this.type(typeFor(path))
     this.set("Content-Length", stats.size)
     if (this.raw.req?.method === "HEAD") return void this.raw.end()
     await new Promise<void>((done) => {

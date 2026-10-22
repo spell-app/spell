@@ -2,7 +2,19 @@ import { createServer, type IncomingMessage, type Server } from "node:http"
 import { relative, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import { SRV, type FileTransform, type HtmlTransform, type Mount, type ServedFile } from "spell-kit/server"
+import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { Guard } from "./Guard"
+import { toListener } from "./listener"
+import { liveClientScript, type ServerConfig } from "./liveClient"
+import { LiveReload } from "./LiveReload"
+import { type ListenOptions, listenPreferred } from "./ports"
+import { underPrefix } from "./proxy"
+import { Reply } from "./Reply"
+import { Request } from "./Request"
+import { Router } from "./Router"
+import { HttpError } from "./server.types"
+import { StaticHandler } from "./StaticHandler"
 // Import directly:  the `site` barrel is browser code (`SiteHeader extends HTMLElement`)
 import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell-kit/server/site/favicon"
 
@@ -25,19 +37,19 @@ export class WebServer {
   readonly root?: string
 
   /** routes tried BEFORE static files */
-  readonly router = new SRV.Router()
+  readonly router = new Router()
 
   /** routes tried AFTER static files */
-  readonly fallback = new SRV.Router()
+  readonly fallback = new Router()
 
   /** the static folders */
-  readonly files: SRV.StaticHandler
+  readonly files: StaticHandler
 
   /** host and write checks */
-  readonly guard: SRV.Guard
+  readonly guard: Guard
 
   /** live reload, when asked for */
-  readonly live?: SRV.LiveReload
+  readonly live?: LiveReload
 
   /** node's server */
   readonly server: Server
@@ -46,7 +58,7 @@ export class WebServer {
   private configure?: (served: ServedFile) => Record<string, unknown>
 
   /** websocket upgrades by path prefix, e.g. `/ui` -> a dev server's HMR */
-  private upgrades: { claims: (request: SRV.Request) => boolean; handle: UpgradeHandler }[] = []
+  private upgrades: { claims: (request: Request) => boolean; handle: UpgradeHandler }[] = []
 
   /** upgraded sockets:  `closeAllConnections()` doesn't see them, so `close()` ends them itself */
   private sockets = new Set<Duplex>()
@@ -58,27 +70,27 @@ export class WebServer {
     const { mounts = [], html = [], transforms, live = false, checkHost = true, onError } = props
     this.root = props.root ?? mounts.find((mount) => mount.prefix === "/")?.dir
     this.configure = props.configure
-    this.guard = new SRV.Guard({ token: props.token })
-    if (live) this.live = new SRV.LiveReload({ root: this.root ?? process.cwd() })
-    this.files = new SRV.StaticHandler({
+    this.guard = new Guard({ token: props.token })
+    if (live) this.live = new LiveReload({ root: this.root ?? process.cwd() })
+    this.files = new StaticHandler({
       mounts,
       transforms,
       html: live ? [...html, (page, served) => this.inject(page, served)] : html
     })
 
-    const top = new SRV.Router()
+    const top = new Router()
     if (checkHost) top.use(this.guard.hostCheck)
     if (this.live) {
       this.upgrade(LIVE_EVENTS, this.live.events)
       top.get(LIVE_SCRIPT, (_request, reply) =>
-        reply.type("text/javascript; charset=utf-8").set("Cache-Control", "no-store").send(SRV.liveClientScript())
+        reply.type("text/javascript; charset=utf-8").set("Cache-Control", "no-store").send(liveClientScript())
       )
     }
-    const favicons = new SRV.Router()
+    const favicons = new Router()
     for (const [path, icon] of Object.entries(FAVICONS)) favicons.get(path, (_request, reply) => sendIcon(reply, icon))
     favicons.get("/favicon.ico", (_request, reply) => sendIcon(reply, FAVICONS[FAVICON_PNG]!))
     top.use(this.router, this.files.handle, favicons, this.fallback)
-    this.server = createServer(SRV.toListener(top.handle, { onError: onError ?? logError }))
+    this.server = createServer(toListener(top.handle, { onError: onError ?? logError }))
     this.server.on("upgrade", (raw: IncomingMessage, socket: Duplex, head: Buffer) => this.onUpgrade(raw, socket, head))
   }
 
@@ -88,20 +100,20 @@ export class WebServer {
    * - the host check applies
    * - an upgrade nothing claims is refused
    */
-  upgrade(prefix: string | ((request: SRV.Request) => boolean), handle: UpgradeHandler): this {
-    const claims = typeof prefix === "string" ? (request: SRV.Request) => SRV.underPrefix(request.path, prefix) : prefix
+  upgrade(prefix: string | ((request: Request) => boolean), handle: UpgradeHandler): this {
+    const claims = typeof prefix === "string" ? (request: Request) => underPrefix(request.path, prefix) : prefix
     this.upgrades.push({ claims, handle })
     return this
   }
 
   /** route one upgrade */
   private onUpgrade(raw: IncomingMessage, socket: Duplex, head: Buffer): void {
-    const request = new SRV.Request(raw)
+    const request = new Request(raw)
     const claim = this.upgrades.find(({ claims }) => claims(request))
     this.sockets.add(socket)
     socket.on("close", () => this.sockets.delete(socket))
     try {
-      if (!claim) throw new SRV.HttpError(404, "no upgrade here")
+      if (!claim) throw new HttpError(404, "no upgrade here")
       this.guard.checkHost(request)
       void Promise.resolve(claim.handle(raw, socket, head)).catch(() => socket.destroy())
     } catch {
@@ -118,8 +130,8 @@ export class WebServer {
    * Start listening:  on `port` (0:  any), falling back to any free port if it's taken (unless `fallback: false`).
    * - SIDE EFFECT:  the guard now accepts this port's host names
    */
-  async listen(options: SRV.ListenOptions = {}): Promise<{ url: string; port: number }> {
-    this.port = await SRV.listenPreferred(this.server, options)
+  async listen(options: ListenOptions = {}): Promise<{ url: string; port: number }> {
+    this.port = await listenPreferred(this.server, options)
     this.guard.allowPort(this.port)
     return { url: this.url, port: this.port }
   }
@@ -133,7 +145,7 @@ export class WebServer {
   }
 
   /** the config every live page gets, as `window.SPELL_SERVER` */
-  config(served: ServedFile): SRV.ServerConfig {
+  config(served: ServedFile): ServerConfig {
     const file = this.root
       ? `/${relative(this.root, served.file).split(sep).map(encodeURIComponent).join("/")}`
       : served.path
@@ -182,7 +194,7 @@ export type WebServerProps = {
   configure?: (served: ServedFile) => Record<string, unknown>
   token?: string
   checkHost?: boolean
-  onError?: (error: unknown, request: SRV.Request) => void
+  onError?: (error: unknown, request: Request) => void
 }
 
 /** Answers a websocket upgrade:  takes over `socket`. */
@@ -229,11 +241,11 @@ export const FAVICON_LINKS =
 const HAS_ICON = /<link\b[^>]*\brel\s*=\s*["']?(?:shortcut\s+)?icon\b/i
 
 /** Answer with favicon `icon`:  cached an hour (`yarn favicon` rarely changes it). */
-function sendIcon(reply: SRV.Reply, { type, body }: { type: string; body: Buffer }): void {
+function sendIcon(reply: Reply, { type, body }: { type: string; body: Buffer }): void {
   reply.type(type).set("Cache-Control", "public, max-age=3600").send(body)
 }
 
 /** Log a failure:  method, URL and stack. */
-function logError(error: unknown, request: SRV.Request): void {
+function logError(error: unknown, request: Request): void {
   console.error(`${request.method} ${request.originalUrl}:`, error)
 }

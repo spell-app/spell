@@ -1,6 +1,9 @@
 import { randomBytes } from "node:crypto"
 
-import { SRV, type Handler } from "spell-kit/server"
+import type { Handler } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { Request } from "./Request"
+import { HttpError } from "./server.types"
 
 /**
  * Guards a local server:  only pages it served itself may write to it.
@@ -36,15 +39,15 @@ export class Guard {
   }
 
   /** `HttpError(403)` unless `request` is addressed to us */
-  checkHost(request: SRV.Request): void {
-    if (!this.hosts.has(request.get("host") ?? "")) throw new SRV.HttpError(403, "unknown host")
+  checkHost(request: Request): void {
+    if (!this.hosts.has(request.get("host") ?? "")) throw new HttpError(403, "unknown host")
   }
 
   /** `HttpError(403)` unless `request` carries the token, from our own origin */
-  checkWrite(request: SRV.Request): void {
-    if (request.get("x-server-token") !== this.token) throw new SRV.HttpError(403, "bad token:  reload the page")
+  checkWrite(request: Request): void {
+    if (request.get("x-server-token") !== this.token) throw new HttpError(403, "bad token:  reload the page")
     const origin = request.get("origin")
-    if (origin && !this.origins.has(origin)) throw new SRV.HttpError(403, "wrong origin")
+    if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
   }
 
   /** middleware:  `checkHost` */

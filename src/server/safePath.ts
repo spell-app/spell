@@ -6,7 +6,8 @@
 import { existsSync, statSync, type Stats } from "node:fs"
 import { isAbsolute, join, relative, resolve, sep } from "node:path"
 
-import { SRV } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { HttpError } from "./server.types"
 
 /**
  * Where a URL path led:
@@ -40,7 +41,7 @@ export function resolveInside(root: string, urlPath: string, options: ResolveOpt
   try {
     file = fileInside(root, urlPath, { dotFiles })
   } catch (error) {
-    if (!(error instanceof SRV.HttpError)) throw error
+    if (!(error instanceof HttpError)) throw error
     return { status: error.status as 400 | 403, message: error.message }
   }
   const stat = statSync(file, { throwIfNoEntry: false })
@@ -70,16 +71,16 @@ export function fileInside(root: string, urlPath: string, { dotFiles = false }: 
     try {
       segment = decodeURIComponent(raw)
     } catch {
-      throw new SRV.HttpError(400, `bad path:  ${urlPath}`)
+      throw new HttpError(400, `bad path:  ${urlPath}`)
     }
-    if (/[/\\\0]/.test(segment)) throw new SRV.HttpError(400, `bad path:  ${urlPath}`)
-    if (segment === "." || segment === "..") throw new SRV.HttpError(403, `outside the root:  ${urlPath}`)
-    if (!dotFiles && segment.startsWith(".")) throw new SRV.HttpError(403, `hidden file:  ${urlPath}`)
+    if (/[/\\\0]/.test(segment)) throw new HttpError(400, `bad path:  ${urlPath}`)
+    if (segment === "." || segment === "..") throw new HttpError(403, `outside the root:  ${urlPath}`)
+    if (!dotFiles && segment.startsWith(".")) throw new HttpError(403, `hidden file:  ${urlPath}`)
     segments.push(segment)
   }
   const base = resolve(root)
   const file = resolve(base, ...segments)
-  if (!isInside(base, file)) throw new SRV.HttpError(403, `outside the root:  ${urlPath}`)
+  if (!isInside(base, file)) throw new HttpError(403, `outside the root:  ${urlPath}`)
   return file
 }
 

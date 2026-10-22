@@ -2,7 +2,13 @@ import type { Stats } from "node:fs"
 import { readFile } from "node:fs/promises"
 import { extname, resolve } from "node:path"
 
-import { SRV, type FileTransform, type Handler, type HtmlTransform, type Mount } from "spell-kit/server"
+import type { FileTransform, Handler, HtmlTransform, Mount } from "spell-kit/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
+import { typeFor } from "./mime"
+import { Reply } from "./Reply"
+import { Request } from "./Request"
+import { type Resolved, resolveInside } from "./safePath"
+import { HttpError } from "./server.types"
 
 /**
  * Serves folders under URL prefixes:  `GET` / `HEAD` only, never anything outside a folder.
@@ -70,7 +76,7 @@ export class StaticHandler {
     if ("redirect" in resolved) return void reply.redirect(`${request.baseUrl}${path}/`, 301)
     if ("status" in resolved) {
       if (resolved.status === 404) return next()
-      throw new SRV.HttpError(resolved.status, resolved.message)
+      throw new HttpError(resolved.status, resolved.message)
     }
     await this.serve(request, reply, resolved.file, resolved.stat)
   }
@@ -81,7 +87,7 @@ export class StaticHandler {
    * - for routes that act on a page by its URL, e.g. `docs`' details answers (`/worktrees/<w>/...` included)
    * - an overlay's file first (`overlays`)
    */
-  resolve(path: string): SRV.Resolved | undefined {
+  resolve(path: string): Resolved | undefined {
     for (const overlay of this.overlays) {
       const other = overlay(path)
       const found = other === undefined ? undefined : this.resolveMounted(other)
@@ -95,36 +101,36 @@ export class StaticHandler {
    * - several folders at the longest matching prefix:  the first one that has the path (not a 404) answers
    * - a catch-all (`skip`) looks without the path's first folders;  a path too short for it isn't its
    */
-  private resolveMounted(path: string): SRV.Resolved | undefined {
+  private resolveMounted(path: string): Resolved | undefined {
     const mount = this.mounts.find((each) => path.startsWith(each.prefix) || `${path}/` === each.prefix)
     if (!mount) return undefined
     // a mount's own folder without its slash (`/ui`):  redirect like any folder, so its pages' relative links resolve
     if (path.length < mount.prefix.length) return { redirect: `${path}/` }
     const inside = path.slice(mount.prefix.length - 1)
-    let resolved: SRV.Resolved | undefined
+    let resolved: Resolved | undefined
     for (const each of this.mounts.filter(({ prefix }) => prefix === mount.prefix)) {
       const at = each.skip ? skipFolders(inside, each.skip) : inside
       if (at === undefined) continue
-      resolved = SRV.resolveInside(each.dir, at, each)
+      resolved = resolveInside(each.dir, at, each)
       if (!("status" in resolved) || resolved.status !== 404) return resolved
     }
     return resolved
   }
 
   /** answer with `file`, through the hooks */
-  private async serve(request: SRV.Request, reply: SRV.Reply, file: string, stat: Stats): Promise<void> {
+  private async serve(request: Request, reply: Reply, file: string, stat: Stats): Promise<void> {
     reply.set({ "Cache-Control": "no-store", ETag: StaticHandler.etagOf(stat) })
     const ext = extname(file).toLowerCase()
     const transform = this.transforms[ext]
     const isHtml = ext === ".html" || ext === ".htm"
     const raw = request.get("sec-fetch-dest") === "empty"
     if (raw || (!transform && !(isHtml && this.html.length))) {
-      reply.type(SRV.typeFor(file))
+      reply.type(typeFor(file))
       return reply.sendFile(file, { dotfiles: "allow" })
     }
     const context = { path: decodeURIComponent(request.path), file, request }
     let body: string | Uint8Array = await readFile(file, "utf8")
-    let type = SRV.typeFor(file)
+    let type = typeFor(file)
     if (transform) ({ body, type } = transform(body, context))
     if (isHtml && typeof body === "string") for (const hook of this.html) body = hook(body, context)
     reply.type(type).send(body)
