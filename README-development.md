@@ -531,7 +531,7 @@ spell-app
 - Vite+ (`vite-plus`, the `vp` command) pins Vite, Vitest, oxlint, oxfmt and tsgolint together, at the versions in
   the kit's `catalog:`;  how they're bumped:
   [README-toolchain.md](README-toolchain.md#one-dependency-pins-every-tool), "One dependency pins every tool".
-- TypeScript 7;  Solid 2.0.0-rc.13 for every repo;  Playwright 1.63.0 for the browser tests.
+- TypeScript 7;  Solid 2.0.0-rc.17 for every repo;  Playwright 1.63.0 for the browser tests.
 
 </details>
 

@@ -633,7 +633,7 @@ It ships no bundle of its own, though:  it's source, bundled by whoever draws wi
 so on a page it arrives inside Spell UI's core, and packs leave it out.
 
 What it costs you, writing one:
-- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.13, pinned to one copy across every repo.
+- **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.17, pinned to one copy across every repo.
 - **A component is a class.**
   No function components, and no hand-written Solid effects in a component file:
   the lint guard flags them, and names the decorator to use ([README-toolchain.md](README-toolchain.md)).
