@@ -29,8 +29,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Written by `yarn core:gen:declarations` ([writeCoreDeclarations.ts](writeCoreDeclarations.ts)).
   - [coreDeclarations.test.ts](../../tests/core/coreDeclarations.test.ts) fails until you run it,
     after adding, renaming or removing anything on `core`.
-  - Python's [test_core_declarations.py](../../tests/py/core/tests/test_core_declarations.py) checks `spell_core` against it:
-    a new name fails there too,
+  - Python's [test_core_declarations.py](../../tests/py/core/tests/test_core_declarations.py) checks `spell_core`
+    against it:  a new name fails there too,
     until it's ported or listed in py's [not_ported_yet.json5](../py/core/not_ported_yet.json5).
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
@@ -44,7 +44,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   the page's console by default, stderr under `spell run`.
 - Depends only on `spell-kit/util`.
   NEVER import `spell-lang/spell` / `spell-lang/parser`, or anything above.
-- Drawing code here is Solid work:  READ the root's Solid 2 pointer first.
+- Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
   - That's [drawing.ts](drawing.ts):
     - drawing a thing or a list's items:  `drawThing()`, `drawItems()`
     - the `@drawn` decorator, and the error boundary it shares with `drawThing()`
@@ -79,12 +79,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `referenceFor()`
   - They search the running program's things, or what the caller hands `searchThings()` instead
     (epic `people-and-orgs` P9, Q44).
-    - So a library's code finds `Person#owen` under `spell-lang/core/model` too, in the people store's people and orgs.
+    - So a library's code finds `Person#owen` under `spell-lang/core/model` too,
+      in the people store's people and orgs.
 
 ## Who may value-import it
 
-- ONLY the app's runner entry, [spellRuntime.ts](../../../spell-app/src/app/runner/spellRuntime.ts), may value-import `spell-lang/core`,
-  in every bundle.
+- ONLY the app's runner entry, [spellRuntime.ts](../../../spell-app/src/app/runner/spellRuntime.ts),
+  may value-import `spell-lang/core`, in every bundle.
   - Anything else -- the app, the parser, the language --
     puts it in a shared chunk, or loads a second copy.
   - Programs run on the runtime bundle built from it, `spell-runtime.js`, NEVER the page's own `core`.
@@ -93,12 +94,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - its types:  `import type` from `spell-lang/core/core.types`
     - or the runtime's own API, e.g. `runtimeConsole()`
   - Pinned by two of app's tests:
-    [element.build.test.ts](../../../spell-app/tests/app/runner/element.build.test.ts) and [build.test.ts](../../../spell-app/tests/app/build.test.ts).
+    - [element.build.test.ts](../../../spell-app/tests/app/runner/element.build.test.ts)
+    - [build.test.ts](../../../spell-app/tests/app/build.test.ts)
 - The ONE other entry:  `spell-lang/core/model` ([model.ts](model.ts), epic `people-and-orgs` P3).
   - The core with no drawing, so no Solid, and no running program's list of things.
     - References by name are in it all the same, searching what `searchThings()` was given (P9).
   - What a compiled LIBRARY imports, e.g. `people.lib.ts` (the `ts/lib` target).
-    - By its entry in spell-lang's `package.json` `exports`, `spell-lang/core/model`.
+    - By its name, `spell-lang/core/model`, through spell-lang's `exports`.
   - So the server and the app may value-import it, through a library:
     its things are plain data, belonging to no program, so a copy of its own is fine.
   - Code it loads NEVER imports the barrel, and asks `programThings()` for the running program's things,
@@ -181,7 +183,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Each writer keeps the ids it gave:  one writer per page.
   - `StateMirror.read()` reads each state INTO the things it read before, by id:  the same objects, changed.
   - `fromJSON()` reads through a new mirror, so JSON with ids keeps each thing as one.
-  - Python's twin is `spell_core.state`:  both write [stateById.expected.json5](../../tests/core/stateById.expected.json5), and read it.
+  - Python's twin is `spell_core.state`:
+    both write [stateById.expected.json5](../../tests/core/stateById.expected.json5), and read it.
 - SAVING things by id ([saving.ts](saving.ts), epic `people-and-orgs` P2):  what lasts, as opposed to a page's state.
   - `new Saver().save(thing)`:  the thing as an entry, by key, `"Person#owen"`.
     - Every thing it reaches is written INSIDE what holds it (decision Q42):
@@ -203,7 +206,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - The loader brings an older entry up step by step (`upgradeEntry()`):
       each version's renames and drops, then its upgrade method on the made thing.
     - A newer file than its type reads as it is.
-  - Python's twin is `spell_core.saving`:  both write [savedById.expected.json5](../../tests/core/savedById.expected.json5), and read it.
+  - Python's twin is `spell_core.saving`:
+    both write [savedById.expected.json5](../../tests/core/savedById.expected.json5), and read it.
 - CHECKING a saved entry against its class ([checking.ts](checking.ts), epic `people-and-orgs` P5, Q43):
   - `checkEntry(entry, { classNamed })`:  each property declared, of its kind.
     - A thing written whole inside is checked too.

@@ -17,17 +17,20 @@ when working with code in this folder, `src/markdown/` of the `spell-lang` packa
 - It depends only on `spell-lang/parser` and `spell-kit/util`.
   - NEVER import `spell-lang/spell`, or anything above it.
   - `ui` NEVER imports this folder, nor ships it prebuilt:  Spell UI's `<ui-markdown>` draws with marked.
-    The app's `<spell-markdown>` draws with it, from source ([MDEngine](../../../spell-app/src/app/components/spell-markdown/MDEngine.ts)).
+    The app's `<spell-markdown>` draws with it, from source
+    ([MDEngine](../../../spell-app/src/app/components/spell-markdown/MDEngine.ts)).
 - [MarkdownTokenizer.ts](MarkdownTokenizer.ts):  how text becomes tokens.
   - words:  letters / digits
   - one symbol per other character
-  - whitespace rides on the token before it (`LEADING_ONLY`), so rulex's spacing (`{spaces}`, touching parts) sees it
+  - whitespace rides on the token before it (`LEADING_ONLY`):
+    so rulex's spacing (`{spaces}`, touching parts) sees it
 - Rules are written in rulex as much as possible ([the Rulex guide](../../../spell.epics/guides/rulex/rulex.html)).
   - What rulex can't say is hand-written:  block nesting, emphasis pairing, "any token but a backtick".
 - The tests live in the repo's `tests/markdown/`, at the same paths as the code.
 - `spec/`:  the GFM spec examples, and their test.
   - `gfm-spec.json`:  the examples, from cmark-gfm's `spec.txt`, by `yarn markdown:spec:update <spec.txt>`
-  - [spec.test.ts](../../tests/markdown/spec/spec.test.ts) renders each with the PLAIN-HTML tags, and pins the pass count per section in a snapshot.
+  - [spec.test.ts](../../tests/markdown/spec/spec.test.ts) renders each with the PLAIN-HTML tags,
+    and pins the pass count per section in a snapshot.
     - A regression fails it.
     - A gain updates it:  `vitest -u`, after reading the diff.
 

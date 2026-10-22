@@ -12,8 +12,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The generic rule-based parser, `spell-lang/parser` (`P`):
   - tokenizer, rules and `Parser`, `Match`
   - scopes, ASTs, incremental parsing
-  - It knows NO language:  the spell language on it is `../spell` (`spell-lang/spell`).
-- `PARSING.md`, the map of the parse pipeline, is still in `../spell`:  [PARSING.md](../spell/PARSING.md).
+  - It knows NO language:  the spell language on it is the spell folder (`spell-lang/spell`).
+- [PARSING.md](../spell/PARSING.md), the map of the parse pipeline, is still in the spell folder.
   - Read it BEFORE digging into parser internals.
   - A change to the parsing mechanism HERE updates it too
     ([spell's AGENTS.md](../spell/AGENTS.md), "How parsing works").
@@ -55,7 +55,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - each drawable type's element class (epic `drawable-thing` P10).
         - e.g. `class CardElement extends SpellElement<Card>`, its base imported from `@spell/elements`
         - Written by `elementClassFor()`.
-  - `P.LibraryWriter`:  a project's classes alone, as a TypeScript LIBRARY other code imports (epic `people-and-orgs`)
+  - `P.LibraryWriter` (epic `people-and-orgs`):
+    a project's classes alone, as a TypeScript LIBRARY other code imports
     - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `spell-lang/core/model`.
     - One file, `<Project>.lib.ts`, its own types:  no `.d.ts` beside it.
     - `P.isDeclaration()` says what's kept:  classes, what's added to them, comments.
@@ -78,13 +79,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   because a rule's name is worked out from its class name.
   - e.g. `ListAddRelative` => `list_add_relative`
   - `P.Rule.ruleNameFor()` works it out.
-  - The builds:
-    app's [vite.config.ts](../../../spell-app/app/vite.config.ts) and [vite.editor.config.ts](../../../spell-app/app/vite.editor.config.ts).
+  - The builds, app's:
+    - [vite.config.ts](../../../spell-app/app/vite.config.ts)
+    - [vite.editor.config.ts](../../../spell-app/app/vite.editor.config.ts)
   - Pinned by app's [build.test.ts](../../../spell-app/tests/app/build.test.ts).
 
 ## Imports
 
-- As WWOD §4 (examples there are ours).  `import { P } from "spell-lang/parser"`.
+- As WWOD §4 (examples there are ours):  `import { P } from "spell-lang/parser"`.
 - [barrel.test.ts](../../tests/parser/barrel.test.ts) is the smoke test for circular imports through the barrel:
   run it after moving files.
   - The tests live in the repo's `tests/parser/`, at the same paths as the code under `src/parser/`.
