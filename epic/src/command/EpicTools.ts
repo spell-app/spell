@@ -192,6 +192,7 @@ export class EpicTools {
     "pages open": { tool: "src/tools/open.js", tsx: "tsconfig.json", cwd: "." },
     "pages link": { tool: "src/tools/link.ts", tsx: "tsconfig.json", cwd: "." },
     "pages fuss": { tool: "src/tools/fuss.ts", tsx: "tsconfig.json" },
+    "pages voice": { tool: "src/tools/voice.ts", tsx: "tsconfig.json", cwd: "." },
     "pages offline": { tool: "src/tools/offline.ts", tsx: "tsconfig.json" }
   } satisfies Record<string, ToolSpec>
 
@@ -217,7 +218,9 @@ export class EpicTools {
   static runPages([verb, ...args]: string[]): Promise<number> {
     const name = `pages ${verb}` as EpicToolName
     if (!(name in EpicTools.TOOLS)) {
-      process.stderr.write("epic pages:  which verb?  index, update, create, template, open, link, fuss or offline\n")
+      process.stderr.write(
+        "epic pages:  which verb?  index, update, create, template, open, link, fuss, voice or offline\n"
+      )
       return Promise.resolve(EXIT.USAGE)
     }
     return EpicTools.run(name, args)

@@ -532,6 +532,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 | `epic pages open [<page>]` | shows a page in Chrome, or in VS Code's side bar (`--vs`;  `--review`:  the Review tab) |
 | `epic pages link <page>` | prints a page's two links for a reply, the side bar's and the browser's;  `--hash <id>`, `--review`;  `--show`:  shows it too |
 | `epic pages fuss <path> ... \| --branch` | checks the writing of pages and comments against the house rules |
+| `epic pages voice [<page> ...] [--voice <name>] [--done <page> ...]` | lists the guides a voice hasn't gone over yet (`/voice` rewrites them), with their word counts;  `--done` stamps one as gone over |
 | `epic pages offline [<page> ...]` | lists what the docs pages load from the internet, for airplane mode |
 
 ### The repo's settings
@@ -543,7 +544,7 @@ Every key of the config file, and what `epic init` writes:  [README-adopting.md]
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
-| `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships `readme` |
+| `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 
 ### Pages you answer on, agents, airplane mode
 
