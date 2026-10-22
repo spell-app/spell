@@ -3,7 +3,7 @@
 Route handlers, server-side API code, env vars and configuration.  Read with `agents/wwod/WWOD.md` (the hub).
 From:  original WWOD §9 "Server / API patterns", §10 "Environment & configuration".
 
-SEE:  `packages/server/AGENTS.md` for `$/server` itself (`SRV.Router`, `SRV.WebServer`, the page server), and
+SEE:  `packages/server/AGENTS.md` for `spell-kit/server` itself (`SRV.Router`, `SRV.WebServer`, the page server), and
 `packages/app/AGENTS.md` for the app's server and `api.test.ts`.
 
 ## 10. Server & API
@@ -44,14 +44,14 @@ SEE:  `packages/server/AGENTS.md` for `$/server` itself (`SRV.Router`, `SRV.WebS
     `respondWithJSON()` MUST answer a mapped error with its own status, not 500.
   - Inside a handler, throw;  NEVER hand-write `reply.status(4xx).send(...)` for an error.
   - ONE error body shape per server, so the client parses one thing.
-  - Client side, an answered error becomes `$/util`'s `ResponseError` family -- SEE:  WWOD §5 › "Server → client
+  - Client side, an answered error becomes `spell-kit/util`'s `ResponseError` family -- SEE:  WWOD §5 › "Server → client
     error identity".
   - TODO:  response examples, for each error class.
   - TODO:  how a `TypeError` from a handler answers -- epic wwod T6.
 - **Grow `response-utils.ts` (name will change), don't write route-local helpers:**
   - New request / response capability = a small helper in `response-utils.ts` under its own `////` banner, e.g.
     `getIdParams()` ("Id utilities"), `sendTextFile()` ("Text responses").
-  - Generic, app-agnostic pieces (body parsing, static files, routing) belong in `$/server` instead.
+  - Generic, app-agnostic pieces (body parsing, static files, routing) belong in `spell-kit/server` instead.
 - **Shared constants live in `<folder>.types.ts`:**
   - Cache headers, content types, header lists:  named constants, so client and server share them;  never string
     literals in a route file.  SEE:  WWOD §8 › "`<folder>.types.ts`".
@@ -85,7 +85,7 @@ SEE:  `packages/server/AGENTS.md` for `$/server` itself (`SRV.Router`, `SRV.WebS
       `packages/ui/src/static/StaticRender.ssr.ts`.  (Owen, 2026-10-06, epic `wwod-spell-ui` J19.)
   - Its server-only types:  `<folder>.types.server.ts` (above, "Shared constants live in `<folder>.types.ts`").
   - Anything touching the file system, `process` or node built-ins is server code.
-  - Today's `src/node/` folders (`$/spell/node/...`, WWOD §4) predate the suffix:  `agents/CODE-DEBT.md`.
+  - Today's `src/node/` folders (`spell-lang/spell/node/...`, WWOD §4) predate the suffix:  `agents/CODE-DEBT.md`.
 - **API docstrings use stock bullets:**
   - A request handler's docstring opens with `` `METHOD /api/path` -- what it does ``, then:
     - `- Client sends:  ...` -- route params, query, body shape

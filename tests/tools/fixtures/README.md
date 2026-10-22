@@ -49,3 +49,7 @@ Run `spell serve @spell/examples/solitaire`, not `@spell/test/solitaire`;  see `
 ## See also
 
 - [README-other.md](README-other.md)
+- Also beside it:  [README-other.md](README-other.md)
+
+The brand pages are internal.
+A program written in spell.

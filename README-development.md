@@ -1,244 +1,322 @@
 # Working on Spell
 
-Everything a developer does day to day across the six repos, in one place:
-the one install, the checks, how the tests are laid out, imports between repos, worktrees and windows, CI,
-and where to go to change what.
-If you know a JavaScript project with workspaces (several packages, one install), most of this will feel familiar;
-the difference is that each child repo is its own git repo, cloned inside the kit.
+```sh
+# 1.  A branch in every repo at once:  in Claude Code, /isolate readme (or /epic readme)
+cd ~/www/spell.worktrees/readme
 
-- New here?  Set up first:  [the kit's README](README.md), "Setting up".
-- The house rules for code and docs are the agents' rules too:  [README-agents.md](README-agents.md).
+# 2.  Edit, then run the tests you're near:  here, the server's router
+yarn vp test run Router
+#  Test Files  1 passed (1)
+#       Tests  21 passed (21)
+
+# 3.  The finishing pass:  ts, lint:fix, format and tests, in the kit and then in every repo above it
+yarn review
+
+# 4.  What changed, and in which repo (the kit goes by its folder's name, spell)
+epic worktree repos
+# spell:  readme, 0 ahead of main, 0 behind, 7 uncommitted
+# spell-lang:  readme, 0 ahead of main, 0 behind
+# spell-ui:  readme, 0 ahead of main, 0 behind
+# spell-epic:  readme, 0 ahead of main, 0 behind
+# spell-app:  readme, 0 ahead of main, 0 behind
+
+# 5.  A commit in each repo that changed:  here only the kit, the git repo at the root
+git commit -am "README-development:  the loop first"
+
+# 6.  main moved meanwhile?  Merge it into every repo, regenerating the generated files
+epic worktree merge-main
+
+# 7.  In Claude Code, /isolate done:  it asks, then opens the pull requests and moves each changed repo's main up
+
+# 8.  Push each main, lowest first:  GitHub marks the pull requests merged
+cd ~/www/spell && git push
+```
+
+_A change from branch to merged, in the worktree this page was written in.  The outputs are real runs._
+
+That's five git repos, changed and checked as one, and nothing in the loop publishes anything:
+no `npm link`, no version bump, no prerelease for the repo above to install.
+Every repo runs the others' SOURCE through one install,
+so the repos above your change are running it already, and step 3 checks them.
+
+Not set up yet?  Start at [the kit's README](README.md#setup-from-zero), "Setup from zero".
+
+## Workspaces, with three differences
+
+If you've used npm or yarn workspaces, you know the shape:  several packages, one install, one lockfile.
+Spell keeps all of that, and changes three things.
+
+### Each workspace is its own git repo
+
+The kit is the git repo at the root.
+The other four are cloned inside it, git-ignored there, each with its own history, pull requests and CI:
+[repos.json5](repos.json5) lists them, lowest first ([the kit's README](README.md), "The five repos").
+
+So `git` acts on the repo whose folder you're in:  `cd spell-ui`, or `git -C spell-ui log`.
+At the root, `git status` sees only the kit's own files.
+For all of them at once, the kit has two scripts:
+- `yarn status`:  each child repo's branch, how far it is ahead or behind, and up to 12 changed files;
+  a clean one on one line
+- `yarn pull`:  `git pull --ff-only` in each
+
+The install is still ONE, at the kit's root, and the child repos have no lockfile.
+
+<details>
+<summary>What the one install does</summary>
+
+- Each child repo is a workspace (`"workspaces": ["spell-*"]`):  linked, never published.
+- One copy of each package version, Solid above all, pinned by the kit's `resolutions`.
+- It links each child repo's `agents` folder to the kit's, so every repo reads one copy of the house rules.
+  spell-epic gets none:  Claude Code would load a root `agents/` there as the plugin's own agents.
+
+</details>
+
+### A check at the root runs every repo, bottom up, and always finishes
+
+`yarn ts`, `yarn test`, `yarn lint` and `yarn review` at the kit's root run the kit's own check first,
+then each child repo's, lowest first.
+Lowest first because each repo's type check builds the declarations the repos above it read
+([README-toolchain.md](README-toolchain.md#every-tool-reads-source-but-one), "Every tool reads source, but one").
+
+A failure doesn't stop the run.
+Every repo runs, and the summary at the end names the ones that failed.
+Here's the end of a real `yarn lint`, run on the day this page was written:
+
+```text
+==================== yarn lint, every repo
+
+spell-kit      passed  (11s)
+spell-lang     passed  (8s)
+spell-ui       passed  (2s)
+spell-epic     passed  (1s)
+spell-app      FAILED  (7s)
+```
+
+One warning did that:  a hook's dependency list in spell-app's command line, whose prompts are drawn with Ink,
+React for the terminal.
+Lint fails on a warning here, and `yarn lint` exits 1.
+
+### A change across repos is a branch name
+
+A change to two repos is two commits, one in each, and two pull requests.
+What ties them together is the NAME of the branch:
+CI checks a repo against each other repo at the same branch name where it has one, and at `main` where it doesn't
+([below](#ci-checks-a-branch-name-not-a-commit)).
+An epic's worktree puts every repo on one name for you.
+
+Merge the lower repo first.
+A repo's `main` is checked against the `main` of the repos below it,
+so merging spell-app before the kit change it needs leaves spell-app's `main` failing until the kit catches up.
+
+## The checks:  four of them, and review
+
+Every repo answers to the same script names, so `yarn test` means the same thing in each, whatever runs underneath.
+`review` is the one to run before you commit:  it runs the other four, lint as `lint:fix`, and it CHANGES files.
+
+| Check | What it does |
+| --- | --- |
+| `ts` | the type check:  the lower repos' declarations rebuilt where stale (`spell-types --below`), then this repo's own programs and its tests' |
+| `lint` | oxlint, strict:  a warning fails, and so does an unused disable comment;  plus ruff, for Python |
+| `lint:fix` | the same, fixing what it can |
+| `format` | oxfmt, and ruff's formatter for Python;  it rewrites files |
+| `test` | Vitest, every project in the repo;  then pytest for its Python, and spell-epic's `node --test` scripts |
+| `review` | `ts`, `lint:fix`, `format`, `test`, in that order, stopping at the first that fails;  then "REVIEW PASSED" |
+
+- spell-epic's `review` is `ts`, `lint` and `test`:  it fixes nothing and formats nothing,
+  so run its `lint:fix` and `format` yourself.
+- There's no `format` over every repo:  `yarn review` formats them all, or run `yarn format` in each.
+- Run TypeScript as `yarn tsc`, never `npx tsc`:  yarn picks the install's TypeScript 7.
+- Two installs these checks need, once:
+  - `yarn playwright install chromium`, for the browser tests (CI adds `--with-deps`, for Linux)
+  - uv, which runs spell-lang's and spell-app's Python:  without it, their `test` and `lint` fail at the Python step
+- Not to be confused with `spell lint` and `spell format`, which check and tidy `.spell` programs, not TypeScript.
+  🌱 The repo checks as `spell` commands too, under a group of their own:  planned, not started
+  ([README-cli.md](README-cli.md#-coming)).
+
+Run them as wide or as narrow as the change:
+
+| To check | Run |
+| --- | --- |
+| every repo | `yarn ts`, `yarn test`, `yarn lint`, `yarn review`, at the kit's root |
+| the kit alone | `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`, `kit:review`, at the kit's root |
+| one child repo | its own scripts, in its folder:  `cd spell-ui && yarn test` |
+| one folder's tests | `yarn vp test run --project server`, at its repo's root |
+| one test file | `yarn vp test run Router`:  Vitest matches the file name |
+| as you edit | `yarn vp test`:  Vitest's watch mode, at its repo's root |
+
+**Not checked by any of them:  a repo you haven't cloned.**
+The checks over every repo run what's cloned (`yarn repos` puts a ✓ by those),
+so a kit change can break a repo that isn't on your machine, and nothing here will say so.
+
+<details>
+<summary>Every repo's test projects, for <code>--project</code></summary>
+
+One Vitest config per repo, `vitest.config.ts` at its root, with a project per folder of its `src/`;
+Spell UI and spell-epic split theirs by where the tests run instead.
+
+| Repo | Projects |
+| --- | --- |
+| the kit | `util` and `element` (in Chromium);  `util:node`, `server`, `element-tools`, `cli`, `toolchain`, `tools` |
+| spell-lang | `parser`, `markdown`, `core`, `py`, `spell`, `cli` |
+| spell-ui | `ssr` (node, Solid's server build), then `browser` |
+| spell-epic | `node`, `browser` |
+| spell-app | `spaces`, `lsp`, `cli`, `page-server`, `app:node`, `app:browser` |
+
+</details>
+
+## Done means the finishing pass
+
+A change is done when three things are true, and they're the same for a person and for a coding agent
+(whose rules start at [AGENTS.md](AGENTS.md)).
+
+1. `yarn review` passed, at the kit's root:
+   it checks every repo, so it catches a change that broke a repo above the one you changed.
+2. You read your own diff for the bugs a fast draft leaves:
+   an inverted guard, a `return promise` inside a `try` with no `await`,
+   copy-paste residue from the file you copied.
+   WWOD lists them all:  [WWOD.md](agents/wwod/WWOD.md), §1, "Finishing pass for fast-drafted code".
+3. You reported it with numbers:  the test count and how it moved, with the reason;
+   and what was broken before you came, called pre-existing.
+
+The summary above is that habit at work:  spell-app's warning was there before this page was.
+
+## Tests live in a second tree, at the code's paths
+
+If you keep `Button.test.tsx` beside `Button.tsx`, drop the habit here.
+Each repo's tests are in `tests/` at its root, at the same paths as the code under `src/`:
+[Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts).
+Swap the first folder, and you've found it.
+The cost is the mirror's:  move or rename a file, and its test moves too, in the other tree.
+
+A test is ordinary code in every other way.
+It imports what it tests by its package name (below, "One name per file"),
+takes Vitest's API from `vite-plus/test`, never `vitest` itself, since a lint rule fails the other,
+and keeps its snapshots and data beside it (`__snapshots__/`).
+The tests have TypeScript settings of their own, `tests/tsconfig.json`, and `ts` checks them too.
+
+Where a test runs is decided by its folder and its name, so a new file needs no registering:
+- Anything that draws runs in a real Chromium, headless (Vitest's browser mode, with Playwright):
+  the kit's `util` and `element`, Spell UI's elements, spell-epic's `<epic-*>` elements, spell-app's `app:browser`.
+- Everything else runs in node.
+  A name can say which:  `*.ssr.test.tsx` runs in node in Spell UI, `*.browser.test.tsx` in Chromium in spell-app.
+- Spell UI's `yarn test:all` adds Firefox and WebKit;  `yarn test:browsers` installs them.
+- The Python tests are pytest's, run through uv inside the same `yarn test`:
+  spell-lang's Python runtime, spell-app's Python web apps.
+- Shared helpers:
+  - the kit's, for every set of elements:  `spell-kit/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
+    ([README-element.md](README-element.md))
+  - Spell UI's setup, `spell-ui/test-helpers/setup.ts`, which spell-app's and spell-epic's browser tests run first
+
+Tests reach DOWN only, as code does:
+- A higher repo's tests may use a lower repo's helpers and test data:
+  spell-app's tests read spell-lang's frozen test projects.
+- A lower repo's tests never read a higher one's:  they get a fixture of their own, or the test moves up.
+- A test that needs a higher repo only to check against it skips itself when that repo isn't cloned:
+  spell-lang's TypeScript check of compiled Spell, against the editor's types, says "(needs spell-app)".
+
+## One name per file, from every repo
+
+Most projects give a file two names:  a path alias from inside (`@/server/Router`), the package's name from outside.
+Here a file has ONE, the same from every repo, its own included:
+the package's name plus the file's path under the repo's `src/`, with no extension.
+
+```ts
+// a folder's barrel, by the folder's name:  src/server/index.ts
+import { SRV } from "spell-kit/server"
+// one file, src/util/string.ts:  the same name from inside the kit, where this line comes from
+import { camelCase, kebabCase } from "spell-kit/util/string"
+// a query stays
+import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+```
+
+_Real lines, from [the router's test](tests/server/Router.test.ts),
+[the kit's tag names for drawable things](src/util/spell/drawable.ts)
+and [Spell UI's label](spell-ui/src/components/ui-label/UILabel.tsx)._
+
+- The other repos' files go the same way:  `spell-ui/components/ui-button`, `spell-lang/spell`.
+- No path aliases and no `../`;  a same-folder peer stays `./Peer`.
+  Lint holds it:  `spell/no-parent-import` fails a `../` that climbs into a package's `src/`,
+  and its message names the import to write ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules)).
+- Every arrow points down:  a repo imports only the kit and the repos it needs, never one above it.
+  `yarn clone <repo>` clones exactly those, so a wrong import fails there, not in someone else's checkout.
+- A file another repo needs at run time (Spell's runtime source, the frozen test projects) is found by PACKAGE,
+  through `node_modules`, never by a path into that repo.
+- Under the hood, the type check reads the repos below through their built declarations, and Vite, Vitest, `tsx` and
+  lint read source:  each entry of a package's `exports` names both
+  ([README-toolchain.md](README-toolchain.md#every-tool-reads-source-but-one), "Every tool reads source, but one").
+
+The cost:  a file's path IS its name, so moving one renames it in every repo that imports it.
+Search the whole checkout before you move anything, the child repos included.
+
+## Working across repos:  one epic, one branch name
+
+`git worktree` gives one repo a second checkout, on another branch.
+An epic's worktree does that for the WHOLE checkout:
+a worktree of the kit at `~/www/spell.worktrees/<epic>/`, with a worktree of every child repo inside it,
+all on the epic's branch, and an install of its own.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
-flowchart TB
-  subgraph kit["~/www/spell: the kit"]
-    folders["util, toolchain, server, element, cli"]
-    children["spell-lang, spell-ui, spell-brand, spell-epic, spell-app"]
-    nm["node_modules: the ONE install"]
-    data["spell.epics and spell.spaces: yours, not cloned"]
+flowchart LR
+  subgraph main["~/www/spell:  the main checkout, on main"]
+    kit1["the kit, at the root"]
+    kids1["spell-lang · spell-ui · spell-epic · spell-app, inside it"]
+    nm1["node_modules/:  the one install"]
   end
-  subgraph wt["~/www/spell.worktrees/name: an epic's worktree"]
-    wfolders["the kit's folders"]
-    wchildren["a worktree of every child repo"]
-    wnm["its own install"]
+  subgraph wt["~/www/spell.worktrees/readme:  an epic's worktree, on readme"]
+    kit2["the kit, a worktree of it"]
+    kids2["spell-lang · spell-ui · spell-epic · spell-app, a worktree of each"]
+    nm2["node_modules/:  an install of its own"]
   end
-  kit -.same branch name in every repo.-> wt
+  main -- "/isolate readme" --> wt
+  wt -- "/isolate done" --> main
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
-  classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
-  class children repo
-  class data data
+  classDef folder fill:#E6EAF5,stroke:#8E96B5,stroke-width:1.5px,color:#1A1C27,rx:4px,ry:4px
+  class kit1,kids1,kit2,kids2 repo
+  class nm1,nm2 folder
 ```
 
-_One checkout holds every repo and one install;  an epic's worktree is a copy of all of it, on one branch._
+_The worktree is a copy of the whole checkout, on one branch name in every repo._
 
-## The one install
+**Making one:**  `/epic <name>`, or `/isolate <name>` for a smaller job, in Claude Code.
+- spell-epic's worktree hook branches every repo from your local `main`, unpushed work included.
+- It runs the one install, then the two VS Code extensions' own (`spell-epic/vscode`, `spell-app/vscode`).
+- The edge:  it's Claude Code's worktree hook that does this, so making one needs Claude Code.
+  Without it, do by hand what it does:  the same branch name in each repo you change (below, "The manual way").
 
-The kit is the ONLY place you run `yarn install`.
-Its install covers every child repo you've cloned:  the child repos have no lock file of their own.
+**Merging `main` in** is the one step git can't do alone.
+A generated file (a syntax table, a snapshot, a compiled library) is a function of BOTH branches' source:
+after a merge neither side's copy is right, and no line merge of the two is either.
+So `epic worktree merge-main` merges `main` into every repo, child repos lowest first and the kit last,
+and REGENERATES each generated file both sides changed, from the merged source.
+- It re-runs the snapshots too, and lists any entry neither side had:  new behaviour nobody has looked at yet.
+- Any other conflict stops it mid-merge:  resolve it, `git add`, then `epic worktree merge-main --continue`.
+- Never a bare `git merge main`:  git keeps your side of each such file, marks it conflicted, and can't rebuild it.
 
-- Every child repo is a workspace of the kit's install (`"workspaces": ["spell-*"]`),
-  so each package is linked, never published:  a repo always uses the others' source, as it is on disk.
-- One copy of each package version, above all Solid, pinned by the kit's `resolutions`.
-- Tool versions are bumped here only:  `vite-plus` and every `catalog:` entry together.
-  Then the child repos' copies of `.yarnrc.yml`.
-- `yarn install` also links each child repo's `agents` folder to the kit's (not spell-epic's),
-  so every repo reads one copy of the house rules ([README-agents.md](README-agents.md)).
+**Leaving:**  `/isolate done` merges `main` in one last time,
+then offers to push and open the pull requests, and to merge each branch into `main`.
+- It moves every changed repo's `main`, or none:  one that isn't ready (not on `main`, or not clean) stops them all,
+  and says which.
+- It never pushes `main`:  push each yourself, lowest first, and GitHub marks the pull requests merged.
+- `epic worktree remove <name>` clears the worktree away after, its servers stopped first;  the branches stay.
 
-The kit's commands for the child repos, run in `~/www/spell`:
+To shelve the work instead:  `/park`, then `/unpark`;  or `/wait-for <other>`, to pick it up when another finishes.
 
-| Command | What it does |
-| --- | --- |
-| `yarn clone [repo...]` | Clones what's missing (the named repos and everything they need;  none named:  all), then one `yarn install`. |
-| `yarn pull` | `git pull --ff-only` in every cloned child repo. |
-| `yarn status` | Each child repo's branch, ahead / behind, and up to 12 changed files;  a clean one on one line. |
-| `yarn repos` | The list:  a check mark when cloned, and what each needs. |
-
-```text
-$ yarn repos
-✓ spell-lang     -
-✓ spell-ui       -
-✓ spell-brand    spell-ui
-✓ spell-epic     spell-ui
-✓ spell-app      spell-lang, spell-brand, spell-ui, spell-epic (runs)
-```
-
-<details>
-<summary>yarn clone's flags, and what a partial clone does</summary>
-
-- SSH first, HTTPS when SSH is refused (GitHub's login, `gh auth setup-git`).
-- `--branch <name>`:  each repo at that branch where it has one, else its default branch.
-- `--https`:  skip SSH.
-- `--shallow`:  only the last commit.
-- `--no-install`:  clone only.
-- Run it again after `repos.json5` gains a repo:  it clones only what's missing.
-- A partial clone rewrites the kit's `yarn.lock` (the lock file lists every child repo):  don't commit that change.
-- The list of repos, lowest first, and what each needs:  [repos.json5](repos.json5).
-
-</details>
-
-## The checks
-
-Four checks run over everything, from the kit's root:  the kit's own first, then each child repo's, lowest first.
-Every repo runs even when one fails, and a summary comes at the end.
-
-```sh
-yarn ts        # type check;  each repo builds the declarations the ones above it read
-yarn test      # every repo's tests
-yarn lint      # every repo's lint
-yarn review    # the finishing pass:  ts, lint:fix, format, test
-```
-
-- `review` CHANGES files:  it fixes what lint can, and formats.  Run it before you commit.
-- `yarn tsc`, never `npx tsc`:  yarn picks the workspace's TypeScript 7.
-
-Narrower, from wider to one file:
-
-| Scope | Run |
-| --- | --- |
-| the kit only | `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`, `kit:review` |
-| one child repo | `cd spell-ui && yarn test` (each repo has `ts`, `test`, `lint`, `review`) |
-| one folder of a several-folder repo | `cd spell-lang && yarn spell-folders test core`;  in the kit, `node toolchain/bin/spell-folders.ts test server element` |
-| one folder's tools directly | `cd server && yarn vp test run`, `yarn vp lint src`, `yarn vp fmt` |
-| one test file | `cd server && yarn vp test run Router` (Vitest matches the file name) |
-
-```text
-$ cd server && yarn vp test run Router
- Test Files  1 passed (1)
-      Tests  21 passed (21)
-```
-
-- A folder has no `package.json` of its own, so no scripts:  in it, use its tools directly.
-- Each check's tools are Vite+'s (Vitest, oxlint, oxfmt, the type checker):
-  [README-toolchain.md](README-toolchain.md) says how they're shared.
-
-## How the tests are organized
-
-Tests live in a `tests/` folder at each repo's root, NOT beside the code, at the same paths as the code they test.
-E.g. the kit's [Router.test.ts](tests/server/src/Router.test.ts) tests [Router.ts](server/src/Router.ts):
-the same path, under `tests/`.
-
-- A repo of several folders (the kit, spell-lang, spell-app) has `tests/<folder>/`.
-  E.g. `spell-lang/tests/parser/`, `spell-app/tests/cli/`.
-- A flat repo (spell-ui, spell-brand, spell-epic) has `tests/` mirroring its code.
-- Snapshots and test data sit with their tests.
-- Each folder's `vitest.config.ts` points at its tests folder,
-  and a `tsconfig.json` in each tests folder gives them the folder's own settings.
-- Browser or node:
-  - browser tests run in a real Chromium, headless (Vitest's browser mode with Playwright):
-    the kit's util and element, Spell UI's elements, spell-app's app
-  - the rest run in node
-  - so install Chromium once:  `yarn playwright install chromium` (CI adds `--with-deps`, for Linux)
-- Python folders (spell-lang's py, spell-app's spaces) run pytest and ruff through uv,
-  in the same `yarn test` and `yarn lint`:  install uv for them.
-- Shared helpers stay in the code folders:
-  every component set's element helpers are the kit's (`spell-kit/test-helpers/ElementFixture` ...);
-  [README-element.md](README-element.md), "Tools and test helpers".
-
-Tests only reach DOWN, as code does:
-
-- A higher repo's tests may use a lower repo's helpers and test data
-  (spell-app's and spell-brand's run Spell UI's setup;  spell-app's spaces reads spell-lang's frozen test projects).
-- A lower repo's tests never read a higher one's:  they get a fixture of their own, or the test moves up.
-- A test that needs a higher repo only to check against it skips itself when that repo isn't cloned
-  (spell-lang's TypeScript check of compiled spell, against the editor's types).
-
-## Imports across repos
-
-Every import is a package name, from anywhere:  `spell-kit/server`, `spell-ui/core`, `spell-lang/spell`.
-A package's own deep files go by `#/`, its private subpath imports:  `#/components/ui-parts/UIParts.css?inline`.
-
-- From another repo:  the package's name and an entry its `package.json` `exports` names.
-  The kit's are under its folders' names:  `spell-kit/util/class`, `spell-kit/server/page`, `spell-kit/element`.
-- Every arrow points DOWN:  a repo imports only the kit and the repos it needs, never one above it.
-  `yarn clone <repo>` clones exactly those, so a wrong import fails there.
-- Lint fails a `../` path into another repo's package.
-- A file another repo needs at run time (spell's runtime source, the frozen test projects) is found by PACKAGE,
-  through `node_modules`, never by a path into that repo.
-
-How each tool finds another repo's package:
-
-| Tool | Reads | How |
-| --- | --- | --- |
-| `tsc` | its built declarations | each `exports` entry's `types` condition, `dist-types/...d.ts`, built by `spell-types`;  a repo's `yarn ts` runs `spell-types --below` first, so the lower repos' are fresh |
-| Vite and Vitest | its source | the entry's `default`, a `.ts` file |
-| `tsx` and node | its source | the same `default`, through node's own package resolution |
-
-<details>
-<summary>Until repo-split P14 lands:  today's aliases</summary>
-
-- Inside a repo, today's imports start from a `$/` alias, from the repo's own `tsconfig.base.json`.
-  - E.g. `$/parser`, `$/ui/components/...`.
-  - The kit's own files use `$/util`, `$/server`.
-  - The kit's folders import each other by package name already.
-- So `tsx` needs a run-time hook to resolve them, `spell-kit/toolchain/aliases`.
-  - Load it after `tsx` in every program that runs another repo's source:
-    `tsx --import spell-kit/toolchain/aliases <script>`.
-  - Without it:  `Cannot find package '$'`, on the first other repo's file.
-- `spell-types` rewrites every `$/` in a declaration as a relative path.
-- Lint also fails a `$/` alias into another repo (`spell/no-cross-repo-alias`).
-- The kit's `assembler/` is its own folder today, `spell-kit/assembler`;  P14 folds it into the server.
-- P14 replaces all of this with package names and `#/`:
-  the alias tables, the hook, the rewrite and that lint rule go.
-
-</details>
-
-## Worktrees and windows
-
-An epic works in a worktree of the WHOLE checkout:  a worktree of the kit at `~/www/spell.worktrees/<epic>/`,
-with a worktree of every child repo inside it, all on the epic's branch, and one install of its own.
-
-- `/epic <name>` or `/isolate <name>` in Claude Code makes one, through spell-epic's worktree hook:
-  the branches, the install, the two VS Code extensions' own installs.
-- Each worktree has its own page server:  port 4747 is the main checkout's, and a worktree gets another.
-  The main page server shows it at `/worktrees/<name>/` too.
-- `git.detectWorktrees` is on in every window, so each repo's worktree shows in Source Control.
-- Merge `main` in with `epic worktree merge-main`, never a bare git merge:
-  it REGENERATES each generated file both sides changed, from the merged source, instead of line-merging it.
-- Shelving:  `/park`, `/unpark`, `/wait-for <other>`.
-- Leaving:  `/isolate done` offers a merge into `main` and pull requests.
-- Windows:  a worktree gets its own VS Code window, `⎇ <name>`.
-  - Never `code --add`:  it restarts a one-folder window's extensions, the Claude panel too.
-  - Never `code -r`.
-  - How windows are laid out:  [README-vscode.md](README-vscode.md), "Windows and worktrees".
-
-<details>
-<summary>The generated files merge-main rebuilds</summary>
-
-Each repo lists its own in its `.epic/generators.json5`, each branch's own copy:
-
-| Repo | Generated files | Made by |
-| --- | --- | --- |
-| spell-lang | `spell/spellSyntax.json` | `yarn spell:gen:syntax` |
-| spell-ui | `docs/__data/` (components, icons, search, custom elements, HTML custom data) | `yarn site:data` |
-| spell-brand | `docs/__data/`;  `components/__pack/` | `yarn site:data`;  `yarn pack:build` |
-| spell-app | the spell libraries' `*.lib.ts`;  App UI's `docs/__data/` | `spell compile @spell/library`;  `yarn site:data` |
-
-- They're marked in each repo's `.gitattributes`:  `merge=binary` (never line-merged), `-diff` when minified,
-  `linguist-generated` (folded in GitHub's diffs).
-- A new committed generated file goes in both lists.
-- NOT committed at all:  the bundles only the page server serves (Spell UI's docs site, the brand pages);
-  it builds the stale ones when it starts, or `spell bundle --stale` by hand.
-
-</details>
-
-## Working across six repos:  use spell-epic
-
-A change that touches several repos is easiest as an epic:
-spell-epic makes the worktrees, keeps the branches in step, and checks them together.
-
-1. `/epic <name>` (or `/isolate <name>` for a smaller job) makes one worktree of the kit.
-   It has a worktree of every child repo inside, all on branch `<name>`.
-2. Work across them as one checkout:  one install, one `yarn review` over all.
-3. `epic worktree repos` shows each repo's state:
-   its branch, what's uncommitted, how far it's ahead of or behind `main`.
-4. `epic worktree merge-main` brings `main` into all of them, regenerating the generated files.
-5. `/isolate done` merges each branch into `main` and opens the pull requests.
-6. The same branch name in every repo makes CI check them together (below, "Commits and CI").
-
-- How the epic pages, the review loop and the skills work:  [spell-epic's README](spell-epic/README.md).
+While you're in it:
+- `epic worktree repos` shows each repo's branch, what's uncommitted, and how far it is ahead of or behind `main`.
+- The worktree has its own page server.
+  The first to start gets port 4747, the main checkout's usually;  a worktree's gets another free one,
+  and the main page server shows the worktree at `/worktrees/<name>/` too.
+- The `spell` on your `PATH` still runs your main checkout's code, on the worktree's files.
+  So to try your change to a command, or to the compiler under one, run `yarn spell <command>`:  the worktree's own.
+- It opens in its own VS Code window, `⎇ <name>`, where `git.detectWorktrees` shows every repo's worktree in Source
+  Control.
+  Never `code --add`, never `code -r`:  [README-vscode.md](README-vscode.md), "Windows and worktrees", says why.
+- `epic` is spell-epic's command, on every Claude Code session's `PATH` while the plugin is on:
+  every verb in [spell-epic's README-cli.md](spell-epic/README-cli.md);
+  epic pages, the review loop and the skills in [spell-epic's README](spell-epic/README.md).
 
 <details>
 <summary>The manual way, for a change in one repo</summary>
@@ -254,95 +332,168 @@ git -C spell-ui commit -am "my fix"
 git -C spell-ui push -u origin my-fix
 ```
 
-- `git status` at the kit's root sees only the kit's own files;  `yarn status` shows every child repo.
-- Two repos by hand:  the same branch name in both, one commit in each, the lower repo's merged first.
+Two repos by hand are the same, twice:  one branch name in both, and the lower repo's pull request merged first.
 
 </details>
 
-## Commits and CI
+<details>
+<summary>The generated files merge-main rebuilds</summary>
 
-A change across repos is one commit per repo, merged lowest first.
-There's no publish and no version bump:  every repo uses the others' source, through the one install.
+Each repo lists its own in its `.epic/generators.json5`, and each branch reads its own copy,
+so a branch that adds a generated file also teaches its own merge to rebuild it.
 
-- Every repo has one GitHub Actions workflow, [checks.yml](.github/workflows/checks.yml):
-  on a push to `main`, a pull request, or by hand.
-- The kit's runs `kit:ts`, `kit:lint` and `kit:test`, with no child repo cloned.
-- A child repo's checks it the way it's worked on:
-  - the kit at the root, at the branch under test when the kit has one, else at `main`
-  - the repo itself inside it, at the commit under test
-  - the repos it needs, by `yarn clone <repo> --branch <branch> --https --shallow`
-  - then its `yarn ts`, `yarn lint` and `yarn test`
-- So a change across repos is checked together when every repo's branch has the same name.
-- The repos are public:  CI needs no token.
+| Repo | Generated files | Made by |
+| --- | --- | --- |
+| spell-lang | `src/spell/spellSyntax.json`, the syntax table | `yarn spell:gen:syntax` |
+| spell-ui | `docs/__data/`:  components, icons, search, custom elements, HTML custom data | `yarn site:data` |
+| spell-app | the Spell libraries' compiled `*.lib.ts`;  App UI's `app/docs/__data/` | `spell compile @spell/library`;  `yarn site:data` |
+| every repo | Vitest snapshots, `__snapshots__/*.snap` | `vp test run --update` |
+
+- They're marked in each repo's `.gitattributes`:
+  - `merge=binary`:  changed on both sides, git keeps ours and marks the file conflicted, never interleaving the two
+  - `-diff` when minified:  `git diff` says "Binary files differ" instead of printing one enormous line
+  - `linguist-generated`:  folded in GitHub's pull request diffs
+  - NOT `merge=ours`:  it silently drops the other side's changes
+- A new committed generated file goes in both lists.
+- NOT committed at all:  the bundles only the page server serves, such as Spell UI's docs site.
+  It builds the stale ones when it starts, or `spell bundle --stale` builds them by hand.
+
+</details>
+
+## CI checks a branch name, not a commit
+
+Every repo has ONE GitHub Actions workflow, [checks.yml](.github/workflows/checks.yml):
+on a push to `main`, a pull request, or by hand from the Actions tab.
+The kit's runs `kit:ts`, `kit:lint` and `kit:test`, with no child repo cloned.
+
+A child repo's workflow rebuilds the layout you work in, and picks every other repo by the NAME of your branch:
+1. the kit at the root, at the branch under test when the kit has one, else at `main`
+2. the repo itself inside it, at the commit under test
+3. the repos it needs, by `yarn clone <repo> --branch <branch> --https --shallow`:
+   each at the branch under test when it has one, else its default branch
+4. then its `yarn ts`, `yarn lint` and `yarn test`
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
+flowchart LR
+  push["a pull request in spell-app, branch x"] --> ci["spell-app's CI"]
+  ci -- "has x" --> kit["the kit at x"]
+  ci -- "the commit under test" --> app["spell-app at x"]
+  ci -- "no x" --> lang["spell-lang at main"]
+  ci -- "no x" --> ui["spell-ui at main"]
+  ci -- "no x" --> epic["spell-epic at main"]
+  %% the Spell look:  yarn mermaid:pretty
+  classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
+  classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
+  class kit,app,lang,ui,epic repo
+```
+
+_A change to the kit and spell-app on branch x:  spell-app's CI takes the kit at x, and every other repo at main._
+
+So push the lower repo's branch before you open the pull request above it:
+CI looks the branch up on GitHub, and takes `main` wherever it isn't there yet.
+
+The edges:
+- **The kit's own CI checks the kit ALONE.**
+  A change only to the kit starts no child repo's CI:  each runs at its own next pull request, or push to `main`.
+  Till then, your `yarn review` at the root is the only check of the repos above, so run it before you push.
+  To have CI check one anyway, push a branch of the same name to it, and run its workflow on that branch by hand:
+  the Actions tab, "checks", "Run workflow".
+- The pairing is by name and nothing else:
+  a `fix` branch in spell-ui runs against whatever `fix` the kit has, so pick a name nobody else is using.
+- CI never checks formatting:  it runs `ts`, `lint` and `test`, never `format:check`.
+  What keeps the format is `yarn review` before you commit, which formats as it goes.
 
 <details>
 <summary>The CI workflow, step by step</summary>
 
-1. Check the code out;  `corepack enable` (turns on the repo's yarn).
+1. Check the kit out;  `corepack enable`, which turns on the yarn release the kit pins.
 2. Node 24, with yarn's cache.
 3. `yarn install`, with `YARN_ENABLE_IMMUTABLE_INSTALLS=false`:
-   the lock file lists child repos that aren't cloned there.
-4. `yarn playwright install --with-deps chromium`, for the browser tests.
-5. In a child repo:  clone the repos it needs at the same branch;  uv for spell-lang's and spell-app's Python;
-   spell-epic's extension install.
-6. The checks.
+   the lockfile lists child repos that aren't cloned there.
+4. In a child repo, around the clones above:  uv, for spell-lang's and spell-app's Python;
+   and spell-epic's extension install (`spell-epic/vscode`, a yarn project of its own, which its `lint` reads).
+5. `yarn playwright install --with-deps chromium`, for the browser tests.
+6. In a child repo, a git name and email:  some tests make throwaway git repos and commit to them.
+7. The checks.
 
-- The five child workflows are the same but for the repo's name, uv and spell-epic's extension install:
+- A new push to the same branch cancels the run still going.
+- The repos are public, so CI needs no token;  a `SPELL_REPOS_TOKEN` secret, when it's set, signs the clones in.
+- The four child workflows are the same but for the repo's name, uv and spell-epic's extension install:
   change them together.
 
 </details>
 
-## Where to hack on what
+## Where to change what
+
+The code for one behaviour is rarely where its name suggests:
+the squiggle under a word is spell-app's, the rule that put it there is spell-lang's.
+Find the row for what you want to change, then read the page beside it before you start.
 
 | To change ... | Look in |
 | --- | --- |
-| how a spell sentence parses or compiles | spell-lang's [rules](spell-lang/spell/src/rules/) and its [parser](spell-lang/parser/) (the engine, Rulex) |
-| what compiled code runs on | spell-lang's [core](spell-lang/core/) (JavaScript) and [py](spell-lang/py/) (Python) |
-| the output for one language | the writers, and the target list in spell-lang's [`targets.ts`](spell-lang/spell/src/targets.ts) |
-| errors, hover and completion | the language service ([`SpellLanguageService.ts`](spell-app/lsp/src/SpellLanguageService.ts)) |
-| the editor's screens and behaviour | spell-app's [`app/src/`](spell-app/app/src/):  [`solid/`](spell-app/app/src/solid/), [`pages/`](spell-app/app/src/pages/), [`editor.ts`](spell-app/app/src/editor.ts) |
-| how programs run in a page | spell-app's [runner](spell-app/app/src/runner/) |
-| `<spell-app>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` | spell-app's [`app/components/`](spell-app/app/components/);  build with `yarn build:element`;  demos in `app/demo/` |
+| how a Spell sentence parses or compiles | spell-lang's [rules](spell-lang/src/spell/rules/) and its [parser](spell-lang/src/parser/) (the engine, Rulex):  [README-spell.md](spell-lang/README-spell.md), [README-parser.md](spell-lang/README-parser.md) |
+| what compiled code runs on | spell-lang's [core](spell-lang/src/core/) (JavaScript) and [py](spell-lang/src/py/) (Python):  [README-core.md](spell-lang/README-core.md) |
+| the output for one language | the writers, and the list of targets in spell-lang's [`targets.ts`](spell-lang/src/spell/targets.ts):  [README-targets.md](spell-lang/README-targets.md) |
+| errors, hover and completion | the language service ([`SpellLanguageService.ts`](spell-app/src/lsp/SpellLanguageService.ts)):  [README-lsp.md](spell-app/README-lsp.md) |
+| the editor's screens and behaviour | spell-app's [`src/app/`](spell-app/src/app/):  [`solid/`](spell-app/src/app/solid/), [`pages/`](spell-app/src/app/pages/), [`editor.ts`](spell-app/src/app/editor.ts);  [README-app.md](spell-app/README-app.md) |
+| how programs run in a page | spell-app's [runner](spell-app/src/app/runner/) |
+| `<spell-app>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` | spell-app's [`src/app/components/`](spell-app/src/app/components/);  build with `yarn build:element`;  demos in `app/demo/` |
 | VS Code language features, Run Project | spell-app's [`vscode/src/`](spell-app/vscode/src/):  [README-vscode.md](README-vscode.md) |
-| projects on disk, addresses, the editor's API | spell-app's [spaces](spell-app/spaces/src/server/node/) |
-| the example projects | spell-app's [`spaces/@spell/examples/`](spell-app/spaces/@spell/examples/) and `library/` |
-| Python web apps | spell-app's [`spell_quart`](spell-app/spaces/src/server/py/) |
-| a `spell` command | its repo's `cli/` folder:  [README-cli.md](README-cli.md), "How a command is built" |
-| the page server | the kit's [server](server/) ([README-server.md](README-server.md));  spell-app's layer in [`page-server/`](spell-app/page-server/), its settings in spell-app's root `package.json` (`"pageServer"`) |
+| projects on disk, addresses, the editor's API | spell-app's [spaces](spell-app/src/spaces/server/node/):  [README-spaces.md](spell-app/README-spaces.md) |
+| the example projects | spell-app's [`spaces/@spell/examples/`](spell-app/spaces/@spell/examples/) and `library/`:  [README-examples.md](spell-app/README-examples.md) |
+| Python web apps | spell-app's [`spell_quart`](spell-app/src/spaces/server/py/) |
+| a `spell` command | its repo's `src/cli/` folder:  [README-cli.md](README-cli.md) |
+| the page server | the kit's [server](src/server/) ([README-server.md](README-server.md));  spell-app's layer in [`src/page-server/`](spell-app/src/page-server/) ([README-page-server.md](spell-app/README-page-server.md)), its settings in spell-app's root `package.json` (`"pageServer"`) |
 | a Spell UI element | [spell-ui](spell-ui/README.md) |
-| the element framework under every set | the kit's [element](element/):  [README-element.md](README-element.md) |
+| the element framework under every set | the kit's [element](src/element/):  [README-element.md](README-element.md) |
 | epic pages, review, windows, hooks, skills | [spell-epic](spell-epic/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
 | the Review tab and Epic Docs | spell-epic's [`vscode/`](spell-epic/vscode/) |
 | the house style | the kit's [`agents/wwod/`](agents/wwod/), then `spell wwod check` |
 
-## When something's wrong
+## When something's wrong, read the papercuts first
 
-Check the papercuts log FIRST when tooling fails mysteriously:  someone has often lost the same hour before.
+Tooling failing for no reason you can see?
+Check `PAPERCUTS.md` FIRST:  it's where anything that slowed development down is written up, with its fix,
+and someone has often lost the same hour before you.
 
-| Log | What goes in it |
-| --- | --- |
-| papercuts | anything that slowed development down:  date, symptom, fix, project |
-| suspected bugs | something that looks wrong, not yet confirmed:  the file and symbol, why, how to prove it |
-| code debt | structural problems known and tolerated on purpose:  cost, cause, fix, where it's pinned |
+- It's one of three logs in the kit's [`agents/`](agents/) folder, beside `SUSPECTED-BUGS.md` and `CODE-DEBT.md`.
+- What goes in each, and how to add to them:  [README-agents.md](README-agents.md), "The three logs".
 
-- They're in the kit's [`agents/`](agents/) folder, one section per package:
-  [README-agents.md](README-agents.md), "The three logs", says how to add to them.
+Two that nearly everyone meets once:
+- "Cannot find module" for another repo's file, in a type check or your editor, on a fresh clone:
+  the declarations it reads aren't built yet (`dist-types/` is git-ignored).
+  `yarn ts` at the kit's root builds them.
+- `spell` not found, or running an old checkout's code:  it's a link to one checkout's `bin/spell.mjs`.
+  `yarn cli:install` at the kit's root links it to this one;  run it again after moving the checkout
+  ([README-cli.md](README-cli.md#setting-it-up)).
+
+## Every script, repo by repo
+
+Day to day you'll type the checks, `yarn pull` and `yarn status`.
+The rest are each repo's own tools, listed so you can find one by name before you go looking in a `package.json`.
+Every script, `spell` command and skill is also on the commands page, a guide in the docs site:
+add one, and `spell commands check` exits 1 until the page names it too.
 
 <details>
 <summary>Every yarn script, repo by repo</summary>
 
 The kit (`~/www/spell`)
-- the child repos:  `clone`, `pull`, `status`, `repos`;  `postinstall` makes the links
+- the child repos:  `clone` (what's missing, and what it needs, then one install), `pull`, `status`, `repos`;
+  `postinstall` makes the links
 - over every repo:  `ts`, `test`, `lint`, `review`
 - the kit's own:  `kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`, `kit:review`
-- `server`:  the page server's command line, on the kit alone
+- `spell` (the `spell` command, without installing it), `cli:install` (puts `spell` on your `PATH`)
+- `server`:  `spell server`, the page server's command line, on the kit's own checkout
 - `favicon [--hat 0.74]`:  Spell's favicon files, from the hat mark
+- `readme:check`, `mermaid:pretty`:  the READMEs' check, and the look of their Mermaid pictures
 
 spell-lang
 - checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`, `review`
 - `spell:test:rules`, `spell:test:rules:bless`, `spell:test:fixtures`, `spell:test:fixtures:bless`, `spell:test:ui`,
   `spell:test:coverage`
-- `spell:gen:syntax` (the syntax table), `core:gen:declarations`, `markdown:spec:update` (GitHub's Markdown spec)
+- `spell:gen:syntax` (the syntax table), `core:gen:declarations` (the core's method list), `markdown:spec:update`
+  (GitHub's Markdown spec)
 
 spell-ui
 - checks:  `ts`, `test` (its `ssr` and `browser` projects), `test:all`, `test:watch`, `test:ui`, `lint`, `lint:fix`,
@@ -350,62 +501,54 @@ spell-ui
 - `dev` (the demo page), `build`, `preview`, `clean`
 - visual and browser tests:  `test:visual`, `test:visual:update`, `test:hmr`, `test:browsers`, `smoke`, `screenshots`
 - the docs site:  `site:dev`, `site:data`, `site:index`, `site:kitchen`, `site:bundle`, `site:build`, `site:new`,
-  `site:sections`, `site:check`
+  `site:sections`, `site:check`, `readme:components`
 - generators:  `gen:styles`, `gen:icons`, `gen:emoji`, `gen:root`, `tokens:alias`, `icons:pack`, `manifest`
 - tools:  `vendor`, `measure`, `serve`, `report`, `design:build`
-
-spell-brand
-- checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `review`
-- `build`, `compare`, `site:data`, `pack:build`, `pack:check`, `design:bundle`, `design:check`, `rename:shared`
 
 spell-epic
 - checks:  `ts`, `test` (with `test:scripts` and `test:vscode`), `test:node`, `test:watch`,
   `lint`, `lint:fix`, `format`, `review`
 - `epic`, `pack:build`, `pack:check`, `site:data`, `plugin:validate`, `vscode:check`, `vscode:package`
-- the docs tools:  `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `plan-doc`, `details`
+- the docs tools:  `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `details`
 
 spell-app
 - checks:  `ts`, `test`, `test:watch`, `lint`, `lint:fix`, `format`, `format:check`, `review`
-- the editor:  `start` (page server and editor, prints the editor's URL), `stop`, `start:dev` (Vite alone),
-  `start:server` (the API alone, port 3001), `start:server:prod`, `build`, `build:runner`, `build:element`,
-  `build:page`, `preview`, `site:data`, `site:pictures`, `clean`
+- the editor:  `start` (an install, a fresh page server, then the editor, printing its URL), `stop`,
+  `start:dev` (Vite alone), `start:server` (the API alone, port 3001), `start:server:prod`, `build`, `build:runner`,
+  `build:element`, `build:page`, `preview`, `site:data`, `site:pictures`, `examples:readme`, `clean`
 - the language server:  `lsp:start`, `lsp:scopes`
-- the command line:  `spell`, `cli:install`;  `dev`, `dev:ts`, `dev:py` (`spell run` in the folder you're in)
+- the command line:  `spell`;  `dev`, `dev:ts`, `dev:py` (`spell run` in the folder you're in)
 - repo tools:  `vscode`, `vscode:build`, `vscode:install`, `server`, `serve` (every web server), `window`,
-  `commands:check`, `docs:update`, `docs:index`, `docs:new`, `docs:open`, `docs:link`, `epic`, `ask`, `plan-doc`,
-  `details`
+  `commands:check`, `epic`, `ask`
 
 </details>
 
 <details>
-<summary>The tool versions</summary>
+<summary>The tools underneath</summary>
 
-- Node 24.11 or later (`engines`);  CI uses Node 24.
-  The kit runs `.ts` files with plain `node`, which needs Node 24's built-in type stripping.
-- Yarn 4.18.0, its release committed in the kit (`.yarn/releases/`);  `corepack enable` turns it on.
-- Vite+ 1.0.0 (`vite-plus`, the `vp` command) pins Vite, Vitest 5.0.1, oxlint, oxfmt and tsgolint together.
-  Their versions are the `catalog:` in the kit's `.yarnrc.yml`.
-- TypeScript 7;  Solid 2.0.0-rc.13 for every repo;  Playwright for the browser tests.
-- No ESLint, no Prettier.
+- Node and yarn, and how to install them:  [the kit's README](README.md#setup-from-zero), "Setup from zero".
+  The kit runs its own `.ts` tools with plain `node`, which needs Node 24's built-in type stripping.
+- Vite+ (`vite-plus`, the `vp` command) pins Vite, Vitest, oxlint, oxfmt and tsgolint together, at the versions in
+  the kit's `catalog:`;  how they're bumped:
+  [README-toolchain.md](README-toolchain.md#one-dependency-pins-every-tool), "One dependency pins every tool".
+- TypeScript 7;  Solid 2.0.0-rc.13 for every repo;  Playwright 1.63.0 for the browser tests.
 
 </details>
 
 ## See also
 
-- [README.md](README.md):  the kit's front page
+- [README-toolchain.md](README-toolchain.md):  what the checks run on, and how a type check reads another repo
+- [spell-epic's README](spell-epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
+  `/isolate`
+- [README-vscode.md](README-vscode.md):  the extensions, and how windows and worktrees are laid out
+- [README-agents.md](README-agents.md):  how a coding agent finds the rules, and the three logs
 - [README-cli.md](README-cli.md):  every `spell` command, and `epic`
-- [README-toolchain.md](README-toolchain.md):  what the checks run on
-- [README-vscode.md](README-vscode.md):  the extensions, windows and worktrees
-- [README-agents.md](README-agents.md):  the house style and the logs
-- [AGENTS.md](AGENTS.md):  the rules for the kit and across repos
-- Also beside it:
-  [README-element.md](README-element.md) · [README-server.md](README-server.md) · [README-util.md](README-util.md)
 
 <details>
 <summary>More in the docs site</summary>
 
 These guides live in the content folder, so they need a checkout with `spell.epics` beside the repos and the page
-server running (`spell server start`, then the URL it prints):
+server running (`spell server start`, which prints where it is):
 
 - "Vite+":  `/guides/vite-plus.html`
 - "Windows and Review":  `/guides/windows-and-review.html`
