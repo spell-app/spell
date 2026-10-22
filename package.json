@@ -164,7 +164,7 @@
     "review": "node tools/repos.ts run review"
   },
   "dependencies": {
-    "@solidjs/vite-plugin": "3.0.0-next.47",
+    "@solidjs/vite-plugin": "3.0.0-next.51",
     "chalk": "^5.6.0",
     "commander": "^14",
     "esbuild": "^0.28.2",
@@ -182,7 +182,7 @@
     "vite-plus": "catalog:"
   },
   "devDependencies": {
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.17",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.20.4",
     "@types/pluralize": "^0.0.33",
@@ -190,15 +190,15 @@
     "@vitest/browser-playwright": "catalog:",
     "axe-core": "^4.13.0",
     "playwright": "1.63.0",
-    "solid-js": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.17",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.17",
     "axe-core": "^4.13.0",
-    "solid-js": "2.0.0-rc.13"
+    "solid-js": "2.0.0-rc.17"
   },
   "peerDependenciesMeta": {
     "@solidjs/web": {
@@ -212,13 +212,13 @@
     }
   },
   "resolutions": {
-    "@solidjs/babel-plugin": "2.0.0-rc.13",
-    "@solidjs/compiler": "2.0.0-rc.13",
-    "@solidjs/h": "2.0.0-rc.13",
-    "@solidjs/signals": "2.0.0-rc.13",
-    "@solidjs/web": "2.0.0-rc.13",
+    "@solidjs/babel-plugin": "2.0.0-rc.17",
+    "@solidjs/compiler": "2.0.0-rc.17",
+    "@solidjs/h": "2.0.0-rc.17",
+    "@solidjs/signals": "2.0.0-rc.17",
+    "@solidjs/web": "2.0.0-rc.17",
     "axe-core": "4.13.0",
-    "solid-js": "2.0.0-rc.13",
+    "solid-js": "2.0.0-rc.17",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
     "vitest": "5.0.1"
   },
