@@ -102,15 +102,15 @@ describe("ReadmeTest.matches()", () => {
 })
 
 describe("ReadmeTest.run()", () => {
-  test("runs the commands in the page's folder, stdout then stderr, colours stripped", () => {
+  test("runs the commands in the page's folder, stdout and stderr as a terminal shows them, colours stripped", () => {
     const run = new ReadmeTest(SCRATCH).run({
       page: "README.md",
       line: 1,
       folder: SCRATCH,
-      commands: "printf '\\033[32mgreen\\033[0m\\n'; pwd; echo oops >&2",
+      commands: "echo first >&2; printf '\\033[32mgreen\\033[0m\\n'; pwd",
       expected: ""
     })
-    expect(run.printed).toBe(`green\n${SCRATCH}\noops\n`)
+    expect(run.printed).toBe(`first\ngreen\n${SCRATCH}\n`)
     expect(run.status).toBe(0)
   })
 })

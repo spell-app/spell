@@ -94,13 +94,15 @@ export class ReadmeTest {
   }
 
   /**
-   * Run `example`'s commands, from its page's repo root, in `bash`;  what they printed (stdout, then stderr), its
-   * colours stripped, and the exit status.
+   * Run `example`'s commands, from its page's repo root, in `bash`;  what they printed, its colours stripped, and the
+   * exit status.
+   * - stdout and stderr in ONE stream, in the order a terminal shows them (`exec 2>&1`):  `spell` prints its
+   *   `✓ Compiling ...` line to stderr, ahead of the program's own output
    * - `spell` and `epic` are this checkout's (`shims()`);  colours off
    * - NEVER throws:  a command that can't start prints why
    */
   run(example: ReadmeExample): ReadmeRun {
-    const result = spawnSync("bash", ["-c", example.commands], {
+    const result = spawnSync("bash", ["-c", `exec 2>&1\n${example.commands}`], {
       cwd: example.folder,
       encoding: "utf8",
       timeout: ReadmeTest.TIMEOUT * 1000,
@@ -112,7 +114,7 @@ export class ReadmeTest {
         FORCE_COLOR: "0"
       }
     })
-    const printed = `${result.stdout ?? ""}${result.stderr ?? ""}${result.error ? String(result.error) : ""}`
+    const printed = `${result.stdout ?? ""}${result.error ? String(result.error) : ""}`
     return { printed: stripColours(printed), status: result.status ?? 1 }
   }
 
