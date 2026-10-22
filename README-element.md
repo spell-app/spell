@@ -648,8 +648,11 @@ How it's turned on:
   - `js/ts.tsdk.path`:  `node_modules/@typescript/old/lib`, TypeScript 6
   - `js/ts.experimental.useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins
   - VS Code asks once, "Use Workspace Version":  say yes.
-- A window opened from a `.code-workspace` file (an epic's window) ignores a folder's window settings:
-  put those two in the window file's `settings`, or run "TypeScript:  Select TypeScript Version".
+- A window opened from a `.code-workspace` file (an epic's window) ignores a folder's window settings,
+  so `epic window` writes the same ones into every window file:
+  `windows.settings` in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
+  - A window file from before gets them from `epic window init`.
+  - Or run "TypeScript:  Select TypeScript Version" in that window.
 - Its log lines (the manifests it found, anything that failed) are in "TypeScript:  Open TS Server log",
   prefixed `spell-elements`.
 

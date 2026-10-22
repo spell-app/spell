@@ -354,11 +354,12 @@ The settings it sets for you:
 
 ## The settings the repos ship
 
-One folder of editor settings, across five repos:  spell-app's `.vscode/`.
-spell-ui adds a single setting;  the kit, spell-lang and spell-epic ship none.
+Two folders of editor settings:  the kit's `.vscode/` and spell-app's.
+spell-ui adds a single setting;  spell-lang and spell-epic ship none.
 
 | File | What it holds |
 | --- | --- |
+| the kit's [settings.json](.vscode/settings.json) | the repo's own TypeScript in the editor, so the kit's TypeScript plugin loads ([README-element.md](README-element.md));  `<ui-*>` autocomplete in HTML, and Spell UI's custom properties, parts and states in CSS |
 | spell-app's [extensions.json](https://github.com/spell-app/spell-app/blob/main/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
 | spell-app's [settings.json](https://github.com/spell-app/spell-app/blob/main/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  `<ui-*>` autocomplete in HTML;  what search skips |
 | spell-app's [launch.json](https://github.com/spell-app/spell-app/blob/main/.vscode/launch.json) | "Run Spell Extension", on F5:  a new window running the extension from `vscode/`, open on the Solitaire example |
@@ -366,8 +367,16 @@ spell-ui adds a single setting;  the kit, spell-lang and spell-epic ship none.
 | spell-ui's [settings.json](https://github.com/spell-app/spell-ui/blob/main/.vscode/settings.json) | a link in the Markdown preview opens its file in the editor |
 
 **The catch:  VS Code reads a folder's `.vscode/` only when that folder is one of the window's top-level folders.**
-The kit's window and every epic's window are rooted at the kit, so none of these apply in them:
+The kit's window and every epic's window are rooted at the kit, so only the kit's apply in them:
 there, your own settings decide what formats on save.
+
+- And in a window of several folders (every epic's), VS Code reads a WINDOW setting from the window file only,
+  never a folder's `.vscode/`:  the TypeScript ones are such.
+  - So `epic window` writes them into every window file too,
+    from `windows.settings` in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
+  - Keep the two the same.
+- The HTML and CSS data are a folder's own settings, so the kit's apply in every window it's a folder of,
+  each checkout reading its own files.
 For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/spell-app`;
 its Claude panel then lists only the sessions started there.
 
@@ -384,6 +393,7 @@ its Claude panel then lists only the sessions started there.
 | `files.associations`:  `*.json5` as `jsonc` | VS Code has no JSON5 mode, and checks a file against a schema only in its JSON modes |
 | `json.schemas` | a person's `__me.json5` and an org's `__org.json5`, checked against the people library's types;  `spell compile` writes `Person.schema.json` and `Org.schema.json` into the build folder, so they're missing until it has run |
 | `html.customData` | autocomplete and hover docs for every `<ui-*>` tag, attribute and value in `.html` files, from Spell UI's `html-custom-data.json` (its `yarn site:data` writes it) |
+| `css.customData` | in `.css` files, every `--ui-*` custom property (with its default), part (`::part(icon)`) and custom state (`:state(open)`), with hover docs, from Spell UI's `css-custom-data.json` |
 | `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/`, `app/static/semantic-ui-css/` and `yarn.lock`;  Explorer still shows them |
 | `js/ts.experimental.useTsgo: false` | the editor's TypeScript stays the JavaScript one, not the native preview |
 | `vetur.validation.script: false` | a leftover, for Vue's Vetur extension |
@@ -430,6 +440,8 @@ because the order of a window's folders decides which sessions its Claude panel 
   an epic's goes in `windows/ongoing/`.
   The folder is `windowsFolder`, in the kit's epic settings ([.epic/config.json5](.epic/config.json5)).
 - `epic window init` writes the missing ones, and brings the rest up to date.
+- Each one also gets the kit's window settings, the TypeScript ones (`windows.settings` in the epic settings),
+  so the kit's TypeScript plugin loads in an epic's window too.
 
 Here's the window this page was written in, the `readme` epic's, as `epic window` wrote it:
 

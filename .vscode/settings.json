@@ -1,7 +1,9 @@
 {
   // The kit's window settings, for a window opened on the kit's folder itself.
-  // - A window opened from a `.code-workspace` file (an epic's window) reads these window settings from that file
+  // - A window opened from a `.code-workspace` file (an epic's window) reads the WINDOW settings below from that file
   //   instead:  VS Code ignores a folder's window settings in a workspace of several folders.
+  //   spell-epic writes them there, from `windows.settings` in the kit's `.epic/config.json5`:  keep the two the same.
+  // - The HTML and CSS data apply in every window the kit is a folder of:  they're a folder's own settings.
 
   // TypeScript:  the editor runs the repo's own TypeScript 6 server, so the tsconfigs' plugins load
   // (the kit's TypeScript plugin:  slot and part names for custom elements in JSX;  README-element.md).
@@ -11,5 +13,13 @@
   // - VS Code asks once, "Use Workspace Version", before it switches.
   "js/ts.tsdk.path": "node_modules/@typescript/old/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
-  "js/ts.experimental.useTsgo": false
+  "js/ts.experimental.useTsgo": false,
+
+  // HTML:  autocomplete and hover docs for every `<ui-*>` and `<brand-*>` tag, attribute and value in `.html` files.
+  // CSS:  their custom properties (`--ui-button-padding-block`), parts (`::part(icon)`) and custom states
+  // (`:state(open)`) in `.css` files.
+  // - Spell UI's and the brand's, written by each repo's `yarn site:data` (spell-ui's `ElementManifests`).
+  // - Paths from the kit's folder:  a folder's own settings, so they resolve in each checkout, an epic's worktree too.
+  "html.customData": ["spell-ui/docs/__data/html-custom-data.json", "spell-brand/docs/__data/html-custom-data.json"],
+  "css.customData": ["spell-ui/docs/__data/css-custom-data.json", "spell-brand/docs/__data/css-custom-data.json"]
 }

@@ -40,7 +40,25 @@
     // The repo root's folder name in every window:  folder 1, so the Claude panel lists every repo's sessions.
     "repoName": "spell",
     // The content repo's folder name in every window.
-    "contentName": "spell.epics"
+    "contentName": "spell.epics",
+    // VS Code settings every window file gets (epic `intellisense` P4):  the kit's `.vscode/settings.json`'s WINDOW
+    // settings, which VS Code reads only from the window file in a window of several folders (every epic's).
+    // - TypeScript:  the editor runs the repo's own TypeScript 6 server, so the tsconfigs' plugins load
+    //   (the kit's TypeScript plugin:  slot and part names for custom elements in JSX;  README-element.md).
+    //   - TypeScript 7 (`node_modules/typescript`, what `tsc` runs) has no editor server that loads plugins,
+    //     so the editor's is TypeScript 6's:  `@typescript/typescript6`, installed as `@typescript/old`.
+    //   - The path is from each folder of the window:  the epic's worktree, folder 1, comes first.
+    //   - `useTsgo: false`:  the native preview (TypeScript 7 in the editor) loads no plugins either.
+    //   - VS Code asks once, "Use Workspace Version", before it switches.
+    // - Keep them the same as the kit's `.vscode/settings.json`.
+    // - `epic window init` writes them into the window files that exist;  a new window file gets them as it's made.
+    // - NOT the HTML and CSS data (`html.customData`, `css.customData`):  a folder's own settings give those in any
+    //   window, so naming them here too would list each `<ui-*>` tag twice.
+    "settings": {
+      "js/ts.tsdk.path": "node_modules/@typescript/old/lib",
+      "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+      "js/ts.experimental.useTsgo": false
+    }
   },
 
   // Whether the worktree hook links each NEW worktree's saved-session folder to the main checkout's,
