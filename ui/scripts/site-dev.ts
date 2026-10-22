@@ -46,9 +46,10 @@ function report(event: Rolldown.RolldownWatcherEvent): void {
  * spell-app's page server origin, e.g. `http://127.0.0.1:54769` (`SPELL_APP`'s:  it serves this site).
  * - SIDE EFFECT:  `spell server start` starts it in the background if it isn't running
  * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
+ * - `--root`, always:  run from a `yarn` script, the server would take the folder yarn ran in (`INIT_CWD`, Spell UI)
  */
 function ensurePageServer(): string {
-  const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start"], {
+  const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start", "--root", SPELL_APP], {
     cwd: SPELL_APP,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],

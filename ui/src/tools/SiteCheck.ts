@@ -176,12 +176,13 @@ export class SiteCheck {
    * The page server's origin, once it serves the site bundle.
    * - `spell server start` prints `{ base, port, ... }` as JSON, maybe after other lines:
    *   parsed from the first `{`
+   * - `--root`, always:  run from a `yarn` script, the server would take the folder yarn ran in (`INIT_CWD`, Spell UI)
    * - throws `SiteCheckError` when there's no server, or it doesn't serve `/components/ui/_assets/site.js`
    */
   async ensureServer(): Promise<string> {
     let base: string
     try {
-      const text = execFileSync(process.execPath, [SPELL, "server", "start"], {
+      const text = execFileSync(process.execPath, [SPELL, "server", "start", "--root", REPO], {
         cwd: REPO,
         encoding: "utf8",
         stdio: ["ignore", "pipe", "pipe"],
