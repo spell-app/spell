@@ -1,5 +1,5 @@
 /**
- * Tests of `InboxMonitor` (`epic session listen`, the plugin's monitor) on a scratch checkout:
+ * Tests of `InboxMonitor` (`epic session listen`, the look the plugin's monitor runs) on a scratch checkout:
  * an epic page, its inbox file, and a made-up session record.
  */
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs"
@@ -11,8 +11,8 @@ import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
 import type { RunningSession } from "spell-epic/command/command.types"
 import { Sessions } from "spell-epic/command/Sessions"
-import { InboxMonitor, POLL_MS } from "spell-epic/tool/InboxMonitor"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { InboxMonitor } from "spell-epic/tool/InboxMonitor"
+import { LISTEN_STALE_MS, ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -25,20 +25,12 @@ const inboxFile = ReviewInbox.pathFor(file)
 /** A session titled for epic `x`, in the scratch checkout, alive (this process). */
 const SESSION: RunningSession = { pid: process.pid, sessionId: "s1", cwd: root, name: "🚧 x", nameSource: "hook" }
 
-/** What the monitor printed. */
-let printed: string[]
-
-/** A monitor for `session`, its lines caught in `printed`. */
+/** A monitor for `session`. */
 function monitor(session: RunningSession | undefined = SESSION): InboxMonitor {
-  return new InboxMonitor({
-    sessions: new Sessions({ home }),
-    print: (line) => void printed.push(line),
-    findSession: () => session
-  })
+  return new InboxMonitor({ sessions: new Sessions({ home }), findSession: () => session })
 }
 
 beforeEach(() => {
-  printed = []
   mkdirSync(join(root, "epics", "x"), { recursive: true })
   copyFileSync(join(FIXTURES, "epic-plan.html"), file)
   rmSync(inboxFile, { force: true })
@@ -56,49 +48,64 @@ test("epicOf:  the epic the session's title names;  none for a title or folder n
   expect(each.epicOf({ ...SESSION, name: "" })).toBeUndefined()
 })
 
-test("poll:  listens for the session at once, says nothing while nothing waits", () => {
-  const each = monitor()
-  expect(each.poll(1_000)).toBe(true)
-  expect(ReviewInbox.read(inboxFile).listening?.session).toBe("s1")
-  expect(printed).toEqual([])
+/** The poller's process:  this one, alive. */
+const MONITOR = { monitor: process.pid }
+
+test("check:  listens for the session at once, held by its monitor;  watches the inbox;  nothing waiting", () => {
+  const check = monitor().check(MONITOR)
+  expect(check).toMatchObject({ pid: process.pid, epic: "x", waiting: false })
+  expect(check.watch[0]).toBe(inboxFile)
+  expect(check.notice).toBeUndefined()
+  expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
 })
 
-test("poll:  a Send is announced ONCE, after two polls;  taken, the next one is announced again", () => {
+test("check:  run by hand (no monitor), it listens as inbox watch does:  a heartbeat, no process", () => {
+  expect(monitor().check()).toMatchObject({ epic: "x" })
+  expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1" })
+  expect(ReviewInbox.read(inboxFile).listening?.pid).toBeUndefined()
+})
+
+test("check:  a Send is waiting, with the line to print;  taken, nothing is", () => {
   const each = monitor()
-  const now = Date.now()
-  each.poll(now)
+  each.check(MONITOR)
   ReviewInbox.update(inboxFile, (box) => box.markSent())
-  each.poll(now + POLL_MS)
-  // one poll:  a `wait` running in the session may take it first
-  expect(printed).toEqual([])
-  each.poll(now + 2 * POLL_MS)
-  each.poll(now + 3 * POLL_MS)
-  expect(printed).toEqual([InboxMonitor.notice("x")])
+  expect(each.check(MONITOR)).toMatchObject({ waiting: true, notice: InboxMonitor.notice("x") })
   ReviewInbox.update(inboxFile, (box) => box.takeWork())
-  each.poll(now + 4 * POLL_MS)
-  ReviewInbox.update(inboxFile, (box) => box.markSent(new Date(now + 5 * POLL_MS).toISOString()))
-  each.poll(now + 5 * POLL_MS)
-  each.poll(now + 6 * POLL_MS)
-  expect(printed).toHaveLength(2)
+  expect(each.check(MONITOR)).toMatchObject({ waiting: false })
 })
 
-test("poll:  another session listening hears it;  this monitor stays quiet and takes nothing", () => {
+test("check:  another session listening hears it;  this one watches nothing until that one would go stale", () => {
   const now = Date.now()
   ReviewInbox.update(inboxFile, (box) => {
     box.setListening("other", new Date(now).toISOString())
     box.markSent(new Date(now).toISOString())
   })
-  const each = monitor()
-  each.poll(now)
-  each.poll(now + POLL_MS)
-  each.poll(now + 2 * POLL_MS)
-  expect(printed).toEqual([])
+  const check = monitor().check({ ...MONITOR, now })
+  expect(check).toMatchObject({ waiting: false, watch: [] })
+  expect(check.recheckMs).toBeGreaterThan(LISTEN_STALE_MS)
+  expect(check.recheckMs).toBeLessThan(LISTEN_STALE_MS + 5_000)
   expect(ReviewInbox.read(inboxFile).listening?.session).toBe("other")
   expect(ReviewInbox.read(inboxFile).hasWork).toBe(true)
 })
 
-test("poll:  no epic, nothing done;  the session's process gone, the monitor stops", () => {
-  expect(monitor({ ...SESSION, name: "" }).poll()).toBe(true)
+test("check:  this session's own /epic review wait (no process) keeps the inbox;  the monitor stands back", () => {
+  const now = Date.now()
+  ReviewInbox.update(inboxFile, (box) => box.setListening("s1", new Date(now).toISOString()))
+  expect(monitor().check({ ...MONITOR, now })).toMatchObject({ watch: [] })
+  expect(ReviewInbox.read(inboxFile).listening?.pid).toBeUndefined()
+})
+
+test("check:  another live monitor of this session holds it (an old one, after a reload);  this one stands back", () => {
+  ReviewInbox.update(inboxFile, (box) => box.setListening("s1", undefined, process.ppid))
+  expect(monitor().check(MONITOR)).toMatchObject({ watch: [], recheckMs: 5 * 60_000 })
+  expect(ReviewInbox.read(inboxFile).listening?.pid).toBe(process.ppid)
+})
+
+test("check:  no epic, nothing done, its record watched;  the session's process gone, it ended", () => {
+  const check = monitor({ ...SESSION, name: "" }).check(MONITOR)
+  expect(check).toMatchObject({ waiting: false, watch: [join(home, "sessions", `${process.pid}.json`)] })
   expect(ReviewInbox.read(inboxFile).listening).toBeNull()
-  expect(monitor({ ...SESSION, pid: 999_999 }).poll()).toBe(false)
+  expect(monitor({ ...SESSION, pid: 999_999 }).check()).toMatchObject({ ended: true })
+  const unfound = new InboxMonitor({ sessions: new Sessions({ home }), findSession: () => undefined })
+  expect(unfound.check()).toMatchObject({ watch: [], waiting: false })
 })

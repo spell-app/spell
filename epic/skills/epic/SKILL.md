@@ -545,8 +545,12 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.
 - EVERY epic session listens on its own while it's open, `/epic review` or not (epic `epic-engine` P18):
-  - the plugin's monitor (`epic session listen`) holds the inbox for the session whose title, or worktree, names the
-    epic, and keeps its heartbeat:  the page says it's listening
+  - the plugin's monitor holds the inbox for the session whose title, or worktree, names the epic, while it runs:
+    the page says it's listening
+    - a small poller (`InboxPoller`), which runs `epic session listen` for a moment as the inbox changes
+      (epic `epic-engine` P19:  about 45MB a session, not 170)
+    - `/epic review`'s `epic inbox watch` takes the inbox over;  once that session's `wait` stops for good, the
+      monitor takes it back within about 90s
   - it prints NOTHING until Owen sends;  then ONE line, `📬 <epic>:  Owen sent work ...`, which wakes the session
   - that line:  take the work with `epic inbox wait <epic> --timeout 5`, then go on at 7.3, as if your own `wait` had
     finished

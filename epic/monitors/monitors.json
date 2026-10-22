@@ -1,7 +1,7 @@
 [
   {
     "name": "review-inbox",
-    "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/epic\" session listen",
+    "command": "node \"${CLAUDE_PLUGIN_ROOT}/monitors/listen.mjs\"",
     "description": "Owen's sends from this session's epic page (marks, comments, Do Now)"
   }
 ]

@@ -1,4 +1,6 @@
-import { setTimeout as sleep } from "node:timers/promises"
+import { join } from "node:path"
+
+import { SRV } from "spell-kit/server"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
@@ -8,133 +10,94 @@ import { bareTitle } from "spell-epic/list/RunningEpics"
 
 import { GuideSends } from "./InboxCommands"
 import { PlanDocFiles } from "./PlanDocFiles"
-import { LISTEN_HEARTBEAT_MS, ReviewInbox } from "./ReviewInbox"
+import { LISTEN_STALE_MS, ReviewInbox } from "./ReviewInbox"
 
 /****************
  * ### `InboxMonitor`
  * Keeps an epic's session listening to its epic page whenever the session is open (epic `epic-engine` P18):
- * `epic session listen`, run by the spell-epic plugin's MONITOR (`monitors/monitors.json`), one per session.
- * - Claude Code starts it with the session, and stops it with the session.
- *   Each line it prints reaches the session as a notification, and wakes it when idle.
- * - It prints NOTHING while there's nothing to do, so it costs no tokens while idle:
- *   a quiet file read every `POLL_MS`.
- * - Which epic (`epicOf()`), looked up again every `RESOLVE_MS`, so a session titled later starts listening then:
+ * ONE look at the page's inbox for the session, `epic session listen`.
+ * - The spell-epic plugin's MONITOR (`monitors/monitors.json`) runs a small poller beside every session,
+ *   `InboxPoller` (`monitors/listen.mjs`), which runs this look whenever a file it names changes, or when it asks to be run again.
+ *   - Why two parts (epic `epic-engine` P19):  this code, with the epic tool it reads the pages with, takes about
+ *     150MB while it runs;  the poller is plain node, about 45MB, and runs it for a fraction of a second.
+ *   - The poller prints the line this look gives (`notice`), once per batch of work, and nothing else:
+ *     so it costs no tokens while idle.
+ * - Which epic (`epicOf()`):
  *   - the session's title names one (`🚧 seo`)
  *   - else its folder is in an epic's worktree
- *   - else none:  a main or untitled session listens to nothing
+ *   - else none:  a main or untitled session listens to nothing, and is looked at again when its record changes
  * - It LISTENS for the session (`ReviewInbox.setListening()`, with the session's id), so the page says so:
- *   - nobody listening, or this session:  it takes the listener's place, and keeps its heartbeat
- *   - another session listening:  that one hears it;  this monitor stays quiet
- *   - so `/epic review`'s own `inbox watch` and `wait` in the same session agree with it:  one listener, one id
- * - Work waiting (`ReviewInbox.hasWork`, or a Send on a page the epic owns):  ONE line, `📬 ...`, saying how to
- *   take it (`epic inbox wait <epic>`), once per batch.
+ *   - nobody listening:  it takes the listener's place, with the MONITOR's process id (`monitor`, the poller's):
+ *     live while the poller runs, so it needs no heartbeat;  a poller that dies takes it with it, and a Send wakes
+ *     the session the old way
+ *   - another listener, live:  another session's, this session's own `/epic review` wait, or another poller:
+ *     that one hears the work;  this look says to look again when it would go stale, and watches nothing till then
+ *   - run by hand, with no `monitor`:  it listens as `epic inbox watch` does, stale in `LISTEN_STALE_MS`
+ * - Work waiting (`ReviewInbox.hasWork`, or a Send on a page the epic owns):  `waiting`, with the line to print,
+ *   `📬 ...`, saying how to take it (`epic inbox wait <epic>`).
  *   - Never TAKES it:  the session does, with its own `wait`, so what Owen sent reaches the session's context.
- *   - Only once the work has waited two polls:  a `wait` already running in the session takes it first, and nothing
- *     is said twice.
- * - Ends when its session's process does (`claude`, the ancestor it found).
- * - NEVER throws out of a poll:  a page or inbox it can't read is tried again next time.
+ * - NEVER throws:  a page or inbox it can't read is looked at again next time.
  ****************/
 export class InboxMonitor {
   /** Claude Code's sessions:  this session's record, its title */
   readonly sessions: Sessions
-  /** where its lines go:  stdout, which Claude Code reads */
-  readonly print: (line: string) => void
-  /** this session's registry record, once found;  `findSession()` by default */
+  /** this session's registry record;  `ancestorSession()` by default */
   private readonly findSession: () => RunningSession | undefined
-  /** the session, as last found */
-  private session: RunningSession | undefined
-  /** the epic it listens to, as last looked up */
-  private epic: MonitoredEpic | undefined
-  /** when the session and its epic were last looked up, ms */
-  private resolvedAt = -Infinity
-  /** when the heartbeat was last stamped, ms */
-  private beatAt = -Infinity
-  /** polls in a row that found work waiting */
-  private waitingPolls = 0
-  /** whether this batch of work was announced already */
-  private announced = false
 
-  constructor({
-    sessions = new Sessions(),
-    print = (line: string) => void process.stdout.write(`${line}\n`),
-    findSession
-  }: InboxMonitorProps = {}) {
+  constructor({ sessions = new Sessions(), findSession }: InboxMonitorProps = {}) {
     this.sessions = sessions
-    this.print = print
     this.findSession = findSession ?? (() => this.ancestorSession())
   }
 
   ////////////////
-  // ## Running
+  // ## The look
   ////////////////
 
   /**
-   * Poll until the session ends;  resolves to the exit code.
-   * - `once`:  one poll, then return (tests, a quick look)
+   * One look:  find the session and its epic, listen for it, and say what's waiting and what to watch.
+   * - `monitor`:  the poller's process id, which the listener's place is held by
+   * - NEVER throws:  a failure says to look again in `RECHECK_MS`
+   * - SIDE EFFECT:  takes the inbox's listener place when nobody holds it (`listen()`)
    */
-  async run({ once = false }: { once?: boolean } = {}): Promise<number> {
-    for (;;) {
-      const alive = this.poll()
-      if (!alive || once) return 0
-      await sleep(this.epic ? POLL_MS : IDLE_POLL_MS)
-    }
-  }
-
-  /**
-   * One poll:  look the session and its epic up when due, then listen and announce.
-   * - returns `false` once the session is gone (its process ended):  the monitor stops
-   * - NEVER throws
-   */
-  poll(now = Date.now()): boolean {
+  check({ monitor, now = Date.now() }: { monitor?: number; now?: number } = {}): MonitorCheck {
     try {
-      if (now - this.resolvedAt >= RESOLVE_MS) this.resolve(now)
-      if (!this.session) return true
-      if (this.session.pid && !isAlive(this.session.pid)) return false
-      if (this.epic) this.listen(this.epic, now)
+      const session = this.findSession()
+      // not registered yet (a session just starting):  soon again
+      if (!session) return { watch: [], waiting: false, recheckMs: UNFOUND_RECHECK_MS }
+      const pid = session.pid
+      if (pid && !SRV.isProcessAlive(pid)) return { pid, ended: true, watch: [], waiting: false, recheckMs: 0 }
+      const epic = this.epicOf(session)
+      // no epic yet:  its registry record changes as it's titled (and on every turn)
+      if (!epic) return { pid, watch: [this.recordFile(session)], waiting: false, recheckMs: IDLE_RECHECK_MS }
+      return { pid, epic: epic.name, ...this.listen(session, epic, monitor, now) }
     } catch {
-      // a file mid-write, a page being renamed:  the next poll tries again
+      return { watch: [], waiting: false, recheckMs: RECHECK_MS }
     }
-    return true
-  }
-
-  /** Look the session and its epic up again;  a new epic starts its batch afresh. */
-  private resolve(now: number): void {
-    this.resolvedAt = now
-    this.session = this.findSession() ?? this.session
-    const epic = this.session && this.epicOf(this.session)
-    if (epic?.name !== this.epic?.name) {
-      this.waitingPolls = 0
-      this.announced = false
-      this.beatAt = -Infinity
-    }
-    this.epic = epic
   }
 
   /**
-   * Listen to `epic`'s inbox for the session:  take the listener's place when it's free (or ours), stamp the
-   * heartbeat, and announce work waiting.
+   * Listen to `epic`'s inbox for `session`:  take the listener's place when it's free, and say what's waiting.
+   * - another live listener holds it:  nothing to watch until it would go stale
+   *   (a monitor's, with its process:  `RECHECK_MS`)
    */
-  private listen(epic: MonitoredEpic, now: number): void {
-    const id = this.session!.sessionId
+  private listen(session: RunningSession, epic: MonitoredEpic, monitor: number | undefined, now: number): ListenResult {
     const inbox = ReviewInbox.read(epic.inbox)
     const live = inbox.liveListener(now)
-    if (live && live.session !== id) {
-      this.waitingPolls = 0
-      return
+    const mine = live?.session === session.sessionId && Boolean(monitor) && live.pid === monitor
+    if (live && !mine) {
+      const seen = Date.parse(live.seen ?? live.since)
+      const recheckMs = live.pid ? RECHECK_MS : Math.max(seen + LISTEN_STALE_MS - now, 0) + STALE_MARGIN_MS
+      return { watch: [], waiting: false, recheckMs }
     }
     if (!live) {
-      ReviewInbox.update(epic.inbox, (box) => box.setListening(id))
-      this.beatAt = now
-    } else if (now - this.beatAt >= LISTEN_HEARTBEAT_MS) {
-      ReviewInbox.update(epic.inbox, (box) => box.touchListening())
-      this.beatAt = now
+      ReviewInbox.update(epic.inbox, (box) => box.setListening(session.sessionId, undefined, monitor))
     }
     const waiting = inbox.hasWork || epic.guides.hasNewSend
-    this.waitingPolls = waiting ? this.waitingPolls + 1 : 0
-    if (!waiting) this.announced = false
-    if (this.waitingPolls >= SETTLE_POLLS && !this.announced) {
-      this.announced = true
-      this.print(InboxMonitor.notice(epic.name))
+    return {
+      watch: [epic.inbox, ...epic.guides.files],
+      waiting,
+      ...(waiting ? { notice: InboxMonitor.notice(epic.name) } : {}),
+      recheckMs: RECHECK_MS
     }
   }
 
@@ -168,6 +131,11 @@ export class InboxMonitor {
     return [...this.sessions.running().values()].find((session) => mine.has(session.pid))
   }
 
+  /** The file holding `session`'s registry record:  Claude Code rewrites it as the session is titled, and each turn. */
+  private recordFile(session: RunningSession): string {
+    return join(this.sessions.home, "sessions", `${session.pid}.json`)
+  }
+
   ////////////////
   // ## The line
   ////////////////
@@ -185,26 +153,51 @@ export class InboxMonitor {
 export type InboxMonitorProps = {
   /** Claude Code's sessions;  default `new Sessions()` */
   sessions?: Sessions
-  /** where its lines go;  default stdout */
-  print?: (line: string) => void
   /** this session's registry record;  default the running session whose process is an ancestor of this one */
   findSession?: () => RunningSession | undefined
 }
 
+/**
+ * What one look found (`InboxMonitor.check()`), as `epic session listen --json` prints it for the poller
+ * (`InboxPoller`).
+ */
+export type MonitorCheck = {
+  /** the session's process;  absent while its record isn't found */
+  pid?: number
+  /** the session's process has ended:  the poller stops */
+  ended?: true
+  /** the epic listened to;  absent for none */
+  epic?: string
+  /** files whose change calls for another look;  `[]`:  only the clock does */
+  watch: string[]
+  /** work is waiting for the session */
+  waiting: boolean
+  /** the line to print, once per batch, while `waiting` */
+  notice?: string
+  /** look again after this long, ms, whatever changed */
+  recheckMs: number
+}
+
+/** `listen()`'s part of a look. */
+type ListenResult = Pick<MonitorCheck, "watch" | "waiting" | "notice" | "recheckMs">
+
 /** The epic a monitor listens to:  its name, its inbox file, the pages it owns. */
 export type MonitoredEpic = { name: string; inbox: string; guides: GuideSends }
 
-/** How often it polls while it listens to an epic, ms:  a file read, no output. */
-export const POLL_MS = 2_000
+/**
+ * How long until the next look, ms, while nothing changed:  a session titled, a guide linked, another session's
+ * monitor gone.
+ */
+const RECHECK_MS = 5 * 60_000
 
-/** How often it polls while the session has no epic, ms:  only to find one. */
-const IDLE_POLL_MS = 30_000
+/** How long until the next look while the session has no epic, ms:  its record changing looks sooner. */
+const IDLE_RECHECK_MS = 5 * 60_000
 
-/** How often the session's title and folder are looked up again, ms. */
-const RESOLVE_MS = 30_000
+/** How long until the next look while the session isn't found, ms:  Claude Code registers it as it starts. */
+const UNFOUND_RECHECK_MS = 30_000
 
-/** Polls in a row work must wait before it's announced:  a `wait` running in the session takes it first. */
-const SETTLE_POLLS = 2
+/** Past a heartbeat listener's going stale, ms, before looking again:  so it IS stale by then. */
+const STALE_MARGIN_MS = 1_000
 
 /** An epic's name:  lower-kebab-case, as its folder. */
 const EPIC_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/
@@ -215,15 +208,5 @@ function docOf(files: PlanDocFiles, name: string): string | undefined {
     return files.findDoc(name)
   } catch {
     return undefined
-  }
-}
-
-/** Whether process `pid` is running. */
-function isAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
   }
 }

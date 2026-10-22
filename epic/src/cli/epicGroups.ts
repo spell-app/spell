@@ -196,7 +196,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   airplane: [
     {
       name: "status",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "airplane mode on or off, and since when (the default verb)",
       example: "epic airplane"
     },
@@ -228,7 +228,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   worktree: [
     {
       name: "list",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "every running session and the worktree, branch and folder it works in;  then idle worktrees",
       example: "epic worktree list"
     },
@@ -339,9 +339,10 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "listen",
-      usage: "[--once]",
-      description: "keep this session listening to its epic page while it's open:  the plugin's monitor runs it",
-      example: "epic session listen --once"
+      usage: "[--json] [--monitor <pid>]",
+      description:
+        "one look at this session's epic page for it:  listen, say what's waiting (the plugin's monitor runs it)",
+      example: "epic session listen"
     }
   ],
   park: [
@@ -369,7 +370,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   shared: [
     {
       name: "status",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "each checkout's links, and the shared repo's uncommitted files and last commit (the default verb)",
       example: "epic shared status"
     },
@@ -584,7 +585,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "list",
-      usage: "[--json]",
+      usage: "[--json] [--monitor <pid>]",
       description: "every registered repo:  its URL prefix, checkout and content folder",
       example: "epic repo list"
     },

@@ -359,7 +359,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell-kit/blob/ma
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder), so the plugin loads in place |
 | [skills/](skills/) | the seventeen skills, a `SKILL.md` each |
 | [hooks/](hooks/) | `hooks.json` and the nine scripts it runs |
-| [monitors/](monitors/) | `monitors.json`:  the one monitor Claude Code runs beside each session, `epic session listen`, which keeps an epic's session listening to its epic page |
+| [monitors/](monitors/) | `monitors.json`:  the one monitor Claude Code runs beside each session, `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page;  a small poller that runs `epic session listen` for a moment as the page's inbox changes |
 | [bin/epic](bin/epic) | the `epic` command:  its program in [src/cli/](src/cli/), the work its verbs do in [src/command/](src/command/) |
 | [src/](src/) | the code:  the `<epic-*>` elements, the epic tool, the epic server, the docs tools, Epic UI's pages |
 | [tests/](tests/) | its tests, at the same paths as the code;  and the extension's |

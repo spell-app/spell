@@ -69,8 +69,9 @@ import { Worktrees } from "./Worktrees"
  *     the icon its work's state calls for (`workIcon()`)
  *   - `window [pid]`:  the VS Code window id a process runs in (default this session's)
  *   - `transcript <id prefix>`:  another session's prompts, last reply and waiting question
- *   - `listen [--once]`:  keep THIS session listening to its epic page while it's open (`InboxMonitor`), run by the
- *     plugin's monitor;  prints a line only when Owen sent work
+ *   - `listen [--json] [--monitor <pid>]`:  ONE look at THIS session's epic page for it (`InboxMonitor`):  takes the
+ *     listener's place, says what's waiting;  the plugin's monitor (`InboxPoller`) runs it as files change, `--json`,
+ *     its own pid as `--monitor`, which holds the place while it runs
  *   - `--json` (`list`, `find`, `transcript`):  the data instead of lines
  * - Node built-ins only, plus the repo's config:  no spell.
  * - Was `session.py` and `transcript.py`.
@@ -115,7 +116,11 @@ export class Sessions {
       case "listen": {
         // loaded here:  the epic tool's review inbox, which no other verb needs
         const { InboxMonitor } = await import("spell-epic/tool/InboxMonitor")
-        return new InboxMonitor({ sessions: this }).run({ once: Boolean(flags.once) })
+        const monitor = Number(flags.monitor) || undefined
+        const check = new InboxMonitor({ sessions: this }).check({ monitor })
+        if (flags.json) out(JSON.stringify(check))
+        else out(check.notice ?? (check.epic ? `listening to ${check.epic}:  nothing waiting` : "no epic to listen to"))
+        return EXIT.OK
       }
       default:
         throw new EpicCommandError(

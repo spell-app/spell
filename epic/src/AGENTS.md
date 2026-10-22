@@ -332,12 +332,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
-    - `InboxMonitor`:  `epic session listen`, the plugin's MONITOR (`monitors/monitors.json`), one beside every
-      session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
+    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR (`monitors/monitors.json`), one beside
+      every session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
       - the epic:  the session's title, else its worktree;  none, it does nothing
-      - holds the inbox for the session (`setListening()`, its heartbeat) unless another session listens
-      - prints NOTHING while idle (no tokens);  Owen's Send:  one `📬` line, which wakes the session, which takes the
-        work with its own `epic inbox wait`
+      - holds the inbox for the session (`setListening()`, with the monitor's pid:  live while it runs, no heartbeat)
+        unless another listener holds it
+      - says what's waiting, the `📬` line to print, which files to watch, and when to look again
+    - `InboxPoller` (`spell-epic/tool/InboxPoller.mjs`, run by `monitors/listen.mjs`):  the monitor itself (epic
+      `epic-engine` P19)
+      - plain JavaScript, node's own modules only:  bare node, about 45MB a session;  the look, under `tsx`, about
+        150MB, runs for a moment as its own process.  NEVER import TypeScript into it:  node's TypeScript support
+        alone adds about 28MB
+      - looks at start, a few seconds after a watched file changes, and when the last look said to
+      - prints NOTHING while idle (no tokens);  Owen's Send:  the look's `📬` line, once per batch, which wakes the
+        session, which takes the work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
@@ -1339,6 +1347,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Waiting until answered (`epic inbox done <name>#M3`).
   - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
+  - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
+    P19):  live exactly while that process runs, with no heartbeat.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send, Review Now or Do Now with nobody listening wakes it, inside the request:
       `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
