@@ -113,7 +113,7 @@ properties.addRule(PropertyExpression, {
         ["the foo of the bar of the baz", "baz.bar.foo"],
         ["the foo-bar of the baz", "baz.fooBar"],
         { title: "several undeclared words:  not a property read", input: "the foo bar of the baz", js: undefined },
-        { title: "a blacklisted word:  not a loose read", input: "the short of the baz", js: undefined }
+        { title: "a blacklisted word:  not a loose read", input: "the if of the baz", js: undefined }
       ]
     }
   ]

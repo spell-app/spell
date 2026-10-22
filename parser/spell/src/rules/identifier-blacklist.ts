@@ -1,138 +1,32 @@
 import { P } from "$/parser"
 
 /**
- * Blacklist of common english words which may not be used as single-word identifiers.
- * - Shared by `SpellType`, `SpellConstant` and `SpellIdentifier` (all `P.Pattern` subclasses) so e.g.
- *   `if` or `the` can't shadow a keyword by being parsed as a variable/type/constant name.
- * - Grouped into commented categories below (verbs, control keywords, booleans, articles, prepositions,
- *   number words, ordinals) purely for readability -- the map itself is flat.
+ * Words which may never be a one-word name (a variable, type, constant or loose property), so they stay
+ * spell's own words.
+ * - Shared by `SpellType`, `SpellConstant`, `SpellIdentifier` and `Property` (all `P.Pattern` subclasses).
+ * - SLIM on purpose (epic `spanish` P2):  only the words whose removal changes what something compiles to,
+ *   each with the reason.
+ *   - Found by dropping each word in turn and recompiling every rule test and fixture project:
+ *     `identifierBlacklist.analysis.test.ts`, in `tests/spell/src/rules/` (run with `BLACKLIST_ANALYSIS=1`).
+ *   - It held 105 English words before;  the rest changed nothing, as the rules already read their own words first.
+ * - A new word goes in only with a failing test that shows why.
+ * - English only:  a translation brings its own list (epic `spanish` P3).
  */
 export const identifierBlacklist: P.IdentifierBlacklist = {
-  // Common english verbs:
-  are: 1,
-  do: 1,
-  does: 1,
-  contains: 1,
-  has: 1,
-  have: 1,
+  // `bank account is a thing`:  a type's words stop at `is`;  `the last card of the deck` isn't `is` read as a name
   is: 1,
-  repeat: 1,
-  was: 1,
-  were: 1,
-
-  // Special control keywords:
-  else: 1,
+  // `if` as a type, variable or constant would shadow the `if` statement
   if: 1,
-  otherwise: 1,
-  while: 1,
-
-  // Boolean tokens:
-  true: 1,
-  false: 1,
-  yes: 1,
-  no: 1,
-  ok: 1,
-  cancel: 1,
-
-  // articles
-  //   a: 1,      // TODO... ???
-  //   an: 1,
+  // `the foo of the bar`:  `the` starts a read, never names one;  the solitaire fixtures depend on it
   the: 1,
-
-  // English prepositions (from Wikipeda "Preposition"):
-  about: 1,
-  above: 1,
-  after: 1,
-  and: 1,
-  as: 1,
-  at: 1,
-  before: 1,
-  behind: 1,
-  below: 1,
-  beneath: 1,
-  beside: 1,
-  between: 1,
-  beyond: 1,
-  by: 1,
-  defined: 1,
-  //  down: 1,
-  during: 1,
-  each: 1,
-  empty: 1,
-  exactly: 1,
-  except: 1,
-  for: 1,
-  from: 1,
-  greater: 1,
-  I: 1,
+  // `biggest in prices`:  `in` ends the name before the list
   in: 1,
-  into: 1,
-  less: 1,
-  long: 1,
-  me: 1,
-  minus: 1,
-  more: 1,
-  near: 1,
-  not: 1,
+  // `largest of the prices`, `name of`:  `of` ends the name before what it's of
   of: 1,
-  off: 1,
-  on: 1,
-  onto: 1,
-  opposite: 1,
-  or: 1,
-  out: 1,
-  outside: 1,
-  over: 1,
-  short: 1,
-  since: 1,
-  than: 1,
-  then: 1,
-  through: 1,
-  thru: 1,
-  to: 1,
-  toward: 1,
-  towards: 1,
-  undefined: 1,
-  under: 1,
-  underneath: 1,
-  unique: 1,
-  until: 1,
-  //  up: 1,
-  upon: 1,
-  upside: 1,
-  versus: 1,
-  vs: 1,
-  where: 1,
+  // `fire event card click with card = 1`:  `with` starts the event's details
   with: 1,
-  within: 1,
-  without: 1,
-
-  // Number words:
-  one: 1,
-  two: 1,
-  three: 1,
-  four: 1,
-  five: 1,
-  six: 1,
-  seven: 1,
-  eight: 1,
-  nine: 1,
-  ten: 1,
-
-  // Ordinals:
-  first: 1,
-  second: 1,
-  third: 1,
-  fourth: 1,
-  fifth: 1,
-  sixth: 1,
-  seventh: 1,
-  eighth: 1,
-  ninth: 1,
-  tenth: 1
-  //     penultimate: 1,   // TODO... ???
-  //     final: 1,         // TODO... ???
-  //     last: 1,          // TODO... ???
-  //     top: 1,           // TODO... ???
-  //     bottom: 1,        // TODO... ???
+  // `set y to ...`:  `to` starts the value;  a name of several words can't hold it
+  to: 1,
+  // `its "with jokers" is yes or no`:  the choice's words, never a name;  outline-solitaire depends on it
+  no: 1
 }
