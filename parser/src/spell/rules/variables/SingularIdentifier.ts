@@ -1,7 +1,5 @@
-import { type Plurality } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SpellIdentifier } from "./SpellIdentifier"
-import { variables } from "./variables.parser"
 
 /**
  * `singular_identifier` rule:  possibly-unknown variable identifier which MUST be singular, WITHOUT `the`
@@ -16,20 +14,7 @@ export class SingularIdentifier extends SpellIdentifier {
   }
 
   /** Whatever the word, a match of ours IS singular as far as anyone downstream is concerned. */
-  getPlurality(_match: P.MatchFor<this>): Plurality {
+  getPlurality(_match: P.MatchFor<this>): P.Plurality {
     return "singular"
   }
 }
-variables.addRule(SingularIdentifier, {
-  tests: [
-    {
-      tests: [
-        { title: "singular, single word", input: "thing", js: "thing" },
-        { title: "singular, multi-word", input: "bank-account", js: "bankAccount" },
-        { title: "uncountable, matches as singular too", input: "sheep", js: "sheep" },
-        { title: "plural, single word", input: "things", js: undefined },
-        { title: "plural, multi-word", input: "bank-accounts", js: undefined }
-      ]
-    }
-  ]
-})

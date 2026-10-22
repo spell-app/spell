@@ -1,15 +1,19 @@
-import { instanceCase, proto } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { type MethodBody } from "./classes.shared"
 
 /** The words for a literal's type, by its rule, e.g. `a number` for `0` -- see `warnIfAlwaysTheSame()`. */
-const LITERAL_TYPES: Record<string, string> = { number: "a number", text: "text", boolean: "yes or no" }
+/** The type a getter's literal value says, by its rule, as its language's message writes it:  `a number` ... */
+const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
+  number: "example-number",
+  text: "example-text",
+  boolean: "example-yes-or-no"
+}
 
 /**
  * `property_value_getter` rule:  `the value of a card is:` -- defines a property getter whose body is an inline
@@ -50,14 +54,16 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
    */
   private warnIfAlwaysTheSame(match: P.MatchFor<this>): void {
     const body = this.getBody(match)
-    const typeWords = LITERAL_TYPES[`${body?.rule.name}`]
-    if (!body || !typeWords || !SpellStatement.subjectWords(match)) return
+    const literalType = LITERAL_TYPES[`${body?.rule.name}`]
+    if (!body || !literalType || !SpellStatement.subjectWords(match)) return
     const name = match.groups.property.raw
     const { superType } = getKnownType(match.groups.type)
     if (superType && match.scope.getType(superType)?.getMember(`${match.groups.property.value}`)) return
+    const language = SP.Language.of(match.scope)
+    const type = language.parserMessage(literalType)
     SP.SpellWarnings.note(
       match,
-      `${name} is always ${body.inputText.trim()}:  to give it a type, write "${name} is ${typeWords}"`
+      language.parserMessage("always-the-same", { name: `${name}`, value: body.inputText.trim(), type })
     )
   }
 
@@ -124,7 +130,7 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
     const { type, property } = match.groups
     if (match.data.valueKind) {
       const typeAST = P.matchAST<P.ASTTypeExpression>(type)
-      const value = new P.ASTVariableExpression(match, { name: instanceCase(typeAST.name) })
+      const value = new P.ASTVariableExpression(match, { name: P.instanceCase(typeAST.name) })
       return new P.ASTStaticMethod(match, {
         type: typeAST,
         name: `${property.value}`,
@@ -140,109 +146,3 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
     })
   }
 }
-classes.addRule(PropertyValueGetter, {
-  syntax: "the {property:member_words} of (a|an) {type:known_type} is :? {expression_body}?",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.compile("a card is a thing\na pile is a list of cards")
-      },
-      tests: [
-        {
-          input: "the value of a card is:",
-          js: ['Object.defineProperty(Card.prototype, "value", {', "  get() {},", "  configurable: true", "})"],
-          ts: [
-            "export interface Card { readonly value: any /* spell: type unknown */ }",
-            'Object.defineProperty(Card.prototype, "value", {',
-            "  get(this: Card) {},",
-            "  configurable: true",
-            "})"
-          ]
-        },
-        {
-          input: "the value of a card is its name",
-          js: [
-            'Object.defineProperty(Card.prototype, "value", {',
-            "  get() {",
-            "    return this.name",
-            "  },",
-            "  configurable: true",
-            "})"
-          ],
-          ts: [
-            "export interface Card { readonly value: any /* spell: type unknown */ }",
-            'Object.defineProperty(Card.prototype, "value", {',
-            "  get(this: Card) {",
-            "    return this.name",
-            "  },",
-            "  configurable: true",
-            "})"
-          ]
-        },
-        {
-          input: ["the short-name of a card is:", "\treturn the first word of the name of the card"],
-          js: [
-            'Object.defineProperty(Card.prototype, "shortName", {',
-            "  get() {",
-            "    return core.getItemAt(this.name, 0)",
-            "  },",
-            "  configurable: true",
-            "})"
-          ],
-          ts: [
-            "export interface Card { readonly shortName: any /* spell: type unknown */ }",
-            'Object.defineProperty(Card.prototype, "shortName", {',
-            "  get(this: Card) {",
-            "    return core.getItemAt(this.name, 0)",
-            "  },",
-            "  configurable: true",
-            "})"
-          ]
-        },
-        {
-          title: "Show error if both nestedBlock and inlineStatement",
-          input: ["the short-name of a card is its name", "\treturn the first word of the name of the card"],
-          js: [
-            'Object.defineProperty(Card.prototype, "shortName", {',
-            "  get() {",
-            "    return core.getItemAt(this.name, 0)",
-            "  },",
-            "  configurable: true",
-            "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
-          ],
-          ts: [
-            "export interface Card { readonly shortName: any /* spell: type unknown */ }",
-            'Object.defineProperty(Card.prototype, "shortName", {',
-            "  get(this: Card) {",
-            "    return core.getItemAt(this.name, 0)",
-            "  },",
-            "  configurable: true",
-            "})",
-            "/* PARSE ERROR: Got both inline statement and nested block */"
-          ]
-        }
-      ]
-    }
-  ]
-})
-// in an outline body:  `- its "color" is the color of its suit` -- tests in `parserTests/outline.test.ts`
-classes.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_its} {property:quoted_member} is :? {expression_body}?"
-})
-classes.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_its} {property:member_words} is :? {expression_body}?"
-})
-// ... and with the subject left out (P8):  `- "color" is the color of its suit`
-classes.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_implied} {property:quoted_member} (is|are) :? {expression_body}?"
-})
-// ... and a bare name (P9):  `- state is:` + a block, `- name is: its rank + " of " + its suit`
-classes.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_implied} {property:body_member_words} (is|are) :? {expression_body}?"
-})
-// a quoted name in the sentence style (epic page J3, option C):  `the "short name" of a card is: ...`
-classes.addRule(PropertyValueGetter, {
-  syntax: "the {property:quoted_member} of (a|an) {type:known_type} is :? {expression_body}?"
-})

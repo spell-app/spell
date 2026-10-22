@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_remove_ordinal` rule:  remove one item from list by ordinal position,
@@ -20,18 +19,3 @@ export class ListRemoveOrdinal extends SpellStatement<"position|arg|list"> {
     })
   }
 }
-lists.addRule(ListRemoveOrdinal, {
-  syntax: "remove the? {position:ordinal} {arg:singular_identifier} of {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["remove last card of deck", "core.removeItemAt(deck, -1)"],
-        ["remove the first card of the deck", "core.removeItemAt(deck, 0)"]
-      ]
-    }
-  ]
-})

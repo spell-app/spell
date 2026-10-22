@@ -1,7 +1,8 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+
+import { Negatable } from "./Negatable"
 import { SpellExpression } from "./SpellExpression"
-import { expressions } from "./expressions.parser"
 
 /**
  * `there_is_a` rule:  `there is [not] a`/`an {operand}` or `there is no such {operand}`, e.g. `there is a thing`.
@@ -22,32 +23,9 @@ export class ThereIsA extends SpellExpression<"operator|expression"> {
       methodName: "isDefined",
       args: [match.groups.expression.AST as P.ASTExpression]
     })
-    if (operator && typeof operator.value === "string" && operator.value.includes("no")) {
+    if (Negatable.isNegated(operator)) {
       return new P.ASTNotExpression(match, { expression })
     }
     return expression
   }
 }
-expressions.addRule(ThereIsA, {
-  syntax: "there (operator:is not? (a|an)|is no such) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.variables?.add("animal")
-      },
-      tests: [
-        { input: "there is a thing", js: "thing !== undefined" },
-        { input: "there is an animal", js: "animal !== undefined" },
-        { input: "there is not a thing", js: "thing === undefined" },
-        { input: "there is no such animal", js: "animal === undefined" },
-        // an operand:  `and` is the expression's, not the thing's (D23)
-        {
-          input: "there is a thing and animal",
-          js: "(thing !== undefined && animal)"
-        }
-      ]
-    }
-  ]
-})

@@ -2,20 +2,15 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `starts_with` rule:  does list start with some value,
  * e.g. `my-list starts with thing` => `core.startsWith(myList, thing)`.
  * - `Precedence.comparison`, like the other comparisons.
+ * - Negated by its word rule's `negated` forms, e.g. `does not start with` -- see `Negatable`, `starts_with_or_not`.
  */
 export class StartsWith extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.comparison
-
-  /** Negate result for the `does not` / `doesnt` / `doesn't` spellings of `operator`. */
-  shouldNegateOutput(operator: P.Match): boolean {
-    return operator.value.includes("not") || operator.value.includes("doesn")
-  }
   compileASTExpression(
     match: P.Match,
     { lhs, rhs }: { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
@@ -26,22 +21,3 @@ export class StartsWith extends InfixOperatorSuffix<"operator|expression"> {
     })
   }
 }
-lists.addRule(StartsWith, {
-  syntax: "(operator:starts with|does not start with|doesnt start with|doesn't start with) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["my-list starts with thing", "core.startsWith(myList, thing)"],
-        ["[1,2,3] starts with 1", "core.startsWith([1, 2, 3], 1)"],
-        ["[1,2,3] does not start with 10", "!core.startsWith([1, 2, 3], 10)"],
-        ["[1,2,3] doesn't start with 10", "!core.startsWith([1, 2, 3], 10)"],
-        ["[1,2,3] doesnt start with 10", "!core.startsWith([1, 2, 3], 10)"]
-      ]
-    }
-  ]
-})

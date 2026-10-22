@@ -1,6 +1,6 @@
 import type { PropRule } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 // Import directly to avoid circular import
 import { RuleSuggestion } from "./RuleSuggestion"
 
@@ -18,6 +18,8 @@ import { RuleSuggestion } from "./RuleSuggestion"
  *   - on a line of its own (`property_must`):  `- its title must not be empty`
  *   - in the property's own statement (`define_property_has`):  `- it has a title as text, which must not be empty`
  *   - or indented under that statement:  `- it must not be empty`
+ * - Its words that pick the rule are WORD RULES, so it reads what they mean, whatever the language:
+ *   `at_least_or_at_most`, and `url_or_email` (as `type_specifier_text_kind`'s).
  * - Compiles to the rule as data (`PropRule`), the shape Spell UI's form checks read:
  *   `{ type: "minLength", value: "3" }`.
  *   - A pattern is written as typed:  `"^\d+$"` means digits, not `d`s.
@@ -49,10 +51,10 @@ export class MustRule extends P.Sequence<
     return literal
   }
 
-  /** See `ruleOf()`:  worked out from which words matched. */
+  /** See `ruleOf()`:  worked out from which words matched, and what its word rules' words mean. */
   private static readRule(match: P.MatchFor<MustRule>): PropRule {
     const { empty, pattern, bound, count, min, max, limit, kind, suggestion } = match.groups
-    const atLeast = `${bound?.value}`.toLowerCase() === "at least"
+    const atLeast = Wording.meaningOf(bound) === "at_least"
     const rule: PropRule = empty
       ? { type: "empty" }
       : pattern
@@ -63,70 +65,8 @@ export class MustRule extends P.Sequence<
             ? { type: "range", value: `${min.value}..${max.value}` }
             : limit
               ? { type: atLeast ? "minValue" : "maxValue", value: `${limit.value}` }
-              : { type: `${kind?.value}`.toLowerCase() === "url" ? "url" : "email" }
+              : { type: Wording.meaningOf(kind) === "url" ? "url" : "email" }
     if (suggestion?.is(RuleSuggestion)) rule.prompt = RuleSuggestion.promptOf(suggestion)
     return rule
   }
 }
-classes.addRule(MustRule, {
-  syntax: "(empty:not be empty) {suggestion:rule_suggestion}?",
-  tests: [
-    {
-      tests: [
-        ["not be empty", '{ type: "empty" }'],
-        ['not be empty, with suggestion "Give it a name"', '{ type: "empty", prompt: "Give it a name" }']
-      ]
-    }
-  ]
-})
-classes.addRule(MustRule, {
-  syntax: "match {pattern:pattern_text} {suggestion:rule_suggestion}?",
-  tests: [
-    {
-      tests: [
-        ['match "^\\d+$"', '{ type: "regExp", value: "/^\\\\d+$/" }'],
-        [
-          'match "^[a-z]+$" saying "Small letters only"',
-          '{ type: "regExp", value: "/^[a-z]+$/", prompt: "Small letters only" }'
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(MustRule, {
-  syntax: "be (bound:at least|at most) {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
-  tests: [
-    {
-      tests: [
-        ["be at least 3 letters long", '{ type: "minLength", value: "3" }'],
-        ["be at most 140 characters long", '{ type: "maxLength", value: "140" }']
-      ]
-    }
-  ]
-})
-classes.addRule(MustRule, {
-  syntax: "be between {min:number} and {max:number} {suggestion:rule_suggestion}?",
-  tests: [{ tests: [["be between 1 and 5", '{ type: "range", value: "1..5" }']] }]
-})
-classes.addRule(MustRule, {
-  syntax: "be (bound:at least|at most) {limit:number} {suggestion:rule_suggestion}?",
-  tests: [
-    {
-      tests: [
-        ["be at least 18", '{ type: "minValue", value: "18" }'],
-        ["be at most 120", '{ type: "maxValue", value: "120" }']
-      ]
-    }
-  ]
-})
-classes.addRule(MustRule, {
-  syntax: "be (a|an) (kind:email|url) {suggestion:rule_suggestion}?",
-  tests: [
-    {
-      tests: [
-        ["be an email", '{ type: "email" }'],
-        ["be a url", '{ type: "url" }']
-      ]
-    }
-  ]
-})

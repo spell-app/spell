@@ -8,9 +8,9 @@ describe("drawable things' elements", () => {
     core.elementDefiner = undefined
   })
 
-  test("a tag is the project's name made singular, then the class's, kebab-cased", () => {
+  test("a tag is the project's name as written, then the class's, kebab-cased", () => {
     expect(elementTagFor("Solitaire", "Card")).toBe("solitaire-card")
-    expect(elementTagFor("games", "BankAccount")).toBe("game-bank-account")
+    expect(elementTagFor("games", "BankAccount")).toBe("games-bank-account")
     expect(elementTagFor("Todos - Form Based", "Task")).toBe("todos-form-based-task")
     expect(elementTagFor("", "Card")).toBe("spell-card")
   })
@@ -21,7 +21,7 @@ describe("drawable things' elements", () => {
     expect(elementTagFor("My Drawables", "Card")).toBe("my-card")
     expect(elementTagFor("Drawable", "Card")).toBe("spell-card")
     // only the project's:  a class's own name keeps it
-    expect(elementTagFor("Games", "DrawableCard")).toBe("game-drawable-card")
+    expect(elementTagFor("Games", "DrawableCard")).toBe("games-drawable-card")
   })
 
   test("defineElement() names a drawable class's tag as it's declared;  the page hears of it once the class is whole", async () => {
@@ -49,7 +49,7 @@ describe("drawable things' elements", () => {
   test("with no definer, the tag is still named", () => {
     class Card extends Drawable {}
     core.defineElement(Card, "games")
-    expect(core.elementTagOf(new Card())).toBe("game-card")
+    expect(core.elementTagOf(new Card())).toBe("games-card")
   })
 
   test("useElement() keeps the element class compiled TypeScript hands over, for the definer to build on (P10)", () => {

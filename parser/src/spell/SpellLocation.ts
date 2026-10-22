@@ -259,7 +259,7 @@ export class SpellLocation {
    */
   static typeFor(address: string): { projectId: string; type: string; version?: number } {
     const slash = address.lastIndexOf("/")
-    const match = /^([A-Z][\w$]*?)(?:__v(\d+))?$/.exec(address.slice(slash + 1))
+    const match = /^(\p{Lu}[\p{L}\p{M}\d_$]*?)(?:__v(\d+))?$/u.exec(address.slice(slash + 1))
     if (!SpellLocation.isAddress(address) || slash < 0 || !match)
       throw new TypeError(
         `SpellLocation.typeFor('${address}'):  not a type's address, e.g. '@spell/library/people/Person'`
@@ -276,7 +276,7 @@ export class SpellLocation {
    */
   static kebab(name: string): string {
     return name
-      .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+      .replace(/([\p{Ll}\d])(\p{Lu})/gu, "$1-$2")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
@@ -301,7 +301,7 @@ export class SpellLocation {
    * - TODO: do we need to export this?
    */
   static isValidPathSegment(segment: string): boolean {
-    const LEGAL_SEGMENT_PATTERN = /^[\w\d-$. ]+$/
+    const LEGAL_SEGMENT_PATTERN = /^[\p{L}\p{M}\d_$. -]+$/u
     const SEGMENT_BLACKLIST = [".", ".."]
     return typeof segment === "string" && !SEGMENT_BLACKLIST.includes(segment) && LEGAL_SEGMENT_PATTERN.test(segment)
   }

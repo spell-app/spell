@@ -11,7 +11,8 @@ import {
   fixtureDraws,
   fixturePath,
   fixtureProjectNames,
-  fixtureWords
+  fixtureWords,
+  fixtureLanguage
 } from "spell-lang/spell/test"
 
 /**
@@ -19,15 +20,15 @@ import {
  * against the snapshots beside it, in `tests/spaces/@spell/test/<Project>/`:
  * - `<Project>.snapshot.js`:  the javascript (`js/solid` target)
  * - `<Project>.snapshot.declarations.json5`:  its declarations
- * - `<Project>.en.snapshot.js`:  its words
+ * - `<Project>.<lang>.snapshot.js`:  its words, in its language (`cards.en.snapshot.js`, `cartas.es.snapshot.js`)
  * - `<Project>.snapshot.tsx`:  the TypeScript (`ts/solid` target)
  * - `<Project>.snapshot.py`:  the Python (the `py` target)
  *   - only for the fixtures in `PYTHON_FIXTURES`
  * - `<Project>.lib.snapshot.ts`:  as a library (the `ts/lib` target)
  *   - only for the fixtures in `LIBRARY_FIXTURES`
  * - Why beside it:  a change shows up as a diff of a real `.js` or `.py` file, in VS Code's Source Control.
- * - New fixture:  copy a project into `tests/spaces/@spell/test/`, then `yarn test:fixtures:bless` writes its snapshot.
- * - Changed on purpose:  `yarn test:fixtures:bless`, then read the diff before committing it.
+ * - New fixture:  copy a project into `tests/spaces/@spell/test/`, then `yarn spell:test:fixtures:bless` writes its snapshot.
+ * - Changed on purpose:  `yarn spell:test:fixtures:bless`, then read the diff before committing it.
  * - See `compiledFixture()` for what's in each.
  */
 describe("fixture projects compile to their snapshots", () => {
@@ -44,9 +45,11 @@ describe("fixture projects compile to their snapshots", () => {
     })
 
     // its words, by the names its javascript uses -- see `SP.SpellWords`.
-    // `.en.snapshot.js`:  ending as a snapshot does keeps it out of the fixture's files, in the app.
+    // `.<lang>.snapshot.js`:  ending as a snapshot does keeps it out of the fixture's files, in the app.
     test(`${name}'s words`, async () => {
-      await expect(fixtureWords(name)).toMatchFileSnapshot(fixturePath(name, `${name}.en${SP.SNAPSHOT_JS_SUFFIX}`))
+      await expect(fixtureWords(name)).toMatchFileSnapshot(
+        fixturePath(name, `${name}.${fixtureLanguage(name)}${SP.SNAPSHOT_JS_SUFFIX}`)
+      )
     })
 
     // the `ts/solid` target's, `tsc`-checked by `typescript.test.ts`

@@ -6,9 +6,11 @@
  *   name, e.g. `as either red or black` / `as a number` / `as a new thing` / `as yes or no`.
  * - `the_property_of_a_thing` / `a_things_property` are the two `type_property` spellings shared by
  *   `property_value_either` / `property_value_getter`.
- * - One rule per file, each registering itself on `classes` (`classes.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `classes.en.ts` registers them on `classes` (`classes.parser.ts`),
+ *   and each other language's `classes.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./classes.parser"
 export * from "./classes.shared"

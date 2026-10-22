@@ -2,20 +2,19 @@
  * Types and helpers several of the `classes` module's rule files share:
  * - the `ScopeVariable` fields an enumerated property sets
  * - `MethodBody`:  a getter's or method's body
- * - `placeholderData()` and `QuotedPropertyFormulaBits`:  what `quoted_property_formula` and the
- *   `QuotedPropertyRule` it makes both work with
+ * - `placeholderData()` and `QuotedPropertyFormulaBits`:
+ *   what `quoted_property_formula` and the `QuotedPropertyRule` it makes both work with
  */
-import { pluralize, singularize } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 
 /**
- * Ad-hoc fields this module sets/reads on `ScopeVariable` (src/parser/scope/ScopeVariable.ts), for a property
- * defined `as one of a, b, c` (see `define_property_has`).  Not covered by `P.ScopeVariableProps`, and
- * only used in this module, so augmented locally.
+ * Ad-hoc fields this module sets and reads on `P.ScopeVariable`,
+ * for a property defined `as one of a, b, c` (see `define_property_has`).
+ * - Augmented here:  `P.ScopeVariableProps` doesn't cover them, and only this module uses them.
  */
 declare module "spell-lang/parser/scope/ScopeVariable" {
-  // NOTE: MUST stay an `interface` -- module augmentation merges into the declared `ScopeVariable`,
-  // and `type` cannot merge.  Documented exception to the "always use `type`" rule.
+  // NOTE: MUST stay an `interface`:  module augmentation merges into the declared `ScopeVariable`,
+  // and a `type` can't merge.  A documented exception to the "always use `type`" rule.
   interface ScopeVariable {
     /** Raw enumerated values (as parsed), e.g. `["'clubs'", "'diamonds'", ...]` or `[1, 2, 3]`. */
     enumeration?: Array<string | number>
@@ -37,8 +36,8 @@ export function placeholderData(
   values: Array<string | number>,
   kind?: string
 ): QuotedPropertyFormulaBits["ruleData"][number] {
-  const isSingular = singularize(instanceVar) === instanceVar
-  const inflector = isSingular ? singularize : pluralize
+  const isSingular = P.singularize(instanceVar) === instanceVar
+  const inflector = isSingular ? P.singularize : P.pluralize
   const enumeration = values.map((value) =>
     typeof value === "string" ? inflector(value.replace(/^'(.*)'$/, "$1")) : value
   )

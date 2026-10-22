@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `as_lowercase` rule:  `as lower case`/`lowercase` postfix, e.g. `"foo" as lower case`.
@@ -19,15 +18,3 @@ export class AsLowercase extends PostfixOperatorSuffix {
     })
   }
 }
-expressions.addRule(AsLowercase, {
-  syntax: "as (lower case|lowercase)",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        [`"foo" as lower case`, '"foo".toLocaleLowerCase()'],
-        [`1 as lowercase`, `core.lowerCase(1)`]
-      ]
-    }
-  ]
-})

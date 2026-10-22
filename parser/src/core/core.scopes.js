@@ -52,6 +52,11 @@
       description: "What names it among the others of its kind, e.g. `the id of the person`.\n- Every thing and list has one:  nobody declares it, and a type can't declare its own.\n- Made up the first time it's read, e.g. `person-k3x9q2mf`, unless you set it first:\n  `a new person with id = \"owen\"`, or `set the id of the person to \"owen\"`.\n- Saving uses it:  a thing saved in its own file is referred to by it."
     },
     {
+      path: "type:List/property:name",
+      detail: "text",
+      description: "What it's called, e.g. `the name of the pile` -- nothing until it's given one.\n- Give it one when it's made, `a new pile with name = \"stock\"`, or later, `set the name of the pile to \"stock\"`.\n- Every list has one, built in, but a type may still say so:  `a pile has a name as text`.\n- One list by its name:  `tableau T1` is the tableau named `T1`."
+    },
+    {
       path: "type:List/property:length",
       detail: "number",
       description: "How many items it has, e.g. `the length of the deck`.\n- ~== `the size of the deck`, `the number of cards in the deck`."
@@ -65,53 +70,41 @@
       path: "type:List/method:(a list) can give up (a thing)",
       description: "Would it let go of a thing moving elsewhere, e.g. `if the stock can give up the card`?\n- Yes, unless its type says otherwise:  `a stock-pile can give up a card if: the card is its last card`,\n  or `a foundation can never let go of a card`.\n- `release`, `remove` and `let go of` mean the same.\n- Only `move` asks.  `remove` and `empty` never do.",
       rules: [
-        { name: "can_give_up", syntax: "{operator:can} (release|remove|give up|let go of) {expression:operand}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) (verb:add|take) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_it} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_it} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can (never:never) (verb:add|take) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) (verb:add|take) (a|an) {item:type}" }
+        { name: "can_give_up", syntax: "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" }
       ]
     },
     {
       path: "type:List/method:(a list) can take (a thing)",
       description: "Would it take a thing moving to it, e.g. `if the tableau can take the card`?\n- Yes, unless its type says otherwise:  `a tableau can take a card if: ...`, answering yes or no.\n- `add` means the same.\n- Only `move` asks.  `add` never does.",
       rules: [
-        { name: "can_take", syntax: "{operator:can} (add|take) {expression:operand}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) (verb:add|take) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_it} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_it} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_it} can (never:never) (verb:add|take) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}" },
-        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) (verb:add|take) (a|an) {item:type}" }
+        { name: "can_take", syntax: "{operator:can_or_cannot} (add|take) {expression:operand}" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" },
+        { name: "list_guard", syntax: "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?" },
+        { name: "list_guard", syntax: "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}" }
       ]
     },
     {
       path: "type:List/method:(a list) has items where",
       description: "Does ANY item pass a test?  e.g. `the deck has cards where the card is an ace`.\n- `has no ...` for none of them.",
       rules: [
-        { name: "list_membership_test", syntax: "(operator:has|has no|doesnt have|does not have) {arg:plural_identifier} where {inline_expression}?" }
+        { name: "list_membership_test", syntax: "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?" }
       ]
     },
     {
       path: "type:List/method:(a list) starts with (a thing)",
       description: "Is `thing` its first item, e.g. `the pile starts with the king`?\n- `ends with` for its last.\n- `does not start with` etc for the opposite.",
       rules: [
-        { name: "starts_with", syntax: "(operator:starts with|does not start with|doesnt start with|doesn't start with) {expression:operand}" },
-        { name: "ends_with", syntax: "(operator:ends with|does not end with|doesnt end with|doesn't end with) {expression:operand}" }
+        { name: "starts_with", syntax: "{operator:starts_with_or_not} {expression:operand}" },
+        { name: "ends_with", syntax: "{operator:ends_with_or_not} {expression:operand}" }
       ]
     },
     {
@@ -133,10 +126,10 @@
       path: "type:List/method:add (a thing) to (a list)",
       description: "Add `thing` to the end -- or wherever you say:\n- `add the card to the deck`, or `... to the end of the deck`\n- `add the card to the start of the deck`, or `prepend the card to the deck`\n- `add the card to the deck before the ace` (at the start if the ace isn't in it;  `after`:  at the end)",
       rules: [
-        { name: "list_add", syntax: "add {thing:expression} to (the (method:start|front|top|end|back|bottom) of)? {list:expression}" },
+        { name: "list_add", syntax: "add {thing:expression} to (the {method:list_end} of)? {list:expression}" },
         { name: "list_prepend", syntax: "prepend {thing:expression} to {list:expression}" },
         { name: "list_append", syntax: "append {thing:expression} to {list:expression}" },
-        { name: "list_add_relative", syntax: "add {thing:expression} to {list:expression} (operator:before|after) {item:expression}" }
+        { name: "list_add_relative", syntax: "add {thing:expression} to {list:expression} {operator:before_or_after} {item:expression}" }
       ]
     },
     {

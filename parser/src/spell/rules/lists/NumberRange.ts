@@ -1,5 +1,4 @@
 import { P } from "spell-lang/parser"
-import { lists } from "./lists.parser"
 
 /**
  * `number_range` rule:  whole numbers from one to another, e.g. `2 ... 10` in `ace, 2 ... 10, jack, queen or king`
@@ -27,18 +26,6 @@ export class NumberRange extends P.Sequence<"start|end"> {
     return new P.ASTListExpression(match, { items })
   }
 }
-lists.addRule(NumberRange, {
-  syntax: "{start:number} ... {end:number}",
-  tests: [
-    {
-      tests: [
-        ["2 ... 4", "[2, 3, 4]"],
-        ["4 ... 2", undefined],
-        ["1.5 ... 3", undefined]
-      ]
-    }
-  ]
-})
 
 /** Most numbers a `number_range` spells out. */
 const MAX_RANGE = 1000

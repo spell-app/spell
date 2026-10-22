@@ -46,12 +46,7 @@ class Chip extends Thing {
 class Stack extends List<Chip> {
   static instanceType = Chip
   static exclusive = true
-  get name() {
-    return this.getProp("name")
-  }
-  set name(value) {
-    this.setProp("name", value)
-  }
+  // its `name`:  every list's, built in (epic `spanish` P15)
 }
 
 class Table extends Thing {

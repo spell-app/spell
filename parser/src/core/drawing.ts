@@ -260,7 +260,6 @@ function drawingFailed(thing: object, error: unknown): Drawing | null {
   if (target && !target.dispatchEvent(event)) return null
   const message = error instanceof Error ? error.message : String(error)
   // made NOW, as `madeOnce()` makes a drawing:  the boundary shows the stand-in once, as it is
-  return madeOnce(
-    h("span.spell-draw-error", { title: message, role: "alert" }, `⚠ ${type} can't draw`) as unknown as Drawing
-  )
+  const standIn = core.message("cant-draw", { type })
+  return madeOnce(h("span.spell-draw-error", { title: message, role: "alert" }, standIn) as unknown as Drawing)
 }

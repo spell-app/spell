@@ -2,13 +2,13 @@ import { isNode } from "browser-or-node"
 
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { Negatable } from "spell-lang/spell/rules/expressions"
-import { SubjectImplied } from "spell-lang/spell/rules/types"
+import { SP } from "spell-lang/spell"
+import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
+import { SubjectImplied, SubjectRule } from "spell-lang/spell/rules/types"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 import { MethodDefinition } from "./MethodDefinition"
-import { methods } from "./methods.parser"
 import type { MethodSignatureData } from "./methods.shared"
 
 /**
@@ -62,11 +62,11 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
       if (QuotedTypeExpression.isPropertySlip(scope, tokens)) {
         const whole = match.clone({ matched: tokens, tokens: [...tokens] })
         const name = (tokens[1] as P.TextToken).innerText
-        return SpellStatement.refuse(whole, `A property starts "its":  write its "${name}" is ...`)
+        return SpellStatement.refuse(whole, SP.Language.of(scope).parserMessage("property-starts-its", { name }))
       }
       if (QuotedTypeExpression.isBodiless(match, tokens)) {
         const phrase = match.groups.signature.inputText.trim()
-        return SpellStatement.refuse(match, `${phrase} has no body:  write ${phrase} always, or ${phrase} if ...`)
+        return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("phrase-without-body", { phrase }))
       }
     }
     return match
@@ -85,7 +85,7 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
   }
 
   /**
-   * Is `match` a property, not a phrase:  its subject left out, then `is` or `are` after the quoted name?
+   * Is `match` a property, not a phrase:  its subject left out, then `is` or `are` (`is_or_are`) after the quoted name?
    * - e.g. `- "color" is red if ...` or `- "short name" is: ...` in an outline body (epic page `outline-spell`, P8)
    * - Not ours:  the property rules take it, as they take `its "color" is ...`.
    *   We'd outrank them (`Priority.belowDeclaration`), and take the quoted name alone.
@@ -93,25 +93,36 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
   private static isPropertyWithoutSubject(match: P.MatchFor<QuotedTypeExpression>, tokens: P.Token[]): boolean {
     if (!match.groups.type.is(SubjectImplied)) return false
     const lastOfSignature = match.groups.signature.tokens.at(-1)
-    const next = tokens[tokens.indexOf(lastOfSignature!) + 1]
-    return /^(is|are)$/i.test(`${next?.value}`)
+    return Wording.lengthAt(match.scope, "is_or_are", tokens, tokens.indexOf(lastOfSignature!) + 1) > 0
   }
 
   /**
    * Is `tokens` a property written with `it` for `its` in an outline body, e.g. `- it "rank" is a number`
    * (epic page `outline-spell`, todo T3)?
-   * - `it`, a quoted member name (no verb, so not a phrase like `"is face up"`), then `is`.
+   * - `it` (`subject_it`), a quoted member name (no verb, so not a phrase like `"is face up"`), then `is`
+   *   (`is_or_is_not`, not negated).
    * - Refused, saying so:
    *   read as a phrase, it'd make an empty `get rank() {}`, and say only "Don't understand `a number`".
    */
   private static isPropertySlip(scope: P.Scope, tokens: P.Token[]): boolean {
     const [subject, name, is] = tokens
     return (
-      `${subject?.value}`.toLowerCase() === "it" &&
+      SubjectRule.reads(scope, "subject_it", subject) &&
       !!name &&
       !!scope.getRuleOrDie("quoted_member").test(scope, [name]) &&
-      `${is?.value}`.toLowerCase() === "is"
+      !!is &&
+      Wording.reads(scope, "is_or_is_not", `${is.value}`.toLowerCase())
     )
+  }
+
+  /**
+   * The words naming `type`, as a signature's `instanceType` holds them, e.g. `card`, `stock pile`.
+   * - As written, unless they're a language's word for another type:  Spanish's `cosa` is `thing`, its type's own name.
+   */
+  private static instanceTypeOf(type: P.Match): string | undefined {
+    const { scopeType } = type.data as { scopeType?: P.TypeScope }
+    if (scopeType && type.raw && P.typeCase(type.raw) !== type.value) return scopeType.instanceName
+    return type.raw
   }
 
   /**
@@ -134,7 +145,7 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
     signature: MethodSignatureData,
     scope: P.Scope
   ): MethodSignatureData {
-    signature.instanceType = groups.type.raw
+    signature.instanceType = QuotedTypeExpression.instanceTypeOf(groups.type)
     if (signature.args.length === 0) {
       signature.asPostfixExpression = true
       // a value kind's phrase:  its static method -- see `MethodSignatureData.valueKindOf`
@@ -147,336 +158,35 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
       // TODO: we don't handle this currently...
       // signature.syntaxBits.unshift("{thisArg:operand}")
     }
-    // FIRST negatable word, e.g. `is`, matches all its forms, e.g. `isn't` -- see `Negatable`
+    // FIRST negatable word, e.g. `is`, matches all its forms, e.g. `isn't`, in the parser's language;
+    // `is a` + a word matches `are not a` too, e.g. `cards which are not a face card` -- see `Negatable`
     if (signature.asPostfixExpression || signature.asInfixExpression) {
-      const rules = scope.parser?.rules
-      let foundOne = false
-      signature.syntaxBits = signature.syntaxBits.map((bit) => {
-        if (foundOne || !(rules?.[bit] instanceof Negatable)) return bit
-        foundOne = true
-        return `{operator:${bit}}`
-      })
+      signature.syntaxBits = negatableSyntaxBits(scope, signature.syntaxBits)
     }
     // console.warn(signature)
     return signature
   }
 }
-methods.addRule(QuotedTypeExpression, {
-  syntax: "(a|an) {type:singular_type} {signature:quoted_method_signature} (if|is)? :? {expression_body}?",
-  tests: [
-    {
-      title: "fails if",
-      compileAs: "block",
-      tests: [
-        {
-          title: "signature is empty",
-          input: `a thing "" if`,
-          js: `/* PARSE ERROR: Don't understand "a thing "" if" */`
-        },
-        {
-          title: "signature doesn't start with a keyword",
-          input: `a thing "(thing)" if`,
-          js: `/* PARSE ERROR: Don't understand "a thing "(thing)" if" */`
-        },
-        {
-          title: "more than one arg specified",
-          input: `a thing "(thing) but (thing)" if`,
-          js: `/* PARSE ERROR: Don't understand "a thing "(thing) but (thing)" if" */`
-        }
-      ]
-    },
-    {
-      title: "no args, no negatables",
-      compileAs: "block",
-      tests: [
-        {
-          title: "no body",
-          input: [`a thing "nerds out" if`, `if a new thing nerds out`],
-          js: [
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get() {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly nerdsOut: any /* spell: type unknown */ }",
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get(this: Thing) {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ]
-        },
-        {
-          title: "no if",
-          input: [`a thing "nerds out": never`, `if a new thing nerds out`],
-          js: [
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get() {",
-            "    return false",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly nerdsOut: boolean }",
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get(this: Thing) {",
-            "    return false",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ]
-        },
-        {
-          title: "inline expression",
-          input: [`a thing "nerds out" if yes`, `if a new thing nerds out`],
-          js: [
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get() {",
-            "    return true",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly nerdsOut: boolean }",
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get(this: Thing) {",
-            "    return true",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ]
-        },
-        {
-          title: "indented method body",
-          input: [`a thing "nerds out" if`, `\treturn yes`, `if a new thing nerds out`],
-          js: [
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get() {",
-            "    return true",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly nerdsOut: boolean }",
-            'Object.defineProperty(Thing.prototype, "nerdsOut", {',
-            "  get(this: Thing) {",
-            "    return true",
-            "  },",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).nerdsOut) {}"
-          ]
-        }
-      ]
-    },
-    {
-      title: "one arg",
-      compileAs: "block",
-      tests: [
-        {
-          title: "no body",
-          input: [`a thing "nerds out with (another as a thing)" if`, `if a new thing nerds out with a new thing`],
-          js: [
-            "Thing.prototype.nerdsOutWithAnother = function (another) {}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ],
-          ts: [
-            "export interface Thing { nerdsOutWithAnother(another: Thing): any /* spell: type unknown */ }",
-            "Thing.prototype.nerdsOutWithAnother = function (this: Thing, another: Thing) {}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ]
-        },
-        {
-          title: "inline expression",
-          input: [`a thing "nerds out with (another as a thing)" if yes`, `if a new thing nerds out with a new thing`],
-          js: [
-            "Thing.prototype.nerdsOutWithAnother = function (another) {",
-            "  return true",
-            "}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ],
-          ts: [
-            "export interface Thing { nerdsOutWithAnother(another: Thing): boolean }",
-            "Thing.prototype.nerdsOutWithAnother = function (this: Thing, another: Thing) {",
-            "  return true",
-            "}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ]
-        },
-        {
-          title: "indented method body",
-          input: [
-            `a thing "nerds out with (another as a thing)" if`,
-            `\treturn yes`,
-            `if a new thing nerds out with a new thing`
-          ],
-          js: [
-            "Thing.prototype.nerdsOutWithAnother = function (another) {",
-            "  return true",
-            "}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ],
-          ts: [
-            "export interface Thing { nerdsOutWithAnother(another: Thing): boolean }",
-            "Thing.prototype.nerdsOutWithAnother = function (this: Thing, another: Thing) {",
-            "  return true",
-            "}",
-            "if ((new Thing()).nerdsOutWithAnother(new Thing())) {}"
-          ]
-        }
-      ]
-    },
-    {
-      title: "negatables",
-      compileAs: "block",
-      tests: [
-        {
-          title: "is",
-          input: [
-            `a thing "is a bug" if`,
-            `if a new thing is a bug`,
-            `if a new thing is not a bug`,
-            `if a new thing isnt a bug`,
-            `if a new thing isn't a bug`
-          ],
-          js: [
-            'Object.defineProperty(Thing.prototype, "isABug", {',
-            "  get() {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly isABug: any /* spell: type unknown */ }",
-            'Object.defineProperty(Thing.prototype, "isABug", {',
-            "  get(this: Thing) {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}",
-            "if (!(new Thing()).isABug) {}"
-          ]
-        },
-        {
-          title: "can",
-          input: [
-            `a thing "can play" if`,
-            `if a new thing can play`,
-            `if a new thing cannot play`,
-            `if a new thing can not play`,
-            `if a new thing cant play`,
-            `if a new thing can't play`
-          ],
-          js: [
-            'Object.defineProperty(Thing.prototype, "canPlay", {',
-            "  get() {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly canPlay: any /* spell: type unknown */ }",
-            'Object.defineProperty(Thing.prototype, "canPlay", {',
-            "  get(this: Thing) {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}",
-            "if (!(new Thing()).canPlay) {}"
-          ]
-        },
-        {
-          title: "will",
-          input: [
-            `a thing "will blow up" if`,
-            `if a new thing will blow up`,
-            `if a new thing will not blow up`,
-            `if a new thing wont blow up`,
-            `if a new thing won't blow up`
-          ],
-          js: [
-            'Object.defineProperty(Thing.prototype, "willBlowUp", {',
-            "  get() {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly willBlowUp: any /* spell: type unknown */ }",
-            'Object.defineProperty(Thing.prototype, "willBlowUp", {',
-            "  get(this: Thing) {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}",
-            "if (!(new Thing()).willBlowUp) {}"
-          ]
-        },
-        {
-          title: "has",
-          input: [
-            `a thing "has a friend" if`,
-            `if a new thing has a friend`,
-            `if a new thing does not have a friend`,
-            `if a new thing doesnt have a friend`,
-            `if a new thing doesn't have a friend`
-          ],
-          js: [
-            'Object.defineProperty(Thing.prototype, "hasAFriend", {',
-            "  get() {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}"
-          ],
-          ts: [
-            "export interface Thing { readonly hasAFriend: any /* spell: type unknown */ }",
-            'Object.defineProperty(Thing.prototype, "hasAFriend", {',
-            "  get(this: Thing) {},",
-            "  configurable: true",
-            "})",
-            "if ((new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}",
-            "if (!(new Thing()).hasAFriend) {}"
-          ]
-        }
-      ]
-    }
-  ]
-})
-// in an outline body:  `- it "is face up" if its direction is up` -- tests in `parserTests/outline.test.ts`
-methods.addRule(QuotedTypeExpression, {
-  syntax: "{type:subject_it} {signature:quoted_method_signature} (if|is)? :? {expression_body}?"
-})
-// ... and with the subject left out (P8):  `- "is face up" if its direction is up`
-// - NOT `is`:  `- "suit" is ...` is a property, as `its "suit" is ...` -- see `isPropertyWithoutSubject()`
-methods.addRule(QuotedTypeExpression, {
-  syntax: "{type:subject_implied} {signature:quoted_method_signature} if? :? {expression_body}?"
-})
+
+/**
+ * A phrase's syntax bits with its first negatable word as an `{operator:<rule>}`, e.g. `is a face card` =>
+ * `{operator:is_or_is_not_a} face card`, so it matches `isn't a face card` and `are not a face card` too.
+ * - The longest reading wins:  the first TWO words (`is a`) before the first one (`is`) -- `Negatable.ruleReading()`.
+ * - Words, not rule names:  `es` in Spanish reads as `is_or_is_not` just as `is` does in English.
+ * - Only the first:  `is face up if ...` keeps the rest as written.
+ */
+export function negatableSyntaxBits(scope: P.Scope, bits: string[]): string[] {
+  for (let index = 0; index < bits.length; index++) {
+    const bit = bits[index]!
+    if (bit.startsWith("{") || bit.startsWith("(")) continue
+    const next = bits[index + 1]
+    const pair =
+      next && !next.startsWith("{") && !next.startsWith("(")
+        ? Negatable.ruleReading(scope, `${bit} ${next}`)
+        : undefined
+    if (pair) return [...bits.slice(0, index), `{operator:${pair}}`, ...bits.slice(index + 2)]
+    const single = Negatable.ruleReading(scope, bit)
+    if (single) return [...bits.slice(0, index), `{operator:${single}}`, ...bits.slice(index + 1)]
+  }
+  return bits
+}

@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `inline_whitespace` rule:  inline whitespace only, e.g. spaces/tabs between tokens on same line.
@@ -15,4 +14,3 @@ export class InlineWhitespace extends P.TokenType {
     return new P.ASTStringLiteral(match, { value: assert.string(value), raw })
   }
 }
-core.addRule(InlineWhitespace)

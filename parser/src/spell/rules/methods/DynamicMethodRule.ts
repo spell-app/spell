@@ -148,7 +148,7 @@ export class DynamicMethodRule extends SpellStatement<"thisArg?|callArgs[]?|prop
   theOnlyOne(scope: P.Scope): P.ScopeVariable | undefined {
     const type = scope.getType(this.thisType)
     if (!type) return undefined
-    const name = type.name.replace(/(?<=[a-z0-9])(?=[A-Z])/g, "_").toLowerCase()
+    const name = type.name.replace(P.CAMEL_WORD_BOUNDARY, "_").toLowerCase()
     const variable = scope.variables?.get(name)
     return variable?.kind === "only" && variable.datatype === type.name ? variable : undefined
   }

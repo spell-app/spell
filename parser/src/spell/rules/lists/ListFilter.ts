@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**
@@ -34,26 +33,3 @@ export class ListFilter extends SpellExpression<"arg|list|body?"> {
     })
   }
 }
-lists.addRule(ListFilter, {
-  syntax: "the? {arg:plural_identifier} (in|of) {list:expression} where {inline_expression}?",
-  tests: [
-    {
-      compileAs: "expression",
-      showAll: true,
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-      },
-      tests: [
-        [`words in "a word list" where`, 'core.filter("a word list", () => {})'],
-        [
-          `words in "a word list" where word starts with "a"`,
-          'core.filter("a word list", (word) => core.startsWith(word, "a"))',
-          'core.filter("a word list", (word: string) => core.startsWith(word, "a"))'
-        ],
-        ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
-        ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],
-        ["the items in my-list where its id > 1", "core.filter(myList, (item) => item.id > 1)"]
-      ]
-    }
-  ]
-})

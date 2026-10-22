@@ -16,6 +16,8 @@
   - a blank line, then the JSON on one line
   - after `--page`'s HTML, if both
   - nothing when it failed
+- `--words`:  the program's words file, e.g. `cartas.py.es.json5`:  its tests print in its language (epic spanish, P12).
+  Without it, English.
 - The program's own folder is first on the import path:
   another project it imports (`from cards import Card`) sits beside it.
 """
@@ -40,7 +42,10 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--no-pauses", action="store_true", help="don't wait at a pause, e.g. in a test run")
     parser.add_argument("--page", action="store_true", help="print what the program drew, as HTML, when it ends")
     parser.add_argument("--state", action="store_true", help="print its state, as JSON by id, when it ends")
+    parser.add_argument("--words", help="the program's words file, e.g. cartas.py.es.json5, for its language")
     args = parser.parse_args(argv)
+    if args.words:
+        core.load_words(args.words)
     names = run_program(args.program, seed=args.seed, pauses=not args.no_pauses)
     if args.page:
         print_page()

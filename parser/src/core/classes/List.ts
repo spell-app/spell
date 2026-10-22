@@ -57,6 +57,17 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
 
   static {
     this.declareProp("id", ID_PROP)
+    this.declareProp("name", { type: "text" })
+    // `name`'s getter / setter, on the prototype, not in the class body:  see `List.name`, below the class
+    Object.defineProperty(this.prototype, "name", {
+      get(this: List) {
+        return this.getProp<string | undefined>("name")
+      },
+      set(this: List, name: string | undefined) {
+        this.setProp("name", name)
+      },
+      configurable: true
+    })
   }
 
   /**
@@ -653,6 +664,21 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   [Symbol.iterator](): Iterator<T> {
     return [...this.items][Symbol.iterator]()
   }
+}
+
+/** `List`'s members declared beside it, for TypeScript:  see each one. */
+export interface List<T = unknown> {
+  /**
+   * What it's called, e.g. `"stock"` -- `undefined` until given one (epic `spanish` P15).
+   * - Every list has one, built in:  compiled spell's `the name of the pile` (Spanish's `el nombre de la pila`).
+   * - Set it as it's made, `new Pile({ name: "stock" })`, or later.
+   * - A reactive prop, declared as text (`declareProp()`), its getter / setter put on the prototype as the class is made.
+   * - Declared HERE, not in the class body:  so a sub-class may declare it again, as text --
+   *   `a pile has a name as text`, compiled to `@prop({ type: "text" }) accessor name!: string`.
+   *   A getter / setter in the class body would make that a TypeScript error (TS2612).
+   * - Finds one list by name:  `tableau T1` -- see `thingNamed()`.
+   */
+  name: string | undefined
 }
 
 /**

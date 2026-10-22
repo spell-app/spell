@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { types } from "./types.parser"
 import { SubjectRule } from "./SubjectRule"
 
 /**
@@ -35,4 +34,3 @@ export class SubjectImplied extends SubjectRule {
     return match
   }
 }
-types.addRule(SubjectImplied)

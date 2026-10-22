@@ -13,8 +13,11 @@ import { loadFixtureProject, parseSpellProject, summarize, type SpellSourceFile 
  * - `code`:  that, markers out, as its `<Project>.spell.js`
  * - `declarations`:  as its `<Project>.declarations.json5`, read back as another project would
  */
-function compiledProject(files: SpellSourceFile[], options: { version?: string; exports?: string[] } = {}) {
-  const { scope, files: parsed } = parseSpellProject(files)
+function compiledProject(
+  files: SpellSourceFile[],
+  options: { version?: string; exports?: string[]; parentScope?: P.Scope } = {}
+) {
+  const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
   const marked = SP.SpellProject.combineCompiled(parts)
   const { code, declarations } = SP.SpellDeclarations.split(marked, scope, options)
@@ -147,25 +150,15 @@ describe("SpellDeclarations.importScope()", () => {
   test("the app compiles the same against the library's declarations as against its sources", () => {
     const fromSources = summarize(parseSpellProject(all)).filter(({ path }) => path === "/Solitaire.spell")
     const fromDeclarations = summarize(parseSpellProject(app, { parentScope: importLibrary() }))
-    // bar two things.  `set the name of cards-to-move to ...` declares a pile's `name`
-    // only on a type the project declares itself (see `AssignmentStatement.declareProperty()`),
-    // and so only there asks what it is.  Its declaration:  the comment, the spell that set it, then its five lines
-    const autoDeclared =
-      /\/\*! SPELL: DECLARES \{\n {2}property: "name", of: "Pile", autoDeclared: true,\n.*\n\} \*\/\n\/\/ set .*\n(.*\n){5}/
-    const asksWhatItIs = /Say what "name" is/
-    // And a member read its type never declares warns only where the type is the project's own, never an import's:
-    // the importer may give it anything -- see `MemberReadExpression.warnIfUndeclared()`
+    // The same, bar one thing:  a member read its type never declares warns only where the type is the project's
+    // own, never an import's -- the importer may give it anything (see `MemberReadExpression.warnIfUndeclared()`).
+    // - A pile's `name` is no longer a second:  every list has one, built in (epic `spanish` P15),
+    //   so `set the name of cards-to-move to ...` declares nothing, from sources or declarations.
     const neverSays = /A pile never says it has a droppable/
-    expect(fromSources[0]!.compiled).toMatch(autoDeclared)
-    expect(fromSources[0]!.warnings).toContainEqual(expect.stringMatching(asksWhatItIs))
     expect(fromSources[0]!.warnings).toContainEqual(expect.stringMatching(neverSays))
-    // and so, from its sources, a foundation's `name` is the pile's, of no known kind:  `==`.
-    // From the library's declarations, which don't have it, it's what every foundation is given, text:  `===` (P19)
-    const nameKnown = (code: string) => code.replace(/this\.name == ("\w+")/g, "this.name === $1")
     const withoutIt = fromSources.map((it) => ({
       ...it,
-      compiled: it.compiled && nameKnown(it.compiled.replace(autoDeclared, "")),
-      warnings: it.warnings.filter((warning) => !asksWhatItIs.test(warning) && !/never says it has/.test(warning))
+      warnings: it.warnings.filter((warning) => !/never says it has/.test(warning))
     }))
     expect(fromDeclarations).toEqual(withoutIt)
   })
@@ -461,5 +454,29 @@ describe("SpellDeclarations, a type's short name", () => {
       { from: "@spell/library/bank", declarations }
     ])
     expect(imports.types.get("accounts")?.name).toBe("BankAccount")
+  })
+})
+
+/** A type's gender, `una carta es una cosa` (epic `spanish` P8), in another project. */
+describe("SpellDeclarations, a type's gender", () => {
+  test("goes into its declarations, and its type has it in a project that imports it", () => {
+    const { declarations } = compiledProject(
+      [{ path: "/Cartas.spell", contents: "una carta es una cosa\nun mazo es una lista de cartas" }],
+      { parentScope: SP.spanish.rootScope }
+    )
+    const genders = declarations.statements.filter((it) => it.type).map(({ type, gender }) => [type, gender])
+    expect(genders).toEqual([
+      ["Carta", "feminine"],
+      ["Mazo", "masculine"]
+    ])
+    const imports = SP.SpellDeclarations.importScope(SP.spanish.rootScope, [
+      { from: "@spell/library/cartas", declarations }
+    ])
+    expect(imports.types.get("Carta")?.gender).toBe("feminine")
+  })
+
+  test("an English type has none:  its declaration says nothing of one", () => {
+    const { declarations } = compiledProject([{ path: "/Card.spell", contents: "a card is a thing" }])
+    expect(declarations.statements.find((it) => it.type === "Card")).not.toHaveProperty("gender")
   })
 })

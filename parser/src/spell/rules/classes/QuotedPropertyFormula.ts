@@ -1,10 +1,12 @@
-import { pluralize, proto, singularize, upperFirst } from "spell-kit/util"
+import { proto, upperFirst } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
+import { Wording } from "spell-lang/spell/rules/expressions"
+import { negatableSyntaxBits } from "spell-lang/spell/rules/methods"
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { placeholderData, type QuotedPropertyFormulaBits } from "./classes.shared"
 import { QuotedPropertyRule } from "./QuotedPropertyRule"
 
@@ -39,29 +41,29 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
-    // If first word of `alias` is not `is`, forget it
+    // If the first word of `alias` isn't the language's `is` (`es` in Spanish), forget it
     const phrase = `${match.groups.alias.value}`.replace(/^["']|["']$/g, "")
     const alias = phrase.split(" ")
-    if (alias[0] !== "is") return undefined
+    if (!Wording.reads(scope, "is_or_is_not", alias[0] ?? "")) return undefined
     if (match.groups.sources) return QuotedPropertyFormula.resolveSources(match)
     // more after the phrase, e.g. `it "is face up" if ...`:  not ours, a `quoted_type_expression`
     if (tokens.slice(match.length).join("").trim()) return undefined
-    const typeWords = SpellStatement.subjectWords(match) ?? "thing"
+    const language = SP.Language.of(scope)
     if (!phrase.includes("(")) {
-      return SpellStatement.refuse(
-        match,
-        `"${phrase}" has no blank:  put the word that varies in parens, e.g. "is a (suit)", ` +
-          `or say when it's true, "${phrase}" if ...`
-      )
+      return SpellStatement.refuse(match, language.parserMessage("phrase-without-blank", { phrase }))
     }
-    const inferred = QuotedPropertyFormula.inferPlaceholders(alias, getKnownType(match.groups.type))
+    const type = getKnownType(match.groups.type)
+    const inferred = QuotedPropertyFormula.inferPlaceholders(alias, type)
     if (!inferred) return undefined
     if ("unlisted" in inferred) {
-      return SpellStatement.refuse(
-        match,
-        `"(${inferred.unlisted})" names no property of a ${typeWords} with a list of values, ` +
-          `e.g. its "suit" is one of clubs, diamonds, hearts or spades`
-      )
+      const typeWords = SpellStatement.subjectWords(match) ?? language.wordFor("thing")
+      const aType = language.withArticle("indefinite", typeWords, type)
+      const message = language.parserMessage("blank-without-values", {
+        word: inferred.unlisted,
+        type: typeWords,
+        aType
+      })
+      return SpellStatement.refuse(match, message)
     }
     match.data.inferred = inferred
     return match
@@ -78,13 +80,13 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
     const sources: string[] = []
     for (const source of match.groups.sources!.items) {
       const name = `${(source.groups.property as P.Match | undefined)?.value}`
-      const listed = QuotedPropertyFormula.listedProperty(type, [name, singularize(name)])
+      const listed = QuotedPropertyFormula.listedProperty(type, [name, P.singularize(name)])
       if (!listed) {
-        return SpellStatement.refuse(
-          match,
-          `"its ${name}" isn't a property of a ${match.groups.type.raw} with a list of values, ` +
-            `e.g. its "suit" is one of clubs, diamonds, hearts or spades`
-        )
+        const language = SP.Language.of(match.scope)
+        const typeWords = `${match.groups.type.raw}`
+        const aType = language.withArticle("indefinite", typeWords, type)
+        const message = language.parserMessage("source-without-values", { name, type: typeWords, aType })
+        return SpellStatement.refuse(match, message)
       }
       sources.push(listed)
     }
@@ -114,11 +116,17 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
    * See `SpellStatement.getLongForm()`.
    */
   getLongForm(match: P.MatchFor<this>): string | undefined {
-    const typeWords = SpellStatement.subjectWords(match)
+    const params = SpellStatement.longFormParams(match)
     const { inferred } = match.data
-    if (!typeWords || !inferred) return super.getLongForm(match)
-    const sources = inferred.sources.map((source) => `its ${pluralize(source)}`).join(" and ")
-    return `a ${typeWords} "${inferred.words.join(" ")}" for ${sources}`
+    if (!params || !inferred) return super.getLongForm(match)
+    const language = SP.Language.of(match.scope)
+    const sources = inferred.sources
+      .map((source) => {
+        const plural = P.Inflector.using(language.inflector, () => P.pluralize(source))
+        return language.parserMessage("long-form-source", { plural })
+      })
+      .join(language.parserMessage("long-form-and"))
+    return language.parserMessage("long-form-phrase-for", { ...params, phrase: inferred.words.join(" "), sources })
   }
 
   /**
@@ -140,7 +148,7 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
       // only a blank in parens:  a bare word is always just a word (epic page J9:  "require the parens")
       const blank = /^\((.+)\)$/.exec(word)?.[1]
       if (!blank) continue
-      const listed = QuotedPropertyFormula.listedProperty(type, [singularize(blank)])
+      const listed = QuotedPropertyFormula.listedProperty(type, [P.singularize(blank)])
       if (!listed) return { unlisted: blank }
       sources.push(listed)
     }
@@ -153,7 +161,7 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
    * e.g. `Suits` for `suit` (`define_property_has`).
    */
   private static enumerationOf(type: P.TypeScope, name: string): Array<string | number> | undefined {
-    return type.variables.get(name)?.enumeration ?? type.variables.get(pluralize(upperFirst(name)))?.enumeration
+    return type.variables.get(name)?.enumeration ?? type.variables.get(P.pluralize(upperFirst(name)))?.enumeration
   }
 
   /** Compute (and cache in `match.data.bits`) `bits` for making rules and AST nodes -- see the type. */
@@ -179,13 +187,11 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
       .map((word) => {
         // output keywords directly into words/keywords immediately
         if (!word.startsWith("(")) {
-          // transform `a` to `(a|an)` for flexbility
-          if (word === "a" || word === "an") syntaxParts.push("(a|an)")
-          else syntaxParts.push(word)
+          syntaxParts.push(word)
           return word
         }
         const instanceVar = word.slice(1, -1)
-        vars.push(singularize(instanceVar))
+        vars.push(P.singularize(instanceVar))
 
         // Try to find the enumeration:  the property's own, or its value kind's
         const propertyName = sourceNames[sourceNum]
@@ -215,9 +221,14 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
         return `$${instanceVar}`
       })
       .join("_")
-    // `is` => every form of it, e.g. `isn't`, which negates -- see `Negatable`
-    syntaxParts.splice(0, 1, "{operator:is}")
-    const syntax = syntaxParts.join(" ")
+    // `is` => every form of it, e.g. `isn't`, which negates;  `is a` => `are not a` too -- see `Negatable`
+    const syntax = negatableSyntaxBits(match.scope, syntaxParts)
+      // any other article matches every form of it, e.g. `a` or `an`, `el` or `la`:  the language's own
+      .map((bit) => {
+        const article = isWord(bit) && ARTICLES.find((rule) => Wording.reads(match.scope, rule, bit))
+        return article ? `{${article}}` : bit
+      })
+      .join(" ")
     return { type, syntax, ruleData, vars, property }
   }
 
@@ -273,85 +284,6 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
     return new P.ASTStatementGroup(match, { statements })
   }
 }
-classes.addRule(QuotedPropertyFormula, {
-  syntax: "(a|an) {type} {alias:text} for [sources:(its {property:member_words}) and]",
-  tests: [
-    {
-      beforeEach(scope: P.Scope) {
-        scope.parse(
-          [
-            "a card is a thing",
-            "a card has a rank as one of ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king",
-            "a card has a suit as one of clubs, diamonds, hearts, spades"
-          ].join("\n"),
-          "block"
-        )
-      },
-      compileAs: "block",
-      tests: [
-        [
-          'a card "is a (rank)" for its ranks',
-          ["Card.prototype.isARank = function (rank) {", "  return this.rank === rank", "}"],
-          [
-            "export interface Card { isARank(rank: any /* spell: type unknown */): boolean }",
-            "Card.prototype.isARank = function (this: Card, rank: any /* spell: type unknown */) {",
-            "  return this.rank === rank",
-            "}"
-          ]
-        ],
-        [
-          'a card "is the (rank) of (suits)" for its ranks and its suits',
-          [
-            "Card.prototype.isTheRankOfSuits = function (rank, suit) {",
-            "  return this.rank === rank && this.suit === suit",
-            "}"
-          ],
-          [
-            "export interface Card { isTheRankOfSuits(rank: any /* spell: type unknown */, suit: any /* spell: type unknown */): boolean }",
-            "Card.prototype.isTheRankOfSuits = function (this: Card, rank: any /* spell: type unknown */, suit: any /* spell: type unknown */) {",
-            "  return this.rank === rank && this.suit === suit",
-            "}"
-          ]
-        ]
-      ]
-    },
-    {
-      beforeEach(scope: P.Scope) {
-        scope.parse(
-          [
-            "a card is a thing",
-            "a card has a rank as one of ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king",
-            "a card has a suit as one of clubs, diamonds, hearts, spades",
-            'a card "is a (suit)" for its suits',
-            'a card "is the (rank) of (suits)" for its ranks and its suits',
-            "card = a new card"
-          ].join("\n"),
-          "block"
-        )
-      },
-      compileAs: "statement",
-      tests: [
-        ["print card is a club", 'core.console.log(card.isASuit("clubs"))'],
-        ["print card is the 2 of hearts", 'core.console.log(card.isTheRankOfSuits(2, "hearts"))']
-      ]
-    }
-  ]
-})
-// in an outline body:  `- it "is a (suit)" for its suits` -- tests in `parserTests/outline.test.ts`
-classes.addRule(QuotedPropertyFormula, {
-  syntax: "{type:subject_it} {alias:text} for [sources:(its {property:member_words}) and]"
-})
-// ... and with the placeholders inferred (P3):  `- it "is a suit"`, `- it "is the rank of suits"` -- see `parse()`
-classes.addRule(QuotedPropertyFormula, {
-  syntax: "{type:subject_it} {alias:text}"
-})
-// ... and with the subject left out (P8):  `- "is a (suit)"`, `- "is a (suit)" for its suits`
-classes.addRule(QuotedPropertyFormula, {
-  syntax: "{type:subject_implied} {alias:text} for [sources:(its {property:member_words}) and]"
-})
-classes.addRule(QuotedPropertyFormula, {
-  syntax: "{type:subject_implied} {alias:text}"
-})
 
 /** What `quoted_property_formula` stashes in `match.data`. */
 type QuotedPropertyFormulaMatchData = {
@@ -370,3 +302,11 @@ type InferredPlaceholders = {
   /** Each placeholder's property, in order, e.g. `["suit"]`. */
   sources: string[]
 }
+
+/** Is `bit` of a syntax a plain word, not a `{rule}` or a `(group)`? */
+function isWord(bit: string): boolean {
+  return !bit.startsWith("{") && !bit.startsWith("(")
+}
+
+/** The article word rules a phrase's own article becomes, so it matches every form:  `el` matches `la` too. */
+const ARTICLES = ["indefinite_article", "definite_article"]

@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `undefined` rule:  `undefined` as an expression... ???
@@ -16,15 +15,3 @@ export class UndefinedLiteral extends P.Literal {
     return new P.ASTNothingLiteral(match)
   }
 }
-core.addRule(UndefinedLiteral, {
-  syntax: "(undefined|nothing)",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        ["nothing", "undefined"],
-        ["undefined", "undefined"]
-      ]
-    }
-  ]
-})

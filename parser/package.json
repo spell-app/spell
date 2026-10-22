@@ -17,6 +17,11 @@
       "types": "./dist-types/src/parser/rulex/index.d.ts",
       "default": "./src/parser/rulex/index.ts"
     },
+    "./parser/test": {
+      "spell-lang-source": "./src/parser/test/index.ts",
+      "types": "./dist-types/src/parser/test/index.d.ts",
+      "default": "./src/parser/test/index.ts"
+    },
     "./markdown": {
       "spell-lang-source": "./src/markdown/index.ts",
       "types": "./dist-types/src/markdown/index.d.ts",
@@ -88,7 +93,7 @@
     "spell:test:fixtures:bless": "vp test run --project spell tests/spell/test/fixtures.test.ts tests/spell/test/typescript.test.ts tests/spell/test/python.test.ts --update=all",
     "spell:test:rules": "vp test run --project spell tests/spell/rules",
     "spell:test:rules:bless": "BLESS_RULE_TESTS=1 vp test run --project spell tests/spell/rules; vp fmt src/spell/rules",
-    "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax.json"
+    "spell:gen:syntax": "tsx src/spell/node/writeSpellSyntax.ts && vp fmt src/spell/spellSyntax*.json"
   },
   "dependencies": {
     "@solidjs/h": "2.0.0-rc.17",
@@ -97,6 +102,7 @@
     "entities": "^6.0.1",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
+    "pluralize": "^8.0.0",
     "semver": "^7.8.5",
     "solid-js": "2.0.0-rc.17",
     "spell-kit": "workspace:*"
@@ -105,6 +111,7 @@
     "@solidjs/compiler": "2.0.0-rc.17",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.20.4",
+    "@types/pluralize": "^0.0.33",
     "@types/semver": "^7.8.0",
     "@typescript/typescript6": "^6.0.2",
     "@vitest/coverage-v8": "catalog:",

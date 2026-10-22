@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { draw } from "./draw.parser"
 
 /**
  * `draw_thing` rule:  draw a single thing, e.g. `draw the card`.
@@ -27,6 +26,3 @@ export class DrawThing extends SpellStatement<"expression"> {
     })
   }
 }
-draw.addRule(DrawThing, {
-  syntax: "draw {expression}"
-})

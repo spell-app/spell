@@ -1,49 +1,36 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
+import { InfixOperatorSuffix, Precedence, Wording } from "spell-lang/spell/rules/expressions"
 
 /**
- * `is_gt_lt` rule:  `is greater than`, `is less than`, optionally `... or equal to`,
- * e.g. `salary is greater than expenses`.
+ * `is_gt_lt` rule:  `is greater than` or `is less than`, optionally `... or equal to`.
+ * - e.g. `salary is greater than expenses`
  * - TODO: is *not* greater than???
- * - `getOperator()` maps `greater` / `less`, plus optional `or equal to`, to `greater than` / `less than` /
- *   `at least` / `at most`.
- * - `getAST()` below looks unreachable in practice, same as `gt_lt` above -- see `TODO` there.
+ * - `getOperator()` maps what `operator` means (`is_greater_or_less_than`) to an operator:
+ *   `greater` / `less` / `at_least` / `at_most` => `greater than` / `less than` / `at least` / `at most`.
  */
 export class IsGtLt extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.comparison
   @proto static parenthesize = true
 
-  // CLAUDE VOCAB: engish-specific
-  getOperator({ value }: P.Match): P.ASTOperator {
-    const greater = String(value).includes("greater")
-    if (String(value).includes("equal")) return greater ? "at least" : "at most"
-    return greater ? "greater than" : "less than"
-  }
-  getAST(match: P.MatchFor<this>) {
-    const { operator, expression } = match.groups
-    return new P.ASTCoreMethodInvocation(match, {
-      methodName: operator.value,
-      args: [P.asAST<P.ASTExpression>(expression.AST)]
-    })
+  /** The operator `operator` means, e.g. `at least` for `is greater than or equal to`. */
+  getOperator(operator: P.Match): P.ASTOperator {
+    const meaning = Wording.meaningOf(operator) as Comparison | undefined
+    if (!meaning) {
+      const problem = `\`${operator.value}\` means nothing`
+      throw new TypeError(`IsGtLt.getOperator():  ${problem};  put each form of \`is_greater_or_less_than\` in a group`)
+    }
+    return OPERATOR_FOR_MEANING[meaning]
   }
 }
-math.addRule(IsGtLt, {
-  syntax: "(operator:is (greater|less) than (or equal to)?) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("salary")
-        scope.variables?.add("expenses")
-      },
-      tests: [
-        ["salary is greater than expenses", "(salary > expenses)"],
-        ["salary is greater than or equal to expenses", "(salary >= expenses)"],
-        ["salary is less than expenses", "(salary < expenses)"],
-        ["salary is less than or equal to expenses", "(salary <= expenses)"]
-      ]
-    }
-  ]
-})
+
+/** The meanings of `is_greater_or_less_than`'s forms. */
+type Comparison = "greater" | "less" | "at_least" | "at_most"
+
+/** The operator each meaning compiles to. */
+const OPERATOR_FOR_MEANING: Record<Comparison, P.ASTOperator> = {
+  greater: "greater than",
+  less: "less than",
+  at_least: "at least",
+  at_most: "at most"
+}

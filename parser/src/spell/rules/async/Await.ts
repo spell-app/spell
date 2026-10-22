@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _async } from "./async.parser"
 
 /**
  * `await` rule:  `await`/`wait for` an expression, with the expression itself optional (bare `await`).
@@ -27,31 +26,3 @@ export class Await extends SpellStatement<"expression?"> {
     })
   }
 }
-_async.addRule(Await, {
-  syntax: "(await|wait for) :? {expression}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        ["await", "await undefined"],
-        ["wait for 1", "await 1"],
-        ["set the result to wait for 1", "export const result = await 1"],
-        ["wait for 2 is 1", "await (2 === 1)"],
-        ["if wait for 2 is 1 then print 1", "if (await 2 == 1) core.console.log(1)"]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        {
-          input: ["to do something", "\twait for 1"],
-          js: ["export async function doSomething() {", "  await 1", "}"]
-        },
-        {
-          input: ["to do something", "\tif (1) wait for 1"],
-          js: ["export async function doSomething() {", "  if (1) await 1", "}"]
-        }
-      ]
-    }
-  ]
-})

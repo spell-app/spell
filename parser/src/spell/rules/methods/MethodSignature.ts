@@ -2,23 +2,26 @@ import { P } from "spell-lang/parser"
 import { SpellType } from "spell-lang/spell/rules/types"
 import { BareTypeArg } from "./BareTypeArg"
 import { MethodKeyword } from "./MethodKeyword"
-import { methods } from "./methods.parser"
 import type { MethodArgData, MethodSignatureData } from "./methods.shared"
 
 /**
- * `method_signature` rule:  a full method signature, alternating keywords and args,
- * e.g. `foo the (bar as a thing)`, `give a card to a pile`.
+ * `method_signature` rule:  a full method signature, alternating keywords and args.
+ * - e.g. `foo the (bar as a thing)`, `give a card to a pile`
  * - `({bare_type_arg}|{method_keyword}|\({method_arg}\))+`:
  *   keywords and args can appear in ANY order/mix, any number of times.
  * - The syntax requires at least one repetition, but see `parse()` for the additional keyword requirement.
  * - `a card` is an arg if `card` is a KNOWN type (`bare_type_arg`, the longer match), else two keywords.
- * - `parse()` walks the repeated items and assembles `methodBits`/`syntaxBits` (joined into
- *   `methodName`/`syntax` by `MethodDefinition.computeSignature()`), `args`, `types` (candidate
- *   instance-method receivers), `extraVars` and `props` into `match.data` -- see `MethodSignatureData`.
+ * - `parse()` walks the repeated items, and puts these in `match.data` (`MethodSignatureData`):
+ *   - `methodBits` / `syntaxBits`:  `MethodDefinition.computeSignature()` joins them into `methodName` / `syntax`
+ *   - `args`
+ *   - `types`:  the types it could be an instance method of
+ *   - `extraVars`, `props`
  */
 export class MethodSignature extends P.Repeat<never, MethodSignatureData> {
-  /** Build `match.data`, then reject the match entirely if no keyword was found -- arg-only signatures
-   *  (e.g. `to (foo)`) are invalid. */
+  /**
+   * Build `match.data`, then reject the match entirely if no keyword was found:
+   * an arg-only signature (e.g. `to (foo)`) is invalid.
+   */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
@@ -103,6 +106,3 @@ export class MethodSignature extends P.Repeat<never, MethodSignatureData> {
     })
   }
 }
-methods.addRule(MethodSignature, {
-  syntax: `({bare_type_arg}|{method_keyword}|\\( {method_arg} \\))+`
-})

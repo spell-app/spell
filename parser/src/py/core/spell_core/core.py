@@ -23,6 +23,7 @@ from spell_core.collection_methods import CollectionMethods
 from spell_core.console import SpellConsole
 from spell_core.drawing_methods import DrawingMethods
 from spell_core.kinds import TypeMethods
+from spell_core.messages import MessageMethods
 from spell_core.numbers import NumberMethods
 from spell_core.reference_methods import ReferenceMethods
 from spell_core.runtime_methods import RuntimeMethods
@@ -45,6 +46,7 @@ class Core(
     WordMethods,
     DrawingMethods,
     ReferenceMethods,
+    MessageMethods,
 ):
     """Everything compiled Python calls on `core`, each part in a module of its own:
 
@@ -58,6 +60,7 @@ class Core(
     - the running program's events and processes, and pauses:  `runtime_methods.py`, `events.py`
     - drawing things, mounting an app, and the page it's drawn on:  `drawing_methods.py`, `drawing.py`
     - spell's wording of a program's members, for reflection:  `word_methods.py`
+    - what it says to the person running the program, in the program's language:  `messages.py`
     - the things a program made, found by name, place or reference:  `reference_methods.py`, `references.py`
     - the console, `core.console`:  `console.py`
     - the classes compiled Python extends, `Thing`, `List` and `App`:  `things.py`, `lists.py`, `apps.py`

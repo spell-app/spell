@@ -13,7 +13,7 @@
  * - Part of `core`:  imported by `spell-lang/core`'s barrel for its side effect.
  */
 
-import { elementTagFor, instanceCase, schemaOf, type Schema } from "spell-kit/util"
+import { elementTagFor, schemaOf, type Schema } from "spell-kit/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -225,7 +225,8 @@ function ownerPropertiesOf(Class: Function): ElementApi["properties"] {
     if (!(ListClass.prototype instanceof List) || !Object.hasOwn(ListClass, "exclusive") || !exclusive) continue
     if (typeof instanceType !== "function") continue
     if (Class !== instanceType && !(Class.prototype instanceof instanceType)) continue
-    const name = instanceCase(ListClass.name)
+    // A class name is singular already:  only lowercased, so the core never loads a language's inflector
+    const name = ListClass.name.toLowerCase()
     if (hasGetter(Class.prototype as object, name)) owners.push({ name, type: ListClass.name, owner: true })
   }
   return owners

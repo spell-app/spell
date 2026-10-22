@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_remove` rule:  remove all instances of something from a list.
@@ -20,16 +19,3 @@ export class ListRemove extends SpellStatement<"thing|list"> {
     })
   }
 }
-lists.addRule(ListRemove, {
-  syntax: "remove {thing:expression} from {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.variables?.add("my-list")
-      },
-      tests: [["remove thing from my-list", "core.remove(myList, thing)"]]
-    }
-  ]
-})

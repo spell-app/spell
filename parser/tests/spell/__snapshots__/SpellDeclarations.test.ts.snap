@@ -38,32 +38,31 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
     297,
     302,
     307,
-    313,
-    326,
-    327,
-    334,
-    340,
-    381,
+    322,
+    323,
+    330,
+    336,
+    377,
+    378,
     382,
-    386,
-    395,
+    391,
+    392,
     396,
-    400,
-    406,
+    402,
+    403,
     407,
-    411,
-    420,
-    432,
+    416,
+    428,
+    429,
     433,
-    437,
-    442,
+    438,
+    497,
     501,
-    505,
-    514,
-    530,
-    564,
-    602,
-    607,
+    510,
+    526,
+    560,
+    598,
+    603,
   ],
   "provides": [
     "Card",
@@ -157,7 +156,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "output": "is_face_up",
       "returns": "choice",
       "rule": "method_postfix",
-      "syntax": "{operator:is} face up",
+      "syntax": "{operator:is_or_is_not} face up",
     },
     {
       "defined": "/Card.spell:659-705",
@@ -167,7 +166,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "output": "is_face_down",
       "returns": "choice",
       "rule": "method_postfix",
-      "syntax": "{operator:is} face down",
+      "syntax": "{operator:is_or_is_not} face down",
     },
     {
       "defined": "/Card.spell:731-796",
@@ -177,7 +176,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "output": "is_a_face_card",
       "returns": "choice",
       "rule": "method_postfix",
-      "syntax": "{operator:is} a face card",
+      "syntax": "{operator:is_or_is_not_a} face card",
     },
     {
       "defined": "/Card.spell:838-872",
@@ -186,7 +185,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "of": "Card",
       "output": "is_a_$suit",
       "rule": "quoted_property",
-      "syntax": "{operator:is} (a|an) (expression:club|diamond|heart|spade)",
+      "syntax": "{operator:is_or_is_not_a} (expression:club|diamond|heart|spade)",
       "values": {
         "suit": [
           "clubs",
@@ -203,7 +202,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "of": "Card",
       "output": "is_a_$rank",
       "rule": "quoted_property",
-      "syntax": "{operator:is} (a|an) (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king)",
+      "syntax": "{operator:is_or_is_not_a} (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king)",
       "values": {
         "rank": [
           "ace",
@@ -229,7 +228,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "of": "Card",
       "output": "is_the_$rank_of_$suits",
       "rule": "quoted_property",
-      "syntax": "{operator:is} the (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king) of (expression:clubs|diamonds|hearts|spades)",
+      "syntax": "{operator:is_or_is_not} {definite_article} (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king) of (expression:clubs|diamonds|hearts|spades)",
       "values": {
         "rank": [
           "ace",
@@ -473,12 +472,6 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       "property": "state",
     },
     {
-      "autoDeclared": true,
-      "defined": "/Solitaire.spell:3765-3824",
-      "of": "Pile",
-      "property": "name",
-    },
-    {
       "defined": "/Solitaire.spell:149-165",
       "superType": "App",
       "type": "Game",
@@ -527,7 +520,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} pick up {expression:operand}",
+      "syntax": "{operator:can_or_cannot} pick up {expression:operand}",
     },
     {
       "alias": [
@@ -561,7 +554,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} pick up {expression:operand}",
+      "syntax": "{operator:can_or_cannot} pick up {expression:operand}",
     },
     {
       "alias": [
@@ -595,7 +588,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} pick up {expression:operand}",
+      "syntax": "{operator:can_or_cannot} pick up {expression:operand}",
     },
     {
       "defined": "/Solitaire.spell:992-1117",
@@ -611,7 +604,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} play {expression:operand}",
+      "syntax": "{operator:can_or_cannot} play {expression:operand}",
     },
     {
       "alias": [
@@ -645,7 +638,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} pick up {expression:operand}",
+      "syntax": "{operator:can_or_cannot} pick up {expression:operand}",
     },
     {
       "defined": "/Solitaire.spell:1717-1894",
@@ -661,7 +654,7 @@ exports[`SpellDeclarations, inline > Solitaire's declarations 1`] = `
       ],
       "returns": "choice",
       "rule": "method_infix",
-      "syntax": "{operator:can} play {expression:operand}",
+      "syntax": "{operator:can_or_cannot} play {expression:operand}",
     },
     {
       "alias": [

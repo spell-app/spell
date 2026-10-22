@@ -150,7 +150,7 @@ export class TSWriter extends JSWriter {
     if (typeof datatype !== "string" || !datatype) return undefined
     if (datatype.startsWith("list")) return TSWriter.TYPES.list
     if (Object.hasOwn(TSWriter.TYPES, datatype)) return TSWriter.TYPES[datatype]
-    if (/^[A-Z][A-Za-z0-9_$]*$/.test(datatype)) return this.typeNameOf(datatype)
+    if (/^\p{Lu}[\p{L}\p{M}\d_$]*$/u.test(datatype)) return this.typeNameOf(datatype)
     return undefined
   }
 
@@ -1363,7 +1363,7 @@ const indented = jsText.indented
 
 /** A type's name in words, e.g. `stock pile` for `StockPile`. */
 function wordsOf(typeName: string): string {
-  return typeName.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
+  return typeName.replace(P.CAMEL_WORD_BOUNDARY, " ").toLowerCase()
 }
 
 /** `a` or `an`, for `words`. */

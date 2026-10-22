@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `boolean` rule:  boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.
@@ -9,49 +8,13 @@ import { core } from "./core.parser"
  * - TODO: better name for this?  "flag"?  "truism"?
  */
 export class BooleanLiteral extends P.Pattern {
+  // Its words and what each means (`pattern`, `VALUE_MAP`) are the language's:  see its `.en.ts` registration
   static ruleName = "boolean"
   @proto static alias = "expression"
   @proto static datatype = "choice"
-  @proto static pattern = /^(true|false|yes|no|ok|cancel|always|never)$/
-  @proto static VALUE_MAP = {
-    true: true,
-    false: false,
-    yes: true,
-    no: false,
-    ok: true,
-    cancel: false,
-    always: true,
-    never: false
-  }
 
   getAST(match: P.MatchFor<this>): P.ASTBooleanLiteral {
     const { value, raw } = match
     return new P.ASTBooleanLiteral(match, { value: assert.boolean(value), raw })
   }
 }
-core.addRule(BooleanLiteral, {
-  tests: [
-    {
-      title: "correctly matches booleans",
-      tests: [
-        ["", undefined],
-        ["true", "true"],
-        ["yes", "true"],
-        ["ok", "true"],
-        ["always", "true"],
-        ["false", "false"],
-        ["no", "false"],
-        ["cancel", "false"],
-        ["never", "false"]
-      ]
-    },
-    {
-      title: "doesn't match in the middle of a longer keyword",
-      tests: [
-        ["yessir", undefined],
-        ["yes-sir", undefined],
-        ["yes_sir", undefined]
-      ]
-    }
-  ]
-})

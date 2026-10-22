@@ -1,0 +1,386 @@
+/**
+ * The `JSX` rules in Spanish (epic `spanish`):
+ * each rule's syntax and its tests, registered on Spanish's own `JSX` parser.
+ * - The rule CLASSES are their own files, beside this one, shared with every language.
+ * - Registered in the same order as `JSX.en.ts`:  a tie between two rules goes to the first.
+ * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
+ * - Tags and attributes stay as written, the web's and Spell UI's (`<div>`, `<ui-button>`);
+ *   only spell's own words are Spanish:  `<hijos/>` for the web's `<slot/>`, `en="header"` for `slot="header"`.
+ * - Spell UI's Spanish tags stay as written too, with their Spanish attributes and values:
+ *   `<es-boton tamano="grande">` draws `h("es-boton", { tamano: "grande" })` (epic `spanish` P9).
+ *   - The page knows them once Spanish is on:  `<ui-root lang="es">` defines every component as `es-*` too.
+ *   - So spell needs none of Spell UI's Spanish words, which it can't import.
+ */
+import { P } from "spell-lang/parser"
+import { SpellParser } from "spell-lang/spell/SpellParser"
+import { Wording } from "spell-lang/spell/rules/expressions"
+
+import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
+import { MarkdownBlock } from "./MarkdownBlock"
+import { SpellJSX } from "./SpellJSX"
+import { SpellJSXAttribute } from "./SpellJSXAttribute"
+import { SpellJSXEndTag } from "./SpellJSXEndTag"
+import { SpellJSXExpression } from "./SpellJSXExpression"
+import { SpellJSXFragment } from "./SpellJSXFragment"
+import { SpellJSXText } from "./SpellJSXText"
+
+/** Spanish's `JSX` rules. */
+export const JSXEs = new SpellParser({ module: "JSX" })
+
+// spell's own tag words, each meaning the web's tag:  `<hijos/>` => `<slot/>`
+// - the web's own `slot` too:  a word rule needs two forms
+JSXEs.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_JSX_MEANINGS }), {
+  syntax: "((slot:hijos)|slot)"
+})
+
+// spell's own attribute words, each meaning the web's attribute:  `<h3 en="header">` => `<h3 slot="header">`
+JSXEs.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_JSX_MEANINGS }), {
+  syntax: "((slot:en)|slot)"
+})
+
+JSXEs.addRule(MarkdownBlock, {
+  tests: [
+    {
+      title: "Markdown, as written",
+      compileAs: "expression",
+      tests: [
+        [
+          ["<markdown>", "\t## Klondike", "\tBuild each pile **down**, alternating colours.", "</markdown>"],
+          'h("ui-markdown", "## Klondike\\nBuild each pile **down**, alternating colours.")',
+          '<ui-markdown>{"## Klondike\\nBuild each pile **down**, alternating colours."}</ui-markdown>'
+        ],
+        // `*`, `#`, `<`, back ticks and braces in code, an escaped brace:  all untouched
+        [
+          [
+            "<markdown>",
+            "\t# Rules <small>v2</small>",
+            "\t* a *list* with `{code}` and \\{braces\\}",
+            "\t```css",
+            "\t.red { color: crimson }",
+            "\t```",
+            "</markdown>"
+          ],
+          [
+            'h("ui-markdown",',
+            '  "# Rules <small>v2</small>\\n* a *list* with `{code}` and \\\\{braces\\\\}\\n```css\\n.red { color: crimson }\\n```"',
+            ")"
+          ],
+          [
+            "<ui-markdown>",
+            '  {"# Rules <small>v2</small>\\n* a *list* with `{code}` and \\\\{braces\\\\}\\n```css\\n.red { color: crimson }\\n```"}',
+            "</ui-markdown>"
+          ]
+        ],
+        // inside a drawing, indented with it
+        [
+          ["<div>", "\t<markdown>", "\t\tHello **there**", "\t</markdown>", "</div>"],
+          'h("div", h("ui-markdown", "Hello **there**"))',
+          ["<div>", '  <ui-markdown>{"Hello **there**"}</ui-markdown>', "</div>"]
+        ]
+      ]
+    },
+    {
+      title: "Holes, live",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        [
+          ["<markdown>", "\tRank:  **{el rank de la card}**", "</markdown>"],
+          'h("ui-markdown", () => `Rank:  **${card.rank}**`)',
+          "<ui-markdown>{`Rank:  **${card.rank}**`}</ui-markdown>"
+        ],
+        // a back tick and `${` in the text stay text
+        [
+          ["<markdown>", "\t`${x}` and {el rank de la card}!", "</markdown>"],
+          'h("ui-markdown", () => `\\`\\${x}\\` and ${card.rank}!`)',
+          "<ui-markdown>{`\\`\\${x}\\` and ${card.rank}!`}</ui-markdown>"
+        ],
+        // a hole that doesn't read:  a parse error
+        [
+          ["<markdown>", "\tHi {foo bar baz}", "</markdown>"],
+          [
+            'h("ui-markdown",',
+            '  () => `Hi ${null /* PARSE ERROR: No entiendo "{foo bar baz}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave */}`',
+            ")"
+          ],
+          [
+            "<ui-markdown>",
+            '  {`Hi ${null /* PARSE ERROR: No entiendo "{foo bar baz}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave */}`}',
+            "</ui-markdown>"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(SpellJSX, {
+  tests: [
+    {
+      title: "Simple nested elements",
+      compileAs: "expression",
+      tests: [
+        [`<a/>`, 'h("a")', "<a />"],
+        [`<a></a>`, 'h("a")', "<a />"],
+        [`<a b=1 c="ccc"/>`, 'h("a", { b: 1, c: "ccc" })', '<a b={1} c="ccc" />'],
+        [`<a b=1 c="ccc" d></a>`, 'h("a", { b: 1, c: "ccc", d: true })', '<a b={1} c="ccc" d={true} />'],
+
+        [`<a><b/></a>`, 'h("a", h("b"))', ["<a>", "  <b />", "</a>"]],
+        [`<a><b></b></a>`, 'h("a", h("b"))', ["<a>", "  <b />", "</a>"]],
+        [
+          `<a A=1><b c=1>foo</b></a>`,
+          'h("a", { A: 1 }, h("b", { c: 1 }, "foo"))',
+          ["<a A={1}>", "  <b c={1}>foo</b>", "</a>"]
+        ],
+        [`<a><b><c>d</c></b></a>`, 'h("a", h("b", h("c", "d")))', ["<a>", "  <b>", "    <c>d</c>", "  </b>", "</a>"]],
+        [
+          `<a>\n\tBBB\n\t<c/>\n\tDDD</a>`,
+          ['h("a",', '  "BBB",', '  h("c"),', '  "DDD"', ")"],
+          ["<a>", "  BBB", "  <c />", "  DDD", "</a>"]
+        ],
+        [
+          ["<ui-button ", "\thidden={1} ", "\tonPress={imprimir 2}", "\t/>"],
+          'h("ui-button", { hidden: 1, onPress: () => core.console.log(2) })',
+          "<ui-button hidden={1} onPress={() => core.console.log(2)} />"
+        ],
+        [
+          '<input attrOnly text="text" number=1 boolean={sí} expression={1 + 1} onClick={imprimir el value del target del event} />',
+          [
+            'h("input", {',
+            "  attronly: true,",
+            '  text: "text",',
+            "  number: 1,",
+            "  boolean: true,",
+            "  expression: () => 1 + 1,",
+            "  onClick: (event) => core.console.log(event.target.value)",
+            "})"
+          ],
+          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} />'
+        ]
+      ]
+    },
+    {
+      title: "Attribute expressions",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        [`<div foo/>`, 'h("div", { foo: true })', "<div foo={true} />"],
+        [
+          `<div rank={el rank de la card} value={1 + 2 + 3}/>`,
+          'h("div", { rank: () => card.rank, value: () => 1 + 2 + 3 })',
+          "<div rank={card.rank} value={1 + 2 + 3} />"
+        ],
+        [
+          `<div rank={unknown expression} value={another unknown expression}/>`,
+          [
+            'h("div", {',
+            '  rank: undefined /* PARSE ERROR: No entiendo "unknown expression" */,',
+            '  value: undefined /* PARSE ERROR: No entiendo "another unknown expression" */',
+            "})"
+          ],
+          "<div />"
+        ],
+        // DO parse a statement as an attribute expression
+        [
+          `<div on-click={imprimir 1024}/>`,
+          'h("div", { "on-click": () => core.console.log(1024) })',
+          "<div on-click={() => core.console.log(1024)} />"
+        ],
+        // don't match attribute expressions that don't eat the entire text
+        [
+          "<div foo={verdadero verdadero}/>",
+          'h("div", { foo: undefined /* PARSE ERROR: No entiendo "verdadero verdadero" */ })',
+          "<div />"
+        ],
+        // ignore newlines in attribute expression
+        // NOTE: this was once a comma expression `(a, b)`, not a `[a, b]` tuple,
+        // which JS silently evaluated to a single-element array (the comma operator discards `a`).
+        // `RuleTest`'s tuple typing caught it;  fixed to the evidently-intended 2-tuple.
+        ["<div foo={\n1 + \n\t2\n\t}/>", 'h("div", { foo: () => 1 + 2 })', "<div foo={1 + 2} />"]
+      ]
+    },
+    {
+      title: "The page's names, decided when it compiles",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        // React's spellings, as the page spells them;  `class` first
+        [
+          `<td colSpan=2 htmlFor="x" className="suit"/>`,
+          'h("td", { class: "suit", colspan: 2, for: "x" })',
+          '<td class="suit" colspan={2} for="x" />'
+        ],
+        // on a `ui-*` tag, a value that can change is a property;  text, a dashed name and `class` stay attributes
+        [
+          `<ui-form value={la card} debug aria-label="Done" className={la card}/>`,
+          'h("ui-form", { class: () => card, "prop:value": () => card, debug: true, "aria-label": "Done" })',
+          '<ui-form class={card} prop:value={card} debug={true} aria-label="Done" />'
+        ],
+        // a dotted tag is a compile error:  `h()` would draw a `<UI>` with class `Form`
+        [
+          `<UI.Form/>`,
+          "null /* PARSE ERROR: <UI.Form> isn't an element:  write Spell UI's own tag, e.g. <ui-form> */",
+          "<UI.Form />"
+        ]
+      ]
+    },
+    {
+      title: "Spell's words for the web's slots:  <hijos/> and en=",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        // where a drawable list's items show
+        [`<hijos/>`, 'h("slot")', "<slot />"],
+        // a named place
+        [`<hijos name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],
+        // with what shows while it's empty
+        [
+          `<hijos name="header">Pile</hijos>`,
+          'h("slot", { name: "header" }, "Pile")',
+          '<slot name="header">Pile</slot>'
+        ],
+        // the web's own word keeps working
+        [`<slot/>`, 'h("slot")', "<slot />"],
+        [`<slot name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],
+        // a child says which named place it goes in
+        [`<h3 en="header">Pile 1</h3>`, 'h("h3", { slot: "header" }, "Pile 1")', '<h3 slot="header">Pile 1</h3>'],
+        [`<h3 slot="header">Pile 1</h3>`, 'h("h3", { slot: "header" }, "Pile 1")', '<h3 slot="header">Pile 1</h3>'],
+        // on a custom tag, `slot` stays an attribute, even with a value that can change
+        [`<game-card en={la card}/>`, 'h("game-card", { slot: () => card })', "<game-card slot={card} />"],
+        // a frame with both
+        [
+          `<div className="pile"><hijos name="header"/><hijos/></div>`,
+          ['h("div", { class: "pile" },', '  h("slot", { name: "header" }),', '  h("slot")', ")"],
+          ['<div class="pile">', '  <slot name="header" />', "  <slot />", "</div>"]
+        ]
+      ]
+    },
+    {
+      title: "Spell UI in Spanish:  <es-*> tags, their attributes and values as written",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        [`<es-tarjeta>Hola</es-tarjeta>`, 'h("es-tarjeta", "Hola")', "<es-tarjeta>Hola</es-tarjeta>"],
+        [
+          `<es-boton primario color="rojo" tamano="grande">Jugar</es-boton>`,
+          'h("es-boton", { primario: true, color: "rojo", tamano: "grande" }, "Jugar")',
+          '<es-boton primario={true} color="rojo" tamano="grande">Jugar</es-boton>'
+        ],
+        // a handler, a value from the program, a class
+        [
+          `<es-boton onClick={imprimir 1} className="mano">{el rank de la card}</es-boton>`,
+          'h("es-boton", { class: "mano", onClick: () => core.console.log(1) }, () => card.rank)',
+          '<es-boton class="mano" onClick={() => core.console.log(1)}>{card.rank}</es-boton>'
+        ],
+        // a value that can change is set as the element's property, by its Spanish name:
+        // Spell UI names a Spanish tag's properties in Spanish (`discontinuo`, its `dashed`)
+        [
+          `<es-tarjeta discontinuo={el rank de la card}>Pila</es-tarjeta>`,
+          'h("es-tarjeta", { "prop:discontinuo": () => card.rank }, "Pila")',
+          "<es-tarjeta prop:discontinuo={card.rank}>Pila</es-tarjeta>"
+        ],
+        // spell's own words inside one:  where a drawable list's items show, and a child's named place
+        [
+          `<es-tarjeta><h3 en="header">Pila</h3><hijos/></es-tarjeta>`,
+          ['h("es-tarjeta",', '  h("h3", { slot: "header" }, "Pila"),', '  h("slot")', ")"],
+          ["<es-tarjeta>", '  <h3 slot="header">Pila</h3>', "  <slot />", "</es-tarjeta>"]
+        ]
+      ]
+    },
+    {
+      title: "Inline expressions",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        [
+          `<div foo={<a><b><c>{1}</c></b></a>}/>`,
+          'h("div", { foo: h("a", h("b", h("c", 1))) })',
+          ["<div foo={<a>", "  <b>", "    <c>{1}</c>", "  </b>", "</a>} />"]
+        ],
+        // compound expression
+        [`<div>{1 + 2 + 3}</div>`, 'h("div", () => 1 + 2 + 3)', "<div>{1 + 2 + 3}</div>"],
+        // multi-line expression is fine
+        ["<div>{\n\t1 + \n2 + 3\t\n}</div>", 'h("div", () => 1 + 2 + 3)', "<div>{1 + 2 + 3}</div>"],
+        //
+        [`<div>{el rank de la card}</div>`, 'h("div", () => card.rank)', "<div>{card.rank}</div>"],
+        // fail if we don't eat entire expression
+        [
+          `<div>{verdadero verdadero}</div>`,
+          'h("div", null /* PARSE ERROR: No entiendo "verdadero verdadero" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "verdadero verdadero" */}</div>'
+        ],
+        // fail on unknown expression
+        [
+          `<div>{unknown expression}</div>`,
+          'h("div", null /* PARSE ERROR: No entiendo "unknown expression" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "unknown expression" */}</div>'
+        ],
+        // DO NOT parse a inline statement as a JSXExpression
+        [
+          `<div>{imprimir 1024}</div>`,
+          'h("div", null /* PARSE ERROR: No entiendo "imprimir 1024" */)',
+          '<div>{null /* PARSE ERROR: No entiendo "imprimir 1024" */}</div>'
+        ]
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(SpellJSXFragment, {
+  tests: [
+    {
+      title: "Explicit fragments:  <>...</>",
+      compileAs: "expression",
+      tests: [
+        [`<><a/><b/></>`, ["[", '  h("a"),', '  h("b")', "]"], ["<>", "  <a />", "  <b />", "</>"]],
+        [`<></>`, "[]", "<></>"],
+        [`<>Hello</>`, '["Hello"]', "<>Hello</>"],
+        [
+          `<>\n\t<a>A</a>\n\t<b>B</b>\n</>`,
+          ["[", '  h("a", "A"),', '  h("b", "B")', "]"],
+          ["<>", "  <a>A</a>", "  <b>B</b>", "</>"]
+        ],
+        // inside an element, and an element inside it
+        [
+          `<div><><a/>{1 + 2}</></div>`,
+          ['h("div",', "  [", '    h("a"),', "    () => 1 + 2", "  ]", ")"],
+          ["<div>", "  <>", "    <a />", "    {1 + 2}", "  </>", "</div>"]
+        ]
+      ]
+    },
+    {
+      title: "Implicit fragments:  elements one after another",
+      compileAs: "expression",
+      tests: [
+        // on one line
+        [`<a>A</a> <b>B</b>`, ["[", '  h("a", "A"),', '  h("b", "B")', "]"], ["<>", "  <a>A</a>", "  <b>B</b>", "</>"]],
+        // on the next line
+        [
+          `<ui-container>\n\tA\n</ui-container>\n<ui-grid>\n\tB\n</ui-grid>`,
+          ["[", '  h("ui-container", "A"),', '  h("ui-grid", "B")', "]"],
+          ["<>", "  <ui-container>A</ui-container>", "  <ui-grid>B</ui-grid>", "</>"]
+        ]
+      ]
+    }
+  ]
+})
+
+JSXEs.addRule(SpellJSXAttribute)
+
+JSXEs.addRule(SpellJSXText)
+
+JSXEs.addRule(SpellJSXEndTag)
+
+JSXEs.addRule(SpellJSXExpression)

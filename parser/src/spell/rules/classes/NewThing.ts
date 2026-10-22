@@ -3,15 +3,23 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `new_thing` rule:  `a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).
  * - NOTE: we assume that all types take an object of properties????
  * - Compiles to `new Type(...)`, e.g. `a new Thing with a = 1, b = yes` => `new Thing({ a: 1, b: true })`.
+ * - A built-in member given in another language's words goes by its own name (epic `spanish` P15):
+ *   `una nueva pila con nombre = "mazo"` => `new Pila({ name: "mazo" })` -- see `noteBuiltInNames()`.
  */
-export class NewThing extends SpellStatement<"type|props?"> {
+export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Record<string, string> }> {
   @proto static alias = "expression"
+
+  /** Notes the built-in members its props name in the language's own words -- see `noteBuiltInNames()`. */
+  parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (match) NewThing.noteBuiltInNames(match)
+    return match
+  }
 
   /** The type it makes, e.g. `Card`, `thing`. */
   getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
@@ -22,8 +30,41 @@ export class NewThing extends SpellStatement<"type|props?"> {
     const { type, props } = match.groups
     return new P.ASTNewInstanceExpression(match, {
       type: P.matchAST<P.ASTTypeExpression>(type),
-      props: P.matchAST<P.ASTObjectLiteral>(props)
+      props: NewThing.renamed(P.matchAST<P.ASTObjectLiteral>(props), match.data.builtInNames)
     })
+  }
+
+  ////////////////
+  // ## Built-in members in the language's own words
+  ////////////////
+
+  /**
+   * SIDE EFFECT:  notes each prop naming a built-in member in the language's own words, by the member's name,
+   * in `match.data.builtInNames`, e.g. `{ nombre: "name" }` for `una nueva pila con nombre = "mazo"`.
+   * - Only for a type spell knows comes from a built-in one:  see `SP.builtInStoredMember()`.
+   * - A lookup:  call it WHILE PARSING.
+   */
+  private static noteBuiltInNames(match: P.MatchFor<NewThing>): void {
+    const { scopeType } = (match.groups.type.data ?? {}) as { scopeType?: unknown }
+    if (!(scopeType instanceof P.TypeScope)) return
+    for (const item of match.groups.props?.items ?? []) {
+      const key = `${(item.groups.property as P.Match | undefined)?.value ?? ""}`
+      const builtIn = key ? SP.builtInStoredMember(scopeType, key) : undefined
+      if (builtIn && builtIn.name !== key) match.data.builtInNames = { ...match.data.builtInNames, [key]: builtIn.name }
+    }
+  }
+
+  /** `props`, each prop `names` holds going by the member's name instead:  `{ nombre: "mazo" }` => `{ name: "mazo" }`. */
+  private static renamed(
+    props: P.ASTObjectLiteral | undefined,
+    names: Record<string, string> | undefined
+  ): P.ASTObjectLiteral | undefined {
+    if (!props || !names) return props
+    const properties = props.properties.map((it) => {
+      if (!(it instanceof P.ASTObjectLiteralProperty) || !names[it.property.value]) return it
+      return new P.ASTObjectLiteralProperty(it.match, { property: names[it.property.value]!, value: it.value })
+    })
+    return new P.ASTObjectLiteral(props.match, { properties })
   }
 
   ////////////////
@@ -41,7 +82,8 @@ export class NewThing extends SpellStatement<"type|props?"> {
     const { props } = match.groups
     for (const property of props?.items ?? []) {
       const { property: key, value } = property.groups as { property?: P.Match; value?: P.Match }
-      if (`${key?.value}` !== "name" || !value) continue
+      const said = `${key?.value}`
+      if ((match.data.builtInNames?.[said] ?? said) !== "name" || !value) continue
       const ast = P.matchAST(value)
       return ast instanceof P.ASTStringLiteral ? ast.value : undefined
     }
@@ -80,27 +122,6 @@ export class NewThing extends SpellStatement<"type|props?"> {
     return (NAMES_GIVEN.get(type) ?? []).filter((given) => given.name === name).length
   }
 }
-classes.addRule(NewThing, {
-  syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
-  tests: [
-    {
-      title: "creates normal types",
-      compileAs: "expression",
-      tests: [
-        [`a new thing`, `new Thing()`],
-        [`a new Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`]
-      ]
-    },
-    {
-      title: "creates base types",
-      compileAs: "expression",
-      tests: [
-        ["a new Object", "new Object()"],
-        ["a new object with a = 1, b = yes", "new Object({ a: 1, b: true })"]
-      ]
-    }
-  ]
-})
 
 /** The names each type's things are given in so many words, and the statements giving them -- see `noteNameGiven()`. */
 const NAMES_GIVEN = new WeakMap<P.TypeScope, Array<{ name: string; statement: P.Match }>>()

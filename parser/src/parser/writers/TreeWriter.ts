@@ -239,7 +239,7 @@ export class TreeWriter extends Writer<P.TreeNode> {
 function kindOf(node: P.ASTNode): string {
   const words = String(node.nodeType)
     .replace(/^AST/, "")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/(\p{Ll})(\p{Lu})/gu, "$1 $2")
     .toLowerCase()
   return words.charAt(0).toUpperCase() + words.slice(1)
 }

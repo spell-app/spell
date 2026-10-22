@@ -1,6 +1,6 @@
 import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { identifierBlacklist } from "spell-lang/spell/rules/identifier-blacklist"
+import { SP } from "spell-lang/spell"
 
 /**
  * Base pattern rule for matching a single-word constant identifier (alpha-numeric, dashes/underscores).
@@ -12,9 +12,17 @@ export class SpellConstant extends P.Pattern<never, ConstantMatchData> {
   /** Editors colour every constant as an enum member -- they're the values of enumerated properties. */
   @proto static highlightAs?: P.HighlightKind = "enumMember"
 
-  /** Every constant rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not blacklisted. */
+  /**
+   * Every constant rule matches the same thing:
+   * an alpha-numeric word (dashes / underscores OK), not the language's own (`test()`).
+   */
   constructor(props?: Partial<P.PatternProps>) {
-    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, blacklist: identifierBlacklist, ...props })
+    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, ...props })
+  }
+
+  /** Matches our `pattern`, and isn't one of the language's own words (its `blacklist`, `SP.LanguageWords`). */
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
+    return super.test(scope, tokens, start) && !SP.Language.of(scope).words.blacklist[`${tokens[start]!.value}`]
   }
 
   /** Match, then look up (but don't require) `match.data.scopeConstant` from `scope.constants`. */

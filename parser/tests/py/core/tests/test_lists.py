@@ -203,6 +203,17 @@ def test_an_id_as_a_things_none_until_read_then_a_property_before_its_items() ->
     assert Deck(id="spare-deck").id == "spare-deck"
 
 
+def test_a_name_built_in_none_until_given_then_a_property() -> None:
+    pile = List(["a"])
+    assert pile.name is None
+    assert pile.to_json() == {"$type": "List", "$items": ["a"]}
+    assert List(name="stock").name == "stock"
+    pile.name = "discards"
+    assert pile.to_json() == {"$type": "List", "name": "discards", "$items": ["a"]}
+    # a sub-class may declare it again, as text:  `a pile has a name as text`
+    assert Deck(name="spare").name == "spare"
+
+
 ####################
 # ## Positions:  indexes, from 0
 ####################

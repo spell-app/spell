@@ -5,7 +5,6 @@ import { MemberReadExpression } from "spell-lang/spell/rules/properties"
 import { NewThing } from "spell-lang/spell/rules/classes"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { assignment } from "./assignment.parser"
 
 /**
  * `assignment` rule:  assignment, via any of 4 equivalent surface forms:
@@ -48,11 +47,30 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     const read = match && MemberReadExpression.memberRead(match.groups.thing)
     const member = read?.member
     if (!match || !read || !(member instanceof P.ScopeVariable) || !(member.readAs || member.exclusive)) return match
-    const type = read.type ? ` of a ${SP.typeName(read.type.name)}` : ""
-    const why = member.exclusive
-      ? `it's the ${member.datatype} holding it -- move it to a ${member.datatype} instead`
-      : "spell works it out"
-    return SpellStatement.refuse(match, `Can't set the ${read.property.raw}${type}:  ${why}`)
+    const language = SP.Language.of(scope)
+    const property = `${read.property.raw}`
+    const theProperty = language.withArticle("definite", property)
+    const what = read.type
+      ? language.parserMessage("the-property-of-a-type", {
+          property,
+          theProperty,
+          type: SP.typeName(read.type.name),
+          aType: SP.SpellWarnings.exampleNoun(scope, read.type)
+        })
+      : language.parserMessage("the-property", { property, theProperty })
+    if (!member.exclusive) return SpellStatement.refuse(match, language.parserMessage("cant-set-worked-out", { what }))
+    const holder = `${member.datatype}`
+    const holderType = scope.getType(holder)
+    const holderWords = language.wordFor(holder)
+    return SpellStatement.refuse(
+      match,
+      language.parserMessage("cant-set-belongs-to", {
+        what,
+        holder,
+        theHolder: language.withArticle("definite", holderWords, holderType),
+        aHolder: language.withArticle("indefinite", holderWords, holderType)
+      })
+    )
   }
 
   /**
@@ -85,7 +103,10 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
       // which already accepts a plain name string as `.add()`/`.get()` input.
       const scope = match.scope as P.BlockScope
       const { variables } = scope
-      // `set it to ...` always declares a new `it` -- see `AssignmentStatement.declareIt()`
+      // `set it to ...` always declares a new `it` -- see `AssignmentStatement.declareIt()`.
+      // REFACTOR: `"it"` is the `it` VARIABLE's name,
+      // which spell's code shares (`MethodScope`, `Get`, `ItsProperty` ...):
+      // a language's own word for it (epic `spanish`) maps to that name where `variable` reads it, not here.
       const { datatype } = value
       if (varName === "it") {
         match.data.newIt = AssignmentStatement.declareIt(scope, match, datatype)
@@ -113,8 +134,9 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
    */
   private static warnListOfNothing(match: P.MatchFor<AssignmentStatement>, identifier: P.Match): void {
     const words = identifier.raw ?? `${identifier.value}`
-    const example = `set ${words} to a new list of ${SP.SpellWarnings.exampleItemType(match.scope, words)}`
-    SP.SpellWarnings.note(match, `Say what "${words}" holds, e.g. "${example}"`, match.groups.value)
+    const items = SP.SpellWarnings.exampleItemType(match.scope, words)
+    const message = SP.Language.of(match.scope).parserMessage("untyped-list-variable", { name: words, items })
+    SP.SpellWarnings.note(match, message, match.groups.value)
   }
 
   /**
@@ -151,11 +173,15 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     }
     // what it holds, when `V` doesn't say:  ask for its declaration (epic `output-targets`, Q24)
     if (!datatype) {
-      const words = property.raw ?? name
-      const typeWords = type.name.toLowerCase().replace(/_/g, "-")
-      const has = `${/^[aeiou]/i.test(typeWords) ? "an" : "a"} ${typeWords} has a ${words}`
-      const example = `${has} as ${SP.SpellWarnings.exampleType(match.scope, words)}`
-      SP.SpellWarnings.note(match, `Say what "${words}" is:  declare it, e.g. "${example}"`, thing)
+      const words = `${property.raw ?? name}`
+      const language = SP.Language.of(match.scope)
+      const message = language.parserMessage("untyped-set-property", {
+        name: words,
+        aName: language.withArticle("indefinite", words),
+        aType: SP.SpellWarnings.exampleNoun(match.scope, type),
+        type: SP.SpellWarnings.exampleType(match.scope, words)
+      })
+      SP.SpellWarnings.note(match, message, thing)
     }
   }
 
@@ -220,93 +246,13 @@ export class AssignmentStatement extends SpellStatement<"thing|value", Assignmen
     return number ? Number(number) : 1
   }
 }
-assignment.addRule(AssignmentStatement, {
-  syntax: "(thing:{expression}|{variable}) = {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: "unknown-var = yes",
-          js: "export const unknownVar = true",
-          ts: "export const unknownVar: boolean = true"
-        },
-        { title: "existing var", input: "thing = yes", js: "thing = true" }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "let (thing:{expression}|{variable}) = {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var: property set (won't work)",
-          input: `let the name of unknown-var = "bob"`,
-          js: `/* PARSE ERROR: Don't understand "let the name of unknown-var = "bob"" */`
-        },
-        {
-          title: "existing var: property set",
-          input: `let the name of thing = "bob"`,
-          js: `thing.name = "bob"`
-        }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "set (thing:{expression}|{variable}) to {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: "set unknown-var to yes",
-          js: "export const unknownVar = true",
-          ts: "export const unknownVar: boolean = true"
-        },
-        { title: "existing var", input: "set thing to yes", js: "thing = true" },
-        {
-          title: "alias var reassign works",
-          input: "set it to the name of it",
-          js: "const it = this.name"
-        },
-        {
-          title: "assignment to alias property doesn't redefine alias",
-          input: "set the title of it to the name of it",
-          js: "this.title = this.name"
-        }
-      ]
-    }
-  ]
-})
-assignment.addRule(AssignmentStatement, {
-  syntax: "{thing:variable} is {value:expression}",
-  tests: [
-    {
-      ...setupAssignmentStatement(),
-      tests: [
-        {
-          title: "non-existing var",
-          input: `bob is a new person whose name is "bob"`,
-          js: 'export const bob = new Person({ name: "bob" })'
-        },
-        { title: "existing var", input: "thing is a new person", js: "thing = new Person()" }
-      ]
-    }
-  ]
-})
 
 /**
  * Test setup shared by each `assignment` syntax:
  * spread into a test block, e.g. `{ ...setupAssignmentStatement(), tests: [...] }`.
  * - `beforeEach` adds variable `thing`, alias `it` (=> `this`) and type `Person`.
  */
-function setupAssignmentStatement(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
+export function setupAssignmentStatement(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
   return {
     compileAs: "block",
     beforeEach(scope: P.Scope) {

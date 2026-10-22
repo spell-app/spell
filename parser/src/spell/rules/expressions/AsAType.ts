@@ -3,13 +3,14 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
- * `as_a_type` rule:  `as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer`
- *   -- casts value to `string`/`number`/`fraction`/`integer`/`text`.
- * - `string`/`text` wrap output in a template-literal `${...}` via `BackTickExpression`.
- * - `number`/`fraction` compile to `parseFloat()`, `integer` to `parseInt()`.
+ * `as_a_type` rule:  `as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.
+ * - e.g. `1 as a string`, `1.4 as an integer`
+ * - The type is read through the language's own type words (`SP.Language.typeWords`), so no English word is read here:
+ *   `string` and Spanish's `cadena` both mean `text`.
+ * - `text` wraps output in a template-literal `${...}` via `BackTickExpression`.
+ * - `integer` compiles to `parseInt()`, any other number type (`number`, `fraction`) to `parseFloat()`.
  */
 export class AsAType extends PostfixOperatorSuffix<"type"> {
   @proto static precedence = Precedence.comparison
@@ -17,15 +18,21 @@ export class AsAType extends PostfixOperatorSuffix<"type"> {
 
   /** The type it converts to, in spell's words, e.g. `text` for `as a string`. */
   getResultDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
-    return SP.typeName(`${match.groups.type.value}`)
+    return this.castType(match)
+  }
+
+  /** What our `type` means, in spell's own type names, e.g. `text` for `string` or `cadena`. */
+  castType(match: P.MatchFor<this>): P.Datatype {
+    const { typeWords, words } = SP.Language.of(match.scope)
+    return P.typeName(`${match.groups.type.value}`, typeWords, words.listOfWord)
   }
 
   compileASTExpression(
     match: P.MatchFor<this>,
     { lhs }: OperatorOperands
   ): P.ASTBackTickExpression | P.ASTMethodInvocation {
-    const type = match.groups.type.value
-    if (type === "string" || type === "text") {
+    const type = this.castType(match)
+    if (type === "text") {
       // Wrap the expression in backticks to convert it to a string.
       // Output is something like: "`${EXPRESSION_VALUE}`"
       return new P.ASTBackTickExpression(match, {
@@ -41,29 +48,3 @@ export class AsAType extends PostfixOperatorSuffix<"type"> {
     }
   }
 }
-expressions.addRule(AsAType, {
-  syntax: "as (a|an) (type:string|number|fraction|integer)",
-  // es: "como (un|una) (type:cadena|numero|fracción|entero)"
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        ["1 as a string", "`${1}`"],
-        [`"hello" as a string`, '`${"hello"}`'],
-        ["1 as a number", "parseFloat(1)"],
-        ["1.3 as a fraction", "parseFloat(1.3)"],
-        ["1.4 as an integer", "parseInt(1.4)"],
-        [`"foo" as a number`, `parseFloat("foo")`]
-      ]
-    }
-  ]
-})
-expressions.addRule(AsAType, {
-  syntax: "as (type:text)",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [["1 as text", "`${1}`"]]
-    }
-  ]
-})

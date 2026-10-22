@@ -5,13 +5,16 @@ import { parseSync } from "vite-plus"
 import { P } from "spell-lang/parser"
 import { PY } from "spell-lang/py"
 import { core } from "spell-lang/core"
-import { spellParser } from "spell-lang/spell"
+import { SP } from "spell-lang/spell"
 
 /**
- * The spell syntax table:  every rule class of the base spell language, what it's for, each syntax it's registered
- * with, and what an example of each compiles to in each writer.
- * - Written to `spellSyntax.json`, at `spell/`'s root, by `yarn spell:gen:syntax` (`writeSpellSyntax.ts`).
- *   - `spellSyntax.test.ts` fails when that file and the rules differ.
+ * The spell syntax table of one human language:  every rule class of the base spell language, what it's for,
+ * each syntax it's registered with in that language, and what an example of each compiles to in each writer.
+ * - `language`:  whose registrations and tests, English's by default (epic `spanish`).
+ * - Written by `yarn spell:gen:syntax` (`writeSpellSyntax.ts`), at `spell/`'s root, a file per language:
+ *   - English's:  `spellSyntax.json`
+ *   - each other's:  `spellSyntax.<lang>.json`, e.g. `spellSyntax.es.json` -- see `spellSyntaxFileFor()`
+ *   - `spellSyntax.test.ts` fails when those files and the rules differ.
  *   - The spell syntax guide draws it (`guides/spell-syntax/spell-syntax.html`),
  *     from the checkout serving the page, so each branch shows its own rules.
  * - One row per rule CLASS, by module (the folder it's registered from, `rules/math/` ...):
@@ -20,13 +23,16 @@ import { spellParser } from "spell-lang/spell"
  *   - INTERNAL:  a rule class in `src/rules/` that's never registered itself, e.g. a base class (`SpellStatement`)
  *   - in a module, its internal rows first (by name), then its registered ones (in registration order)
  * - Each syntax's example:  the first input of its own tests that compiles (`examplesOf()`).
+ *   - In the language's own words:  Spanish's from its Spanish tests (`<module>.es.ts`).
  *   - Each writer writes it as its rule test would:  `js` and `ts` are what the rule's tests expect, once they pass.
  *   - Comments are left out of the example and of what the writers write (`withoutComments()`).
  * - The aliases:  the other rule names it answers to, e.g. `expression` (`@proto static alias`).
  * - The purpose:  the class docstring's first sentence, without its "`is_gt_lt` rule:" lead.
+ *   - In English, for every language:  the rule classes are shared.
  * - NODE-ONLY:  reads the rule files' source, for their docstrings.  NOT in the barrel.
  */
-export function spellSyntax(parser: P.Parser = spellParser): SpellSyntaxData {
+export function spellSyntax(language: SP.Language = SP.Language.default): SpellSyntaxData {
+  const { parser } = language
   const sources = classSources()
   const registered = registeredClasses(parser)
   const ancestors = ancestorClasses(registered)
@@ -58,7 +64,7 @@ export function spellSyntax(parser: P.Parser = spellParser): SpellSyntaxData {
     })
   }
   return {
-    about: ABOUT,
+    about: language === SP.Language.default ? ABOUT : `${ABOUT}  ${language.name}'s rules:  \`${language.lang}\`.`,
     modules: [...modules].map(([module, rules]) => ({
       module,
       rules: [...sortedInternal(rules), ...rules.filter((rule) => !rule.internal)]
@@ -417,8 +423,17 @@ function firstLine(text: string): string {
   return text.split("\n")[0]!.trim()
 }
 
-/** The file `yarn spell:gen:syntax` writes, at `spell/`'s root. */
+/** The file `yarn spell:gen:syntax` writes for English, at `spell/`'s root. */
 export const SPELL_SYNTAX_FILE = "spellSyntax.json"
+
+/**
+ * The file `yarn spell:gen:syntax` writes for `language`, at `spell/`'s root:
+ * - English's (the default language's):  `SPELL_SYNTAX_FILE`, `spellSyntax.json`
+ * - another's:  its code before `.json`, e.g. `spellSyntax.es.json`
+ */
+export function spellSyntaxFileFor(language: SP.Language): string {
+  return language === SP.Language.default ? SPELL_SYNTAX_FILE : `spellSyntax.${language.lang}.json`
+}
 
 /** spell-lang's root:  file paths in the data are from here (`src/spell/rules/...`). */
 const REPO_ROOT = resolve(import.meta.dirname, "../../..")
@@ -456,7 +471,7 @@ const ABOUT =
 // ## Types
 ////////////////
 
-/** What `spellSyntax()` returns, and `spellSyntax.json` holds. */
+/** What `spellSyntax()` returns, and `spellSyntax.json` (or a language's own, `spellSyntax.es.json`) holds. */
 export type SpellSyntaxData = {
   /** The file's own note:  generated, by what. */
   about: string

@@ -1,11 +1,10 @@
-import { instanceCase, pluralize, proto } from "spell-kit/util"
+import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `belongs_to_one` rule:  `a card belongs to one pile` -- a card is in at most ONE pile at a time
@@ -14,9 +13,9 @@ import { classes } from "./classes.parser"
  *   Adding a card to one takes it out of the other.
  * - A list outside the family, e.g. `a deck is a list of cards`, stays outside:
  *   a card can be in the deck AND one pile.
- * - Both types MUST be declared ABOVE, e.g. `a pile is a list of cards`:
- *   what we compile to needs both classes.  A type only mentioned so far (a stub) is refused, as is
- *   a list type of spell's own, e.g. `one list`:  it'd make every list hold a card once.
+ * - Both types MUST be declared ABOVE, e.g. `a pile is a list of cards`:  what we compile to needs both classes.
+ *   - A type only mentioned so far (a stub) is refused,
+ *     as is a list type of spell's own, e.g. `one list`:  it'd make every list hold a card once.
  * - SIDE EFFECT:  the item type gains a READ-ONLY member naming the list type, `the pile of a card`:
  *   the pile holding it, or nothing.  Declared by THIS line -- see `P.TypeScope.declareOwnerMember()`.
  *   - A built-in item type, e.g. `a thing belongs to one bag`, gets NO member:
@@ -34,8 +33,13 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
   @proto static declares: P.DeclaresSpec = { kind: "property", name: "list", of: "type" }
 
   /** `it belongs to a pile` => `a card belongs to one pile` -- see `SpellStatement.getLongForm()`. */
-  getLongForm(match: P.Match): string | undefined {
-    return super.getLongForm(match)?.replace(/ belongs to (a|an) /i, " belongs to one ")
+  getLongForm(match: P.MatchFor<this>): string | undefined {
+    const params = SpellStatement.longFormParams(match)
+    if (!params || super.getLongForm(match) === undefined) return undefined
+    const language = SP.Language.of(match.scope)
+    const list = `${match.groups.list.raw}`
+    const aList = language.withArticle("indefinite", list, BelongsToOne.typeOf(match.groups.list))
+    return language.parserMessage("long-form-belongs-to-one", { ...params, list, aList })
   }
 
   /** Refused unless both types are declared above, and `list` is a list type of the project's -- see class docs. */
@@ -43,22 +47,34 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     const { type, list } = match.groups
+    const language = SP.Language.of(scope)
     const sentence = `"${match.inputText.trim()}"`
+    const typeWords = `${type.raw}`
+    const listWords = `${list.raw}`
+    const aType = language.withArticle("indefinite", typeWords, BelongsToOne.typeOf(type))
+    const aList = language.withArticle("indefinite", listWords, BelongsToOne.typeOf(list))
+    const listExample = language.parserMessage("example-list-type", {
+      list: listWords,
+      aList,
+      items: P.pluralize(typeWords)
+    })
     for (const [word, example] of [
-      [type, `a ${type.raw} is a thing`],
-      [list, `a ${list.raw} is a list of ${pluralize(`${type.raw}`)}`]
+      [type, SpellStatement.exampleTypeDeclaration(scope, typeWords)],
+      [list, listExample]
     ] as const) {
       const declared = BelongsToOne.typeOf(word)
       if (!declared || declared.stub) {
-        return SpellStatement.refuse(match, `Can't say ${sentence} yet:  declare "${example}" above it`)
+        return SpellStatement.refuse(match, language.parserMessage("belongs-to-undeclared", { sentence, example }))
       }
     }
     const listType = BelongsToOne.typeOf(list)!
     if (SP.isBuiltInTypeScope(listType)) {
-      return SpellStatement.refuse(match, `Can't say ${sentence}:  every list would hold a ${type.raw} once`)
+      const message = language.parserMessage("belongs-to-built-in-list", { sentence, type: typeWords, aType })
+      return SpellStatement.refuse(match, message)
     }
     if (!listType.isA("list")) {
-      return SpellStatement.refuse(match, `Can't say ${sentence}:  a ${list.raw} isn't a list`)
+      const message = language.parserMessage("belongs-to-not-a-list", { sentence, list: listWords, aList })
+      return SpellStatement.refuse(match, message)
     }
     return match
   }
@@ -109,66 +125,9 @@ export class BelongsToOne extends SpellStatement<"type|list"> {
     return new P.ASTPatchedMember(match, {
       member: new P.ASTPropertyDefinition(match, {
         type: itemAST,
-        property: instanceCase(listAST.runtimeName),
+        property: P.instanceCase(listAST.runtimeName),
         get: new P.ASTMethodDefinition(match, { body: new P.ASTReturnStatement(match, { value: owner }) })
       })
     })
   }
 }
-classes.addRule(BelongsToOne, {
-  syntax: "(a|an) {type} belongs to one {list:type}",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse(["a card is a thing", "a pile is a list of cards", "a bag is a list of things"].join("\n"), "block")
-      },
-      tests: [
-        [
-          "a card belongs to one pile",
-          [
-            "Pile.exclusive = true",
-            'Object.defineProperty(Card.prototype, "pile", {',
-            "  get() {",
-            "    return Pile.ownerOf(this)",
-            "  },",
-            "  configurable: true",
-            "})"
-          ],
-          [
-            "Pile.exclusive = true",
-            "export interface Card { readonly pile: Pile }",
-            'Object.defineProperty(Card.prototype, "pile", {',
-            "  get(this: Card) {",
-            "    return Pile.ownerOf(this)!",
-            "  },",
-            "  configurable: true",
-            "})"
-          ]
-        ],
-        {
-          title: "a built-in item type:  no member, it'd go on a type every project shares",
-          input: "a thing belongs to one bag",
-          js: "Bag.exclusive = true"
-        },
-        {
-          title: "both types MUST be declared above",
-          input: "a card belongs to one hand",
-          js: `/* PARSE ERROR: Can't say "a card belongs to one hand" yet:  declare "a hand is a list of cards" above it */`
-        },
-        {
-          title: "the list type MUST be a list of the project's",
-          input: ["a card belongs to one list", "a card belongs to one card"],
-          js: [
-            `/* PARSE ERROR: Can't say "a card belongs to one list":  every list would hold a card once */`,
-            `/* PARSE ERROR: Can't say "a card belongs to one card":  a card isn't a list */`
-          ]
-        }
-      ]
-    }
-  ]
-})
-// in an outline body:  `- it belongs to a deck` -- tests in `parserTests/outline.test.ts`
-classes.addRule(BelongsToOne, { syntax: "{type:subject_it} belongs to (one|a|an) {list:type}" })
-// ... and with the subject left out (P8):  `- belongs to a pile`
-classes.addRule(BelongsToOne, { syntax: "{type:subject_implied} belongs to (one|a|an) {list:type}" })

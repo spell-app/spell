@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `includes` rule:  `{lhs} includes`/`contains {rhs}`, e.g. `theList includes thing`.
@@ -18,19 +17,3 @@ export class Includes extends InfixOperatorSuffix<"operator|expression"> {
     })
   }
 }
-expressions.addRule(Includes, {
-  syntax: "(operator:includes|contains) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("theList")
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["theList includes thing", "core.includes(theList, thing)"],
-        ["theList contains thing", "core.includes(theList, thing)"]
-      ]
-    }
-  ]
-})

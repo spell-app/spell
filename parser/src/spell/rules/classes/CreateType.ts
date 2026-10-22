@@ -1,12 +1,12 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 import { isDrawableType } from "./classes.shared"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
  * `create_type` rule:  `a card is a thing` -- declares `type` as a new class extending `superType`.
- * - Its name may be several words, with a short name:  `a bank account aka account is a thing` -- see `TypeDeclaration`.
+ * - Its name may be several words, with a short name (see `TypeDeclaration`):
+ *   `a bank account aka account is a thing`
  * - `Priority.declaration`, so this wins over other `{type} is {type}` -ish statement rules.
  * - SIDE EFFECT: adds `type` to `scope.types`, unless it's already defined (no redefinition/merge) --
  *   see `TypeDeclaration.declareType()`.
@@ -53,121 +53,3 @@ export class CreateType extends TypeDeclaration<
     })
   }
 }
-classes.addRule(CreateType, {
-  syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        ["a card is a thing", "export class Card extends Thing {}"],
-        ["a deck is a list", "export class Deck extends List {}"],
-        ["a bank account is a thing", "export class BankAccount extends Thing {}"],
-        ["a bank account aka account is a thing", "export class BankAccount extends Thing {}"],
-        [
-          "a card is a drawable thing",
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-class-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its card's properties;  its methods call its card's.",
-            " * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.",
-            " */",
-            "export class CardElement extends SpellElement<Card> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-card", "card", [])',
-            "}",
-            "core.useElement(Card, CardElement)"
-          ]
-        ],
-        [
-          "a card is a drawable",
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-class-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its card's properties;  its methods call its card's.",
-            " * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.",
-            " */",
-            "export class CardElement extends SpellElement<Card> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-card", "card", [])',
-            "}",
-            "core.useElement(Card, CardElement)"
-          ]
-        ],
-        [
-          "a pile is a drawable list",
-          [
-            "export class Pile extends DrawableList {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}"
-          ],
-          [
-            "export class Pile extends DrawableList {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "}",
-            "",
-            "/**",
-            " * `<test-class-pile>`:  a pile, drawn in its own element, e.g. by `draw the pile`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its pile's properties;  its methods call its pile's.",
-            " * - What every drawable thing's element does, e.g. drawing its pile, is `SpellElement`'s.",
-            " */",
-            "export class PileElement extends SpellElement<Pile> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-pile", "pile", [])',
-            "}",
-            "core.useElement(Pile, PileElement)"
-          ]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        ["a card is a thing where:", "export class Card extends Thing {}"],
-        ["a card is a thing:", "export class Card extends Thing {}"],
-        [
-          ["a card is a thing with:", "\t- it has a rank as a number"],
-          [
-            "export class Card extends Thing {",
-            "  // - it has a rank as a number",
-            '  static { this.declareProp("rank", { type: "number" }) }',
-            '  get rank() { return this.getProp("rank") }',
-            '  set rank(value) { this.setProp("rank", value) }',
-            "}"
-          ],
-          [
-            "export class Card extends Thing {",
-            "  // - it has a rank as a number",
-            '  @prop({ type: "number" })',
-            "  accessor rank!: number",
-            "}"
-          ]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(CreateType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?",
-  tests: [
-    { compileAs: "statement", tests: [['a "card" is a thing', "export class Card extends Thing {}"]] },
-    { compileAs: "block", tests: [['a "card" is a thing where:', "export class Card extends Thing {}"]] }
-  ]
-})

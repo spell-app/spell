@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority, declaredPrefix } from "spell-lang/spell/rules/rules.types"
 import { getKnownType } from "spell-lang/spell/rules/types"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { classes } from "./classes.parser"
 
 /**
  * `class_member` rule:  `{type} {member words}` -- a class variable of a known type, e.g.:
@@ -42,31 +41,6 @@ export class ClassMember extends SpellExpression<"type|member", ClassMemberData>
     })
   }
 }
-classes.addRule(ClassMember, {
-  syntax: "{type:known_type} {member:member_words}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(
-          [
-            "a card is a thing",
-            "a card has a suit as one of clubs, diamonds",
-            "a bank-account is a thing",
-            "a bank-account has an account-type as one of savings, checking"
-          ].join("\n"),
-          "block"
-        )
-      },
-      tests: [
-        ["card suits", "Card.Suits"],
-        ["Card Suits", "Card.Suits"],
-        ["bank-account account-types", "BankAccount.AccountTypes"],
-        { title: "not a class variable", input: "card ranks", js: undefined }
-      ]
-    }
-  ]
-})
 
 /** What `class_member` stashes on its match. */
 type ClassMemberData = {

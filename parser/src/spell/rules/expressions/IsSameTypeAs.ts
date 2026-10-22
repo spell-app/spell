@@ -2,19 +2,15 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `is_same_type_as` rule:  `{lhs} is [not] the same type as {rhs}`, e.g. `thing is the same type as other`.
- * - `shouldNegateOutput()` handles `is not the same type as`.
+ * - Negated by its word rule's `negated` forms, e.g. `isn't` -- see `Negatable`.
  * - Compiles to `core.matchesType(lhs, rhs)`.
  */
 export class IsSameTypeAs extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.comparison
 
-  shouldNegateOutput(operator: P.Match): boolean {
-    return typeof operator.value === "string" && operator.value.includes("not")
-  }
   compileASTExpression(match: P.MatchFor<this>, { lhs, rhs }: OperatorOperands): P.ASTCoreMethodInvocation {
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "matchesType",
@@ -22,19 +18,3 @@ export class IsSameTypeAs extends InfixOperatorSuffix<"operator|expression"> {
     })
   }
 }
-expressions.addRule(IsSameTypeAs, {
-  syntax: "(operator:is not? the same type as) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("thing")
-        scope.variables?.add("other")
-      },
-      tests: [
-        ["thing is the same type as other", "core.matchesType(thing, other)"],
-        ["thing is not the same type as other", "!core.matchesType(thing, other)"]
-      ]
-    }
-  ]
-})

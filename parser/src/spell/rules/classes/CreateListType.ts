@@ -1,17 +1,16 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { classes } from "./classes.parser"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**
- * `create_list_type` rule:  `a deck is a list of cards` or `create a type called Deck as a list of cards` -- declares
- * `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.
+ * `create_list_type` rule:  `a deck is a list of cards` or `create a type called Deck as a list of cards` --
+ * declares `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.
  * - `Priority.declaration`, so this wins over the plainer `create_type` rule above for the `is a list of` form.
  * - SIDE EFFECT: adds `type` to `scope.types` (superType `"list"`), unless already defined --
  *   with its `itemType`, e.g. `Card`, so `the first card of the deck` knows it's a card.
- * - Its name may be several words, with a short name:  `a draw pile aka pile is a list of cards` -- see
- *   `TypeDeclaration`.
+ * - Its name may be several words, with a short name (see `TypeDeclaration`):
+ *   `a draw pile aka pile is a list of cards`
  * - Compiles to a class declaration extending `List` with a static `instanceType`,
  *   e.g. `a deck is a list of cards` => `export class Deck extends List {` + `static instanceType = Card` + `}`.
  * - A card in at most ONE pile at a time:  `a card belongs to one pile`, below.
@@ -28,8 +27,8 @@ export class CreateListType extends TypeDeclaration<
   /**
    * Notes whether what it holds is declared BELOW us, e.g. `a deck is a list of cards` above `a card is a thing`:
    * then its class is read when used -- `static get instanceType() { return Card }` -- as `Card` isn't defined yet.
-   * - A value kind on us, e.g. the deck's `"suits" as one of ...`, is why:  the card says `its "suit" is a suit`,
-   *   so the deck comes first (epic page `outline-spell`, P2).
+   * - A value kind on us, e.g. the deck's `"suits" as one of ...`, is why:
+   *   the card says `its "suit" is a suit`, so the deck comes first (epic page `outline-spell`, P2).
    * - Then refuses a name some other type already goes by -- see `TypeDeclaration.refuseTakenNames()`.
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
@@ -69,70 +68,3 @@ export class CreateListType extends TypeDeclaration<
     })
   }
 }
-classes.addRule(CreateListType, {
-  syntax: "create a type (named|called) {type} as (a|an) list of {instanceType:type}",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          "create a type named hand as a list of cards",
-          ["export class Hand extends List {", "  static instanceType = Card", "}"],
-          ["export class Hand extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})
-// TODO: "{plural_type} are a list of ..."
-classes.addRule(CreateListType, {
-  syntax:
-    "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) list of {instanceType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          "a deck is a list of cards",
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        [
-          "a deck is a list of cards with:",
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})
-classes.addRule(CreateListType, {
-  syntax: "(a|an) {type:quoted_type} is (a|an) list of {instanceType:type} {with_nested_statements}?",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [
-          'a "deck" is a list of cards',
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    },
-    {
-      compileAs: "block",
-      tests: [
-        [
-          'a "deck" is a list of cards with:',
-          ["export class Deck extends List {", "  static instanceType = Card", "}"],
-          ["export class Deck extends List<Card> {", "  static instanceType = Card", "}"]
-        ]
-      ]
-    }
-  ]
-})

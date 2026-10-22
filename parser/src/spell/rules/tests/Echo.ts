@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { tests } from "./tests.parser"
 
 /** `echo` rule:  `echo {expression}` -- print `expression`'s value, e.g. for debugging. */
 export class Echo extends SpellStatement<"expression"> {
@@ -15,15 +14,3 @@ export class Echo extends SpellStatement<"expression"> {
     })
   }
 }
-tests.addRule(Echo, {
-  syntax: "echo {expression}",
-  tests: [
-    {
-      tests: [
-        [`echo 1`, `core.echo(1)`],
-        [`echo "foo"`, `core.echo("foo")`],
-        ["echo the rank of a new thing", "core.echo((new Thing()).rank)"]
-      ]
-    }
-  ]
-})

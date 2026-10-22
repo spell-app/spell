@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 // Import directly to avoid circular import
 import { MustRule } from "./MustRule"
 
@@ -33,8 +32,12 @@ export class PropertyMust extends SpellStatement<"type|property|rule"> {
     const typeScope = P.TypeScope.getOrStub(match.scope, `${type.value}`, match)
     const name = `${property.value}`
     if (typeScope.addPropertyRules(name, [MustRule.ruleOf(rule as P.MatchFor<MustRule>)], match)) return
-    const words = property.raw ?? name
-    SP.SpellWarnings.note(match, `Declare "${words}" above its rule, e.g. "- it has a ${words} as text"`)
+    const words = `${property.raw ?? name}`
+    const aName = SP.Language.of(match.scope).withArticle("indefinite", words)
+    SP.SpellWarnings.note(
+      match,
+      SP.Language.of(match.scope).parserMessage("rule-before-property", { name: words, aName })
+    )
   }
 
   getAST(match: P.MatchFor<this>): P.ASTPropertyRules {
@@ -46,12 +49,3 @@ export class PropertyMust extends SpellStatement<"type|property|rule"> {
     })
   }
 }
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_its} {property:member_words} must {rule:must_rule}"
-})
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_its} {property:quoted_member} must {rule:must_rule}"
-})
-classes.addRule(PropertyMust, {
-  syntax: "{type:subject_implied} {property:body_member_words} must {rule:must_rule}"
-})

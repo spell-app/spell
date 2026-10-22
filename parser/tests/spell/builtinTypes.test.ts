@@ -68,7 +68,11 @@ describe("built-in type table", () => {
     const stored = SP.BUILT_IN_TYPE_TABLE.flatMap((entry) =>
       entry.members.filter((member) => member.stored).map((member) => ({ entry, member }))
     )
-    expect(stored.map(({ entry, member }) => `${entry.name}'s ${member.words}`)).toEqual(["thing's id", "list's id"])
+    expect(stored.map(({ entry, member }) => `${entry.name}'s ${member.words}`)).toEqual([
+      "thing's id",
+      "list's id",
+      "list's name"
+    ])
     const runtime: Record<string, () => Record<string, unknown>> = {
       thing: () => new Thing() as unknown as Record<string, unknown>,
       list: () => new List({}) as unknown as Record<string, unknown>
@@ -76,14 +80,38 @@ describe("built-in type table", () => {
     for (const { entry, member } of stored) {
       const where = `${entry.name}'s ${member.words}`
       const name = SP.builtInMemberName(member.words)
-      expect(SP.SpellParser.rootScope.types.get(entry.name)!.getMember(name), where).toMatchObject({ name })
-      expect(SP.isBuiltInStoredMember(member.words), where).toBe(true)
+      const type = SP.SpellParser.rootScope.types.get(entry.name)!
+      expect(type.getMember(name), where).toMatchObject({ name })
+      expect(SP.builtInStoredMember(type, member.words), where).toMatchObject({ member, name, on: entry.name })
       const value = runtime[entry.name]!()
       value[name] = "kept"
       expect(value[name], where).toBe("kept")
     }
-    // any other name is a type's own to declare
-    expect(SP.isBuiltInStoredMember("name")).toBe(false)
+  })
+
+  test("`builtInStoredMember()`:  what a type has built in, through the built-in type it comes from", () => {
+    const root = SP.SpellParser.rootScope
+    const project = new P.ProjectScope({ name: "test", path: "/test", parser: root.parser!, parentScope: root })
+    const [pile, card, stub] = project.types!.add(
+      { name: "pile", superType: "list" },
+      { name: "card", superType: "thing" },
+      { name: "club" }
+    )
+    expect(SP.builtInStoredMember(pile, "name")).toMatchObject({ name: "name", on: "list" })
+    expect(SP.builtInStoredMember(pile, "id")).toMatchObject({ name: "id", on: "list" })
+    // a thing has no `name`:  any type may declare one
+    expect(SP.builtInStoredMember(card, "name")).toBeUndefined()
+    expect(SP.builtInStoredMember(card, "id")).toMatchObject({ name: "id", on: "thing" })
+    // its super-types unknown:  only what no type may declare
+    expect(SP.builtInStoredMember(stub, "id")).toMatchObject({ name: "id" })
+    expect(SP.builtInStoredMember(stub, "name")).toBeUndefined()
+  })
+
+  test("a `stored` member in another language's words compiles to its own name:  Spanish's `nombre` is `name`", () => {
+    const list = SP.spanish.rootScope.types.get("list", "LOCAL_ONLY")!
+    expect(list.getMember("nombre")).toMatchObject({ name: "nombre", output: "name", datatype: "text" })
+    expect(list.getMember("id")).toMatchObject({ name: "id" })
+    expect(list.getMember("id")).not.toHaveProperty("output")
   })
 
   test("a template that's none of the forms is refused", () => {

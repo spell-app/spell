@@ -1,6 +1,6 @@
-import { NONE, getPlurality, proto, type Plurality } from "spell-kit/util"
+import { NONE, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { identifierBlacklist } from "spell-lang/spell/rules/identifier-blacklist"
+import { SP } from "spell-lang/spell"
 import { type IdentifierMatchData } from "./variables.shared"
 
 /**
@@ -18,9 +18,17 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Editors colour every identifier as a variable -- `SpellLanguageService` refines to `parameter` for arguments. */
   @proto static highlightAs?: P.HighlightKind = "variable"
 
-  /** Every identifier rule matches the same thing:  alpha-numeric word (dashes / underscores OK), not blacklisted. */
+  /**
+   * Every identifier rule matches the same thing:
+   * an alpha-numeric word (dashes / underscores OK), not the language's own (`test()`).
+   */
   constructor(props?: Partial<P.PatternProps>) {
-    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, blacklist: identifierBlacklist, ...props })
+    super({ pattern: P.ALPHANUMERIC_WORD_WITH_DASHES, ...props })
+  }
+
+  /** Matches our `pattern`, and isn't one of the language's own words (its `blacklist`, `SP.LanguageWords`). */
+  test(scope: P.Scope, tokens: P.Token[], start = 0) {
+    return super.test(scope, tokens, start) && !SP.Language.of(scope).words.blacklist[`${tokens[start]!.value}`]
   }
 
   /**
@@ -29,8 +37,8 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
    *   and subclasses which know better override it, e.g. `singular_identifier` always says `"singular"`.
    * - Ask from elsewhere as `if (match.is(SpellIdentifier)) match.rule.getPlurality(match)`.
    */
-  getPlurality(match: P.MatchFor<this>): Plurality {
-    return getPlurality(`${match.raw ?? match.value}`)
+  getPlurality(match: P.MatchFor<this>): P.Plurality {
+    return P.getPlurality(`${match.raw ?? match.value}`)
   }
 
   /** Map value by converting dashes and whitespace to underscores. */
@@ -41,8 +49,21 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
   /** Match a word, remembering the scope variable it names as `match.data.scopeVar` -- see class docs. */
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match) match.data.scopeVar = scope.variables?.get(match.value) ?? NONE
+    if (match) match.data.scopeVar = SpellIdentifier.scopeVariableFor(scope, match.value) ?? NONE
     return match
+  }
+
+  /**
+   * The scope variable `name` names, if any.
+   * - A language's word for `it` as an object (Spanish's `eso`, `SP.LanguageWords.itWords`) names the `it` variable,
+   *   unless a variable of that name is in scope.
+   */
+  static scopeVariableFor(scope: P.Scope, name: string): P.ScopeVariable | undefined {
+    const variables = scope.variables
+    if (!variables) return undefined
+    const named = variables.get(name)
+    if (named || !SP.Language.of(scope).words.itWords?.has(name)) return named
+    return variables.get("it")
   }
 
   /** What the variable it named holds, if known -- see `P.ScopeVariable.datatype`. */
@@ -63,8 +84,8 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
     const { scopeVar } = match.data
     const variable = scopeVar === NONE ? undefined : scopeVar
     if (variable?.output === "this") return new P.ASTSelfLiteral(match, { value: "this", raw: match.raw })
-    // Allow variable to override name if it wants to (e.g. "it")
-    const name = variable && variable.output ? variable.output : match.value
+    // Allow variable to override name if it wants to (e.g. "it");  a word for `it` (Spanish's `eso`) writes `it`
+    const name = variable?.output ? variable.output : variable?.name === "it" ? "it" : match.value
     const plurality = this.getPlurality(match) === "plural" ? "plural" : "singular"
     return new P.ASTVariableExpression(match, { raw: match.raw, name, variable, plurality })
   }

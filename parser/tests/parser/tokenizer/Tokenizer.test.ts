@@ -1229,3 +1229,26 @@ describe("raw-text JSX tags (`rawTextTags`)", () => {
     expect(element.children?.[0]).toBeInstanceOf(JSXExpressionToken)
   })
 })
+
+//
+//  Words in any script (epic `spanish` P1)
+//
+describe("words in any script", () => {
+  test("accented letters and ñ are word characters", () => {
+    const words = tokenizer.tokenize("año corazón Árbol niño-pequeño").filter((token) => token instanceof WordToken)
+    expect(words.map((token) => token.value)).toEqual(["año", "corazón", "Árbol", "niño-pequeño"])
+  })
+  test("¿ and ¡ are symbols around a word", () => {
+    const tokens = tokenizer.tokenize("¿qué?")
+    expect(tokens.map((token) => token.constructor)).toEqual([SymbolToken, WordToken, SymbolToken])
+    expect(tokens[1]!.value).toBe("qué")
+  })
+  test("a decomposed accent reads as the composed word, at the text's own positions", () => {
+    const decomposed = "corazón" // `o` plus a combining acute accent
+    const [word] = tokenizer.tokenize(decomposed)
+    expect(word).toBeInstanceOf(WordToken)
+    expect(word!.value).toBe("corazón")
+    expect(word!.raw).toBe(decomposed)
+    expect(word!.next).toBe(decomposed.length)
+  })
+})

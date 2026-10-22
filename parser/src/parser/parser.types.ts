@@ -1,12 +1,28 @@
-import { CustomError, pluralize, singularize, typeCase } from "spell-kit/util"
+import { CustomError } from "spell-kit/util"
+
+import { pluralize, singularize, typeCase } from "./Inflector"
 import type { P } from "spell-lang/parser"
 
 export type { RulexParser } from "spell-lang/parser/rulex/RulexParser"
 
 // ## Patterns
 
-/** Alpha-numeric word, including dashes or underscores. */
-export const ALPHANUMERIC_WORD_WITH_DASHES = /^[a-zA-Z][\w-]*$/
+/**
+ * A word:  a letter in any script, then letters, accents, digits, `_` or `-`, e.g. `foo-bar2`, `año`, `corazón`.
+ * - Letters are `\p{L}`, accents `\p{M}` (a mark on its own, when a text isn't normalized), digits `\d`.
+ * - The tokenizer reads words the same way (`Tokenizer.WORD_START` / `WORD_CHAR`).
+ */
+export const ALPHANUMERIC_WORD_WITH_DASHES = /^\p{L}[\p{L}\p{M}\d_-]*$/u
+/** A word starting with a capital, any script:  a type's or a thing's name, e.g. `Card`, `Árbol`. */
+export const UPPER_INITIAL_WORD_WITH_DASHES = /^\p{Lu}[\p{L}\p{M}\d_-]*$/u
+/** A word starting with a small letter, any script:  a property's name, e.g. `foo`, `niño-2`. */
+export const LOWER_INITIAL_WORD_WITH_DASHES = /^\p{Ll}[\p{L}\p{M}\d_-]*$/u
+/**
+ * Where a camelCase name splits into its words:
+ * before a capital that follows a small letter or a digit, e.g. `bankAccount`, `año2Nuevo`.
+ * - Global, for `split()` and `replace()`;  never `test()` it.
+ */
+export const CAMEL_WORD_BOUNDARY = /(?<=[\p{Ll}\d])(?=\p{Lu})/gu
 
 // ## Datatypes
 
@@ -25,8 +41,9 @@ export type Datatype = string
 /**
  * Spell's built-in types, by their datatype, with each one's super-type.
  * - The root scope has a `TypeScope` for each -- see `SpellParser.rootScope`.
- * - Their members, e.g. `the length of the name`, are spell's:  in its `BUILT_IN_TYPE_TABLE`,
- *   loaded into these `TypeScope`s.  The parser only knows their names.
+ * - Their members, e.g. `the length of the name`, are spell's:
+ *   in its `BUILT_IN_TYPE_TABLE`, loaded into these `TypeScope`s.
+ *   The parser only knows their names.
  * - NOTE: `list`, `thing`, `app`, `drawable` and `drawable list` are runtime classes too (`List`, `Thing` ...),
  *   which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
  */
@@ -85,11 +102,13 @@ export function classCase(name: string): string {
  *   when its first word names a `list` -- see `listOf()`.
  * - Anything else is a user's type, PascalCase and singular, as its `TypeScope` is named:  `cards` => `Card`.
  * - NOTE: a language wraps this with its vocabulary, e.g. `SP.typeName()`:  the parser knows no language's words.
+ * - `ofWord`:  the language's word between a list and what it holds, `of` in `list of cards`, `de` in `lista de cartas`.
  */
-export function typeName(written: string, typeWords: TypeWords = {}): Datatype {
+export function typeName(written: string, typeWords: TypeWords = {}, ofWord = "of"): Datatype {
   const words = `${written}`.trim().replace(/\s+/g, " ")
-  const items = /^(\S+) of (.+)$/i.exec(words)
-  if (items && builtInTypeWritten(items[1]!, typeWords) === "list") return listOf(typeName(items[2]!, typeWords))
+  const items = new RegExp(`^(\\S+) ${ofWord} (.+)$`, "iu").exec(words)
+  if (items && builtInTypeWritten(items[1]!, typeWords) === "list")
+    return listOf(typeName(items[2]!, typeWords, ofWord))
   return builtInTypeWritten(words, typeWords) ?? typeCase(words)
 }
 
@@ -142,8 +161,9 @@ export function itemTypeOf(datatype: Datatype | undefined): Datatype | undefined
  * Widest possible `match.groups` shape -- constraint and default for a RULE's `Groups` type argument.
  * - MUST stay the top type:  `Rule<Props, X>` is only assignable to bare `P.Rule` if `X` is assignable to this,
  *   and inside a generic rule class TypeScript can't prove anything narrower about unresolved `GroupsFor<...>`.
- * - NOTE: by convention groups only ever hold `Match | Match[]` -- what the syntax matched.  Bare `P.Match`
- *   defaults to `P.MatchGroups`, which says so.  Anything a rule works out for itself goes in `match.data`.
+ * - NOTE: by convention groups only ever hold `Match | Match[]` -- what the syntax matched.
+ *   - Bare `P.Match` defaults to `P.MatchGroups`, which says so.
+ *   - Anything a rule works out for itself goes in `match.data`.
  */
 export type AnyGroups = Record<string, unknown>
 
@@ -221,10 +241,11 @@ export type JournalEntry = JournalChange | JournalMark
 
 // ## AST casts
 
-// TODO: review `MatchGroups` / `GroupsFor` to add an optional AST type per group, so most `asAST()` / `matchAST()`
-//  casts go away.  The syntax already says which rule a group is parsed as, e.g. `{number:expression}`,
-//  and in spell an `expression` always builds a `P.ASTExpression`.  Needs a per-language table of rule name
-//  => AST type, plus `Match` generic on its AST type.
+// TODO: review `MatchGroups` / `GroupsFor` to add an optional AST type per group,
+//  so most `asAST()` / `matchAST()` casts go away.
+//  - The syntax already says which rule a group is parsed as, e.g. `{number:expression}`,
+//    and in spell an `expression` always builds a `P.ASTExpression`.
+//  - Needs a per-language table of rule name => AST type, plus `Match` generic on its AST type.
 
 /**
  * Narrow `node` to concrete AST subclass `T`.

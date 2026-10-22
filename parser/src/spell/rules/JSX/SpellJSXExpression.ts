@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { JSX } from "./JSX.parser"
 import { SpellJSXContent } from "./SpellJSXContent"
 
 /**
@@ -41,4 +40,3 @@ export class SpellJSXExpression extends SpellJSXContent {
     })
   }
 }
-JSX.addRule(SpellJSXExpression)

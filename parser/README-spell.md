@@ -22,13 +22,21 @@ Each quoted bullet is a new phrase, and from the next line on Spell reads it lik
 ```sh
 spell parse --in ./solitaire 'the card is a new card whose rank is 7 and suit is hearts
 print the card is a face card, the card is not a 7, the color of the card'
-# ... the match tree, and in it:
-#     expression_suffix › is_a_face_card  is a face card
-#     expression_suffix › is_a_$rank  is not a 7
-#
-# export const card = new Card({ rank: 7, suit: "hearts" })
-# core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+... the match tree, and in it:
+    expression_suffix › is_a_face_card  is a face card
+    expression_suffix › is_a_$rank  is not a 7
+
+export const card = new Card({ rank: 7, suit: "hearts" })
+core.console.log(card.isAFaceCard, !card.isARank(7), card.color)
+```
+
+</details>
 
 The match tree names the rules that read those two phrases, `is_a_face_card` and `is_a_$rank`.
 Nobody wrote them:  the card's bullets made them, a moment before.
@@ -38,7 +46,7 @@ If you've grown a grammar for a parser generator, that's the part to notice.
 There, a new phrase is an edit to the grammar file and a rebuild;
 in a regular expression, it's one more alternation nobody can read next month.
 Spell has no grammar file.
-Its grammar is 274 syntax strings on 241 rule classes, and a program adds rules of its own as it's read.
+Its grammar is 270 syntax strings on 244 rule classes, and a program adds rules of its own as it's read.
 
 And it doesn't guess.
 The same line compiles to the same code every time, and a line nothing reads is an error where it stands:
@@ -49,7 +57,8 @@ and `spell lint` fails on it by file, line and column.
 <details>
 <summary>Run the card yourself</summary>
 
-You need `spell` on your PATH:  [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
+You need `spell` on your PATH:
+[setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
 then [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up).
 In any folder outside the checkout, save the card as `try/solitaire/Card.spell`, then:
 
@@ -57,13 +66,21 @@ In any folder outside the checkout, save the card as `try/solitaire/Card.spell`,
 echo '{}' > try/solitaire/__project.json5
 cd try
 spell compile ./solitaire --stdout
-# ✓ @local/try/solitaire
-# import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
-#
-# export class Card extends Drawable {
-#   static elementTag = core.defineElement(this, "solitaire")
-# ...
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ @local/try/solitaire
+import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+
+export class Card extends Drawable {
+  static elementTag = core.defineElement(this, "solitaire")
+...
+```
+
+</details>
 
 - `{}` is a whole project file (below, "The compiler").
 - `--stdout` prints the code and writes nothing;  without it, the code goes to the build folder (below, "The compiler").
@@ -109,8 +126,9 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 
 - In an outline, `it` and `its` mean the type its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
-- A file may mix the two:  [outline-solitaire's card](tests/spaces/@spell/test/outline-solitaire/Card.spell)
-  is an outline, and its actions, underneath, are sentences.
+- A file may mix the two:
+  [outline-solitaire's card](tests/spaces/@spell/test/outline-solitaire/Card.spell) is an outline,
+  and its actions, underneath, are sentences.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
 
@@ -125,12 +143,12 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | core | numbers, text, yes and no, nothing, comments | 12 | `nothing` | `undefined` |
 | variables | names, of one word or several | 9 | `the start pile` | `startPile` |
 | constants | words that are values | 3 | `red` | `"red"` |
-| expressions | comparisons, `and` / `or`, `is a`, `is in` | 26 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
+| expressions | comparisons, `and` / `or`, `is a`, `is in` | 28 | `thing is green or blue` | `core.includes(["green", "blue"], thing)` |
 | math | arithmetic, biggest and smallest, rounding | 10 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, object literals | 13 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for each`, `where` | 42 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
 | UI | `print`, notices, alerts and prompts, styles | 8 | `prompt "Name for the new baby?"` | `await core.prompt("Name for the new baby?")` |
-| classes | types, properties, phrases, saving, versions | 51 | `a card is a thing` | `export class Card extends Thing {}` |
+| classes | types, properties, phrases, saving, versions | 52 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 5 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
 | JSX | elements, fragments, `<markdown>` blocks | 8 | `<a/>` | `h("a")` |
@@ -142,20 +160,20 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | methods | `to ...` actions, animations, quoted phrases | 17 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
 
-The weight is in `classes`:  51 of the 241 rule classes, and 104 of the 274 syntaxes, are ways to DECLARE
+The weight is in `classes`:  52 of the 244 rule classes, and 95 of the 270 syntaxes, are ways to DECLARE
 something (a type, a property, a phrase, how a thing is saved).
 A language that reads like English spends most of its grammar letting you say what things ARE;
 doing things is the smaller half.
 
-- Nineteen modules are folders of [src/spell/rules/](src/spell/rules/), one rule class per file;
+- Nineteen modules are folders of [the rules folder](src/spell/rules/), one rule class per file;
   the base rules sit at the top of it:  a block, a line, a blank line, a line nothing reads.
-- The 241 classes are 224 rules, and 17 base classes that no syntax names.
+- The 244 classes are 227 rules, and 17 base classes that no syntax names.
   There are more syntaxes than rules because a rule with several ways to be written is registered once per way.
 - Every rule, with every syntax and what each target writes for it:
   the generated syntax table, [spellSyntax.json](src/spell/spellSyntax.json), which the Spell Syntax guide draws
   (below, "More in the docs site").
   - Each syntax there carries an example from its tests, as the JavaScript, TypeScript and Python writers write it.
-  - The counts on this page are from it, on 2026-10-21;  `yarn spell:gen:syntax` rewrites it (below, "Adding a rule").
+  - The counts on this page are from it, on 2026-10-22;  `yarn spell:gen:syntax` rewrites it (below, "Adding a rule").
 
 ## What a line can say
 
@@ -207,8 +225,8 @@ every later line can use the phrase, in this project and in any project that imp
 - The blank reads the word in the form you wrote it:  `(suit)` reads `spade`, `(suits)` reads `spades`.
   So the card at the top of this page answers to `the card is the queen of spade`;
   the `cards` project wrote `(suits)`, and answers to `the queen of spades`.
-- A phrase travels with its project's declarations:  `klondike` imports `cards`,
-  and its `a tableau can give up a card if: the card is face up` reads a phrase `cards` made.
+- A phrase travels with its project's declarations, e.g. from `cards` to `klondike`, which imports it:
+  klondike's `a tableau can give up a card if: the card is face up` reads a phrase `cards` made.
 
 **The edge, and it's a sharp one:**  a phrase in the other form doesn't fail;  it reads as something else.
 Against the card at the top, `the card is the queen of spades` compiles to `card == "spades".queen`:
@@ -250,8 +268,8 @@ Its first line is how you call it, with each blank's type in brackets:
 | `move card to tableau` | `core.move(card, tableau)` |
 | `a card belongs to one pile` | `Pile.exclusive = true`, and a `pile` getter on the card |
 
-- Positions count from 1, as people count;  the compiler turns them into the target's own
-  ([README-core](README-core.md#positions-count-from-1)).
+- Positions count from 1, as people count:
+  the compiler turns them into the target's own ([README-core](README-core.md#positions-count-from-1)).
 - A project whose project file says `"listsStartAt": 0` counts from 0 instead:  the frozen `cards-from-zero`.
 - `a card belongs to one pile` makes piles exclusive:  adding a card to one takes it out of the last.
 
@@ -343,14 +361,22 @@ export function testCardSetup() {
 cp -R ~/www/spell/spell-lang/tests/spaces/@spell/test/cards try/
 cd try
 spell test ./cards
-# ✓ Compiling @local/try/cards  2 warnings
-#     cards/Deck.spell:14:20  warning:  Say what "card-names" holds, e.g. "set card-names to a new list of text"
-#     cards/Pile.spell:15:20  warning:  A pile never says it has a name:  declare it, e.g. "a pile has a name as text"
-# ✓ test card setup  (22 checks)
-# ✓ test deck creation  (6 checks)
-#
-# 2 passed
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+✓ Compiling @local/try/cards  2 warnings
+    cards/Deck.spell:14:20  warning:  Say what "card-names" holds, e.g. "set card-names to a new list of text"
+    cards/Pile.spell:15:20  warning:  A pile never says it has a name:  declare it, e.g. "a pile has a name as text"
+✓ test card setup  (22 checks)
+✓ test deck creation  (6 checks)
+
+2 passed
+```
+
+</details>
 
 - A warning is something the program should say;  it never stops a line compiling, and never counts as an error.
 
@@ -365,10 +391,10 @@ Every thing has an `id`, built in:  nobody declares it.
 | `a person is saved in its own file` | `Person.savedInFile = true` |
 | `a dated-event is saved inline` | `DatedEvent.savedInline = true` |
 
-- A thing saves as readable JSON, its type first:  the format is the runtime's
-  ([README-core](README-core.md#the-pieces--one-object-built-as-it-loads), "JSON").
-- Saved in its own file, each person is a file of their own;  saved inline, a small thing stays inside what holds it
-  ([people](tests/spaces/@spell/test/people/People.spell)).
+- A thing saves as readable JSON, its type first:
+  the format is the runtime's ([README-core](README-core.md#the-pieces--one-object-built-as-it-loads), "JSON").
+- Saved in its own file, each person is a file of their own;
+  saved inline, a small thing stays inside what holds it ([people](tests/spaces/@spell/test/people/People.spell)).
 
 One thing of a running program is named by its type, then its name or its place:
 
@@ -414,7 +440,8 @@ Here's `klondike`'s project file, which takes three types from the `cards` proje
 ```
 
 - `imports` lists the project's own files by path, and other projects by address.
-- Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`.
+- Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`,
+  and `"language"`, the human language its Spell is written in (`"es"` for the frozen `cartas`;  English when missing).
 - A project file can start as `{}`, as the card's did:  the first compile lists the folder's files in it,
   and spell-app's spaces keeps that list in step with the folder, adding a new file and dropping a deleted one.
 - `SpellProject` reads a project's files (`SpellFile`s) and compiles them
@@ -445,7 +472,8 @@ What a compile writes, for a project `<Project>`:
     written after a clean compile
 - Beside the source, and committed with it:
   - `<Project>.declarations.json5`:  what other projects import, so they needn't parse this one
-  - `<Project>.en.js`:  Spell's English for each member, for a runner's Thing Explorer;
+  - `<Project>.en.js`:  Spell's English for each member, for a runner's Thing Explorer
+    (a Spanish project's is `<Project>.es.js`);
     and Python's own copy of those words, `<Project>.py.en.json5`
   - `<Project>.lib.ts`, for a library (`ts/lib`)
   - `<Project>.app.py`, a Python program's web app, rewritten only while nobody has edited it
@@ -473,7 +501,7 @@ SP.spellParser.compile("print 1 + 2", "statement") // => "core.console.log(1 + 2
 
 ## The frozen test projects
 
-Eleven projects in [tests/spaces/@spell/test/](tests/spaces/@spell/test/) pin what Spell does, line for line:
+Twelve projects in [tests/spaces/@spell/test/](tests/spaces/@spell/test/) pin what Spell does, line for line:
 each has a snapshot of every target's output beside it, and a test fails on any change.
 They're NEVER edited to follow the live examples, which people change.
 
@@ -490,6 +518,7 @@ They're NEVER edited to follow the live examples, which people change.
 | [thing-references](tests/spaces/@spell/test/thing-references/) | naming one thing:  `tableau T1`, `the first tableau` |
 | [people](tests/spaces/@spell/test/people/) | people and what they keep, as a TypeScript library |
 | [todos-form-based](tests/spaces/@spell/test/todos-form-based/) | a to-do app drawn with Spell UI's form elements |
+| [cartas](tests/spaces/@spell/test/cartas/) | the card, the deck and the pile in Spanish:  `una carta es una cosa` |
 
 The snapshots, for a project `<Project>`:
 
@@ -501,11 +530,11 @@ The snapshots, for a project `<Project>`:
 | `<Project>.snapshot.py` | the Python |
 | `<Project>.snapshot.pyright.txt` | what pyright says of the Python |
 | `<Project>.snapshot.declarations.json5` | its declarations |
-| `<Project>.en.snapshot.js` | its words |
+| `<Project>.en.snapshot.js` | its words (`cartas.es.snapshot.js`, in Spanish) |
 | `<Project>.elements.snapshot.js` | a program's drawing half, for Python |
 | `<Project>.lib.snapshot.ts` | the library target, for `people` |
 
-- Every project has a Python snapshot but `todos-form-based`, and those ten are `PYTHON_FIXTURES`,
+- Every project has a Python snapshot but `todos-form-based` and `cartas`, and those ten are `PYTHON_FIXTURES`,
   which the Python runtime runs too.
   What `tsc` and pyright found, and why the to-do app has no Python yet:
   [README-targets](README-targets.md#typescript--the-same-program-typed-as-solid-developers-write-it).
@@ -527,9 +556,11 @@ Spell's rules live in its modules, laid out like this:
 ```text
 src/spell/rules/<module>/
   <module>.parser.ts    the module's parser, and nothing else
-  <RuleClass>.ts        one rule class each:  the class, then its addRule() calls
+  <RuleClass>.ts        one rule class each:  what it does, in every language
+  <module>.en.ts        its English:  every rule's syntax and tests, in tie-break order
+  <module>.es.ts        the same rules' Spanish, in the same order
   <module>.shared.ts    what several of its rule files share, if anything
-  index.ts              exports every file, in tie-break order
+  index.ts              exports every rule class
 
 tests/spell/rules/<module>/
   <module>.test.ts      calls unitTestModuleRules(), or its tests never run
@@ -540,14 +571,18 @@ tests/spell/rules/<module>/
    Its docstring's first line starts with the rule's name, its class name in snake case:
    `` `pause` rule:  delay for a certain amount of time ``.
 2. Write the class:  its `@proto static` settings first, then `getAST()`.
-   Then call `<module>.addRule(...)` right after it, once per syntax, each with its tests.
-3. Export it from the module's `index.ts`:  its place there is its registration order, which breaks ties.
-4. `yarn spell:test:rules`, then `yarn spell:test:rules:bless` once the output is right, and read the diff.
-5. `yarn spell:gen:syntax`:  the syntax table's test fails until you do.
-6. A built-in type's member (`the length of the name`) is data, not a rule (below, "The built-in types"):
+   Export it from the module's `index.ts`.
+3. Register it in the module's `<module>.en.ts`:  `<module>.addRule(...)`, once per syntax, each with its tests.
+   Its place there is its registration order, which breaks ties.
+4. Register it in `<module>.es.ts` too, with its Spanish syntax, in the same place.
+   `spell lang packs check` lists what the Spanish lacks against the English;
+   `spell lang packs fix` writes a stub for each, the English copied and marked to translate.
+5. `yarn spell:test:rules`, then `yarn spell:test:rules:bless` once the output is right, and read the diff.
+6. `yarn spell:gen:syntax`:  the syntax table's test fails until you do.
+7. A built-in type's member (`the length of the name`) is data, not a rule (below, "The built-in types"):
    add it to the table in [builtinTypes.ts](src/spell/builtinTypes.ts), then run `yarn lsp:scopes --builtins` in
    spell-app, which rewrites their docs for pages with no parser, [core.scopes.js](src/core/core.scopes.js).
-7. A new operator, or a change to how parsing works:  [PARSING.md](src/spell/PARSING.md), in the same change.
+8. A new operator, or a change to how parsing works:  [PARSING.md](src/spell/PARSING.md), in the same change.
 
 The `yarn` scripts run in spell-lang's folder.
 A test pins every rule's name, module and registration order, so a renamed class that renames a rule fails it
@@ -561,12 +596,12 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _async } from "./async.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.
  * - Compiles to `await core.pauseFor(number, 'units')`.
- * - TODO: "a second", "a little bit", "a while", "a noticeable amount".
+ * ...
  */
 export class Pause extends SpellStatement<"number|units"> {
   @proto static alias = "statement"
@@ -576,13 +611,21 @@ export class Pause extends SpellStatement<"number|units"> {
     return new P.ASTAwaitExpression(match, {
       expression: new P.ASTCoreMethodInvocation(match, {
         methodName: "pauseFor",
-        args: [P.asAST<P.ASTExpression>(number.AST), new P.ASTQuotedExpression(units, units.value)]
+        args: [
+          P.asAST<P.ASTExpression>(number.AST),
+          new P.ASTQuotedExpression(units, Wording.meaningOf(units) ?? DEFAULT_UNITS)
+        ]
       })
     })
   }
 }
+```
+
+_[Pause.ts](src/spell/rules/async/Pause.ts), in the `async` module:  the class, the same in every language._
+
+```ts
 _async.addRule(Pause, {
-  syntax: "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
+  syntax: "pause for {number:expression} {units:pause_units}",
   tests: [
     {
       compileAs: "statement",
@@ -595,9 +638,13 @@ _async.addRule(Pause, {
 })
 ```
 
-- [Pause.ts](src/spell/rules/async/Pause.ts), in the `async` module:  one of its four tests kept.
+_Its English, in [async.en.ts](src/spell/rules/async/async.en.ts):  one of its four tests kept.
+Its Spanish, in [async.es.ts](src/spell/rules/async/async.es.ts), registers the same class as
+`pausar (por|durante)? {number:expression} {units:pause_units}`._
+
 - The syntax is [Rulex](README-rulex.md):  `{number:expression}` is another rule, kept as `number`;
-  `(units:second|...)` a choice of words, kept as `units`.
+  `{units:pause_units}` a word rule, kept as `units`:  `seconds`, `msec` ... in English, `segundos`, `mseg` ... in
+  Spanish, each MEANING the runtime's name for the unit, so `pausar 2 segundos` compiles as `pause for 2 seconds` does.
 - `getAST()` builds the language-neutral Spell tree;  each target's writer turns it into code.
 
 </details>
@@ -605,10 +652,12 @@ _async.addRule(Pause, {
 The rules for writing rules, in full, are in [the `spell` folder's AGENTS.md](src/spell/AGENTS.md), "Parser rules":
 what goes on the class and what on the match, and why `getAST()` must never touch scope.
 
-**The cost:**  English lives in the syntax strings.
-A rule's class can take another language's syntax, which is why `addRule()` takes only `{ syntax, tests }`;
-but no second human language has its syntaxes written yet
-([how one would start](README-parser.md#-spell-in-another-human-language)).
+**The cost:**  each human language lives in its own syntax strings, so every rule is written once per language.
+A rule's class takes any language's syntax, which is why `addRule()` takes only `{ syntax, tests }`:
+English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
+([how a language is added](README-parser.md#spell-in-another-human-language)).
+Spanish has all of English's:  `spell lang packs check` says `Spanish (es):  complete, 19 modules`.
+A project in Spanish says `"language": "es"` in its project file, as the frozen `cartas` does.
 
 ## What lives here, and what doesn't
 
@@ -660,6 +709,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | File | What it is |
 | --- | --- |
 | [SpellParser.ts](src/spell/SpellParser.ts) | Spell's parser:  its tokenizer settings, the shared root scope |
+| [languages/](src/spell/languages/) | the language packs, English's and Spanish's:  each one's words, inflector and messages, `SP.Language` |
 | [rules/](src/spell/rules/) | the twenty modules;  `SP.spellParser` from their index |
 | [SpellProject.ts](src/spell/SpellProject.ts), [SpellFile.ts](src/spell/SpellFile.ts) | a project and its files:  reading, compiling, saving |
 | [hoistClassMembers.ts](src/spell/hoistClassMembers.ts) | gathers each class's members from every file into its class |
@@ -672,6 +722,7 @@ each says its words, and what it reads as in `core` or JavaScript.
 | [node/](src/spell/node/) | node only:  the TypeScript check and build, pyright, the syntax table |
 | [test/](src/spell/test/) | test helpers:  `loadFixtureProject()`, `fixturePath()` |
 | [spellSyntax.json](src/spell/spellSyntax.json) | GENERATED:  every rule, syntax and output |
+| [spellSyntax.es.json](src/spell/spellSyntax.es.json) | GENERATED:  the same, in Spanish's syntax |
 | [PARSING.md](src/spell/PARSING.md) | the detailed map of the parse pipeline |
 
 </details>

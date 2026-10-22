@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `saved_in_file` rule:  `a person is saved in its own file` -- a person gets an entry, a file, of its own,
@@ -25,11 +24,9 @@ export class SavedInFile extends SpellStatement<"type"> {
     const { type } = match.groups
     const { scopeType } = type.data as { scopeType?: unknown }
     if (scopeType instanceof P.TypeScope && SP.isBuiltInTypeScope(scopeType)) {
-      const typeName = SP.typeName(`${type.value}`)
-      return SpellStatement.refuse(
-        match,
-        `Can't save ${typeName} in its own file:  it's built in, and every project shares it`
-      )
+      const language = SP.Language.of(scope)
+      const typeName = language.wordFor(SP.typeName(`${type.value}`))
+      return SpellStatement.refuse(match, language.parserMessage("cant-save-built-in-in-file", { type: typeName }))
     }
     return match
   }
@@ -43,25 +40,3 @@ export class SavedInFile extends SpellStatement<"type"> {
     return new P.ASTPatchedMember(match, { member: savedInFile })
   }
 }
-classes.addRule(SavedInFile, {
-  syntax: "(a|an) {type:known_type} is saved in its own file",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        scope.parse("a person is a thing", "block")
-      },
-      tests: [
-        ["a person is saved in its own file", "Person.savedInFile = true"],
-        {
-          title: "not a built-in type:  every project shares it",
-          input: "a thing is saved in its own file",
-          js: `/* PARSE ERROR: Can't save thing in its own file:  it's built in, and every project shares it */`
-        }
-      ]
-    }
-  ]
-})
-// in an outline body:  `- it is saved in its own file` -- tests in `parserTests/outline.test.ts`
-classes.addRule(SavedInFile, { syntax: "{type:subject_it} is saved in its own file" })
-classes.addRule(SavedInFile, { syntax: "{type:subject_implied} is saved in its own file" })

@@ -1,8 +1,7 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { JSX } from "./JSX.parser"
-import { SPELL_TAG_NAMES, type JSXMatchData } from "./JSX.shared"
+import { SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -21,7 +20,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   - `<children/>` => `h("slot")`
  *   - `<children name="header"/>` => `h("slot", { name: "header" })`
  *   - `<h3 in="header">` => `h("h3", { slot: "header" })`, in `SpellJSXAttribute`
- *   - see `SPELL_TAG_NAMES`, `SPELL_ATTRIBUTE_NAMES`
+ *   - each language's words, in its word rules `spell_jsx_tag` and `spell_jsx_attribute`:
+ *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
  * - NOTE: rule name is `jsxElement`, kept distinct from class name `SpellJSX` (pre-existing convention).
  */
 export class SpellJSX extends P.TokenType<never, JSXMatchData> {
@@ -46,20 +46,22 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     )
     // a fragment (`jsxFragment`) has no tag and no attributes
     if (!(element instanceof P.JSXElementToken)) return match
+    match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
-    const tagError = P.ASTJSXElement.tagError(element.tagName)
-    if (tagError) match.data.error = SP.spellParser.createParseError(scope, [element], tagError)
+    if (P.ASTJSXElement.tagError(element.tagName)) {
+      const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
+      match.data.error = SP.spellParser.createParseError(scope, [element], message)
+    }
     return match
   }
 
   /**
    * Build `P.ASTJSXElement`; drops falsy child ASTs (e.g. blank `jsxText`) via `.filter(Boolean)`.
-   * - Spell's own tag words as the web's:  `<children/>` => `<slot/>` (`SPELL_TAG_NAMES`).
+   * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    const { tagName: written } = match.matched[0] as P.JSXElementToken
-    const tagName = SPELL_TAG_NAMES.get(written) ?? written
+    const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
     return new P.ASTJSXElement(match, { tagName, attrs, children: this.childASTs(match) })
   }
@@ -106,190 +108,3 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
   }
 }
-JSX.addRule(SpellJSX, {
-  tests: [
-    {
-      title: "Simple nested elements",
-      compileAs: "expression",
-      tests: [
-        [`<a/>`, 'h("a")', "<a />"],
-        [`<a></a>`, 'h("a")', "<a />"],
-        [`<a b=1 c="ccc"/>`, 'h("a", { b: 1, c: "ccc" })', '<a b={1} c="ccc" />'],
-        [`<a b=1 c="ccc" d></a>`, 'h("a", { b: 1, c: "ccc", d: true })', '<a b={1} c="ccc" d={true} />'],
-
-        [`<a><b/></a>`, 'h("a", h("b"))', ["<a>", "  <b />", "</a>"]],
-        [`<a><b></b></a>`, 'h("a", h("b"))', ["<a>", "  <b />", "</a>"]],
-        [
-          `<a A=1><b c=1>foo</b></a>`,
-          'h("a", { A: 1 }, h("b", { c: 1 }, "foo"))',
-          ["<a A={1}>", "  <b c={1}>foo</b>", "</a>"]
-        ],
-        [`<a><b><c>d</c></b></a>`, 'h("a", h("b", h("c", "d")))', ["<a>", "  <b>", "    <c>d</c>", "  </b>", "</a>"]],
-        [
-          `<a>\n\tBBB\n\t<c/>\n\tDDD</a>`,
-          ['h("a",', '  "BBB",', '  h("c"),', '  "DDD"', ")"],
-          ["<a>", "  BBB", "  <c />", "  DDD", "</a>"]
-        ],
-        [
-          ["<ui-button ", "\thidden={1} ", "\tonPress={print 2}", "\t/>"],
-          'h("ui-button", { hidden: 1, onPress: () => core.console.log(2) })',
-          "<ui-button hidden={1} onPress={() => core.console.log(2)} />"
-        ],
-        [
-          '<input attrOnly text="text" number=1 boolean={yes} expression={1 + 1} onClick={print the value of the target of the event} />',
-          [
-            'h("input", {',
-            "  attronly: true,",
-            '  text: "text",',
-            "  number: 1,",
-            "  boolean: true,",
-            "  expression: () => 1 + 1,",
-            "  onClick: (event) => core.console.log(event.target.value)",
-            "})"
-          ],
-          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} />'
-        ]
-      ]
-    },
-    {
-      title: "Attribute expressions",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [
-        [`<div foo/>`, 'h("div", { foo: true })', "<div foo={true} />"],
-        [
-          `<div rank={the rank of the card} value={1 + 2 + 3}/>`,
-          'h("div", { rank: () => card.rank, value: () => 1 + 2 + 3 })',
-          "<div rank={card.rank} value={1 + 2 + 3} />"
-        ],
-        [
-          `<div rank={unknown expression} value={another unknown expression}/>`,
-          [
-            'h("div", {',
-            '  rank: undefined /* PARSE ERROR: Don\'t understand "unknown expression" */,',
-            '  value: undefined /* PARSE ERROR: Don\'t understand "another unknown expression" */',
-            "})"
-          ],
-          "<div />"
-        ],
-        // DO parse a statement as an attribute expression
-        [
-          `<div on-click={print 1024}/>`,
-          'h("div", { "on-click": () => core.console.log(1024) })',
-          "<div on-click={() => core.console.log(1024)} />"
-        ],
-        // don't match attribute expressions that don't eat the entire text
-        [
-          "<div foo={true true}/>",
-          'h("div", { foo: undefined /* PARSE ERROR: Don\'t understand "true true" */ })',
-          "<div />"
-        ],
-        // ignore newlines in attribute expression
-        // NOTE: this was once a comma expression `(a, b)`, not a `[a, b]` tuple,
-        // which JS silently evaluated to a single-element array (the comma operator discards `a`).
-        // `RuleTest`'s tuple typing caught it;  fixed to the evidently-intended 2-tuple.
-        ["<div foo={\n1 + \n\t2\n\t}/>", 'h("div", { foo: () => 1 + 2 })', "<div foo={1 + 2} />"]
-      ]
-    },
-    {
-      title: "The page's names, decided when it compiles",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [
-        // React's spellings, as the page spells them;  `class` first
-        [
-          `<td colSpan=2 htmlFor="x" className="suit"/>`,
-          'h("td", { class: "suit", colspan: 2, for: "x" })',
-          '<td class="suit" colspan={2} for="x" />'
-        ],
-        // on a `ui-*` tag, a value that can change is a property;  text, a dashed name and `class` stay attributes
-        [
-          `<ui-form value={the card} debug aria-label="Done" className={the card}/>`,
-          'h("ui-form", { class: () => card, "prop:value": () => card, debug: true, "aria-label": "Done" })',
-          '<ui-form class={card} prop:value={card} debug={true} aria-label="Done" />'
-        ],
-        // a dotted tag is a compile error:  `h()` would draw a `<UI>` with class `Form`
-        [
-          `<UI.Form/>`,
-          "null /* PARSE ERROR: <UI.Form> isn't an element:  write Spell UI's own tag, e.g. <ui-form> */",
-          "<UI.Form />"
-        ]
-      ]
-    },
-    {
-      title: "Spell's words for the web's slots:  <children/> and in=",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [
-        // where a drawable list's items show
-        [`<children/>`, 'h("slot")', "<slot />"],
-        // a named place
-        [`<children name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],
-        // with what shows while it's empty
-        [
-          `<children name="header">Pile</children>`,
-          'h("slot", { name: "header" }, "Pile")',
-          '<slot name="header">Pile</slot>'
-        ],
-        // the web's own word keeps working
-        [`<slot/>`, 'h("slot")', "<slot />"],
-        [`<slot name="header"/>`, 'h("slot", { name: "header" })', '<slot name="header" />'],
-        // a child says which named place it goes in
-        [`<h3 in="header">Pile 1</h3>`, 'h("h3", { slot: "header" }, "Pile 1")', '<h3 slot="header">Pile 1</h3>'],
-        [`<h3 slot="header">Pile 1</h3>`, 'h("h3", { slot: "header" }, "Pile 1")', '<h3 slot="header">Pile 1</h3>'],
-        // on a custom tag, `slot` stays an attribute, even with a value that can change
-        [`<game-card in={the card}/>`, 'h("game-card", { slot: () => card })', "<game-card slot={card} />"],
-        // a frame with both
-        [
-          `<div className="pile"><children name="header"/><children/></div>`,
-          ['h("div", { class: "pile" },', '  h("slot", { name: "header" }),', '  h("slot")', ")"],
-          ['<div class="pile">', '  <slot name="header" />', "  <slot />", "</div>"]
-        ]
-      ]
-    },
-    {
-      title: "Inline expressions",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [
-        [
-          `<div foo={<a><b><c>{1}</c></b></a>}/>`,
-          'h("div", { foo: h("a", h("b", h("c", 1))) })',
-          ["<div foo={<a>", "  <b>", "    <c>{1}</c>", "  </b>", "</a>} />"]
-        ],
-        // compound expression
-        [`<div>{1 + 2 + 3}</div>`, 'h("div", () => 1 + 2 + 3)', "<div>{1 + 2 + 3}</div>"],
-        // multi-line expression is fine
-        ["<div>{\n\t1 + \n2 + 3\t\n}</div>", 'h("div", () => 1 + 2 + 3)', "<div>{1 + 2 + 3}</div>"],
-        //
-        [`<div>{the rank of the card}</div>`, 'h("div", () => card.rank)', "<div>{card.rank}</div>"],
-        // fail if we don't eat entire expression
-        [
-          `<div>{true true}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "true true" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "true true" */}</div>'
-        ],
-        // fail on unknown expression
-        [
-          `<div>{unknown expression}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "unknown expression" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "unknown expression" */}</div>'
-        ],
-        // DO NOT parse a inline statement as a JSXExpression
-        [
-          `<div>{print 1024}</div>`,
-          'h("div", null /* PARSE ERROR: Don\'t understand "print 1024" */)',
-          '<div>{null /* PARSE ERROR: Don\'t understand "print 1024" */}</div>'
-        ]
-      ]
-    }
-  ]
-})

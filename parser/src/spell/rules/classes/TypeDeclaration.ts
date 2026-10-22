@@ -1,5 +1,7 @@
 import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
+import { Synonyms } from "spell-lang/spell/rules/expressions"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
@@ -20,8 +22,8 @@ import { SpellType } from "spell-lang/spell/rules/types/SpellType"
  *   - Either name finds the type afterwards, e.g. `the accounts`, `a new bank account`.
  *   - A name some other type already goes by is refused -- see `refuseTakenNames()`.
  *   - So is a type declared a second time (issue I13):  `a game:` adds to it -- see `reopen_type`.
- * - A DRAWABLE type (`a card is a drawable thing`, or a sub-type of one) defines its element as its class is declared,
- *   in a static field:  `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
+ * - A DRAWABLE type (`a card is a drawable thing`, or a sub-type of one) defines its element as its class is declared:
+ *   a static field, `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
  */
 export class TypeDeclaration<
   Groups extends string,
@@ -56,24 +58,27 @@ export class TypeDeclaration<
    */
   refuseTakenNames(match: P.Match): P.Match {
     const { groups, scope } = TypeDeclaration.named(match)
+    const language = SP.Language.of(scope)
     const name = P.classCase(`${groups.type.value}`)
     const named = scope.types?.get(name)
     if (named && SpellType.isShortName(named, name)) {
-      return SpellStatement.refuse(match, `"${groups.type.raw}" is already the short name of ${wordsOf(named.name)}`)
+      const message = language.parserMessage("already-a-short-name", {
+        name: `${groups.type.raw}`,
+        type: wordsOf(named.name)
+      })
+      return SpellStatement.refuse(match, message)
     }
     const { aka } = groups
     const akaNamed = aka && scope.types?.get(`${aka.value}`)
     if (akaNamed && akaNamed.name !== name) {
-      return SpellStatement.refuse(match, `"${aka.raw}" already names a type:  ${wordsOf(akaNamed.name)}`)
+      const message = language.parserMessage("aka-names-a-type", { aka: `${aka.raw}`, type: wordsOf(akaNamed.name) })
+      return SpellStatement.refuse(match, message)
     }
     if (named && TypeDeclaration.isDeclaredElsewhere(named, match)) {
       // as the line says it, e.g. `an account`
       const words = `${match.tokens[0]!.value} ${`${groups.type.raw}`.replace(/^["']|["']$/g, "")}`.toLowerCase()
-      return SpellStatement.refuse(
-        match,
-        `There's ${words} already, ${TypeDeclaration.whereDeclared(named.declaredBy!, match)}:  ` +
-          `to add to it, write "${words}:"`
-      )
+      const where = TypeDeclaration.whereDeclared(named.declaredBy!, match)
+      return SpellStatement.refuse(match, language.parserMessage("type-declared-twice", { words, where }))
     }
     return match
   }
@@ -84,11 +89,13 @@ export class TypeDeclaration<
    * - A type only STUBBED by an earlier mention, or left by an earlier parse of this statement, is claimed instead --
    *   see `P.TypeScope.claim()`.
    * - An IMPORTED one is declared again anyway, so `SP.SpellDeclarations.checkImportClashes()` can report it.
+   * - Its `gender`, from the article it's declared with, e.g. `feminine` for `una carta es una cosa`
+   *   (epic `spanish` P8):  see `genderOf()`.
    */
   declareType(match: P.Match, superType: string, { itemType }: { itemType?: P.Datatype } = {}): void {
     const { groups, scope } = TypeDeclaration.named(match)
     const name = `${groups.type.value}`
-    const options = { itemType, aka: groups.aka && `${groups.aka.value}` }
+    const options = { itemType, aka: groups.aka && `${groups.aka.value}`, gender: TypeDeclaration.genderOf(match) }
     // TODO: complain if existing type is set up differently!
     const existing = scope.types?.get(name)
     if (existing && !(existing.parentScope instanceof P.ImportScope)) {
@@ -99,6 +106,17 @@ export class TypeDeclaration<
       return
     }
     scope.types?.add({ name, superType, declaredBy: match, ...options })
+  }
+
+  /**
+   * The gender of the type `match` declares, read off its article, e.g. `feminine` for `una carta es una cosa`:
+   * see `SP.Language.genderOf()`.
+   * - `undefined` in English, whose articles have none, and for a declaration with no article first,
+   *   e.g. `solitario es una aplicación`.
+   */
+  static genderOf(match: P.Match): string | undefined {
+    const article = Synonyms.matchAt(match.scope, "indefinite_article", match.tokens)
+    return article && SP.Language.of(match.scope).genderOf(Synonyms.formOf(article))
   }
 
   /**
@@ -139,9 +157,13 @@ export class TypeDeclaration<
 
   /** Where `declaredBy` is, as seen from `match`:  `on line 3`, or `on line 3 of /Card.spell` in another file. */
   private static whereDeclared(declaredBy: P.Match, match: P.Match): string {
-    const line = `on line ${declaredBy.line! + 1}`
+    const language = SP.Language.of(match.scope)
+    const line = declaredBy.line! + 1
     const file = TypeDeclaration.fileOf(declaredBy.scope)
-    return file && file !== TypeDeclaration.fileOf(match.scope) ? `${line} of ${file.path}` : line
+    if (file && file !== TypeDeclaration.fileOf(match.scope)) {
+      return language.parserMessage("on-line-of-file", { line, file: file.path })
+    }
+    return language.parserMessage("on-line", { line })
   }
 
   /** The file `scope` is in, if any. */

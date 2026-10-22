@@ -106,9 +106,8 @@ class DrawingMethods:
         """
         type_name = getattr(thing, "type", None) or type(thing).__name__
         self.console.error(f"{type_name}:  draw() failed", repr(error))
-        return h(
-            "span", {"class": "spell-draw-error", "title": str(error), "role": "alert"}, f"⚠ {type_name} can't draw"
-        )
+        stand_in = self.message("cant-draw", type=type_name)
+        return h("span", {"class": "spell-draw-error", "title": str(error), "role": "alert"}, stand_in)
 
     ################
     # ## Mounting

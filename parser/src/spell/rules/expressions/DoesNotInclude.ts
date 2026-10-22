@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `does_not_include` rule:  `{lhs} does not include`/`contain {rhs}`, e.g. `theList does not include thing`.
@@ -21,19 +20,3 @@ export class DoesNotInclude extends InfixOperatorSuffix<"operator|expression"> {
     })
   }
 }
-expressions.addRule(DoesNotInclude, {
-  syntax: "(operator:does not (include|contain)) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("theList")
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["theList does not include thing", "!core.includes(theList, thing)"],
-        ["theList does not contain thing", "!core.includes(theList, thing)"]
-      ]
-    }
-  ]
-})

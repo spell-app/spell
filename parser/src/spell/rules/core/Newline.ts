@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `newline` rule:  single newline.
@@ -15,4 +14,3 @@ export class Newline extends P.TokenType {
     return new P.ASTStringLiteral(match, { value: assert.string(value), raw })
   }
 }
-core.addRule(Newline)

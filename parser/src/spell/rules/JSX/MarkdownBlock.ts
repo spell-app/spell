@@ -3,11 +3,11 @@ import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { type FillInParts, parseFillIn } from "spell-lang/spell/rules/core"
 import { Priority } from "spell-lang/spell/rules/rules.types"
-import { JSX } from "./JSX.parser"
 import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
 
 /**
- * `markdown_block` rule:  formatted text in a drawing, drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
+ * `markdown_block` rule:  formatted text in a drawing,
+ * drawn by Spell UI's `<ui-markdown>` (epic `drawable-thing`, P14).
  *
  * ```spell
  * to draw a rules panel:
@@ -51,11 +51,8 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
       if (typeof part === "string") return part
       const hole = parseFillIn(scope, part.hole)
       if (hole) return hole
-      const error = SP.spellParser.createParseError(
-        scope,
-        [element],
-        `Don't understand "{${part.hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace`
-      )
+      const message = SP.Language.of(scope).parserMessage("markdown-hole", { hole: part.hole })
+      const error = SP.spellParser.createParseError(scope, [element], message)
       errors.push(error)
       return error
     })
@@ -142,83 +139,6 @@ export class MarkdownBlock extends P.TokenType<never, MarkdownBlockData> {
     return markdown.replace(/\\/g, "\\\\").replace(/\n/g, "\\n")
   }
 }
-JSX.addRule(MarkdownBlock, {
-  tests: [
-    {
-      title: "Markdown, as written",
-      compileAs: "expression",
-      tests: [
-        [
-          ["<markdown>", "\t## Klondike", "\tBuild each pile **down**, alternating colours.", "</markdown>"],
-          'h("ui-markdown", "## Klondike\\nBuild each pile **down**, alternating colours.")',
-          '<ui-markdown>{"## Klondike\\nBuild each pile **down**, alternating colours."}</ui-markdown>'
-        ],
-        // `*`, `#`, `<`, back ticks and braces in code, an escaped brace:  all untouched
-        [
-          [
-            "<markdown>",
-            "\t# Rules <small>v2</small>",
-            "\t* a *list* with `{code}` and \\{braces\\}",
-            "\t```css",
-            "\t.red { color: crimson }",
-            "\t```",
-            "</markdown>"
-          ],
-          [
-            'h("ui-markdown",',
-            '  "# Rules <small>v2</small>\\n* a *list* with `{code}` and \\\\{braces\\\\}\\n```css\\n.red { color: crimson }\\n```"',
-            ")"
-          ],
-          [
-            "<ui-markdown>",
-            '  {"# Rules <small>v2</small>\\n* a *list* with `{code}` and \\\\{braces\\\\}\\n```css\\n.red { color: crimson }\\n```"}',
-            "</ui-markdown>"
-          ]
-        ],
-        // inside a drawing, indented with it
-        [
-          ["<div>", "\t<markdown>", "\t\tHello **there**", "\t</markdown>", "</div>"],
-          'h("div", h("ui-markdown", "Hello **there**"))',
-          ["<div>", '  <ui-markdown>{"Hello **there**"}</ui-markdown>', "</div>"]
-        ]
-      ]
-    },
-    {
-      title: "Holes, live",
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-      },
-      tests: [
-        [
-          ["<markdown>", "\tRank:  **{the rank of the card}**", "</markdown>"],
-          'h("ui-markdown", () => `Rank:  **${card.rank}**`)',
-          "<ui-markdown>{`Rank:  **${card.rank}**`}</ui-markdown>"
-        ],
-        // a back tick and `${` in the text stay text
-        [
-          ["<markdown>", "\t`${x}` and {the rank of the card}!", "</markdown>"],
-          'h("ui-markdown", () => `\\`\\${x}\\` and ${card.rank}!`)',
-          "<ui-markdown>{`\\`\\${x}\\` and ${card.rank}!`}</ui-markdown>"
-        ],
-        // a hole that doesn't read:  a parse error
-        [
-          ["<markdown>", "\tHi {foo bar baz}", "</markdown>"],
-          [
-            'h("ui-markdown",',
-            '  () => `Hi ${null /* PARSE ERROR: Don\'t understand "{foo bar baz}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace */}`',
-            ")"
-          ],
-          [
-            "<ui-markdown>",
-            '  {`Hi ${null /* PARSE ERROR: Don\'t understand "{foo bar baz}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace */}`}',
-            "</ui-markdown>"
-          ]
-        ]
-      ]
-    }
-  ]
-})
 
 /** What `markdown_block` keeps on its match. */
 type MarkdownBlockData = {

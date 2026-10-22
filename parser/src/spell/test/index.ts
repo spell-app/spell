@@ -18,6 +18,7 @@ export {
   fixtureDeclarations,
   fixtureDraws,
   fixtureWords,
+  fixtureLanguage,
   fixtureImports,
   FIXTURES_DIR,
   PYTHON_FIXTURES,

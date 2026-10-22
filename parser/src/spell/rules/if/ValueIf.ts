@@ -4,13 +4,12 @@ import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellConstant } from "spell-lang/spell/rules/constants"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _if_ } from "./if.parser"
 import { refuseOutsideMethod } from "./if.shared"
 
 /**
  * `value_if` rule:  `red if it is diamonds or hearts` -- one line of a getter's body:
- * a VALUE, then when it's the answer;
- * `value_otherwise` (`black otherwise`) is the last line (epic page `outline-spell`, P2):
+ * a VALUE, then when it's the answer.
+ * - `value_otherwise` (`black otherwise`) is the last line (epic page `outline-spell`, P2):
  *
  * ```spell
  * - the "color" of a suit is:
@@ -54,34 +53,3 @@ export class ValueIf extends SpellStatement<"value|condition|otherValue?"> {
     return { value: match.groups.value }
   }
 }
-_if_.addRule(ValueIf, {
-  syntax:
-    "(value:{expression}|{constant}) if {condition:expression} (otherwise it is (otherValue:{constant}|{expression}))?",
-  tests: [
-    {
-      compileAs: "block",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("suit")
-      },
-      tests: [
-        [
-          ["to pick a color:", `\tred if suit is "hearts"`],
-          ["export function pickAColor() {", '  if (suit == "hearts") return "red"', "}"]
-        ]
-      ]
-    },
-    {
-      title: "Outside a getter or method:  an error saying where it belongs (epic page `outline-spell`, I9)",
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        ;(scope as P.BlockScope).variables.add("suit")
-      },
-      tests: [
-        [
-          `red if suit is "hearts"`,
-          '/* PARSE ERROR: A line of a getter\'s body:  put it under one, e.g. "the color of a card is:" */'
-        ]
-      ]
-    }
-  ]
-})

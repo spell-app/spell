@@ -528,10 +528,7 @@ function isListLiteral(value: P.ASTExpression): boolean {
 
 /** `Ranks` => `RANKS`, `Short_Names` => `SHORT_NAMES`, `ShortNames` => `SHORT_NAMES`. */
 export function constantCaseOf(name: string): string {
-  return name
-    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
-    .replace(/[$_]+/g, "_")
-    .toUpperCase()
+  return name.replace(P.CAMEL_WORD_BOUNDARY, "_").replace(/[$_]+/g, "_").toUpperCase()
 }
 
 /** `rank` => `Rank`, `short_suit` => `ShortSuit`. */

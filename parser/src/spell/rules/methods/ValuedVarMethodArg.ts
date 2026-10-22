@@ -2,16 +2,15 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
- * `valued_var_method_arg` rule:  variable arg with a default value, e.g. `(message = "Really?")` in
- * `to notify (message = "Really?"): ...`.
- * - Accepts `=`, `is`, `of`, `as` or `set to` before the default expression -- all synonyms here for
- *   "defaults to".
- * - `method`/`syntax` are the same as `var_method_arg`'s (`$name` / `{callArgs:expression}`) -- the default
- *   value only affects the generated function parameter (`arg.default`), not the call syntax.
+ * `valued_var_method_arg` rule:  variable arg with a default value,
+ * e.g. `(message = "Really?")` in `to notify (message = "Really?"): ...`.
+ * - Accepts `=`, `is`, `of`, `as` or `set to` before the default expression:
+ *   all synonyms here for "defaults to".
+ * - `method`/`syntax` are the same as `var_method_arg`'s (`$name` / `{callArgs:expression}`):
+ *   the default value only affects the generated function parameter (`arg.default`), not the call syntax.
  */
 export class ValuedVarMethodArg extends SpellStatement<"identifier|value", MethodArgData> {
   @proto static alias = ["method_arg", "simple_method_arg"]
@@ -31,6 +30,3 @@ export class ValuedVarMethodArg extends SpellStatement<"identifier|value", Metho
     return match
   }
 }
-methods.addRule(ValuedVarMethodArg, {
-  syntax: `{identifier} (=|is|of|as|set to) {value:expression}`
-})

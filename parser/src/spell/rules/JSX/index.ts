@@ -1,9 +1,11 @@
 /**
  * The `JSX` rule module:  JSX -- elements (`<tag attr=.../>`), fragments (`<>...</>`), attributes, text, end tags,
  * and `{...}` expression containers, all tokenized up front by `P.JSXElementToken` & friends and re-parsed here.
- * - One rule per file, each registering itself on `JSX` (`JSX.parser.ts`) as it loads.
- * - NOTE: the rule files are listed in TIE-BREAK order:  when two rules match the same words with the same
- *   `priority` and length, the one registered first wins.  Moving a line here can change what parses.
+ * - One rule class per file;  `JSX.en.ts` registers them on `JSX` (`JSX.parser.ts`),
+ *   and each other language's `JSX.<lang>.ts` registers the same rules in its own words.
+ * - NOTE: those files register them in TIE-BREAK order:
+ *   when two rules match the same words with the same `priority` and length, the one registered first wins.
+ *   Moving a line there can change what parses.
  */
 export * from "./JSX.parser"
 export * from "./JSX.shared"

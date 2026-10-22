@@ -1,6 +1,5 @@
 import { assert, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { core } from "./core.parser"
 
 /**
  * `indent` rule:  indent whitespace specifically, e.g. leading spaces/tabs at start of a line.
@@ -14,4 +13,3 @@ export class Indent extends P.TokenType {
     return new P.ASTStringLiteral(match, { value: assert.string(value), raw })
   }
 }
-core.addRule(Indent)

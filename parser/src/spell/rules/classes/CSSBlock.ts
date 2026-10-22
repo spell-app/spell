@@ -1,10 +1,10 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { rawTextOf } from "spell-lang/spell/rules/JSX/JSX.shared"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 import { isDrawableType } from "./classes.shared"
 
 /**
@@ -38,10 +38,11 @@ export class CSSBlock extends P.TokenType<never, CSSBlockData> {
     if (!match) return undefined
     const type = scope instanceof P.SubjectScope ? scope.subjectType : undefined
     if (!type || !isDrawableType(type)) {
-      const where = type
-        ? `"${type.name}" isn't drawable:  say "a ... is a drawable thing"`
-        : "put it in a type's outline"
-      return SpellStatement.refuse(match, `Only a drawable type has its own <css>:  ${where}`)
+      const language = SP.Language.of(scope)
+      const message = type
+        ? language.parserMessage("css-not-drawable", { type: type.name })
+        : language.parserMessage("css-outside-outline")
+      return SpellStatement.refuse(match, message)
     }
     match.data.typeName = type.name
     match.data.css = rawTextOf(element)
@@ -65,50 +66,6 @@ export class CSSBlock extends P.TokenType<never, CSSBlockData> {
     })
   }
 }
-classes.addRule(CSSBlock, {
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        [
-          ["a card is a drawable thing:", "\t<css>", "\t\t.red { color: crimson }", "\t</css>"],
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "",
-            "  static css = css`",
-            "    .red { color: crimson }",
-            "  `",
-            "}"
-          ],
-          [
-            "export class Card extends Drawable {",
-            '  static elementTag = core.defineElement(this, "test_classes")',
-            "",
-            "  static css = css`",
-            "    .red { color: crimson }",
-            "  `",
-            "}",
-            "",
-            "/**",
-            " * `<test-class-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
-            " * - The page defines its tag with this class:  `core.useElement()`, below.",
-            " * - Its attributes are its card's properties;  its methods call its card's.",
-            " * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.",
-            " */",
-            "export class CardElement extends SpellElement<Card> {",
-            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-class-card", "card", [])',
-            "  @E.protoMerged static elementSetup = {",
-            '    styleSheets: { "test-class-card": Card.css }',
-            "  } satisfies Partial<E.ElementSetup>",
-            "}",
-            "core.useElement(Card, CardElement)"
-          ]
-        ]
-      ]
-    }
-  ]
-})
 
 /** What `css_block` keeps on its match. */
 type CSSBlockData = {

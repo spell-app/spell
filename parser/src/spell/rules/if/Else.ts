@@ -2,11 +2,11 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _if_ } from "./if.parser"
 
 /**
- * `else` rule:  `(else|otherwise) :?` -- else branch; must be tried after `else_if` (see NOTE there) so this
- * rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.
+ * `else` rule:  `(else|otherwise) :?` -- else branch.
+ * - Must be tried after `else_if` (see NOTE there),
+ *   so this rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.
  * - Compiles body in a nested `BlockScope` (named `"else"`) via `getNestedScopeForMatch()`.
  * - Compiles to `else { ...statements }`.
  */
@@ -22,56 +22,3 @@ export class Else extends SpellStatement<"body?"> {
     })
   }
 }
-_if_.addRule(Else, {
-  syntax: "(else|otherwise) :? {statement_body}?",
-  tests: [
-    {
-      title: "correctly matches single-line else statements",
-      compileAs: "block",
-      tests: [
-        ["else", "else {}"],
-        ["otherwise", "else {}"],
-        ["else: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
-        ["otherwise: b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
-        ["else b = 1", "else { const b = 1 }", "else { const b: number = 1 }"],
-        ["otherwise b = 1", "else { const b = 1 }", "else { const b: number = 1 }"]
-      ]
-    },
-    {
-      title: "correctly matches multi-line else blocks",
-      compileAs: "block",
-      tests: [
-        {
-          title: "Separate blocks if no indentation on second line.",
-          input: ["else", "b = 1"],
-          js: ["else {}", "export const b = 1"],
-          ts: ["else {}", "export const b: number = 1"]
-        },
-        {
-          title: "Indent with tab",
-          input: ["else", "\tb = 1"],
-          js: "else { const b = 1 }",
-          ts: "else { const b: number = 1 }"
-        },
-        {
-          title: "ANY number of spaces should count as indentation",
-          input: ["else", " b = 1"],
-          js: "else { const b = 1 }",
-          ts: "else { const b: number = 1 }"
-        },
-        {
-          title: "Multiple lines in the nested block",
-          input: ["else", "\tb = 1", "\tlet c = 2"],
-          js: ["else {", "  const b = 1", "  const c = 2", "}"],
-          ts: ["else {", "  const b: number = 1", "  const c: number = 2", "}"]
-        },
-        {
-          title: "Show error if nested block AND inline statement. Prefer block.",
-          input: ["else b = 1", "\tc = 2"],
-          js: ["else { const c = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"],
-          ts: ["else { const c: number = 2 }", "/* PARSE ERROR: Got both inline statement and nested block */"]
-        }
-      ]
-    }
-  ]
-})

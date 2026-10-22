@@ -1,7 +1,6 @@
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `range_between_expression` rule:  range expression:
@@ -24,20 +23,3 @@ export class RangeBetweenExpression extends SpellExpression<"arg|start|end|list"
     })
   }
 }
-lists.addRule(RangeBetweenExpression, {
-  syntax: "{arg:variable} {start:expression} to {end:expression} (of|in|from) {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-      },
-      tests: [
-        ["item 1 to 2 of my-list", "core.rangeBetween(myList, 0, 2)"],
-        [`word 2 to 3 in "some other words"`, 'core.rangeBetween("some other words", 1, 3)'],
-        ["card 1 to 3 from deck", "core.rangeBetween(deck, 0, 3)"]
-      ]
-    }
-  ]
-})

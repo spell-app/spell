@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
-import { expressions } from "./expressions.parser"
 
 /**
  * `as_uppercase` rule:  `as upper case`/`uppercase` postfix, e.g. `"foo" as upper case`.
@@ -19,15 +18,3 @@ export class AsUppercase extends PostfixOperatorSuffix {
     })
   }
 }
-expressions.addRule(AsUppercase, {
-  syntax: "as (upper case|uppercase)",
-  tests: [
-    {
-      compileAs: "expression",
-      tests: [
-        [`"foo" as upper case`, '"foo".toLocaleUpperCase()'],
-        [`1 as uppercase`, '`${1 ?? ""}`.toLocaleUpperCase()']
-      ]
-    }
-  ]
-})

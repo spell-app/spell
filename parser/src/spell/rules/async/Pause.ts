@@ -2,11 +2,13 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { _async } from "./async.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.
  * - Compiles to `await core.pauseFor(number, 'units')`.
+ * - Its unit is the word rule `pause_units`:  the unit's MEANING is compiled, the runtime's name for it
+ *   (`core.TIME_UNITS_MAP`'s keys), so `pausar 2 segundos` compiles as `pause for 2 seconds` does.
  * - TODO: "a second", "a little bit", "a while", "a noticeable amount".
  */
 export class Pause extends SpellStatement<"number|units"> {
@@ -17,22 +19,17 @@ export class Pause extends SpellStatement<"number|units"> {
     return new P.ASTAwaitExpression(match, {
       expression: new P.ASTCoreMethodInvocation(match, {
         methodName: "pauseFor",
-        args: [P.asAST<P.ASTExpression>(number.AST), new P.ASTQuotedExpression(units, units.value)]
+        args: [
+          P.asAST<P.ASTExpression>(number.AST),
+          new P.ASTQuotedExpression(units, Wording.meaningOf(units) ?? DEFAULT_UNITS)
+        ]
       })
     })
   }
 }
-_async.addRule(Pause, {
-  syntax: "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`pause for 2 seconds"`, 'await core.pauseFor(2, "seconds")'],
-        [`pause for 500 msec"`, 'await core.pauseFor(500, "msec")'],
-        [`pause for 10 ticks"`, 'await core.pauseFor(10, "ticks")'],
-        [`pause for (10 + 10) sec`, 'await core.pauseFor(10 + 10, "sec")']
-      ]
-    }
-  ]
-})
+
+/** The unit a pause with no known meaning waits in, as the runtime's `pauseFor()` does. */
+const DEFAULT_UNITS = "seconds"
+
+/** The units a pause may wait in, the runtime's names (`core.TIME_UNITS_MAP`):  `pause_units`'s meanings. */
+export const PAUSE_UNITS = ["second", "seconds", "sec", "millisecond", "milliseconds", "msec", "tick", "ticks"]

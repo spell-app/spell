@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_move` rule:  `move the card to the tableau` -- moves it, if the pile it belongs to lets it go
@@ -30,19 +29,3 @@ export class ListMove extends SpellStatement<"thing|list"> {
     })
   }
 }
-lists.addRule(ListMove, {
-  syntax: "move {thing:expression} to {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("card")
-        scope.variables?.add("tableau")
-      },
-      tests: [
-        ["move card to tableau", "core.move(card, tableau)"],
-        ["if move card to tableau then print 1", "if (core.move(card, tableau)) core.console.log(1)"]
-      ]
-    }
-  ]
-})

@@ -1,10 +1,10 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { MARKDOWN_TAG, rawTextOf } from "spell-lang/spell/rules/JSX/JSX.shared"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { classes } from "./classes.parser"
 
 /**
  * `markdown_description` rule:  a type's description, as markdown, in its outline (epic `drawable-thing`, P14).
@@ -39,10 +39,7 @@ export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionD
     if (!match) return undefined
     const type = scope instanceof P.SubjectScope ? scope.subjectType : undefined
     if (!type) {
-      return SpellStatement.refuse(
-        match,
-        "A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown>"
-      )
+      return SpellStatement.refuse(match, SP.Language.of(scope).parserMessage("markdown-outside-outline"))
     }
     match.data.typeName = type.name
     match.data.markdown = rawTextOf(element)
@@ -64,24 +61,6 @@ export class MarkdownDescription extends P.TokenType<never, MarkdownDescriptionD
     return match?.is(MarkdownDescription) ? match.data.markdown : undefined
   }
 }
-classes.addRule(MarkdownDescription, {
-  tests: [
-    {
-      compileAs: "block",
-      tests: [
-        [
-          ["a card is a thing:", "\t<markdown>", "\t\tA playing card:  **{rank}** of *suit*.", "\t</markdown>"],
-          ["export class Card extends Thing {", '  static description = "A playing card:  **{rank}** of *suit*."', "}"]
-        ],
-        // not in an outline:  says where it goes
-        [
-          ["<markdown>", "\tHello", "</markdown>"],
-          "/* PARSE ERROR: A <markdown> block goes in a type's outline, as its description, or in a drawing:  return <markdown>...</markdown> */"
-        ]
-      ]
-    }
-  ]
-})
 
 /** What `markdown_description` keeps on its match. */
 type MarkdownDescriptionData = {

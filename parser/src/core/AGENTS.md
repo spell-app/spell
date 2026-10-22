@@ -233,9 +233,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
-  - The four files both cores read stay in the JavaScript core:
-    its method list here, the three expected files with its tests (`tests/core/`):
+  - The five files both cores read stay in the JavaScript core:
+    its method list here, the four expected files with its tests (`tests/core/`):
     - [core.declarations.json5](core.declarations.json5)
+    - [messages.expected.json5](../../tests/core/messages.expected.json5)
     - [seededRandom.expected.json5](../../tests/core/seededRandom.expected.json5)
     - [stateById.expected.json5](../../tests/core/stateById.expected.json5)
     - [savedById.expected.json5](../../tests/core/savedById.expected.json5)

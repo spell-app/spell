@@ -3,7 +3,6 @@ import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `list_count` rule:  length of something KNOWN to be a list, without naming its items,
@@ -26,19 +25,3 @@ export class ListCount extends SpellExpression<"list"> {
     return new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [P.matchAST(match.groups.list)] })
   }
 }
-lists.addRule(ListCount, {
-  syntax: "the? number of {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.compile(["a card is a thing", "a card has a suit as one of clubs, diamonds", "set x to 1"].join("\n"))
-      },
-      tests: [
-        ["the number of card suits", "core.itemCountOf(Card.Suits)"],
-        ["the number of [1, 2]", "core.itemCountOf([1, 2])"],
-        { title: "not a list:  a property read", input: "the number of x", js: "x.number" }
-      ]
-    }
-  ]
-})

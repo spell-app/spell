@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { ListItemExpression } from "./ListItemExpression"
-import { lists } from "./lists.parser"
 
 /**
  * `ordinal_position_expression` rule:  ordinal-word index expression:
@@ -20,21 +19,3 @@ export class OrdinalPositionExpression extends ListItemExpression<"ordinal|arg|e
     })
   }
 }
-lists.addRule(OrdinalPositionExpression, {
-  syntax: "the {ordinal} {arg:singular_identifier} (in|of) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("deck")
-        scope.variables?.add("words")
-      },
-      tests: [
-        ["the first item of my-list", "core.getItemAt(myList, 0)"],
-        ["the tenth card of deck", "core.getItemAt(deck, 9)"],
-        ["the penultimate word in words", "core.getItemAt(words, -2)"]
-      ]
-    }
-  ]
-})

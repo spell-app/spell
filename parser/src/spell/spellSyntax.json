@@ -9,7 +9,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/Statement.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Base class for all spell statement rules.",
           "syntaxes": [],
           "aliases": []
@@ -19,8 +19,8 @@
           "ruleNames": ["blank_line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 14,
-          "purpose": "Blank line, compiling to `P.ASTBlankLine` -- generic `P.BlankLine` has no `getAST()` of its own, and spell always converts to AST before compiling.",
+          "line": 16,
+          "purpose": "A blank line, compiling to `P.ASTBlankLine`.",
           "syntaxes": [],
           "aliases": []
         },
@@ -39,7 +39,7 @@
           "ruleNames": ["line"],
           "internal": false,
           "file": "src/spell/rules/BlockLine.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "Parse a single `LineToken` in a `BlockToken` as.",
           "syntaxes": [],
           "aliases": []
@@ -49,7 +49,7 @@
           "ruleNames": ["parse_error"],
           "internal": false,
           "file": "src/spell/rules/ParseError.ts",
-          "line": 9,
+          "line": 10,
           "purpose": "Fallback rule matched (via `scope.parser.parse(tokens, \"parse_error\", scope)`) over tokens that no other rule could make sense of -- always \"succeeds\" so callers such as `BlockLine`/`Block`/`JSX` can keep an un-parseable chunk of input as an inline error node instead of aborting the whole parse.",
           "syntaxes": [],
           "aliases": []
@@ -78,7 +78,7 @@
           "ruleNames": ["whitespace"],
           "internal": false,
           "file": "src/spell/rules/core/Whitespace.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Any whitespace token -- space, tab, newline, etc., wrapped as-is into a `StringLiteral`.",
           "syntaxes": [],
           "aliases": []
@@ -88,7 +88,7 @@
           "ruleNames": ["indent"],
           "internal": false,
           "file": "src/spell/rules/core/Indent.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Indent whitespace specifically, e.g. leading spaces/tabs at start of a line.",
           "syntaxes": [],
           "aliases": []
@@ -98,7 +98,7 @@
           "ruleNames": ["newline"],
           "internal": false,
           "file": "src/spell/rules/core/Newline.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Single newline.",
           "syntaxes": [],
           "aliases": []
@@ -108,7 +108,7 @@
           "ruleNames": ["inline_whitespace"],
           "internal": false,
           "file": "src/spell/rules/core/InlineWhitespace.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Inline whitespace only, e.g. spaces/tabs between tokens on same line.",
           "syntaxes": [],
           "aliases": []
@@ -118,7 +118,7 @@
           "ruleNames": ["number"],
           "internal": false,
           "file": "src/spell/rules/core/NumberLiteral.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`number` as a float or integer token.",
           "syntaxes": [
             {
@@ -143,8 +143,8 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 10,
-          "purpose": "`number` spelled out as a string, `zero` to `ten` -- `VALUE_MAP` does the word-to-number lookup.",
+          "line": 9,
+          "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
               "example": "zero",
@@ -168,7 +168,7 @@
           "ruleNames": ["boolean"],
           "internal": false,
           "file": "src/spell/rules/core/BooleanLiteral.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Boolean literal -- also accepts common synonyms like `yes`/`no`, `ok`/`cancel`, `always`/`never`.",
           "syntaxes": [
             {
@@ -193,7 +193,7 @@
           "ruleNames": ["text"],
           "internal": false,
           "file": "src/spell/rules/core/TextLiteral.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Literal `text` string.",
           "syntaxes": [
             {
@@ -218,7 +218,7 @@
           "ruleNames": ["undefined"],
           "internal": false,
           "file": "src/spell/rules/core/UndefinedLiteral.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "`undefined` as an expression... ???",
           "syntaxes": [
             {
@@ -244,7 +244,7 @@
           "ruleNames": ["comment"],
           "internal": false,
           "file": "src/spell/rules/core/CommentLine.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Line comment token -- wraps a `CommentToken` into a `LineComment` AST node, e.g. `// foo`.",
           "syntaxes": [
             {
@@ -269,7 +269,7 @@
           "ruleNames": ["keyword"],
           "internal": false,
           "file": "src/spell/rules/core/KeywordRule.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Single alphanumeric word used as a keyword, e.g. in a method definition.",
           "syntaxes": [
             {
@@ -309,7 +309,7 @@
           "ruleNames": ["known_variable"],
           "internal": false,
           "file": "src/spell/rules/variables/KnownVariable.ts",
-          "line": 12,
+          "line": 10,
           "purpose": "Single word variable which is already known by our scope, with optional `the` prefix -- unlike `singular_identifier`, this fails if unresolvable.",
           "syntaxes": [
             {
@@ -361,7 +361,7 @@
           "ruleNames": ["singular_identifier"],
           "internal": false,
           "file": "src/spell/rules/variables/SingularIdentifier.ts",
-          "line": 10,
+          "line": 8,
           "purpose": "Possibly-unknown variable identifier which MUST be singular, WITHOUT `the` -- fails on plural input.",
           "syntaxes": [
             {
@@ -386,7 +386,7 @@
           "ruleNames": ["plural_identifier"],
           "internal": false,
           "file": "src/spell/rules/variables/PluralIdentifier.ts",
-          "line": 10,
+          "line": 8,
           "purpose": "Possibly-unknown variable identifier which MUST be plural, WITHOUT `the` -- fails on singular input.",
           "syntaxes": [
             {
@@ -411,7 +411,7 @@
           "ruleNames": ["variable"],
           "internal": false,
           "file": "src/spell/rules/variables/Variable.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`SpellIdentifier` which may or may not be known, with optional `the` prefix, e.g. `the thing`.",
           "syntaxes": [
             {
@@ -437,7 +437,7 @@
           "ruleNames": ["words_identifier"],
           "internal": false,
           "file": "src/spell/rules/variables/WordsIdentifier.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "A variable's name of several words, e.g. `start pile` (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -488,7 +488,7 @@
           "ruleNames": ["identifier"],
           "internal": false,
           "file": "src/spell/rules/variables/Identifier.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Variable identifier with no adornments (no leading `the`, no known/unknown check).",
           "syntaxes": [],
           "aliases": []
@@ -513,7 +513,7 @@
           "ruleNames": ["known_constant"],
           "internal": false,
           "file": "src/spell/rules/constants/KnownConstant.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Single-word constant that MUST already be known in `scope.constants` -- fails otherwise.",
           "syntaxes": [
             {
@@ -538,7 +538,7 @@
           "ruleNames": ["constant"],
           "internal": false,
           "file": "src/spell/rules/constants/Constant.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Possibly-unknown constant identifier.",
           "syntaxes": [
             {
@@ -598,7 +598,7 @@
           "ruleNames": ["parenthesized_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/ParenthesizedExpression.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "`(expression)` -- parenthesized sub-expression.",
           "syntaxes": [
             {
@@ -624,11 +624,11 @@
           "ruleNames": ["there_is_a"],
           "internal": false,
           "file": "src/spell/rules/expressions/ThereIsA.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "`there is [not] a`/`an {operand}` or `there is no such {operand}`, e.g. `there is a thing`.",
           "syntaxes": [
             {
-              "syntax": "there (operator:is not? (a|an)|is no such) {expression:operand}",
+              "syntax": "{operator:there_is_or_is_not} {expression:operand}",
               "example": "there is a thing",
               "outputs": {
                 "js": {
@@ -650,7 +650,7 @@
           "ruleNames": ["unicode_literal"],
           "internal": false,
           "file": "src/spell/rules/expressions/UnicodeLiteral.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "`unicode 1F0A0` -- the character with that code point, written in hex (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -676,7 +676,7 @@
           "ruleNames": ["unicode_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/UnicodeExpression.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`unicode code` -- the character with a code point worked out as the program runs (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -702,7 +702,7 @@
           "ruleNames": ["expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/CompoundExpression.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "An operand, then each operator suffix binding TIGHTER than `bound`, e.g. `x + 1 is 3`.",
           "syntaxes": [
             {
@@ -728,7 +728,7 @@
           "ruleNames": ["arithmetic_expression"],
           "internal": false,
           "file": "src/spell/rules/expressions/ArithmeticExpression.ts",
-          "line": 13,
+          "line": 11,
           "purpose": "An `expression` taking only arithmetic suffixes, `+ - * /`: stops before a comparison.",
           "syntaxes": [
             {
@@ -754,7 +754,7 @@
           "ruleNames": ["and"],
           "internal": false,
           "file": "src/spell/rules/expressions/And.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`{lhs} and {rhs}`, e.g. `thing and other`.",
           "syntaxes": [
             {
@@ -780,8 +780,8 @@
           "ruleNames": ["or"],
           "internal": false,
           "file": "src/spell/rules/expressions/Or.ts",
-          "line": 11,
-          "purpose": "`{lhs} or {rhs}`, e.g. `thing or other` -- `Precedence.or`: lowest of the boolean / comparison suffixes.",
+          "line": 10,
+          "purpose": "`{lhs} or {rhs}`, e.g. `thing or other`.",
           "syntaxes": [
             {
               "syntax": "(operator:or) {expression:operand}",
@@ -806,11 +806,11 @@
           "ruleNames": ["is_equal"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `==`/`!=`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is not?) {expression:operand}",
+              "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing is other",
               "outputs": {
                 "js": {
@@ -832,11 +832,11 @@
           "ruleNames": ["is_exactly"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsExactly.ts",
-          "line": 8,
+          "line": 9,
           "purpose": "`{lhs} is [not] exactly {rhs}`, e.g. `thing is exactly other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is not? exactly) {expression:operand}",
+              "syntax": "{operator:is_or_is_not} exactly {expression:operand}",
               "example": "thing is exactly other",
               "outputs": {
                 "js": {
@@ -858,11 +858,11 @@
           "ruleNames": ["is_a"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsA.ts",
-          "line": 20,
+          "line": 19,
           "purpose": "`{lhs} is [not] a`/`an {type}`, e.g. `thing is a Bee`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is not? (a|an)) {expression:known_type}",
+              "syntax": "{operator:is_or_is_not_a} {expression:known_type}",
               "example": "thing is a Bee",
               "outputs": {
                 "js": {
@@ -884,11 +884,11 @@
           "ruleNames": ["is_same_type_as"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsSameTypeAs.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`{lhs} is [not] the same type as {rhs}`, e.g. `thing is the same type as other`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is not? the same type as) {expression:operand}",
+              "syntax": "{operator:is_or_is_not} the same type as {expression:operand}",
               "example": "thing is the same type as other",
               "outputs": {
                 "js": {
@@ -910,11 +910,11 @@
           "ruleNames": ["is_in"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsIn.ts",
-          "line": 15,
-          "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`, e.g. `thing is in theList`, `thing is neither red nor green`.",
+          "line": 14,
+          "purpose": "`{lhs} is [not] in`/`one of`/`either`/`neither ... nor {list}`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is (not? in|not? one of|either|not either of?|neither)) (expression:{operand}|{identifier_list})",
+              "syntax": "{operator:is_or_is_not} (in|one of|either of?) (expression:{operand}|{identifier_list})",
               "example": "thing is in theList",
               "outputs": {
                 "js": {
@@ -929,7 +929,22 @@
               }
             },
             {
-              "syntax": "(operator:is not?) (expression:{value_choices})",
+              "syntax": "{operator:is_neither} (expression:{operand}|{identifier_list})",
+              "example": "thing is neither red nor green",
+              "outputs": {
+                "js": {
+                  "code": "!core.includes([red, \"green\"], thing)"
+                },
+                "ts": {
+                  "code": "!core.includes([red, \"green\"], thing)"
+                },
+                "py": {
+                  "code": "not thing in [red, \"green\"]"
+                }
+              }
+            },
+            {
+              "syntax": "{operator:is_or_is_not} (expression:{value_choices})",
               "example": "thing is green or blue",
               "outputs": {
                 "js": {
@@ -951,7 +966,7 @@
           "ruleNames": ["includes"],
           "internal": false,
           "file": "src/spell/rules/expressions/Includes.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`{lhs} includes`/`contains {rhs}`, e.g. `theList includes thing`.",
           "syntaxes": [
             {
@@ -977,7 +992,7 @@
           "ruleNames": ["does_not_include"],
           "internal": false,
           "file": "src/spell/rules/expressions/DoesNotInclude.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`{lhs} does not include`/`contain {rhs}`, e.g. `theList does not include thing`.",
           "syntaxes": [
             {
@@ -1003,11 +1018,11 @@
           "ruleNames": ["is_defined"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsDefined.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`{lhs} is defined`/`undefined`/`not defined` postfix, e.g. `thing is defined`.",
           "syntaxes": [
             {
-              "syntax": "is (defined|undefined|not defined)",
+              "syntax": "{operator:is_defined_or_not}",
               "example": "thing is defined",
               "outputs": {
                 "js": {
@@ -1029,11 +1044,11 @@
           "ruleNames": ["exists"],
           "internal": false,
           "file": "src/spell/rules/expressions/Exists.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`{lhs} exists`/`does not exist` postfix, e.g. `thing exists`.",
           "syntaxes": [
             {
-              "syntax": "(exists|does not exist)",
+              "syntax": "{operator:exists_or_not}",
               "example": "thing exists",
               "outputs": {
                 "js": {
@@ -1055,11 +1070,11 @@
           "ruleNames": ["is_empty"],
           "internal": false,
           "file": "src/spell/rules/expressions/IsEmpty.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`{lhs} is [not] empty` postfix, e.g. `thing is empty`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is not? empty)",
+              "syntax": "{operator:is_or_is_not} empty",
               "example": "thing is empty",
               "outputs": {
                 "js": {
@@ -1081,7 +1096,7 @@
           "ruleNames": ["as_uppercase"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsUppercase.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`as upper case`/`uppercase` postfix, e.g. `\"foo\" as upper case`.",
           "syntaxes": [
             {
@@ -1107,7 +1122,7 @@
           "ruleNames": ["as_lowercase"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsLowercase.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`as lower case`/`lowercase` postfix, e.g. `\"foo\" as lower case`.",
           "syntaxes": [
             {
@@ -1133,8 +1148,8 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 14,
-          "purpose": "`as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
+          "line": 15,
+          "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
               "syntax": "as (a|an) (type:string|number|fraction|integer)",
@@ -1171,14 +1186,31 @@
         },
         {
           "className": "Negatable",
-          "ruleNames": ["is", "can", "will", "has"],
+          "ruleNames": [
+            "is_or_is_not",
+            "is_or_is_not_a",
+            "can_or_cannot",
+            "will_or_will_not",
+            "has_or_has_not",
+            "is_neither",
+            "is_defined_or_not",
+            "exists_or_not",
+            "there_is_or_is_not",
+            "starts_with_or_not",
+            "ends_with_or_not",
+            "has_or_has_no",
+            "exclusive_or_not"
+          ],
           "internal": false,
           "file": "src/spell/rules/expressions/Negatable.ts",
-          "line": 13,
-          "purpose": "A word and its negated forms, e.g. `(is|(negated:is not|isn't|isnt))` -- registered under the word, e.g. `is`.",
+          "line": 19,
+          "purpose": "A word and its negated forms, e.g. `is_or_is_not`: `(is|(negated:is not|isn't|isnt))`.",
           "syntaxes": [
             {
               "syntax": "(is|(negated:is not|isn't|isnt))"
+            },
+            {
+              "syntax": "(is a|is an|are a|are an|(negated:is not a|is not an|isn't a|isn't an|isnt a|isnt an|are not a|are not an|aren't a|aren't an|arent a|arent an))"
             },
             {
               "syntax": "(can|(negated:can not|cannot|can't|cant))"
@@ -1188,6 +1220,120 @@
             },
             {
               "syntax": "(has|(negated:does not have|doesn't have|doesnt have))"
+            },
+            {
+              "syntax": "(negated:is neither|isn't either)"
+            },
+            {
+              "syntax": "(is defined|(negated:is undefined|is not defined|isn't defined|isnt defined))"
+            },
+            {
+              "syntax": "(exists|(negated:does not exist|doesn't exist|doesnt exist))"
+            },
+            {
+              "syntax": "(there is a|there is an|(negated:there is not a|there is not an|there isn't a|there isn't an|there is no such))"
+            },
+            {
+              "syntax": "(starts with|(negated:does not start with|doesnt start with|doesn't start with))"
+            },
+            {
+              "syntax": "(ends with|(negated:does not end with|doesnt end with|doesn't end with))"
+            },
+            {
+              "syntax": "(has|(negated:has no|doesnt have|doesn't have|does not have))"
+            },
+            {
+              "syntax": "(exclusive|(negated:non-exclusive|nonexclusive))"
+            }
+          ],
+          "aliases": ["is", "can", "will", "has"]
+        },
+        {
+          "className": "Synonyms",
+          "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Synonyms.ts",
+          "line": 14,
+          "purpose": "A WORD RULE whose forms all mean the same to spell, e.g. `is_or_are`, `(is|are)` (epic `spanish` P3).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an)"
+            },
+            {
+              "syntax": "the"
+            },
+            {
+              "syntax": "(is|are)/i"
+            },
+            {
+              "syntax": "(has|belongs)/i"
+            },
+            {
+              "syntax": "of"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "Wording",
+          "ruleNames": [
+            "and_or",
+            "is_greater_or_less_than",
+            "rounding",
+            "list_end",
+            "before_or_after",
+            "print_kind",
+            "take_or_give_up",
+            "at_least_or_at_most",
+            "url_or_email",
+            "side_name",
+            "pause_units",
+            "spell_jsx_tag",
+            "spell_jsx_attribute"
+          ],
+          "internal": false,
+          "file": "src/spell/rules/expressions/Wording.ts",
+          "line": 16,
+          "purpose": "A WORD RULE: the words a language says one thing with, and what each form MEANS (epic `spanish` P3).",
+          "syntaxes": [
+            {
+              "syntax": "((and:and)|(or:or))"
+            },
+            {
+              "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
+            },
+            {
+              "syntax": "(off|(up:up)|(down:down))"
+            },
+            {
+              "syntax": "((start:start|front|top)|(end:end|back|bottom))"
+            },
+            {
+              "syntax": "((before:before)|(after:after))"
+            },
+            {
+              "syntax": "((info:info)|(warning:warning)|(error:error)|(group:group)|(collapsed_group:collapsed group))"
+            },
+            {
+              "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
+            },
+            {
+              "syntax": "((at_least:at least)|(at_most:at most))"
+            },
+            {
+              "syntax": "((url:url)|(email:email))"
+            },
+            {
+              "syntax": "((front:front)|(back:back))"
+            },
+            {
+              "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
+            },
+            {
+              "syntax": "((slot:children)|slot)"
+            },
+            {
+              "syntax": "((slot:in)|slot)"
             }
           ],
           "aliases": []
@@ -1197,7 +1343,7 @@
           "ruleNames": ["unicode_code"],
           "internal": false,
           "file": "src/spell/rules/expressions/UnicodeCode.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "A code point written in hex, e.g. `1F0A0`, `2665`, `A0` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -1212,7 +1358,7 @@
           "ruleNames": ["absolute_value"],
           "internal": false,
           "file": "src/spell/rules/math/AbsoluteValue.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`the absolute value of {expression}`.",
           "syntaxes": [
             {
@@ -1238,7 +1384,7 @@
           "ruleNames": ["max"],
           "internal": false,
           "file": "src/spell/rules/math/Max.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`the biggest`/`largest` [thing] `of`/`in` {expression}, e.g. `largest of the prices`.",
           "syntaxes": [
             {
@@ -1264,7 +1410,7 @@
           "ruleNames": ["min"],
           "internal": false,
           "file": "src/spell/rules/math/Min.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`the smallest` [thing] `of`/`in` {expression}, e.g. `smallest of prices`.",
           "syntaxes": [
             {
@@ -1294,7 +1440,7 @@
           "purpose": "`round {expression}`, optionally `off`/`up`/`down`, e.g. `round price up`.",
           "syntaxes": [
             {
-              "syntax": "round {expression:arithmetic_expression} (operator:off|up|down)?",
+              "syntax": "round {expression:arithmetic_expression} {operator:rounding}?",
               "example": "round price",
               "outputs": {
                 "js": {
@@ -1342,11 +1488,11 @@
           "ruleNames": ["is_gt_lt"],
           "internal": false,
           "file": "src/spell/rules/math/IsGtLt.ts",
-          "line": 14,
-          "purpose": "`is greater than`, `is less than`, optionally `... or equal to`, e.g. `salary is greater than expenses`.",
+          "line": 12,
+          "purpose": "`is greater than` or `is less than`, optionally `... or equal to`.",
           "syntaxes": [
             {
-              "syntax": "(operator:is (greater|less) than (or equal to)?) {expression:operand}",
+              "syntax": "{operator:is_greater_or_less_than} {expression:operand}",
               "example": "salary is greater than expenses",
               "outputs": {
                 "js": {
@@ -1368,7 +1514,7 @@
           "ruleNames": ["plus"],
           "internal": false,
           "file": "src/spell/rules/math/Plus.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "`plus` / `+`, e.g. `price + tax` -- `Precedence.sum`: tighter than comparisons, looser than `*` `/`.",
           "syntaxes": [
             {
@@ -1394,7 +1540,7 @@
           "ruleNames": ["minus"],
           "internal": false,
           "file": "src/spell/rules/math/Minus.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`minus` / `-`, e.g. `price - tax`.",
           "syntaxes": [
             {
@@ -1420,7 +1566,7 @@
           "ruleNames": ["times"],
           "internal": false,
           "file": "src/spell/rules/math/Times.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "`*` / `times`, e.g. `price * taxRate` -- `Precedence.product`, tightest, alongside `/`.",
           "syntaxes": [
             {
@@ -1446,7 +1592,7 @@
           "ruleNames": ["divided_by"],
           "internal": false,
           "file": "src/spell/rules/math/DividedBy.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "`/` / `divided by`, e.g. `price / taxRate` -- `Precedence.product`, same as `*`.",
           "syntaxes": [
             {
@@ -1487,7 +1633,7 @@
           "ruleNames": ["property_expression"],
           "internal": false,
           "file": "src/spell/rules/properties/PropertyExpression.ts",
-          "line": 28,
+          "line": 27,
           "purpose": "`the {member words} of {thing}` ~== `thing.member`.",
           "syntaxes": [
             {
@@ -1513,7 +1659,7 @@
           "ruleNames": ["its_known_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsKnownProperty.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "`its {member words}`, where the words name a PROPERTY `it`'s type declares: the LONGEST run of them that does, e.g. `short rank` in `its short rank + its short suit`.",
           "syntaxes": [
             {
@@ -1539,7 +1685,7 @@
           "ruleNames": ["its_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsProperty.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`its {property}` -- possessive shorthand.",
           "syntaxes": [
             {
@@ -1565,7 +1711,7 @@
           "ruleNames": ["its_ordinal"],
           "internal": false,
           "file": "src/spell/rules/properties/ItsOrdinal.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "`its {ordinal} {arg}` -- possessive-plus-ordinal shorthand, e.g. `its third card`.",
           "syntaxes": [
             {
@@ -1591,7 +1737,7 @@
           "ruleNames": ["member_words"],
           "internal": false,
           "file": "src/spell/rules/properties/MemberWords.ts",
-          "line": 19,
+          "line": 23,
           "purpose": "1..N words naming a member, e.g. `short rank`, `short-rank`, `rank`.",
           "syntaxes": [
             {
@@ -1616,7 +1762,7 @@
           "ruleNames": ["body_member_words"],
           "internal": false,
           "file": "src/spell/rules/properties/BodyMemberWords.ts",
-          "line": 18,
+          "line": 15,
           "purpose": "A member's bare name starting a line of a type's outline body, e.g. `suit` in `- suit is a suit of its deck` (epic page `outline-spell`, P9).",
           "syntaxes": [
             {
@@ -1641,7 +1787,7 @@
           "ruleNames": ["quoted_member"],
           "internal": false,
           "file": "src/spell/rules/properties/QuotedMember.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "A member's name in quotes, where it's being declared: `its \"suit\" is one of ...` in an outline-style type's body -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
           "syntaxes": [
             {
@@ -1692,7 +1838,7 @@
           "ruleNames": ["named_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 50,
+          "line": 26,
           "purpose": "`name T1` -- a one-word property and a bare name, no `=` (epic `outline-spell` P19).",
           "syntaxes": [
             {
@@ -1718,7 +1864,7 @@
           "ruleNames": ["flag_object_literal_property"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperty.ts",
-          "line": 76,
+          "line": 41,
           "purpose": "`jokers` -- a property's name alone, meaning `jokers = yes` (epic `outline-spell` P26).",
           "syntaxes": [
             {
@@ -1744,7 +1890,7 @@
           "ruleNames": ["object_literal_properties"],
           "internal": false,
           "file": "src/spell/rules/properties/ObjectLiteralProperties.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Object literal -- creates an object with one or more property values, e.g. `foo = 1 and bar is 2`.",
           "syntaxes": [
             {
@@ -1770,8 +1916,8 @@
           "ruleNames": ["property"],
           "internal": false,
           "file": "src/spell/rules/properties/Property.ts",
-          "line": 15,
-          "purpose": "ONE word naming a property: initial-lower-case, not in `identifierBlacklist`.",
+          "line": 12,
+          "purpose": "ONE word naming a property: initial-lower-case, not one of the language's own words (its `blacklist`).",
           "syntaxes": [],
           "aliases": []
         }
@@ -1795,7 +1941,7 @@
           "ruleNames": ["bracketed_list"],
           "internal": false,
           "file": "src/spell/rules/lists/BracketedList.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Bracketed list (array) literal, e.g. `[1,2 , true,false ]`.",
           "syntaxes": [
             {
@@ -1847,7 +1993,7 @@
           "ruleNames": ["merge_lists"],
           "internal": false,
           "file": "src/spell/rules/lists/MergeLists.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Merge a set of lists together, e.g. `merge the piles` => `core.mergeLists(piles)`.",
           "syntaxes": [
             {
@@ -1873,7 +2019,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -1914,7 +2060,7 @@
           "ruleNames": ["list_count"],
           "internal": false,
           "file": "src/spell/rules/lists/ListCount.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "Length of something KNOWN to be a list, without naming its items, e.g. `the number of card suits` => `core.itemCountOf(Card.Suits)`.",
           "syntaxes": [
             {
@@ -1940,7 +2086,7 @@
           "ruleNames": ["list_position"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPosition.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "Return position of an item in a list, e.g. `position of thing in my-list` => `spellPosition(positionOf(myList, thing))`, imported from `@spell/core`.",
           "syntaxes": [
             {
@@ -1969,7 +2115,7 @@
           "ruleNames": ["position_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/PositionExpression.ts",
-          "line": 13,
+          "line": 18,
           "purpose": "Numeric-position index expression, e.g. `card 1 of the pile`, `card #2 of the pile`.",
           "syntaxes": [
             {
@@ -1995,7 +2141,7 @@
           "ruleNames": ["ordinal_position_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/OrdinalPositionExpression.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Ordinal-word index expression: e.g. `the first item of my-list`, `the tenth card of deck`.",
           "syntaxes": [
             {
@@ -2021,7 +2167,7 @@
           "ruleNames": ["ordinal_where_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/OrdinalWhereExpression.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "The first (second, last ...) item of a list that passes a test (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -2047,7 +2193,7 @@
           "ruleNames": ["random_item_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RandomItemExpression.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "Pick a single random item from list, e.g. `a random item of my-list`.",
           "syntaxes": [
             {
@@ -2073,7 +2219,7 @@
           "ruleNames": ["random_items_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RandomItemsExpression.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Pick a unique set of random items from list, returning an array.",
           "syntaxes": [
             {
@@ -2099,7 +2245,7 @@
           "ruleNames": ["range_between_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeBetweenExpression.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Range expression: e.g. `item 1 to 2 of my-list` => `core.rangeBetween(myList, 0, 2)`.",
           "syntaxes": [
             {
@@ -2125,7 +2271,7 @@
           "ruleNames": ["range_starting_with_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeStartingWithExpression.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "Range expression starting at some item in list, inclusive: e.g. `items in my-list starting with thing`.",
           "syntaxes": [
             {
@@ -2151,7 +2297,7 @@
           "ruleNames": ["range_count_expression"],
           "internal": false,
           "file": "src/spell/rules/lists/RangeCountExpression.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "Alternative form of range expression.",
           "syntaxes": [
             {
@@ -2177,7 +2323,7 @@
           "ruleNames": ["list_filter"],
           "internal": false,
           "file": "src/spell/rules/lists/ListFilter.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "List filter, e.g. `words in \"a word list\" where word starts with \"a\"`.",
           "syntaxes": [
             {
@@ -2203,7 +2349,7 @@
           "ruleNames": ["list_move"],
           "internal": false,
           "file": "src/spell/rules/lists/ListMove.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "`move the card to the tableau` -- moves it, if the pile it belongs to lets it go and the tableau takes it: their guards, e.g. `a tableau can take a card if: ...` (epic page Q25).",
           "syntaxes": [
             {
@@ -2258,7 +2404,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 22,
+          "line": 21,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -2284,7 +2430,7 @@
           "ruleNames": ["identifier_list"],
           "internal": false,
           "file": "src/spell/rules/lists/IdentifierList.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "List of identifiers and/or numbers, e.g. `clubs or hearts`, `jack, queen, king`.",
           "syntaxes": [
             {
@@ -2310,7 +2456,7 @@
           "ruleNames": ["number_range"],
           "internal": false,
           "file": "src/spell/rules/lists/NumberRange.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "Whole numbers from one to another, e.g. `2 ... 10` in `ace, 2 ... 10, jack, queen or king` (epic page `outline-spell`, P2).",
           "syntaxes": [
             {
@@ -2336,11 +2482,11 @@
           "ruleNames": ["value_choices"],
           "internal": false,
           "file": "src/spell/rules/lists/ValueChoices.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "Two or more KNOWN values joined by `or`, e.g. `diamonds or hearts`, `jack, queen or king` -- for `it is diamonds or hearts` (`is_in`): the same as `it is one of diamonds or hearts`.",
           "syntaxes": [
             {
-              "syntax": "[({known_constant}|{number}) (,|or)]",
+              "syntax": "[({known_constant}|{number}) (,|(or:or))]",
               "example": "jack or queen",
               "outputs": {
                 "js": {
@@ -2366,7 +2512,7 @@
           "purpose": "Does list start with some value, e.g. `my-list starts with thing` => `core.startsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "(operator:starts with|does not start with|doesnt start with|doesn't start with) {expression:operand}",
+              "syntax": "{operator:starts_with_or_not} {expression:operand}",
               "example": "my-list starts with thing",
               "outputs": {
                 "js": {
@@ -2392,7 +2538,7 @@
           "purpose": "Does list end with some value, e.g. `my-list ends with thing` => `core.endsWith(myList, thing)`.",
           "syntaxes": [
             {
-              "syntax": "(operator:ends with|does not end with|doesnt end with|doesn't end with) {expression:operand}",
+              "syntax": "{operator:ends_with_or_not} {expression:operand}",
               "example": "my-list ends with thing",
               "outputs": {
                 "js": {
@@ -2414,7 +2560,7 @@
           "ruleNames": ["ordinal"],
           "internal": false,
           "file": "src/spell/rules/lists/Ordinal.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "Ordinal numbers (`first`, `second`, `last`, etc.), mapped to numeric literals via `VALUE_MAP`.",
           "syntaxes": [
             {
@@ -2439,11 +2585,11 @@
           "ruleNames": ["list_membership_test"],
           "internal": false,
           "file": "src/spell/rules/lists/ListMembershipTest.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "Set membership test, e.g. `my-list has items where the item is 1`.",
           "syntaxes": [
             {
-              "syntax": "(operator:has|has no|doesnt have|does not have) {arg:plural_identifier} where {inline_expression}?",
+              "syntax": "{operator:has_or_has_no} {arg:plural_identifier} where {inline_expression}?",
               "example": "my-list has items where",
               "outputs": {
                 "js": {
@@ -2469,7 +2615,7 @@
           "purpose": "Add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.",
           "syntaxes": [
             {
-              "syntax": "add {thing:expression} to (the (method:start|front|top|end|back|bottom) of)? {list:expression}",
+              "syntax": "add {thing:expression} to (the {method:list_end} of)? {list:expression}",
               "example": "add thing to the start of my-list",
               "outputs": {
                 "js": {
@@ -2491,7 +2637,7 @@
           "ruleNames": ["list_prepend"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPrepend.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Prepend to list, e.g. `prepend thing to my-list` => `core.prepend(myList, thing)`.",
           "syntaxes": [
             {
@@ -2517,7 +2663,7 @@
           "ruleNames": ["list_append"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAppend.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Append to list, e.g. `append thing to my-list` => `core.append(myList, thing)`.",
           "syntaxes": [
             {
@@ -2543,11 +2689,11 @@
           "ruleNames": ["list_add_relative"],
           "internal": false,
           "file": "src/spell/rules/lists/ListAddRelative.ts",
-          "line": 17,
+          "line": 18,
           "purpose": "Add to list before/after some other item, e.g. `add thing to my-list before other-thing`.",
           "syntaxes": [
             {
-              "syntax": "add {thing:expression} to {list:expression} (operator:before|after) {item:expression}",
+              "syntax": "add {thing:expression} to {list:expression} {operator:before_or_after} {item:expression}",
               "example": "add thing to my-list before other-thing",
               "outputs": {
                 "js": {
@@ -2569,7 +2715,7 @@
           "ruleNames": ["list_empty"],
           "internal": false,
           "file": "src/spell/rules/lists/ListEmpty.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Empty a list in-place, e.g. `empty my-list` => `core.clear(myList)`.",
           "syntaxes": [
             {
@@ -2595,7 +2741,7 @@
           "ruleNames": ["list_remove_ordinal"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveOrdinal.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Remove one item from list by ordinal position, e.g. `remove last card of deck` => `core.removeItemAt(deck, -1)`.",
           "syntaxes": [
             {
@@ -2621,7 +2767,7 @@
           "ruleNames": ["list_remove_position"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemovePosition.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "Remove one item from list by numeric position.",
           "syntaxes": [
             {
@@ -2647,7 +2793,7 @@
           "ruleNames": ["list_remove_range"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveRange.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "Remove range of items from list, e.g. `remove items 2 to 4 of my-list`.",
           "syntaxes": [
             {
@@ -2673,7 +2819,7 @@
           "ruleNames": ["list_remove_range_ordinal"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveRangeOrdinal.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Remove range of items from list using ordinal words for both ends, e.g. `remove first to third cards of the deck` => `core.removeRangeBetween(deck, 0, 3)`.",
           "syntaxes": [
             {
@@ -2699,7 +2845,7 @@
           "ruleNames": ["list_remove"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemove.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Remove all instances of something from a list.",
           "syntaxes": [
             {
@@ -2725,7 +2871,7 @@
           "ruleNames": ["list_remove_where"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRemoveWhere.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Remove all items from list where condition is true: e.g. `remove items from my-list where item is not \"ace\"`.",
           "syntaxes": [
             {
@@ -2751,11 +2897,11 @@
           "ruleNames": ["can_take"],
           "internal": false,
           "file": "src/spell/rules/lists/CanTake.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "`{list} can take {thing}` -- would the list take it, moved there?",
           "syntaxes": [
             {
-              "syntax": "{operator:can} (add|take) {expression:operand}",
+              "syntax": "{operator:can_or_cannot} (add|take) {expression:operand}",
               "example": "tableau can take card",
               "outputs": {
                 "js": {
@@ -2777,11 +2923,11 @@
           "ruleNames": ["can_give_up"],
           "internal": false,
           "file": "src/spell/rules/lists/CanGiveUp.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "`{list} can give up {thing}` -- would the list give it up, moved elsewhere?",
           "syntaxes": [
             {
-              "syntax": "{operator:can} (release|remove|give up|let go of) {expression:operand}",
+              "syntax": "{operator:can_or_cannot} (release|remove|give up|let go of) {expression:operand}",
               "example": "stock can give up card",
               "outputs": {
                 "js": {
@@ -2803,7 +2949,7 @@
           "ruleNames": ["list_reverse"],
           "internal": false,
           "file": "src/spell/rules/lists/ListReverse.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "Reverse list in-place, e.g. `reverse my-list` => `core.reverse(myList)`.",
           "syntaxes": [
             {
@@ -2829,7 +2975,7 @@
           "ruleNames": ["list_shuffle"],
           "internal": false,
           "file": "src/spell/rules/lists/ListShuffle.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Shuffle (randomize) list in-place: e.g. `shuffle my-list` => `core.randomize(myList)`.",
           "syntaxes": [
             {
@@ -2855,7 +3001,7 @@
           "ruleNames": ["list_range_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListRangeIteration.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "Number range-specific iteration, e.g. `for each number from 1 to 10:`.",
           "syntaxes": [
             {
@@ -2886,7 +3032,7 @@
           "ruleNames": ["css"],
           "internal": false,
           "file": "src/spell/rules/UI/CSSStyles.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Parse CSS from a `TextToken` WITHOUT quotes.",
           "syntaxes": [
             {
@@ -2915,7 +3061,7 @@
           "purpose": "Print an expression (to the console currently).",
           "syntaxes": [
             {
-              "syntax": "print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]",
+              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
               "example": "print \"Yo!\"",
               "outputs": {
                 "js": {
@@ -2937,7 +3083,7 @@
           "ruleNames": ["end_print_group"],
           "internal": false,
           "file": "src/spell/rules/UI/EndPrintGroup.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Stop a previous `print group...`",
           "syntaxes": [
             {
@@ -2963,7 +3109,7 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "Notify user about `message` in a non-modal (popup?) interface.",
           "syntaxes": [
             {
@@ -2989,7 +3135,7 @@
           "ruleNames": ["alert"],
           "internal": false,
           "file": "src/spell/rules/UI/Alert.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Show user a `message` in a modal alert.",
           "syntaxes": [
             {
@@ -3015,7 +3161,7 @@
           "ruleNames": ["warn"],
           "internal": false,
           "file": "src/spell/rules/UI/Warn.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Warning message -- like alert but more dire.",
           "syntaxes": [
             {
@@ -3041,7 +3187,7 @@
           "ruleNames": ["confirm"],
           "internal": false,
           "file": "src/spell/rules/UI/Confirm.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Confirm message -- present a question with two answers.",
           "syntaxes": [
             {
@@ -3067,7 +3213,7 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "Prompt user to specify a value in response to `message` with `defaultValue`.",
           "syntaxes": [
             {
@@ -3108,7 +3254,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/classes/TypeDeclaration.ts",
-          "line": 26,
+          "line": 28,
           "purpose": "A statement declaring a type -- which may take an OUTLINE body: `a card is a thing where:`, then indented lines all about cards, e.g. `- it has a deck` (epic page `outline-spell`).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -3118,7 +3264,7 @@
           "ruleNames": ["new_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NewThing.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "`a new object` -- constructs `type` (optionally `with`/`where`/`whose` `props`).",
           "syntaxes": [
             {
@@ -3144,7 +3290,7 @@
           "ruleNames": ["new_list"],
           "internal": false,
           "file": "src/spell/rules/classes/NewList.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`a new list of <type>` -- constructs a `List`, optionally tagged with `instanceType`.",
           "syntaxes": [
             {
@@ -3170,8 +3316,8 @@
           "ruleNames": ["create_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateThing.ts",
-          "line": 15,
-          "purpose": "`create a thing` -- same as `new_thing` above, worded with `create` instead of `a new`.",
+          "line": 14,
+          "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
               "syntax": "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
@@ -3196,7 +3342,7 @@
           "ruleNames": ["class_member"],
           "internal": false,
           "file": "src/spell/rules/classes/ClassMember.ts",
-          "line": 19,
+          "line": 18,
           "purpose": "`{type} {member words}` -- a class variable of a known type, e.g.",
           "syntaxes": [
             {
@@ -3222,7 +3368,7 @@
           "ruleNames": ["named_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/NamedThing.ts",
-          "line": 23,
+          "line": 22,
           "purpose": "One thing, by its type and its name (epic `drawable-thing` P19, Owen's J23).",
           "syntaxes": [
             {
@@ -3263,7 +3409,7 @@
           "ruleNames": ["thing_at_place"],
           "internal": false,
           "file": "src/spell/rules/classes/ThingAtPlace.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "One thing, by its type and its place (epic `drawable-thing` P19, Owen's J23).",
           "syntaxes": [
             {
@@ -3289,7 +3435,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -3315,7 +3461,7 @@
           "ruleNames": ["the_things"],
           "internal": false,
           "file": "src/spell/rules/classes/TheThings.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "`the foundations` -- every thing of a type, by its plural (epic page `outline-spell`, P23).",
           "syntaxes": [
             {
@@ -3341,7 +3487,7 @@
           "ruleNames": ["with_nested_statements"],
           "internal": false,
           "file": "src/spell/rules/classes/WithNestedStatements.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`where:`, `with:` or a bare `:` ending a line -- then the indented block under it is the statement's body, e.g. a type's outline body (epic page `outline-spell` Q7).",
           "syntaxes": [
             {
@@ -3423,7 +3569,7 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
@@ -3449,7 +3595,7 @@
           "ruleNames": ["create_list_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateListType.ts",
-          "line": 19,
+          "line": 18,
           "purpose": "`a deck is a list of cards` or `create a type called Deck as a list of cards` -- declares `type` as a new class extending `List`, with its `instanceType` set to `instanceType`.",
           "syntaxes": [
             {
@@ -3581,7 +3727,7 @@
           "ruleNames": ["belongs_to_one"],
           "internal": false,
           "file": "src/spell/rules/classes/BelongsToOne.ts",
-          "line": 31,
+          "line": 30,
           "purpose": "`a card belongs to one pile` -- a card is in at most ONE pile at a time (epic page D7, D8, Q22).",
           "syntaxes": [
             {
@@ -3613,7 +3759,7 @@
           "ruleNames": ["can_belong_to_many"],
           "internal": false,
           "file": "src/spell/rules/classes/CanBelongToMany.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`a card can belong to many piles` -- the opposite of `a card belongs to one pile`: what a list does anyway, so it compiles to nothing.",
           "syntaxes": [
             {
@@ -3639,7 +3785,7 @@
           "ruleNames": ["saved_inline"],
           "internal": false,
           "file": "src/spell/rules/classes/SavedInline.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "`a dated-event is saved inline` -- a dated event is saved INSIDE what holds it (epic `people-and-orgs`, Q9 and J1).",
           "syntaxes": [
             {
@@ -3671,7 +3817,7 @@
           "ruleNames": ["saved_in_file"],
           "internal": false,
           "file": "src/spell/rules/classes/SavedInFile.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "`a person is saved in its own file` -- a person gets an entry, a file, of its own, and what holds one saves a reference to it (epic `people-and-orgs`, decision Q42).",
           "syntaxes": [
             {
@@ -3744,7 +3890,7 @@
           "ruleNames": ["upgrade_method"],
           "internal": false,
           "file": "src/spell/rules/classes/UpgradeMethod.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "What bringing a saved thing up to a version takes, beyond renames and drops (epic `people-and-orgs` P6).",
           "syntaxes": [
             {
@@ -3770,11 +3916,11 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 35,
+          "line": 38,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:known_type} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?",
+              "syntax": "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?",
               "example": "a pile can take a card if: it is empty",
               "outputs": {
                 "js": {
@@ -3789,22 +3935,7 @@
               }
             },
             {
-              "syntax": "(a|an) {type:known_type} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?",
-              "example": "a pile can give up a card if: the card is its last card",
-              "outputs": {
-                "js": {
-                  "code": "Pile.prototype.canGiveUp = function (card) {\n  return card === this.lastItem\n}"
-                },
-                "ts": {
-                  "code": "export interface Pile { canGiveUp(card: Card): boolean }\nPile.prototype.canGiveUp = function (this: Pile, card: Card) {\n  return card === this.lastItem\n}"
-                },
-                "py": {
-                  "code": "@Pile.add_method(\"can_give_up\")\ndef _pile_can_give_up(self, card: Card) -> bool:\n    return card == self.last_item"
-                }
-              }
-            },
-            {
-              "syntax": "(a|an) {type:known_type} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}",
+              "syntax": "(a|an) {type:known_type} can (never:never) {verb:take_or_give_up} (a|an) {item:type}",
               "example": "a pile can never let go of a card",
               "outputs": {
                 "js": {
@@ -3819,43 +3950,16 @@
               }
             },
             {
-              "syntax": "(a|an) {type:known_type} can (never:never) (verb:add|take) (a|an) {item:type}",
-              "example": "a pile can never take a card",
-              "outputs": {
-                "js": {
-                  "code": "Pile.prototype.canTake = function (card) {\n  return false\n}"
-                },
-                "ts": {
-                  "code": "export interface Pile { canTake(card: Card): boolean }\nPile.prototype.canTake = function (this: Pile, card: Card) {\n  return false\n}"
-                },
-                "py": {
-                  "code": "@Pile.add_method(\"can_take\")\ndef _pile_can_take(self, card: Card) -> bool:\n    return False"
-                }
-              }
+              "syntax": "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
             },
             {
-              "syntax": "{type:subject_it} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
             },
             {
-              "syntax": "{type:subject_it} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
             },
             {
-              "syntax": "{type:subject_it} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}"
-            },
-            {
-              "syntax": "{type:subject_it} can (never:never) (verb:add|take) (a|an) {item:type}"
-            },
-            {
-              "syntax": "{type:subject_implied} can (verb:add|take) (a|an) {item:type} if :? {expression_body}?"
-            },
-            {
-              "syntax": "{type:subject_implied} can (verb:release|remove|give up|let go of) (a|an) {item:type} if :? {expression_body}?"
-            },
-            {
-              "syntax": "{type:subject_implied} can (never:never) (verb:release|remove|give up|let go of) (a|an) {item:type}"
-            },
-            {
-              "syntax": "{type:subject_implied} can (never:never) (verb:add|take) (a|an) {item:type}"
+              "syntax": "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
             }
           ],
           "aliases": ["statement"]
@@ -3865,7 +3969,7 @@
           "ruleNames": ["type_specifier_enum"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierEnum.ts",
-          "line": 11,
+          "line": 13,
           "purpose": "Specifies a property's allowed values as an enumeration, for use by `define_property_has`.",
           "syntaxes": [
             {
@@ -3891,7 +3995,7 @@
           "ruleNames": ["type_specifier_datatype"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierDatatype.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`as a number` / `as an automobile` -- specifies a property's datatype as a primitive or known type.",
           "syntaxes": [
             {
@@ -3917,7 +4021,7 @@
           "ruleNames": ["type_specifier_instance"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierInstance.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`as a new thing` / `as a new list of tasks` -- specifies a property's default/initializer value as a `new_thing` or `new_list` expression.",
           "syntaxes": [
             {
@@ -3943,7 +4047,7 @@
           "ruleNames": ["type_specifier_yes_or_no"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierYesOrNo.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`as yes or no` / `as either true or false` -- specifies a property's datatype as a boolean.",
           "syntaxes": [
             {
@@ -4034,7 +4138,7 @@
           "ruleNames": ["outline_specifier_enum"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierEnum.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "The `type_specifier`s again, without their `as`, for an outline body's `its \"suit\" is ...`.",
           "syntaxes": [
             {
@@ -4075,7 +4179,7 @@
           "ruleNames": ["outline_specifier_datatype"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierDatatype.ts",
-          "line": 6,
+          "line": 5,
           "purpose": "`a number` -- see `outline_specifier_enum`.",
           "syntaxes": [
             {
@@ -4131,7 +4235,7 @@
           "ruleNames": ["outline_specifier_yes_or_no"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierYesOrNo.ts",
-          "line": 6,
+          "line": 5,
           "purpose": "`yes or no` -- see `outline_specifier_enum`.",
           "syntaxes": [
             {
@@ -4157,7 +4261,7 @@
           "ruleNames": ["outline_specifier_list"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierList.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "`a list of people` -- in a type's outline body, a property holding a list, e.g. `- its \"people\" is a list of people` (epic `people-and-orgs`).",
           "syntaxes": [
             {
@@ -4183,7 +4287,7 @@
           "ruleNames": ["outline_specifier_instance"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierInstance.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`a new foundation with ...` -- a property's starting value, in a type's outline body (epic `outline-spell` P19).",
           "syntaxes": [
             {
@@ -4209,7 +4313,7 @@
           "ruleNames": ["property_value_either"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueEither.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "Defines a property getter whose value depends on a condition, e.g. `the color of a card is red if its suit is either diamonds or hearts (otherwise it is X)?`",
           "syntaxes": [
             {
@@ -4235,7 +4339,7 @@
           "ruleNames": ["property_value_getter"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyValueGetter.ts",
-          "line": 22,
+          "line": 26,
           "purpose": "`the value of a card is:` -- defines a property getter whose body is an inline EXPRESSION or nested block (`{expression_body}?`), with `its`/`it` mapped to `this` inside.",
           "syntaxes": [
             {
@@ -4276,7 +4380,7 @@
           "ruleNames": ["quoted_property_formula"],
           "internal": false,
           "file": "src/spell/rules/classes/QuotedPropertyFormula.ts",
-          "line": 25,
+          "line": 27,
           "purpose": "`a card \"is a (rank) of (suits)\" for its ranks and its suits`.",
           "syntaxes": [
             {
@@ -4314,7 +4418,7 @@
           "ruleNames": ["thing_name"],
           "internal": false,
           "file": "src/spell/rules/classes/ThingName.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "The name of one thing, written bare after its type (epic `drawable-thing` P19).",
           "syntaxes": [
             {
@@ -4339,7 +4443,7 @@
           "ruleNames": ["pattern_text"],
           "internal": false,
           "file": "src/spell/rules/classes/PatternText.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "A PATTERN in quotes, a regular expression, read exactly as typed.",
           "syntaxes": [
             {
@@ -4364,7 +4468,7 @@
           "ruleNames": ["rule_suggestion"],
           "internal": false,
           "file": "src/spell/rules/classes/RuleSuggestion.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "What to say when a property's rule is broken, in place of the rule's own words.",
           "syntaxes": [
             {
@@ -4390,7 +4494,7 @@
           "ruleNames": ["must_rule"],
           "internal": false,
           "file": "src/spell/rules/classes/MustRule.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "What a property's value must be, the words after `must`, e.g. `not be empty`.",
           "syntaxes": [
             {
@@ -4424,7 +4528,7 @@
               }
             },
             {
-              "syntax": "be (bound:at least|at most) {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
+              "syntax": "be {bound:at_least_or_at_most} {count:number} (letters|characters) long {suggestion:rule_suggestion}?",
               "example": "be at least 3 letters long",
               "outputs": {
                 "js": {
@@ -4454,7 +4558,7 @@
               }
             },
             {
-              "syntax": "be (bound:at least|at most) {limit:number} {suggestion:rule_suggestion}?",
+              "syntax": "be {bound:at_least_or_at_most} {limit:number} {suggestion:rule_suggestion}?",
               "example": "be at least 18",
               "outputs": {
                 "js": {
@@ -4469,7 +4573,7 @@
               }
             },
             {
-              "syntax": "be (a|an) (kind:email|url) {suggestion:rule_suggestion}?",
+              "syntax": "be (a|an) {kind:url_or_email} {suggestion:rule_suggestion}?",
               "example": "be an email",
               "outputs": {
                 "js": {
@@ -4491,11 +4595,11 @@
           "ruleNames": ["type_specifier_text_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierTextKind.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Makes a property text that must be a web address or an email address.",
           "syntaxes": [
             {
-              "syntax": "as (a|an) (kind:url|email)",
+              "syntax": "as (a|an) {kind:url_or_email}",
               "example": "as a url",
               "outputs": {
                 "js": {
@@ -4517,11 +4621,11 @@
           "ruleNames": ["outline_specifier_text_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierTextKind.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "In an outline line, makes a property text that must be a url or an email.",
           "syntaxes": [
             {
-              "syntax": "(a|an) (kind:url|email)",
+              "syntax": "(a|an) {kind:url_or_email}",
               "example": "a url",
               "outputs": {
                 "js": {
@@ -4543,7 +4647,7 @@
           "ruleNames": ["reopen_type"],
           "internal": false,
           "file": "src/spell/rules/classes/ReopenType.ts",
-          "line": 26,
+          "line": 25,
           "purpose": "Adds to a type declared elsewhere, in the outline style -- `a game:`, then bullets about games (epic page `outline-spell`, P11).",
           "syntaxes": [
             {
@@ -4557,7 +4661,7 @@
           "ruleNames": ["value_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/ValueKind.ts",
-          "line": 26,
+          "line": 25,
           "purpose": "In a type's outline body, a list of values which is a KIND of thing of its own, kept by the type the body is about.",
           "syntaxes": [
             {
@@ -4571,7 +4675,7 @@
           "ruleNames": ["draw_side"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSide.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "One SIDE of a thing, as markup, in a type's outline body: `to \"draw its front\":` then markup (epic page `outline-spell`, P3; Q14).",
           "syntaxes": [
             {
@@ -4585,7 +4689,7 @@
           "ruleNames": ["property_must"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyMust.ts",
-          "line": 26,
+          "line": 25,
           "purpose": "What a property's value must be, beyond its type, said on a line of its own.",
           "syntaxes": [
             {
@@ -4605,7 +4709,7 @@
           "ruleNames": ["property_body_must"],
           "internal": false,
           "file": "src/spell/rules/classes/PropertyBodyMust.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "What a property's value must be, said indented under the property's own line.",
           "syntaxes": [
             {
@@ -4615,12 +4719,24 @@
           "aliases": ["statement"]
         },
         {
+          "className": "Sequence",
+          "ruleNames": ["draw_its"],
+          "internal": false,
+          "purpose": "",
+          "syntaxes": [
+            {
+              "syntax": "draw its"
+            }
+          ],
+          "aliases": []
+        },
+        {
           "className": "ThePropertyOfAThing",
           "ruleNames": ["the_property_of_a_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/ThePropertyOfAThing.ts",
-          "line": 10,
-          "purpose": "`the color of a card` -- one of two `type_property` spellings consumed by `property_value_either` and `property_value_getter` below.",
+          "line": 9,
+          "purpose": "`the color of a card` -- one of two `type_property` spellings, read by `property_value_either` and `property_value_getter`.",
           "syntaxes": [
             {
               "syntax": "the {property:member_words} of (a|an) {type}"
@@ -4636,8 +4752,8 @@
           "ruleNames": ["a_things_property"],
           "internal": false,
           "file": "src/spell/rules/classes/AThingsProperty.ts",
-          "line": 9,
-          "purpose": "`a cards color` -- the other `type_property` spelling, see `the_property_of_a_thing` above.",
+          "line": 7,
+          "purpose": "`a cards color` -- the other `type_property` spelling, see `the_property_of_a_thing`.",
           "syntaxes": [
             {
               "syntax": "(a|an) {type:plural_type} {property:member_words}"
@@ -4650,8 +4766,8 @@
           "ruleNames": ["its_quoted_property"],
           "internal": false,
           "file": "src/spell/rules/classes/ItsQuotedProperty.ts",
-          "line": 10,
-          "purpose": "`its \"color\"` in an outline body -- the third `type_property` spelling, for `property_value_either`: `- its \"color\" is red if its suit is either diamonds or hearts otherwise it is black`.",
+          "line": 9,
+          "purpose": "`its \"color\"` in an outline body -- the third `type_property` spelling.",
           "syntaxes": [
             {
               "syntax": "{type:subject_its} {property:quoted_member}"
@@ -4678,7 +4794,7 @@
           "ruleNames": ["await"],
           "internal": false,
           "file": "src/spell/rules/async/Await.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "`await`/`wait for` an expression, with the expression itself optional (bare `await`).",
           "syntaxes": [
             {
@@ -4707,11 +4823,11 @@
           "ruleNames": ["check_process"],
           "internal": false,
           "file": "src/spell/rules/async/CheckProcess.ts",
-          "line": 10,
-          "purpose": "Check whether a conceptual animation or process is currently running, e.g. `animation dealing is running`.",
+          "line": 9,
+          "purpose": "Check whether a conceptual animation or process is currently running.",
           "syntaxes": [
             {
-              "syntax": "(animation|process) {name:constant} {operator:is} (running|active)",
+              "syntax": "(animation|process) {name:constant} {operator:is_or_is_not} (running|active)",
               "example": "animation dealing is running",
               "outputs": {
                 "js": {
@@ -4733,11 +4849,11 @@
           "ruleNames": ["pause"],
           "internal": false,
           "file": "src/spell/rules/async/Pause.ts",
-          "line": 12,
+          "line": 14,
           "purpose": "Delay for a certain amount of time, e.g. `pause for 2 seconds`.",
           "syntaxes": [
             {
-              "syntax": "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
+              "syntax": "pause for {number:expression} {units:pause_units}",
               "example": "pause for 2 seconds\"",
               "outputs": {
                 "js": {
@@ -4763,7 +4879,7 @@
           "purpose": "Start a conceptual animation or process, e.g. `start animation dealing`.",
           "syntaxes": [
             {
-              "syntax": "start (operator:exclusive|non-exclusive|nonexclusive)? (animation|process) {name:constant}",
+              "syntax": "start {operator:exclusive_or_not}? (animation|process) {name:constant}",
               "example": "start process dealing",
               "outputs": {
                 "js": {
@@ -4785,7 +4901,7 @@
           "ruleNames": ["stop_process"],
           "internal": false,
           "file": "src/spell/rules/async/StopProcess.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Stop a conceptual animation or process.",
           "syntaxes": [
             {
@@ -4816,7 +4932,7 @@
           "ruleNames": ["draw_thing"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawThing.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Draw a single thing, e.g. `draw the card`.",
           "syntaxes": [
             {
@@ -4830,7 +4946,7 @@
           "ruleNames": ["draw_items"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawItems.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "Draw each / all of a collection of items.",
           "syntaxes": [
             {
@@ -4856,7 +4972,7 @@
           "ruleNames": ["start_app"],
           "internal": false,
           "file": "src/spell/rules/draw/StartApp.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Start a scoped `App`/`Drawable`, e.g. `start the game` => `game.start()` (a method call, not a global).",
           "syntaxes": [
             {
@@ -4935,7 +5051,7 @@
           "ruleNames": ["jsxFragment"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXFragment.ts",
-          "line": 27,
+          "line": 26,
           "purpose": "Several elements drawn side by side, with no element around them, `<>...</>`.",
           "syntaxes": [
             {
@@ -4960,7 +5076,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -4970,7 +5086,7 @@
           "ruleNames": ["jsxEndTag"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXEndTag.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "Match a JSX closing tag (`</tag>`), tracked as a `jsxChild` alongside element/text/expression children.",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -4980,7 +5096,7 @@
           "ruleNames": ["jsxExpression"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXExpression.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "Match a `{...}` JSX expression container (a `jsxChild`, e.g. `<div>{1 + 2}</div>`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]
@@ -4990,7 +5106,7 @@
           "ruleNames": ["jsxAttribute"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXAttribute.ts",
-          "line": 20,
+          "line": 19,
           "purpose": "Match a single JSX attribute (`name`, `name=value`, or `name={expression}`).",
           "syntaxes": [],
           "aliases": []
@@ -5005,7 +5121,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/types/SpellType.ts",
-          "line": 16,
+          "line": 17,
           "purpose": "Base pattern rule for matching a type name, singular or plural, known or unknown.",
           "syntaxes": [],
           "aliases": []
@@ -5015,8 +5131,8 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/types/SubjectRule.ts",
-          "line": 15,
-          "purpose": "`it` in an outline-style type's body: the type the body is about -- `Card` in `- it has a deck` under `a card is a thing where:`.",
+          "line": 19,
+          "purpose": "`it` in an outline-style type's body: the type the body is about, e.g. `Card` in `- it has a deck` under `a card is a thing where:`.",
           "syntaxes": [],
           "aliases": []
         },
@@ -5025,7 +5141,7 @@
           "ruleNames": ["type"],
           "internal": false,
           "file": "src/spell/rules/types/Type.ts",
-          "line": 7,
+          "line": 6,
           "purpose": "Possibly-unknown type identifier, singular or plural, e.g. `thing` or `things` => `Thing`.",
           "syntaxes": [
             {
@@ -5050,7 +5166,7 @@
           "ruleNames": ["singular_type"],
           "internal": false,
           "file": "src/spell/rules/types/SingularType.ts",
-          "line": 10,
+          "line": 8,
           "purpose": "Possibly-unknown type identifier which MUST be singular -- fails on plural input.",
           "syntaxes": [
             {
@@ -5075,7 +5191,7 @@
           "ruleNames": ["plural_type"],
           "internal": false,
           "file": "src/spell/rules/types/PluralType.ts",
-          "line": 11,
+          "line": 9,
           "purpose": "Possibly-unknown type identifier which MUST be plural -- fails on singular input.",
           "syntaxes": [
             {
@@ -5100,8 +5216,8 @@
           "ruleNames": ["quoted_type"],
           "internal": false,
           "file": "src/spell/rules/types/QuotedType.ts",
-          "line": 13,
-          "purpose": "A type's name in quotes, where it's being declared: `a \"card\" is a thing where:` -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
+          "line": 16,
+          "purpose": "A type's name in quotes, where it's being declared, e.g. `a \"card\" is a thing where:` -- the outline style's \"quotes teach a new word\" (epic page `outline-spell`).",
           "syntaxes": [
             {
               "example": "\"card\"",
@@ -5125,7 +5241,7 @@
           "ruleNames": ["known_type"],
           "internal": false,
           "file": "src/spell/rules/types/KnownType.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "Known type identifier, NOT including built-in types like `Object`.",
           "syntaxes": [
             {
@@ -5150,7 +5266,7 @@
           "ruleNames": ["type_words"],
           "internal": false,
           "file": "src/spell/rules/types/TypeWords.ts",
-          "line": 15,
+          "line": 20,
           "purpose": "The name a declaration gives a type, one word or several, e.g. `bank account` in `a bank account is a thing`.",
           "syntaxes": [
             {
@@ -5177,7 +5293,11 @@
           "file": "src/spell/rules/types/SubjectIt.ts",
           "line": 7,
           "purpose": "`it`, as the subject of an outline body's line, e.g. `- it has a deck` -- see `SubjectRule`.",
-          "syntaxes": [],
+          "syntaxes": [
+            {
+              "syntax": "it/i"
+            }
+          ],
           "aliases": []
         },
         {
@@ -5185,9 +5305,13 @@
           "ruleNames": ["subject_its"],
           "internal": false,
           "file": "src/spell/rules/types/SubjectIts.ts",
-          "line": 9,
+          "line": 8,
           "purpose": "`its`, as the subject of an outline body's line, e.g. `- its \"suit\" is ...` -- see `SubjectRule`.",
-          "syntaxes": [],
+          "syntaxes": [
+            {
+              "syntax": "its/i"
+            }
+          ],
           "aliases": []
         },
         {
@@ -5195,7 +5319,7 @@
           "ruleNames": ["subject_implied"],
           "internal": false,
           "file": "src/spell/rules/types/SubjectImplied.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "The subject an outline body's line leaves out (epic page `outline-spell`, P8).",
           "syntaxes": [],
           "aliases": []
@@ -5210,7 +5334,7 @@
           "ruleNames": ["assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/AssignmentStatement.ts",
-          "line": 35,
+          "line": 34,
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
@@ -5281,7 +5405,7 @@
           "ruleNames": ["words_assignment"],
           "internal": false,
           "file": "src/spell/rules/assignment/WordsAssignment.ts",
-          "line": 10,
+          "line": 9,
           "purpose": "`set start pile to ...` -- sets, or declares, a variable of several words (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -5307,7 +5431,7 @@
           "ruleNames": ["get"],
           "internal": false,
           "file": "src/spell/rules/assignment/Get.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "`get {value}` -- assign `value` to a NEW `it`.",
           "syntaxes": [
             {
@@ -5333,7 +5457,7 @@
           "ruleNames": ["return_statement"],
           "internal": false,
           "file": "src/spell/rules/assignment/ReturnStatement.ts",
-          "line": 13,
+          "line": 12,
           "purpose": "`(return|exit with?) {expression}? {nested_expression}?` -- return a value.",
           "syntaxes": [
             {
@@ -5364,7 +5488,7 @@
           "ruleNames": ["do_nothing"],
           "internal": false,
           "file": "src/spell/rules/statements/DoNothing.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "A no-op statement -- compiles to `core.doNothing()`.",
           "syntaxes": [
             {
@@ -5395,7 +5519,7 @@
           "ruleNames": ["trigger"],
           "internal": false,
           "file": "src/spell/rules/events/Trigger.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "Fires a global event, optionally with a `props` object.",
           "syntaxes": [
             {
@@ -5436,7 +5560,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 21,
+          "line": 20,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -5477,7 +5601,7 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 14,
+          "line": 13,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -5492,7 +5616,7 @@
           "ruleNames": ["if"],
           "internal": false,
           "file": "src/spell/rules/if/If.ts",
-          "line": 17,
+          "line": 16,
           "purpose": "`if {condition} (then|:)?` statement, with an inline statement or an indented nested block as body.",
           "syntaxes": [
             {
@@ -5518,7 +5642,7 @@
           "ruleNames": ["else_if"],
           "internal": false,
           "file": "src/spell/rules/if/ElseIf.ts",
-          "line": 18,
+          "line": 17,
           "purpose": "`(else|otherwise) if {condition} (then|:)?` -- else-if branch, chained after `if`.",
           "syntaxes": [
             {
@@ -5545,7 +5669,7 @@
           "internal": false,
           "file": "src/spell/rules/if/Else.ts",
           "line": 13,
-          "purpose": "`(else|otherwise) :?` -- else branch; must be tried after `else_if` (see NOTE there) so this rule's bare `(else|otherwise)` prefix doesn't eat an `else if` statement.",
+          "purpose": "`(else|otherwise) :?` -- else branch.",
           "syntaxes": [
             {
               "syntax": "(else|otherwise) :? {statement_body}?",
@@ -5570,7 +5694,7 @@
           "ruleNames": ["backwards_if"],
           "internal": false,
           "file": "src/spell/rules/if/BackwardsIf.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "Postfix ternary, `{expr} if {condition} (else|otherwise) {expr}`.",
           "syntaxes": [
             {
@@ -5596,8 +5720,8 @@
           "ruleNames": ["value_if"],
           "internal": false,
           "file": "src/spell/rules/if/ValueIf.ts",
-          "line": 26,
-          "purpose": "`red if it is diamonds or hearts` -- one line of a getter's body: a VALUE, then when it's the answer; `value_otherwise` (`black otherwise`) is the last line (epic page `outline-spell`, P2): ```spell",
+          "line": 25,
+          "purpose": "`red if it is diamonds or hearts` -- one line of a getter's body: a VALUE, then when it's the answer.",
           "syntaxes": [
             {
               "syntax": "(value:{expression}|{constant}) if {condition:expression} (otherwise it is (otherValue:{constant}|{expression}))?",
@@ -5622,7 +5746,7 @@
           "ruleNames": ["value_otherwise"],
           "internal": false,
           "file": "src/spell/rules/if/ValueOtherwise.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "`black otherwise` -- the value when no `value_if` line above was the answer: `return 'black'`.",
           "syntaxes": [
             {
@@ -5663,7 +5787,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 25,
+          "line": 26,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -5693,7 +5817,7 @@
           "ruleNames": ["to_do_something"],
           "internal": false,
           "file": "src/spell/rules/methods/ToDoSomething.ts",
-          "line": 16,
+          "line": 14,
           "purpose": "Defines a new method/statement: e.g. `to foo the bar`, `to create a card`, `to create (a card)`, `to notify (message)`.",
           "syntaxes": [
             {
@@ -5719,7 +5843,7 @@
           "ruleNames": ["create_animation"],
           "internal": false,
           "file": "src/spell/rules/methods/CreateAnimation.ts",
-          "line": 19,
+          "line": 17,
           "purpose": "Defines an animation method: `animation deal the cards`, or `create animation deal the cards`.",
           "syntaxes": [
             {
@@ -5777,7 +5901,7 @@
           "ruleNames": ["method_keyword"],
           "internal": false,
           "file": "src/spell/rules/methods/MethodKeyword.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "One bare word in a method's keyword phrase, e.g. `foo`, `the`, `bar` in `to foo the bar`.",
           "syntaxes": [],
           "aliases": []
@@ -5787,7 +5911,7 @@
           "ruleNames": ["var_method_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/VarMethodArg.ts",
-          "line": 17,
+          "line": 15,
           "purpose": "Untyped variable inside parens, e.g. `(message)` in `to notify (message): ...`.",
           "syntaxes": [],
           "aliases": ["method_arg", "simple_method_arg"]
@@ -5797,7 +5921,7 @@
           "ruleNames": ["valued_var_method_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/ValuedVarMethodArg.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "Variable arg with a default value, e.g. `(message = \"Really?\")` in `to notify (message = \"Really?\"): ...`.",
           "syntaxes": [
             {
@@ -5811,7 +5935,7 @@
           "ruleNames": ["type_method_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/TypeMethodArg.ts",
-          "line": 15,
+          "line": 14,
           "purpose": "Bare type name inside parens, e.g. `(a card)` in `to create (a card): ...`.",
           "syntaxes": [
             {
@@ -5825,7 +5949,7 @@
           "ruleNames": ["typed_method_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/TypedMethodArg.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "Variable arg with explicit type, e.g. `(thing as a card)` in `to show (thing as a card): ...`.",
           "syntaxes": [
             {
@@ -5839,8 +5963,8 @@
           "ruleNames": ["with_props_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/WithPropsArg.ts",
-          "line": 23,
-          "purpose": "A `with`-prefixed prop list, e.g. `(with bar and baz = \"baz\" and bong as text)` in `to foo (with bar and baz = \"baz\" and bong as text)`.",
+          "line": 22,
+          "purpose": "A `with`-prefixed prop list.",
           "syntaxes": [
             {
               "syntax": "with [{simple_method_arg} (,|and)]"
@@ -5853,7 +5977,7 @@
           "ruleNames": ["bare_type_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/BareTypeArg.ts",
-          "line": 16,
+          "line": 15,
           "purpose": "A KNOWN type after `a` / `an`, with no parens, in a method's signature: a parameter, as `(a card)` is.",
           "syntaxes": [
             {
@@ -5867,8 +5991,8 @@
           "ruleNames": ["method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/MethodSignature.ts",
-          "line": 19,
-          "purpose": "A full method signature, alternating keywords and args, e.g. `foo the (bar as a thing)`, `give a card to a pile`.",
+          "line": 20,
+          "purpose": "A full method signature, alternating keywords and args.",
           "syntaxes": [
             {
               "syntax": "({bare_type_arg}|{method_keyword}|\\( {method_arg} \\))+"
@@ -5881,7 +6005,7 @@
           "ruleNames": ["quoted_signature_words"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedSignatureWords.ts",
-          "line": 12,
+          "line": 11,
           "purpose": "A QUOTED phrase's words, where only `(...)` is a parameter (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
@@ -5910,8 +6034,8 @@
           "ruleNames": ["expect_test"],
           "internal": false,
           "file": "src/spell/rules/tests/ExpectTest.ts",
-          "line": 16,
-          "purpose": "`expect {expression}`, `expect {expression} to be {value}` or `{expression} should be {value}` -- an assertion.",
+          "line": 15,
+          "purpose": "An assertion -- `expect {expression}`, `expect {expression} to be {value}` or `{expression} should be {value}`.",
           "syntaxes": [
             {
               "syntax": "expect that? {expression} (to be (value:{expression}|{constant}))?",
@@ -5951,7 +6075,7 @@
           "ruleNames": ["echo"],
           "internal": false,
           "file": "src/spell/rules/tests/Echo.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "`echo {expression}` -- print `expression`'s value, e.g. for debugging.",
           "syntaxes": [
             {
@@ -5977,7 +6101,7 @@
           "ruleNames": ["start_test"],
           "internal": false,
           "file": "src/spell/rules/tests/StartTest.ts",
-          "line": 11,
+          "line": 10,
           "purpose": "`start test {message}` or `start quiet test {message}` -- marks beginning of a named test run.",
           "syntaxes": [
             {
@@ -5991,7 +6115,7 @@
           "ruleNames": ["end_test"],
           "internal": false,
           "file": "src/spell/rules/tests/EndTest.ts",
-          "line": 8,
+          "line": 7,
           "purpose": "`end test` -- marks end of the current named test run started by `start_test`.",
           "syntaxes": [
             {

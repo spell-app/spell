@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { lists } from "./lists.parser"
 
 /**
  * `identifier_list` rule:  list of identifiers and/or numbers, e.g. `clubs or hearts`, `jack, queen, king`.
@@ -22,18 +21,3 @@ export class IdentifierList extends P.Repeat {
     })
   }
 }
-lists.addRule(IdentifierList, {
-  syntax: "[({number_range}|{known_variable}|{constant}|{number}) (,|or|and|nor)]",
-  tests: [
-    {
-      tests: [
-        ["up or down", '["up", "down"]'],
-        ["red and black", '["red", "black"]'],
-        ["back nor forth", '["back", "forth"]'],
-        ["clubs, diamonds, hearts, spades", '["clubs", "diamonds", "hearts", "spades"]'],
-        ["ace, 2, 3, 4, jack, queen or king", '["ace", 2, 3, 4, "jack", "queen", "king"]'],
-        ["ace, 2 ... 5, jack, queen or king", '["ace", 2, 3, 4, 5, "jack", "queen", "king"]']
-      ]
-    }
-  ]
-})

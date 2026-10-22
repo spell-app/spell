@@ -1,7 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { type FillInParts, fillInsAST, parseFillIns } from "spell-lang/spell/rules/core"
-import { JSX } from "./JSX.parser"
 
 /**
  * `jsxText` rule:  match literal text between JSX tags (`jsxChild`).  Blank text yields no AST node -- see below.
@@ -39,4 +38,3 @@ export class SpellJSXText extends P.TokenType<never, { fillIns?: FillInParts }> 
     return new P.ASTJSXText(match, { raw, value: text })
   }
 }
-JSX.addRule(SpellJSXText)

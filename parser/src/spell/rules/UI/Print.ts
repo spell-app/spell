@@ -2,47 +2,35 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { UI } from "./UI.parser"
+import { Wording } from "spell-lang/spell/rules/expressions/Wording"
 
 /**
  * `print` rule:  print an expression (to the console currently).
  * - e.g. `print "Yo!"`
- * - `operator` (`info`/`warning`/`error`/`group`/`collapsed group`) selects the `console` method
- *   via `operatorMap`; omitted operator defaults to `log`.
+ * - What `operator` means (`print_kind`:  `info` / `warning` / `error` / `group` / `collapsed_group`)
+ *   picks the `console` method, by `CONSOLE_METHOD_FOR_KIND`;  no `operator` prints with `log`.
  */
 export class Print extends SpellStatement<"operator?|expressions"> {
   @proto static alias = "statement"
-
-  /** Maps `operator` group value to `console` method name; `default` is used when `operator` is absent. */
-  operatorMap: Record<string, string> = {
-    info: "info",
-    warning: "warn",
-    error: "error",
-    group: "group",
-    "collapsed group": "groupCollapsed",
-    default: "log"
-  }
   getAST(match: P.MatchFor<this>) {
     const { operator, expressions } = match.groups
-    const methodName = this.operatorMap[operator?.value || "default"]
+    const kind = Wording.meaningOf(operator) as PrintKind | undefined
+    const methodName = kind ? CONSOLE_METHOD_FOR_KIND[kind] : "log"
     return new P.ASTConsoleMethodInvocation(match, {
       methodName,
       args: expressions.items.map((item) => P.asAST<P.ASTExpression>(item.AST))
     })
   }
 }
-UI.addRule(Print, {
-  syntax: "print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]",
-  tests: [
-    {
-      compileAs: "statement",
-      tests: [
-        [`print "Yo!"`, `core.console.log("Yo!")`],
-        [`print warning "Yo!"`, `core.console.warn("Yo!")`],
-        [`print error "Yo!"`, `core.console.error("Yo!")`],
-        [`print group "Yo!"`, `core.console.group("Yo!")`],
-        [`print collapsed group "Yo!"`, `core.console.groupCollapsed("Yo!")`]
-      ]
-    }
-  ]
-})
+
+/** What a `print_kind` form means:  the kind of message printed. */
+type PrintKind = "info" | "warning" | "error" | "group" | "collapsed_group"
+
+/** The `console` method each kind of `print` calls. */
+const CONSOLE_METHOD_FOR_KIND: Record<PrintKind, string> = {
+  info: "info",
+  warning: "warn",
+  error: "error",
+  group: "group",
+  collapsed_group: "groupCollapsed"
+}

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
 
 /**
  * `list_remove_range` rule:  remove range of items from list, e.g. `remove items 2 to 4 of my-list`.
@@ -21,15 +20,3 @@ export class ListRemoveRange extends SpellStatement<"arg|start|end|list"> {
     })
   }
 }
-lists.addRule(ListRemoveRange, {
-  syntax: "remove {arg:plural_identifier} {start:expression} to {end:expression} of {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-      },
-      tests: [["remove items 2 to 4 of my-list", "core.removeRangeBetween(myList, 1, 4)"]]
-    }
-  ]
-})

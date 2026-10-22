@@ -1,12 +1,13 @@
 import { proto, type PropRule } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
-import { classes } from "./classes.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `type_specifier_text_kind` rule:  makes a property text that must be a web address or an email address.
  * - e.g. `as a url`, `as an email`
  * - Its datatype is `text`.
+ * - Which kind is what its word rule's word means, `url_or_email`:  whatever the language.
  * - The property also gets the rule `must be a url` (or `an email`), as if it said so:
  *   see `define_property_has`'s `rulesOf()`.
  * - `Priority.specific`, so it wins over `as a {type}`, which would take `url` for a type of the project's.
@@ -19,24 +20,11 @@ export class TypeSpecifierTextKind extends P.Sequence<"kind"> {
 
   /** The rule it brings:  `{ type: "url" }` or `{ type: "email" }`. */
   static ruleOf(match: P.Match): PropRule {
-    return {
-      type:
-        `${(match as P.MatchFor<TypeSpecifierTextKind>).groups.kind.value}`.toLowerCase() === "url" ? "url" : "email"
-    }
+    const { kind } = (match as P.MatchFor<TypeSpecifierTextKind>).groups
+    return { type: Wording.meaningOf(kind) === "url" ? "url" : "email" }
   }
 
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {
     return new P.ASTTypeExpression(match, { raw: `${match.groups.kind.value}`, name: "text" })
   }
 }
-classes.addRule(TypeSpecifierTextKind, {
-  syntax: "as (a|an) (kind:url|email)",
-  tests: [
-    {
-      tests: [
-        ["as a url", "text"],
-        ["as an email", "text"]
-      ]
-    }
-  ]
-})

@@ -2,7 +2,6 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { PostfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 import { getWhereScope, getWhereMethod } from "./lists.shared"
 
 /**
@@ -10,8 +9,8 @@ import { getWhereScope, getWhereMethod } from "./lists.shared"
  * - A postfix suffix:  the list is the expression before it, e.g. `the foo of the bar has items where ...`.
  * - Trailing `where` expects an inline expression as predicate (`{inline_expression}?`) -- see `getWhereScope()`.
  *   NOTE: so it eats the rest of the line, and is always the last suffix.
- * - Compiles to `core.any(list, (item) => { ... })`, negated (wrapped in `NotExpression`) unless
- *   `operator` is exactly `has`.
+ * - Compiles to `core.any(list, (item) => { ... })`, negated (wrapped in `NotExpression`) by its word rule's
+ *   `negated` forms, e.g. `has no` -- see `Negatable`, `has_or_has_no`.
  */
 export class ListMembershipTest extends PostfixOperatorSuffix<"operator|arg|body?"> {
   @proto static precedence = Precedence.comparison
@@ -23,10 +22,6 @@ export class ListMembershipTest extends PostfixOperatorSuffix<"operator|arg|body
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
     return getWhereScope(match, match.groups.arg, undefined)
   }
-  /** Negated unless `operator` is exactly `has`. */
-  shouldNegateOutput(operator: P.Match): boolean {
-    return operator.value !== "has"
-  }
   compileASTExpression(match: P.MatchFor<this>, { lhs }: { lhs?: P.ASTExpression }): P.ASTCoreMethodInvocation {
     const filter = getWhereMethod(match, match.groups.arg, this.getBody(match))
     return new P.ASTCoreMethodInvocation(match, {
@@ -36,26 +31,3 @@ export class ListMembershipTest extends PostfixOperatorSuffix<"operator|arg|body
     })
   }
 }
-lists.addRule(ListMembershipTest, {
-  syntax: "(operator:has|has no|doesnt have|does not have) {arg:plural_identifier} where {inline_expression}?",
-  tests: [
-    {
-      compileAs: "expression",
-      showAll: true,
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("bar")
-      },
-      tests: [
-        ["my-list has items where", "core.any(myList, () => {})"],
-        ["my-list has items where the item is 1", "core.any(myList, (item) => item == 1)"],
-        ["my-list has items where it is 1", "core.any(myList, (item) => item == 1)"],
-        ["my-list has items where its foo is 1", "core.any(myList, (item) => item.foo == 1)"],
-        ["my-list has no items where item is 1", "!core.any(myList, (item) => item == 1)"],
-        ["my-list has no items where it is 1", "!core.any(myList, (item) => item == 1)"],
-        ["my-list doesnt have items where item is 1", "!core.any(myList, (item) => item == 1)"],
-        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item == 1)"]
-      ]
-    }
-  ]
-})

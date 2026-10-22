@@ -4,7 +4,6 @@ import { SP } from "spell-lang/spell"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 // Import directly to avoid circular import
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { lists } from "./lists.parser"
 
 /**
  * `list_position` rule:  return position of an item in a list,
@@ -30,11 +29,12 @@ export class ListPosition extends SpellExpression<"thing|list?", { kindType?: P.
     if (!kindType || (!kindType.valueKind && !kindType.stub)) return undefined
     match.data.kindType = kindType
     // a stub may turn out not to be a kind, once the project has parsed:  then it's no position at all
-    SP.SpellWarnings.noteIf(
-      match,
-      `"${match.inputText.trim()}":  a ${kindType.instanceName} isn't a kind's value;  say which list, "... in ..."`,
-      () => !kindType.valueKind
-    )
+    const message = SP.Language.of(scope).parserMessage("position-not-a-kind", {
+      text: match.inputText.trim(),
+      kind: kindType.instanceName,
+      aKind: SP.Language.of(scope).withArticle("indefinite", kindType.instanceName, kindType)
+    })
+    SP.SpellWarnings.noteIf(match, message, () => !kindType.valueKind)
     return match
   }
 
@@ -59,25 +59,3 @@ export class ListPosition extends SpellExpression<"thing|list?", { kindType?: P.
     })
   }
 }
-lists.addRule(ListPosition, {
-  syntax: "the? position of {thing:expression} in {list:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("thing")
-        scope.variables?.add("bar")
-      },
-      tests: [
-        ["position of thing in my-list", "spellPosition(positionOf(myList, thing))"],
-        ["the position of thing in the foo of the bar", "spellPosition(positionOf(bar.foo, thing))"],
-        [`the position of "a" in ["a", "b", "c"]`, 'spellPosition(positionOf(["a", "b", "c"], "a"))']
-      ]
-    }
-  ]
-})
-// ... and a kind's value, in its kind's own list (epic page `outline-spell`, P12):  `the position of its rank`
-lists.addRule(ListPosition, {
-  syntax: "the? position of {thing:expression}"
-})

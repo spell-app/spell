@@ -2,11 +2,11 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { lists } from "./lists.parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
  * `list_add` rule:  add to list, e.g. `add thing to my-list`, `add thing to the front of my-list`.
- * - Compiles to `core.prepend(list, thing)` when `method` is `start`/`front`/`top`,
+ * - Compiles to `core.prepend(list, thing)` when `method` means the `start` (`list_end`, e.g. `front`),
  *   else `core.append(list, thing)`.
  */
 export class ListAdd extends SpellStatement<"thing|method?|list"> {
@@ -14,32 +14,10 @@ export class ListAdd extends SpellStatement<"thing|method?|list"> {
 
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { thing, list, method } = match.groups
-    const spellMethod = method && ["start", "front", "top"].includes(method.value) ? "prepend" : "append"
+    const spellMethod = Wording.meaningOf(method) === "start" ? "prepend" : "append"
     return new P.ASTCoreMethodInvocation(match, {
       methodName: spellMethod,
       args: [P.matchAST(list), P.matchAST(thing)]
     })
   }
 }
-lists.addRule(ListAdd, {
-  syntax: "add {thing:expression} to (the (method:start|front|top|end|back|bottom) of)? {list:expression}",
-  tests: [
-    {
-      compileAs: "statement",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("my-list")
-        scope.variables?.add("thing")
-      },
-      tests: [
-        ["add thing to the start of my-list", "core.prepend(myList, thing)"],
-        ["add thing to the front of my-list", "core.prepend(myList, thing)"],
-        ["add thing to the top of my-list", "core.prepend(myList, thing)"],
-
-        ["add thing to my-list", "core.append(myList, thing)"],
-        ["add thing to the end of my-list", "core.append(myList, thing)"],
-        ["add thing to the back of my-list", "core.append(myList, thing)"],
-        ["add thing to the bottom of my-list", "core.append(myList, thing)"]
-      ]
-    }
-  ]
-})

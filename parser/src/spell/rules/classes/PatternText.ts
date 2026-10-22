@@ -1,6 +1,5 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
-import { classes } from "./classes.parser"
 
 /**
  * `pattern_text` rule:  a PATTERN in quotes, a regular expression, read exactly as typed.
@@ -20,13 +19,3 @@ export class PatternText extends P.TokenType {
     return new P.ASTStringLiteral(match, { value: (match.matched[0] as P.TextToken).innerText, quote: '"' })
   }
 }
-classes.addRule(PatternText, {
-  tests: [
-    {
-      tests: [
-        ['"^\\d+$"', '"^\\\\d+$"'],
-        ['"^[a-z]+$"', '"^[a-z]+$"']
-      ]
-    }
-  ]
-})

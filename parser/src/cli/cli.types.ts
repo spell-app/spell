@@ -1,6 +1,6 @@
 /**
- * Types for the language's `spell` commands (`spell compile`, `spell run`, `spell lint` ...):  their flags, and the
- * hook their work comes through (`LanguageCommands`).
+ * Types for the language's `spell` commands (`spell compile`, `spell run`, `spell lint` ...):
+ * their flags, and the hook their work comes through (`LanguageCommands`).
  * - Types only:  `spell help` loads the command list, which must load nothing of spell.
  * - spell-app implements `LanguageCommands` (its `"language"` hook) and imports these flags' types from here:
  *   every arrow points down.
@@ -97,8 +97,10 @@ export type SeedOptions = {
 
 /**
  * `spell run` flags.
- * - `browser`:  `true` opens the project in a browser even if it shows no UI;  `false` never does;  left out:  only if
- *   it tried to show one
+ * - `browser`:
+ *   - `true`:  opens the project in a browser, even if it shows no UI
+ *   - `false`:  never does
+ *   - left out:  only if it tried to show one
  * - `target`:  `ts` or `py` (or a target's full name):  run as that target compiles it
  */
 export type RunOptions = GlobalOptions &
@@ -162,4 +164,14 @@ export type ParseOptions = GlobalOptions & {
 export type ExplainOptions = GlobalOptions & {
   in?: string
   json?: boolean
+}
+
+/**
+ * `spell lang packs check|fix` flags (epic `spanish` P7).
+ * - `json`:  `check` prints its report as JSON
+ * - `ai`:  `fix` asks `claude -p` to translate each stub, rather than leaving it in English
+ */
+export type PacksOptions = GlobalOptions & {
+  json?: boolean
+  ai?: boolean
 }

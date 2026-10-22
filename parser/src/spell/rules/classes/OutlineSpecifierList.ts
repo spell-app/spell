@@ -1,5 +1,4 @@
 import { proto } from "spell-kit/util"
-import { classes } from "./classes.parser"
 import { NewList } from "./NewList"
 
 /**
@@ -12,14 +11,3 @@ import { NewList } from "./NewList"
 export class OutlineSpecifierList extends NewList {
   @proto static alias = "outline_specifier"
 }
-classes.addRule(OutlineSpecifierList, {
-  syntax: "a new? (list|List) of {instanceType:type}",
-  tests: [
-    {
-      tests: [
-        ["a list of people", 'new List({ instanceType: "Person" })', 'new List<Person>({ instanceType: "Person" })'],
-        ["a new list of people", 'new List({ instanceType: "Person" })', 'new List<Person>({ instanceType: "Person" })']
-      ]
-    }
-  ]
-})

@@ -10,7 +10,8 @@ import { SP } from "spell-lang/spell"
  *   The Thing Explorer shows a thing's actions and properties in spell's words again by reading them here.
  * - Lives in `<Project>.en.js`, committed beside its source -- see `SP.SpellProject.wordsFile`.
  *   - As a Spell UI element keeps its words in its own vocabulary file, e.g. `UIForm.en.ts`.
- *   - Another language is another file of the same shape, e.g. `Solitaire.es.js`:  NOT written yet.
+ *   - Another language is another file of the same shape, e.g. `cartas.es.js`.
+ *     It also holds what the core says to the person running the program in that language, `messages`.
  *   - A target with words of its own writes them as JSON, by its own names:
  *     Python's `<Project>.py.en.json5` -- see `json()`.
  * - Written from the declarations the compiler already gathers (`of()`),
@@ -31,9 +32,12 @@ export class SpellWords {
    * - Properties by their words as written (`asWritten`), e.g. `is-set-up`, else their name, e.g. `rank`.
    * - Left out:  top-level functions, and class variables, e.g. `Ranks` -- the Thing Explorer shows neither.
    * - Types in the order they're declared;  one with no members is left out.
+   * - `messages`:  what the core says to the person running it, from the language's pack (`SP.Language.messages`)
+   *   -- only for a language other than English, the core's own (epic `spanish` P12).
    * - `writer`:  whose names the compiled code uses -- javascript's by default, as that's what runs.
    */
   static of(declarations: SP.SpellDeclarationsData, writer: SpellWordsWriter = P.JSWriter.instance): SP.SpellWordsData {
+    const lang = declarations.language ?? SpellWords.LANG
     const types: Record<string, Record<string, string>> = {}
     for (const statement of declarations.statements) {
       if (statement.type) types[statement.type] ??= {}
@@ -45,7 +49,18 @@ export class SpellWords {
     for (const [type, members] of Object.entries(types)) {
       if (!Object.keys(members).length) delete types[type]
     }
-    return { lang: SpellWords.LANG, types }
+    const messages = SpellWords.messagesFor(lang)
+    return messages ? { lang, types, messages } : { lang, types }
+  }
+
+  /**
+   * What the core says to the person running a program in language `lang`, for its words file:
+   * its pack's `messages` (`SP.Language.messages`), a copy -- `undefined` for English, the core's own.
+   * - `undefined` too for a language with no pack.
+   */
+  static messagesFor(lang: string): Record<string, string> | undefined {
+    const messages = lang === SpellWords.LANG ? undefined : SP.Language.all.get(lang)?.messages
+    return messages && { ...messages }
   }
 
   /**
@@ -77,19 +92,20 @@ export class SpellWords {
    *     Card: {
    *       moveToPile: "move (a card) to (a pile)",
    * ```
+   * - Then `messages`, if it has any:  `"expect-failed": "Inesperado: ..."`.
    * - One member a line, so a diff shows which changed.  Keys bare where they're identifiers, as a person writes.
    * - Plain data, so `read()` reads it back with `JSON5`.
    */
   static script(words: SP.SpellWordsData, projectName: string): string {
     const types = Object.entries(words.types).map(([type, members]) => {
-      const lines = Object.entries(members).map(([name, text]) => `      ${literalKey(name)}: ${JSON.stringify(text)}`)
-      return `    ${literalKey(type)}: {\n${lines.join(",\n")}\n    }`
+      return `    ${literalKey(type)}: {\n${literalLines(members, "      ").join(",\n")}\n    }`
     })
     return [
       `/*! ${WORDS_MARKER} ${projectName} ${words.lang} */`,
       "export const words = {",
       `  lang: ${JSON.stringify(words.lang)},`,
-      types.length ? `  types: {\n${types.join(",\n")}\n  }` : "  types: {}",
+      (types.length ? `  types: {\n${types.join(",\n")}\n  }` : "  types: {}") + (words.messages ? "," : ""),
+      ...(words.messages ? [`  messages: {\n${literalLines(words.messages, "    ").join(",\n")}\n  }`] : []),
       "}",
       ""
     ].join("\n")
@@ -116,11 +132,19 @@ export class SpellWords {
   }
 
   /**
-   * Is `file` a words file of project `projectName`, in any language -- `Solitaire.en.js`, `Solitaire.pt-BR.js`?
+   * Is `file` named as a words file of project `projectName`, in any language -- `Solitaire.en.js`, `Solitaire.pt-BR.js`?
+   * - No `projectName`:  of ANY project, e.g. `calculator.en.js` left in a copy of it named `calc2`.
+   *   - A name alone can't tell that one from a helper, `socket.io.js`:  `isWordsScript()` reads its text.
    * - NEVER one of a project's own files:  the server leaves it out of the manifest, as its compiled output.
    */
-  static isWordsFile(file: string, projectName: string): boolean {
+  static isWordsFile(file: string, projectName?: string): boolean {
+    if (projectName === undefined) return WORDS_FILE.test(file)
     return file.startsWith(`${projectName}.`) && LANGUAGE_JS.test(file.slice(projectName.length + 1))
+  }
+
+  /** Is `text` a words file as `script()` writes it, of any project?  Its first line says so. */
+  static isWordsScript(text: string): boolean {
+    return text.startsWith(`/*! ${WORDS_MARKER} `)
   }
 
   /**
@@ -137,7 +161,7 @@ export class SpellWords {
     return `${JSON.stringify(words, null, 2)}\n`
   }
 
-  /** Language the compiler writes words in:  English, spell's own. */
+  /** Language a project's words are in when its declarations name none:  English, the default. */
   static LANG = "en"
 }
 
@@ -153,17 +177,25 @@ const WORDS_LITERAL = /export const words = (\{[\s\S]*\})\s*$/
 /** End of a words file's name after its project's, e.g. `en.js`, `pt-BR.js`. */
 const LANGUAGE_JS = /^[a-z]{2}(-[A-Za-z]{2,4})?\.js$/
 
+/** Any project's words file's name, e.g. `calculator.en.js`, `Solitario.pt-BR.js`. */
+const WORDS_FILE = /^[^.]+\.[a-z]{2}(-[A-Za-z]{2,4})?\.js$/
+
 /** Spell's `name` as `writer` writes it;  as is if it isn't an identifier, which the writer quotes. */
 function compiledName(writer: SpellWordsWriter, name: string): string {
   return IDENTIFIER.test(name) ? writer.nameOf(name) : name
 }
 
-/** Is it a javascript identifier, written bare? */
-const IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+/** Is it a javascript identifier, written bare?  Any script:  `corazón` is one. */
+const IDENTIFIER = /^[\p{L}_$][\p{L}\p{M}\d_$]*$/u
 
 /** `text` without the double quotes a method read as a property is named with:  `"is face up"` => `is face up`. */
 function unquoted(text: string): string {
   return text.replace(/^"(.*)"$/, "$1")
+}
+
+/** Each of `entries` as a line of an object literal, after `indent`:  `moveToPile: "move (a card) to (a pile)"`. */
+function literalLines(entries: Record<string, string>, indent: string): string[] {
+  return Object.entries(entries).map(([key, text]) => `${indent}${literalKey(key)}: ${JSON.stringify(text)}`)
 }
 
 /** `key` bare if it's an identifier, else quoted, e.g. `moveToPile` but `"is-a"`. */

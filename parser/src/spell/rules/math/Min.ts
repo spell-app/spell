@@ -2,11 +2,10 @@ import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { Priority } from "spell-lang/spell/rules/rules.types"
 import { SpellExpression } from "spell-lang/spell/rules/expressions"
-import { math } from "./math.parser"
 
 /**
  * `min` rule:  `the smallest` [thing] `of`/`in` {expression}, e.g. `smallest of prices`.
- * - `Priority.specific`, same reasoning as `max` above.
+ * - `Priority.specific`, same reasoning as `max`.
  */
 export class Min extends SpellExpression<"operator|argument?|expression"> {
   @proto static priority = Priority.specific
@@ -21,18 +20,3 @@ export class Min extends SpellExpression<"operator|argument?|expression"> {
     })
   }
 }
-math.addRule(Min, {
-  syntax: "(operator:the? smallest) {argument:singular_identifier}? (of|in) {expression:operand}",
-  tests: [
-    {
-      compileAs: "expression",
-      beforeEach(scope: P.Scope) {
-        scope.variables?.add("prices")
-      },
-      tests: [
-        ["smallest of prices", "core.smallestOf(prices)"],
-        ["smallest value in prices", "core.smallestOf(prices)"]
-      ]
-    }
-  ]
-})

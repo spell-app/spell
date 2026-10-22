@@ -1,17 +1,16 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { methods } from "./methods.parser"
 import type { MethodArgData } from "./methods.shared"
 
 /**
  * `typed_method_arg` rule:  variable arg with explicit type,
  * e.g. `(thing as a card)` in `to show (thing as a card): ...`.
- * - `arg` keeps the ORIGINAL variable name (`thing`), not the type name -- contrast with
- *   `type_method_arg`, which has no variable and names the arg after the type instead.
+ * - `arg` keeps the ORIGINAL variable name (`thing`), not the type name:
+ *   unlike `type_method_arg`, which has no variable and names the arg after the type instead.
  * - `arg.datatype` records what it holds, in spell's words (`Card`, `text`) -- its scope variable's `datatype`.
- * - `method`/`syntax` match `var_method_arg`'s (`$name` / `{callArgs:expression}`) -- the type only
- *   annotates the arg, it doesn't change the generated method name or call syntax.
+ * - `method`/`syntax` match `var_method_arg`'s (`$name` / `{callArgs:expression}`):
+ *   the type only annotates the arg, it doesn't change the generated method name or call syntax.
  */
 export class TypedMethodArg extends P.Sequence<"identifier|type", MethodArgData> {
   @proto static alias = ["method_arg", "simple_method_arg"]
@@ -34,6 +33,3 @@ export class TypedMethodArg extends P.Sequence<"identifier|type", MethodArgData>
     return match
   }
 }
-methods.addRule(TypedMethodArg, {
-  syntax: `{identifier} as (a|an)? {type}`
-})
