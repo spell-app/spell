@@ -165,11 +165,9 @@ means "open a window for epic `<name>`" (Owen, 2026-10-07).
    - A natural-language trigger:  save it yourself, as "1. Name" says.
 2. Collisions, as "1. Name".
    Not the future-epic case:  it goes on as usual in the new window.
-3. AskUserQuestion "Open epic `<name>` in a new window?",
-   the question saying this session works in `<other>` and stays there:
-   - "New window `⎇ <name>`" (Recommended):  step 4
-   - "Not now":  one line, where the text is saved,
-     and that `/epic <name>` alone picks it up from any other window
+3. NO question:  typing it is the ask (Owen, 2026-10-21:  "I just create a new session in this window, type
+   `/epic name` and you do the right thing").  Straight on to step 4.
+   - A multi-repo kit:  the worktree is the kit's, with every repo in it, from ANY repo's window (`EpicConfig.top`).
 4. `epic window launch <name> [--color <look>]`, a look after the name as in "1. Name".
    - It makes the worktree, opens its window,
      and starts a NEW session there with `/epic <name>` typed in.

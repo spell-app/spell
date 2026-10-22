@@ -62,7 +62,8 @@ import { SessionFolders } from "../config/SessionFolders.ts"
  *    - `/epic <name>` there is NOT blocked (Owen, 2026-10-07):
  *      typed in another epic's session, it means "open a window for `<name>`".
  *      - Let through, the session NOT renamed (it stays `<other>`'s), with a note (`additionalContext`)
- *        sending Claude to the `/epic` skill's "From another worktree", which asks first.
+ *        sending Claude to the `/epic` skill's "From another worktree", which opens it at once (no question:
+ *        Owen, 2026-10-21, "type `/epic name` and you do the right thing").
  * 3. Otherwise:  renames the session `🚧 <name>` (`hookSpecificOutput.sessionTitle`), unless it already is.
  *    - "already is":  its `session_title`, and its transcript's last title line too (`rename()`)
  *    - `/epic resume` and `/unpark` rename it whatever it seems to be:  a resumed session's tab may show
@@ -306,14 +307,15 @@ function rename(input: GateInput, title: string, always = false): GateAnswer | n
 /**
  * The hook's answer to `/epic <name> [text]` typed in worktree `other`'s session:
  * let through, NOT renamed (the session stays `other`'s),
- * with a note telling Claude to offer a new window for `<name>` instead.
+ * with a note telling Claude to open a new window for `<name>` instead, at once.
  * - SIDE EFFECT:  `text` saved first (`savePrompt()`), so the new window's `/epic <name>` picks it up
  */
 function launchNote(other: string, name: string, text: string): GateAnswer {
   const saved = text ? `  Its text is saved in ${PromptGate.savePrompt(name, text).replace(homedir(), "~")}.` : ""
   const note =
     `This session works in worktree \`${other}\`:  \`/epic ${name}\` must NOT run here.  Owen means "open a new ` +
-    `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  ask him first.`
+    `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  launch it now, ` +
+    `without asking.`
   return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note } }
 }
 
