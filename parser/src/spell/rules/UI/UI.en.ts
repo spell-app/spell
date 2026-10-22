@@ -4,6 +4,8 @@
  * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `UI.<lang>.ts` (epic `spanish`).
  */
+import { Wording } from "spell-lang/spell/rules/expressions"
+
 import { UI } from "./UI.parser"
 import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
@@ -14,8 +16,24 @@ import { Print } from "./Print"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
 
+////////////////
+// ## Word rules:  each language's words for one thing, and what each form means (`Wording`)
+////////////////
+
+// Which kind of message, for `print`:  `print warning "Yo!"` means `warning`
+UI.addRule(
+  Wording.specialize({ ruleName: "print_kind", meanings: ["info", "warning", "error", "group", "collapsed_group"] }),
+  {
+    syntax: "((info:info)|(warning:warning)|(error:error)|(group:group)|(collapsed_group:collapsed group))"
+  }
+)
+
+////////////////
+// ## Statements
+////////////////
+
 UI.addRule(Print, {
-  syntax: "print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]",
+  syntax: "print {operator:print_kind}? [expressions:{expression} ,]",
   tests: [
     {
       compileAs: "statement",

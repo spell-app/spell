@@ -4,12 +4,12 @@
  * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `async.<lang>.ts` (epic `spanish`).
  */
-import { Negatable } from "spell-lang/spell/rules/expressions"
+import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
 
 import { _async } from "./async.parser"
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"
-import { Pause } from "./Pause"
+import { Pause, PAUSE_UNITS } from "./Pause"
 import { StartProcess } from "./StartProcess"
 import { StopProcess } from "./StopProcess"
 
@@ -42,8 +42,14 @@ _async.addRule(Await, {
   ]
 })
 
+// a pause's unit, each meaning the runtime's name for it (`core.TIME_UNITS_MAP`):  `seconds` for `seconds`
+_async.addRule(Wording.specialize({ ruleName: "pause_units", meanings: PAUSE_UNITS }), {
+  syntax:
+    "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
+})
+
 _async.addRule(Pause, {
-  syntax: "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
+  syntax: "pause for {number:expression} {units:pause_units}",
   tests: [
     {
       compileAs: "statement",

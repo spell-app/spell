@@ -216,10 +216,11 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
       .join("_")
     // `is` => every form of it, e.g. `isn't`, which negates;  `is a` => `are not a` too -- see `Negatable`
     const syntax = negatableSyntaxBits(match.scope, syntaxParts)
-      // any other article matches every form of it, e.g. `a` or `an`:  the language's own
-      .map((bit) =>
-        isWord(bit) && Wording.reads(match.scope, "indefinite_article", bit) ? "{indefinite_article}" : bit
-      )
+      // any other article matches every form of it, e.g. `a` or `an`, `el` or `la`:  the language's own
+      .map((bit) => {
+        const article = isWord(bit) && ARTICLES.find((rule) => Wording.reads(match.scope, rule, bit))
+        return article ? `{${article}}` : bit
+      })
       .join(" ")
     return { type, syntax, ruleData, vars, property }
   }
@@ -299,3 +300,6 @@ type InferredPlaceholders = {
 function isWord(bit: string): boolean {
   return !bit.startsWith("{") && !bit.startsWith("(")
 }
+
+/** The article word rules a phrase's own article becomes, so it matches every form:  `el` matches `la` too. */
+const ARTICLES = ["indefinite_article", "definite_article"]

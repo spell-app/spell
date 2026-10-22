@@ -483,7 +483,6 @@ expressions.addRule(AsLowercase, {
 
 expressions.addRule(AsAType, {
   syntax: "as (a|an) (type:string|number|fraction|integer)",
-  // es: "como (un|una) (type:cadena|numero|fracción|entero)"
   tests: [
     {
       compileAs: "expression",

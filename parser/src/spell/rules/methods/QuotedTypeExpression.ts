@@ -115,6 +115,16 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
   }
 
   /**
+   * The words naming `type`, as a signature's `instanceType` holds them, e.g. `card`, `stock pile`.
+   * - As written, unless they're a language's word for another type:  Spanish's `cosa` is `thing`, its type's own name.
+   */
+  private static instanceTypeOf(type: P.Match): string | undefined {
+    const { scopeType } = type.data as { scopeType?: P.TypeScope }
+    if (scopeType && type.raw && P.typeCase(type.raw) !== type.value) return scopeType.instanceName
+    return type.raw
+  }
+
+  /**
    * Turn the quoted signature into a postfix (no args) or infix (one arg) expression on `groups.type`.
    * - SIDE EFFECT: sets `signature.instanceType` directly from the OUTER `{type:singular_type}`
    *   capture -- bypasses `MethodDefinition`'s normal inline-type-promotion path (`inlineInitialType`)
@@ -134,7 +144,7 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
     signature: MethodSignatureData,
     scope: P.Scope
   ): MethodSignatureData {
-    signature.instanceType = groups.type.raw
+    signature.instanceType = QuotedTypeExpression.instanceTypeOf(groups.type)
     if (signature.args.length === 0) {
       signature.asPostfixExpression = true
       // a value kind's phrase:  its static method -- see `MethodSignatureData.valueKindOf`

@@ -1,0 +1,307 @@
+{
+  "spellVersion": "0.8.0",
+  "language": "es",
+  "provides": [
+    "Carta",
+    "test_la_carta"
+  ],
+  "statements": [
+    {
+      "type": "Carta",
+      "superType": "Thing",
+      "defined": "/Carta.spell:71-92"
+    },
+    {
+      "property": "rango",
+      "classVariable": "Rangos",
+      "of": "Carta",
+      "enumeration": [
+        "as",
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        "jota",
+        "reina",
+        "rey"
+      ],
+      "defined": "/Carta.spell:143-231"
+    },
+    {
+      "property": "palo",
+      "classVariable": "Palos",
+      "of": "Carta",
+      "enumeration": [
+        "tréboles",
+        "diamantes",
+        "corazones",
+        "espadas"
+      ],
+      "defined": "/Carta.spell:252-330"
+    },
+    {
+      "property": "color",
+      "of": "Carta",
+      "constants": [
+        "rojo",
+        "negro"
+      ],
+      "defined": "/Carta.spell:366-463"
+    },
+    {
+      "property": "valor",
+      "of": "Carta",
+      "datatype": "number",
+      "defined": "/Carta.spell:500-567"
+    },
+    {
+      "property": "dirección",
+      "classVariable": "Direcciones",
+      "of": "Carta",
+      "enumeration": [
+        "arriba",
+        "abajo"
+      ],
+      "defined": "/Carta.spell:611-667"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} boca arriba",
+      "output": "está_boca_arriba",
+      "rule": "method_postfix",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"está boca arriba\"",
+      "returns": "choice",
+      "defined": "/Carta.spell:717-771"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} boca abajo",
+      "output": "está_boca_abajo",
+      "rule": "method_postfix",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"está boca abajo\"",
+      "returns": "choice",
+      "defined": "/Carta.spell:772-824"
+    },
+    {
+      "syntax": "{operator:is_or_is_not_a} figura",
+      "output": "es_una_figura",
+      "rule": "method_postfix",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"es una figura\"",
+      "returns": "choice",
+      "defined": "/Carta.spell:853-918"
+    },
+    {
+      "syntax": "{operator:is_or_is_not_a} (expression:trébol|diamante|corazón|espada)",
+      "output": "es_un_$palo",
+      "rule": "quoted_property",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"es un (palo)\"",
+      "values": {
+        "palo": [
+          "tréboles",
+          "diamantes",
+          "corazones",
+          "espadas"
+        ]
+      },
+      "defined": "/Carta.spell:971-1010"
+    },
+    {
+      "syntax": "{operator:is_or_is_not_a} (expression:as|2|3|4|5|6|7|8|9|10|jota|reina|rey)",
+      "output": "es_un_$rango",
+      "rule": "quoted_property",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"es un (rango)\"",
+      "values": {
+        "rango": [
+          "as",
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          "jota",
+          "reina",
+          "rey"
+        ]
+      },
+      "defined": "/Carta.spell:1058-1099"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} {definite_article} (expression:as|2|3|4|5|6|7|8|9|10|jota|reina|rey) de (expression:tréboles|diamantes|corazones|espadas)",
+      "output": "es_el_$rango_de_$palos",
+      "rule": "quoted_property",
+      "of": "Carta",
+      "kind": "method",
+      "name": "\"es el (rango) de (palos)\"",
+      "values": {
+        "rango": [
+          "as",
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          "jota",
+          "reina",
+          "rey"
+        ],
+        "palos": [
+          "tréboles",
+          "diamantes",
+          "corazones",
+          "espadas"
+        ]
+      },
+      "defined": "/Carta.spell:1141-1205"
+    },
+    {
+      "property": "nombre",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1249-1303"
+    },
+    {
+      "property": "palo_corto",
+      "asWritten": "palo corto",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1305-1513"
+    },
+    {
+      "property": "rango_corto",
+      "asWritten": "rango corto",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1515-1686"
+    },
+    {
+      "property": "dirección_corta",
+      "asWritten": "dirección corta",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1688-1777"
+    },
+    {
+      "property": "nombre_corto",
+      "asWritten": "nombre corto",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1779-1842"
+    },
+    {
+      "property": "estado",
+      "of": "Carta",
+      "datatype": "text",
+      "defined": "/Carta.spell:1844-1922"
+    },
+    {
+      "syntax": "voltear {thisArg:expression} boca arriba",
+      "output": "voltear_boca_arriba",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "voltear una carta boca arriba",
+      "waits": true,
+      "defined": "/Carta.spell:2044-2124"
+    },
+    {
+      "syntax": "voltear {thisArg:expression} boca abajo",
+      "output": "voltear_boca_abajo",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "voltear una carta boca abajo",
+      "waits": true,
+      "defined": "/Carta.spell:2125-2203"
+    },
+    {
+      "syntax": "dar vuelta {thisArg:expression}",
+      "output": "dar_vuelta",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "dar vuelta una carta",
+      "waits": true,
+      "defined": "/Carta.spell:2235-2380"
+    },
+    {
+      "syntax": "dibujar {thisArg:expression}",
+      "output": "dibujar",
+      "rule": "method_call",
+      "of": "Carta",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "dibujar una carta",
+      "defined": "/Carta.spell:2382-2893"
+    },
+    {
+      "syntax": "probar la carta",
+      "output": "test_la_carta",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "la carta",
+      "defined": "/Carta.spell:2928-4170"
+    }
+  ],
+  "codeLines": [
+    4,
+    9,
+    16,
+    23,
+    29,
+    34,
+    44,
+    48,
+    53,
+    58,
+    63,
+    68,
+    73,
+    77,
+    85,
+    91,
+    96,
+    100,
+    110,
+    115,
+    121,
+    127,
+    143
+  ]
+}

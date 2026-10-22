@@ -142,8 +142,13 @@ export function fixtureDeclarations(projectName: string): string {
   return JSON.stringify(compileFixture(projectName).declarations, null, 2) + "\n"
 }
 
+/** The human language fixture `projectName` is written in, from its project file:  `en` when it names none. */
+export function fixtureLanguage(projectName: string): string {
+  return readProjectFile(fixturePath(projectName)).language ?? "en"
+}
+
 /**
- * Fixture `projectName`'s words, as its `<Project>.en.js` would hold them:
+ * Fixture `projectName`'s words, as its `<Project>.<lang>.js` would hold them (`cards.en.js`, `cartas.es.js`):
  * from its declarations, by javascript's names -- see `SP.SpellWords`.
  */
 export function fixtureWords(projectName: string): string {

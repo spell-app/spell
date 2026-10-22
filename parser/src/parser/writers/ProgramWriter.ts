@@ -103,6 +103,9 @@ export abstract class ProgramWriter extends Writer {
    * - A rule with no tree compiles itself.
    */
   writeMatch(match: P.Match | undefined): unknown {
+    // the match's language in play:  its words go singular and plural by its rules as they're written
+    const parser = match?.scope?.parser
+    if (parser && P.Parser.current !== parser) return parser.inPlay(() => this.writeMatch(match))
     const ast = match?.rule.getAST ? match.AST : undefined
     if (!ast) return match?.compile()
     const statements = ast instanceof P.ASTStatementGroup ? (ast.statements ?? []) : [ast]

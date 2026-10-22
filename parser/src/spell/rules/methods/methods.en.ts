@@ -5,6 +5,7 @@
  * - Another language registers the same classes with its own syntax, in `methods.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
+import { Synonyms } from "spell-lang/spell/rules/expressions"
 
 import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
@@ -20,6 +21,10 @@ import { TypeMethodArg } from "./TypeMethodArg"
 import { ValuedVarMethodArg } from "./ValuedVarMethodArg"
 import { VarMethodArg } from "./VarMethodArg"
 import { WithPropsArg } from "./WithPropsArg"
+
+// the word before a method's receiver, where a type's outline body leaves it out:
+// `deal the cards of the solitaire` -- see `MethodDefinition.takeSubject()`
+methods.addRule(Synonyms.specialize({ ruleName: "receiver_of" }), { syntax: "of" })
 
 methods.addRule(MethodKeyword)
 

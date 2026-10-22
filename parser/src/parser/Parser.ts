@@ -163,7 +163,7 @@ export class Parser extends Derivative {
    * - NOTE: only for matches parsed OUTSIDE a language's own block parsing, which commits each line itself.
    */
   commit(match: P.Match) {
-    match.rule.mutateScope(match)
+    this.inPlay(() => match.rule.mutateScope(match))
   }
 
   ////////////////

@@ -1,5 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 import { Wording } from "spell-lang/spell/rules/expressions"
 import { CreateType } from "./CreateType"
 
@@ -24,6 +25,7 @@ export class CreateOneOfAKind extends CreateType {
    * Quick test:  no article first (`a solitaire is an app` is `create_type`'s), and `is a|an <app>` after it.
    * - So an editor doesn't offer `is a ...` after just any words, e.g. `set y`:  only on a line naming an app.
    * - `is` and the article are the language's own, its `is_or_is_not` and `indefinite_article` word rules.
+   * - The app's word too:  `SP.typeName()` reads Spanish's `aplicación` as `app`.
    *   Each is read only before a word naming an app:  reading a word rule's word tokenizes it.
    */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
@@ -33,7 +35,7 @@ export class CreateOneOfAKind extends CreateType {
     const app = tokens.findIndex(
       (token, index) =>
         index > start + 2 &&
-        !!scope.getType(`${token.value}`)?.isA("App") &&
+        !!scope.getType(SP.typeName(`${token.value}`))?.isA("App") &&
         reads("indefinite_article", tokens[index - 1]) &&
         reads("is_or_is_not", tokens[index - 2])
     )

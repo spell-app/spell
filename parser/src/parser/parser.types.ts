@@ -101,11 +101,13 @@ export function classCase(name: string): string {
  *   when its first word names a `list` -- see `listOf()`.
  * - Anything else is a user's type, PascalCase and singular, as its `TypeScope` is named:  `cards` => `Card`.
  * - NOTE: a language wraps this with its vocabulary, e.g. `SP.typeName()`:  the parser knows no language's words.
+ * - `ofWord`:  the language's word between a list and what it holds, `of` in `list of cards`, `de` in `lista de cartas`.
  */
-export function typeName(written: string, typeWords: TypeWords = {}): Datatype {
+export function typeName(written: string, typeWords: TypeWords = {}, ofWord = "of"): Datatype {
   const words = `${written}`.trim().replace(/\s+/g, " ")
-  const items = /^(\S+) of (.+)$/i.exec(words)
-  if (items && builtInTypeWritten(items[1]!, typeWords) === "list") return listOf(typeName(items[2]!, typeWords))
+  const items = new RegExp(`^(\\S+) ${ofWord} (.+)$`, "iu").exec(words)
+  if (items && builtInTypeWritten(items[1]!, typeWords) === "list")
+    return listOf(typeName(items[2]!, typeWords, ofWord))
   return builtInTypeWritten(words, typeWords) ?? typeCase(words)
 }
 

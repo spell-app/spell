@@ -1,0 +1,9 @@
+{
+  "language": "es",
+  "imports": [
+    {
+      "path": "/Carta.spell",
+      "active": true
+    }
+  ]
+}

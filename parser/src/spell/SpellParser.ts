@@ -206,7 +206,7 @@ export class SpellParser extends P.Parser {
    * - A one-of-a-kind app too, with no article:  `solitaire is an app` (`create_one_of_a_kind`).
    */
   declaredTypes(text: string): string[] {
-    const types = [...text.matchAll(SpellParser.TYPE_DECLARATION)].map(
+    const types = [...text.matchAll(this.declarations.typeDeclaration)].map(
       ([, type, words, created, onlyOne]) =>
         type ??
         (words ?? onlyOne)
@@ -215,7 +215,7 @@ export class SpellParser extends P.Parser {
           .join("-") ??
         created!
     )
-    const kinds = [...text.matchAll(SpellParser.VALUE_KIND_DECLARATION)].map(([, plural]) => P.singularize(plural!))
+    const kinds = [...text.matchAll(this.declarations.valueKindDeclaration)].map(([, plural]) => P.singularize(plural!))
     return [...types, ...kinds]
   }
 
@@ -233,12 +233,13 @@ export class SpellParser extends P.Parser {
     let subject = ""
     for (const line of text.split("\n")) {
       if (!/^\s/.test(line)) {
-        subject = SpellParser.subjectOf(line) ?? ""
-        if (METHOD_LINE.test(line)) found.push(`\t${firstLineOf(line)}`)
+        subject = this.subjectOf(line) ?? ""
+        if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
         continue
       }
       const bullet = /^(?:\t| {2,4})-[ \t]+(.*)$/.exec(line)?.[1]
-      if (subject && bullet && METHOD_LINE.test(bullet)) found.push(`${subject}\t${firstLineOf(bullet)}`)
+      if (subject && bullet && this.declarations.methodLine.test(bullet))
+        found.push(`${subject}\t${firstLineOf(bullet)}`)
     }
     return found
   }
@@ -279,9 +280,18 @@ export class SpellParser extends P.Parser {
     return (match?.rule as CallsAhead | undefined)?.callAhead ? match : undefined
   }
 
+  /**
+   * The raw-text patterns of our language that find what a file declares before it's parsed -- see `SP.LanguageWords`.
+   * - The default language's for a parser with none of its own.
+   */
+  get declarations(): SP.DeclarationPatterns {
+    return (this.language ?? SP.Language.default).words.declarations
+  }
+
   /** Type a top-level `line` declares or re-opens, e.g. `solitaire` for `a solitaire:` -- `undefined` if none. */
-  static subjectOf(line: string): string | undefined {
-    const declared = new RegExp(SpellParser.TYPE_DECLARATION.source, "i").exec(line)
+  subjectOf(line: string): string | undefined {
+    const { typeDeclaration, reopenedType } = this.declarations
+    const declared = new RegExp(typeDeclaration.source, "iu").exec(line)
     if (declared) {
       const [, type, words, created, onlyOne] = declared
       return (
@@ -293,30 +303,16 @@ export class SpellParser extends P.Parser {
         created
       )
     }
-    return /^an?[ \t]+([\w-]+(?:[ \t]+[\w-]+){0,3})[ \t]*(?:where[ \t]*)?:[ \t]*$/i
+    return reopenedType
       .exec(line)?.[1]
       ?.split(/[ \t]+/)
       .join("-")
   }
 
-  /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` -- see `declaredTypes()`. */
-  static VALUE_KIND_DECLARATION = /^[ \t]*(?:-[ \t]+)?["']([\w-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gim
-
-  /**
-   * A line declaring a type, its name captured -- see `declaredTypes()`.
-   * - The name may be quoted, `a "card" is a thing` (`quoted_type`), and the line bulleted, `- a card is a thing`.
-   * - Its groups, in order:
-   *   1. a one-word name
-   *   2. a name of several words, before `is a` / `is an` or `aka`
-   *   3. `create a type ...`'s name
-   *   4. a one-of-a-kind app's name, `solitaire is an app`
-   */
-  static TYPE_DECLARATION =
-    /^[ \t]*(?:-[ \t]+)?(?:an?[ \t]+["']?([\w-]+)["']?[ \t]+is\b|an?[ \t]+((?:(?!(?:is|aka)\b)[\w-]+[ \t]+){1,3}(?!(?:is|aka)\b)[\w-]+)[ \t]+(?:is[ \t]+an?|aka)\b|create[ \t]+a[ \t]+type[ \t]+(?:named|called)[ \t]+([\w-]+)|(?!(?:an?|its?|the)\b)((?:(?!is\b)[\w-]+[ \t]+){0,3}(?!is\b)[\w-]+)[ \t]+is[ \t]+an[ \t]+app\b)/gim
-
   /** Commit a spell statement parsed on its own -- see `SP.commitStatement()`. */
   commit(match: P.Match) {
-    SP.commitStatement(match)
+    // our language in play:  what the statement declares is named by its rules
+    this.inPlay(() => SP.commitStatement(match))
   }
 
   /** Parse one item of a block:  a nested block, or a line plus any indented body it takes. */
@@ -390,8 +386,6 @@ export class SpellParser extends P.Parser {
 type OperandTwinned = { operandInExpressions?: boolean }
 
 /** A method definition's first line:  `to ...`, `animation ...`, `create animation ...` -- see `declaredMethods()`. */
-const METHOD_LINE = /^(?:to|(?:create[ \t]+)?animation)[ \t]/i
-
 /** `line` up to its first `:`, trimmed:  a method's first line without its body. */
 function firstLineOf(line: string): string {
   return line.split(":")[0]!.trim()

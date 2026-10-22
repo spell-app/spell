@@ -9,7 +9,10 @@ import { SpellType } from "./SpellType"
 export class PluralType extends SpellType {
   parse(scope: P.Scope, tokens: P.Token[]) {
     const match = super.parse(scope, tokens)
-    if (match && typeof match.raw === "string" && match.raw === P.pluralize(match.raw)) return match
+    const words = match?.raw
+    // Anything but a definite singular will do, as `plural_identifier`:  uncountable words (`sheep`) match here too.
+    // NOT `words === P.pluralize(words)`:  Spanish's inflector makes a plural more plural, `cartas` => `cartases`
+    if (match && typeof words === "string" && P.getPlurality(words) !== "singular") return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {

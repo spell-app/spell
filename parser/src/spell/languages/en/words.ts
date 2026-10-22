@@ -113,5 +113,29 @@ export const englishWords: SP.LanguageWords = {
   ]),
 
   /** Words which end a type's name of several words:  `aka`, as in `a bank account aka account is a thing`. */
-  typeNameStopWords: new Set(["aka"])
+  typeNameStopWords: new Set(["aka"]),
+
+  /** The word between a list and what it holds:  `list of cards`. */
+  listOfWord: "of",
+
+  /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
+  declarations: {
+    /**
+     * A line declaring a type, its name captured.
+     * - The name may be quoted, `a "card" is a thing`, and the line bulleted, `- a card is a thing`.
+     * - Its groups, in order:
+     *   1. a one-word name
+     *   2. a name of several words, before `is a` / `is an` or `aka`
+     *   3. `create a type ...`'s name
+     *   4. a one-of-a-kind app's name, `solitaire is an app`
+     */
+    typeDeclaration:
+      /^[ \t]*(?:-[ \t]+)?(?:an?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+is\b|an?[ \t]+((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)[ \t]+(?:is[ \t]+an?|aka)\b|create[ \t]+a[ \t]+type[ \t]+(?:named|called)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:an?|its?|the)\b)((?:(?!is\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!is\b)[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an[ \t]+app\b)/gimu,
+    /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` in `- "suits" as one of ...`. */
+    valueKindDeclaration: /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gimu,
+    /** A line starting a method:  `to play a card`, `animation deal`. */
+    methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
+    /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */
+    reopenedType: /^an?[ \t]+([\p{L}\p{M}\d_-]+(?:[ \t]+[\p{L}\p{M}\d_-]+){0,3})[ \t]*(?:where[ \t]*)?:[ \t]*$/iu
+  }
 }

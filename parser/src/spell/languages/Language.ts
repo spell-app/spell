@@ -57,7 +57,7 @@ export class Language {
         if (!existing) scope.types.add({ name, superType })
         else if (superType) existing.superType = P.classCase(superType)
       }
-      SP.loadBuiltInTypes(scope)
+      SP.loadBuiltInTypes(scope, this.words)
       return scope
     }))
   }
@@ -134,4 +134,29 @@ export type LanguageWords = {
   danglingWords: Set<string>
   /** Words which end a type's name of several words, e.g. `aka`. */
   typeNameStopWords: Set<string>
+  /** How a file's raw text declares things, found before it's parsed. */
+  declarations: DeclarationPatterns
+  /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
+  listOfWord: string
+  /**
+   * The language's words for the built-in types' members, by their English words:  `{ length: ["largo", "longitud"] }`.
+   * - Each reads as its English one does (`SP.BUILT_IN_TYPE_TABLE`'s `readAs`).
+   * - None:  the English words.
+   */
+  builtInMembers?: Record<string, string[]>
+}
+
+/**
+ * How a language's raw text declares things, found before a file is parsed (`SpellParser.declaredTypes()` ...),
+ * so a line can name a type or call a method declared further down.
+ */
+export type DeclarationPatterns = {
+  /** A line declaring a type:  `gim`, its groups a one-word name, a several-word name, a created type, an app. */
+  typeDeclaration: RegExp
+  /** A line declaring a value kind:  `gim`, its plural name captured, e.g. `suits`. */
+  valueKindDeclaration: RegExp
+  /** A line starting a method definition, e.g. `to play a card`. */
+  methodLine: RegExp
+  /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */
+  reopenedType: RegExp
 }

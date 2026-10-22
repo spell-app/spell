@@ -123,7 +123,7 @@ export class Card extends Thing {
 
   /** "card is the queen of spades" etc */
   /*! SPELL: DECLARES {
-    syntax: "{operator:is_or_is_not} the (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king) of (expression:clubs|diamonds|hearts|spades)",
+    syntax: "{operator:is_or_is_not} {definite_article} (expression:ace|2|3|4|5|6|7|8|9|10|jack|queen|king) of (expression:clubs|diamonds|hearts|spades)",
     output: "is_the_$rank_of_$suits", rule: "quoted_property", of: "Card", kind: "method",
     name: '"is the (rank) of (suits)"',
     values: { rank: ["ace", 2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king"], suits: ["clubs", "diamonds", "hearts", "spades"] },

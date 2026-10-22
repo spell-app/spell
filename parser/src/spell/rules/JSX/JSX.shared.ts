@@ -1,23 +1,50 @@
 import { P } from "spell-lang/parser"
 import type { FillInParts } from "spell-lang/spell/rules/core"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 /**
- * Spell's own tag words in JSX, by the web's tag each becomes.
- * - Renamed as the element's AST is built, so both writers write the web's.
+ * Spell's own tag words in JSX, in ENGLISH, by the web's tag each becomes:  for the editor's completions.
+ * - The rules never read it:  they ask the language's word rule, `spell_jsx_tag` (`webWordFor()`).
  * - `<children/>` => `<slot/>`:  where a drawable list's items show, in its `to draw`
  * - `<children name="header"/>` => `<slot name="header"/>`:
- *   a second, named place, filled by a child written `in="header"` (`SPELL_ATTRIBUTE_NAMES`)
+ *   a second, named place, filled by a child written `in="header"` (`spell_jsx_attribute`)
  * - The web's own `<slot/>` keeps working.
+ * - TODO(es):  the editor should offer the project's language's words, not English's.
  */
 export const SPELL_TAG_NAMES = new Map([["children", "slot"]])
 
 /**
- * Spell's own attribute words in JSX, by the web's attribute each becomes.
- * - On any tag, renamed as its AST is built.
- * - `<h3 in="header">` => `<h3 slot="header">`:  "put me in the frame's `header` children"
+ * The word rule holding spell's own JSX TAG words, each meaning the web's tag it becomes (epic `spanish`).
+ * - English `((slot:children)|slot)`, Spanish `((slot:hijos)|slot)`:  `<children/>` / `<hijos/>` => `<slot/>`.
+ * - Renamed as the element is parsed (`SpellJSX`), so both writers write the web's.
+ */
+export const SPELL_TAG_WORDS = "spell_jsx_tag"
+
+/**
+ * The word rule holding spell's own JSX ATTRIBUTE words, each meaning the web's attribute it becomes.
+ * - English `((slot:in)|slot)`, Spanish `((slot:en)|slot)`:  `<h3 in="header">` / `<h3 en="header">` => `<h3 slot="header">`,
+ *   "put me in the frame's `header` children".
+ * - On any tag, renamed as the attribute is parsed (`SpellJSXAttribute`).
  * - The web's own `slot="header"` keeps working.
  */
-export const SPELL_ATTRIBUTE_NAMES = new Map([["in", "slot"]])
+export const SPELL_ATTRIBUTE_WORDS = "spell_jsx_attribute"
+
+/** What spell's own JSX words may mean:  the web's names they become, `SPELL_TAG_WORDS`' and `SPELL_ATTRIBUTE_WORDS`' meanings. */
+export const SPELL_JSX_MEANINGS = ["slot"]
+
+/**
+ * The web's name for `written`, a tag or attribute name, if word rule `ruleName` (`SPELL_TAG_WORDS` ...) holds it --
+ * `written` itself if not, e.g. `slot` for `children` in English, `div` for `div`.
+ * - Only a plain word is looked up:  `ui-button`, `on-click` and `UI.Form` never are.
+ */
+export function webWordFor(scope: P.Scope, ruleName: string, written: string): string {
+  if (!PLAIN_WORD.test(written)) return written
+  const rule = scope.parser?.rules[ruleName] as Wording | undefined
+  return rule?.meanings?.find((meaning) => Wording.reads(scope, ruleName, written, meaning)) ?? written
+}
+
+/** A name of letters alone, which might be one of spell's own JSX words. */
+const PLAIN_WORD = /^\p{L}+$/u
 
 /**
  * What JSX rules (`jsxElement`, `jsxAttribute`, `jsxExpression`) stash on their matches.
@@ -38,6 +65,10 @@ export type JSXMatchData = {
   attributes?: Array<P.Match | undefined>
   /** (`jsxAttribute`) Normalized attribute name. */
   attribute?: string
+  /** (`jsxAttribute`) The web's name for it:  `slot` for spell's own `in` (`SPELL_ATTRIBUTE_WORDS`), else `attribute`. */
+  webAttribute?: string
+  /** (`jsxElement`) The web's tag:  `slot` for spell's own `children` (`SPELL_TAG_WORDS`), else the tag as written. */
+  tagName?: string
   /** (`jsxElement`) Parsed child matches (`jsxChild` or `parse_error`) for the element. */
   children?: Array<P.Match | undefined>
   /** (`jsxAttribute`) A text value's `[name]` fill-ins, if it has any -- see `parseFillIns()`. */

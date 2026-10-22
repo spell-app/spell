@@ -1,7 +1,7 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { SPELL_TAG_NAMES, type JSXMatchData } from "./JSX.shared"
+import { SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -20,7 +20,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   - `<children/>` => `h("slot")`
  *   - `<children name="header"/>` => `h("slot", { name: "header" })`
  *   - `<h3 in="header">` => `h("h3", { slot: "header" })`, in `SpellJSXAttribute`
- *   - see `SPELL_TAG_NAMES`, `SPELL_ATTRIBUTE_NAMES`
+ *   - each language's words, in its word rules `spell_jsx_tag` and `spell_jsx_attribute`:
+ *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
  * - NOTE: rule name is `jsxElement`, kept distinct from class name `SpellJSX` (pre-existing convention).
  */
 export class SpellJSX extends P.TokenType<never, JSXMatchData> {
@@ -45,6 +46,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     )
     // a fragment (`jsxFragment`) has no tag and no attributes
     if (!(element instanceof P.JSXElementToken)) return match
+    match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
     const tagError = P.ASTJSXElement.tagError(element.tagName)
@@ -54,11 +56,10 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
 
   /**
    * Build `P.ASTJSXElement`; drops falsy child ASTs (e.g. blank `jsxText`) via `.filter(Boolean)`.
-   * - Spell's own tag words as the web's:  `<children/>` => `<slot/>` (`SPELL_TAG_NAMES`).
+   * - Spell's own tag words as the web's, found by `parse()`:  `<children/>` => `<slot/>` (`SPELL_TAG_WORDS`).
    */
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
-    const { tagName: written } = match.matched[0] as P.JSXElementToken
-    const tagName = SPELL_TAG_NAMES.get(written) ?? written
+    const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
     return new P.ASTJSXElement(match, { tagName, attrs, children: this.childASTs(match) })
   }

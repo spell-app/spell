@@ -80,6 +80,11 @@ classes.addRule(Wording.specialize({ ruleName: "url_or_email", meanings: ["url",
 // What a side's quoted name starts with, for `draw_side`:  `to "draw its front":`
 classes.addRule(P.Sequence.specialize({ ruleName: "draw_its" }), { syntax: "draw its" })
 
+// Which side a side's name means, for `draw_side`:  `to "draw its back":` is the `back`, drawn face down
+classes.addRule(Wording.specialize({ ruleName: "side_name", meanings: ["front", "back"] }), {
+  syntax: "((front:front)|(back:back))"
+})
+
 classes.addRule(WithNestedStatements, {
   syntax: "(where|with)? :",
   tests: [

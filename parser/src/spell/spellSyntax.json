@@ -1148,7 +1148,7 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "`as a`/`an {type}`, e.g. `1 as a string`, `1.4 as an integer` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
@@ -1250,7 +1250,7 @@
         },
         {
           "className": "Synonyms",
-          "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs"],
+          "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
           "line": 11,
@@ -1267,6 +1267,9 @@
             },
             {
               "syntax": "(has|belongs)/i"
+            },
+            {
+              "syntax": "of"
             }
           ],
           "aliases": []
@@ -1279,9 +1282,14 @@
             "rounding",
             "list_end",
             "before_or_after",
+            "print_kind",
             "take_or_give_up",
             "at_least_or_at_most",
-            "url_or_email"
+            "url_or_email",
+            "side_name",
+            "pause_units",
+            "spell_jsx_tag",
+            "spell_jsx_attribute"
           ],
           "internal": false,
           "file": "src/spell/rules/expressions/Wording.ts",
@@ -1304,6 +1312,9 @@
               "syntax": "((before:before)|(after:after))"
             },
             {
+              "syntax": "((info:info)|(warning:warning)|(error:error)|(group:group)|(collapsed_group:collapsed group))"
+            },
+            {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
             },
             {
@@ -1311,6 +1322,18 @@
             },
             {
               "syntax": "((url:url)|(email:email))"
+            },
+            {
+              "syntax": "((front:front)|(back:back))"
+            },
+            {
+              "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
+            },
+            {
+              "syntax": "((slot:children)|slot)"
+            },
+            {
+              "syntax": "((slot:in)|slot)"
             }
           ],
           "aliases": []
@@ -2355,7 +2378,7 @@
           "ruleNames": ["repeat_n_times"],
           "internal": false,
           "file": "src/spell/rules/lists/RepeatNTimes.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "Repeat an action `N` times, e.g. `repeat 3 times: print the number`.",
           "syntaxes": [
             {
@@ -3034,11 +3057,11 @@
           "ruleNames": ["print"],
           "internal": false,
           "file": "src/spell/rules/UI/Print.ts",
-          "line": 12,
+          "line": 13,
           "purpose": "Print an expression (to the console currently).",
           "syntaxes": [
             {
-              "syntax": "print (operator:info|warning|error|collapsed? group)? [expressions:{expression} ,]",
+              "syntax": "print {operator:print_kind}? [expressions:{expression} ,]",
               "example": "print \"Yo!\"",
               "outputs": {
                 "js": {
@@ -3546,7 +3569,7 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
@@ -3946,7 +3969,7 @@
           "ruleNames": ["type_specifier_enum"],
           "internal": false,
           "file": "src/spell/rules/classes/TypeSpecifierEnum.ts",
-          "line": 10,
+          "line": 13,
           "purpose": "Specifies a property's allowed values as an enumeration, for use by `define_property_has`.",
           "syntaxes": [
             {
@@ -4115,7 +4138,7 @@
           "ruleNames": ["outline_specifier_enum"],
           "internal": false,
           "file": "src/spell/rules/classes/OutlineSpecifierEnum.ts",
-          "line": 14,
+          "line": 12,
           "purpose": "The `type_specifier`s again, without their `as`, for an outline body's `its \"suit\" is ...`.",
           "syntaxes": [
             {
@@ -4652,7 +4675,7 @@
           "ruleNames": ["draw_side"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawSide.ts",
-          "line": 25,
+          "line": 29,
           "purpose": "One SIDE of a thing, as markup, in a type's outline body: `to \"draw its front\":` then markup (epic page `outline-spell`, P3; Q14).",
           "syntaxes": [
             {
@@ -4826,11 +4849,11 @@
           "ruleNames": ["pause"],
           "internal": false,
           "file": "src/spell/rules/async/Pause.ts",
-          "line": 11,
+          "line": 14,
           "purpose": "Delay for a certain amount of time, e.g. `pause for 2 seconds`.",
           "syntaxes": [
             {
-              "syntax": "pause for {number:expression} (units:second|seconds|sec|millisecond|milliseconds|msec|tick|ticks)",
+              "syntax": "pause for {number:expression} {units:pause_units}",
               "example": "pause for 2 seconds\"",
               "outputs": {
                 "js": {
@@ -5003,7 +5026,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -5764,7 +5787,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 25,
+          "line": 26,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -5940,7 +5963,7 @@
           "ruleNames": ["with_props_arg"],
           "internal": false,
           "file": "src/spell/rules/methods/WithPropsArg.ts",
-          "line": 22,
+          "line": 23,
           "purpose": "A `with`-prefixed prop list, e.g. `(with bar and baz = \"baz\" and bong as text)` in `to foo (with bar and baz = \"baz\" and bong as text)`.",
           "syntaxes": [
             {

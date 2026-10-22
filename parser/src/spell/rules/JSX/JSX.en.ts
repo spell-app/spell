@@ -5,8 +5,10 @@
  * - Another language registers the same classes with its own syntax, in `JSX.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
+import { Wording } from "spell-lang/spell/rules/expressions"
 
 import { JSX } from "./JSX.parser"
+import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
 import { SpellJSXAttribute } from "./SpellJSXAttribute"
@@ -14,6 +16,17 @@ import { SpellJSXEndTag } from "./SpellJSXEndTag"
 import { SpellJSXExpression } from "./SpellJSXExpression"
 import { SpellJSXFragment } from "./SpellJSXFragment"
 import { SpellJSXText } from "./SpellJSXText"
+
+// spell's own tag words, each meaning the web's tag:  `<children/>` => `<slot/>`
+// - the web's own `slot` too:  a word rule needs two forms
+JSX.addRule(Wording.specialize({ ruleName: SPELL_TAG_WORDS, meanings: SPELL_JSX_MEANINGS }), {
+  syntax: "((slot:children)|slot)"
+})
+
+// spell's own attribute words, each meaning the web's attribute:  `<h3 in="header">` => `<h3 slot="header">`
+JSX.addRule(Wording.specialize({ ruleName: SPELL_ATTRIBUTE_WORDS, meanings: SPELL_JSX_MEANINGS }), {
+  syntax: "((slot:in)|slot)"
+})
 
 JSX.addRule(MarkdownBlock, {
   tests: [
