@@ -71,9 +71,14 @@ export class EpicConfig {
     windowsFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
     repos: "",
+    voices: {},
+    pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true
   }
+
+  /** the voices spell-epic ships, one `<name>.md` each:  its `voices/` folder (epic `readme` P12) */
+  static readonly ENGINE_VOICES = resolve(import.meta.dirname, "../../voices")
 
   /**
    * where the window files were before epic `epic-eject` P13, from the main checkout:  `epic window move` carries
@@ -593,9 +598,54 @@ export class EpicConfig {
       "app.start": this.settings.app.start,
       repos: this.repos.join(","),
       top: this.top?.main ?? "",
+      ...Object.fromEntries(this.voiceNames.map((name) => [`voices.${name}`, this.voiceFile(name) ?? ""])),
+      ...Object.fromEntries(
+        Object.entries(this.settings.pageVoices).map(([kind, voice]) => [`pageVoices.${kind}`, voice])
+      ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck
     }
+  }
+
+  ////////////////
+  // ## Voices
+  ////////////////
+
+  /**
+   * The file of VOICE `name` (`readme`, `code` ...):  how a kind of people-facing page is written (epic `readme` P13).
+   * - the repo's own, when its file names one (`"voices": { "code": "agents/wwod/writing.md" }`):  from the main
+   *   checkout, absolute
+   * - else, in a child repo of a MULTI-REPO top, the top's own (Spell's child repos write in the kit's house style)
+   * - else spell-epic's, `voices/<name>.md` (`ENGINE_VOICES`), when it ships one
+   * - else `undefined`:  no such voice here (spell-epic ships no `code`:  it's each repo's house style)
+   */
+  voiceFile(name: string): string | undefined {
+    const own = this.settings.voices[name]
+    if (own) return resolve(this.main, own)
+    const top = this.top
+    const topsOwn = top && top.main !== this.main ? top.settings.voices[name] : undefined
+    if (topsOwn) return resolve(top!.main, topsOwn)
+    const shipped = join(EpicConfig.ENGINE_VOICES, `${name}.md`)
+    return existsSync(shipped) ? shipped : undefined
+  }
+
+  /**
+   * The voice a KIND of page is written in (`guide` => `readme`):  the file's `pageVoices`, over the defaults;
+   * a kind it doesn't name, a voice of that name
+   */
+  voiceFor(kind: string): string {
+    return this.settings.pageVoices[kind] ?? kind
+  }
+
+  /** every voice this repo can use:  its own, its top's, then spell-epic's, by name, sorted */
+  get voiceNames(): string[] {
+    const shipped = existsSync(EpicConfig.ENGINE_VOICES)
+      ? readdirSync(EpicConfig.ENGINE_VOICES)
+          .filter((name) => name.endsWith(".md"))
+          .map((name) => name.slice(0, -3))
+      : []
+    const tops = this.top && this.top.main !== this.main ? Object.keys(this.top.settings.voices) : []
+    return [...new Set([...Object.keys(this.settings.voices), ...tops, ...shipped])].sort()
   }
 
   ////////////////
@@ -641,6 +691,8 @@ export class EpicConfig {
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
+      voices: namesTo(given, "voices", defaults.voices, file),
+      pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       app: {
@@ -727,6 +779,11 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - on, an epic's worktree is `<worktreesFolder>/<epic>/`:  a worktree of the top with one of every child repo
  *     inside it, all on branch `<epic>`, one install at its top (`top`, `repoCheckouts()`;  the worktree hook)
  *   - read in the TOP's config;  a child repo finds its top as the folder above its main checkout (`top`)
+ * - `voices`:  the repo's own VOICES (epic `readme` P13), a name each, its file from the main checkout
+ *   (`{ "code": "agents/wwod/writing.md" }`);  `{}` (the default):  only spell-epic's, `voices/<name>.md`
+ *   - a name spell-epic ships too (`readme`) is the repo's own, in place of spell-epic's (`voiceFile()`)
+ * - `pageVoices`:  which voice each KIND of page is written in, over the defaults
+ *   (`readme` and `guide` in `readme`;  `code` and `epic-page` in `code`):  `voiceFor()`
  * - `checkoutPatches`:  fixes to a checkout's setup that every checkout gets at once, `main` and each worktree,
  *   however far behind `main` its branch is (`CheckoutPatch`, `CheckoutPatches`;  epic `epic-engine` P17);  `[]`
  *   (the default):  none
@@ -751,6 +808,8 @@ export type EpicSettings = {
   windowsFolder: string
   app: EpicApp
   repos: string | string[]
+  voices: Record<string, string>
+  pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
 }
@@ -884,6 +943,31 @@ function reposOf(given: Record<string, unknown>, fallback: string | string[], fi
   throw new TypeError(
     `EpicConfig:  ${file}'s "repos" must be a file ("repos.json5") or a list of repo names, not ${JSON.stringify(value)}`
   )
+}
+
+/**
+ * `given[key]`, an object of plain names to non-empty text (`{ "code": "agents/wwod/writing.md" }`);  `fallback` when
+ * it's left out.
+ * - throws `TypeError` naming the file and the key for anything else
+ */
+function namesTo(
+  given: Record<string, unknown>,
+  key: string,
+  fallback: Record<string, string>,
+  file: string
+): Record<string, string> {
+  const value = given[key]
+  if (value === undefined) return fallback
+  const ok =
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.entries(value).every(([name, text]) => /^[\w.-]+$/.test(name) && typeof text === "string" && text.trim())
+  if (!ok)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "${key}" must be an object of names to text, { "code": "..." }, not ${JSON.stringify(value)}`
+    )
+  return value as Record<string, string>
 }
 
 /**

@@ -562,7 +562,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 - Spell UI's docs bundle, `/_epic/assets/spell-ui.js`, defines `<ui-root>`, which adds the pack's script.
 - The pack carries none of the shared code:  it takes `solid-js`, `@solidjs/web`, `spell-kit/element`,
   `spell-ui/core` and `spell-ui/forms` from the bundle, by those names, so a page has ONE Solid.
-- Both addresses are the engine's routes, served by the epic server and spell-app's page server alike.
+- Both addresses are the engine's routes, served by the epic server and the kit's page server alike.
 - So a page needs one of those servers to draw at all, and the part files and review controls need it too.
   Opened straight from disk, a page shows exactly what its file holds:  its prose, unstyled.
 

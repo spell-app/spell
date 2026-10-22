@@ -156,6 +156,8 @@ export class RepoInit {
       windowsFolder: `../${repo}.epics/windows`,
       app: { ...EpicConfig.DEFAULTS.app },
       repos: "",
+      voices: {},
+      pageVoices: { ...EpicConfig.DEFAULTS.pageVoices },
       checkoutPatches: [],
       promptAck: true
     }
