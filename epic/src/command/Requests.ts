@@ -2,9 +2,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFil
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { DataFile } from "$/epics/data/DataFile"
-import { PhaseIds } from "$/epics/phases"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { DataFile } from "spell-epic/data/DataFile"
+import { PhaseIds } from "spell-epic/phases"
 
 import {
   EXIT,
@@ -39,11 +39,10 @@ import { Sessions } from "./Sessions"
  *   - `requests <epic> [--json]`:  every request sent to `<epic>`, and where each went
  *     - one filed into a phase:  that phase's number TODAY (`shown()`), so a phase inserted ahead of it moves it along
  *   - `file <epic>#P7 <id>`:  file a request into phase P7:
- *     his words and screenshots in its Requests field (the `epic` tool's `add-request`), the request marked filed,
+ *     his words and screenshots in its Requests field (the `epic` tool's `request`), the request marked filed,
  *     `P7 · Its Title`, and the phase's stable id kept (`phase:  p-its-title`;  epic `epic-engine` I4)
  *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
- *     - `add-request`, its old name, hidden (epic `epic-workflow` P19), does the same,
- *       its `--from` and `--file` (the request as html) taken as given rather than read from the epic's `requests/`
+ *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
  *   - `merge <epic>`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main checkout
  *     - a multi-repo top (epic `epic-engine` P10):  each repo whose branch `<epic>` has commits (`mergeEach()`)
@@ -59,10 +58,10 @@ export class Requests {
   readonly sessions: Sessions
 
   /**
-   * - `root`:  default the nearest checkout with the docs tools (`Git.nearestCheckout()`)
+   * - `root`:  default the nearest checkout of a repo set up for epics (`Git.nearestCheckout()`)
    * - `sessions`:  default `new Sessions()`
    */
-  constructor({ root = Git.nearestCheckout(CHECKOUT_MARKER), sessions = new Sessions() }: RequestsProps = {}) {
+  constructor({ root = Git.nearestCheckout(), sessions = new Sessions() }: RequestsProps = {}) {
     this.root = root
     this.epics = join(EpicConfig.contentOf(root), "epics")
     this.sessions = sessions
@@ -115,7 +114,6 @@ export class Requests {
         return EXIT.OK
       }
       case "file":
-      case "add-request":
         return this.fileVerb(epic, rest, flags)
       default:
         throw new EpicCommandError(`unknown verb '${verb}':  ${VERBS}`)
@@ -159,7 +157,7 @@ export class Requests {
    * `epic file <epic>#P7 <id>`:  request `id` into the phase's Requests field, by the `epic` tool,
    * then marked filed there.
    * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went
-   * - `--from` and `--file` (`add-request`'s shape):  the request as given;  marked filed only if `requests/` has it
+   * - `--from` and `--file`:  the request as given;  marked filed only if `requests/` has it
    * - the old order, the phase a word of its own (`file seo r3 7`):  refused, spelled right
    */
   private async fileVerb(named: string, [id, where]: string[], flags: VerbArgs["flags"]): Promise<number> {
@@ -183,7 +181,7 @@ export class Requests {
       from = request.from
     }
     // into the phase's Requests field (`P7`, `p-epic-migrate`, its name:  the tool finds it)
-    const exitCode = await EpicTools.runPlanDoc(["add-request", named, id, "--from", from, "--file", html])
+    const exitCode = await EpicTools.runPlanDoc(["file", named, id, "--from", from, "--file", html])
     if (exitCode !== EXIT.OK) return exitCode
     const { filed, phase } = await this.phaseFiled(epic, ref)
     out(request ? requestLine(this.file(epic, id, filed, phase)) : `${id}  into ${epic}#${filed}`)
@@ -574,9 +572,6 @@ export class Requests {
 
 /** What `new Requests()` takes:  see its constructor. */
 export type RequestsProps = { root?: string; sessions?: Sessions }
-
-/** What marks a checkout with epics (`Git.nearestCheckout()`):  the docs tools, as for every epic verb. */
-const CHECKOUT_MARKER = "packages/epics/tools/plan-doc.js"
 
 /** The verbs, for errors. */
 const VERBS = "send, requests, file, home or merge"

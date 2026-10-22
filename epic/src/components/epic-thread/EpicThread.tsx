@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { ThreadFacts, type ThreadComment } from "$/epics/comments"
+import { ThreadFacts, type ThreadComment } from "spell-epic/comments"
 
 import { epicThreadVocabulary } from "./EpicThread.en"
 import {
@@ -30,7 +30,7 @@ import {
 } from "./EpicThread.types"
 
 import threadCSS from "./EpicThread.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `DOMThreadElement`

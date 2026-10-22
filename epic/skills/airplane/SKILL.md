@@ -110,7 +110,7 @@ Owen is back online.  Gather everything, work through it in the background, then
    - Not running:  list it in the reply, with `/session <name>` to reopen it, then `/unpark <name>` there.
    - Nothing waiting AND nothing parked:  say so in one line, and stop.
 3. Reply at once, short:  the counts by place, and that the work runs in the background now.
-4. Per epic, in the session itself (quick):  `epic inbox <name> apply --all`.
+4. Per epic, in the session itself (quick):  `epic inbox apply <name> --all`.
    - Into the doc go, sent or not (Owen's decision Q3 of `airplane`):
      - approvals, picks, todos, and new items
      - a todo's plane:  queued into the next phase
@@ -146,8 +146,8 @@ Owen is back online.  Gather everything, work through it in the background, then
      - Never `done` (Owen, 2026-10-10:  a Done card means work was done).
      - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
-     - First `epic inbox <name>#M3 working on`:  his thread shows "Claude: thinking…" until the answer lands.
-     - Into the item or phase it's on, then `epic inbox <name>#M3 done --file <answer.html>`.
+     - First `epic inbox working <name>#M3 on`:  his thread shows "Claude: thinking…" until the answer lands.
+     - Into the item or phase it's on, then `epic inbox done <name>#M3 --file <answer.html>`.
        - The answer goes on his thread too:  his turn, and the thinking stub gone.
      - A reply of his:  answer his latest words.
    - Page notes were gathered in 4b with the comments.

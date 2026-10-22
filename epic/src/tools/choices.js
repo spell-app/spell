@@ -3,7 +3,7 @@
  * per use site, which Owen goes through one by one:  each row's Recommended box is pre-filled and he types over the
  * ones he'd call differently, then presses "Do it".  For a call too big for a details page's options (P13's ~180
  * boolean names), where each name needs its own context.  Docs:  `guides/syntax-choices.html`.
- * - `new <slug> --rows <rows.json5> [--title "..."] [--epic <name>] [--description "..."]` -- a page from the tool's
+ * - `create <slug> --rows <rows.json5> [--title "..."] [--epic <name>] [--description "..."]` -- a page from the tool's
  *   own template (`templates/syntax-choices.html` beside it), its rows written into it as the epics pack's
  *   `<epic-choice-row>`s (`answerPages.js`), plus the rows beside it (`<slug>.rows.json5`);  prints the page's path
  *   - scratch:  `pages/details/<slug>.html`, ignored by version control, swept with the details pages after 14 days
@@ -20,7 +20,7 @@
  *   the spell syntax guide (`guides/spell-syntax/spell-syntax.html`), whose rows are generated from the code.
  *   `show`, `wait` and `answer` work on it by its path;  `list` covers only the `details/` folders
  * - Beside the page (`<slug>.html`):
- *   - `<slug>.rows.json5` -- the rows (`ChoicesData`, below), written by `new`, beside the same rows in the page:
+ *   - `<slug>.rows.json5` -- the rows (`ChoicesData`, below), written by `create`, beside the same rows in the page:
  *     `answer` / `wait` read them, and the route knows a choices page by it (and checks the ids it's sent).
  *     Before epic `epic-workflow` P12 the page fetched it and drew its tables from it
  *   - `<slug>.draft.json5` -- what Owen typed so far, saved by the page as he types (`choicesRoutes.ts`);  never
@@ -36,7 +36,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { DataFile } from "../data/DataFile.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
 import { ROWS, TOOL_TEMPLATES, choiceSections, fillHead, fillWords } from "./answerPages.js"
 import {
   SLUG,
@@ -60,8 +60,8 @@ async function main(argv) {
   const { positional, flags } = parseArgs(argv)
   const [command, target] = positional
   try {
-    if (command === "new") {
-      if (!flags.rows || flags.rows === true) throw new Error("new needs --rows <rows.json5>")
+    if (command === "create") {
+      if (!flags.rows || flags.rows === true) throw new Error("create needs --rows <rows.json5>")
       const data = DataFile.parse(readFileSync(findFile(flags.rows), "utf8"))
       console.log(shown(createPage(CONTENT, target, { ...flags, data })))
       return 0
@@ -92,7 +92,7 @@ async function main(argv) {
 }
 
 /** `epic choices` with no or a wrong command. */
-const USAGE = `usage:  epic choices new <slug> --rows <rows.json5> [--title "..."] [--epic <name>] [--description "..."]
+const USAGE = `usage:  epic choices create <slug> --rows <rows.json5> [--title "..."] [--epic <name>] [--description "..."]
         epic choices show <page> [--wait] [--timeout 8h]
         epic choices wait <page> [--timeout 8h]
         epic choices answer <page>
@@ -195,9 +195,9 @@ function json(value) {
   return JSON.stringify(value)?.slice(0, 120)
 }
 
-/** `path` as given:  absolute, else from where `spell` ran, the checkout's root or `packages/epics`. */
+/** `path` as given:  absolute, else from where `spell` ran, or the checkout's root. */
 function findFile(path) {
-  const found = [process.env.INIT_CWD ?? process.cwd(), ROOT, join(ROOT, "packages/epics")]
+  const found = [process.env.INIT_CWD ?? process.cwd(), ROOT]
     .map((base) => resolve(base, path))
     .find((each) => existsSync(each))
   if (!found) throw new Error(`no file ${path}`)

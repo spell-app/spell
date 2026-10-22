@@ -2,9 +2,9 @@ import { mkdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { RealPath } from "$/epics/config/RealPath"
-import { DataFile } from "$/epics/data/DataFile"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { RealPath } from "spell-epic/config/RealPath"
+import { DataFile } from "spell-epic/data/DataFile"
 
 import {
   encodedPath,
@@ -126,7 +126,7 @@ export class RepoList {
 
   /**
    * The checkout the pages of checkout `root` are LAID UNDER when served:  where their links to code resolve, so the
-   * linker's root (`AS.Linker`;  epic `epic-engine` I22).
+   * linker's root (`SRV.Linker`;  epic `epic-engine` I22).
    * - `root` itself:
    *   - when it holds its own pages (`content` is `root`), or its repo is registered (spell-app, a worktree of it)
    *   - when no registered repo has `content` (another machine's list, a test's made-up checkout)

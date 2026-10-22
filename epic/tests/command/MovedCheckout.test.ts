@@ -23,9 +23,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { Sessions } from "$/epics/command/Sessions"
-import { Worktrees } from "$/epics/command/Worktrees"
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { Sessions } from "spell-epic/command/Sessions"
+import { Worktrees } from "spell-epic/command/Worktrees"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 const TOP = realpathSync(mkdtempSync(join(tmpdir(), "moved-checkout-")))
 const OLD_WWW = join(TOP, "www", "spell-app")

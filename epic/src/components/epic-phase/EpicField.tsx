@@ -4,14 +4,14 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
-import { EpicPage } from "$/epics/components/epic-page/EpicPage"
-import { STATUS_STATES } from "$/epics/components/epic-item/EpicItem.types"
+import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
+import { STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
 
 import fieldCSS from "./EpicField.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicField`

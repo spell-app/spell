@@ -11,7 +11,7 @@ import {
   type PageAnswer,
   type PartLabels,
   type SentAnswer
-} from "$/epics/answers"
+} from "spell-epic/answers"
 
 import { epicTextBoxVocabulary } from "./EpicTextBox.en"
 
@@ -196,7 +196,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
     const type = this.type ?? "comment"
     if (type === "notes") labels[NOTES_KEY] = this.translationForKey("notesTitle")
     else if (type === "comment" && this.for)
-      labels[this.for] ??= document.getElementById(this.for)?.getAttribute("header") ?? this.for
+      labels[this.for] ??= document.getElementById(this.for)?.getAttribute("label") ?? this.for
   }
 
   /** Show its share of `answer`, as sent. */

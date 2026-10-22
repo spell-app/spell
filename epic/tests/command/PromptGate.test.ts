@@ -12,7 +12,7 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { PromptGate, type GateAnswer, type GateInput, type GateWindow } from "$/epics/command/PromptGate"
+import { PromptGate, type GateAnswer, type GateInput, type GateWindow } from "spell-epic/command/PromptGate"
 
 /** The temp folders. */
 const prompts = mkdtempSync(join(tmpdir(), "spell-prompts-"))

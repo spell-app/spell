@@ -5,7 +5,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { WORDS_PER_MINUTE, countWords, readingTime } from "../../src/tools/ReadingTime.js"
+import { WORDS_PER_MINUTE, countWords, readingTime } from "spell-epic/tools/ReadingTime.js"
 
 /** `words` words of filler text. */
 function wordsOf(words: number) {

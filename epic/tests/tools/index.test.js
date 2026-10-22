@@ -1,7 +1,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, it } from "vite-plus/test"
 
-import { END, LISTS, START, areaCards, listSection, planOf, replaceBetween, skeleton } from "../../src/tools/index.js"
+import { END, LISTS, START, areaCards, listSection, planOf, replaceBetween, skeleton } from "spell-epic/tools/index.js"
 
 /** A described epic page (`describe()`'s shape) with `phases`, each a status. */
 function epic(name, statuses, updated = new Date().toISOString().slice(0, 10)) {
@@ -102,8 +102,12 @@ describe("the list pages", () => {
     expect(html).toContain(`<a href="b/b.plan.html">b</a>`)
     // the facts the card draws its state from, and the page server marks it again by
     expect(html).toContain(`<epic-card id="epic-p" epic="p" data-status="open" phases="todo" updated="2026-01-01">`)
-    expect(html).toMatch(/<epic-card id="epic-e" epic="e" data-status="open" phases="done" updated="[\d-]+" urgent="q1">/)
-    expect(html).toMatch(/<epic-card id="epic-s" epic="s" data-status="done" [^>]*worked="2026-10-09T14:34[+-]\d\d:\d\d" favorite>/)
+    expect(html).toMatch(
+      /<epic-card id="epic-e" epic="e" data-status="open" phases="done" updated="[\d-]+" urgent="q1">/
+    )
+    expect(html).toMatch(
+      /<epic-card id="epic-s" epic="s" data-status="done" [^>]*worked="2026-10-09T14:34[+-]\d\d:\d\d" favorite>/
+    )
     expect(html).toMatch(/<epic-card id="epic-a" epic="a" data-status="done" phases="done" updated="[\d-]+">/)
     expect(html).not.toMatch(/sleeping|😴/)
   })
@@ -119,7 +123,9 @@ describe("the list pages", () => {
     expect(html).toContain(`<epic-list class="spell-epics" sagas="drawable-spell epics">`)
     expect(html).toContain(` saga="epics" saga-title="Epic Tooling" saga-purpose="Epics &amp; co.">`)
     // a saga not in the list:  none on the card (the list counts it as No saga)
-    expect(html).toMatch(/<epic-card id="epic-b" epic="b" data-status="open" phases="active" updated="[\d-]+" active="P1 · Phase">/)
+    expect(html).toMatch(
+      /<epic-card id="epic-b" epic="b" data-status="open" phases="active" updated="[\d-]+" active="P1 · Phase">/
+    )
   })
 
   it("list guides by saga, in the sagas' order, each headed by its saga page's link;  the rest in Misc, last", () => {
@@ -134,7 +140,7 @@ describe("the list pages", () => {
       "saga-epics",
       "misc"
     ])
-    expect(html).toContain(`<span slot="header"><a href="../sagas/epics/epics.saga.html">Epic Tooling</a></span>`)
+    expect(html).toContain(`<span slot="label"><a href="../sagas/epics/epics.saga.html">Epic Tooling</a></span>`)
     expect(html).toMatch(/id="saga-drawable-spell"[\s\S]*No guides name this saga yet[\s\S]*id="saga-epics"/)
     expect(html).toMatch(
       /id="saga-epics"[\s\S]*href="a.html"[\s\S]*id="misc"[\s\S]*href="b\/b.html"[\s\S]*href="c.html"/
@@ -156,7 +162,7 @@ describe("the list pages", () => {
     const paths = ["brand/pony.html", "brand/compare.html", "brand/spell-design-system/Logo.spell.html"]
     expect(paths.filter((path) => brand.has(path))).toEqual(["brand/pony.html"])
     const html = listSection(brand, [page("brand/pony.html")])
-    expect(html).toMatch(/^<ui-section id="pulled" header="6\. From Claude Design"/)
+    expect(html).toMatch(/^<ui-section id="pulled" label="6\. From Claude Design"/)
     expect(html).toContain(`<a href="pony.html">brand/pony.html</a>`)
   })
 
@@ -223,7 +229,7 @@ describe("planOf():  an epic page's card data (epic-components P8)", () => {
 
   it("reads a doc in the old markup as an empty plan (read no more since P15)", () => {
     const { document } = parseHTML(`<html><body><time id="plan-updated">2026-10-06</time>
-<ui-section id="phases"><ui-section data-phase="1" data-status="done" header="P1 · First Go"></ui-section></ui-section>
+<ui-section id="phases"><ui-section data-phase="1" data-status="done" label="P1 · First Go"></ui-section></ui-section>
 <ui-list class="plan-items"><ui-item id="q1" data-status="open"></ui-item></ui-list></body></html>`)
     expect(planOf(document)).toEqual({ phases: [], updated: null, future: false, saga: null, urgent: [] })
   })

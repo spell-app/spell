@@ -1,7 +1,7 @@
 /****************
  * ### `PlanMarkup`
  * Small helpers over HTML text and a parsed (linkedom) document, shared by `PlanDoc` and its helpers and by the
- * converter (`$/epics/convert`):  escaping, serializing, building elements with their attributes in order, small DOM
+ * converter (`spell-epic/convert`):  escaping, serializing, building elements with their attributes in order, small DOM
  * edits (moving children, stripping their text, a title as `<epic-*>` data), comparing markup however oxfmt wrapped
  * it.
  * - STATIC and instance-free on purpose:  no state, and nothing here knows what an epic page is, beyond

@@ -4,9 +4,10 @@
  * its verbs.
  * - On the `PATH` of every Claude Code session while the spell-epic plugin is on:  Claude Code puts a plugin's
  *   `bin/` there.  In a terminal:  link it onto your `PATH` (the README's "Install").
- * - `tsx` with spell-epic's `tsconfig.json` (its `$/epics` names), then `spell-kit/toolchain/aliases` (epic `repo-split`
- *   I12):  the packages of the other repos, workspaces of the top `spell` install, run as source with their own names.
- * - Runs `src/command/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
+ * - `tsx` with spell-epic's `tsconfig.json`:  every repo's files by their package names (`spell-epic/tool/PlanDoc`,
+ *   `spell-kit/server`;  epic `repo-split` P14), the other repos' packages workspaces of the top `spell` install, run as
+ *   source.
+ * - Runs `src/cli/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
  *   of a second.
  * - Every verb runs THIS copy's code, on the caller's checkout's data (`Git.nearestCheckout()`, `EPIC_CHECKOUT`).
  * - Plain ESM with no extension:  `"type": "module"` in spell-epic's `package.json` makes node read it so.
@@ -18,6 +19,4 @@ import { register } from "tsx/esm/api"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 register({ tsconfig: resolve(root, "tsconfig.json") })
-// then the run-time alias hook:  the other repos' source (`spell-kit/server` ...) by ITS repo's `$/` table
-await import("spell-kit/toolchain/aliases")
-await import(pathToFileURL(resolve(root, "src/command/epicMain.ts")).href)
+await import(pathToFileURL(resolve(root, "src/cli/epicMain.ts")).href)

@@ -34,7 +34,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "../config/EpicConfig.ts"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
@@ -45,7 +45,7 @@ const SHOTS = join(HERE, "shots")
 if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -61,8 +61,8 @@ if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
-const { PlanDocCommands } = await import("../tool/PlanDocCommands.ts")
-const { PlanDocFiles } = await import("../tool/PlanDocFiles.ts")
+const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
+const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
 
 ////////////////
 // ## Settings

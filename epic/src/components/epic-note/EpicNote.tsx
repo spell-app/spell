@@ -4,13 +4,13 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell-kit/element"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { FOLDS, Fold } from "$/epics/components/epic-item/Fold"
+import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
 
 import { epicNoteVocabulary } from "./EpicNote.en"
 
 import noteCSS from "./EpicNote.css?inline"
-import foldCSS from "$/epics/components/epic-item/Fold.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNote`

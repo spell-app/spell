@@ -1,7 +1,7 @@
 /**
  * `epic ask <command>` (once `spell dev details`):  details pages, questions Claude explains on a page and Owen
  * answers ON it (`/details`, `.claude/skills/details/SKILL.md`).
- * - `new <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]` --
+ * - `create <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]` --
  *   a page from the tool's own template (`templates/details.html` beside it);  prints its path
  *   - built in the epics pack's `<epic-*>` elements (`answerPages.js`)
  *   - `--from`:  the whole page from a JSON list of questions (`DetailsSpec`, below),
@@ -24,7 +24,7 @@
  * - `list [<epic>]` -- every details page, answered or waiting;  with an epic, only that epic's
  *   (`epics/<epic>/details/`), as `epic choices list <epic>`
  * - `sweep [--days 14]` -- delete scratch pages (and their answers) older than that;  never an epic's
- *   - `new` sweeps first, by itself
+ *   - `create` sweeps first, by itself
  * - `<page>`:  a slug (`pick-layout`), `<epic>/<slug>`, or a path
  *   (absolute, or from the content folder, its `pages/`, or the checkout's root)
  * - paths print absolute:  they mean the same in whichever checkout Claude reads them
@@ -52,7 +52,7 @@ import {
   questionSection
 } from "./answerPages.js"
 import { AskListeners } from "./AskListeners.ts"
-import { DataFile } from "../data/DataFile.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
 import { CONTENT, ROOT, atDepth, inContent, openInVSCode, serialize } from "./pages.js"
 
 /** How long `wait` waits by default:  8 hours (decision D9). */
@@ -75,7 +75,7 @@ async function main(argv) {
   const { positional, flags } = parseArgs(argv)
   const [command, target] = positional
   try {
-    if (command === "new") {
+    if (command === "create") {
       // scratch pages sweep themselves:  nobody has to remember to
       for (const file of sweep(CONTENT, SWEEP_DAYS)) console.error(`swept ${relative(CONTENT, file)}`)
       const spec = flags.from ? DataFile.parse(readFileSync(findFile(flags.from), "utf8")) : undefined
@@ -123,7 +123,7 @@ async function main(argv) {
 }
 
 /** `epic ask` with no or a wrong command. */
-const USAGE = `usage:  epic ask new <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]
+const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]
         epic ask show <page> [--wait] [--timeout 8h]
         epic ask wait <page> [--timeout 8h]
         epic ask answer <page>
@@ -189,18 +189,15 @@ function fillFromSpec(document, spec) {
   if (example) example.replaceWith(...sections)
 }
 
-/**
- * `path` as given:  absolute, else from the checkout's root or `packages/epics`
- * (`yarn workspace` hides where yarn ran).
- */
+/** `path` as given:  absolute, else from the checkout's root. */
 function findFile(path) {
-  const found = [ROOT, join(ROOT, "packages/epics")].map((base) => resolve(base, path)).find((each) => existsSync(each))
-  if (!found) throw new Error(`no file ${path}`)
+  const found = resolve(ROOT, path)
+  if (!existsSync(found)) throw new Error(`no file ${path}`)
   return found
 }
 
 /**
- * What `new --from` reads:  a whole page as data.
+ * What `create --from` reads:  a whole page as data.
  * - `title`, `lede`, `askedBy` (`session <code>x</code>, while ...`);  HTML allowed except in `title`
  * - `where`:  `{ epic, justNow, decides }`, the "Where we are" box (`.claude/skills/details/SKILL.md`, "Writing for Owen")
  * - `context`:  HTML for "1. Context" (the picture);  none:  the section goes
@@ -397,12 +394,12 @@ function titleOf(page, document = parseHTML(readFileSync(page, "utf8")).document
 }
 
 /**
- * Where comment `id` was written, for people:  a section's header (`1.2 What exists today`), or an option's question
+ * Where comment `id` was written, for people:  a section's label (`1.2 What exists today`), or an option's question
  * and title (`Q1 · Revisit's colour, A · Blue`) for `<question id>-<letter>`;  else the id itself.
  */
 function commentPlace(document, id) {
   const section = document.getElementById(id)
-  if (section) return section.getAttribute("header") ?? id
+  if (section) return section.getAttribute("label") ?? id
   // a letter is `B`, or the item picker's item id (`J7`)
   const [, key, letter] = /^(.+)-([A-Z][A-Za-z0-9]*)$/.exec(id) ?? []
   const question = key && [...document.querySelectorAll(ASK)].find((each) => askKey(each) === key)
@@ -416,9 +413,9 @@ export function askKey(question) {
   return question.getAttribute("name") ?? question.closest("ui-section[id]")?.id ?? ""
 }
 
-/** A question's title, for people:  its section's `header` (`Q1 · Which layout?`), else its key. */
+/** A question's title, for people:  its section's `label` (`Q1 · Which layout?`), else its key. */
 function askHeader(question) {
-  return question.closest("ui-section[id]")?.getAttribute("header") ?? askKey(question)
+  return question.closest("ui-section[id]")?.getAttribute("label") ?? askKey(question)
 }
 
 /** Option `letter` of question `question`:  its own options only, not one quoted in an option's text. */

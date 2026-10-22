@@ -18,9 +18,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Shared } from "$/epics/command/Shared"
-import { Worktrees } from "$/epics/command/Worktrees"
-import { SessionFolders } from "$/epics/config/SessionFolders"
+import { Shared } from "spell-epic/command/Shared"
+import { Worktrees } from "spell-epic/command/Worktrees"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
 
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "worktree-move-")))
 const MAIN = join(TEMP, "repo")

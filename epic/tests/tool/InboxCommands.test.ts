@@ -9,13 +9,13 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
-import { PageInboxes } from "../../src/tools/PageInboxes"
+import { PageInboxes } from "spell-epic/tools/PageInboxes"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -288,9 +288,9 @@ test("wait:  a send with ONLY comments wakes it, and prints each comment and Owe
     /M1 {2}on j1 \(item\) {2}quoting "a real choice" {2}"Why\?"[^\n]*\n {6}Owen replied:  "Say more"/
   )
   expect(said).toMatch(/M2 {2}on p1#field-1 \(field\) {2}"Is this hooked up\?"/)
-  expect(said).toMatch(/epic inbox x#<M id> working on/)
+  expect(said).toMatch(/epic inbox working x#<M id> on/)
   // nothing to apply:  no line saying so
-  expect(said).not.toMatch(/epic inbox x apply/)
+  expect(said).not.toMatch(/epic inbox apply x/)
   // handed over:  the next wait has nothing until Owen speaks again
   expect(ReviewInbox.read(inboxFile).hasWork).toBe(false)
 })

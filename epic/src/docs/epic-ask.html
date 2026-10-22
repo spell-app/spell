@@ -66,7 +66,7 @@
               ><code title="spell-epic/src/components/epic-ask/EpicAsk.en.ts">EpicAsk.en.ts</code></a
             >.
           </p>
-          <ui-section id="1-example" header="1. Example" sticky collapsible dividing collapsed
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="eye"></ui-icon>
             <p>
               Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing
@@ -125,10 +125,10 @@
               </epic-choices>
             </epic-ask></ui-section
           >
-          <ui-section id="2-markup" header="2. Markup" sticky collapsible dividing collapsed
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="code"></ui-icon>
             <p>
-              A question's section, as <code>epic ask new</code> writes it from a spec (<a
+              A question's section, as <code>epic ask create</code> writes it from a spec (<a
                 href="../../spell-epic/src/tools/details.js"
                 target="src-spell-epic-src-tools-details-js"
                 ><code>details.js</code></a
@@ -142,7 +142,7 @@
               ><ui-content
                 ><ui-code language="html"
                   ><script type="text/plain">
-                    <ui-section id="q1" header="Q1 · Which colour for Revisit?">
+                    <ui-section id="q1" label="Q1 · Which colour for Revisit?">
                       <epic-ask>
                         <epic-question><p>Revisit asks Claude to look again. Which colour says so?</p></epic-question>
                         <epic-choices>
@@ -162,7 +162,7 @@
               ><ui-content
                 ><ui-code language="html"
                   ><script type="text/plain">
-                    <ui-section id="items" header="Judgement calls (2/3)">
+                    <ui-section id="items" label="Judgement calls (2/3)">
                       <epic-ask multiple select-all filter more-details>
                         <epic-choices>
                           <epic-option letter="J1" title="First call" selected state-icon="circle outline" state-color="red" state-label="Not reviewed yet"><p>Its text.</p></epic-option>
@@ -176,7 +176,7 @@
               ></ui-accordion
             ></ui-section
           >
-          <ui-section id="3-where-it-goes" header="3. Where it goes" sticky collapsible dividing collapsed
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="layer group"></ui-icon>
             <p>
               <b>Its parent:</b> a <code>&lt;ui-section id&gt;</code> of a details page, one question each; its answer
@@ -221,7 +221,7 @@
               </table></ui-table
             ></ui-section
           >
-          <ui-section id="4-attributes" header="4. Attributes" sticky collapsible dividing collapsed
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="table columns"></ui-icon>
             <ui-table celled compact striped unstackable
               ><table>
@@ -277,7 +277,7 @@
                   </tr>
                 </tbody></table
             ></ui-table>
-            <ui-section id="epic-ask-slots" header="Slots" sticky collapsible dividing collapsed
+            <ui-section id="epic-ask-slots" label="Slots" sticky collapsible dividing collapsed
               ><p>
                 A slot is a place in the drawing that a child goes to: a child with <code>slot="name"</code> goes to
                 that name's place, every other child to the default one (shown as <i>default</i>).
@@ -302,7 +302,7 @@
                 </table></ui-table
               ></ui-section
             >
-            <ui-section id="epic-ask-parts" header="Parts" sticky collapsible dividing collapsed
+            <ui-section id="epic-ask-parts" label="Parts" sticky collapsible dividing collapsed
               ><p>
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-ask::part(base)</code>.
@@ -347,7 +347,7 @@
                 </table></ui-table
               ></ui-section
             >
-            <ui-section id="epic-ask-states" header="States" sticky collapsible dividing collapsed
+            <ui-section id="epic-ask-states" label="States" sticky collapsible dividing collapsed
               ><p>
                 A state is a word the element sets on itself while something is true, for styling:
                 <code>epic-ask:state(attention)</code>. Never written in the file.
@@ -378,7 +378,7 @@
               ></ui-section
             >
           </ui-section>
-          <ui-section id="5-how-it-looks" header="5. How it looks" sticky collapsible dividing collapsed
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -400,11 +400,11 @@
               </li>
             </ul></ui-section
           >
-          <ui-section id="6-written-by" header="6. Written by" sticky collapsible dividing collapsed
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing collapsed
             ><ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>epic ask new &lt;slug&gt; [--from &lt;spec.json&gt;]</code>: each question of the spec (<a
+                <code>epic ask create &lt;slug&gt; [--from &lt;spec.json&gt;]</code>: each question of the spec (<a
                   href="../../spell-epic/src/tools/details.js"
                   target="src-spell-epic-src-tools-details-js"
                   ><code>details.js</code></a

@@ -12,11 +12,11 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   epic `epic-engine` P10):  the other repos' packages (`spell-ui`, `spell-kit/server` ...) are `workspace:*`
   dependencies, imported by their package names (WWOD §4), never by a path into a sibling repo.
   - `tsc` reads their built declarations (`dist-types/`):  `yarn ts` builds them first (`spell-types --below`).
-  - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts)).
-  - Their source runs here with their own `$/` names through `spell-kit/toolchain/aliases` (`bin/epic`, the
-    `tsx` scripts).
+  - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts), on the kit's
+    `spell-kit/toolchain/sourceNames`).
+  - Their source runs here as it is, by those names:  `tsx` (`bin/epic`, the `tsx` scripts), Vite and Vitest.
 - spell-epic is ONE package, `spell-epic` (epic `epic-eject` J14), laid out as a plain JS repo:
-  - `src/`:  the code (`$/epics`), the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
+  - `src/`:  the code, the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
   - `tests/`:  its tests, at the same paths as the code (`tests/command/X.test.ts` for `src/command/X.ts`)
   - `scripts/`:  dev-only scripts;  `vscode/`:  the extension, its own yarn project
   - the plugin's parts at the root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
@@ -36,5 +36,35 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - The epic server ([EpicServer.ts](src/server/EpicServer.ts)) opens each repo's APP at `/editor/` (the top bar's App
   tab):  the repo declares it in its `.epic/config.json5`'s `"app"` ([RepoApp.ts](src/server/RepoApp.ts));  the
   server starts it in the background when it's down, never restarts it, and never serves it itself.
+- Imports:  "Imports" below.
 - Checks, from the root:  `yarn ts`, `yarn test`, `yarn lint`, `yarn plugin:validate`;  over every repo:  the kit's
   `yarn ts` / `yarn test` / `yarn lint`.
+
+## Imports
+
+As WWOD §4, plus these.
+
+- ONE name per file, the same in every repo (epic `repo-split` P14, Q47):  the package name and the file's path under
+  `src/`, no extension, inside this repo too.
+  - `spell-epic` (the barrel, `EP`), `spell-epic/markup`, `spell-epic/tool/PlanDoc`,
+    `spell-epic/components/epic-page`
+  - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
+  - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
+    The one file code imports from OUTSIDE `src/` has an explicit `exports` key:  `spell-epic/vscode/src/docUrls.ts`,
+    for its test.
+- How every tool finds them:  `package.json`'s `exports`, no alias table anywhere.
+  - TypeScript:  the `spell-epic-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the
+    source.
+  - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
+  - Every folder barrel has an explicit key (`"./markup"`, `"./components/epic-page"` ...):  `tsx`, run from another
+    repo through `node_modules` (spell-app's page server loads the route modules), finds a file without its
+    extension but not a folder's `index`.
+  - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
+    (`spell-kit/toolchain/sourceNames`) finds our packages' names as their source files.
+- PLAIN `node` writes the extension, as it needs it (the `"./*.ts"` key):  `spell-epic/config/EpicConfig.ts`,
+  `spell-epic/window.mjs`, `spell-epic/tools/pages.js`.
+  - Plain node runs the hooks, the window script, and the docs tools' `.js` scripts (`details.js`, `update.js` ...):
+    every file they load, of ours, imports this way, and of the kit's only its explicitly exported files
+    (`spell-kit/server/checkout`, `spell-kit/server/DataFile` ...).
+- A page's pack modules (`spell-ui.entry.js`'s `packModules`) are keyed by the import names themselves
+  (`spell-kit/element`, `spell-ui/core`;  epic `repo-split` P14, Q45):  what a pack's build leaves external.

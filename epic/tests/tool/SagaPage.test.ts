@@ -9,10 +9,10 @@ import { join } from "node:path"
 
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { PlanDocCommands } from "$/epics/tool/PlanDocCommands"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
-import { SagaEpics } from "$/epics/tool/SagaEpics"
-import { SagaPage } from "$/epics/tool/SagaPage"
+import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { SagaEpics } from "spell-epic/tool/SagaEpics"
+import { SagaPage } from "spell-epic/tool/SagaPage"
 
 const root = mkdtempSync(join(tmpdir(), "saga-page-"))
 const FILES = new PlanDocFiles({ root })

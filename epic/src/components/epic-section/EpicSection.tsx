@@ -3,14 +3,18 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "$/epics/review"
+import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
-import { ReviewState } from "$/epics/components/epic-review/ReviewState"
-import { SHOW_NOTE, type ReviewShows } from "$/epics/components/epic-review/EpicReview.types"
-import { NEW_KIND_LOOKS } from "$/epics/components/epic-new-item/EpicNewItem.types"
-import { NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "$/epics/components/epic-item/EpicItem.types"
-import { SHOW_ALL, STATE_PICK, type StatePickDetail } from "$/epics/components/epic-state-filter/EpicStateFilter.types"
-import { TEST_START } from "$/epics/components/epic-test-run/EpicTestRun.types"
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
+import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
+import { NEW_KIND_LOOKS } from "spell-epic/components/epic-new-item/EpicNewItem.types"
+import { NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
+import {
+  SHOW_ALL,
+  STATE_PICK,
+  type StatePickDetail
+} from "spell-epic/components/epic-state-filter/EpicStateFilter.types"
+import { TEST_START } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
@@ -41,11 +45,11 @@ import {
   type StateFilterEntry
 } from "./EpicSection.types"
 
-import collapseAllCSS from "$/epics/components/epic-item/CollapseAll.css?inline"
+import collapseAllCSS from "spell-epic/components/epic-item/CollapseAll.css?inline"
 import foldCSS from "./EpicFold.css?inline"
 import sectionCSS from "./EpicSection.css?inline"
 import chipsCSS from "./StateChips.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `DOMEpicSectionElement`

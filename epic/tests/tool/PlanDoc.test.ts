@@ -4,17 +4,17 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { Markup } from "$/epics/markup"
-import { PhaseIds } from "$/epics/phases"
+import { Markup } from "spell-epic/markup"
+import { PhaseIds } from "spell-epic/phases"
 
-import { PlanDocError } from "$/epics/tool/planDoc.types"
+import { PlanDocError } from "spell-epic/tool/planDoc.types"
 
-import { EpicTests } from "$/epics/tool/EpicTests"
-import { ItemPicker } from "$/epics/tool/ItemPicker"
-import { PlanCommits } from "$/epics/tool/PlanCommits"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanItem } from "$/epics/tool/PlanItem"
-import { PlanTime } from "$/epics/tool/PlanTime"
+import { EpicTests } from "spell-epic/tool/EpicTests"
+import { ItemPicker } from "spell-epic/tool/ItemPicker"
+import { PlanCommits } from "spell-epic/tool/PlanCommits"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanItem } from "spell-epic/tool/PlanItem"
+import { PlanTime } from "spell-epic/tool/PlanTime"
 
 /**
  * The epic pages these tests read, tracked beside them (`fixtures/`):  `epic-plan.html`, a new doc in `<epic-*>` markup
@@ -325,75 +325,6 @@ describe("PlanDoc phases", () => {
     plan.updateStates()
     expect(counts()).toEqual(["1", null, "2"])
     expect(PlanDoc.parse(plan.toString(), NOW).updateChangeCounts()).toBe(false)
-  })
-
-  test("migrate:  an older doc's plan changes (lines, slotted or not;  copies above the phases) as <epic-update>s", () => {
-    const plan = freshPlan()
-    plan.addPhase("One", { symptom: "s", changes: "c" })
-    plan.addPhase("Two", { symptom: "s", changes: "c" })
-    // as the tool wrote it until 2026-10-11:  copies in the section (T14), a line in no slot, a line in the slot (P6)
-    const section = plan.findSection("phases")!
-    section.insertAdjacentHTML(
-      "afterbegin",
-      '<epic-updated slot="changes" at="2026-10-01 09:00" phase="1" of="2"><p>split in two</p></epic-updated>'
-    )
-    el(plan, "p2")
-      .querySelector(':scope > epic-field[name="changes"]')!
-      .insertAdjacentHTML(
-        "afterend",
-        '<epic-updated at="2026-10-01 09:00" phase="1"><p>Split in two. Then more.</p></epic-updated>' +
-          '<epic-updated slot="changes" at="2026-10-02 10:00"><p>joined again</p></epic-updated>'
-      )
-    Markup.set<"epic-phase">(el(plan, "p2"), { changes: 2 })
-    // read without errors as it is
-    expect(problems(plan)).toEqual([])
-    expect(plan.check()).toEqual([])
-
-    expect(plan.migrate()).toEqual(["updates-as-epic-update"])
-    expect(section.querySelectorAll("epic-updated")).toHaveLength(0)
-    expect(kids(el(plan, "p2"))).toEqual([
-      "field:symptom",
-      "field:changes",
-      "epic-update",
-      "epic-update",
-      "field:files",
-      "field:verify"
-    ])
-    const updates = Array.from(el(plan, "p2").querySelectorAll(":scope > epic-update"), (update) => [
-      Markup.read(update),
-      update.textContent
-    ])
-    expect(updates).toEqual([
-      [{ at: "2026-10-01 09:00", phase: 1, summary: "Split in two" }, "Split in two. Then more."],
-      [{ at: "2026-10-02 10:00", summary: "joined again" }, "joined again"]
-    ])
-    expect(plan.document.querySelector("epic-event:last-of-type")!.textContent).toBe(
-      "migrated:  updates-as-epic-update"
-    )
-    expect(problems(plan)).toEqual([])
-    // idempotent:  nothing left to migrate, and the count stands
-    expect(plan.migrate()).toEqual([])
-    expect(plan.updateChangeCounts()).toBe(false)
-  })
-
-  test("migrate:  an older UPDATE note moves AFTER the prose it stood before, dated and summed up;  a bare label stays", () => {
-    const plan = freshPlan()
-    plan.addPhase("One")
-    plan.setPhase(1, "active")
-    const id = plan.addItem("judgement", "a call", { details: "<p>First.</p><p>Second.</p>" })
-    const item = el(plan, id)
-    Markup.set<"epic-item">(item, { changed: "2026-10-04T12:46:05-04:00" })
-    const second = item.querySelectorAll(":scope > p")[1]!
-    second.insertAdjacentHTML("beforebegin", '<epic-update phase="1"><p>Rewritten after P1. Why.</p></epic-update>')
-    const label = item.querySelector('[slot="title"] > epic-update')!
-    expect(plan.migrate()).toEqual(["updates-as-epic-update"])
-    expect(kids(item).slice(-3)).toEqual(["p", "p", "epic-update"])
-    const note = item.querySelector(":scope > epic-update")!
-    expect(Markup.read(note)).toEqual({ at: "2026-10-04T12:46:05-04:00", summary: "Rewritten after P1", phase: 1 })
-    expect(note.previousElementSibling).toBe(second)
-    expect(label.isConnected && !label.hasAttribute("at")).toBe(true)
-    expect(problems(plan)).toEqual([])
-    expect(plan.migrate()).toEqual([])
   })
 
   test("phase N done:  drops its bare labels and its prose updates;  a phase's own plan changes stay", () => {
@@ -1239,12 +1170,64 @@ describe("PlanDoc bedtime", () => {
     expect([again.bedtime, again.summary().bedtime]).toEqual([false, null])
     expect(again.finishBedtime()).toBe(false)
   })
+})
 
-  test("an older doc's Overnight section, kept outside the page:  removed once read", () => {
+// epic `repo-split` J141:  `epic summarize`
+describe("PlanDoc condense", () => {
+  /** An item after a lot of back and forth:  text, unpicked and picked choices, More Details, replies, a status card. */
+  function talkedOver() {
     const plan = freshPlan()
-    plan.page.insertAdjacentHTML("beforebegin", '<ui-section id="overnight" header="Overnight"></ui-section>')
-    expect(plan.removeOvernight()).toBe(true)
-    expect(plan.removeOvernight()).toBe(false)
+    plan.addItem("judgement", "templates", { details: "<p>one file each</p>" })
+    plan.addMore("j1", "<p>more about it</p>")
+    const pick =
+      '<epic-reply from="Claude" at="2026-10-01 09:10"><p>or:</p><epic-choices chosen="B">' +
+      '<epic-option letter="A" title="One"></epic-option><epic-option letter="B" title="Two"></epic-option>' +
+      "</epic-choices></epic-reply>"
+    plan.setDetails("j1", pick, { append: true })
+    plan.setDetails("j1", '<epic-reply from="Owen" at="2026-10-01 09:12"><p>B, but shorter</p></epic-reply>', {
+      append: true
+    })
+    plan.addStatus("j1", "Condense it.")
+    return plan
+  }
+
+  test("the condensed text replaces what it showed;  the rest moves into one Original Discussion version", () => {
+    const plan = talkedOver()
+    expect(plan.condense("j1", "<p>Two files, short.</p><ul><li>open:  where they live</li></ul>")).toEqual({
+      title: "templates",
+      moved: 4
+    })
+    const item = el(plan, "j1")
+    expect(kids(item)).toEqual(["p", "ul", "epic-choices", "epic-original"])
+    expect(item.querySelector(":scope > epic-choices")!.getAttribute("chosen")).toBe("B")
+    const versions = item.querySelectorAll(":scope > epic-original > epic-version")
+    expect(versions.length).toBe(1)
+    expect(versions[0]!.textContent).toMatch(/one file each[\s\S]*more about it[\s\S]*B, but shorter/)
+    // the status card, slotted, stays
+    expect(item.querySelector(':scope > epic-status[slot="status"]')).not.toBeNull()
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("a question keeps the question as asked and its answer;  a second condense adds a dated version", () => {
+    const plan = freshPlan()
+    plan.addItem("question", "Which?", { details: "<p>Which browser?</p>" })
+    plan.setDetails("q1", '<epic-reply from="Owen" at="2026-10-01 09:12"><p>Chrome, I think</p></epic-reply>', {
+      append: true
+    })
+    plan.decide("q1", "Chrome")
+    plan.condense("q1", "<p>Chrome first.</p>")
+    expect(kids(el(plan, "q1"))).toEqual(["epic-question", "p", "epic-answer", "epic-original"])
+    expect(el(plan, "q1").querySelector("epic-version")!.textContent).toMatch(/Chrome, I think/)
+    plan.condense("q1", "<p>Chrome.</p>")
+    expect(el(plan, "q1").querySelectorAll("epic-version").length).toBe(2)
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("refused for empty text, or an item with nothing to condense", () => {
+    const plan = freshPlan()
+    plan.addItem("todo", "bare")
+    expect(() => plan.condense("t1", "  ")).toThrow(/T1:  the condensed text is empty/)
+    expect(() => plan.condense("t1", "<p>x</p>")).toThrow(/T1:  nothing to condense/)
   })
 })
 
@@ -1916,7 +1899,7 @@ describe("PlanDoc status cards (P13)", () => {
       ],
       [{ state: "noted", at: "2026-10-01 09:05", slot: "status", reading: "<p>Recorded:  later</p>", summary: "" }]
     ])
-    expect(() => plan.finishStatus("c1")).toThrow(/status <name> c1 noted/)
+    expect(() => plan.finishStatus("c1")).toThrow(/epic update <name>#c1 noted/)
     expect(problems(plan)).toEqual([])
   })
 

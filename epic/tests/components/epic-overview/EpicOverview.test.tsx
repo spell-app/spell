@@ -4,12 +4,12 @@ import type { E } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "spell-ui/ui-section"
-import "$/epics/components/epic-overview"
-import "$/epics/components/epic-section"
-import "$/epics/components/epic-summary"
-import "$/epics/components/epic-prompt"
-import "$/epics/components/epic-item"
+import "spell-ui/components/ui-section"
+import "spell-epic/components/epic-overview"
+import "spell-epic/components/epic-section"
+import "spell-epic/components/epic-summary"
+import "spell-epic/components/epic-prompt"
+import "spell-epic/components/epic-item"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {

@@ -3,8 +3,8 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { Sessions } from "$/epics/command/Sessions"
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { Sessions } from "spell-epic/command/Sessions"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 /** A fake `~/.claude`, and a folder that is NOT a git checkout to list sessions from. */
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))

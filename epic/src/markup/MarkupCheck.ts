@@ -10,7 +10,7 @@ import {
   type ChildSpec,
   type EpicAttributeSpec,
   type EpicVocabulary
-} from "$/epics/definitions"
+} from "spell-epic/definitions"
 
 import {
   ELEMENT_NODE,

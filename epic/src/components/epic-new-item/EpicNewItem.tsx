@@ -3,9 +3,9 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "$/epics/review"
+import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls': its file, not `epic-review`'s barrel
-import { ReviewState } from "$/epics/components/epic-review/ReviewState"
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 
 import { epicNewItemVocabulary } from "./EpicNewItem.en"
 import {
@@ -20,7 +20,7 @@ import {
 } from "./EpicNewItem.types"
 
 import newItemCSS from "./EpicNewItem.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNewItem`
@@ -34,7 +34,7 @@ import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
  * - What's asked for is a mark in the review inbox, under a key of its own (`new1` ...):
  *   `{ action: "new", kind, title, note?, near? }`
  *   - sent with the next Send
- *   - made into an item by `plan-doc inbox apply`
+ *   - made into an item by `epic inbox apply`
  * - Shown only while the page is reviewed:  the family that draws it wraps it in `<Show>`.
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/

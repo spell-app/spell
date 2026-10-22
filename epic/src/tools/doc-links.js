@@ -6,14 +6,14 @@
  *   yarn tsx tools/doc-links.js <folder>/<doc>.html ...           -- add links (idempotent)
  *   yarn tsx tools/doc-links.js --check <folder>/<doc>.html ...   -- verify, exit 1 on problems
  *   ... --root <checkout> ...                                     -- links resolve in that checkout, not this one
- * - This file is the command line, on files, of `$/assembler`'s `Linker` (epic `epic-components`, P7).
+ * - This file is the command line, on files, of `spell-kit/server`'s `Linker` (epic `epic-components`, P7).
  *   - the rules live there:  what becomes a link, how a link gets its target, what `--check` verifies
  *   - shared with the `epic` tool (`src/tool/`)
  * - `--root`:  for a copy of the pages beside a copy of the code (a dry run of `relocate.js relink`, say)
  *   - version control's ignores are that checkout's, so it should be a git repo with the repo's `.gitignore`
  * - A page in the CONTENT folder links as served under the checkout that serves it (`contentLinker`, epic
  *   `epic-engine` I22):  this one, or spell-app's for spell-epic's own epics
- * - Runs under `tsx`, which maps `$/assembler` through this package's `tsconfig.json`:  plain `node` can't.
+ * - Runs under `tsx`:  `spell-kit/server`'s files import each other without extensions, which plain `node` can't load.
  *   - the tools that run it (`update.js`, `pages.js` `tidy()`, goals' check) go through `pages.js` `docLinksRun()`
  * - A component set's pages link as from their SERVED address,
  *   so their links hold at `/worktrees/<w>/components/epics/` too.
@@ -28,10 +28,10 @@ import { readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { basename, dirname, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { AS } from "spell-kit/assembler"
-import { RepoList } from "$/epics/server/RepoList"
-import { EpicTargets } from "$/epics/tool/EpicTargets"
-import { ServedFolders } from "$/epics/tool/ServedFolders"
+import { SRV } from "spell-kit/server"
+import { RepoList } from "spell-epic/server/RepoList"
+import { EpicTargets } from "spell-epic/tool/EpicTargets"
+import { ServedFolders } from "spell-epic/tool/ServedFolders"
 
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
 
@@ -47,7 +47,7 @@ function servedUnder(root) {
 /**
  * One linker for this checkout (or the command line's `--root`):  its bare-name index is built once per process.
  */
-let linker = new AS.Linker(ROOT, { served: servedUnder(ROOT) })
+let linker = new SRV.Linker(ROOT, { served: servedUnder(ROOT) })
 
 /**
  * The linker for pages in the CONTENT folder (epic `epic-engine` I22):  `linker`, unless the content is served under
@@ -60,7 +60,7 @@ let contentLinker = linkerUnder(new RepoList().linkRootOf(ROOT))
 
 /** A linker under checkout `root`:  `linker` when it's `linker`'s. */
 function linkerUnder(root) {
-  return resolvePath(root) === linker.root ? linker : new AS.Linker(root, { served: servedUnder(root) })
+  return resolvePath(root) === linker.root ? linker : new SRV.Linker(root, { served: servedUnder(root) })
 }
 
 /** The content folder, real:  a page in it takes `contentLinker`, whichever link it's reached through. */
@@ -152,7 +152,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const at = args.indexOf("--root")
   const root = at >= 0 ? args[at + 1] : undefined
   if (root) {
-    linker = new AS.Linker(resolvePath(root), { served: servedUnder(ROOT) })
+    linker = new SRV.Linker(resolvePath(root), { served: servedUnder(ROOT) })
     contentLinker = linker
     targets = new EpicTargets(resolvePath(root))
   }

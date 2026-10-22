@@ -3,8 +3,8 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { EPIC_GROUPS, byTitle, type EpicGroupName } from "$/epics/list/EpicCards"
-import { StateFilter } from "$/epics/components/epic-section/StateFilter"
+import { EPIC_GROUPS, byTitle, type EpicGroupName } from "spell-epic/list/EpicCards"
+import { StateFilter } from "spell-epic/components/epic-section/StateFilter"
 
 import { epicListVocabulary } from "./EpicList.en"
 import {
@@ -23,7 +23,7 @@ import {
   type SortDetail
 } from "./EpicList.types"
 
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 import listCSS from "./EpicList.css?inline"
 
 /****************

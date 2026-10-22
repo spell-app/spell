@@ -33,7 +33,7 @@ try {
   const { session_id: sessionId, transcript_path: transcript, cwd } = input
   if (cwd) process.env.EPIC_CHECKOUT = cwd
   // loaded in here, once `EPIC_CHECKOUT` says whose windows they are
-  const { Window } = await import("../src/window.mjs")
+  const { Window } = await import("spell-epic/window.mjs")
   const file = sessionId && Window.handoffFile(sessionId)
   if (file && existsSync(file)) {
     const running = join(Window.handoffs, `${sessionId}.running.json`)
@@ -51,7 +51,7 @@ try {
 /** `SessionFolders.requeueTitle()`:  never stops the move. */
 async function requeueTitle(sessionId) {
   try {
-    const { SessionFolders } = await import("../src/config/SessionFolders.ts")
+    const { SessionFolders } = await import("spell-epic/config/SessionFolders.ts")
     SessionFolders.requeueTitle(sessionId)
   } catch (error) {
     console.error(`handoff hook:  no title queued:  ${error.message}`)

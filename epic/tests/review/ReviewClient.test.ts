@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 
-import { ReviewClient } from "$/epics/review/ReviewClient"
-import { NOBODY_LISTENING, REVISIT_KEY_PREFIX, type ReviewClientOptions } from "$/epics/review/review.types"
+import { ReviewClient } from "spell-epic/review/ReviewClient"
+import { NOBODY_LISTENING, REVISIT_KEY_PREFIX, type ReviewClientOptions } from "spell-epic/review/review.types"
 
 ////////////////
 // ## Fakes

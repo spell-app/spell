@@ -8,7 +8,7 @@
  *   - `notes.ts` (`epic notes`):  Claude lists them, answers them, marks them done
  *   - `index.js`:  carries the notes over when it regenerates a list page (`PageNotes.carryOver()`)
  * - Edits SPLICE the source:  every byte outside the note stays as it was, so the page's diff shows only the note.
- * - Plain node JS, no `$/` imports:  `index.js` runs under plain `node`.
+ * - Plain node JS, importing only `linkedom`:  `index.js` runs under plain `node`.
  *
  * The markup, at the end of the section it's about (or, for the whole page, right after the sticky page header):
  *
@@ -392,8 +392,8 @@ function labelOf(document, anchor) {
   if (anchor === PAGE_ANCHOR) return "the page"
   const section = document.getElementById(anchor)
   if (!section) return anchor
-  const header = section.getAttribute("header") ?? section.querySelector(':scope > [slot="header"]')?.textContent
-  return header?.replace(/\s+/g, " ").trim() || anchor
+  const label = section.getAttribute("label") ?? section.querySelector(':scope > [slot="label"]')?.textContent
+  return label?.replace(/\s+/g, " ").trim() || anchor
 }
 
 /** `date` as a note's `at`:  local `YYYY-MM-DD HH:MM`. */

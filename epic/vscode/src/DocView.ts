@@ -65,8 +65,8 @@ import { existsSync } from "fs"
 import { join } from "path"
 import * as vscode from "vscode"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { RepoList } from "$/epics/server/RepoList"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { RepoList } from "spell-epic/server/RepoList"
 
 import { escapeAttribute, fileForPath, planDocsOf, samePage, stamped, type ServerInfo } from "./docUrls"
 
@@ -374,7 +374,7 @@ export class DocView implements vscode.WebviewViewProvider {
   /**
    * Rebuild the view from scratch:  new html, so a new iframe, at the page in view (fresh `?t=` stamp), or at `to`.
    * - resolves to that URL, `undefined` when the view hasn't been shown yet (nothing to rebuild)
-   * - `epic window reload-view`:  for a view gone wrong in a way a reload doesn't fix
+   * - `epic window reload`:  for a view gone wrong in a way a reload doesn't fix
    *   (clicks no longer reaching the page, PAPERCUTS `vscode`, 2026-10-06)
    *   - the reload button only navigates the SAME iframe
    * - NOT a fix for pages stuck on their placeholders (6 docs pages holding every connection to a host):

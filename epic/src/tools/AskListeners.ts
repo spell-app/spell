@@ -3,8 +3,8 @@ import { existsSync, mkdirSync, realpathSync } from "node:fs"
 import { homedir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
-import { DataFile } from "../data/DataFile.ts"
-import { HOME_ENV, HOME_FOLDER } from "../server/server.types.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
+import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
 
 /****************
  * ### `AskListeners`

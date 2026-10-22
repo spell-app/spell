@@ -26,7 +26,7 @@ import { PlanMarkup } from "./PlanMarkup"
  * - Why several ways to find docs:  the shared folders (`guides/`, `templates/`, `ui/`) aren't in spell-app's git,
  *   so a commit can't show them;  the shared repo's own commits name the checkout whose turn swept them up
  *   (`Turn-end:`), and the pages themselves name the epic.
- * - Node only (git, `node:fs`):  NOT in the `$/epics` barrel, imported by path.  Reads, never writes.
+ * - Node only (git, `node:fs`):  NOT in the `spell-epic` barrel, imported by path.  Reads, never writes.
  ****************/
 export class EpicDocs {
   /** the checkout's epic pages, and its git */

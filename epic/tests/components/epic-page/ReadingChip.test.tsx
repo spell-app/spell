@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { shownReadingTime } from "$/epics/tools/ReadingTime.js"
+import { shownReadingTime } from "spell-epic/tools/ReadingTime.js"
 
 /** A scratch box on the page, removed after each test. */
 let box: HTMLElement | undefined

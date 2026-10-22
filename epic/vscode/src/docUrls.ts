@@ -9,8 +9,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-// By its file, not `$/epics/...`:  plain `node` runs this file's tests, with no alias table
-import { RealPath } from "../../src/config/RealPath.ts"
+// By its file, not `spell-epic/...`:  plain `node` runs this file's tests, with no alias table
+import { RealPath } from "spell-epic/config/RealPath.ts"
 
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */
 export const EXTENSION_ID = "spell-app.spell-epic"

@@ -16,8 +16,8 @@ import {
   isChoicesPage,
   readRows,
   rowsFile
-} from "../../src/tools/choices.js"
-import { answerFile, createPage as createDetailsPage, waitForAnswer } from "../../src/tools/details.js"
+} from "spell-epic/tools/choices.js"
+import { answerFile, createPage as createDetailsPage, waitForAnswer } from "spell-epic/tools/details.js"
 
 let docs
 
@@ -85,7 +85,7 @@ test("new:  the page, its rows in it as elements and beside it as JSON, fixed fo
   expect(html).not.toContain("q1-example-1")
   // one section per section of the rows, its rule with its code, its rows by file then line
   expect(html).toContain(
-    '<ui-section id="q1" header="Q1 · Members" sticky collapsible dividing collapsed><ui-icon slot="icon" name="list check"></ui-icon><p class="spell-choices-rule"><code>is</code> / <code>has</code></p><epic-choice-rows>'
+    '<ui-section id="q1" label="Q1 · Members" sticky collapsible dividing collapsed><ui-icon slot="icon" name="list check"></ui-icon><p class="spell-choices-rule"><code>is</code> / <code>has</code></p><epic-choice-rows>'
   )
   expect(html).toContain(
     '<epic-choice-row name="q1-A-7" file="packages/ui/src/A.tsx" line="7" purpose="menu open" current="this.open" recommended="this.isOpen"></epic-choice-row>'

@@ -1,5 +1,5 @@
-import { RepoList, RepoListError } from "$/epics/server/RepoList"
-import type { Repo } from "$/epics/server/server.types"
+import { RepoList, RepoListError } from "spell-epic/server/RepoList"
+import type { Repo } from "spell-epic/server/server.types"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 import { Git } from "./Git"

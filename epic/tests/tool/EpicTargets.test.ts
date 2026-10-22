@@ -8,9 +8,9 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicAddress } from "$/epics/links"
+import { EpicAddress } from "spell-epic/links"
 
-import { EpicTargets } from "$/epics/tool/EpicTargets"
+import { EpicTargets } from "spell-epic/tool/EpicTargets"
 
 const root = mkdtempSync(join(tmpdir(), "epic-targets-"))
 

@@ -1,4 +1,4 @@
-/* GENERATED -- do not edit:  `spell dev pack build epics` */
+/* GENERATED -- do not edit:  `spell pack build epics` */
 /**
  * The `epics` pack's script:  registers with the page's Spell UI, which adds the catalog and calls `define()`.
  * - `define()` imports every family barrel, which defines its tags:  inlined in the script, run only when called.

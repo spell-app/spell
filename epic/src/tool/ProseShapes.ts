@@ -1,5 +1,5 @@
-import { Definitions, type EpicTag } from "$/epics/definitions"
-import { MarkupCheck, TEXT_NODE } from "$/epics/markup"
+import { Definitions, type EpicTag } from "spell-epic/definitions"
+import { MarkupCheck, TEXT_NODE } from "spell-epic/markup"
 
 import { Chrome, Drawn, LABELLED_BLOCK, ProseBlocks } from "./planDoc.types"
 

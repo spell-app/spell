@@ -60,6 +60,8 @@ import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
+import { sourceNames } from "spell-kit/toolchain/sourceNames"
+
 import { packageDir } from "./packageDir.ts"
 
 /** `src`, the folder of the docs tools (`tools/`). */
@@ -208,8 +210,8 @@ const ICONS = {
   "solid/rotate-left": ["rotate left", "undo alternate"], // Undo, in the toast after a comment's deleted
   "solid/plug": ["plug"],
   "solid/circle-play": ["circle play"],
-  "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`$/epics/list/EpicState`)
-  // an Epics card's star (`$/epics/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
+  "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell-epic/list/EpicState`)
+  // an Epics card's star (`spell-epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
   "regular/star": ["star outline"],
   // epic pages' review (epic `review-review`):
@@ -224,11 +226,14 @@ const ICONS = {
   "../fa7-brands/brands/git-alt": ["git", "git alt"] // the brands pack, beside `ICON_PACK`
 }
 
+/** spell-epic's own names (`spell-epic/links`), which the docs runtime imports:  found as their source files. */
+const SPELL_EPIC = /^spell-epic(?:\/.*)?$/
+
 /** Bare specifiers that MUST resolve from UI's root:  Solid, all subpaths. */
 const SOLID = /^(solid-js|@solidjs\/[\w-]+)(\/.*)?$/
 
 /** UI's emoji name data:  `<set>/<letter>.json`, written out as lazy classic scripts (`writeEmojiChunks()`). */
-const EMOJI_DATA = join(UI_DIR, "components/ui-emoji/data")
+const EMOJI_DATA = join(UI_DIR, "src/components/ui-emoji/data")
 
 /** Where the emoji chunk scripts go, and their URL relative to the bundle. */
 const EMOJI_OUT = join(ASSETS, "emoji")
@@ -249,21 +254,21 @@ const LAZY = [
   {
     name: "code-engine",
     global: "__spellCodeEngine",
-    source: join(UI_DIR, "components/ui-code/CodeEngine.ts"),
+    source: join(UI_DIR, "src/components/ui-code/CodeEngine.ts"),
     chunk: /(?:^|\/)CodeEngine-[\w-]+\.js$/,
     hook: `CodeHighlighter.engineLoader = () => lazy("code-engine", "__spellCodeEngine")`
   },
   {
     name: "markdown-engine",
     global: "__spellMarkdownEngine",
-    source: join(UI_DIR, "components/ui-markdown/MarkdownEngine.ts"),
+    source: join(UI_DIR, "src/components/ui-markdown/MarkdownEngine.ts"),
     chunk: /(?:^|\/)MarkdownEngine-[\w-]+\.js$/,
     hook: `MarkdownRenderer.engineLoader = () => lazy("markdown-engine", "__spellMarkdownEngine")`
   },
   {
     name: "markdown-sanitizer",
     global: "__spellMarkdownSanitizer",
-    source: join(UI_DIR, "components/ui-markdown/MarkdownSanitizer.ts"),
+    source: join(UI_DIR, "src/components/ui-markdown/MarkdownSanitizer.ts"),
     chunk: /(?:^|\/)MarkdownSanitizer-[\w-]+\.js$/,
     hook: `MarkdownRenderer.sanitizerLoader = () => lazy("markdown-sanitizer", "__spellMarkdownSanitizer")`
   }
@@ -335,7 +340,8 @@ async function bundle() {
     legalComments: "eof",
     metafile: true,
     logLevel: "silent",
-    plugins: [spellUiResolver()]
+    // the docs runtime's own imports of spell-epic (`spell-epic/links` ...), as their source files
+    plugins: [spellUiResolver(), sourceNames(SPELL_EPIC)]
   })
   checkOneSolid(result.metafile)
   checkEachFileOnce(result.metafile)
@@ -362,7 +368,8 @@ async function bundleComments() {
     minify: true,
     legalComments: "eof",
     metafile: true,
-    logLevel: "silent"
+    logLevel: "silent",
+    plugins: [sourceNames(SPELL_EPIC)]
   })
   checkNoSpellUI(result.metafile)
   checkClassicScript(COMMENTS_OUT)
@@ -371,8 +378,9 @@ async function bundleComments() {
 
 /**
  * esbuild plugin wiring the entry to UI:
- * - `spell-ui` ~== `dist/index.js`, `spell-ui/<entry>` ~== `dist/<entry>.js`
- *   (mirrors UI's `package.json` `exports`)
+ * - `spell-ui` ~== `dist/index.js`, `spell-ui/<entry>` ~== `dist/<entry>.js`,
+ *   `spell-ui/components/ui-code` ~== `dist/ui-code.js`
+ *   (mirrors UI's published `exports`, its `package.json`'s `publishConfig`)
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
  * - the page runtime:  an empty module until its file exists
@@ -416,9 +424,15 @@ function spellUiResolver() {
   }
 }
 
-/** File in UI's `dist/` for a `spell-ui[/...]` specifier. */
+/**
+ * File in UI's `dist/` for a `spell-ui[/...]` specifier:  a family's folder (`components/ui-code`) is its own file
+ * (`dist/ui-code.js`), as UI's published `exports` have it.
+ */
 function uiDistPath(specifier) {
-  const sub = specifier.slice("spell-ui".length).replace(/^\//, "")
+  const sub = specifier
+    .slice("spell-ui".length)
+    .replace(/^\//, "")
+    .replace(/^components\/(ui-[a-z-]+)$/, "$1")
   if (!sub) return join(UI_DIR, "dist/index.js")
   return join(UI_DIR, "dist", `${sub}.js`)
 }
@@ -477,7 +491,7 @@ function baseUrlSource() {
  */
 function emojiModule() {
   return [
-    `import { EmojiData } from "spell-ui/ui-emoji"`,
+    `import { EmojiData } from "spell-ui/components/ui-emoji"`,
     baseUrlSource(),
     `const base = bundleUrl("emoji/")`,
     `const waiting = new Map()`,
@@ -623,8 +637,10 @@ async function writeLazyScripts() {
       minify: true,
       keepNames: true,
       legalComments: "eof",
-      // `$/ui/runtime/runtime.types` (each engine's `SourceError`)
+      // Spell UI's own names in its source (`spell-ui/runtime/runtime.types`, each engine's `SourceError`), found as
+      // their files;  its `tsconfig.json` for the rest (JSX, decorators)
       tsconfig: join(UI_DIR, "tsconfig.json"),
+      plugins: [sourceNames()],
       logLevel: "silent"
     })
     checkClassicScript(outfile)
@@ -642,8 +658,8 @@ async function writeLazyScripts() {
  */
 function lazyModule() {
   return [
-    `import { CodeHighlighter } from "spell-ui/ui-code"`,
-    `import { MarkdownRenderer } from "spell-ui/ui-markdown"`,
+    `import { CodeHighlighter } from "spell-ui/components/ui-code"`,
+    `import { MarkdownRenderer } from "spell-ui/components/ui-markdown"`,
     baseUrlSource(),
     `const base = bundleUrl("lazy/")`,
     `const loading = new Map()`,

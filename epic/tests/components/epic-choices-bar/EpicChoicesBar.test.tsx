@@ -3,10 +3,10 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { ChoicesForm } from "$/epics/answers"
+import { ChoicesForm } from "spell-epic/answers"
 
-import "$/epics/components/epic-choices-bar"
-import "$/epics/components/epic-choice-rows"
+import "spell-epic/components/epic-choices-bar"
+import "spell-epic/components/epic-choice-rows"
 
 ////////////////
 // ## Fakes
@@ -47,7 +47,7 @@ function part(host: Element, name: string): HTMLElement | null {
 
 /** A section of one row, then the bar. */
 const PAGE =
-  `<div><ui-section id="q1" header="Q1"><epic-choice-rows><epic-choice-row name="r1" file="a.ts" line="1" ` +
+  `<div><ui-section id="q1" label="Q1"><epic-choice-rows><epic-choice-row name="r1" file="a.ts" line="1" ` +
   `purpose="p" current="a" recommended="b"></epic-choice-row></epic-choice-rows></ui-section>` +
   `<epic-choices-bar></epic-choices-bar></div>`
 

@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { SessionFolders } from "$/epics/config/SessionFolders"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
 
 /****************
  * ### `ReviewBackfill`

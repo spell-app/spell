@@ -1,11 +1,11 @@
 import { isAbsolute, join, relative, sep } from "node:path"
 
 // The settings' own package entry (its `exports`, epic `repo-split` P6), not the page server's barrel:  that would load
-// the whole server into every `epic` call, and plain `node` loads this file (`pages.js`), which knows no `$/` alias;
-// `settings.ts` is node built-ins only
+// the whole server into every `epic` call, and plain `node` loads this file (`pages.js`), which finds only an explicit
+// entry or a name with its `.ts`;  `settings.ts` is node built-ins only
 import { componentSets, pageServerSettings } from "spell-kit/server/page/settings"
 
-import { EPIC_UI } from "../server/server.types.ts"
+import { EPIC_UI } from "spell-epic/server/server.types.ts"
 
 /****************
  * ### `ComponentSetFolders`

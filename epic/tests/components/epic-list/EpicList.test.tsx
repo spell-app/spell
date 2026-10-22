@@ -3,13 +3,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "spell-ui/ui-icon"
-import "spell-ui/ui-card"
-import "spell-ui/ui-label"
-import "spell-ui/ui-button"
-import "$/epics/components/epic-list"
+import "spell-ui/components/ui-icon"
+import "spell-ui/components/ui-card"
+import "spell-ui/components/ui-label"
+import "spell-ui/components/ui-button"
+import "spell-epic/components/epic-list"
 
-import { SAGAS_SHOWN_KEY, SORT_KEY } from "$/epics/components/epic-list/EpicList.types"
+import { SAGAS_SHOWN_KEY, SORT_KEY } from "spell-epic/components/epic-list/EpicList.types"
 
 /** Today, as a card's `updated` writes it:  in progress, never paused. */
 const TODAY = new Date().toISOString().slice(0, 10)

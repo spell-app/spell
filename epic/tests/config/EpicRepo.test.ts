@@ -14,12 +14,12 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicProgram } from "$/epics/command/EpicProgram"
-import { PromptGate } from "$/epics/command/PromptGate"
-import { WorktreeGuard } from "$/epics/command/WorktreeGuard"
-import { Worktrees } from "$/epics/command/Worktrees"
-import { EpicRepo } from "$/epics/config/EpicRepo"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
+import { EpicProgram } from "spell-epic/cli/EpicProgram"
+import { PromptGate } from "spell-epic/command/PromptGate"
+import { WorktreeGuard } from "spell-epic/command/WorktreeGuard"
+import { Worktrees } from "spell-epic/command/Worktrees"
+import { EpicRepo } from "spell-epic/config/EpicRepo"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 
 /** The worktree hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/worktree.mjs")

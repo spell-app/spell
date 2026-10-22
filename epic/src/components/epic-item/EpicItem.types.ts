@@ -3,7 +3,7 @@
  * - Data only:  nothing here runs.
  */
 
-import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "$/epics/components/epic-review/EpicReview.types"
+import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "spell-epic/components/epic-review/EpicReview.types"
 
 import type { epicItemVocabulary } from "./EpicItem.en"
 

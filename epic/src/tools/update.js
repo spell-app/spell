@@ -26,9 +26,7 @@ const skipUiBuild = args.includes("--skip-ui-build")
 const check = !args.includes("--no-check")
 const unknown = args.filter((arg) => arg !== "--skip-ui-build" && arg !== "--no-check")
 if (unknown.length) {
-  console.error(
-    `unknown argument(s):  ${unknown.join(" ")}\nusage:  epic pages update [--skip-ui-build] [--no-check]`
-  )
+  console.error(`unknown argument(s):  ${unknown.join(" ")}\nusage:  epic pages update [--skip-ui-build] [--no-check]`)
   process.exit(2)
 }
 

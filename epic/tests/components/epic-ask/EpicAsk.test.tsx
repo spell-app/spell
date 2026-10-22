@@ -3,11 +3,11 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import { AnswerForm, type PageAnswer } from "$/epics/answers"
+import { AnswerForm, type PageAnswer } from "spell-epic/answers"
 
-import "$/epics/components/epic-ask"
-import "$/epics/components/epic-choices"
-import "$/epics/components/epic-question"
+import "spell-epic/components/epic-ask"
+import "spell-epic/components/epic-choices"
+import "spell-epic/components/epic-question"
 
 ////////////////
 // ## Fixtures
@@ -16,7 +16,7 @@ import "$/epics/components/epic-question"
 /** A question of three options, in its section (its key), pick one unless `flags` say otherwise. */
 function question(flags = "", options = OPTIONS) {
   return (
-    `<ui-section id="q1" header="Q1 · Which?"><epic-ask ${flags}><epic-question><p>Which one?</p></epic-question>` +
+    `<ui-section id="q1" label="Q1 · Which?"><epic-ask ${flags}><epic-question><p>Which one?</p></epic-question>` +
     `<epic-choices>${options}</epic-choices></epic-ask></ui-section>`
   )
 }

@@ -1,7 +1,7 @@
 /**
- * `epic pages new <template> <page> [--title "Title"] [--description "One sentence."]`:  start a page from a template.
+ * `epic pages create <template> <page> [--title "Title"] [--description "One sentence."]`:  start a page from a template.
  * - `<template>`:  `durable`, `cheatsheet` or `commands` (or a path under `templates/`);  epic pages come from
- *   `epic new`
+ *   `epic create`
  *   - found by `templateFile()`:  the repo's own templates first (`repoTemplates`), then the engine's, spell-epic's
  *     `templates/` (epic `epic-eject` T11)
  * - `--dry-run`:  print the template and the page it would write, and write nothing
@@ -20,17 +20,17 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { DataFile } from "../data/DataFile.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
 import { CONTENT, GUIDES, PACKAGE, TOOLS, atDepth, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
 const [templateArg, page] = positional
 if (!templateArg || !page?.endsWith(".html")) {
   fail(
-    `usage:  epic pages new durable|cheatsheet|commands <topic>/<topic>.html [--title "Title"] [--description "..."] [--dry-run]`
+    `usage:  epic pages create durable|cheatsheet|commands <topic>/<topic>.html [--title "Title"] [--description "..."] [--dry-run]`
   )
 }
-if (/^templates\/epics\/|^plan$/.test(templateArg)) fail("epic pages:  `epic new <epic>`")
+if (/^templates\/epics\/|^plan$/.test(templateArg)) fail("epic pages:  `epic create <epic>`")
 const template = templateFile(templateArg)
 if (!template) fail(`no template ${templateArg}`)
 const file = /^(guides|pages)\//.test(page) ? join(CONTENT, page) : join(GUIDES, page)

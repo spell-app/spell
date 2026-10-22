@@ -3,17 +3,17 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "$/epics/review"
+import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel
-import { ReviewState } from "$/epics/components/epic-review/ReviewState"
-import { EpicPage } from "$/epics/components/epic-page/EpicPage"
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
+import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
 
 import { epicTestRunVocabulary } from "./EpicTestRun.en"
 import { TestRun } from "./TestRun"
 import { ALL_QUERY, ANSWER_LOOKS, TEST_DONE, TEST_QUERY, type AnswerLook, type TestFields } from "./EpicTestRun.types"
 
 import runCSS from "./EpicTestRun.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicTestRun`

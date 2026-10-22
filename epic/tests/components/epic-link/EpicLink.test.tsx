@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "$/epics/components/epic-link"
+import "spell-epic/components/epic-link"
 
 /** `<epic-link>`'s drawn link (or plain text) in its shadow root. */
 function linkOf(element: Element): HTMLElement {

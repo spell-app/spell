@@ -11,7 +11,7 @@ import {
   SectionIds,
   type EpicAttributeSpec,
   type EpicTag
-} from "$/epics/definitions"
+} from "spell-epic/definitions"
 import { SkeletonText } from "spell-kit/element/SkeletonText"
 
 /** The pack's family folders. */

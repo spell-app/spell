@@ -67,8 +67,8 @@ export class MigrateCommands {
           : this.files.listEpics()
       code = await this.migrateEpics(docs, { step, dryRun, notify: Boolean(flags.notify) })
     } else if (kind === "epic") throw new PlanDocError(`no epic page step "${step}" (migrate --list lists them)`)
-    // a step both registries hold (the data files', the engine routes'):  the epic pages', then the docs tools'
-    const epicOnly = step !== undefined && epicStep && !BOTH_KINDS.includes(step)
+    // a step of the epic pages' registry runs there alone;  any other, the docs tools' too
+    const epicOnly = step !== undefined && epicStep
     if (kind !== "epic" && !(epicFile && kind === undefined) && !(epicOnly && kind === undefined))
       code = Math.max(code, this.migrateOthers(kind, { file, step, dryRun }))
     return code
@@ -107,9 +107,7 @@ export class MigrateCommands {
     { step, dryRun, notify }: { step?: string; dryRun: boolean; notify: boolean }
   ): Promise<number> {
     if (notify && !this.sessionsOf)
-      throw new PlanDocError(
-        "--notify needs the running sessions, which only the `epic` command can see"
-      )
+      throw new PlanDocError("--notify needs the running sessions, which only the `epic` command can see")
     const only = step ? [step] : undefined
     const counts = new Map<string, number>()
     const tell: { epic: string; sessions: string[]; steps: string[] }[] = []
@@ -130,11 +128,7 @@ export class MigrateCommands {
         refused++
         continue
       }
-      const steps = [
-        ...result.ran,
-        ...(result.moves.length && !result.ran.includes(LINKS) ? [LINKS] : []),
-        ...(result.files.some((move) => !move.clash) && !result.ran.includes(DATA_FILES) ? [DATA_FILES] : [])
-      ]
+      const steps = [...result.ran, ...(result.moves.length && !result.ran.includes(LINKS) ? [LINKS] : [])]
       for (const each of steps) counts.set(each, (counts.get(each) ?? 0) + 1)
       if (steps.length) changed++
       if (running && steps.length) tell.push({ epic: name, sessions, steps })
@@ -148,7 +142,7 @@ export class MigrateCommands {
     return refused ? 1 : 0
   }
 
-  /** One page's report line:  `seo:  up to date`, `seo:  updates-as-epic-update, links-agree` ... */
+  /** One page's report line:  `seo:  up to date`, `seo:  links-agree, engine-links` ... */
   static pageLine(name: string, steps: string[], { dryRun, running }: { dryRun: boolean; running: boolean }): string {
     if (!steps.length) return `${name}:  up to date`
     if (running) return `${name}:  its session is running:  told to run ${steps.join(", ")} itself`
@@ -242,16 +236,6 @@ export type SessionFinder = (epic: string) => Promise<{ name: string; sessionId:
 
 /** The step whose inbox-only fixes count as a change:  comments moved. */
 const LINKS = "links-agree"
-
-/** The step that changes only files beside the page, never the page:  it counts when it has files to rename. */
-const DATA_FILES = "json5-data-files"
-
-/**
- * The steps the epic pages' registry (`Migrations`) AND the docs tools' (`migrate.js` `STEPS`) both hold, by one name.
- * - `--step <name>` runs both
- * - the data files' (`json5-data-files`), and the engine routes' (`engine-asset-routes`, epic `epic-eject` P7)
- */
-const BOTH_KINDS: readonly string[] = [DATA_FILES, "engine-asset-routes"]
 
 /** An epic page's path:  `epics/<name>/<name>.plan.html` (or an older `<name>.html`);  `[1]` its name. */
 const PLAN_DOC = /(?:^|[\\/])epics[\\/]([^\\/]+)[\\/]\1(?:\.plan)?\.html$/

@@ -20,7 +20,7 @@
         >
         <p class="lede">A starting point for every kind of docs page, and how to write one.</p>
         <!-- index:start -->
-        <ui-section id="templates" header="Templates" sticky collapsible dividing>
+        <ui-section id="templates" label="Templates" sticky collapsible dividing>
           <ui-icon slot="icon" name="copy"></ui-icon>
           <ui-cards class="spell-grid" stackable>
             <ui-card
@@ -123,12 +123,12 @@
           </ui-cards>
         </ui-section>
         <!-- index:end -->
-        <ui-section id="writing-docs" header="Writing docs" sticky collapsible dividing collapsed>
+        <ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing collapsed>
           <ui-icon slot="icon" name="pen to square"></ui-icon>
           <ul>
             <li>
               Start from a template:
-              <code>epic pages new durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.
+              <code>epic pages create durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.
             </li>
             <li>
               An epic page: run <code>/epic &lt;name&gt;</code> in Claude Code. Never copy the plan template by hand.
@@ -142,7 +142,7 @@
               >.
             </li>
             <li>
-              <code>pages new</code> lists the page on its area's page; after renaming one or changing its title, run
+              <code>pages create</code> lists the page on its area's page; after renaming one or changing its title, run
               <code>epic pages index</code>.
             </li>
           </ul>

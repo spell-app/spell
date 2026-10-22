@@ -3,12 +3,12 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-kit/element"
 
-import { PlanDates } from "$/epics/dates"
+import { PlanDates } from "spell-epic/dates"
 
 import { epicVersionVocabulary } from "./EpicVersion.en"
 
 import originalCSS from "./EpicOriginal.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicVersion`

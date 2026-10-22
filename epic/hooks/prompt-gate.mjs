@@ -22,8 +22,8 @@ try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   if (input.cwd) process.env.EPIC_CHECKOUT = input.cwd
   // loaded in here, so a gate that won't load never fails the prompt
-  const { PromptGate } = await import("../src/command/PromptGate.ts")
-  const { Window } = await import("../src/window.mjs")
+  const { PromptGate } = await import("spell-epic/command/PromptGate.ts")
+  const { Window } = await import("spell-epic/window.mjs")
   const output = PromptGate.gate(input, Window.current())
   if (output) console.log(JSON.stringify(output))
 } catch (error) {

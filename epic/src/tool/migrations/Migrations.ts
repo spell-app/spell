@@ -1,39 +1,29 @@
-import { EngineAssetRoutes } from "./EngineAssetRoutes"
 import { EngineLinks } from "./EngineLinks"
-import { Json5DataFiles } from "./Json5DataFiles"
 import { LinksAgree } from "./LinksAgree"
 import type { Migration, MigrationContext } from "./migrations.types"
-import { ReaderIsYou } from "./ReaderIsYou"
-import { StablePhaseIds } from "./StablePhaseIds"
-import { UnstackableTables } from "./UnstackableTables"
-import { UpdatesAsEpicUpdate } from "./UpdatesAsEpicUpdate"
 
 /****************
  * ### `Migrations`
  * Every MIGRATION of an epic page's markup, in the order they run (oldest first):
  * named, dated, idempotent steps that bring an older page up to today's (`Migration`).
  * - the epic page's share of the steps by page kind (J44 of epic `epic-workflow`);
- *   the docs package holds the other kinds' (`src/tools/migrate.js`)
+ *   the docs tools hold the other kinds' (`src/tools/migrate.js`)
  * - `epic migrate` runs them on every epic page on command (`MigrateCommands`), under each page's lock
  * - every write runs the cheap ones too (`everyEdit`), before the command's change (`PlanDocFiles.edit()`):
  *   an older doc comes up to date the first time anything edits it, and a migrated one costs a read
  * - A new step:  a class implementing `Migration` in this folder, its instance added to `all`, LAST,
  *   in the same commit as the markup change it follows (epics' `AGENTS.md`, "Rules").
  *   It must change nothing on a doc it has migrated already, and keep every word.
+ * - The older steps went once every page had run them (epic `repo-split` Q45):  `updates-as-epic-update`,
+ *   `owen-types-to-you-type`, `stable-phase-ids`, `json5-data-files`, `engine-asset-routes`,
+ *   `unstackable-tables`.  Their code is in git history, for a page restored from an old backup.
+ *   - `links-agree` stays:  `rename` and `add-phase --before` run it too, so links follow what moved
+ *   - `engine-links` stays while epic pages still need it (`epic migrate --dry-run`)
  * - STATIC:  the registry.
  ****************/
 export class Migrations {
   /** Every step, in the order they run:  oldest first. */
-  static readonly all: readonly Migration[] = [
-    new UpdatesAsEpicUpdate(),
-    new ReaderIsYou(),
-    new LinksAgree(),
-    new StablePhaseIds(),
-    new Json5DataFiles(),
-    new EngineAssetRoutes(),
-    new EngineLinks(),
-    new UnstackableTables()
-  ]
+  static readonly all: readonly Migration[] = [new LinksAgree(), new EngineLinks()]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */
   static get everyEdit(): readonly Migration[] {

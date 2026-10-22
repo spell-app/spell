@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { WorktreeGuard } from "$/epics/command/WorktreeGuard"
+import { WorktreeGuard } from "spell-epic/command/WorktreeGuard"
 import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
 
 /** The hook, as the plugin runs it. */

@@ -18,7 +18,7 @@
         <main class="spell-doc-main">
           <!--
             TEMPLATE:  a CHOICE PAGE, the tool's own (tracked with each branch, as its elements are).  NEVER
-            copy by hand:  `epic choices new <slug> --rows <rows.json>` (`packages/epics/tools/choices.js`;  how-to:
+            copy by hand:  `epic choices create <slug> --rows <rows.json>` (spell-epic's `src/tools/choices.js`;  how-to:
             `guides/syntax-choices.html`).
             - Written in the epics pack's elements (epic `epic-workflow` P12):  `new` writes one `<ui-section>` per
               section of the rows where the example section is, each holding an `<epic-choice-rows>` of
@@ -49,7 +49,7 @@
             <epic-field label="This decides">what changes for you once you press Do it.</epic-field>
           </ui-message>
 
-          <ui-section id="how" header="How to answer" sticky collapsible dividing collapsed>
+          <ui-section id="how" label="How to answer" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="circle question"></ui-icon>
             <ul>
               <li>
@@ -71,7 +71,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="q1" header="Q1 · Short question" sticky collapsible dividing collapsed>
+          <ui-section id="q1" label="Q1 · Short question" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="list check"></ui-icon>
             <p class="spell-choices-rule">Which question this answers, and the recommended rule.</p>
             <epic-choice-rows>

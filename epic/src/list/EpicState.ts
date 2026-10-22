@@ -9,9 +9,9 @@
  * - `future` -- written down with `/epic future`, not planned yet
  *
  * Who draws it:
- * - the Epics page's cards, `<epic-card>` (`$/epics/components`, epic `epic-engine` P3), in the browser;  and their
+ * - the Epics page's cards, `<epic-card>` (`spell-epic/components`, epic `epic-engine` P3), in the browser;  and their
  *   groups, which `docs index` (`src/tools/index.js`, plain `node`:  it imports this FILE by path) counts on the home
- * - `<epic-page>`'s header mark (`$/epics/components`), in the browser
+ * - `<epic-page>`'s header mark (`spell-epic/components`), in the browser
  * - the session titles' icons (`epic session icons`, `packages/cli`)
  *
  * Its position:  browser code with NO imports at all, so plain `node` loads it (types stripped),

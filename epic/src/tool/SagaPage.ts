@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { SAGA_PREFIX } from "$/epics/review/review.types"
+import { SAGA_PREFIX } from "spell-epic/review/review.types"
 
 import { PlanDocError } from "./planDoc.types"
 
@@ -22,7 +22,7 @@ import { Sagas } from "./Sagas"
  *   (`Sagas`), its Overview's "Done so far" and "Ideas not done yet" to fill, its Epics drawn from the page server
  *   (`<epic-cards>`), then Questions, Todos and Log
  * - ONE file, not split:  a saga page is small, and its Overview then reads from disk too
- * - Node only (`node:fs`):  NOT in the `$/epics` barrel, imported by path.
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class SagaPage {
   /** the checkout's epic pages:  its root, linker and writer */

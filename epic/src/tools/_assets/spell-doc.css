@@ -68,7 +68,7 @@
    * - red needs you;  yellow open, still undecided (DARK ink on it:  `--ui-yellow-on`);  blue Claude is working on
    *   it;  green decided or done lately;  grey older;  orange (DARK ink) Claude answered with options, your turn to
    *   pick (an epic page's `replied` items, Owen 2026-10-09)
-   * - the same values as `<epic-page>`'s `--epic-state-*` (`$/epics`, `EpicPage.css`):  change both
+   * - the same values as `<epic-page>`'s `--epic-state-*` (`spell-epic`, `EpicPage.css`):  change both
    * - red keeps its light-mode hue in dark mode:  dark's lighter red reads as orange
    */
   --spell-state-attention: light-dark(var(--ui-red, #db2828), var(--ui-red-on-light, #db2828));

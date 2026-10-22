@@ -20,7 +20,7 @@ import {
   stamped,
   tabShows,
   windowsFolder
-} from "../../vscode/src/docUrls.ts"
+} from "spell-epic/vscode/src/docUrls.ts"
 
 const top = mkdtempSync(join(tmpdir(), "spell-epic-vscode-"))
 after(() => rmSync(top, { recursive: true, force: true }))

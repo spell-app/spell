@@ -3,8 +3,8 @@
  * the four answers' looks, the run's events and address, its JSX tag.
  * - Data and types only:  nothing here runs.
  */
-import type { TestResult } from "$/epics/review"
-import type { UIJSXAttributes } from "$/epics/components/epic-page/EpicPage.types"
+import type { TestResult } from "spell-epic/review"
+import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 ////////////////
 // ## The answers

@@ -3,16 +3,16 @@
  * the local half of Spell's claude.ai design system.
  * Claude's `/design` skill (`.claude/skills/design/`) does the claude.ai half with its Artifact tool.
  * - `pull <board.dc.html> <page.html> [--title "..."] [--from <design link>]`:
- *   a Claude Design artboard (read from a Design with the Artifact tool) as a spell-app-dev page
+ *   a Claude Design artboard (read from a Design with the Artifact tool) as a page in the content folder
  *   - its `<ui-*>` markup kept, Claude Design's runtime dropped
  *   - the one-file bundle and the site header added for the page's depth
  *   - prints what it couldn't carry
  * - `changed [--json]`:  which files of the built system differ from what was last pushed, and which were removed
- *   - the built system, from `spell design build` + `yarn design:bundle`:
- *     `packages/ui/build/design-system/project/`
+ *   - the built system, from `spell design build` + spell-brand's `yarn design:bundle`:
+ *     Spell UI's `build/design-system/project/` (`BUILT`)
  * - `pushed [--url <system link>]`:  record the built files as pushed (after the skill's publish)
  * - `state [--json]`:  the record:  the system's link, when it was pushed, how many files
- * - The record is SHARED content, `brand/design-system.json` in the content folder (`../spell-app.epics`),
+ * - The record is SHARED content, `brand/design-system.json` in the content folder (`spell.epics`),
  *   so every checkout knows what claude.ai holds:  `{ url, pushedAt, by, files: { "project/<path>": "<sha256>" } }`.
  */
 import { createHash } from "node:crypto"
@@ -22,11 +22,16 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { ENGINE_ROUTES } from "../server/server.types.ts"
+import { ENGINE_ROUTES } from "spell-epic/server/server.types.ts"
+import { packageDir } from "./packageDir.ts"
 import { CONTENT, ROOT, pageFile, pagePath } from "./pages.js"
 
-/** The built design system:  `spell design build` writes it, `yarn design:bundle` adds the bundle. */
-export const BUILT = join(ROOT, "packages/ui/build/design-system")
+/**
+ * The built design system:  `spell design build` writes it, spell-brand's `yarn design:bundle` adds the bundle.
+ * - Spell UI's `build/design-system/` (git-ignored), where the caller's checkout's install finds `spell-ui`
+ *   (epic `repo-split` I27:  spell-app's old `packages/ui/` before)
+ */
+export const BUILT = join(packageDir("spell-ui", ROOT) ?? join(ROOT, "spell-ui (not installed)"), "build/design-system")
 
 /**
  * Attributes Claude Design's runtime reads as event handlers:  `onClick="{{handler}}"`.
@@ -202,7 +207,7 @@ function escapeText(text) {
 // ## Push record
 ////////////////
 
-/** The shared content repo (`../spell-app.epics`):  the repo's content folder (`pages.js` `CONTENT`). */
+/** The shared content repo (`spell.epics`):  the repo's content folder (`pages.js` `CONTENT`). */
 export function sharedDir() {
   return CONTENT
 }

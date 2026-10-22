@@ -4,7 +4,7 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Requests } from "$/epics/command/Requests"
+import { Requests } from "spell-epic/command/Requests"
 
 /** A scratch repo on `main`, with branch `tooling` one commit ahead, and a worktree of it. */
 const REPO = realpathSync(mkdtempSync(join(tmpdir(), "merge-repo-")))

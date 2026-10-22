@@ -1,7 +1,7 @@
 import { resolve } from "node:path"
 
-import { RepoList } from "$/epics/server/RepoList"
-import { DEFAULT_EPIC_PORT, PID_FILE } from "$/epics/server/server.types"
+import { RepoList } from "spell-epic/server/RepoList"
+import { DEFAULT_EPIC_PORT, PID_FILE } from "spell-epic/server/server.types"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
@@ -83,7 +83,7 @@ export class Hub {
     if (!new RepoList({ home: this.home }).repos().length)
       throw new EpicCommandError("no repos to serve yet:  epic repo add <checkout>")
     const [{ EpicServer }, { SRV }] = await Promise.all([
-      import("$/epics/server/EpicServer"),
+      import("spell-epic/server/EpicServer"),
       import("spell-kit/server")
     ])
     try {
@@ -97,7 +97,7 @@ export class Hub {
   /** Serve in the foreground until `Ctrl-C`;  resolves to 0 once stopped. */
   private async serve(port: number): Promise<number> {
     const [{ EpicServer }, { SRV }] = await Promise.all([
-      import("$/epics/server/EpicServer"),
+      import("spell-epic/server/EpicServer"),
       import("spell-kit/server")
     ])
     const server = await new EpicServer({ home: this.home }).start({ port })

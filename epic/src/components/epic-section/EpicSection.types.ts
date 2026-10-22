@@ -23,7 +23,7 @@ export const FOLD_OPEN_ATTRIBUTE = {
     "(or into it) and find-in-page set it;  set it from code to open it."
 } as const
 
-/** Events of every folding element:  `ui-open` / `ui-close` (cancelable), and its `source` body's. */
+/** Events of every folding element:  `ui-open` / `ui-close` (cancelable), and its `source` body's (`LoadableBody`'s). */
 export const FOLD_EVENTS = [
   {
     name: "ui-open",
@@ -38,7 +38,12 @@ export const FOLD_EVENTS = [
     description: "About to fold:  its title was clicked.  Cancel to stay open."
   },
   {
-    name: "ui-load",
+    name: "ui-loading",
+    detail: "{ source: string }",
+    description: "The `source` part is on its way:  the first unfold, or a live reload (as `<ui-section source>`'s)."
+  },
+  {
+    name: "ui-loaded",
     detail: "{ source: string, content: string }",
     description: "The `source` part arrived and is in its children (as `<ui-section source>`'s)."
   },
@@ -195,7 +200,7 @@ export const SECTION_LOOKS = {
 export type SectionLook = (typeof SECTION_LOOKS)[keyof typeof SECTION_LOOKS]
 
 /**
- * A report's kind (an overnight `/bedtime` report, P14):  titled its own, unnumbered.  `$/epics/definitions`' `REPORT`,
+ * A report's kind (an overnight `/bedtime` report, P14):  titled its own, unnumbered.  `spell-epic/definitions`' `REPORT`,
  * restated:  the components never value-import the definitions.
  */
 export const REPORT = "report"

@@ -7,7 +7,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { RepoList, RepoListError } from "$/epics/server/RepoList"
+import { RepoList, RepoListError } from "spell-epic/server/RepoList"
 
 const dirs: string[] = []
 afterEach(() => {

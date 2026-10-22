@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 import JSON5 from "json5"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
 
 /** spell-epic's own config, as committed (comments and all). */

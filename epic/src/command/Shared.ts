@@ -16,24 +16,20 @@ import {
   writeFileSync
 } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
 
 import {
   EXIT,
   EpicCommandError,
   parseVerbArgs,
-  type FileRewrite,
   type LinkReport,
   type MigrateReport,
-  type RenameReport,
   type SharedConfig,
   type SharedStatus
 } from "./command.types"
 import { Git } from "./Git"
 import { SharedMigration } from "./SharedMigration"
-import { SharedRename } from "./SharedRename"
 
 /****************
  * ### `Shared`
@@ -56,39 +52,30 @@ import { SharedRename } from "./SharedRename"
  *     - and, worktrees beside the repo, ONE link in their folder to the content folder (`linkContentBeside()`)
  *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
  *     - one commit per epic / guide / folder (`commit()`)
- *     - first the reorg's repair, for pages older checkouts still write the old way (`relocate.js reorg`)
  *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the shared content
  *     (`SharedMigration`);  stops, writing nothing, on a conflict
- *   - `rename <new> [--dry-run] [--json]`:  move the content folder to `<new>` (beside it, for a bare name)
- *     (`SharedRename`;  epic `epic-eject` P8:  `spell-app-dev` to `spell-app.epics`)
- *     - leaves a link at the old name
- *     - relinks every checkout, and writes the new place into `.epic/config.json5`
- *   - `repair [--dry-run] [--json]`:  the docs tools' own logic (`src/tools/relocate.js`), then `link`
+ *   - NOT `rename` and `repair` (epic `repo-split` Q45):  the content folder's one rename (epic `epic-eject` P8) and
+ *     the old monorepo's page moves (`relocate.js`) are done
  * - `ui`:  Spell UI's hand-written docs pages (claude-design P6);
  *   their bundle and data stay in each branch's `packages/ui/site/`
- * - before 2026-10-05 (epic `claude-design` P4) the docs were ONE link, `packages/docs/content`:
- *   the shared repo keeps old-path links there for checkouts on older code
- *   (`src/tools/relocate.js` `reorgShared()`)
  * - the manifest:  the root `package.json`'s `"shared"` (`configOf()`)
  * - where the shared repo and the worktrees are:
  *   the repo's `.epic/config.json5` (`EpicConfig`:  `contentFolder`, `worktreesFolder`)
  * - only FOLDERS are linked:  Claude's Edit refuses to write through a link to a file
- * - the relocate tool is THIS code's copy (`RELOCATE_TOOL`), run on the caller's checkout (`--root`):
- *   one copy of the epic code, whichever checkout calls it
  * - NOTE:  `SPELL_SHARED_DIR` points every verb at another shared repo (a scratch one, in tests)
  ****************/
 export class Shared {
   /** the manifest:  STATIC for the object's life */
   readonly config: SharedConfig
 
-  /** the checkout the verbs act on (`link`, `init --import`, `repair`):  the caller's */
+  /** the checkout the verbs act on (`link`, `init --import`):  the caller's */
   readonly checkout: string
 
   /**
-   * - `checkout`:  default the nearest checkout from the current folder (one with the docs tools)
+   * - `checkout`:  default the nearest checkout from the current folder of a repo set up for epics
    * - `config`:  default `checkout`'s manifest (`configOf()`)
    */
-  constructor({ checkout = Git.nearestCheckout(CHECKOUT_MARKER), config }: SharedProps = {}) {
+  constructor({ checkout = Git.nearestCheckout(), config }: SharedProps = {}) {
     this.checkout = checkout
     this.config = config ?? Shared.configOf(checkout)
   }
@@ -120,18 +107,6 @@ export class Shared {
         return reports.some((report) => report.action === "diverged") ? EXIT.ERRORS : EXIT.OK
       }
       case "commit": {
-        // first the reorg's repair (claude-design P4):
-        // anything older code wrote at `packages/docs/content/...` since goes to its root folder,
-        // and old-style links are fixed.
-        // Until every checkout has merged the reorg:  claude-design T1 removes this with the old-path links
-        if (existsSync(config.dir)) {
-          const run = spawnSync(
-            process.execPath,
-            [RELOCATE_TOOL, "reorg", "--shared", config.dir, "--root", Git.CODE_ROOT],
-            { encoding: "utf8" }
-          )
-          if (!flags.quiet && run.stdout) out(run.stdout.trimEnd())
-        }
         const session = typeof flags.session === "string" ? flags.session : undefined
         const shas = this.commit({ session, checkout })
         if (!flags.quiet) out(shas.length ? `committed ${shas.join(", ")}` : "nothing to commit")
@@ -149,27 +124,8 @@ export class Shared {
         else for (const line of migrateLines(report, dryRun)) out(line)
         return report.conflicts.length ? EXIT.ERRORS : EXIT.OK
       }
-      case "rename": {
-        if (!name) throw new EpicCommandError("rename:  to what?  a folder name, like spell-app.epics")
-        const dryRun = Boolean(flags.dryRun)
-        const report = new SharedRename({ config, checkouts: this.checkouts() }).run(name, { dryRun })
-        if (flags.json) out(JSON.stringify(report, null, 2))
-        else for (const line of renameLines(report)) out(line)
-        return EXIT.OK
-      }
-      case "repair": {
-        // the docs tools' own logic:  run, never imported (`relocate.js` is a plain node script)
-        const shown = [...(flags.dryRun ? ["--dry-run"] : []), ...(flags.json ? ["--json"] : [])]
-        const run = spawnSync(
-          process.execPath,
-          [RELOCATE_TOOL, "repair", "--root", checkout, "--shared", config.dir, ...shown],
-          { stdio: "inherit" }
-        )
-        if (!flags.dryRun && !flags.json) this.linkAll([checkout])
-        return run.status ?? EXIT.ERRORS
-      }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit, migrate, rename or repair`)
+        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit or migrate`)
     }
   }
 
@@ -329,7 +285,7 @@ export class Shared {
    *   - no `engineFolder`, or no such folder
    *   - a checkout whose git doesn't ignore `spell-epic`:  a branch from before spell-app's switch to spell-epic,
    *     which runs its own copy of the engine, and would show the link as a new file
-   * - Why a link:  spell-app's alias table (`$/epics`) and its page server's route modules reach the engine through
+   * - Why a link:  spell-app's alias table (`spell-epic`) and its page server's route modules reach the engine through
    *   it, from the main checkout and every worktree alike
    * - SIDE EFFECT:  writes the link (a relative target)
    */
@@ -523,12 +479,6 @@ const SWITCHES = ["json", "import", "all", "quiet", "dryRun"]
 /** The spell-epic checkout's link at a checkout's root (`linkEngine()`):  `engineFolder` in `.epic/config.json5`. */
 export const ENGINE_LINK = "spell-epic"
 
-/** What marks a checkout the verbs act on (`Git.nearestCheckout()`):  the docs tools' relocate script. */
-const CHECKOUT_MARKER = "packages/epics/tools/relocate.js"
-
-/** The docs tools' `relocate.js`, beside THIS code:  the reorg's repair (`commit`) and `repair`. */
-const RELOCATE_TOOL = fileURLToPath(new URL("../tools/relocate.js", import.meta.url))
-
 /** Never compared or copied:  OS litter. */
 const LITTER = new Set([".DS_Store"])
 
@@ -593,27 +543,6 @@ function migrateLines(report: MigrateReport, dryRun = false): string[] {
         ? `dry run:  ${changed.length} file(s) would go into the shared repo`
         : "nothing done"
   return [...changed.map((each) => `${each.action.padEnd(8)} ${each.file}`), verdict]
-}
-
-/** `rename`'s lines:  the move, each link relinked, the config keys, each file and line rewritten, what's by hand. */
-function renameLines(report: RenameReport): string[] {
-  const would = report.dryRun ? "would " : ""
-  const changes = ({ lines }: FileRewrite) =>
-    lines.flatMap(({ line, before, after }) => [`  ${String(line).padStart(4)} - ${before}`, `       + ${after}`])
-  return [
-    `${would}move ${report.from} -> ${report.to}, and leave a link at ${basename(report.from)}`,
-    ...report.relinked.map(({ checkout, path }) => `${would}relink ${join(checkout, path)}`),
-    report.config.keys.length
-      ? `${would}write ${report.config.keys.join(", ")} into ${report.config.file} (tracked:  commit it)`
-      : `${report.config.file}:  already says so`,
-    ...report.rewrites.flatMap((each) => [`${would}rewrite ${each.file}:`, ...changes(each)]),
-    ...(report.rewrites.length ? ["(the main checkout's tracked files among them:  commit them with the config)"] : []),
-    ...report.byHand.flatMap((each) => [
-      `edit by hand, ${each.file} (Claude Code's own settings:  never written here):`,
-      ...changes(each)
-    ]),
-    ...(report.dryRun ? ["dry run:  nothing changed"] : ["next:  epic window init (the window files' folders)"])
-  ]
 }
 
 /** `status`'s table:  the shared repo, then a line per checkout with each link's state. */

@@ -9,10 +9,10 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicCommandError } from "$/epics/command/command.types"
-import { Hub } from "$/epics/command/Hub"
-import { Repos } from "$/epics/command/Repos"
-import { RepoList } from "$/epics/server/RepoList"
+import { EpicCommandError } from "spell-epic/command/command.types"
+import { Hub } from "spell-epic/command/Hub"
+import { Repos } from "spell-epic/command/Repos"
+import { RepoList } from "spell-epic/server/RepoList"
 
 const top = realpathSync(mkdtempSync(join(tmpdir(), "epic-repo-cmd-")))
 afterAll(() => rmSync(top, { recursive: true, force: true }))

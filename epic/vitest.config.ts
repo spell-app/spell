@@ -28,8 +28,8 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
 /** The tests live in tests/, at the same paths as the code in src/. */
 const TESTS = resolve(import.meta.dirname, "tests")
 
-/** Spell UI's test setup (`spell-ui/test/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
-const UI_SETUP = fileURLToPath(import.meta.resolve("spell-ui/test/setup.ts"))
+/** Spell UI's test setup (`spell-ui/test-helpers/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
+const UI_SETUP = fileURLToPath(import.meta.resolve("spell-ui/test-helpers/setup.ts"))
 
 export function epicsProjects({
   prefix = "",
@@ -37,7 +37,6 @@ export function epicsProjects({
 }: { prefix?: string; root?: string } = {}): TestProjectConfiguration[] {
   return [
     {
-      resolve: { tsconfigPaths: true },
       ...(root && { root }),
       test: {
         name: `${prefix}node`,

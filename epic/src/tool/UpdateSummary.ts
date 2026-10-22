@@ -8,8 +8,7 @@ import { PlanMarkup } from "./PlanMarkup"
  * - a lead saying who or when (`From Owen's comment CM2 (2026-10-11):`, `Owen, 2026-10-11:`) dropped:  the text says
  *   that, and the update shows its date (Owen, 2026-10-11:  "Don't repeat e.g. From Owen's comment ...")
  * - longer than `MAX_WORDS`:  its first words, with `…` (Owen:  titles of 5-10 words;  pass `--summary` for a good one)
- * - used by `updated` without `--summary` (`PlanDoc.addPhaseUpdate()`) and by the migration of older docs
- *   (`UpdatesAsEpicUpdate`)
+ * - used by `updated` without `--summary` (`PlanDoc.addPhaseUpdate()`)
  * - STATIC, pure:  reads text, or a node's text content
  ****************/
 export class UpdateSummary {

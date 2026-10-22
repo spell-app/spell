@@ -40,19 +40,21 @@ export class Git {
 
   /**
    * The checkout to work on:  the nearest folder from `from` (default the current one) up that either
-   * - holds `marker`, a path relative to a checkout's root, e.g. `src/tools/pages.js`
-   * - or is a checkout of a repo set up for epics (its main checkout has `.epic/config.json5`:  `isEpicCheckout()`)
+   * - is a checkout of a repo set up for epics (its main checkout has `.epic/config.json5`:  `isEpicCheckout()`)
+   * - or holds `marker`, when given:  a path relative to a checkout's root, e.g. `.git` for any checkout
    *
    * Else the one this code is in.
    * - Why:  the `epic` on the `PATH` is the MAIN checkout's,
    *   but in a worktree the files to read or edit are the worktree's.
    *   The DATA is the caller's;  the CODE is always this copy's (`CODE_ROOT`).
-   * - the marker:  a repo that carries the epic tools itself (spell-app, before epic `epic-eject`'s switch-over)
-   * - the config file:  any other repo, which has none of the tools (epic `epic-eject` P9, `epic init`)
+   * - The epic verbs give no marker:  the config file is what marks a repo with epics (epic `epic-eject` P9,
+   *   `epic init`).
+   *   - Before epic `repo-split` I45 they named the docs tools' old place in spell-app
+   *     (`packages/epics/tools/plan-doc.js`), which no checkout has had since epic `epic-eject`.
    */
-  static nearestCheckout(marker: string, from = process.cwd()): string {
+  static nearestCheckout({ marker, from = process.cwd() }: { marker?: string; from?: string } = {}): string {
     for (let dir = resolve(from); ; dir = dirname(dir)) {
-      if (existsSync(join(dir, marker)) || Git.isEpicCheckout(dir)) return dir
+      if ((marker && existsSync(join(dir, marker))) || Git.isEpicCheckout(dir)) return dir
       if (dirname(dir) === dir) return Git.CODE_ROOT
     }
   }

@@ -167,7 +167,7 @@
       "ui-section",
       {
         id: `file-${slug(module)}`,
-        header: prefix + module,
+        label: prefix + module,
         badge: notIn ? `${statements.length} · ${notIn} not in Python` : `${statements.length}`,
         sticky: "",
         collapsible: "",
@@ -179,12 +179,7 @@
       el(
         "ui-table",
         { celled: "", compact: "", striped: "", unstackable: "" },
-        el(
-          "table",
-          {},
-          el("thead", {}, el("tr", {}, ...COLUMNS.map((label) => el("th", {}, label)))),
-          ...bodies
-        )
+        el("table", {}, el("thead", {}, el("tr", {}, ...COLUMNS.map((label) => el("th", {}, label)))), ...bodies)
       )
     )
   }
@@ -424,9 +419,9 @@
       .replace(/^-|-$/g, "")
   }
 
-  /** The leading number of `section`'s header (`3` for "3. The core, file by file"), or "". */
+  /** The leading number of `section`'s label (`3` for "3. The core, file by file"), or "". */
   function sectionNumber(section) {
-    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("header") ?? "")?.[1] ?? ""
+    return /^\s*(\d+(?:\.\d+)*)\.?\s/.exec(section?.getAttribute("label") ?? "")?.[1] ?? ""
   }
 
   /** This page's path from the checkout's root (`guides/...`), for the notice's command. */

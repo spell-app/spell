@@ -3,15 +3,15 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell-ui/core"
 
-import { PlanDates } from "$/epics/dates"
-import { readEpicDate } from "$/epics/list/EpicCards"
-import { epicStateFor, type EpicState } from "$/epics/list/EpicState"
-import { ServerLink } from "$/epics/review"
+import { PlanDates } from "spell-epic/dates"
+import { readEpicDate } from "spell-epic/list/EpicCards"
+import { epicStateFor, type EpicState } from "spell-epic/list/EpicState"
+import { ServerLink } from "spell-epic/review"
 
 import { epicCardVocabulary } from "./EpicCard.en"
 import { FAVORITE_API, cardFactsOf, shortDay, type FavoriteDetail } from "./EpicList.types"
 
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 import cardCSS from "./EpicCard.css?inline"
 
 /****************
@@ -19,7 +19,7 @@ import cardCSS from "./EpicCard.css?inline"
  * One epic's card on the Epics page (epic `epic-engine` P3), drawn from its attributes:
  * - a Spell UI card (`<ui-card>`):  its state's mark, then its title (the link it holds), its description, its
  *   saga's label (the saga's purpose its tooltip) and its meta line
- * - its STATE by the ONE rule every list and page draws it by (`$/epics/list/EpicState`), as of now:
+ * - its STATE by the ONE rule every list and page draws it by (`spell-epic/list/EpicState`), as of now:
  *   in progress (`3/6`, blue), errors, paused, future, done;  why, the mark's tooltip
  * - the STAR at its top right (Owen, 2026-10-10:  "make it yellow"):  a click stars or unstars it at once
  *   (`favorite`, which its list groups by), then on the page server (`POST /api/epics/favorite`);

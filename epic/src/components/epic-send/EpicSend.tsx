@@ -3,12 +3,12 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { AnswerForm, type ListenLine, type SendFill } from "$/epics/answers"
+import { AnswerForm, type ListenLine, type SendFill } from "spell-epic/answers"
 
 import { epicSendVocabulary } from "./EpicSend.en"
 
 import sendCSS from "./EpicSend.css?inline"
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicSend`

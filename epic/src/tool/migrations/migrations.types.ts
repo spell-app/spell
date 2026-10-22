@@ -2,8 +2,8 @@
  * Types the epic page MIGRATIONS share (`Migrations`, each step, `MigrateCommands`).
  * - Data only:  nothing here runs.
  */
-import type { AS } from "spell-kit/assembler"
-import type { DataFileMove } from "$/epics/data/DataFile"
+import type { SRV } from "spell-kit/server"
+import type { DataFileMove } from "spell-epic/data/DataFile"
 
 /**
  * Every KIND of page a migration step can be for (epic `epic-workflow`, J44), by the names P14 proposes.
@@ -73,7 +73,7 @@ export type MigrationContext = {
    * under (`RepoList.linkRootOf()`), told its served folders;  for a step about where the page's links lead
    * (`engine-links`).  Steps read it, never link with it.
    */
-  linker?: AS.Linker
+  linker?: SRV.Linker
   /**
    * The page's review inbox as it stands (its marks and comments:  `ReviewInbox`), when the runner read it
    * (`migrate`);  steps READ it, never write it:  they say what to change in `moves`.

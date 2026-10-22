@@ -2,13 +2,13 @@ import { existsSync, readdirSync, readFileSync, watch, type FSWatcher } from "no
 import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
-import { EpicConfig } from "$/epics/config/EpicConfig"
-import { RealPath } from "$/epics/config/RealPath"
-import { SessionFolders } from "$/epics/config/SessionFolders"
-import { DataFile } from "$/epics/data/DataFile"
+import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { RealPath } from "spell-epic/config/RealPath"
+import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { DataFile } from "spell-epic/data/DataFile"
 import type { SRV } from "spell-kit/server"
 
-import { planDocIn } from "../tools/pages.js"
+import { planDocIn } from "spell-epic/tools/pages.js"
 import {
   EPIC_CARDS_END,
   EPIC_CARDS_START,

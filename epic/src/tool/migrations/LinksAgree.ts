@@ -1,8 +1,8 @@
-import { PhaseIds } from "$/epics/phases"
+import { PhaseIds } from "spell-epic/phases"
+import { PlanAnchors } from "spell-epic/tool/PlanAnchors"
+import { PlanItem } from "spell-epic/tool/PlanItem"
+import { PlanMarkup } from "spell-epic/tool/PlanMarkup"
 
-import { PlanAnchors } from "../PlanAnchors"
-import { PlanItem } from "../PlanItem"
-import { PlanMarkup } from "../PlanMarkup"
 import type { Migration, MigrationContext } from "./migrations.types"
 
 /****************
@@ -24,7 +24,8 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *     runner writes into the inbox (`context.moves`)
  *   - an anchor whose block is gone:  REPORTED
  * - the inbox's MARKS (and drafts, urgency ...) on an id that's gone:  REPORTED
- * - stable phase ids (P15) come with their own step, `stable-phase-ids` (`StablePhaseIds`), which runs before this
+ * - stable phase ids (P15) came with their own step, `stable-phase-ids`, which every page has run (gone since epic
+ *   `repo-split` Q45)
  * - IDEMPOTENT:  once everything agrees, it changes nothing (false), though what it only reports stays reported
  * - Runs on command (`migrate`), and after a rename or an insert (`rename`, `add-phase --before`), never on every
  *   edit (`everyEdit` false):  its report would be noise there

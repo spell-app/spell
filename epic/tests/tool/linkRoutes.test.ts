@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { PageServer } from "spell-kit/server/page"
 import { ask } from "spell-kit/server/test/serve"
 
-import linkRoutes from "$/epics/tool/linkRoutes"
+import linkRoutes from "spell-epic/tool/linkRoutes"
 
 const root = mkdtempSync(join(tmpdir(), "link-routes-"))
 

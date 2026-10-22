@@ -15,15 +15,15 @@ import type {
   SiteSearchPage,
   SiteTag
 } from "spell-ui/docs-components/docs-components.types"
-import { Definitions } from "$/epics/definitions"
-import type { EpicTag, EpicVocabulary } from "$/epics/definitions"
+import { Definitions } from "spell-epic/definitions"
+import type { EpicTag, EpicVocabulary } from "spell-epic/definitions"
 
 /****************
  * ### `EpicUISite`
  * The data of Epic UI, the docs set of the `<epic-*>` elements:
  * what its side column, search and look controls read.
  * - In Spell UI's shapes, since its pages load Spell UI's site bundle.
- * - The set:  `packages/epics/docs/`, served at `/components/epics/` (epic `epic-workflow` P10).
+ * - The set:  spell-epic's `src/docs/`, served at `/components/epics/` (epic `epic-workflow` P10).
  * - The set's pages are ONE flat folder:  its home, `index.html`, and one page per element, `<tag>.html`.
  * - `__data/components.json5` (`SiteDataFile`):  one entry per element, from the pack's own definitions.
  *   - `Definitions.all`:  each vocabulary as data

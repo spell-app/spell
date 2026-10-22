@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { ChoicesForm } from "$/epics/answers"
+import { ChoicesForm } from "spell-epic/answers"
 
 import { epicChoiceRowsVocabulary } from "./EpicChoiceRows.en"
 import { ROW_TAG } from "./EpicChoiceRows.types"

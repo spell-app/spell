@@ -2,55 +2,38 @@
  * MIGRATE the docs' pages, by page KIND (epic `epic-workflow`, P8;  J44):
  * each kind's named, dated, idempotent steps, oldest first, on each page of that kind, under its lock;
  * a report per page that changed.
- * - the epic page's steps are the `epic` tool's (`$/epics/tool/migrations`, `Migrations`):
+ * - the epic page's steps are the `epic` tool's (`spell-epic/tool/migrations`, `Migrations`):
  *   this file holds the OTHER kinds', and `epic migrate` runs it as a child for them (`MigrateCommands`)
- * - `KINDS`:  every page kind, the same list as `PAGE_KINDS` in `$/epics/tool/migrations` (`migrate.test.ts` checks)
+ * - `KINDS`:  every page kind, the same list as `PAGE_KINDS` in `spell-epic/tool/migrations` (`migrate.test.ts` checks)
  * - `pageKind()`:  which kind a page is, from where it lives and what it loads
- * - `STEPS`:  the steps, today's one-off fixers, as steps of their kind:
- *   - `ui-section`:  `to-ui-section.js`, old `section.s2|s3` sections to `<ui-section>`
- *   - `answer-elements`:  `to-answer-elements.js`, a details or choice page (and the old shared templates of both)
- *     in the epics pack's elements, its old page script gone (epic `epic-workflow` P12)
- *   - `engine-asset-routes`:  a page loads the engine's assets and pack from the epic server's routes, `/_epic/...`,
- *     not from the checkout (`$/epics/server/engineLinks`, epic `epic-eject` P7)
- *     - the epic page's own step is `EngineAssetRoutes`
+ * - `STEPS`:  the steps, as steps of their kind:
  *   - `components-not-markup`:  `to-components.js`, a page's bare tables and `<details>` asides in components
  *     (epic `epic-engine` P3);  what it can't call is left, and listed
- *   - NOT the shared-content repair (`relocate.js`):
- *     it moves files between folders rather than fixing a page's markup,
- *     and `epic shared commit` runs its reorg every turn already
- * - `DATA_FILES`, beside the steps (epic `epic-workflow` P21):
- *   - the tooling's data files outside the epics' folders renamed `.json` -> `.json5` (`dataFileMoves()`)
- *   - every page's links to a data file by its old name, except an epic page's (`dataFileLinks()`)
- *   - not a page kind's step:  it renames files, and touches only links
- *   - an epic's own files and links are its page's step, `json5-data-files` (`$/epics/tool/migrations`)
+ *   - The older steps went once every page had run them (epic `repo-split` Q45):  `ui-section`, `answer-elements`,
+ *     `engine-asset-routes`, and the data files' renames (`json5-data-files`).
+ *     Their code is in git history, for a page restored from an old backup.
  * - A new step:  an entry in `STEPS`, LAST, in the same commit as the markup change it follows.
  *   It must change nothing on a page it has migrated already, and keep every word.
- * - `node tools/migrate.js [--root <checkout>] [<kind>] [--file <page>] [--step <name>] [--dry-run] [--list]`:
+ * - `node src/tools/migrate.js [--root <checkout>] [<kind>] [--file <page>] [--step <name>] [--dry-run] [--list]`:
  *   - every kind with steps, or one kind
  *   - one page (`--file`, its kind found unless given)
  *   - `--list`:  the steps
- *   - the data files' renames run with every kind (no `<kind>`, no `--file`), or alone with `--step json5-data-files`
  */
-import { existsSync, readdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
-import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { closeSync, existsSync, openSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { isAbsolute, join, relative, resolve, sep } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { EpicConfig } from "../config/EpicConfig.ts"
-import { DataFile } from "../data/DataFile.ts"
-import { linksEngineByPath, rewriteEngineLinks } from "../server/engineLinks.ts"
-import { TOOL_TEMPLATES } from "./answerPages.js"
-import { checkData, rowsFile } from "./choices.js"
+import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { DataFile } from "spell-epic/data/DataFile.ts"
+import { rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
 import { findPages, formattedAlready, pageFile, parseArgs, ROOT, serialize, tidy } from "./pages.js"
-import { withLocks } from "./relocate.js"
-import { convertChoicesPage, convertDetailsPage, needsConversion } from "./to-answer-elements.js"
 import { convertMarkup, hasMarkup } from "./to-components.js"
-import { convertSections } from "./to-ui-section.js"
 
 /**
- * Every page kind, by its key:  `$/epics/tool/migrations` `PAGE_KINDS`, kept the same.
+ * Every page kind, by its key:  `spell-epic/tool/migrations` `PAGE_KINDS`, kept the same.
  * - keys, typed on the command line (`epic migrate detail`);  what's printed is the kind's name (`KIND_NAMES`)
  */
 export const KINDS = [
@@ -98,58 +81,6 @@ function kindPages(kind) {
  *   - notes with nothing `changed`:  what it left for a person, reported all the same
  */
 export const STEPS = [
-  {
-    name: "ui-section",
-    date: "2026-10-02",
-    kinds: ["guide", "cheatsheet", "command", "changelog", "template", "home", "list"],
-    description: "old `section.s2|s3` sections become `<ui-section>`, ids kept (to-ui-section.js)",
-    applies: (html) => /<section\b[^>]*\bclass="[^"]*\bs[23]\b/.test(html),
-    run(document) {
-      const report = convertSections(document)
-      const notes = [
-        ...report.slotHeaders.map((id) => `#${id}:  a title with markup, now slot="header"`),
-        ...report.droppedIds.map((id) => `#${id}:  a section id dropped (the heading's id wins)`),
-        ...report.levels.map((level) => `level set:  ${level}`),
-        ...report.skipped.map((html) => `SKIPPED (not section > ui-sticky > h2|h3[id]):  ${html}`)
-      ]
-      return { changed: report.converted > 0, notes: [`${report.converted} sections -> <ui-section>`, ...notes] }
-    }
-  },
-  {
-    name: "answer-elements",
-    date: "2026-10-14",
-    kinds: ["detail", "choice", "template"],
-    description:
-      "a page Owen answers on, in the epics pack's elements:  its old page script gone (to-answer-elements.js, epic-workflow P12)",
-    applies: needsConversion,
-    run(document, { file }) {
-      // the old shared templates:  the tools read their own since P12, so these become copies of them
-      const template = /(?:^|\/)templates\/(details|syntax-choices)\.html$/.exec(file.split(sep).join("/"))?.[1]
-      if (template) {
-        const { document: fresh } = parseHTML(readFileSync(join(TOOL_TEMPLATES, `${template}.html`), "utf8"))
-        document.documentElement.replaceWith(fresh.documentElement)
-        return { changed: true, notes: [`now a copy of the tool's own template (tools/templates/${template}.html)`] }
-      }
-      if (document.querySelector('script[src$="syntax-choices.js"]')) {
-        const rows = rowsFile(file)
-        if (!DataFile.exists(rows)) return { changed: false, notes: [`SKIPPED:  no ${basename(rows)} beside it`] }
-        return convertChoicesPage(document, checkData(DataFile.read(rows)))
-      }
-      return convertDetailsPage(document)
-    }
-  },
-  {
-    name: "engine-asset-routes",
-    date: "2026-10-17",
-    kinds: ["guide", "cheatsheet", "command", "changelog", "template", "home", "list", "detail", "choice"],
-    description:
-      "the page loads the engine's assets and pack from /_epic/ (the epic server's routes), not from paths in the checkout (epic-eject P7)",
-    applies: linksEngineByPath,
-    run(document) {
-      const changes = rewriteEngineLinks(document)
-      return { changed: changes.length > 0, notes: changes.map(({ from, to }) => `${from} -> ${to}`) }
-    }
-  },
   {
     name: "components-not-markup",
     date: "2026-10-19",
@@ -261,7 +192,7 @@ export function migratePages(pages, { step, dryRun = false, tidied = true } = {}
       const notes = []
       for (const each of steps) {
         // only a step with something to do, on the page as the steps before left it:  a step's `run()` may change
-        // a page it isn't for (`answer-elements` drops a details page's old script, there or not)
+        // a page it isn't for
         if (!each.applies(serialize(document))) continue
         const done = each.run(document, { file })
         if (done.changed) ran.push(each.name)
@@ -310,141 +241,38 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
 }
 
 /**
- * The DATA FILES' renames (epic `epic-workflow` P21):  the tooling's data files in checkout `root` still named
- * `.json`, outside the epics' own folders (those are their page's step, `json5-data-files`), as `DataFile.moveOf()`
- * gives them (`{ from, to, clash }`), sorted.  The files:
- * - the docs home's:  the tooling home and the starred epics (`epics/home.json`, `epics/favorites.json`)
- * - the sagas' list (`sagas/sagas.json`), and a saga page's review inbox
- * - a docs page's comments (`<page>.inbox.json` beside it):  in `guides/`, `pages/`, a component set's `docs/`
- * - a scratch details page's answer, draft and rows (`pages/details/`)
- * - a commands page's data (`<page>.json` beside a page loading `commands.js`), and its template's
- * - the choice page template's example rows (`templates/syntax-choices.rows.json`)
+ * Run `fn` holding every `<file>.lock` of `files`, as `SRV.FileLock` takes them (`open(wx)`).
+ * - waits up to 30s for each, and takes over one older than a minute (a crashed holder's)
+ * - plain node:  this script loads none of `spell-kit/server`, whose files import each other without extensions
  */
-export function dataFileMoves(root) {
-  const content = EpicConfig.contentOf(root)
-  const found = [
-    ...["epics/home.json", "epics/favorites.json", "sagas/sagas.json"].map((path) => join(content, path)),
-    join(root, "templates/syntax-choices.rows.json"),
-    ...filesUnder(join(content, "sagas"), INBOX),
-    ...filesUnder(join(content, "guides"), INBOX),
-    ...filesUnder(join(content, "pages"), INBOX),
-    ...filesUnder(join(content, "pages", "details"), DETAILS_DATA),
-    ...COMMAND_FOLDERS.flatMap((folder) => filesUnder(folderOf(folder, root), /\.json$/)).filter(isCommandsData),
-    ...readdirOr(join(root, "packages")).flatMap((name) => filesUnder(join(root, "packages", name, "docs"), INBOX))
-  ]
-  return [...new Set(found)]
-    .filter((file) => existsSync(file))
-    .sort((one, other) => one.localeCompare(other))
-    .map((file) => DataFile.moveOf(file))
-}
-
-/** Rename `moves` (`dataFileMoves()`), each under its new name's lock, the one its writers take;  the renamed ones. */
-export function renameDataFiles(moves) {
-  return moves.filter((move) => withLocks([move.to], () => DataFile.rename(move)))
-}
-
-/**
- * Point every page's links to a data file by its old name at its new one (`DataFile.linkFor()`), in checkout `root`:
- * guides, details and choice pages, templates, saga pages, the list pages ...;  NOT an epic page or its parts (its
- * own step's, `json5-data-files`).  Returns `{ file, links }` for each page with any, sorted.
- * - only the links' text changes, every other byte kept;  each page under its lock
- * - `dryRun`:  the same count, nothing written
- */
-export function dataFileLinks(root, { dryRun = false } = {}) {
-  const pages = LINKING_FOLDERS.flatMap((folder) => filesUnder(folderOf(folder, root), /\.html$/)).filter(
-    (file) => !EPIC_PAGE.test(pathFrom(file, root))
-  )
-  const changed = []
-  for (const file of pages.sort((one, other) => one.localeCompare(other))) {
-    const links = withLocks(dryRun ? [] : [file], () => {
-      let count = 0
-      const before = readFileSync(file, "utf8")
-      const after = before.replace(HREF, (whole, open, href, close) => {
-        const to = DataFile.linkFor(href, dirname(file), baseOf(file, root))
-        if (to === undefined) return whole
-        count++
-        return `${open}${to}${close}`
-      })
-      if (count && !dryRun) writeFileSync(file, after)
-      return count
-    })
-    if (links) changed.push({ file, links })
-  }
-  return changed
-}
-
-/** The data files' report:  what was (or would be) renamed, what's left with both names there, the links. */
-function dataFilesReport(moves, links, root, { dryRun = false } = {}) {
-  const renamed = moves.filter((move) => !move.clash)
-  const clashes = moves.filter((move) => move.clash)
-  const linked = links.reduce((sum, page) => sum + page.links, 0)
-  return [
-    ...renamed.map((move) => `${pathFrom(move.from, root)}:  ${dryRun ? "would be " : ""}renamed ${basename(move.to)}`),
-    ...clashes.map(
-      (move) => `${pathFrom(move.from, root)}:  LEFT, ${basename(move.to)} is there too (merge them by hand)`
-    ),
-    ...links.map(
-      ({ file, links: n }) =>
-        `${pathFrom(file, root)}:  ${dryRun ? "would point " : ""}${n} link${n === 1 ? "" : "s"} to .json5`
-    ),
-    `data files:  ${renamed.length} ${dryRun ? "would be renamed" : "renamed"} .json -> .json5${clashes.length ? `, ${clashes.length} left` : ""};  ` +
-      `${linked} link${linked === 1 ? "" : "s"} in ${links.length} page${links.length === 1 ? "" : "s"}`
-  ]
-}
-
-/** Run the data files' pass in checkout `root` (renames, then links), and say what it did. */
-function migrateDataFiles(root, { dryRun = false } = {}, say) {
-  const moves = dataFileMoves(root)
-  if (!dryRun) renameDataFiles(moves)
-  const links = dataFileLinks(root, { dryRun })
-  for (const line of dataFilesReport(moves, links, root, { dryRun })) say(line)
-}
-
-/** The files under `folder` (any depth, never a split epic page's `parts/`, experiments or packages) matching `pattern`. */
-function filesUnder(folder, pattern) {
-  let names
+export function withLocks(files, fn) {
+  const held = []
   try {
-    names = readdirSync(folder, { recursive: true, encoding: "utf8" })
-  } catch {
-    return []
+    for (const file of files) {
+      const lock = `${file}.lock`
+      const deadline = Date.now() + 30_000
+      for (;;) {
+        try {
+          closeSync(openSync(lock, "wx"))
+          held.push(lock)
+          break
+        } catch (error) {
+          if (error.code !== "EEXIST") throw error
+          const age = Date.now() - (statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now())
+          if (age > 60_000) rmSync(lock, { force: true })
+          else if (Date.now() > deadline) throw new Error(`${lock} held for 30s:  stuck?`)
+          else Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100)
+        }
+      }
+    }
+    return fn()
+  } finally {
+    for (const lock of held) rmSync(lock, { force: true })
   }
-  return names.filter((name) => pattern.test(name) && !NOT_PAGES.test(name)).map((name) => join(folder, name))
 }
-
-/** The names in `folder`;  none when there's no folder. */
-function readdirOr(folder) {
-  return existsSync(folder) ? readdirSync(folder) : []
-}
-
-/** Is `file` a commands page's data:  `<page>.json` beside a `<page>.html` that loads `commands.js`? */
-function isCommandsData(file) {
-  const page = file.replace(/\.json$/, ".html")
-  return existsSync(page) && /\bcommands\.js\b/.test(readFileSync(page, "utf8"))
-}
-
-/** A page's old-named review or comments inbox. */
-const INBOX = /\.inbox\.json$/
-
-/** A details page's old-named answer (an archived round's too), draft or rows. */
-const DETAILS_DATA = /\.(answer|draft|rows)\.json$/
-
-/** Where commands pages and their template live. */
-const COMMAND_FOLDERS = ["guides", "templates"]
-
-/** The shared folders whose pages may link a data file. */
-const LINKING_FOLDERS = ["epics", "guides", "pages", "templates", "sagas", "brand"]
 
 /** An epic page, from the checkout's root:  `epics/<name>/<name>.plan.html` (or an older `<name>.html`). */
 const EPIC_PAGE = /^epics\/([^/]+)\/\1(\.plan)?\.html$/
-
-/** A link's address in a page's text:  `href="..."`, in its three parts. */
-const HREF = /(\bhref=")([^"]*)(")/g
-
-/** What's under a docs folder but no page's:  a split epic page's bodies, experiments, installed packages. */
-const NOT_PAGES = /(^|\/)(parts|experiments|node_modules)(\/|$)/
-
-/** The data files' renames, as `--step` and `--list` name them:  the epic page's step's name. */
-const DATA_FILES = "json5-data-files"
 
 /** A problem to say, not a stack trace:  exit 2. */
 export class MigrateError extends Error {}
@@ -474,11 +302,6 @@ function pathFrom(file, root) {
   return relative(baseOf(file, root), file).split(sep).join("/")
 }
 
-/** Top folder `folder` of checkout `root`'s pages:  `templates` in the checkout, the rest in its content folder. */
-function folderOf(folder, root) {
-  return join(folder === "templates" ? root : EpicConfig.contentOf(root), folder)
-}
-
 /**
  * The command line, `argv` after the script:  prints with `say(line)`.
  * - returns the exit code (2:  a usage problem, said on stderr)
@@ -494,18 +317,10 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
     if (flags.list) {
       for (const step of STEPS.filter((each) => !kind || each.kinds.includes(kind)))
         say(`${step.kinds.join(",").padEnd(11)} ${step.date}  ${step.name.padEnd(24)} ${step.description}`)
-      if (!kind)
-        say(`${"data-files".padEnd(11)} 2026-10-14  ${DATA_FILES.padEnd(24)} the docs' data files:  .json -> .json5`)
       return 0
     }
     const step = typeof flags.step === "string" ? flags.step : undefined
     const dryRun = Boolean(flags["dry-run"])
-    const dataFiles = !kind && typeof flags.file !== "string" && (!step || step === DATA_FILES)
-    if (step === DATA_FILES) {
-      if (!dataFiles) throw new MigrateError(`${DATA_FILES} renames files, not pages:  no <kind>, no --file`)
-      migrateDataFiles(root, { dryRun }, say)
-      return 0
-    }
     let pages
     if (typeof flags.file === "string") {
       const file = fileOf(flags.file, root)
@@ -520,7 +335,6 @@ export function main(argv, say = (line) => process.stdout.write(`${line}\n`)) {
     }
     const { results } = migratePages(pages, { step, dryRun })
     for (const line of report(results, root, { dryRun, all: typeof flags.file === "string" })) say(line)
-    if (dataFiles) migrateDataFiles(root, { dryRun }, say)
     return 0
   } catch (error) {
     if (!(error instanceof MigrateError)) throw error

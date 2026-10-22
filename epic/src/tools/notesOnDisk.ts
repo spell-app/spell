@@ -1,7 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { AS } from "spell-kit/assembler"
 import { SRV } from "spell-kit/server"
 
 import { PageNotes } from "./PageNotes.js"
@@ -9,7 +8,7 @@ import { PageNotes } from "./PageNotes.js"
 /**
  * Change the notes of the page at `file` with `change(notes)`, under the page's lock;
  * returns what `change` returned (`epic notes answer | done`, and `epic comments gather`).
- * - formats the page after (oxfmt, in memory:  `AS.formatHTML()`) only when it was formatted before:
+ * - formats the page after (oxfmt, in memory:  `SRV.formatHTML()`) only when it was formatted before:
  *   a long note wraps as `vp fmt` would wrap it, and a page that wasn't keeps every other byte
  * - atomic:  the page server's one atomic write (`SRV.FileOperations.writeAtomic()`), so the live reload never reads
  *   half a page.  NOT `SRV.FileOperations.save()`:  formatting is async, and a save's change must be sync
@@ -19,10 +18,10 @@ import { PageNotes } from "./PageNotes.js"
 export async function editNotes<T>(file: string, change: (notes: PageNotes) => T): Promise<T> {
   return SRV.FileLock.runAsync(file, async () => {
     const before = readFileSync(file, "utf8")
-    const formatted = (await AS.formatHTML(file, before).catch(() => undefined)) === before
+    const formatted = (await SRV.formatHTML(file, before).catch(() => undefined)) === before
     const notes = new PageNotes(before)
     const result = change(notes)
-    await SRV.FileOperations.writeAtomic(file, formatted ? await AS.formatHTML(file, notes.html) : notes.html)
+    await SRV.FileOperations.writeAtomic(file, formatted ? await SRV.formatHTML(file, notes.html) : notes.html)
     return result
   })
 }

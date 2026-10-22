@@ -37,7 +37,7 @@
  *   Printed `M3`
  * - epic pages' comments wait in their epic's review inbox instead:  `epic inbox <name>`
  * - a page an epic owns (epic `epic-workflow` P13):  its header's Send hands its comments to that epic's session
- *   (`epic inbox <epic> wait` prints them under the page);  `working` and `answer`, here, take them one at a time.
+ *   (`epic inbox wait <epic>` prints them under the page);  `working` and `answer`, here, take them one at a time.
  *   `gather` leaves them out, unless the page is named.
  * - Exit codes:  0;  1 a comment or page that isn't there (the message says why);  2 usage.
  */
@@ -45,10 +45,10 @@ import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { CommentList, CommentsError } from "$/epics/tool/CommentList"
-import { GuideInbox } from "$/epics/tool/GuideInbox"
-import { ReviewInbox } from "$/epics/tool/ReviewInbox"
-import { SeeAlso, epicNamed } from "$/epics/tool/SeeAlso"
+import { CommentList, CommentsError } from "spell-epic/tool/CommentList"
+import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { SeeAlso, epicNamed } from "spell-epic/tool/SeeAlso"
 
 import { duration } from "./details.js"
 import { FEEDBACK, GuideChanges } from "./GuideChanges"
@@ -96,7 +96,7 @@ function working([page, id, on]: string[]): number {
 
 /**
  * A session answering comments on a page an epic owns is still listening to that epic (epic `epic-workflow` P13):
- * stamp the heartbeat of the session listening to its review inbox, as `epic inbox ... working` does.
+ * stamp the heartbeat of the session listening to its review inbox, as `epic inbox working ...` does.
  * - a page no epic owns:  the standing `feedback` epic's session (epic `epic-engine` T9)
  * - nobody listening:  nothing written
  */

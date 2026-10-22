@@ -34,7 +34,7 @@
  * - those files:  `./EpicState.ts`
  * - NEVER an alias, an `enum` or a parameter property:  plain `node` can't strip those
  */
-import { PlanDates } from "../dates/PlanDates.ts"
+import { PlanDates } from "spell-epic/dates/PlanDates.ts"
 import { epicStateFor, type EpicFacts, type EpicState } from "./EpicState.ts"
 
 /** The Epics page's groups, in the page's order. */
@@ -53,7 +53,7 @@ export const FAVORITES_FILE = "epics/favorites.json5"
 export const EPIC_CARDS_START = "<!-- running-epics -->"
 export const EPIC_CARDS_END = "<!-- running-epics:end -->"
 
-/** A saga, as a card's label and the chips draw it:  `sagas/sagas.json5`'s fields (`$/epics/tool/Sagas`). */
+/** A saga, as a card's label and the chips draw it:  `sagas/sagas.json5`'s fields (`spell-epic/tool/Sagas`). */
 export type SagaLook = {
   /** `drawable-spell` */
   id: string
@@ -131,9 +131,7 @@ export function epicCardHtml(card: EpicCard, now: Date = new Date()): PlacedCard
     (facts.standing ? " standing" : "") +
     (facts.active ? ` active="${attr(facts.active)}"` : "") +
     (worked ? ` worked="${isoLocal(worked)}"` : "") +
-    (saga
-      ? ` saga="${attr(saga.id)}" saga-title="${attr(saga.title)}" saga-purpose="${attr(saga.purpose)}"`
-      : "") +
+    (saga ? ` saga="${attr(saga.id)}" saga-title="${attr(saga.title)}" saga-purpose="${attr(saga.purpose)}"` : "") +
     (favorite ? " favorite" : "")
   const target = card.target ? ` target="${attr(card.target)}"` : ""
   const html =
@@ -154,7 +152,9 @@ export function epicCardHtml(card: EpicCard, now: Date = new Date()): PlacedCard
  */
 export function epicListHtml(cards: readonly PlacedCard[], sagas: readonly SagaLook[]): string {
   // a copy, sorted in place:  no `toSorted()`, which every package that type-checks this file must know
-  const ordered = [...cards].sort((a, b) => EPIC_GROUPS.indexOf(a.group) - EPIC_GROUPS.indexOf(b.group) || byTitle(a.title, b.title))
+  const ordered = [...cards].sort(
+    (a, b) => EPIC_GROUPS.indexOf(a.group) - EPIC_GROUPS.indexOf(b.group) || byTitle(a.title, b.title)
+  )
   return (
     `<epic-list class="spell-epics"${sagas.length ? ` sagas="${attr(sagas.map((saga) => saga.id).join(" "))}"` : ""}>\n` +
     `${EPIC_CARDS_START}\n${ordered.map((card) => card.html).join("\n")}\n${EPIC_CARDS_END}\n` +

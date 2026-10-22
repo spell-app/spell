@@ -15,7 +15,7 @@ import { dirname, join, relative } from "node:path"
 
 import { fileURLToPath } from "node:url"
 
-import { RealPath } from "$/epics/config/RealPath"
+import { RealPath } from "spell-epic/config/RealPath"
 
 import { EpicCommandError, type FoldReport, type MigrateReport, type SharedConfig } from "./command.types"
 import { Sessions } from "./Sessions"

@@ -4,9 +4,9 @@ import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
 import { keepingCommentsIn } from "spell-kit/util/node/json5"
-import { Definitions } from "$/epics/definitions"
+import { Definitions } from "spell-epic/definitions"
 
-import { EpicUISite, type EpicUIPages } from "$/epics/site/EpicUISite"
+import { EpicUISite, type EpicUIPages } from "spell-epic/site/EpicUISite"
 
 /** Temporary set folders, removed after each case. */
 const made: string[] = []
@@ -30,7 +30,7 @@ function setFolder(pages: EpicUIPages, files: Record<string, string> = {}): stri
 
 /** A page in the set's shape:  `title` on its `main`, `summary` its description, `sections` its section ids. */
 function page(title: string, summary: string, sections: string[] = []): string {
-  const body = sections.map((id) => `<ui-section id="${id}" header="${id.toUpperCase()}"></ui-section>`).join("")
+  const body = sections.map((id) => `<ui-section id="${id}" label="${id.toUpperCase()}"></ui-section>`).join("")
   return `<!doctype html><html><head><title>${title}</title><meta name="description" content="${summary}" /></head><body><main id="main" class="site-main" data-toc-header="${title}">${body}</main></body></html>`
 }
 

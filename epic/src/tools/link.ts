@@ -21,11 +21,11 @@
  */
 import { existsSync, readFileSync } from "node:fs"
 
-import { EpicAddress } from "$/epics/links"
-import { EpicTargets } from "$/epics/tool/EpicTargets"
+import { EpicAddress } from "spell-epic/links"
+import { EpicTargets } from "spell-epic/tool/EpicTargets"
 import { SRV } from "spell-kit/server"
 
-import { Window } from "../window.mjs"
+import { Window } from "spell-epic/window.mjs"
 import { ROOT, ensurePageServer, pageFile, parseArgs, serverUrl } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))

@@ -16,8 +16,8 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { serverProcesses } from "spell-kit/server/page/prune"
 
-import { CheckoutServers } from "$/epics/command/CheckoutServers"
-import { Worktrees } from "$/epics/command/Worktrees"
+import { CheckoutServers } from "spell-epic/command/CheckoutServers"
+import { Worktrees } from "spell-epic/command/Worktrees"
 
 const HOOKS = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks")
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "checkout-servers-")))

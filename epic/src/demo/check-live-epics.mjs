@@ -50,7 +50,7 @@ const ROOT = resolve(HERE, "../..")
 if (!process.env.CHECK_LIVE_UNDER_TSX) {
   const run = spawnSync(
     process.execPath,
-    ["--import", "tsx", "--import", import.meta.resolve("spell-kit/toolchain/aliases"), fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...process.argv.slice(2)],
     {
       stdio: "inherit",
       cwd: ROOT,
@@ -62,7 +62,7 @@ if (!process.env.CHECK_LIVE_UNDER_TSX) {
 
 const { chromium } = await import("playwright")
 const { DemoServer } = await import("./DemoServer.ts")
-const { EpicConfig } = await import("../config/EpicConfig.ts")
+const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"

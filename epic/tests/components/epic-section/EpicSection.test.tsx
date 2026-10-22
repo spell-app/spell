@@ -4,11 +4,11 @@ import { E, UI } from "spell-ui/core"
 import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
 import { expectAccessible } from "spell-kit/test-helpers/A11y"
 
-import "spell-ui/ui-section"
-import "$/epics/components/epic-section"
-import "$/epics/components/epic-phase"
-import "$/epics/components/epic-item"
-import "$/epics/components/epic-aside"
+import "spell-ui/components/ui-section"
+import "spell-epic/components/epic-section"
+import "spell-epic/components/epic-phase"
+import "spell-epic/components/epic-item"
+import "spell-epic/components/epic-aside"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
 const FIXTURES = new URL("fixtures", import.meta.url).pathname
@@ -130,10 +130,10 @@ describe("<epic-section>", () => {
     ).toBeTruthy()
   })
 
-  test("loads its `source` part into its LIGHT children the first time it opens, and fires `ui-load`", async () => {
+  test("loads its `source` part into its LIGHT children the first time it opens, and fires `ui-loaded`", async () => {
     const host = await render(`<epic-section id="log" kind="log" source="${FIXTURES}/part.html"></epic-section>`)
     const loads: string[] = []
-    host.addEventListener("ui-load", (event) => loads.push((event as CustomEvent<{ source: string }>).detail.source))
+    host.addEventListener("ui-loaded", (event) => loads.push((event as CustomEvent<{ source: string }>).detail.source))
     expect(host.querySelector("p.body")).toBeNull()
     toggle(host).click()
     await host.load()

@@ -58,7 +58,7 @@ export abstract class PlanReader {
    * `recent-since` (D2).  `null`:  no git history, so it goes;  `undefined` (default):  left as the doc has it
    * - passed in, so the reader stays pure:  the command line asks git
    * - NOTE: no colour reads it since 2026-10-08 (a decided item stays green, however old:  `itemState()`);
-   *   REFACTOR:  drop it, the git call and the attribute (the converter and its fixtures write it too)
+   *   REFACTOR:  drop it, the git call and the attribute (the tests' fixtures write it too)
    */
   recentSince: string | null | undefined
 
@@ -165,7 +165,7 @@ export abstract class PlanReader {
   }
 
   /**
-   * Item `id`, as `plan-doc inbox` shows it:  `{ id, kind, status, title }` (`id` upper-case), or `null` when the
+   * Item `id`, as `epic inbox` shows it:  `{ id, kind, status, title }` (`id` upper-case), or `null` when the
    * doc has no such item.
    */
   describeItem(id: string): ItemDescription | null {

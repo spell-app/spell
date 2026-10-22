@@ -4,11 +4,11 @@ import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { type SendRequestProps } from "$/epics/command/command.types"
-import { Requests } from "$/epics/command/Requests"
-import { Sessions } from "$/epics/command/Sessions"
-import { PlanDoc } from "$/epics/tool/PlanDoc"
-import { PlanDocFiles } from "$/epics/tool/PlanDocFiles"
+import { type SendRequestProps } from "spell-epic/command/command.types"
+import { Requests } from "spell-epic/command/Requests"
+import { Sessions } from "spell-epic/command/Sessions"
+import { PlanDoc } from "spell-epic/tool/PlanDoc"
+import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
 
 /** A fake `~/.claude`, and a fake checkout holding epic `tooling`. */
 const HOME = mkdtempSync(join(tmpdir(), "claude-home-"))

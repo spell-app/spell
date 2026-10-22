@@ -2,12 +2,12 @@
  * Loose types, constants, errors and small pure helpers of the page's server clients:
  * the review inbox's (`ReviewClient`), the running agents' (`AgentsClient`),
  * and the link both write through (`ServerLink`).
- * - The inbox's shapes are the route's own (`$/epics/tool/ReviewInbox`), and the running agents' the list's
+ * - The inbox's shapes are the route's own (`spell-epic/tool/ReviewInbox`), and the running agents' the list's
  *   (`tools/AgentList.ts`), imported as TYPES only:
  *   erased, so the node-only files never reach the pack, and a reply can't drift from what the server writes.
  */
 
-import { PlanDates } from "$/epics/dates"
+import { PlanDates } from "spell-epic/dates"
 import type {
   InboxDraft,
   InboxListener,
@@ -20,16 +20,16 @@ import type {
   PageInbox,
   PickFields,
   WorkingEntry
-} from "$/epics/tool/ReviewInbox"
-import type { WakeResult } from "$/epics/tool/ReviewStart"
+} from "spell-epic/tool/ReviewInbox"
+import type { WakeResult } from "spell-epic/tool/ReviewStart"
 
-import type { Redirect, RunningAgent as ListedAgent } from "../tools/AgentList"
+import type { Redirect, RunningAgent as ListedAgent } from "spell-epic/tools/AgentList"
 
 ////////////////
 // ## Constants
 ////////////////
 
-/** The review store's routes (`$/epics/tool/reviewRoutes.ts`):  every reply is the page's whole inbox. */
+/** The review store's routes (`spell-epic/tool/reviewRoutes.ts`):  every reply is the page's whole inbox. */
 export const REVIEW_API = "/api/epics/review"
 
 /**
@@ -47,7 +47,7 @@ export const SAGA_PAGE = /\/sagas\/([^/]+)\/\1\.saga\.html$/
 
 /**
  * How a saga page is NAMED to `/epic review` and the `epic` tool:  its short address, `SAGA:/<id>`
- * (`/epic review SAGA:/drawable-spell`, `epic inbox SAGA:/drawable-spell wait`, `epic add SAGA:/drawable-spell#T`).
+ * (`/epic review SAGA:/drawable-spell`, `epic inbox wait SAGA:/drawable-spell`, `epic add SAGA:/drawable-spell#T`).
  * - a saga id may be an epic's name too (`output-targets`):  the prefix says which page
  * - REFACTOR:  one resolver for every `SAGA:/` address once epic `epic-workflow` P15's `<epic-link>` work lands
  */
@@ -163,7 +163,7 @@ export type Inbox = Pick<
 
 /**
  * What the page server's wake did, in a Send's or Do Now's answer (`wake`, epic `epic-workflow` P16):
- * the route's `WakeResult` (`$/epics/tool/ReviewStart`), its type only.
+ * the route's `WakeResult` (`spell-epic/tool/ReviewStart`), its type only.
  * - `message`:  for the notice;  `null` (no `wake`) while a session listens
  */
 export type WakeAnswer = WakeResult

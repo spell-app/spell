@@ -1,8 +1,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { Definitions, type EpicData, type EpicTag } from "$/epics/definitions"
-import { Markup, type MarkupProblem } from "$/epics/markup"
+import { Definitions, type EpicData, type EpicTag } from "spell-epic/definitions"
+import { Markup, type MarkupProblem } from "spell-epic/markup"
 
 ////////////////
 // ## Fixtures

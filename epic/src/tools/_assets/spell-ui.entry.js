@@ -14,16 +14,16 @@
  *   - then the site header (`spell-kit/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
  *     upgrades -- and sets `--spell-site-header-height` -- before the runtime first measures its sticky offsets
  *     (the runtime waits for the `ui-*` definitions first)
- * - `$/...` aliases resolve through esbuild's own tsconfig `paths` support:  `tsconfig.json` extends
- *   the root's `tsconfig.base.json`.
+ * - Every import is a package name:  Spell UI's from its built `dist/` (`spellUiResolver()`), spell-epic's as their
+ *   source files (the kit's `sourceNames()`), the rest by their packages' `exports`.
  * - Exports become `window.SpellUI` (`UI`), for the page runtime's checks and for poking in DevTools.
  * - Component packs (epic `epic-components`):  `<ui-components source="x.pack.js">` in a `<ui-root>` loads a pack's
  *   classic script, which calls `SpellUI.registerPack(pack)` and imports the modules it shares with the page from
- *   `SpellUI.packModules` (`spell pack build` maps each of their specifiers there), so a pack never brings a
+ *   `SpellUI.packModules` (`spell pack build` maps each of their specifiers there, as written), so a pack never brings a
  *   second Solid or Spell UI.
  *   - `packModules` is the EXACT specifier a pack's build leaves external => that module's namespace.  Add one here
  *     AND to the pack build's externals, together.
- *   - `import * as` a Solid package, against `packages/ui/AGENTS.md` ("One Solid per page"), on purpose and ONLY
+ *   - `import * as` a Solid package, against Spell UI's `AGENTS.md` ("One Solid per page"), on purpose and ONLY
  *     here:  that rule keeps a library's bundles from pinning all of Solid, but this map exists so a pack can use any
  *     export, which no tree-shaker can know ahead.  So the whole of `solid-js` / `@solidjs/web` stays in this bundle
  *     (`ui`'s own code never holds such a map).
@@ -43,9 +43,9 @@ import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
 import * as uiCore from "spell-ui/core"
 import * as uiForms from "spell-ui/forms"
-import * as uiRoot from "spell-ui/ui-root"
-import * as uiCode from "spell-ui/ui-code"
-import * as uiMarkdown from "spell-ui/ui-markdown"
+import * as uiRoot from "spell-ui/components/ui-root"
+import * as uiCode from "spell-ui/components/ui-code"
+import * as uiMarkdown from "spell-ui/components/ui-markdown"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
@@ -56,13 +56,15 @@ export { registerPack } from "spell-ui"
 
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.
- * - `$/spell-element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
- *   (`$/ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
- * - `$/ui/components/ui-root` is for `<spell-app>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`, `packages/app`
- *   `vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
+ * - The keys are the import names themselves, as every repo's source writes them (epic `repo-split` P14, Q45):
+ *   the kit's `PACK_MODULES` (`spell-kit/element-tools/packModules`) and spell-app's shared-Solid builds read them.
+ * - `spell-kit/element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
+ *   (`spell-ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
+ * - `spell-ui/components/ui-root` is for `<spell-app>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
+ *   spell-app's `app/vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
  * - `@solidjs/h` likewise:  what compiled spell draws with (`spell-runtime.js`, through `spell-solid-shared.js`),
  *   so a program on a docs page draws with the page's one Solid.
- * - `$/ui/components/ui-code` and `$/ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's
+ * - `spell-ui/components/ui-code` and `spell-ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's
  *   own `<spell-code>` / `<spell-markdown>` (spell-app's app package, `spell-code.js` / `spell-markdown.js`) EXTEND,
  *   through `spell-ui-shared.js`, so they extend THIS page's `UICode` / `UIMarkdown`:  one Spell UI.  Without them
  *   those scripts stop with an error saying so.  Not packs' externals:  the epics pack imports neither.
@@ -71,12 +73,12 @@ export const packModules = Object.freeze({
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
-  "$/spell-element": uiCore,
-  "$/ui/core": uiCore,
-  "$/ui/forms": uiForms,
-  "$/ui/components/ui-root": uiRoot,
-  "$/ui/components/ui-code": uiCode,
-  "$/ui/components/ui-markdown": uiMarkdown
+  "spell-kit/element": uiCore,
+  "spell-ui/core": uiCore,
+  "spell-ui/forms": uiForms,
+  "spell-ui/components/ui-root": uiRoot,
+  "spell-ui/components/ui-code": uiCode,
+  "spell-ui/components/ui-markdown": uiMarkdown
 })
 
 /**

@@ -15,7 +15,7 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <!--
-          TEMPLATE:  `epic pages new commands <topic>/<topic>.html` copies this page AND `commands.json5` beside it,
+          TEMPLATE:  `epic pages create commands <topic>/<topic>.html` copies this page AND `commands.json5` beside it,
           as `<topic>.json5`.
           - The operations live in the JSON;  `_assets/commands.js` draws them in place of `[data-commands-families]`
             (one nested `<ui-section>` per family, its `<ui-table>`), `[data-commands-stats]` (a `<ui-statistic>`
@@ -43,7 +43,7 @@
           >
         </ui-list>
 
-        <ui-section id="1-summary" header="1. Summary" sticky collapsible dividing>
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing>
           <ui-icon slot="icon" name="lightbulb"></ui-icon>
           <ui-statistics class="spell-stats" size="mini" data-commands-stats></ui-statistics>
           <ul>
@@ -79,7 +79,7 @@
           </ui-table>
         </ui-section>
 
-        <ui-section id="2-operations" header="2. Operations" sticky collapsible dividing>
+        <ui-section id="2-operations" label="2. Operations" sticky collapsible dividing>
           <ui-icon slot="icon" name="list check"></ui-icon>
           <div class="spell-filter">
             <ui-input
@@ -92,7 +92,7 @@
           <div data-commands-families></div>
         </ui-section>
 
-        <ui-section id="3-notes" header="3. Notes" sticky collapsible dividing>
+        <ui-section id="3-notes" label="3. Notes" sticky collapsible dividing>
           <ui-icon slot="icon" name="book open"></ui-icon>
           <p>Hand-written prose: how each surface adds a command, oddities, the target.</p>
         </ui-section>

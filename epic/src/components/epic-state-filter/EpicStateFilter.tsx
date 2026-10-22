@@ -4,19 +4,19 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell-ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import { StateFilter } from "$/epics/components/epic-section/StateFilter"
+import { StateFilter } from "spell-epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
   FILTER,
   FILTER_STATES,
   type FilterState
-} from "$/epics/components/epic-section/EpicSection.types"
+} from "spell-epic/components/epic-section/EpicSection.types"
 
 import { epicStateFilterVocabulary } from "./EpicStateFilter.en"
 import { STATE_PICK, type StatePickDetail } from "./EpicStateFilter.types"
 
-import tooltipCSS from "$/epics/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 import filterCSS from "./EpicStateFilter.css?inline"
 
 /****************
