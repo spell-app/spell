@@ -504,6 +504,22 @@ export type PatchReport = {
  * - `review`:  snapshot entries to show Owen (`SnapshotReview`)
  * - `unstaged`:  files a generator changed outside its `outputs`, left for a person to look at
  */
+/**
+ * What `epic merge` did in one repo (`Requests.merge()`, `mergeEach()`).
+ * - `repo`:  a multi-repo top's repo, its folder name;  left out for a single repo
+ * - `base`:  its base branch;  `commits`:  the ones brought onto it, oldest first
+ * - `ditched`:  the stray files moved aside first (`StrayFiles`), from the checkout's root;  `ditchedTo`:  where
+ */
+export type MergeResult = { repo?: string; base: string; commits: string[]; ditched: string[]; ditchedTo?: string }
+
+/**
+ * `Requests.merge()`'s options.
+ * - `ditch`:  move aside the few hand-made stray files too, once Owen said so (`StrayFiles.ASK_LIMIT`)
+ * - `ditched`:  the folder they go into;  default a new one in the epic home (`StrayFiles.folderFor()`)
+ * - `label`:  how its errors name the checkout
+ */
+export type MergeOptions = { ditch?: boolean; ditched?: string; label?: string }
+
 export type MergeMainReport = {
   branch: string
   result: "up-to-date" | "fast-forward" | "merged" | "conflicts"
@@ -516,6 +532,11 @@ export type MergeMainReport = {
   repo?: string
   /** a multi-repo top's:  why this repo's merge couldn't start or go on (the others went on) */
   error?: string
+  /**
+   * the install command run after it, because it changed a lockfile (`MainMerge.reinstall()`):  `command`, the
+   * `lockfiles` changed, whether it worked;  left out when none changed
+   */
+  installed?: { command: string; lockfiles: string[]; ok: boolean }
 }
 
 /**

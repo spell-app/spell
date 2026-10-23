@@ -207,7 +207,9 @@ describe("gate()", () => {
     )
     const busy = gate({ prompt: "/epic resume foo", cwd: WORKTREE }, null)
     expect(busy?.hookSpecificOutput?.sessionTitle).toBeUndefined()
-    expect(busy?.hookSpecificOutput?.additionalContext).toMatch(/epic window launch foo --prompt "\/epic resume foo"`\./)
+    expect(busy?.hookSpecificOutput?.additionalContext).toMatch(
+      /epic window launch foo --prompt "\/epic resume foo"`\./
+    )
     rmSync(transcript)
   })
 

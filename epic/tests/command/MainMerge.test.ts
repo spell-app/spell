@@ -107,6 +107,32 @@ describe("MainMerge.run()", () => {
     expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/uncommitted changes/)
     expect(() => new MainMerge({ root: repo, ...OPTIONS }).run("continue")).toThrow(/no merge in progress/)
   })
+  test("a merge or fast-forward that changed the lockfile installs the packages;  a failed install is reported", () => {
+    const repo = makeRepo("lockfile")
+    const marker = join(TEMP, "lockfile-installed")
+    const install = ["node", "-e", `require("fs").appendFileSync(${JSON.stringify(marker)}, "x")`]
+    // no lockfile change:  no install
+    change(repo, "main", { "src/a.txt": "A2\n" })
+    expect(new MainMerge({ root: repo, ...OPTIONS, install }).run().installed).toBeUndefined()
+    expect(existsSync(marker)).toBe(false)
+
+    change(repo, "main", { "yarn.lock": "v2\n" })
+    expect(new MainMerge({ root: repo, ...OPTIONS, install }).run()).toMatchObject({
+      result: "fast-forward",
+      installed: { command: install.join(" "), lockfiles: ["yarn.lock"], ok: true }
+    })
+    change(repo, "wip", { "src/b.txt": "B2\n" })
+    change(repo, "main", { "yarn.lock": "v3\n" })
+    expect(new MainMerge({ root: repo, ...OPTIONS, install }).run()).toMatchObject({
+      result: "merged",
+      installed: { lockfiles: ["yarn.lock"], ok: true }
+    })
+    expect(read(TEMP, "lockfile-installed")).toBe("xx")
+
+    change(repo, "main", { "yarn.lock": "v4\n" })
+    const failing = new MainMerge({ root: repo, ...OPTIONS, install: ["node", "-e", "process.exit(1)"] }).run()
+    expect(failing.installed).toMatchObject({ ok: false })
+  })
 })
 
 /**

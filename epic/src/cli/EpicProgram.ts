@@ -142,8 +142,11 @@ export class EpicProgram {
       .addHelpText("after", example("epic home epic-workflow"))
 
     requests(epic.command("merge"))
-      .description("a standing epic's phase onto main at once, fast-forward only;  run in the main checkout")
-      .usage("<epic>")
+      .description(
+        "a standing epic's phase onto main at once, fast-forward only;  run in the main checkout;  a stray snapshot " +
+          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once Owen says so"
+      )
+      .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
   }
 

@@ -24,6 +24,9 @@ const isSnapshot = (file: string) => SNAPSHOTS.some((glob) => matchesGlob(file, 
  */
 const SNAPSHOT_UPDATE = (tests: string[]) => ["yarn", "vp", "test", "run", ...tests, "--update"]
 
+/** The lockfiles, at a checkout's root, whose change means the merged packages need installing. */
+const LOCKFILES = ["yarn.lock", "package-lock.json", "pnpm-lock.yaml", "bun.lock"]
+
 /****************
  * ### `MainMerge`
  * `epic worktree merge-main`:  merge `main` into this checkout's branch,
@@ -45,6 +48,7 @@ const SNAPSHOT_UPDATE = (tests: string[]) => ["yarn", "vp", "test", "run", ...te
  *   one NEITHER side had is new behaviour nobody reviewed, so it's reported (`review`), never hidden.
  * - Any OTHER file in conflict stops it mid-merge:
  *   Claude resolves those, `git add`s them, and runs it again with `--continue`.
+ * - A merge (or fast-forward) that changed a lockfile runs the checkout's install command after it (`reinstall()`).
  * - Node built-ins and git only:  no spell.
  ****************/
 export class MainMerge {
@@ -57,15 +61,20 @@ export class MainMerge {
   /** the command that updates the snapshots of `tests` */
   readonly snapshotUpdate: (tests: string[]) => string[]
 
+  /** the command that installs the packages, as words;  `[]`:  none */
+  readonly install: string[]
+
   /**
    * - `root`:  the checkout (a worktree, usually)
    * - `generators`:  default the checkout's own list (`generatorsOf()`)
    * - `snapshotUpdate`:  default `yarn vp test run <tests> --update`
+   * - `install`:  default the checkout's `installCommand` (`.epic/config.json5`;  `yarn install`)
    */
-  constructor({ root, generators, snapshotUpdate = SNAPSHOT_UPDATE }: MainMergeProps) {
+  constructor({ root, generators, snapshotUpdate = SNAPSHOT_UPDATE, install }: MainMergeProps) {
     this.root = root
     this.generators = generators ?? MainMerge.generatorsOf(root)
     this.snapshotUpdate = snapshotUpdate
+    this.install = install ?? EpicConfig.of(root).installCommand.split(/\s+/).filter(Boolean)
   }
 
   /**
@@ -90,6 +99,8 @@ export class MainMerge {
     }
 
     const merging = Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], root).ok
+    // ours, before the merge:  to see whether it changed a lockfile
+    const before = gitOut(root, ["rev-parse", "HEAD"])
     if (mode === "continue") {
       if (!merging) throw new EpicCommandError("merge-main --continue:  no merge in progress")
     } else {
@@ -102,7 +113,7 @@ export class MainMerge {
         return { ...report, result: "up-to-date" }
       if (Git.run(["merge-base", "--is-ancestor", "HEAD", upstream], root).ok) {
         mustGit(root, ["merge", "--ff-only", upstream])
-        return { ...report, result: "fast-forward" }
+        return { ...report, result: "fast-forward", ...this.reinstall(before) }
       }
       // Exits 1 on conflicts, which is fine:  MERGE_HEAD says it started
       const merge = Git.run(
@@ -178,7 +189,23 @@ export class MainMerge {
     )
     report.unstaged = changedFiles(root)
     mustGit(root, ["commit", "--no-edit"])
-    return report
+    return { ...report, ...this.reinstall(before) }
+  }
+
+  /**
+   * Install the merged packages when the merge changed a lockfile (epic `epic-engine` I77):  `install`, at the root.
+   * - Why:  a merge brought in main's `yarn.lock` (Solid rc.17) while rc.13 stayed installed;  the packs built here came
+   *   out on the old Solid, and main's pack check went red
+   * - `before`:  the branch's commit before the merge
+   * - `{}` when no lockfile changed, or there's no install command
+   * - NEVER throws:  the merge is committed;  a failed install is reported (`installed.ok`), to run by hand
+   */
+  private reinstall(before: string): Pick<MergeMainReport, "installed"> {
+    const { root, install } = this
+    const lockfiles = before ? gitLines(root, ["diff", "--name-only", before, "HEAD", "--", ...LOCKFILES]) : []
+    if (!lockfiles.length || !install.length) return {}
+    const run = spawnSync(install[0]!, install.slice(1), { cwd: root, stdio: ["ignore", 2, 2] })
+    return { installed: { command: install.join(" "), lockfiles, ok: run.status === 0 } }
   }
 
   /**
@@ -315,6 +342,7 @@ export type MainMergeProps = {
   root: string
   generators?: Generator[]
   snapshotUpdate?: (tests: string[]) => string[]
+  install?: string[]
 }
 
 /**

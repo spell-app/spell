@@ -252,7 +252,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `command/` -- what the `epic` command's verbs run (epic `epic-eject` P5).
     - a class per verb group, a method per verb:
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
-      - `Worktrees` (`worktree`), with `MainMerge` (`worktree merge-main`)
+      - `Worktrees` (`worktree`), with `MainMerge` (`worktree merge-main`:  installs the packages when it changed a
+        lockfile)
+      - `StrayFiles`:  what's uncommitted in a main checkout `epic merge` fast-forwards, and moving it aside into the
+        epic home's `ditched/` (epic `epic-engine` I77):  a snapshot or generated output by itself, a few others with
+        `--ditch`
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
