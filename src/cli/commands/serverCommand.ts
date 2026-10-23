@@ -134,28 +134,37 @@ export async function stopServers(which = "local"): Promise<number> {
   if (which === "local") return pageServer(["stop"])
   if (which !== "all") throw new CLI.CliError(`stop what?  '${which}':  local (default) or all`)
   const root = pageServerRoot(process.cwd())
+  // read first:  a page server that stops takes its editor down with it, and the editor's record too
+  const editorPid = editorPidOf(root)
   const stopped = await new SRV.PidFile(root).stop()
   CLI.out(`page server:  ${stopped ? "stopped" : "not running"}`)
-  CLI.out(`editor:  ${stopEditor(root)}`)
+  CLI.out(`editor:  ${stopEditor(root, editorPid, { withPageServer: stopped })}`)
   return CLI.EXIT.OK
 }
 
+/** The editor's pid, from `root`'s record;  `undefined` when there's none, or it can't be read. */
+function editorPidOf(root: string): number | undefined {
+  const file = join(root, EDITOR_FILE)
+  if (!existsSync(file)) return undefined
+  try {
+    return (JSON.parse(readFileSync(file, "utf8")) as { pid?: number }).pid
+  } catch {
+    // an unreadable record:  nothing to stop
+    return undefined
+  }
+}
+
 /**
- * Stop the editor `root`'s record names, when it's still running;  what happened, in a word or two.
- * - Its whole process group (Vite starts it detached), else the one process;  the record goes either way.
+ * Stop editor `pid` (from `root`'s record, read before the page server stopped);  what happened, in a few words.
+ * - Gone already, after `withPageServer` stopped:  the page server took it down with it
+ *   (epic `repo-split` I68:  this said "not running");  gone with no page server stopped:  "not running".
+ * - Else its whole process group (Vite starts it detached), else the one process;  the record goes either way.
  * - NEVER throws.
  */
-function stopEditor(root: string): string {
-  const file = join(root, EDITOR_FILE)
-  if (!existsSync(file)) return "not running"
-  let pid: number | undefined
-  try {
-    pid = (JSON.parse(readFileSync(file, "utf8")) as { pid?: number }).pid
-  } catch {
-    // an unreadable record:  nothing to stop, just the file
-  }
-  rmSync(file, { force: true })
+function stopEditor(root: string, pid: number | undefined, { withPageServer }: { withPageServer: boolean }): string {
+  rmSync(join(root, EDITOR_FILE), { force: true })
   if (!pid) return "not running"
+  if (!SRV.isProcessAlive(pid)) return withPageServer ? "stopped, with the page server" : "not running"
   for (const target of [-pid, pid]) {
     try {
       process.kill(target, "SIGTERM")
