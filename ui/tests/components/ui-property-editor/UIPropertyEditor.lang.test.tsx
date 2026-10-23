@@ -7,7 +7,6 @@ import "spell-ui"
 
 describe("<ui-property-editor> in another language", () => {
   it("a Spanish editor's properties find it, and read its schema:  `<es-editor-propiedades>` (outline-spell P29)", async () => {
-    // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
     await RootLoader.useLanguage("es")
     const host = await ElementFixture.render(
       `<es-editor-propiedades esquema="ui-button"><es-propiedad name="basic"></es-propiedad></es-editor-propiedades>`
@@ -25,7 +24,6 @@ describe("<ui-property-editor> in another language", () => {
   })
 
   it("a Spanish form's checkbox shows and writes its yes / no:  `<es-casilla>`'s `seleccionado` (outline-spell P29)", async () => {
-    // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
     await RootLoader.useLanguage("es")
     const task = { done: true }
     const host = await ElementFixture.render(`<es-formulario><es-casilla name="done"></es-casilla></es-formulario>`)
