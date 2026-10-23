@@ -37,12 +37,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell lang translate` (epic `spanish` P24-P26) is half and half:
+- `spell lang translate` (epic `spanish` P24-P27) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation
   - then [translateProject.ts](translateProject.ts), here, runs the three passes (names, lines, fix-ups),
-    runs `claude -p` (as fast as its flags make it), reads and writes the files, the shared glossary too (`--learn`)
+    reads and writes the files, the shared glossary too (`--learn`)
+  - and [claudeRunners.ts](claudeRunners.ts) asks Claude (epic `spanish` P27), `claudeRunnerFor()` picking:
+    - `claudeApiRunner()`:  the Claude API, one `fetch` a call (no SDK), when `ANTHROPIC_API_KEY` is set;
+      structured outputs, thinking off where the model can, the glossary cached, a 429 or 529 retried
+    - `runClaude()`:  `claude -p`, as fast as its flags make it, `--json-schema` too;
+      it says once, at the start, that a key would be faster
+    - `--model` (`withModel()`, in `translateProject.ts`):  one model for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
@@ -62,4 +68,5 @@ As WWOD §20, plus:
 - `spell lang packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
 - `spell lang translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
+  the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
   the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).

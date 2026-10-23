@@ -167,16 +167,39 @@ export type UIVocabulary = {
 }
 
 /**
- * Asks Claude `prompt`, and answers what it said (epic `spanish` P25-P26):  every pass asks through one of these.
- * - `effort`:  how hard it thinks, `claude --effort`:  less is faster -- default Claude's own.
- * - `model`:  which model, `claude --model`, e.g. `haiku` -- default Claude's own.
- * - Injected, so a test can answer with a fake;  the command's runs `claude -p`.
- *   Another way to ask (the Claude API, straight) is another `ClaudeRunner`:  no pass changes.
+ * Asks Claude `prompt`, and answers what it said (epic `spanish` P25-P27):  every pass asks through one of these.
+ * - Two of them, the command picks (`spell-lang/cli/claudeRunners`):
+ *   - the Claude API, straight, when `ANTHROPIC_API_KEY` is set:  no program to start for each call
+ *   - `claude -p` otherwise, signed in as the person
+ * - Injected, so a test can answer with a fake.
  * - throws if Claude couldn't be asked, or failed
  */
-export type ClaudeRunner = (prompt: string, options?: { effort?: ClaudeEffort; model?: string }) => Promise<string>
+export type ClaudeRunner = (prompt: string, options?: ClaudeOptions) => Promise<string>
 
-/** How hard `claude` thinks:  `claude --effort`. */
+/** How a pass wants Claude asked:  see `ClaudeRunner`. */
+export type ClaudeOptions = {
+  /** How hard it thinks:  less is faster -- default the model's own. */
+  effort?: ClaudeEffort
+  /**
+   * Which model, e.g. `opus`, `claude-sonnet-5-5` -- default the runner's:  `claude -p`'s own, the API's Opus 5.5.
+   * - `opus`, `sonnet` and `haiku` are the newest of each, through either runner.
+   */
+  model?: string
+  /**
+   * The answer's shape, a JSON schema:  Claude can only answer JSON that fits it.
+   * - Every object in it lists its properties, all required, with `additionalProperties: false`.
+   */
+  schema?: JsonSchema
+  /**
+   * What every call of a pass shares, e.g. the language pack's glossary:  in the system prompt, after its first line.
+   * - The API caches it, so the calls after the first read it for less, and sooner.
+   */
+  context?: string
+}
+
+/** A JSON schema, as `ClaudeOptions.schema` takes it. */
+export type JsonSchema = { [key: string]: unknown }
+
 export type ClaudeEffort = "low" | "medium" | "high"
 
 /** Something wrong with one line of a translated project, as lint or a failed test says (epic `spanish` P25). */

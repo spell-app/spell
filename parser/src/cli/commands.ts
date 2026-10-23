@@ -164,14 +164,16 @@ export default function languageCommands(spell: Command): void {
     .command("translate")
     .description(
       "write a project in another language:  its names first (<Project>.<lang>.names.json5:  the shared glossary's, " +
-        "then claude -p's), then line by line, rule by rule, then claude fixes each line that fails lint, a test " +
-        "or the shape check -- exits 1 if any line still needs a person"
+        "then Claude's), then line by line, rule by rule, then Claude fixes each line that fails lint, a test " +
+        "or the shape check -- through the Claude API with ANTHROPIC_API_KEY set, else claude -p -- " +
+        "exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
     .requiredOption("--to <lang>", "the language to write it in, e.g. es")
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
-    .option("--no-ai", "never ask claude -p:  each name the dictionary lacks stays TODO, and no line is fixed up")
+    .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
+    .option("--model <model>", "the Claude model every call asks, e.g. sonnet or claude-haiku-5-5 -- default opus")
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"

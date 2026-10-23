@@ -3,7 +3,12 @@ import { describe, expect, test } from "vite-plus/test"
 import { SP } from "spell-lang/spell"
 import { NamesPass } from "spell-lang/spell/translate/NamesPass"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
-import type { ClaudeRunner, DeclarationStatement, MissingName } from "spell-lang/spell/translate/translate.types"
+import type {
+  ClaudeOptions,
+  ClaudeRunner,
+  DeclarationStatement,
+  MissingName
+} from "spell-lang/spell/translate/translate.types"
 
 /**
  * The names pass (epic `spanish` P25-P26):  every name a project declares, and what its lines lack -- the types first,
@@ -50,6 +55,50 @@ const ANSWER = {
 }
 
 describe("NamesPass:  every name in one go, before any line", () => {
+  test("each call's answer has a schema of exactly the names it asks for;  genders a list, made a table (P27)", async () => {
+    const options: ClaudeOptions[] = []
+    const answers = [
+      { types: ANSWER.types, genders: [] },
+      {
+        names: ANSWER.names,
+        phrases: ANSWER.phrases,
+        genders: [
+          { word: "imagen", gender: "feminine" },
+          { word: "rango", gender: "masculine" }
+        ]
+      },
+      { names: { picture: "imagen" }, genders: [] }
+    ]
+    const run: ClaudeRunner = (_prompt, given = {}) => {
+      options.push(given)
+      return Promise.resolve(JSON.stringify(answers.shift()))
+    }
+    const names = new TranslationNames({}, { from: ENGLISH, to: SPANISH })
+    const pass = new NamesPass({ names, run, files: FILES, declarations: DECLARATIONS, glossary: "es:  `es`" })
+    await pass.draft(pass.wanted([]))
+    const gender = { type: "object", required: ["word", "gender"], additionalProperties: false }
+    expect(options[0]!.schema).toMatchObject({
+      required: ["types", "genders"],
+      additionalProperties: false,
+      properties: {
+        types: {
+          required: ["card", "stock pile"],
+          additionalProperties: false,
+          properties: { card: { required: ["name", "gender"], additionalProperties: false } }
+        },
+        genders: { type: "array", items: gender }
+      }
+    })
+    expect(options[1]!.schema).toMatchObject({
+      required: ["names", "phrases", "genders"],
+      properties: { names: { required: expect.arrayContaining(["ace", "king"]) } }
+    })
+    expect(options.map(({ model, effort }) => `${model} ${effort}`)).toEqual(["opus low", "opus low", "opus low"])
+    expect(options[1]!.context).toBe("## The Spanish glossary:  spell's own words\nes:  `es`")
+    expect(names.genderOf("imagen")).toBe("feminine")
+    expect(names.data.names.ace).toBe("as")
+  })
+
   test("asks for what the project declares and what the lines lack, less what the dictionary has", () => {
     const { pass } = namesPass({ names: { rank: "rango" } })
     const wanted = pass.wanted([

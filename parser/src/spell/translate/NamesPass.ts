@@ -3,6 +3,7 @@ import { NAMES_KINDS, TranslationNames } from "./TranslationNames"
 import type {
   ClaudeEffort,
   ClaudeRunner,
+  JsonSchema,
   DeclarationStatement,
   MissingName,
   NamesData,
@@ -22,6 +23,7 @@ import type {
  *   1. the TYPES alone, with their genders, in one small call:  every other name is built on them
  *   2. the rest -- members, phrases, texts, comments -- in a few calls SIDE BY SIDE, a group of files each
  *      (`groups()`), each shown its files, the types from stage 1 and the glossary, so the terms agree
+ * - Each answer is JSON of exactly the names asked for (`schemaFor()`):  the runner can't answer anything else.
  * - Each answer is checked readable by the other language's parser (`problemWith()`):
  *   those that aren't are asked for again, once, all together, saying why;  still unreadable, they're left out.
  * - `claude` runs through `run`, injected:  the command's runs `claude -p`;  a test answers with a fake.
@@ -38,7 +40,7 @@ export class NamesPass {
   readonly declarations: DeclarationStatement[]
   /** The program's words, its types' members by type (`SP.SpellWords`, its `<Project>.<lang>.js`), for the prompt. */
   readonly words: SP.SpellWordsData | undefined
-  /** The other language pack's glossary, for the prompt:  spell's own words in it. */
+  /** The other language pack's glossary, for the system prompt (`glossaryContext()`):  spell's own words in it. */
   readonly glossary: string | undefined
   /** The names other projects chose for words these files use (`NamesGlossary.relevantTo()`), for the prompt. */
   readonly shared: NamesData | undefined
@@ -308,23 +310,29 @@ export class NamesPass {
     const started = performance.now()
     let answer: string
     try {
-      answer = await this.run(this.prompt(wanted, { rejected, files }), { effort, model: NAMES_MODEL })
+      answer = await this.run(this.prompt(wanted, { rejected, files }), {
+        effort,
+        model: NAMES_MODEL,
+        schema: this.schemaFor(wanted),
+        context: glossaryContext(this.glossary, this.names.to)
+      })
     } catch (error) {
       this.notes.push(`claude couldn't draft the names:  ${error instanceof Error ? error.message : String(error)}`)
       return {}
     } finally {
       this.calls.push({ stage, ms: performance.now() - started })
     }
-    const parsed = jsonIn(answer) as NamesData | undefined
+    const parsed = jsonIn(answer) as (Omit<NamesData, "genders"> & { genders?: unknown }) | undefined
     if (!parsed) {
       this.notes.push("claude's names aren't JSON:  left them TODO")
       return {}
     }
     // only what was asked for:  an answer may add a type again under its compiled name (`StockPile`)
     const asked = new Set(wanted.map(({ kind, words }) => `${kind}:${words}`))
+    const answered: NamesData = { ...parsed, genders: gendersIn(parsed.genders) }
     return Object.fromEntries(
       NAMES_KINDS.map((kind) => {
-        const section = Object.entries(parsed[kind] ?? {})
+        const section = Object.entries(answered[kind] ?? {})
         return [
           kind,
           Object.fromEntries(kind === "genders" ? section : section.filter(([words]) => asked.has(`${kind}:${words}`)))
@@ -360,16 +368,17 @@ export class NamesPass {
     const itWord = [...(to.words.itWords ?? ["it"])][0]
     return [
       `Translate the names the people who wrote a spell program chose, from ${from.name} into ${to.name} (\`${to.lang}\`).`,
-      "Spell reads programs written in plain words;  its own words are already translated (the glossary, below).",
+      "Spell reads programs written in plain words;  its own words are already translated (the glossary, above).",
       "Translate them ALL together, so one thing has one word everywhere and the program reads as one language.",
-      "Fill in every empty value below, and answer with ONE JSON object of only those keys, and `genders`, in a ```json fence:",
+      "Fill in every empty value below, and answer with ONE JSON object of only those keys, and `genders`:",
       '- `types`:  each type\'s name, singular, as `{ "name": "...", "gender": "masculine" | "feminine" }`',
       "- `names`:  each property, variable, value or event, as written (a plural stays plural)",
       `  - NEVER with one of spell's own small words inside, which end a name:  ${smallWords(to)}`,
       "    e.g. `test card` => `candidata`, not `carta de prueba`;  one word is best",
       "  - NEVER a word already chosen for something else (below):  spell would read the two as one thing",
       "- `genders`:  ADD the gender of each noun you wrote in `names` that isn't a type's,",
-      '  by its word in the translation, singular:  `{ "imagen": "feminine", "palo": "masculine" }`',
+      "  by its word in the translation, singular:",
+      '  `[{ "word": "imagen", "gender": "feminine" }, { "word": "palo", "gender": "masculine" }]`',
       "- `phrases`:  a method's or quoted phrase's words, as declared:",
       `  - keep each \`(slot)\`, its words translated as \`names\` translates them;  write \`it\` as \`${itWord}\`,`,
       `    straight after the verb:  \`turn it face up\` => \`voltear ${itWord} boca arriba\`, \`turn it over\` => \`voltear ${itWord}\``,
@@ -408,9 +417,31 @@ export class NamesPass {
             "```"
           ]
         : []),
-      ...(files.length ? ["", "## The program", program] : []),
-      ...(this.glossary ? ["", `## The ${to.name} glossary:  spell's own words`, this.glossary] : [])
+      ...(files.length ? ["", "## The program", program] : [])
     ].join("\n")
+  }
+
+  /**
+   * The shape of the answer to a call for `wanted`:  each name asked for, by its section, and `genders`, a list.
+   * - Exactly what the prompt's "To fill in" shows, so Claude can't leave one out, add one, or answer prose.
+   * - `genders` is a list, as a schema can't name keys it doesn't know:  `gendersIn()` makes it a table again.
+   */
+  schemaFor(wanted: MissingName[]): JsonSchema {
+    const kinds = NAMES_KINDS.filter((kind) => kind !== "genders" && wanted.some((name) => name.kind === kind))
+    const properties = Object.fromEntries(
+      kinds.map((kind) => [
+        kind,
+        objectSchema(
+          Object.fromEntries(
+            wanted
+              .filter((name) => name.kind === kind)
+              .map(({ words }) => [words, kind === "types" ? objectSchema({ name: STRING, gender: STRING }) : STRING])
+          )
+        )
+      ])
+    )
+    const gender = objectSchema({ word: STRING, gender: STRING })
+    return objectSchema({ ...properties, genders: { type: "array", items: gender } })
   }
 
   ////////////////
@@ -459,6 +490,35 @@ export function jsonIn(answer: string): unknown {
   } catch {
     return undefined
   }
+}
+
+/** A JSON schema's string. */
+const STRING = { type: "string" }
+
+/** A JSON schema's object of exactly `properties`, every one required, as a structured answer needs. */
+export function objectSchema(properties: Record<string, unknown>): JsonSchema {
+  return { type: "object", properties, required: Object.keys(properties), additionalProperties: false }
+}
+
+/**
+ * The other language pack's glossary (`GLOSSARY.md`), as a pass's shared `context`:  spell's own words in it.
+ * - The same text for every call of a run, so the API reads it from its cache after the first.
+ */
+export function glossaryContext(glossary: string | undefined, to: SP.Language): string | undefined {
+  return glossary && `## The ${to.name} glossary:  spell's own words\n${glossary}`
+}
+
+/**
+ * The genders an answer gave, as a table, `{ imagen: "feminine" }`:  from the list a schema asks for
+ * (`[{ word, gender }]`), or a table as it was.
+ */
+function gendersIn(genders: unknown): Record<string, string> | undefined {
+  if (!Array.isArray(genders)) return genders as Record<string, string> | undefined
+  return Object.fromEntries(
+    genders.flatMap((each: { word?: unknown; gender?: unknown }) =>
+      typeof each?.word === "string" && typeof each.gender === "string" ? [[each.word, each.gender]] : []
+    )
+  )
 }
 
 /** Does `shared` (the glossary's names for a prompt) hold any? */

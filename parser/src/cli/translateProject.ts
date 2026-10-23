@@ -3,11 +3,13 @@
  * 1. NAMES:  every name the project's people chose, into its names dictionary:  its types, properties, values and
  *    methods (its declarations), its texts and comments
  *    - first from the language pack's shared glossary (`NamesGlossary`):  no call for a name another project chose
- *    - the rest by `claude -p` (`NamesPass`):  the types in one small call, then the rest in a few calls at once
+ *    - the rest by Claude (`NamesPass`):  the types in one small call, then the rest in a few calls at once
  * 2. LINES:  each file written again, line by line, by its rules' twins in the other language (`Translator`)
  * 3. FIX-UPS:  each line that fails lint or a test, compiles to a different program than its English (`ShapeCheck`),
- *    couldn't be written, or may read in the wrong order, written again by `claude -p` in context (`FixUps`);
+ *    couldn't be written, or may read in the wrong order, written again by Claude in context (`FixUps`);
  *    checked again, a few rounds at most
+ * - Claude through the API when `ANTHROPIC_API_KEY` is set, else `claude -p` (`claudeRunnerFor()`, epic `spanish` P27);
+ *   `--model` picks the model for every call.
  * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
@@ -18,10 +20,8 @@
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
-import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -29,6 +29,7 @@ import { keepingCommentsIn, readJSON5File } from "spell-kit/util/node/json5"
 import { CLI } from "spell-kit/cli"
 import { SP } from "spell-lang/spell"
 import type { TranslateOptions } from "spell-lang/cli"
+import { claudeRunnerFor, type ChosenRunner } from "spell-lang/cli/claudeRunners"
 import { ElementNames } from "spell-lang/spell/translate/ElementNames"
 import { FixUps, type FixUpFile, type FixUpLine } from "spell-lang/spell/translate/FixUps"
 import { NamesGlossary } from "spell-lang/spell/translate/NamesGlossary"
@@ -38,7 +39,6 @@ import { ShapeCheck } from "spell-lang/spell/translate/ShapeCheck"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import { Translator } from "spell-lang/spell/translate/Translator"
 import type {
-  ClaudeEffort,
   ClaudeRunner,
   DeclarationStatement,
   GlossaryData,
@@ -76,7 +76,8 @@ export type TranslateSource = {
 
 /**
  * Translate `source` into language `options.to`, and write it:  see the file's docstring.
- * - `run`:  how to ask Claude -- `claude -p` by default;  a test's fake.
+ * - `run`:  how to ask Claude -- a test's fake;  by default the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`
+ *   (`claudeRunnerFor()`, which says how to speed it up)
  * - `glossaryFile`:  the shared glossary -- the language pack's `glossary.json5` by default;  a test's own.
  * - Returns the exit code:  `EXIT.ERRORS` if any line still needs a person, fails lint, a test, or the shape check.
  * - Throws `CliError` for a language it doesn't know, or the language the project is already in;
@@ -85,7 +86,7 @@ export type TranslateSource = {
 export async function translateProject(
   source: TranslateSource,
   options: TranslateOptions,
-  run: ClaudeRunner = runClaude,
+  run?: ClaudeRunner,
   { glossaryFile = glossaryFileFor(options.to) }: { glossaryFile?: string } = {}
 ): Promise<number> {
   const started = performance.now()
@@ -96,6 +97,8 @@ export async function translateProject(
   const to = SP.Language.for(options.to)
   if (to === from) throw new CLI.CliError(`${source.projectName} is in ${to.name} already`)
   const ai = options.ai !== false
+  const chosen: ChosenRunner = run ? { run, via: "claude" } : claudeRunnerFor(process.env, { ai: ai && !options.learn })
+  const ask = withModel(chosen.run, options.model)
 
   const paths = translationPaths(source, to)
   const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
@@ -119,7 +122,7 @@ export async function translateProject(
   let plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
   const namesPass = new NamesPass({
     names,
-    run,
+    run: ask,
     files: source.files,
     declarations: source.declarations ?? [],
     words: source.words,
@@ -158,7 +161,7 @@ export async function translateProject(
 
   // 3. fix-ups:  each line wrong in context, a round at a time, checked between
   mark = performance.now()
-  const fixUps = new FixUps({ run, names, glossary })
+  const fixUps = new FixUps({ run: ask, names, glossary })
   const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai, shapes: new ShapeCheck() })
   timings.fixUps = performance.now() - mark
 
@@ -180,7 +183,7 @@ export async function translateProject(
     paths,
     timings,
     checked,
-    calls: { names: namesPass.calls, fixUps: fixUps.durations },
+    calls: { names: namesPass.calls, fixUps: fixUps.durations, via: chosen.via },
     notes: [...namesPass.notes, ...fixUps.notes]
   })
 }
@@ -601,42 +604,10 @@ const NOT_COPIED =
 // ## Asking claude
 ////////////////
 
-/**
- * Run `claude -p` on `prompt`:  what it printed.
- * - As fast as its flags make it (epic `spanish` P26):
- *   - no tools, from a folder of its own:  it only answers
- *   - `--safe-mode`, `--strict-mcp-config`:  none of the person's hooks, plugins, MCP servers or `CLAUDE.md`
- *   - its own short system prompt, not Claude Code's long one
- *   - `--no-session-persistence`:  no session saved
- * - `effort`, `model`:  `claude --effort`, `--model`, when given.
- * - Several at once run side by side (the names pass's second stage).
- * - throws if it couldn't run, or failed
- * - SIDE EFFECT:  runs `claude`;  it must be on the `PATH`, signed in.
- */
-function runClaude(prompt: string, { effort, model }: { effort?: ClaudeEffort; model?: string } = {}): Promise<string> {
-  return new Promise((done, fail) => {
-    const args = [
-      "-p",
-      ...["--tools", "", "--safe-mode", "--strict-mcp-config", "--no-session-persistence"],
-      ...["--system-prompt", CLAUDE_SYSTEM_PROMPT],
-      ...(effort ? ["--effort", effort] : []),
-      ...(model ? ["--model", model] : [])
-    ]
-    const child = spawn("claude", args, { cwd: tmpdir(), stdio: ["pipe", "pipe", "pipe"] })
-    let stdout = ""
-    let stderr = ""
-    child.stdout.on("data", (data) => (stdout += data))
-    child.stderr.on("data", (data) => (stderr += data))
-    child.on("error", fail)
-    child.on("close", (code) => (code === 0 ? done(stdout) : fail(new Error(stderr || `claude exited ${code}`))))
-    child.stdin.end(prompt)
-  })
+/** `run`, asking `model` (`--model`) when given, whatever model a pass names. */
+function withModel(run: ClaudeRunner, model: string | undefined): ClaudeRunner {
+  return model ? (prompt, options) => run(prompt, { ...options, model }) : run
 }
-
-/** What `claude -p` is told it is, in place of Claude Code's own system prompt. */
-const CLAUDE_SYSTEM_PROMPT =
-  "You translate programs written in spell, a programming language of plain words, from one human language into " +
-  "another.  Answer only with what you're asked for, in the form asked for."
 
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */
 function glossaryFor(lang: string): string | undefined {
@@ -703,7 +674,7 @@ function report(done: {
   paths: { names: string; record: string }
   timings: Timings
   checked: CheckResult
-  calls: { names: Array<{ stage: NamesStage; ms: number }>; fixUps: number[] }
+  calls: { names: Array<{ stage: NamesStage; ms: number }>; fixUps: number[]; via: string }
   notes: string[]
 }): number {
   const { source, to, outFolder, translated, outputs, plans, seeded, drafted, paths, timings, checked, calls } = done
@@ -738,7 +709,7 @@ function report(done: {
     .filter((name) => stage(name).length)
     .map((name) => `${name} ${stage(name).length}${each(stage(name))}`)
   CLI.out(
-    `  claude -p:  ${calls.names.length + calls.fixUps.length} calls:  ` +
+    `  ${calls.via}:  ${calls.names.length + calls.fixUps.length} calls:  ` +
       [...namesCalls, `fix-ups ${calls.fixUps.length}${each(calls.fixUps)}`].join(", ")
   )
   const { tests, shapes } = checked

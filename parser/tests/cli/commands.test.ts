@@ -38,6 +38,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "--out",
       "--update",
       "--no-ai",
+      "--model",
       "--seed",
       "--learn"
     ])

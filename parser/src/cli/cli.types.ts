@@ -47,6 +47,8 @@ export type LanguageCommand = keyof LanguageCommands
  * - `ai`:  `false` (`--no-ai`) leaves each name the dictionary lacks as `TODO`, instead of asking `claude -p`
  * - `seed`:  a project translated by hand, whose names fill the dictionary first, e.g. `@spell/examples/Solitario`
  * - `learn`:  translate nothing;  add the project's dictionary to the language's shared glossary (epic `spanish` P26)
+ * - `model`:  the Claude model every call asks, e.g. `sonnet`, `claude-haiku-5-5` -- default each pass's (`opus`)
+ *   (epic `spanish` P27)
  */
 export type TranslateOptions = GlobalOptions & {
   to: string
@@ -55,6 +57,7 @@ export type TranslateOptions = GlobalOptions & {
   ai?: boolean
   seed?: string
   learn?: boolean
+  model?: string
 }
 
 /**

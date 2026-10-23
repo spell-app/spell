@@ -94,6 +94,18 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     ])
   })
 
+  test("--model:  every call asks that model, whatever model a pass names;  the report says how it asked (P27)", async () => {
+    const models: Array<string | undefined> = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      models.push(options?.model)
+      return claude.run(prompt, options)
+    }
+    await translate(source(), { to: "es", out: join(folder, "Cartas"), model: "claude-sonnet-5-5" }, run)
+    expect(models).toEqual(["claude-sonnet-5-5", "claude-sonnet-5-5", "claude-sonnet-5-5"])
+    expect(printed().find((line) => line.startsWith("  claude:"))).toMatch(/^  claude:  3 calls:  types 1/)
+  })
+
   test("a line a check says is wrong goes back too, round after round, until it passes or 3 rounds are up", async () => {
     // a claude that never fixes it:  three rounds asked, then left for a person
     const claude = fakeClaude({ fixes: [] as unknown[] })
