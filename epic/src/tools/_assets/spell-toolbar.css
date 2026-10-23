@@ -276,7 +276,9 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   font: 500 12px/1.3 var(--spell-sans);
   white-space: nowrap;
   /* a faint light ring, so the dark glass shows on a dark page too */
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14), 0 4px 14px rgb(0 0 0 / 0.18);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    0 4px 14px rgb(0 0 0 / 0.18);
   pointer-events: none;
 }
 .spell-toolbar-tip kbd {
@@ -485,11 +487,19 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
 }
 ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before {
   right: 100%;
-  background: radial-gradient(circle at 0 100%, transparent calc(var(--site-tabs-band, 8px) - 0.5px), var(--_panel-glass) var(--site-tabs-band, 8px));
+  background: radial-gradient(
+    circle at 0 100%,
+    transparent calc(var(--site-tabs-band, 8px) - 0.5px),
+    var(--_panel-glass) var(--site-tabs-band, 8px)
+  );
 }
 ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
   left: 100%;
-  background: radial-gradient(circle at 100% 100%, transparent calc(var(--site-tabs-band, 8px) - 0.5px), var(--_panel-glass) var(--site-tabs-band, 8px));
+  background: radial-gradient(
+    circle at 100% 100%,
+    transparent calc(var(--site-tabs-band, 8px) - 0.5px),
+    var(--_panel-glass) var(--site-tabs-band, 8px)
+  );
 }
 /*
  * while the tabs are stuck (`main.site-tabs-stuck`, set by the site;  through a pane's end too, as the panel leaves), a
@@ -503,7 +513,14 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
   inset: calc(-1 * (var(--_panel-up) + var(--site-tabs-gap, 10px)))
     calc(var(--site-tabs-band, 8px) - var(--site-gutter, 3em)) calc(-1 * var(--site-tabs-gap, 10px));
   z-index: -2;
-  background: var(--ui-section-sticky-background, var(--ui-bar-background, var(--spell-rail-fill)));
+  /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`, Owen:  "so it doesn't
+     have to go to white");  else the stuck titles' colour */
+  background-color: var(
+    --ui-bar-wallpaper-color,
+    var(--ui-section-sticky-background, var(--ui-bar-background, var(--spell-rail-fill)))
+  );
+  background-image: var(--ui-bar-wallpaper, none);
+  background-attachment: fixed;
   backdrop-filter: var(--ui-bar-filter, none);
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
