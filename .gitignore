@@ -25,6 +25,3 @@ PARKED-*.md
 # the declarations the kit builds for the repos above it (`spell-types`, epic repo-split I12):  never committed
 dist-types/
 
-# the project file Spell's language server writes into a folder of loose `.spell` files it opens (the outline card's
-# example in `docs/drafts/card-example/`):  never committed, so a main checkout with one open stays clean for merges
-/docs/**/__project.json5

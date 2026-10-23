@@ -556,7 +556,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
     - "Spell" capitalised in prose, like a name;  lowercase only in code (the command, `.spell`, package names)
     - an internal repo is never named:  not in text, tables, pictures or a "needs" list
     - a link into another of Spell's repos is its GitHub URL (`https://github.com/spell-app/<repo>/blob/main/...`)
-    - a card shown as an example is the owner's outline card (the kit's `docs/drafts/card-example/`)
+    - a card shown as an example is the owner's outline card, as the kit's `README.md` shows it
   - in-flight design notes go in an epic page (`epics/`), not beside the README
   - NOT:  a `README.md` in each package folder -- they were folded into the repos' pages and deleted (epic
     `readme` Q5).

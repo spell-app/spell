@@ -86,7 +86,7 @@ Not started.  What the owner said, and what the drafts already show:
   [essay-2.md](essay-2.md).  A person, an afternoon, a program she can read, a line she changes;  and the argument
   behind it, in the essay's order (HyperCard, why English, what an AI that writes programs changes).
 - **Live examples:**  every code block can run.  The pieces exist:  `<spell-editor>` in the app, the browser
-  compiler, and `<ui-*>` components.  The card in [card-example/Card.spell](card-example/Card.spell) is the first
+  compiler, and `<ui-*>` components.  The card in the kit's `README.md` (its first example) is the first
   example to make live:  edit a rule, the cards on the page change.
 - **Readers:**  the curious novice first (round 2's direction), the developer after a clear line.
 - **Reuse:**  the website can take whole paragraphs from [essay-2.md](essay-2.md) and

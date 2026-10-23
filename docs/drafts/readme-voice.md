@@ -7,7 +7,6 @@ Read that page end to end before you write a word of yours;  this guide says wha
 
 Files you work from, all in `docs/drafts/` of the kit (this checkout, `/Users/owen/www/spell.worktrees/readme`):
 - [final.md](final.md):  the voice, on the kit's front page
-- [card-example/](card-example/):  THE card example, verbatim, and what it compiles to in JavaScript, TypeScript and Python
 - [reference/cli-help-tree.txt](reference/cli-help-tree.txt):  every `spell` command as it is now, and `epic --help`
 - [tools/readme-compare.mjs](tools/readme-compare.mjs):  lists facts in the old page that your rewrite lost
 - [tools/p14-check.mjs](tools/p14-check.mjs):  the page check (links, anchors, banned words ...) against the FINISHED
@@ -174,7 +173,7 @@ the same list, three times.
   pages, no "Brand UI", not in text, tables, diagrams or pasted output.
   If a feature only exists for it, cut the feature from the page.
   List every cut in your report, so the owner can restore one.
-- **The card example is the card in [card-example/Card.spell](card-example/Card.spell).**  Verbatim, tabs and all.
+- **The card example is the card in the kit's `README.md` (its first example).**  Verbatim, tabs and all.
   Its compiled JavaScript, TypeScript and Python are in the same folder:  real output from
   `spell compile --stdout [--target ts/solid|py]` on a project named `solitaire` (so the element is
   `<solitaire-card>`).
