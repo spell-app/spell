@@ -1,6 +1,7 @@
 import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
+import { Wording } from "spell-lang/spell/rules/expressions"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell-lang/spell/rules/Statement"
 import { SubjectRule } from "spell-lang/spell/rules/types"
@@ -79,6 +80,7 @@ export class MethodDefinition<
       if (initialType.varName && initialType.varName !== initialType.name) {
         signature.extraVars.push({ name: initialType.varName, output: "this", type: "alias" })
       }
+      if (MethodDefinition.isDrawing(signature.methodBits, scope)) signature.methodBits = ["draw"]
     }
     const { asTest } = groups as { asTest?: P.Match }
     if (asTest) {
@@ -87,6 +89,21 @@ export class MethodDefinition<
       signature.syntaxBits.unshift(`${asTest.raw ?? asTest.value}`.toLowerCase())
     }
     return signature
+  }
+
+  /**
+   * Do a type's method's words, its type taken out, say "draw it" in the language?
+   * Then the method is the type's drawing, `draw()`, whatever the language's verb (epic `spanish` J84).
+   * - Spanish's sentence style:  `para dibujar una carta:` => `Carta.prototype.draw`, as `- para dibujarla:` is;
+   *   its words alone would make `dibujar()`, which nothing calls.
+   * - Read by the `draw_method` word rule, the words then the language's word for `it` as an object
+   *   (`dibujar eso`):  English's `draw` is `draw()` already.
+   */
+  static isDrawing(methodBits: string[], scope: P.Scope): boolean {
+    const words = methodBits.join(" ")
+    if (!words || !scope.parser?.rules["draw_method"]) return false
+    const itWords = SP.Language.of(scope).words.itWords ?? []
+    return [...itWords].some((it) => Wording.reads(scope, "draw_method", `${words} ${it}`, "draw"))
   }
 
   /**

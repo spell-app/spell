@@ -394,15 +394,15 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "- Everything a thing has.",
       "- Its tag starts with the project's or library's name, made singular:  `<solitaire-card>` in a solitaire app.",
       "- `a drawable thing` and `a drawable` both say it.",
+      "- ONE drawing, its `to draw it`:  a card face down checks its own direction there.",
       "",
       "```spell",
-      "a card is a drawable thing",
-      "a card has a rank as a number",
-      "to draw (a card)",
-      "  return <div>{its rank}</div>",
+      "a card is a drawable thing where:",
+      "  - its rank is a number",
+      '  - to "draw it": <div>{its rank}</div>',
       "```"
     ),
-    rules: ["create_type"],
+    rules: ["create_type", "draw_it"],
     members: []
   },
   {
@@ -411,13 +411,19 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
     docstring: md(
       "A list drawn as its own custom element, its items inside it -- `a pile is a drawable list of cards`.",
       "- Everything a list has.",
-      "- Its `to draw` draws its outside;  each item draws itself, inside it.",
+      "- Its `to draw it` is the WRAPPER around its items:  by default nothing but the place they show, `<children/>`.",
+      "- Its `to draw each item` is the wrapper each item is drawn in:  by default just the item's own drawing.",
+      "- A drawing that fails shows a small stand-in instead;  the rest keeps drawing.",
       "",
       "```spell",
-      "a pile is a drawable list of cards",
+      "a pile is a drawable list of cards where:",
+      "  - to draw it:",
+      '    return <div class="pile"><children/></div>',
+      "  - to draw each item:",
+      '    return <div class="spot">{draw the card}</div>',
       "```"
     ),
-    rules: ["create_drawable_list_type"],
+    rules: ["create_drawable_list_type", "draw_it"],
     members: []
   },
   {
@@ -581,13 +587,22 @@ export function typeName(written: string): P.Datatype {
  *     - Under the language's own words, if it has any, its `output` the member's name:
  *       Spanish's `nombre` compiles to `.name`.
  *   - A member spelled only by built-in RULES (no `readAs`) is docs alone.
+ * - `keepExisting`:  leave a member the scope already has by that name, as it is --
+ *   for a root of several languages, loaded once per language (`SP.Language.rootScopeFor()`).
  * - Throws for a type the scope doesn't have, or a template `parseReadAsTemplate()` can't read.
  * - SIDE EFFECT:  changes the shared root's types, once -- `SpellParser.rootScope` calls it as it builds.
  */
-export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = SP.Language.default.words): void {
+export function loadBuiltInTypes(
+  scope: P.RootScope,
+  words: SP.LanguageWords = SP.Language.default.words,
+  { keepExisting = false }: { keepExisting?: boolean } = {}
+): void {
   for (const entry of BUILT_IN_TYPE_TABLE) {
     const type = scope.types.get(entry.name, "LOCAL_ONLY")
     if (!type) throw new TypeError(`Built-in type '${entry.name}' isn't in the root scope:  see P.BUILT_IN_TYPES`)
+    const addMember = (props: P.ScopeVariableProps) => {
+      if (!keepExisting || !type.variables.get(props.name, "LOCAL_ONLY")) type.variables.add(props)
+    }
     if (entry.itemType) type.itemType = entry.itemType
     for (const member of entry.members) {
       // the language's own words for it, e.g. Spanish's `largo` for `length`:  each reads the same
@@ -599,7 +614,7 @@ export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = S
           const name = builtInMemberName(said)
           // compiled by its own name:  Spanish's `nombre` reads and sets `.name`
           const renamed = name !== output ? { output } : {}
-          type.variables.add({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, datatype, docstring })
+          addMember({ name, ...(said !== name ? { asWritten: said } : {}), ...renamed, datatype, docstring })
         }
         continue
       }
@@ -607,7 +622,7 @@ export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = S
         for (const said of local) {
           const name = builtInMemberName(said)
           const { datatype, readAs, docstring } = member
-          type.variables.add({ name, ...(said !== name ? { asWritten: said } : {}), datatype, readAs, docstring })
+          addMember({ name, ...(said !== name ? { asWritten: said } : {}), datatype, readAs, docstring })
         }
         continue
       }
@@ -618,7 +633,7 @@ export function loadBuiltInTypes(scope: P.RootScope, words: SP.LanguageWords = S
       const { datatype, readAs, docstring } = member
       const name = builtInMemberName(member.words)
       const asWritten = member.words !== name ? { asWritten: member.words } : {}
-      type.variables.add({ name, ...asWritten, datatype, readAs, docstring })
+      addMember({ name, ...asWritten, datatype, readAs, docstring })
     }
   }
 }
@@ -647,7 +662,7 @@ export function parseReadAsTemplate(template: string): SP.ReadAsTemplate | undef
  * - The last is a VALUE kind's property, e.g. `Suit.color({it})` -- never in the table:  see `value_kind`.
  */
 const READ_AS_TEMPLATE =
-  /^(?:\{it\}\.(\w+)|\{it\}\.(\w+)\(\)|core\.(\w+)\(\{it\}\)|(?!core\.)([A-Z]\w*)\.(\w+)\(\{it\}\))$/
+  /^(?:\{it\}\.(\w+)|\{it\}\.(\w+)\(\)|core\.(\w+)\(\{it\}\)|(?!core\.)(\p{Lu}[\p{L}\p{N}_$]*)\.([\p{L}\p{N}_$]+)\(\{it\}\))$/u
 
 ////////////////
 // ## Lookups
@@ -687,10 +702,8 @@ export function builtInMembersOfRule(ruleName: string): Array<{ type: SP.BuiltIn
  */
 export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
   if (!type) return false
-  // any language's root:  a Spanish project's built-ins are its own root scope's
-  return [...SP.Language.all.values()].some(
-    (language) => language.rootScope.types.get(type.name, "LOCAL_ONLY") === type
-  )
+  // any root:  a Spanish project's built-ins are its own language's root's, a mixed project's its own root's
+  return SP.Language.rootScopes.some((root) => root.types.get(type.name, "LOCAL_ONLY") === type)
 }
 
 /**

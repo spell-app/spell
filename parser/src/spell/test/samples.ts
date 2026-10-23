@@ -4,7 +4,7 @@ import { resolve } from "path"
 /**
  * Hand-written samples of what a target writes, beside this file:  `<Name>.sample.<ext>`.
  * - For testing what's around a writer (checking its output, building it, running it) apart from the writer itself.
- * - Not spell projects:  those are the fixtures, `tests/spaces/@spell/test/`.
+ * - Not spell projects:  those are the frozen test projects, spell-app's `spaces/@spell/test/`.
  */
 const SAMPLES_DIR = import.meta.dirname
 

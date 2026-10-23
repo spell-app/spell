@@ -148,6 +148,14 @@ export class SpellLocation {
     return !!this.projectId && !!this.folder && !!this.file
   }
 
+  /**
+   * Is this a spell source file:  its name ends `.spell`, in any language -- `Card.spell`, `Carta.es.spell`?
+   * - Not `extension === ".spell"`:  a language's file's is `.es.spell` (epic `spanish` P19).
+   */
+  get isSpellFile(): boolean {
+    return !!this.file?.endsWith(".spell")
+  }
+
   ////////////////
   // ## Syntactic sugar
   ////////////////

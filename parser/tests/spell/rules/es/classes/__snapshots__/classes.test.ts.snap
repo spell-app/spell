@@ -11,7 +11,7 @@ exports[`testing spell module classes, in Spanish > rule group specs > match sna
   "create_thing": "type|props?",
   "create_type": "type|aka?|superType|with_nested_statements?|body?",
   "define_property_has": "type|property|specifier?|rule?|body?",
-  "draw_side": "alias|body?",
+  "draw_it": "alias?|body?|phrase?",
   "every_thing": "type",
   "its_quoted_property": "type|property",
   "list_guard": "type|verb|item|body?|never?",

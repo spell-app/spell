@@ -49,9 +49,28 @@ export class NewThing extends SpellStatement<"type|props?", { builtInNames?: Rec
     if (!(scopeType instanceof P.TypeScope)) return
     for (const item of match.groups.props?.items ?? []) {
       const key = `${(item.groups.property as P.Match | undefined)?.value ?? ""}`
-      const builtIn = key ? SP.builtInStoredMember(scopeType, key) : undefined
-      if (builtIn && builtIn.name !== key) match.data.builtInNames = { ...match.data.builtInNames, [key]: builtIn.name }
+      const name = key
+        ? (SP.builtInStoredMember(scopeType, key)?.name ?? NewThing.storedNameAhead(match, scopeType, key))
+        : undefined
+      if (name && name !== key) match.data.builtInNames = { ...match.data.builtInNames, [key]: name }
     }
+  }
+
+  /**
+   * The member `key` names in the language's own words, for a type used above its declaration (a stub):
+   * e.g. `name` for `nombre`, in `- su "reserva" es una nueva pila de reserva con nombre = "reserva"`.
+   * - Its super-types aren't known yet, so any built-in type's `stored` member, by the language's words for it:
+   *   `nombre` compiles to `name` everywhere (J68).
+   * - `undefined` for a type spell knows, or a word that's no built-in member's.
+   */
+  private static storedNameAhead(match: P.MatchFor<NewThing>, type: P.TypeScope, key: string): string | undefined {
+    if (!type.stub) return undefined
+    const words = SP.Language.of(match.scope).words.builtInMembers ?? {}
+    const english = Object.keys(words).find((it) => words[it]!.includes(key))
+    const isStored = SP.BUILT_IN_TYPE_TABLE.some((entry) =>
+      entry.members.some((member) => member.stored && member.words === english)
+    )
+    return english && isStored ? SP.builtInMemberName(english) : undefined
   }
 
   /** `props`, each prop `names` holds going by the member's name instead:  `{ nombre: "mazo" }` => `{ name: "mazo" }`. */

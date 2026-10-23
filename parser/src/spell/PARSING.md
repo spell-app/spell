@@ -97,7 +97,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
     - `{space}` / `{spaces}` set the next part's
     - a symbol touching its flag repeats as a run (`#+`)
 - Cost, warm:
-  - Measured by a `BENCH=1` run of [the project tests](../../tests/spell/SpellProject.test.ts), 2026-10-04,
+  - Measured by a `BENCH=1` run of [the project tests](../../../spell-app/tests/spell/SpellProject.test.ts) (spell-app's), 2026-10-04,
     after P3 of precedence-and-types halved it.
   - Card.spell (121 lines) ~12ms;  Solitaire.spell (259 lines) ~32ms;  the whole Solitaire project ~55ms
   - the whole project, after later phases:
@@ -292,7 +292,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - A `MethodPostfixRule` checks nothing.
   - Declarations need nothing new:  `of` / `params` are the method record's, in the same comment.
     Loading hands `specialize()` the whole of it.
-- Probe ledger ([grammar.probes.test.ts](../../tests/spell/grammar.probes.test.ts)), "datatypes":
+- Probe ledger ([grammar.probes.test.ts](../../../spell-app/tests/spell/grammar.probes.test.ts), spell-app's), "datatypes":
   what a set of expressions and sinks are.
 
 ## Adding an expression rule
@@ -314,7 +314,7 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - Leave it unset unless a probe shows a tie going wrong.
   - Then set it from the `Priority` table ([rules.types.ts](rules/rules.types.ts)), with a one-line why.
 - Always NAME a slot, so `match.groups` keeps its key.
-- Add one mixed-operator line to the probe ledger, [grammar.probes.test.ts](../../tests/spell/grammar.probes.test.ts).
+- Add one mixed-operator line to the probe ledger, spell-app's [grammar.probes.test.ts](../../../spell-app/tests/spell/grammar.probes.test.ts).
 
 ## Type names:  `a bank account aka account is a thing`
 
@@ -814,7 +814,7 @@ A kind that says so is saved in a file of its own.
 - Editors:  hovering an outline line shows **Reads as**, the sentence style's words for it.
   - That's each rule's `SpellStatement.getLongForm()`.
   - default:  the subject spelled out, `it has a deck` => `a card has a deck`
-  - `define_property_has`, `belongs_to_one`, `quoted_property_formula` and `draw_side` say their own
+  - `define_property_has`, `belongs_to_one` and `quoted_property_formula` say their own
   - Compiling the long forms gives the same javascript as the outline (`outline.test.ts`).
 - A line starting `it` / `its` OUTSIDE a type's body says so.
   See `BlockLine.isOutlineLineOutsideBody()`.
@@ -930,10 +930,14 @@ A kind that says so is saved in a file of its own.
   - A suffix after `and` / `or` is told the operand after it (epic page I7).
     - e.g. `the game`, in `... and the game is red`
   - After anything else, it isn't:  what it follows is the chain so far, e.g. a sum.
-- [`draw_side`](rules/classes/DrawSide.ts):  `- to "draw its front":` + one line of markup => `get front() {...}`.
-  - Front AND back also give the type `draw()`, by its direction (epic page Q14).
+- [`draw_it`](rules/classes/DrawIt.ts):  how a type draws, by what its words mean (the `draw_method` word rule).
+  - `- to "draw it":` + one line of markup => `draw() { return ... }`;  unquoted, a method's body.
+  - A list's `- to draw each item:` => `drawEachItem(item) {...}`, the item as `item` or its type's name.
+  - English's unquoted `to draw it:` stays `to_do_something`'s, the same `draw()`;
+    Spanish's `para dibujarlo:` is this rule's, as the fused `-lo` makes no method name.
+  - ONE drawing per thing:  the front / back sides (`draw_side`) are gone (epic `spanish` P20).
 - A one-line indented body (a `{nested_expression}`) parses in the statement's `nestedScope`.
-  - e.g. `return` + markup, or `draw_side`'s
+  - e.g. `return` + markup, or `draw_it`'s
   - As an inline body does (`SpellStatement.parseNestedBlock()`).
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
@@ -975,7 +979,10 @@ A kind that says so is saved in a file of its own.
   - `FileScope` is a `BlockScope`, so a file owns only variables.
 - `RootScope` adds `types`, `constants`, `rules`.
   - `ProjectScope` is a `RootScope`, and holds the records of the project's free functions.
-  - `SpellParser.rootScope` is ONE static root, shared by every project (see "Built-in types"):
+  - Each language pack has ONE root, shared by every project in it:  `SP.Language.rootScope`.
+    `SpellParser.rootScope` is the default's, English's.
+    A project mixing languages has a root of its own (see "Projects").
+  - A root holds (see "Built-in types"):
     - spell's classes:  `Thing`, `List`, `App`, `Object`
     - every built-in type's NAME, with super-types (`P.BUILT_IN_TYPES`)
       - e.g. `text`, `number` ...
@@ -1181,9 +1188,9 @@ A kind that says so is saved in a file of its own.
   - spaces' built-ins, committed:
     - `@spell/examples/...`, `@spell/library/...`
     - in spell-app's `spaces/@spell/<group>/<Project>/`
-  - the test projects, committed and frozen:
+  - the test projects, committed and frozen, beside them:
     - `@spell/test/...`
-    - in `tests/spaces/@spell/test/<Project>/`
+    - in spell-app's `spaces/@spell/test/<Project>/` (spell-lang's `tests/spaces/` until epic `spanish` P18)
   - Owen's own, in spell.spaces, outside git:
     - `owen@spell/...`
     - in `<main checkout>/../spell.spaces/@spell/owen@/<project>/`
@@ -1191,11 +1198,11 @@ A kind that says so is saved in a file of its own.
     - A person's space is inside their org's, so `@` says what each folder is.
   - A `@local/<folder>` group says where itself, with its `serverPath`.
   - The folders are spaces' `environment` ([environment.ts](../../../spell-app/src/spaces/server/node/environment.ts)), its `spaceFolders`:
-    - `builtins`, `tests` and `spaces`
+    - `builtins` and `spaces`
     - Tests point them at temporary folders, with environment variables:
 
       ```sh
-      SPELL_BUILTINS_DIR  SPELL_TESTS_DIR  SPELL_SPACES_DIR
+      SPELL_BUILTINS_DIR  SPELL_SPACES_DIR
       ```
 
   - A project's folder is its name, e.g. spell-app's `spaces/@spell/examples/drawable-solitaire/` (decision Q39).
@@ -1232,7 +1239,7 @@ A kind that says so is saved in a file of its own.
   - That's `build/` at spell-app's root, never committed, each checkout its own.
     It mirrors the project's path:
     - under spell-app:  `spaces/@spell/examples/drawable-solitaire` => `build/spaces/@spell/examples/drawable-solitaire`
-    - spell-lang's frozen test projects:  `tests/spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
+      - the frozen test projects too:  `spaces/@spell/test/fizzbuzz` => `build/spaces/@spell/test/fizzbuzz`
     - in spell.spaces:  `@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
     - The table, and `SPELL_BUILD_DIR`:  [spaces' AGENTS.md](../../../spell-app/src/spaces/AGENTS.md), "Projects".
   - The files:  its compiled code and its scope pack.
@@ -1300,6 +1307,24 @@ A kind that says so is saved in a file of its own.
   - The clone has empty own rules, and imports the base spell parser.
   - Every file gets a `FileScope` under it, and SHARES that parser.
 - So one file's types, constants and rules are visible to every later file.
+- A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
+  - `SP.Language.forFile()`;  `SpellFile.language`, `SpellProject.languages`.
+  - One project may mix them:
+    - Its root:  `SP.Language.rootScopeFor(languages)`.
+      One language:  that language's own root, so its project parses as it always has.
+      Several:  a root of their own, its built-in types' members in each one's words (`length` and `largo`).
+    - Its project parser is its first language's.
+      A file in another parses with that parser's TWIN in its language, `SpellParser.twinFor()`, set on its `FileScope`:
+      - the language's own rules, plus a copy of every rule the project's layers added (imports', then its own)
+      - every rule one twin adds, the others add too (`SpellParser.addOwnRule()`), into the same journal
+      - so a Spanish file calls a method an English file defines by its English words, and the other way round
+    - Types, variables and methods live in the scopes, as ever:  every file sees every other's.
+    - `P.IncrementalProject` takes each file's parser, and stubs each file's declarations by it.
+  - The program speaks ONE language to the person running it (its runtime messages):
+    its app's file's, else its first file's (`SpellDeclarations.speakingFirst()`).
+  - A words file per language (`<Project>.en.js`, `<Project>.es.js`), each with the members its own files declare
+    (`SP.SpellWords.of(declarations, writer, lang)`), the declarations naming them all (`languages`).
+    A runner reads them as one.
 - Another project can come in WITHOUT its sources, as its declarations (`SP.SpellDeclarations`).
   - They're in `<Project>.declarations.json5`, committed beside its source (epic `output-targets` P5).
   - Before that they were inline in the compiled JS, and `fromComments()` still reads those.
@@ -1462,11 +1487,12 @@ A kind that says so is saved in a file of its own.
   - comment, blank line or top-level statement, anywhere:  ~1-2ms
   - declaration edit near the END:  ~1ms
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
-- [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire file,
-  on ONE project.
+- spell-app's [IncrementalProject.test.ts](../../../spell-app/tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire
+  file, on ONE project.
+  - Over projects written inline:  spell-lang's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).
   - every line, with `INCREMENTAL_FULL=1`
   - After each edit, and after undoing it, it checks output, errors and token positions against a full parse.
-- [ParseJournal.test.ts](../../tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
+- spell-app's [ParseJournal.test.ts](../../../spell-app/tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
 
 ## Compile
 
@@ -1557,7 +1583,7 @@ A kind that says so is saved in a file of its own.
     - Everything else stays put too.
   - A project then does the same across ALL its files (`SpellProject.combineCompiled()`).
     - So `Card.move_to_$pile` from `Pile.spell` ends up in `Card.spell`'s class.
-    - So does `compiledFixture()`.
+    - So does `compiledFixture()`, spell-app's (`spell-app/spaces/test`).
     - It NEVER mutates an AST:  a class which gets members is a NEW `P.ASTClassDeclaration` (`withMembers()`).
   - An AUTO-declared property (see "Scope:  who changes it") compiles ONCE,
     in the file of the `set` that declared it.
@@ -1678,11 +1704,11 @@ A kind that says so is saved in a file of its own.
 
 ## Testing a whole project
 
-- Three helpers parse + compile a project headlessly, exactly as `SpellProject` does:
-  - [`parseSpellProject()`](test/parseSpellProject.ts)
-  - `loadFixtureProject()`
+- Helpers parse + compile a project headlessly, exactly as `SpellProject` does:
+  - [`parseSpellProject()`](test/parseSpellProject.ts), a project written in the test
   - `summarize()`:  the "same as a full parse" reference
-- [SpellProject.test.ts](../../tests/spell/SpellProject.test.ts) snapshots Solitaire's compiled output + errors,
+  - spell-app's `loadFixtureProject()` (`spell-app/spaces/test`):  a frozen test project's files
+- spell-app's [SpellProject.test.ts](../../../spell-app/tests/spell/SpellProject.test.ts) snapshots Solitaire's compiled output + errors,
   and benchmarks with `BENCH=1`.
-- Every fixture project compiles to every target it can, against the snapshots beside it:
+- Every fixture project compiles to every target it can, against the snapshots beside it, in spell-app:
   the "Projects live in spaces" bullet in [AGENTS.md](AGENTS.md) lists them, and how to refresh them.

@@ -9,7 +9,7 @@ import { Wording } from "spell-lang/spell/rules/expressions"
  * - `<children name="header"/>` => `<slot name="header"/>`:
  *   a second, named place, filled by a child written `in="header"` (`spell_jsx_attribute`)
  * - The web's own `<slot/>` keeps working.
- * - TODO(es):  the editor should offer the project's language's words, not English's.
+ * - TODO(es):  the editor should offer the file's language's words, not English's.
  */
 export const SPELL_TAG_NAMES = new Map([["children", "slot"]])
 

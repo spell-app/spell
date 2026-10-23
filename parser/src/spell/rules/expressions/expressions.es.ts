@@ -31,9 +31,12 @@ import { Negatable } from "./Negatable"
 import { Or } from "./Or"
 import { ParenthesizedExpression } from "./ParenthesizedExpression"
 import { ThereIsA } from "./ThereIsA"
+import { HexDigits } from "./HexDigits"
+import { HexLiteral } from "./HexLiteral"
 import { UnicodeCode } from "./UnicodeCode"
 import { UnicodeExpression } from "./UnicodeExpression"
 import { UnicodeLiteral } from "./UnicodeLiteral"
+import { UnicodeOffset } from "./UnicodeOffset"
 
 /** Spanish's `expressions` rules. */
 export const expressionsEs = new SpellParser({ module: "expressions" })
@@ -527,7 +530,41 @@ expressionsEs.addRule(AsAType, {
   ]
 })
 
+expressionsEs.addRule(HexDigits)
+
+expressionsEs.addRule(HexLiteral, {
+  syntax: "(hex|hexadecimal) {digits:hex_digits}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["hex 1F0A0", "0x1F0A0"],
+        ["hexadecimal 1F0A0", "0x1F0A0"],
+        ["hex ff", "0xff"],
+        ["hex 10", "0x10"]
+      ]
+    }
+  ]
+})
+
 expressionsEs.addRule(UnicodeCode)
+
+expressionsEs.addRule(UnicodeOffset, {
+  syntax: "unicode {code:unicode_code} (más|mas|+) {offset:arithmetic_expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("column")
+      },
+      tests: [
+        ["unicode 1F0A0 + 1", "core.unicode(0x1F0A0 + 1)"],
+        ["unicode 1F0A0 más column", "core.unicode(0x1F0A0 + column)"],
+        ["unicode 1F0A0 + column * 2", "core.unicode(0x1F0A0 + column * 2)"]
+      ]
+    }
+  ]
+})
 
 expressionsEs.addRule(UnicodeLiteral, {
   syntax: "unicode {code:unicode_code}",

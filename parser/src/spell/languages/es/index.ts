@@ -1,7 +1,7 @@
 /**
  * Spanish, spell's second language pack (epic `spanish`):  its parser, its inflector, its words.
  * - Its rules' syntax and tests are each rule module's `<module>.es.ts`, assembled into `spanishParser`.
- * - A project written in Spanish says `language: "es"` in its project file.
+ * - A file written in Spanish says so in its name:  `Carta.es.spell` (epic `spanish` P19).
  */
 import { SP } from "spell-lang/spell"
 

@@ -181,15 +181,15 @@ More rows, JavaScript beside Python:  [README-core](README-core.md#the-typescrip
   - any other `to draw` re-runs whole, in its error boundary
 - A type Spell doesn't know is written `any /* spell: type unknown */`, never a bare `any`:
   so every gap shows, and can be counted.
-  In the twelve [frozen test projects](README-spell.md#the-frozen-test-projects)' TypeScript, the count is zero.
+  In the seven [frozen test projects](README-spell.md#the-frozen-test-projects)' TypeScript, the count is zero.
 
 `tsc` checks it against `@spell/core`'s own types, and its report is pinned beside each test project.
-Ten of the twelve check clean;  `cards-from-zero`, whose lists count from 0, has one error,
-the same pile name its lint warns of, and so does `cartas`, the same project in Spanish:
+Six of the seven check clean;  `solitaire` has four errors, two of each:
+`the first pile in the foundations where ...` is typed as a list that may be nothing, without `firstItem`:
 
 ```text
-309:25 TS2339 Property 'name' does not exist on type 'Pile'.
-265:26 TS2339 Property 'nombre' does not exist on type 'Pila'.
+407:26 TS2533 Object is possibly 'null' or 'undefined'.
+407:129 TS2339 Property 'firstItem' does not exist on type '{} | Pick<List<Foundation>, "getItem"> | readonly Foundation[]'.
 ```
 
 The cost:
@@ -302,31 +302,32 @@ A shared method list and shared expected files keep the two cores in step
 ([README-core](README-core.md#the-typescript-and-python-runtimes-side-by-side)).
 
 To run it you need Python 3.12 or later and [uv](https://docs.astral.sh/uv/) on your `PATH`.
-Here's the Solitaire example's card, testing itself in Python:
+Here's the Solitaire example's card, the card library's, testing itself in Python:
 
 ```sh
-spell run @spell/examples/drawable-solitaire --target py --no-browser
+spell run @spell/examples/Solitaire --target py --no-browser
 ```
 
 <details>
 <summary>What it printed</summary>
 
 ```text
-✓ Compiling @spell/examples/drawable-solitaire  2 warnings
+✓ Compiling @spell/examples/Solitaire
 ...
 ✅ test card setup
-  ▶️ Executing   `the card is a new card whose rank is queen, suit is spades and direction is up`
-  ✅ As expected `the rank of the card` is `queen`
-  ✅ As expected `the suit of the card` is `spades`
-  ✅ As expected `the name of the card` is `"queen-of-spades"`
-  ✅ As expected `the color of the card` is `black`
+  ▶️ Executing   `get a new card whose rank is queen, suit is spades and direction is up`
+  ✅ As expected `its rank` is `queen`
+  ✅ As expected `its suit` is `spades`
+  ✅ As expected `its name` is `"queen-of-spades"`
+  ✅ As expected `its color` is `black`
 ...
 ```
 
 </details>
 
 Those tests are the card's own, written in English beside it.
-Run it again without `--target py`, and diff what the two print:  all 40 lines are the same.
+Run it again without `--target py`, and diff what the two print:  all 119 lines are the same,
+but for the deck its test shuffles, which `--seed` makes the same too.
 
 What the two don't share is how a thing looks when you `print` it, and that's on purpose:
 the contract compares only what a program prints as data, and a dumped thing goes to stderr.
@@ -372,9 +373,9 @@ have, grouped by why (36 names):
 | what the lookups search:  Python's take it on each call | 1 |
 | not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 16 |
 
-And the [todos-form-based](tests/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
+And the [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
 the Python writer can't write its function's named arguments yet.
-Its Spell, [todo.spell](tests/spaces/@spell/test/todos-form-based/todo.spell):
+Its Spell, [todo.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/todos-form-based/todo.spell):
 
 ```spell
 to create a new task (with title as text, completed as a choice)
@@ -405,7 +406,7 @@ What it says when you ask for what isn't there:
 | You ask for | Spell says |
 | --- | --- |
 | `spell compile --target wasm` | `There's no target 'wasm':  try js/solid, ts/solid, py, ts/lib.` |
-| a program that draws, as `ts/lib` | `'drawable-solitaire' draws a UI, which target 'ts/lib' can't.` |
+| a program that draws, as `ts/lib` | `'Solitaire' draws a UI, which target 'ts/lib' can't.` |
 | `spell run --target ts/lib` | `` "ts/lib" doesn't run:  it's compiled for other code to import (`spell compile`) `` |
 
 Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang).

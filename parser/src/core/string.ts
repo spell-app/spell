@@ -36,7 +36,8 @@ export const stringMethods = defineCoreModule({
   },
   /**
    * The character with unicode code point `code`, e.g. `"🂠"` for `0x1F0A0`.
-   * - Compiles from spell `unicode {number}`, a number worked out as the program runs (see `rules/expressions/Unicode.ts`).
+   * - Compiles from spell `unicode {number}`, a number worked out as the program runs (`unicode_expression`),
+   *   and from `unicode 1F0A0 + n` (`unicode_offset`), as `core.unicode(0x1F0A0 + n)`.
    *   `unicode 1F0A0`, written out, compiles straight to the character.
    * - `""` for nothing, or what's no code point (not a whole number, or past `0x10FFFF`).
    */

@@ -1,6 +1,6 @@
 """The Cards fixture, as compiled Python will say it, prints what the JavaScript core prints for it.
 
-- The program below is the Cards fixture (`tests/spaces/@spell/test/cards/`) in the shape the Python writer emits:
+- The program below is the Cards fixture (spell-app's `spaces/@spell/test/cards/`) in the shape the Python writer emits:
   the contract between the writer and spell_core (epic page python-target, P10).
 - Its tests' lines must be the JavaScript run's, character for character:  `cards.javascript.out.txt` beside this
   file, a frozen copy of spell-app's contract snapshot (its `tests/cli/__snapshots__/contract/cards.out.txt`,

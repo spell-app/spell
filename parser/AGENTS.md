@@ -72,7 +72,11 @@ Each folder links to its own `AGENTS.md`:  read it before working there.
   - They import by package name too:  `import { P } from "spell-lang/parser"`.
 - [vitest.config.ts](vitest.config.ts) has a project per folder, over its tests.
 - [The tests' tsconfig](tests/tsconfig.json) checks them with node's settings.
-- `tests/spaces/`:  the frozen test projects ([README-spell](README-spell.md#the-frozen-test-projects)).
+- NOT here:  the frozen test projects (`@spell/test`) and the tests that compile them whole (epic `spanish` P18).
+  - They're spell-app's, beside its other `@spell` groups:  its `spaces/@spell/test/`, their tests in its `tests/spell/`
+    ([README-spell](README-spell.md#the-frozen-test-projects)).
+  - Spell's tests here write their projects inline (`parseSpellProject()`, `runSpell()`, from `spell-lang/spell/test`).
+  - So spell-lang's own CI compiles no whole frozen project:  spell-app's does.
 - `tests/py/core/tests/`:  `spell_core`'s pytest tests.
 
 ## Commands
@@ -91,5 +95,5 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
 - A folder's own scripts are the root's, prefixed with its name:
   - `markdown:spec:update`
   - `core:gen:declarations`
-  - `spell:gen:syntax`, `spell:test:fixtures` (and `:bless`), `spell:test:rules` (and `:bless`), `spell:test:ui`,
-    `spell:test:coverage`
+  - `spell:gen:syntax`, `spell:test:rules` (and `:bless`), `spell:test:ui`, `spell:test:coverage`
+  - The frozen test projects' `spell:test:fixtures` (and `:bless`) are spell-app's, at its root.

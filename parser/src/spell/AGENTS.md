@@ -41,8 +41,9 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - `yarn vp test run --project spell` runs them (the repo's `vitest.config.ts`).
     `yarn test` runs the whole repo's.
   - Their helpers stay here, in `test/` (`spell-lang/spell/test`).
-  - The projects they read are spaces' test projects, `tests/spaces/@spell/test/`
-    (see "Projects live in spaces" below).
+  - They write the projects they parse inline:  `parseSpellProject()`, `runSpell()`.
+  - The tests that compile a WHOLE frozen test project (`@spell/test`) are spell-app's, beside the projects:
+    its `tests/spell/`, at the same paths they had here (epic `spanish` P18;  see "Projects live in spaces" below).
   - `tests/spell/parserTests/`:  parser tests that need the spell grammar.
     The generic ones are parser's, in `tests/parser/`.
 - `node/` (`spell-lang/spell/node/...`) is NODE-ONLY:  the repo's `tsconfig.node.json` checks it.
@@ -104,7 +105,9 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - A project lists the others it wants in `project.json`'s `"targets"`.
     `spell compile --target <name>` picks one for a single run.
   - The writers are `spell-lang/parser`'s:  "Compile" in [PARSING.md](PARSING.md).
-- `test/` (`spell-lang/spell/test`):  the test helpers, e.g. the fixture helpers below.
+- `test/` (`spell-lang/spell/test`):  the test helpers for projects a test writes inline,
+  e.g. `parseSpellProject()`, `compiledSpellProject()`, `incrementalSpellProject()`, `runSpell()`, `solidSample()`.
+  - The frozen test projects' own helpers are spell-app's, `spell-app/spaces/test` (below).
 - Projects live in spaces, not here:  this folder reads and compiles them, but holds none.
   - Spell's project groups (`@spell/examples` ...) are spaces' `SPACES.PROJECT_GROUPS`.
     - Spell's registry, `SP.SpellSetup`, starts EMPTY:  loading spaces' groups registers them there.
@@ -114,34 +117,38 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - Where each group's projects are:
     - [spaces' built-ins](../../../spell-app/spaces/@spell/), committed:
       `@spell/examples`, `@spell/library`, `@spell/guides`
-    - `@spell/test`:  the test projects, [tests/spaces/@spell/test/](../../tests/spaces/@spell/test/), committed
+    - `@spell/test`:  the frozen test projects, beside them in
+      [spaces' `@spell/test/`](../../../spell-app/spaces/@spell/test/), committed (spell-lang's `tests/spaces/` until epic `spanish` P18)
     - `owen@spell`:  Owen's own, in spell.spaces beside the main checkout, outside git
   - A project's URLs and folder come from ONE function, [SpellUrls](SpellUrls.ts) (`SP.SpellUrls`).
   - See "Projects" in [PARSING.md](PARSING.md).
   - Tests read ONLY the test projects:  frozen projects, never the live examples, which get edited.
     - Their group:  `@spell/test`, e.g. `@spell/test/solitaire`, listed in the app in dev only.
-    - Read them with the helpers from `spell-lang/spell/test`:
+    - They and the tests that compile them are spell-app's (Owen, 2026-10-22, epic `spanish` P18):
+      every `@spell` group lives there, so a test project may import the card library.
+      - A lower repo's tests never read a higher one's:  spell-lang's own tests write their projects inline.
+    - In spell-app's tests, read them with the helpers from `spell-app/spaces/test`:
       - `loadFixtureProject()`
       - `fixturePath()`
       - `fixtureProjectId()`
     - NEVER update a fixture to follow its example.
   - Each fixture's compiled output is checked against the snapshots beside it
-    ([fixtures.test.ts](../../tests/spell/test/fixtures.test.ts)):
+    (spell-app's [fixtures.test.ts](../../../spell-app/tests/spell/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
-    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), in its language (`.en`, `.es`)
+    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), one per language its files are in (`.en`, `.es`)
       - Its name ends as a snapshot's does, which keeps it out of the project's files.
     - `<Project>.snapshot.tsx`:  the TypeScript target
-    - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../tests/spell/test/typescript.test.ts))
+    - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../../spell-app/tests/spell/test/typescript.test.ts))
     - `<Project>.snapshot.py`:  the Python target
-    - `<Project>.snapshot.pyright.txt`:  what pyright says of the Python ([python.test.ts](../../tests/spell/test/python.test.ts))
+    - `<Project>.snapshot.pyright.txt`:  what pyright says of the Python ([python.test.ts](../../../spell-app/tests/spell/test/python.test.ts))
     - `<Project>.elements.snapshot.js`:  the Python targets' page file, for a fixture that draws
     - `<Project>.lib.snapshot.ts`:  the library target, for the fixtures in `LIBRARY_FIXTURES`
     - The Python ones only for the fixtures in `PYTHON_FIXTURES`:
       every fixture but `todos-form-based` and `cartas`, so far.
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
-    - After a deliberate change, `yarn spell:test:fixtures:bless`, and read the diff.
+    - After a deliberate change, `yarn spell:test:fixtures:bless` at spell-app's root, and read the diff.
 - [README-spell.md](../../README-spell.md), at the repo's root, is this folder's page for people;
   [the repo's README](../../README.md) is spell-lang's front page.
   - Other docs live in the content repo, their tooling in [spell-epic's tools](../../../spell-epic/src/tools/)

@@ -92,7 +92,7 @@ export const EDITOR_PAGE_SUFFIX = ".editor.html"
 
 /**
  * End of a test fixture's snapshot file's name, e.g. `Solitaire.snapshot.js`:
- * its compiled output, which `spell-lang/spell/test`'s `fixtures.test.ts` checks against.
+ * its compiled output, which spell-app's `fixtures.test.ts` checks against.
  * - NEVER one of a project's own files:  the server leaves it out of the manifest, as `COMPILED_JS_SUFFIX`.
  */
 export const SNAPSHOT_JS_SUFFIX = ".snapshot.js"
@@ -155,12 +155,6 @@ export type ProjectManifestJSON5 = {
   targets?: string[]
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
-  /**
-   * The human language its spell is written in, from its project file, e.g. `es` -- English (`en`) when missing.
-   * - One language per project (epic `spanish` Q1):  its parser, words file and messages follow it.
-   * - See `SpellProject.language`, `SP.Language`.
-   */
-  language?: string
   /**
    * Where the server puts what compiling builds, e.g. `Solitaire.spell.py`, inside the checkout's `build/`.
    * - e.g. `spaces/@spell/examples/solitaire`, for a project in spell-app's built-ins (epic `people-and-orgs` J33)
@@ -252,11 +246,11 @@ export type ProjectPathList = string[]
 /**
  * Which folder an address's `SpellUrls.folderFor()` path is under.
  * Spaces' `environment` says where each one is:
- * - `builtins`:  the repo's built-in projects, spell-app's `spaces/` (`@spell/examples/...`)
- * - `tests`:  the repo's test projects, `tests/spaces/` (`@spell/test/...`)
+ * - `builtins`:  the `@spell` space's projects, spell-app's `spaces/`:  `@spell/examples/...`, and the test projects,
+ *   `@spell/test/...`
  * - `spaces`:  every person's and org's space, spell-spaces beside the main checkout (`@spell/owen@/...`)
  */
-export type SpaceFolderBase = "builtins" | "tests" | "spaces"
+export type SpaceFolderBase = "builtins" | "spaces"
 
 /**
  * A project group's ADDRESS, what its projects' addresses start with (epic `people-and-orgs` P4).
@@ -504,8 +498,15 @@ export type SpellDeclarationsData = {
   /** Semver of the compiler which wrote these -- see `SPELL_VERSION`. */
   spellVersion: string
   /**
-   * The human language the project is written in, e.g. `es`;  missing for English, the default.
-   * - So a runner finds its words file (`Solitario.es.js`) before it has any other word of the project.
+   * The human languages the project's files are written in, e.g. `["es", "en"]` -- missing for English alone.
+   * - Each has a words file, e.g. `Solitario.es.js`:  so a runner finds them before it has any other word of the project.
+   * - The first is the one its program speaks to the person running it:  `SpellDeclarations.speakingFirst()`.
+   * - Read through `SpellDeclarations.languagesOf()`.
+   */
+  languages?: string[]
+  /**
+   * DEPRECATED:  the ONE language of declarations from before epic `spanish` P19, e.g. `es` -- read, never written.
+   * - See `languages`.
    */
   language?: string
   /**
@@ -595,6 +596,11 @@ export type SpellDeclaration = {
   of?: string
   /** `property`'s datatype, e.g. `text`. */
   datatype?: string
+  /**
+   * How `property` is read, when not as a property, e.g. `Suit.color({it})` for a value kind's `the color of a suit`.
+   * - See `P.ScopeVariable.readAs`.
+   */
+  readAs?: string
   /**
    * `property` was declared by its first `set`, as its type never declared it.
    * - See `P.ScopeVariable.autoDeclared`.

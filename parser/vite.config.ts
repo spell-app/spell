@@ -2,8 +2,8 @@ import { defineConfig } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
 
-/** Not linted or formatted by oxlint / oxfmt:  Python (ruff's) and the frozen test projects (spell's output). */
-const NOT_OURS = ["src/py/core/**", "tests/py/core/**", "tests/spaces/**"]
+/** Not linted or formatted by oxlint / oxfmt:  Python (ruff's). */
+const NOT_OURS = ["src/py/core/**", "tests/py/core/**"]
 
 /**
  * spell-lang's Vite+ config:  the `lint` / `fmt` blocks (what `vp lint`, `vp fmt` and the Oxc editor extension read),

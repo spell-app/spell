@@ -30,9 +30,12 @@ import { Negatable } from "./Negatable"
 import { Or } from "./Or"
 import { ParenthesizedExpression } from "./ParenthesizedExpression"
 import { ThereIsA } from "./ThereIsA"
+import { HexDigits } from "./HexDigits"
+import { HexLiteral } from "./HexLiteral"
 import { UnicodeCode } from "./UnicodeCode"
 import { UnicodeExpression } from "./UnicodeExpression"
 import { UnicodeLiteral } from "./UnicodeLiteral"
+import { UnicodeOffset } from "./UnicodeOffset"
 
 ////////////////
 // ## Word rules:  each language's words for one thing, and what each form means (`Wording`, `Negatable`)
@@ -511,7 +514,40 @@ expressions.addRule(AsAType, {
   ]
 })
 
+expressions.addRule(HexDigits)
+
+expressions.addRule(HexLiteral, {
+  syntax: "hex {digits:hex_digits}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["hex 1F0A0", "0x1F0A0"],
+        ["hex ff", "0xff"],
+        ["hex 10", "0x10"]
+      ]
+    }
+  ]
+})
+
 expressions.addRule(UnicodeCode)
+
+expressions.addRule(UnicodeOffset, {
+  syntax: "unicode {code:unicode_code} (plus|+) {offset:arithmetic_expression}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("column")
+      },
+      tests: [
+        ["unicode 1F0A0 + 1", "core.unicode(0x1F0A0 + 1)"],
+        ["unicode 1F0A0 plus column", "core.unicode(0x1F0A0 + column)"],
+        ["unicode 1F0A0 + column * 2", "core.unicode(0x1F0A0 + column * 2)"]
+      ]
+    }
+  ]
+})
 
 expressions.addRule(UnicodeLiteral, {
   syntax: "unicode {code:unicode_code}",

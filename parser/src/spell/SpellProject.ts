@@ -159,31 +159,62 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * File for this project's words, committed beside its source, e.g. `Solitaire.en.js`.
+   * File for this project's words in language `lang`, committed beside its source, e.g. `Solitaire.en.js`.
    * - The words:  spell's wording of each member of its types, by the name its compiled code uses.
    *   See `SP.SpellWords`.
-   * - For a runner's Thing Explorer.
-   * - A target with words of its own writes another file, e.g. `Solitaire.py.en.json5`:  see `wordsFileFor()`.
+   * - For a runner's Thing Explorer;  and what the core says to the person running it, in that language.
+   * - One per language our files are written in (epic `spanish` P19):  `wordsFiles`.
+   * - A target with words of its own writes another file, e.g. `Solitaire.py.en.json5`:  see `targetWordsFileFor()`.
    * - A target whose page draws in javascript writes its drawing half too, `Solitaire.elements.spell.js`:
    *   see `elementsFileFor()`.
    */
-  get wordsFile(): SP.SpellJSFile {
-    const lang = this.language.lang
-    // one per language:  the project file names its language once it has loaded
+  wordsFileFor(lang: string): SP.SpellJSFile {
     return this.derived(`wordsFile_${lang}`, () => {
       const location = this.getFileLocation(`${this.projectName}${SP.wordsSuffixFor(lang)}`)!
       return new SP.SpellJSFile(location.path)
     })
   }
 
-  /**
-   * The language our spell is written in, from our project file (`language`), e.g. Spanish -- English when it names none.
-   * - Its parser reads our files, its words name our words file (`Solitario.es.js`).
-   * - throws a `TypeError` naming the languages spell reads, for one it doesn't
-   */
-  get language(): SP.Language {
-    return SP.Language.for(this.contents?.language)
+  /** Our words files, one per language in `wordsLanguages`, the one our program speaks first -- see `wordsFileFor()`. */
+  get wordsFiles(): SP.SpellJSFile[] {
+    return this.wordsLanguages.map((lang) => this.wordsFileFor(lang))
   }
+
+  /** Our words file in the language our program speaks to the person running it:  the first of `wordsFiles`. */
+  get wordsFile(): SP.SpellJSFile {
+    return this.wordsFiles[0]!
+  }
+
+  /**
+   * The human languages our spell files are written in, in file order, by their names (epic `spanish` P19):
+   * `Carta.es.spell` is Spanish, `Card.spell` English -- see `SP.SpellFile.language`.
+   * - Several:  one project may mix them, its root scope theirs (`SP.Language.rootScopeFor()`).
+   * - English when we have no spell files.
+   * - throws a `TypeError` naming the languages spell reads, for a file named for one it doesn't
+   */
+  get languages(): SP.Language[] {
+    const languages = [...new Set(this.spellFiles.map((file) => file.language))]
+    return languages.length ? languages : [SP.Language.default]
+  }
+
+  /**
+   * Codes of the languages we have words files in, the one our program speaks first, e.g. `["es", "en"]`.
+   * - From our last compile's declarations (`SP.SpellDeclarations.languagesOf()`), else our declarations file's,
+   *   if it's loaded;  else our `languages`, in file order.
+   */
+  get wordsLanguages(): string[] {
+    if (this.compiledLanguages) return this.compiledLanguages
+    const declarations = SP.SpellDeclarations.read(this.declarationsFile.contents ?? "")
+    return declarations
+      ? SP.SpellDeclarations.languagesOf(declarations)
+      : this.languages.map((language) => language.lang)
+  }
+
+  /**
+   * Our last compile's `wordsLanguages`.
+   * - NOTE: plain field, not state, as `saveCompiled`.
+   */
+  compiledLanguages: string[] | undefined
 
   /**
    * File for this project's scope pack, beside `outputFile` in its build folder, e.g. `Solitaire.scopes.js`.
@@ -221,15 +252,23 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * Parse our active spell files from scratch into `scope`, in order, and hand each file its result.
+   * - Each by its own language's rules:  a file in another language than our scope's parser reads
+   *   parses with its twin (`SP.SpellParser.twinFor()`).
    * - Other files, e.g. `.css`, parse themselves.
    */
   parseImports(): void {
     const { spellFiles } = this
+    const parser = this.scope!.parser as SP.SpellParser
     this.incremental = new P.IncrementalProject({
       scope: this.scope!,
       // one half-typed line shouldn't break every line after it
       keepLastGood: true,
-      files: spellFiles.map((file) => ({ path: file.path, name: file.file, text: file.parseText }))
+      files: spellFiles.map((file) => ({
+        path: file.path,
+        name: file.file,
+        text: file.parseText,
+        parser: parser.twinFor(file.language)
+      }))
     })
     spellFiles.forEach((file) => {
       file.setParsed(this.incremental!.getFile(file.path)!)
@@ -287,13 +326,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * File for `target`'s own words, committed beside our source, e.g. `Solitaire.py.en.json5`.
+   * File for `target`'s own words in language `lang`, committed beside our source, e.g. `Solitaire.py.en.json5`.
+   * - One per language, as `wordsFileFor()`.
    * - `undefined` for a target with none (`SP.Target.wordsSuffix`).
    */
-  wordsFileFor(target: SP.Target): SP.SpellJSFile | undefined {
+  targetWordsFileFor(target: SP.Target, lang: string): SP.SpellJSFile | undefined {
     if (!target.wordsSuffix) return undefined
     // the suffix names English;  another language's file names its own, e.g. `Solitario.py.es.json5`
-    const suffix = target.wordsSuffix.replace(/\.en\.(?=[^.]+$)/, `.${this.language.lang}.`)
+    const suffix = target.wordsSuffix.replace(/\.en\.(?=[^.]+$)/, `.${lang}.`)
     return new SP.SpellJSFile(this.getFileLocation(`${this.projectName}${suffix}`)!.path)
   }
 
@@ -349,7 +389,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Clones `parentScope`'s parser scoped to `this.path`, so rules added within project
    *   (e.g. custom types/macros) don't leak out to `parentScope` or sibling projects.
    */
-  getScope(parentScope: P.Scope = this.language.rootScope): P.ProjectScope {
+  getScope(parentScope: P.Scope = SP.Language.rootScopeFor(this.languages)): P.ProjectScope {
     // Make a parser that depends on the parentScope's parser
     // This way rules added to the project won't leak out.
     const parser = parentScope.parser!.clone({ module: this.path })
@@ -381,7 +421,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 this.incremental = undefined
                 try {
                   const importScope = await this.loadImportScope(
-                    (parentScope as P.Scope | undefined) ?? this.language.rootScope
+                    (parentScope as P.Scope | undefined) ?? SP.Language.rootScopeFor(this.languages)
                   )
                   this.setState("scope", this.getScope(importScope))
                 } catch (error) {
@@ -452,7 +492,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                 const parts = files.map((file, index) =>
                   file.AST instanceof P.ASTStatementGroup ? file.AST : (allCompiled as string[])[index]
                 )
-                const { version, exports, language } = this.contents ?? {}
+                const { version, exports } = this.contents ?? {}
+                // each file's language, in file order:  `split()` puts the one the program speaks first
+                const languages = [...new Set(this.spellFiles.map((file) => file.language.lang))]
                 // each target's code, through its writer -- `js/solid`'s first:  it's the one that runs
                 for (const target of this.targets) {
                   if (target.can.draw === false && SpellProject.draws(parts)) {
@@ -470,12 +512,16 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                   const { code, declarations } = SP.SpellDeclarations.split(marked, this.scope!, {
                     version,
                     exports,
-                    language
+                    languages
                   })
                   this.outputFileFor(target).contents = code
-                  // a target with words of its own, keyed by its names, e.g. Python's `move_to_pile`
-                  const wordsFile = this.wordsFileFor(target)
-                  if (wordsFile) wordsFile.contents = SP.SpellWords.json(SP.SpellWords.of(declarations, target.writer))
+                  // a target with words of its own, keyed by its names, e.g. Python's `move_to_pile`:  one per language
+                  for (const lang of SP.SpellDeclarations.languagesOf(declarations)) {
+                    const wordsFile = this.targetWordsFileFor(target, lang)
+                    if (wordsFile) {
+                      wordsFile.contents = SP.SpellWords.json(SP.SpellWords.of(declarations, target.writer, lang))
+                    }
+                  }
                   // a target whose page draws in javascript, e.g. Python's:
                   // the drawing half, `Solitaire.elements.spell.js`
                   const elementsFile = this.elementsFileFor(target)
@@ -509,11 +555,14 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                   if (target.name !== SP.RUNNING_TARGET) continue
                   this.setState("compiled", code)
                   this.declarationsFile.contents = JSON.stringify(declarations, null, 2)
-                  // spell's wording of each member, by the names this code uses -- see `SP.SpellWords`
-                  this.wordsFile.contents = SP.SpellWords.script(
-                    SP.SpellWords.of(declarations),
-                    this.projectName ?? this.projectId
-                  )
+                  // spell's wording of each member, by the names this code uses, a file per language -- see `SP.SpellWords`
+                  this.compiledLanguages = SP.SpellDeclarations.languagesOf(declarations)
+                  for (const lang of this.compiledLanguages) {
+                    this.wordsFileFor(lang).contents = SP.SpellWords.script(
+                      SP.SpellWords.of(declarations, P.JSWriter.instance, lang),
+                      this.projectName ?? this.projectId
+                    )
+                  }
                 }
                 return this.compiled
               })
@@ -525,10 +574,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
               // and our words, for a runner's Thing Explorer.  Our compiled code goes in our build folder.
               if (!this.saveCompiled) return this.outputFile.contents
               await this.declarationsFile.save(undefined)
-              await this.wordsFile.save(undefined)
+              for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
               for (const target of this.targets.slice(1)) {
                 await this.outputFileFor(target).save(undefined)
-                await this.wordsFileFor(target)?.save(undefined)
+                for (const lang of this.wordsLanguages) await this.targetWordsFileFor(target, lang)?.save(undefined)
                 const elementsFile = this.elementsFileFor(target)
                 if (elementsFile?.contents) await elementsFile.save(undefined)
                 await this.saveAppFor(target)
@@ -547,7 +596,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
    *   e.g. `Card.move_to_$pile` from `Pile.spell` goes in `Card.spell`'s `class Card`.
    *   Each file's own were moved in by `SP.Block`.
-   * - Also how a fixture compiles -- see `compiledFixture()` in `spell-lang/spell/test`.
+   * - Also how a fixture compiles -- see `compiledFixture()` in spell-app's `spell-app/spaces/test`.
    * - `writer`:  the target's, javascript's by default -- see `SP.TARGETS`.
    *   It sees the whole project first (`P.ProgramWriter.forProject()`),
    *   and finishes the module last (`P.Writer.module()`).

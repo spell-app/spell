@@ -211,7 +211,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /**
    * `object.property`, by our name:  `card.is_face_up`.
-   * - A class's constant, `Card.RANKS`;  bare in that class's own body, `RANKS`, as the class isn't made yet there.
+   * - A class's constant, `Card.RANKS`;  bare in that class's own body, `RANKS`, as the class isn't made yet there --
+   *   but not in a `lambda` there, which runs once it is:  `prop(one_of=lambda: Card.SUITS)` (`inlineFunction()`).
    * - Off what may be nothing (`mayBeNothing()`), as spell reads off nothing as nothing:
    *   `getattr(deck.last_item, "name", None)`.
    * - `getattr(object, "name")` for one that isn't a name.
@@ -1197,10 +1198,17 @@ export class PyBaseWriter extends P.ProgramWriter {
       const value =
         only instanceof P.ASTReturnStatement ? only.value : only instanceof P.ASTExpression ? only : undefined
       if (value) {
-        return this.inBlock(() => {
-          this.noteParams(node)
-          return lambda(this.bare(value))
-        })
+        // run later, once its class is made:  a class's own constant is `Card.SUITS` there, even in its body
+        const { inClassBody } = this
+        this.inClassBody = false
+        try {
+          return this.inBlock(() => {
+            this.noteParams(node)
+            return lambda(this.bare(value))
+          })
+        } finally {
+          this.inClassBody = inClassBody
+        }
       }
     }
     // more than one statement:  a `def` of its own, above the statement that uses it

@@ -95,16 +95,28 @@ export const drawingMethods = defineCoreModule({
   /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
+   *   And what a drawable list's element holds as its children -- see `drawThing()`.
+   * - A list with its own `to draw each item` (`drawEachItem()`) draws each item with it, in a boundary of the list's:
+   *   the wrapper each item is drawn in (epic `spanish` P20).
+   *   - A drawable list's default draws the item itself, in the item's own boundary:  no second one around it.
+   * - Any other list's item draws as itself (`drawThing()`).
    * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
    */
   drawItems(list: unknown): Drawing | null {
     // NOT `list.items` here:  read in the caller's drawing, every change to the list would draw it all again
     if (!list || typeof list !== "object" || !("items" in list)) return null
+    const { drawEachItem } = list as Partial<DrawsEachItem>
+    const drawItem =
+      typeof drawEachItem !== "function"
+        ? (item: unknown) => core.drawThing(item)
+        : drawEachItem === DEFAULT_DRAW_EACH_ITEM
+          ? (item: unknown) => drawEachItem.call(list, item)
+          : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
     return createComponent(For as unknown as ForByIdentity, {
       get each() {
         return (list as { items: unknown[] }).items
       },
-      children: (item: unknown) => core.drawThing(item)
+      children: drawItem
     })
   },
 
@@ -203,6 +215,15 @@ export type MountedApp = {
 
 /** The element an app is mounted into. */
 export type AppElement = HTMLElement & { spellRoot?: MountedApp }
+
+/** A list with its own way to draw each item:  a drawable list's `drawEachItem()`, spell's `to draw each item`. */
+type DrawsEachItem = {
+  /** `item` drawn as one of the list's -- see `DrawableList.drawEachItem()`. */
+  drawEachItem(item: unknown): Drawing
+}
+
+/** A drawable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
+const DEFAULT_DRAW_EACH_ITEM = DrawableList.prototype.drawEachItem
 
 /** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
 type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing

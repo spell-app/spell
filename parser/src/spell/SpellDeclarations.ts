@@ -30,12 +30,14 @@ export class SpellDeclarations {
    * - `declarations`:  its versions, what it `provides`, each marker's statement and where its code starts
    *
    * - `version` / `exports` come from its project file -- see `provides()`.
+   * - `languages`:  the languages its files are written in, in file order, e.g. `["en", "es"]`:
+   *   its declarations say them with the one its program speaks first (`speakingFirst()`), and none for English alone.
    * - A marker MUST start its line, and end one:  as `ASTPreservedComment` writes it, indented in a class body.
    */
   static split(
     compiled: string,
     scope: P.ProjectScope,
-    { version, exports, language }: { version?: string; exports?: string[]; language?: string } = {}
+    { version, exports, languages = [] }: { version?: string; exports?: string[]; languages?: string[] } = {}
   ): { code: string; declarations: SP.SpellDeclarationsData } {
     const code: string[] = []
     const statements: SP.SpellDeclaration[] = []
@@ -56,11 +58,12 @@ export class SpellDeclarations {
       )
       codeLines.push(code.length)
     }
+    const spoken = SpellDeclarations.speakingFirst(languages, statements)
     const declarations = definedOnly({
       version,
       spellVersion: SP.SPELL_VERSION,
-      // English, the default, says nothing:  every English project's declarations stay as they were
-      language: language === "en" ? undefined : language,
+      // English alone, the default, says nothing:  every English project's declarations stay as they were
+      languages: spoken.length === 1 && spoken[0] === SP.SpellWords.LANG ? undefined : spoken,
       provides: SpellDeclarations.provides(scope, exports),
       statements,
       codeLines
@@ -100,13 +103,19 @@ export class SpellDeclarations {
    * - Props packed a few to a line, then where it is (`defined`) last on its own:  3-7 lines all told.
    */
   static commentFor(statement: P.Match): P.ASTPreservedComment | undefined {
+    const lines = SpellDeclarations.commentLines(statement)
+    return lines && new DeclaresComment(statement, { lines })
+  }
+
+  /** The lines of `commentFor()`'s comment, worked out now -- `undefined` if `statement` declared nothing. */
+  static commentLines(statement: P.Match): string[] | undefined {
     const declaration = SpellDeclarations.declarationFor(statement)
     if (!declaration) return undefined
     const { defined, ...props } = declaration
     const lines = [`${DECLARES_MARKER} {`, ...packProps(props)]
     lines.push(...packProps(definedOnly({ defined })))
     lines.push("}")
-    return new P.ASTPreservedComment(statement, { lines })
+    return lines
   }
 
   /**
@@ -181,6 +190,36 @@ export class SpellDeclarations {
         declaration[key] = value
       }
     }
+  }
+
+  /**
+   * `languages`, a project's files' in file order, with the one its program speaks to the person running it first
+   * (epic `spanish` P19):
+   * - the language of the file declaring its app (a type that is an `App`), from where `statements` say it's defined
+   * - else its first file's, where it starts running
+   * - English for none
+   */
+  static speakingFirst(languages: string[], statements: SP.SpellDeclaration[]): string[] {
+    const superTypes = new Map(statements.filter((it) => it.type).map((it) => [it.type!, it.superType]))
+    const isApp = (type: string | undefined, seen = new Set<string>()): boolean => {
+      if (!type || seen.has(type)) return false
+      if (type === "App") return true
+      return isApp(superTypes.get(type), seen.add(type))
+    }
+    const app = statements.find((it) => it.type && isApp(it.type))
+    const appLang = app?.defined ? (SP.Language.langOfFile(app.defined) ?? SP.SpellWords.LANG) : undefined
+    const spoken = appLang ?? languages[0] ?? SP.SpellWords.LANG
+    return [spoken, ...languages.filter((lang) => lang !== spoken)]
+  }
+
+  /**
+   * Codes of the languages `declarations`' project is written in, the one its program speaks first, e.g. `["es", "en"]`:
+   * one words file each (`SP.SpellWords`).
+   * - English alone when they say none.
+   * - Declarations from before epic `spanish` P19 say ONE, `language`.
+   */
+  static languagesOf(declarations: SP.SpellDeclarationsData): string[] {
+    return declarations.languages ?? [declarations.language ?? SP.SpellWords.LANG]
   }
 
   ////////////////
@@ -281,8 +320,11 @@ export class SpellDeclarations {
       const declaredAt = SpellDeclarations.declaredAt(projectId, declaration.defined)
       if (declaration.type) {
         const runtimeName = declaration.type === original.type ? undefined : original.type
-        const { type, superType, aka, gender, itemType } = declaration
-        const props = { name: type, superType, aka, gender, itemType, runtimeName, declaredAt }
+        const { type, superType, aka, gender, itemType, classVariable, of, enumeration } = declaration
+        // a value kind, e.g. `Suit`:  its values, and the list holding them, `Card.Suits` -- see `P.TypeScope.valueKind`
+        const values = classVariable && of && !superType ? spellValues(enumeration) : undefined
+        const valueKind = values && { values, listOn: of!, listName: classVariable! }
+        const props = { name: type, superType, aka, gender, itemType, valueKind, runtimeName, declaredAt }
         SpellDeclarations.loadType(scope, from, names, props)
       }
       SpellDeclarations.loadVariables(scope, names, declaration, declaredAt)
@@ -341,6 +383,8 @@ export class SpellDeclarations {
    *   as `define_property_has` declares it.
    * - An `exclusive` property is the member `a card belongs to one pile` gave, e.g. `pile` on `Card`:
    *   read-only, as there -- see `P.TypeScope.declareOwnerMember()`.
+   * - A value kind's property keeps its `readAs`, its static method's call, e.g. `Suit.color({it})`:
+   *   so an importer's `the color of its suit` calls it too (epic `spanish` P11).
    */
   private static loadVariables(
     scope: P.ImportScope,
@@ -358,13 +402,24 @@ export class SpellDeclarations {
       enumeration,
       autoDeclared,
       exclusive,
-      rules
+      rules,
+      readAs
     } = declaration
     const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
     if (!typeScope) return
     if (property) {
       typeScope.variables.add(
-        definedOnly({ name: property, asWritten, datatype, initializer, autoDeclared, exclusive, rules, declaredAt })
+        definedOnly({
+          name: property,
+          asWritten,
+          datatype,
+          readAs,
+          initializer,
+          autoDeclared,
+          exclusive,
+          rules,
+          declaredAt
+        })
       )
     }
     if (classVariable) {
@@ -590,7 +645,7 @@ export class SpellDeclarations {
     typeScope: P.TypeScope,
     declared: unknown[]
   ): SP.SpellDeclaration {
-    const { name, asWritten, datatype, enumeration, initializer, autoDeclared, exclusive, rules } = variable
+    const { name, asWritten, datatype, readAs, enumeration, initializer, autoDeclared, exclusive, rules } = variable
     const of = typeScope.name
     const derived = enumerationInitializer(enumeration)
     const ownInitializer = initializer === derived ? undefined : initializer
@@ -599,7 +654,17 @@ export class SpellDeclarations {
       (it) => it instanceof P.ScopeVariable && it !== variable && it.kind === "static" && it.name === name
     )
     if (isTwin) return {}
-    return { property: name, asWritten, of, datatype, autoDeclared, exclusive, rules, initializer: ownInitializer }
+    return {
+      property: name,
+      asWritten,
+      of,
+      datatype,
+      readAs,
+      autoDeclared,
+      exclusive,
+      rules,
+      initializer: ownInitializer
+    }
   }
 
   /**
@@ -662,6 +727,23 @@ export class SpellDeclarations {
   }
 }
 
+/**
+ * A `/*! SPELL: DECLARES {...} *\/` comment, its lines worked out each time it's written -- see `commentFor()`.
+ * - Why:  its `defined` is where its statement is now.
+ *   A body's AST is memoized (an outline's type body, e.g. `- its "jokers" is yes or no`),
+ *   and kept when an edit above it only moves it:  lines worked out once would keep the old offsets.
+ */
+class DeclaresComment extends P.ASTPreservedComment {
+  constructor(statement: P.Match, props: { lines: string[] }) {
+    super(statement, props)
+    Object.defineProperty(this, "lines", {
+      get: () => SpellDeclarations.commentLines(this.match as P.Match) ?? props.lines,
+      enumerable: true,
+      configurable: true
+    })
+  }
+}
+
 /** Started the one-line header comment of a project's compiled JS, before declarations files -- see `fromComments()`. */
 const PROJECT_MARKER = "SPELL: PROJECT"
 
@@ -711,6 +793,7 @@ const PROP_ORDER = [
   "kind",
   "name",
   "datatype",
+  "readAs",
   "autoDeclared",
   "getter",
   "itemType",

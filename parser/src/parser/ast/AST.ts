@@ -172,6 +172,16 @@ export class ASTNumericLiteral extends ASTLiteral {
  */
 export class ASTOrdinalLiteral extends ASTNumericLiteral {}
 
+/**
+ * A number written in hex, e.g. spell's `hex 1F0A0` => `0x1F0A0`.
+ * - `raw` is its hex digits as written, `1F0A0`;  `value` the number, `127136`.
+ * - Javascript, TypeScript and Python all write it `0x<digits>`;  a writer with nothing to say of it writes it as
+ *   `ASTNumericLiteral`.
+ */
+export class ASTHexLiteral extends ASTNumericLiteral {
+  declare raw: string
+}
+
 /** A quote a text literal is written in:  double, single or a back tick. */
 export type ASTQuote = '"' | "'" | "`"
 

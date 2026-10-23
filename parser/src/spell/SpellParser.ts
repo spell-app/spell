@@ -159,6 +159,76 @@ export class SpellParser extends P.Parser {
    */
   declare language: SP.Language | undefined
 
+  ////////////////
+  // ## Twins:  one project, several languages
+  ////////////////
+
+  /**
+   * This project parser's twin reading `language`, for a file written in it -- us, for our own language.
+   * - So one project can mix languages (epic `spanish` P19):  `Carta.es.spell` beside `Card.spell`.
+   * - The twin has `language`'s own rules, plus every rule our project added, ours and our imports':
+   *   - the ones there already, copied from each layer between us and our language's parser
+   *     (`SpellDeclarations.importScope()`'s, then ours)
+   *   - and each one any twin adds from now on, which every other twin adds too (`addOwnRule()`):
+   *     a method an English file defines, a Spanish file calls by its English words
+   * - Its journal is ours (`P.IncrementalProject` gives every file's parser the same one).
+   * - One per language, kept while this parser lives:  a new parse's new project parser makes new ones.
+   */
+  twinFor(language: SP.Language): SpellParser {
+    if (!this.language || language === this.language) return this
+    const twins = (this.twins ??= [this])
+    const existing = twins.find((twin) => twin.language === language)
+    if (existing) return existing
+    const twin = language.parser.clone({ module: this.module })
+    for (const layer of this.layersOver(this.language.parser).reverse()) {
+      for (const [ruleName, rule] of Object.entries(layer.ownRules)) twin.addTwinsRule(ruleName, rule)
+    }
+    twin.journal = this.journal
+    twin.twins = twins
+    twins.push(twin)
+    return twin
+  }
+
+  /**
+   * Our project parser and its twins in other languages, which add each other's rules -- see `twinFor()`.
+   * - `undefined` until we make one.
+   * - NEVER copied by `clone()`:  a family is one project's.
+   */
+  declare twins: SpellParser[] | undefined
+
+  /** Add `rule` to our own rules, and to each of our twins' (`twinFor()`):  a rule one adds, they all read. */
+  protected addOwnRule(ruleName: string, rule: P.Rule): void {
+    super.addOwnRule(ruleName, rule)
+    this.twins?.forEach((twin) => twin !== this && twin.addTwinsRule(ruleName, rule))
+  }
+
+  /** Add a rule one of our twins added, to our own rules only:  it's added to the others already. */
+  private addTwinsRule(ruleName: string, rule: P.Rule): void {
+    super.addOwnRule(ruleName, rule)
+  }
+
+  /**
+   * Us, then each parser we import down to `base`, which is left out:  the layers a project's parser adds.
+   * - Each imports one:  a project's parser clones its import scope's, which clones its language's.
+   * - Just us if `base` isn't below us.
+   */
+  private layersOver(base: P.Parser): P.Parser[] {
+    const layers: P.Parser[] = [this]
+    let layer = this.imports?.length === 1 ? this.imports[0] : undefined
+    while (layer && layer !== base) {
+      layers.push(layer)
+      layer = layer.imports?.length === 1 ? layer.imports[0] : undefined
+    }
+    return layer === base ? layers : [this]
+  }
+
+  /** A clone of us, as `P.Parser.clone()`, but none of our twins:  a family is one project's (`twinFor()`). */
+  clone(properties?: P.ParserProps): this {
+    const clone = super.clone(properties)
+    delete clone.twins
+    return clone
+  }
+
   /**
    * The default language's root scope:  spell's built-in types and their members -- see `SP.Language.rootScope`.
    * - Every project scope in English points back to this;  another language's to its own.
@@ -276,7 +346,9 @@ export class SpellParser extends P.Parser {
    */
   private parseFirstLine(scope: P.Scope, found: string): P.Match | undefined {
     const [subject = "", line = ""] = found.split("\t")
-    const at = subject ? new P.SubjectScope({ subject, parentScope: scope }) : scope
+    // by OUR rules, a twin's in another language (`twinFor()`):  a scope reads its rules from its parser
+    const ours = scope.parser === this ? scope : new P.Scope({ name: scope.name, parentScope: scope, parser: this })
+    const at = subject ? new P.SubjectScope({ subject, parentScope: ours }) : ours
     const match = this.parse(line, "statement", at)
     return (match?.rule as CallsAhead | undefined)?.callAhead ? match : undefined
   }

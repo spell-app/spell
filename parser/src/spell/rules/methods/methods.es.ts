@@ -102,6 +102,17 @@ methodsEs.addRule(ToDoSomething, {
           ]
         },
         {
+          title: "paren-free:  `dibujar` a type is its drawing, `draw()`, as `- para dibujarla:` is (J84)",
+          input: "para dibujar una card: imprimir eso",
+          js: [`Card.prototype.draw = function () {`, `  return core.console.log(this)`, `}`],
+          ts: [
+            "export interface Card { draw(): any /* spell: type unknown */ }",
+            "Card.prototype.draw = function (this: Card) {",
+            "  return core.console.log(this)",
+            "}"
+          ]
+        },
+        {
           title: "paren-free type arg in signature - `eso` (it)",
           input: "para crear una card: imprimir eso",
           js: [`Card.prototype.crear = function () {`, `  return core.console.log(this)`, `}`],

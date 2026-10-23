@@ -1,23 +1,8 @@
-import { describe, test, expect, vi } from "vite-plus/test"
+import { describe, test, expect } from "vite-plus/test"
 
-import {
-  core,
-  Thing,
-  List,
-  App,
-  on,
-  off,
-  once,
-  trigger,
-  positionOf,
-  position,
-  spellPosition,
-  endPosition,
-  withSpellPositions
-} from "spell-lang/core"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
-import { loadFixtureProject, parseSpellProject } from "spell-lang/spell/test"
+import { parseSpellProject, runSpellFiles, type RunOptions } from "spell-lang/spell/test"
 
 /**
  * The OUTLINE style (epic page `outline-spell`):  a type's heading, `a card is a thing where:`, then a bulleted
@@ -255,6 +240,26 @@ describe("outline style", () => {
       "set none to unicode 1.5"
     ])
     expect(run("back, heart, ace, next, none")).toEqual({ back: "🂠", heart: "♥", ace: "🂡", next: "🂢", none: "" })
+  })
+
+  test("`unicode 1F0A0 + n` ADDS to the code point;  `hex 1F0A0` is a number;  a character of text is a whole one", () => {
+    const run = runSpell([
+      "set column to 1",
+      "set ace to unicode 1F0A0 + column",
+      "set queen to unicode 1F0A0 + column + 12",
+      "set start to hex 1F0A0",
+      "set next to unicode (start + 1)",
+      'set second to character 2 of "🂡🂢🂣"',
+      'set last to the last character of "🂡🂢🂣"'
+    ])
+    expect(run("ace, queen, start, next, second, last")).toEqual({
+      ace: "🂡",
+      queen: "🂭",
+      start: 0x1f0a0,
+      next: "🂡",
+      second: "🂢",
+      last: "🂣"
+    })
   })
 
   test("a call that's all words beats a built-in reading:  `{draw its placeholder}` is the pile's own method", () => {
@@ -768,18 +773,58 @@ describe("outline style", () => {
     })
   })
 
-  test('`to "draw its front":` + markup:  a side, as a getter;  front and back give `draw()` by direction (Q14)', () => {
-    const lines = [
-      "a card is a thing where:",
-      "\t- its direction is up or down",
-      '\t- to "draw its front":',
-      '\t\t<ui-image source="images/front.png" />',
-      '\t- to "draw its back": <ui-image source="images/back.png" />'
-    ]
-    const js = compile(lines)
-    expect(js).toMatch(/get front\(\) \{\s+return h\("ui-image"/)
-    expect(js).toContain("draw() {")
-    expect(js).toContain('return this.direction === "down" ? this.back : this.front')
+  describe("drawing:  ONE `to draw it`, and a list's `to draw each item` (epic `spanish` P20)", () => {
+    test('`to "draw it":` + markup:  the markup IS its `draw()`, no `return` needed', () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        '\t- to "draw it":',
+        '\t\t<ui-image source="images/front.png" />'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+return h\("ui-image"/)
+      expect(js).not.toContain("this.direction ===")
+    })
+
+    test("`to draw it:` unquoted is a method's body, which returns it:  the same `draw()`", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        "\t- to draw it:",
+        "\t\tif its direction is down",
+        '\t\t\treturn <div class="back"/>',
+        '\t\treturn <div class="front"/>'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction == "down"\) return h\("div", \{ class: "back" \}\)/)
+    })
+
+    test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- to draw it:",
+        '\t\treturn <div class="pile"><children/></div>',
+        "\t- to draw each item:",
+        '\t\treturn <div class="spot">{draw the card}</div>'
+      ])
+      expect(js).toContain('return h("div", { class: "pile" }, h("slot"))')
+      expect(js).toMatch(
+        /drawEachItem\(item\) \{\s+return h\("div", \{ class: "spot" \}, \(\) => core\.drawThing\(item\)\)/
+      )
+    })
+
+    test('`to "draw each item":` + markup:  `the item` is the item too', () => {
+      const js = compile([
+        "a card is a drawable thing",
+        "a pile is a drawable list of cards where:",
+        '\t- to "draw each item": <b>{draw the item}</b>'
+      ])
+      expect(js).toMatch(/drawEachItem\(item\) \{\s+return h\("b", \(\) => core\.drawThing\(item\)\)/)
+    })
+
+    test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
+    })
   })
 
   test("`[rank]` fills in, in text and markup:  inside a card, a bare property is its own (P4)", () => {
@@ -787,10 +832,10 @@ describe("outline style", () => {
       "a card is a thing where:",
       "\t- its rank is a number",
       "\t- its suit is text",
-      '\t- to "draw its front":',
+      '\t- to "draw it":',
       '\t\t<ui-image source="images/[rank]-of-[suit].png" />',
       '\t- its "label" is: "the [rank] of [suit]"',
-      '\t- to "draw its back": <span>[rank] of [suit], [[face down]]</span>'
+      '\t- its "caption" is: <span>[rank] of [suit], [[face down]]</span>'
     ]
     const js = compile(lines)
     // text:  a plain name (an object would be `prop:`)
@@ -969,64 +1014,15 @@ describe("outline style", () => {
       expect(compile(["score is 0"])).toContain("const score = 0")
     })
   })
-
-  test("the outline Solitaire's cards pass their own tests, as today's cards do (P5)", () => {
-    // its deck, card and piles -- not the game itself, which starts an app
-    const files = loadFixtureProject("outline-solitaire").filter(({ path }) => !path.endsWith("Solitaire.spell"))
-    const lines: string[] = []
-    const console = core.console as unknown as Record<string, (...args: unknown[]) => void>
-    for (const method of ["log", "group", "groupCollapsed", "warn", "error", "info"].filter((it) => console[it])) {
-      vi.spyOn(console, method).mockImplementation((...args) => void lines.push(args.join(" ")))
-    }
-    runSpellFiles(files)("")
-    vi.restoreAllMocks()
-    expect(lines.filter((line) => line.includes("❌"))).toEqual([])
-    // 29:  since its deck deals its cards as it's made (`- to create it:`), it checks 52 cards once, not twice
-    expect(lines.filter((line) => line.includes("✅")).length).toBe(29)
-  })
 })
 
 /**
  * `lines` compiled, then RUN on `core`'s source, as `membership.test.ts` does:  a function of the names to return.
  * - Throws on a parse error.
+ * - `options.registered`:  its things register in `core.things` -- see `runSpellFiles()`.
  */
 function runSpell(lines: string[], options?: RunOptions) {
   return runSpellFiles([{ path: "/Test.spell", contents: lines.join("\n") }], options)
-}
-
-/** How `runSpell()` runs a program. */
-type RunOptions = {
-  /** `true`:  its things register in `core.things`, as a running program's do, e.g. for `every pile`.  Default:  not. */
-  registered?: boolean
-}
-
-/** `files`, a project, compiled then RUN -- see `runSpell()`. */
-function runSpellFiles(sources: Array<{ path: string; contents: string }>, { registered = false }: RunOptions = {}) {
-  const { files } = parseSpellProject(sources)
-  const errors = files.flatMap((file) => file.errors)
-  if (errors.length) throw new Error(`parse errors:\n${JSON.stringify(errors, null, 2)}`)
-  const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const code = SP.SpellProject.combineCompiled(parts)
-    .split("\n")
-    .filter((line) => !line.startsWith("import "))
-    .join("\n")
-    .replace(/^export /gm, "")
-  return (names: string) => {
-    // each top-level variable by spell's name, e.g. `first_pile`:  compiled javascript calls it `firstPile`
-    const named = names
-      .split(/,\s*/)
-      .filter(Boolean)
-      .map((name) => `${name}: ${P.JSWriter.instance.nameOf(name)}`)
-    const body = `${code}\nreturn { ${named.join(", ")} }`
-    // `@spell/core`'s helpers it imports by name, e.g. `trigger()`, as the import it lost would give them
-    const imported = { on, off, once, trigger, positionOf, position, spellPosition, endPosition, withSpellPositions }
-    // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test
-    const fn = new Function("core", "Thing", "List", "App", ...Object.keys(imported), body)
-    const run = () => fn(core, Thing, List, App, ...Object.values(imported))
-    if (!registered) return core.things.quietly(run) as Record<string, unknown>
-    core.things.clear()
-    return run() as Record<string, unknown>
-  }
 }
 
 /**
