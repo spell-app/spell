@@ -17,7 +17,8 @@ export const epicCommitVocabulary = {
   noun: "commit",
   ui: false,
   description:
-    "One commit that built a phase or fixed an item:  its short sha is drawn, linked through `<epic-page repo>`;  " +
+    "One commit that built a phase or fixed an item:  its short sha is drawn, linked through its `repo`, else " +
+    "`<epic-page repo>`;  " +
     "its sentence is its children.",
   attributes: [
     {
@@ -26,6 +27,14 @@ export const epicCommitVocabulary = {
       required: true,
       format: "sha",
       description: "The commit's full sha (shown as its first 7)."
+    },
+    {
+      name: "repo",
+      kind: "string",
+      format: "url",
+      description:
+        "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit " +
+        "(`https://github.com/spell-app/spell-lang`)."
     }
   ],
   events: [],

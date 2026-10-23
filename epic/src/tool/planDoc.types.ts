@@ -562,6 +562,8 @@ export type CommitLogEntry = {
   sha: string
   /** its subject line */
   subject: string
+  /** the GitHub page of the repo it's in (`PlanDocFiles.sharedDocLog()`):  a child repo's commit links there */
+  repo?: string | null
 }
 
 /** A commit `PlanDoc.backfillCommits()` listed:  its sha, and where. */
@@ -571,14 +573,29 @@ export type BackfilledCommit = Prettify<CommitTarget & { sha: string }>
 export type CommitOptions = {
   /** the repo's GitHub page:  written to `<epic-page repo>`, which every `<epic-commit>` links through;  `null`:  left */
   base?: string | null
+  /**
+   * the GitHub page of the repo THIS commit is in, when it isn't the page's (a child repo's):
+   * written to its `<epic-commit repo>`, which its link goes through
+   */
+  repo?: string | null
+}
+
+/** `PlanDoc.backfillCommits()`'s options. */
+export type BackfillOptions = CommitOptions & {
+  /** the epic's name:  a commit naming ANOTHER epic first (`other-epic P7:`) is left out */
+  epic?: string
 }
 
 /** What a commit subject says it did (`PlanCommits.parseCommitSubject()`). */
 export type ParsedCommit = {
+  /** the epic it names first (`outline-spell P28:`), else `null` */
+  epic: string | null
   /** phase numbers (`P6a` -> 6) */
   phases: number[]
   /** item ids, lower case (`i3`) */
   items: string[]
+  /** the subject after the colon, up to ` -- `:  a phase commit's phase name (`P3:  Name -- what it did`) */
+  title: string
   /** the subject after ` -- ` (`P3:  Name -- what it did`), else after the colon */
   sentence: string
 }

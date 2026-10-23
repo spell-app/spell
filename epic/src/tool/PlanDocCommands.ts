@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { dirname, join, relative, resolve, sep } from "node:path"
+import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import { atDepth } from "spell-epic/tools/pages.js"
 import { OPEN_KINDS, PlanDocError, REVIEW_SECTIONS, TITLE_PREFIX, type Phase, type PlanSummary } from "./planDoc.types"
@@ -12,6 +12,7 @@ import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { MigrateCommands, type SessionFinder } from "./MigrateCommands"
 import { PlanDoc } from "./PlanDoc"
+import { PlanCommits } from "./PlanCommits"
 import { EPIC_STATUSES, PlanDocFiles, type EpicListing } from "./PlanDocFiles"
 import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
@@ -440,20 +441,28 @@ export class PlanDocCommands {
   /**
    * `commit <name> <sha> --phase N | --item <id> "sentence"`:
    * list commit `sha` under a phase or an item, replacing its entry there.
-   * - `sha` is resolved to its full sha in the doc's checkout
+   * - `sha` is resolved to its full sha in the doc's checkout, else in one of its child repos
+   *   (`PlanDocFiles.repoFolders()`), whose GitHub page its link then goes to
    */
   private async commit(file: string, [sha, sentence]: string[], { phase, item }: Flags): Promise<void> {
     need(sha, "a commit sha")
     need(sentence, "a sentence:  what the commit did")
     if ((phase === undefined) === (item === undefined)) throw new PlanDocError(`commit needs --phase N or --item <id>`)
-    const checkout = this.files.checkoutOf(file)
-    const full = PlanDocFiles.gitIn(checkout, "rev-parse", "--verify", "--quiet", `${sha}^{commit}`)
-    if (!full) throw new PlanDocError(`no commit "${sha}" in ${checkout}`)
+    const folders = this.files.repoFolders(file)
+    const found = folders
+      .map((folder) => ({
+        folder,
+        full: PlanDocFiles.gitIn(folder, "rev-parse", "--verify", "--quiet", `${sha}^{commit}`)
+      }))
+      .find(({ full }) => full)
+    if (!found) throw new PlanDocError(`no commit "${sha}" in ${folders.join(", ")}`)
+    const { folder, full } = found
     const base = this.files.commitBase(file)
+    const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(folder, "remote", "get-url", "origin"))
     const { done, where } = await this.edit(file, (plan) => {
       const target = phase !== undefined ? { phase: plan.phaseNumber(String(phase)) } : { item: String(item) }
       const where = target.phase !== undefined ? `P${target.phase}` : target.item!.toUpperCase()
-      return { done: plan.addCommit(target, full, sentence, { base }), where }
+      return { done: plan.addCommit(target, full, sentence, { base, repo }), where }
     })
     this.print(`${where}:  ${full.slice(0, 7)} ${done}`)
   }
@@ -463,11 +472,14 @@ export class PlanDocCommands {
    * the doc's phase and item commits into its phases' and items' commit lists (`PlanDoc.backfillCommits()`).
    * - prints what it added
    * - the doc's history:  `PlanDocFiles.docLog()` (git's, or a shared doc's `sharedDocLog()`)
+   * - never a commit ANOTHER epic's page lists:  a bare `P7:  Doc Review` reads the same for every epic with one
    */
   private async backfillCommits(file: string): Promise<void> {
-    const log = this.files.docLog(file)
+    const epic = basename(file).replace(/(\.plan)?\.html$/, "")
+    const others = [...new EpicDocs({ files: this.files, name: epic }).otherEpicsCommits()]
+    const log = this.files.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
     const base = this.files.commitBase(file)
-    const added = await this.edit(file, (plan) => plan.backfillCommits(log, { base }))
+    const added = await this.edit(file, (plan) => plan.backfillCommits(log, { base, epic }))
     for (const entry of added) {
       const where = entry.phase !== undefined ? `P${entry.phase}` : entry.item!.toUpperCase()
       this.print(`  ${where.padEnd(4)} ${entry.sha.slice(0, 7)}`)

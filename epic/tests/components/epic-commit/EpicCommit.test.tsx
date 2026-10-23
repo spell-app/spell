@@ -32,6 +32,17 @@ describe("<epic-commit>", () => {
     await expectAccessible(first!)
   })
 
+  test("a child repo's commit links through its OWN `repo`", async () => {
+    const root = await ElementFixture.render(
+      shown(
+        `<epic-commit sha="0123456789abcdef" repo="https://github.com/spell-app/spell-lang">Lang</epic-commit>`,
+        ` repo="https://github.com/spell-app/spell-kit"`
+      )
+    )
+    const link = root.querySelector("epic-commit")!.shadowRoot!.querySelector<HTMLAnchorElement>('[part~="sha"]')!
+    expect(link.getAttribute("href")).toBe("https://github.com/spell-app/spell-lang/commit/0123456789abcdef")
+  })
+
   test("without a `repo`:  the sha as code, no link;  hidden until something shows the commits", async () => {
     const commit = await ElementFixture.render(`<epic-commit sha="0123456789abcdef">Only</epic-commit>`)
     expect(commit.shadowRoot!.querySelector('[part~="sha"]')!.localName).toBe("code")

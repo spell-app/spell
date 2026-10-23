@@ -531,6 +531,18 @@ export class PlanDocFiles {
   }
 
   /**
+   * The repos a doc's commits can be in, the doc's checkout first:  it, then each of its child repos that's there
+   * (`EpicConfig.repos`:  a multi-repo top's, `spell-lang` ...;  none for a single repo).
+   * - every repo's work counts toward an epic (epic `epic-engine` r17):  outline-spell's phases are mostly
+   *   spell-lang's, spell-ui's and spell-app's commits
+   */
+  repoFolders(file: string): string[] {
+    const checkout = this.checkoutOf(file)
+    const children = EpicConfig.of(checkout).repos.map((name) => join(checkout, name))
+    return [checkout, ...children.filter((folder) => existsSync(join(folder, ".git")))]
+  }
+
+  /**
    * The doc's commits, newest first:  its git history when the checkout tracks it, else `sharedDocLog()`.
    * - a doc spell-app tracks:  `git log --follow` (every phase commit touches the epic page), on the doc as HEAD has it
    *   - a rename to `<name>.plan.html` not committed yet has no history of its own, so follow the old name
@@ -546,36 +558,58 @@ export class PlanDocFiles {
     )
     return tracked
       ? PlanDocFiles.parseLog(PlanDocFiles.gitIn(checkout, "log", "--follow", "--format=%H%x09%s", "--", tracked))
-      : PlanDocFiles.sharedDocLog(file, checkout)
+      : PlanDocFiles.sharedDocLog(file, this.repoFolders(file))
   }
 
   /**
    * A shared doc's commits, newest first:
-   * `checkout`'s commits since the doc was started whose subject names THIS epic's work.
+   * the commits of `checkouts` (one repo's, or every repo of a kit's) since the doc was started whose subject names
+   * THIS epic's work.
    * - the start:  `<epic-page started>`
    * - `<epic> ...` (`shared-content P3:`, `shared-content I3:`)
-   * - `P3:  <P3's name> -- ...`:  the phase name must match, since other epics have a P3 too
-   * - a bare `Fix I3:` could be any epic's:  left out (write `<epic> I3:` instead)
+   * - `P3:  <P3's name> -- ...`, no epic named:  the phase name must be its title, since other epics have a P3 too
+   *   (`P7:  Fussbudget -- ... every epic's Doc Review ...` isn't a P7 called Doc Review)
+   * - a commit naming another epic first, or a bare `Fix I3:` (any epic's), is left out (write `<epic> I3:`)
+   * - each commit carries its repo's GitHub page (`repo`), and the repos' commits are merged by time
    * - STATIC:  any checkout's, for any doc in `<epic-*>` markup
    */
-  static sharedDocLog(file: string, checkout: string): CommitLogEntry[] {
+  static sharedDocLog(file: string, checkouts: string | string[]): CommitLogEntry[] {
     const html = readFileSync(file, "utf8")
     const name = basename(file).replace(/(\.plan)?\.html$/, "")
     const since = /<epic-page\b[^>]*\bstarted="(\d{4}-\d\d-\d\d)"/.exec(html)?.[1]
     const phases = PlanDoc.parse(html).phases
-    // a bare date means that day at the CURRENT time to git:  midnight, so the start day's commits count
-    const raw = PlanDocFiles.gitIn(checkout, "log", "--format=%H%x09%s", ...(since ? [`--since=${since} 00:00`] : []))
-    return PlanDocFiles.parseLog(raw).filter(({ subject }) => {
-      if (subject.startsWith(`${name} `)) return true
-      const parsed = PlanCommits.parseCommitSubject(subject)
-      return Boolean(
-        parsed?.phases.length &&
-        parsed.phases.every((n) => {
-          const phase = phases.find((each) => each.n === n)
-          return phase && subject.includes(phase.name)
-        })
+    const timed: (CommitLogEntry & { time: number })[] = []
+    for (const checkout of [checkouts].flat()) {
+      const repo = PlanCommits.githubBase(PlanDocFiles.gitIn(checkout, "remote", "get-url", "origin"))
+      // a bare date means that day at the CURRENT time to git:  midnight, so the start day's commits count
+      const raw = PlanDocFiles.gitIn(
+        checkout,
+        "log",
+        "--format=%ct%x09%H%x09%s",
+        ...(since ? [`--since=${since} 00:00`] : [])
       )
-    })
+      for (const { sha: time, subject: rest } of PlanDocFiles.parseLog(raw)) {
+        const [sha, ...subject] = rest.split("\t")
+        timed.push({ sha: sha!, subject: subject.join("\t"), repo, time: Number(time) })
+      }
+    }
+    const seen = new Set<string>()
+    return timed
+      .sort((a, b) => b.time - a.time)
+      .filter(({ sha }) => !seen.has(sha) && Boolean(seen.add(sha)))
+      .filter(({ subject }) => {
+        const parsed = PlanCommits.parseCommitSubject(subject)
+        if (parsed?.epic) return parsed.epic === name
+        if (subject.startsWith(`${name} `)) return true
+        return Boolean(
+          parsed?.phases.length &&
+          parsed.phases.every((n) => {
+            const phase = phases.find((each) => each.n === n)
+            return phase && PlanCommits.titleNames(parsed.title, phase.name)
+          })
+        )
+      })
+      .map(({ sha, subject, repo }) => ({ sha, subject, repo }))
   }
 
   /** `git log --format=%H%x09%s` output as `{ sha, subject }`s, newest first.  STATIC:  pure. */

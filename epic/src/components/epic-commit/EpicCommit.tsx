@@ -11,7 +11,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
 /****************
  * ### `EpicCommit`
  * The component behind `<epic-commit>`:  one commit of a phase or an item -- its short sha (a link to the commit,
- * made from the page's `<epic-page repo>`), then what it did (its children).
+ * made from its own `repo`, a child repo's, else the page's `<epic-page repo>`), then what it did (its children).
  * - The first of a run of commits carries the run's heading, `Commits:` with the git icon (`:host(:first-of-type)`
  *   in its sheet);  the lines sit under the heading's text.
  * - Hidden until the page's git toggle shows every commit (`--epic-commits-display`, from `<epic-page>`), or an
@@ -29,9 +29,9 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
   /** The heading's icon. */
   readonly glyph = new E.IconGlyph({ owner: this, name: () => "code branch" })
 
-  /** Its link, from the page's `repo`;  `undefined` without one. */
+  /** Its link, from its own `repo`, else the page's;  `undefined` without one. */
   get href(): string | undefined {
-    const repo = this.isConnected ? this.domElement.closest(PAGE_TAG)?.getAttribute("repo") : undefined
+    const repo = this.repo || (this.isConnected ? this.domElement.closest(PAGE_TAG)?.getAttribute("repo") : undefined)
     return repo && this.sha ? `${repo.replace(/\/$/, "")}/commit/${this.sha}` : undefined
   }
 

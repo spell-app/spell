@@ -68,4 +68,49 @@ describe("sharedDocLog", () => {
       "P1:  Spike -- the throwaway test"
     ])
   })
+
+  it("reads every repo given, newest first, each commit with its repo's page;  a phase's name in the TITLE only, no other epic's (r17)", () => {
+    const repo = (folder, remote, subjects) => {
+      const checkout = join(temp, folder)
+      mkdirSync(checkout, { recursive: true })
+      const git = (...args) => execFileSync("git", args, { cwd: checkout, encoding: "utf8" })
+      git("init", "-q")
+      git("remote", "add", "origin", remote)
+      for (const [subject, at] of subjects)
+        execFileSync(
+          "git",
+          ["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", subject],
+          {
+            cwd: checkout,
+            env: { ...process.env, GIT_COMMITTER_DATE: at, GIT_AUTHOR_DATE: at }
+          }
+        )
+      return checkout
+    }
+    const kit = repo("kit", "https://github.com/spell-app/spell-kit.git", [
+      ["P1:  Fussbudget -- every epic's Doc Review runs it", "2026-10-20T10:00:00"],
+      ["other P2:  Doc Review -- another epic's, naming its own", "2026-10-20T11:00:00"],
+      ["demo P1:  Spike -- the kit's part", "2026-10-20T12:00:00"]
+    ])
+    const lang = repo("kit/spell-lang", "git@github.com:spell-app/spell-lang.git", [
+      ["demo P2:  Doc Review -- spell-lang's part", "2026-10-20T13:00:00"]
+    ])
+    const plan = PlanDoc.parse(readFileSync(new PlanDocFiles().template, "utf8"))
+    plan.addPhase("Spike")
+    plan.addPhase("Doc Review")
+    const file = put("kit-content/epics/demo/demo.plan.html", plan.toString())
+
+    expect(sharedDocLog(file, [kit, lang])).toEqual([
+      {
+        sha: expect.any(String),
+        subject: "demo P2:  Doc Review -- spell-lang's part",
+        repo: "https://github.com/spell-app/spell-lang"
+      },
+      {
+        sha: expect.any(String),
+        subject: "demo P1:  Spike -- the kit's part",
+        repo: "https://github.com/spell-app/spell-kit"
+      }
+    ])
+  })
 })
