@@ -749,6 +749,42 @@ describe("<ui-menu> appearance, alignment, equal", () => {
     expect(plain.items.map((item) => item.matches(":state(selected)"))).toEqual([false, true])
   })
 
+  it("segmented:  ONE thumb under the items, sliding to each new choice (Apple's segmented control)", async () => {
+    const { root, items } = await bar(
+      'appearance="segmented" link',
+      `<ui-item value="a">A</ui-item><ui-item value="b" selected>Bee</ui-item><ui-item value="c">Cicada</ui-item>`
+    )
+    /** An item box's left edge, from the track's padding edge. */
+    const leftOf = (item: Element) =>
+      boxOf(item).getBoundingClientRect().left - root.getBoundingClientRect().left - root.clientLeft
+    const thumb = () => getComputedStyle(root, "::before")
+    await expect.poll(() => root.classList.contains("thumbed")).toBe(true)
+    expect(parseFloat(thumb().left)).toBeCloseTo(leftOf(items[1]!), 0)
+    expect(parseFloat(thumb().width)).toBeCloseTo(boxOf(items[1]!).getBoundingClientRect().width, 0)
+    expect(thumb().backgroundColor).toBe(colorOf("var(--ui-primary)"))
+    // the chosen item drops its own fill (fading out), keeping the on-colour text
+    await expect.poll(() => styleOf(items[1]!).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    expect(styleOf(items[1]!).color).toBe(colorOf("var(--ui-primary-on)"))
+    // from the second choice on, it slides
+    await expect.poll(() => root.classList.contains("moving")).toBe(true)
+    expect(thumb().transitionProperty).toContain("left")
+    await userEvent.click(boxOf(items[2]!))
+    await expect
+      .poll(() => parseFloat(root.style.getPropertyValue("--_menu-thumb-x")))
+      .toBeCloseTo(leftOf(items[2]!), 0)
+    expect(parseFloat(root.style.getPropertyValue("--_menu-thumb-width"))).toBeCloseTo(
+      boxOf(items[2]!).getBoundingClientRect().width,
+      0
+    )
+  })
+
+  it("no thumb on a menu that isn't segmented", async () => {
+    const { root } = await bar("secondary")
+    await ElementFixture.settle()
+    expect(root.classList.contains("thumbed")).toBe(false)
+    expect(getComputedStyle(root, "::before").content).not.toBe('""')
+  })
+
   it("alignment packs the items at an end of a full-width bar", async () => {
     for (const [alignment, side] of [
       ["left", "left"],

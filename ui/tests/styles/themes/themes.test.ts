@@ -723,3 +723,26 @@ describe("fruity.css", () => {
     expect(style.backdropFilter).toBe("none")
   })
 })
+
+describe("fruity.css:  interfaces.dev's cheat sheet", () => {
+  it("buttons press in with a named transition, never `all`", async () => {
+    await T3.use("fruity")
+    const { style } = await ThemeHarness.inner(`<ui-button>Save</ui-button>`, ".ui.button")
+    expect(style.transitionProperty).toContain("scale")
+    expect(style.transitionProperty).not.toContain("all")
+  })
+
+  it("a page image wears a 1px outline inside its edge;  links skip descenders", async () => {
+    await T3.use("fruity")
+    const img = document.createElement("img")
+    const link = document.createElement("a")
+    link.href = "#"
+    document.body.append(img, link)
+    onTestFinished(() => {
+      img.remove()
+      link.remove()
+    })
+    expect(getComputedStyle(img)).toMatchObject({ outlineWidth: "1px", outlineOffset: "-1px" })
+    expect(getComputedStyle(link).textUnderlinePosition).toBe("from-font")
+  })
+})

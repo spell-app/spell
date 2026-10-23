@@ -43,7 +43,7 @@ import { E, UI } from "spell-ui/core"
 import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
-import { defineSite } from "spell/server/site"
+import { LOGO_MARK, defineSite } from "spell/server/site"
 import { SiteRouter } from "./SiteRouter"
 import { SiteShell } from "./SiteShell"
 
@@ -76,6 +76,8 @@ document.addEventListener("click", (event) => {
 })
 
 void SiteShell.mount(SITE_ROOT).then(async (content) => {
+  // the hat before the top bar's brand (`site.css`, "Top bar"):  the site header's own mark, a constant SVG
+  for (const hat of document.querySelectorAll(".site-hat")) hat.innerHTML = LOGO_MARK
   const router = content && new SiteRouter({ siteRoot: SITE_ROOT, content })
   router?.followPage()
   // the swaps' landing, for the first page:  saved folds before the sections draw;  the hash once the root is ready

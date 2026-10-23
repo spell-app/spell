@@ -257,10 +257,9 @@ export class FormFields {
     return (control as { checkable?: string }).checkable === "radio"
   }
 
-  /** Chosen now. */
+  /** Chosen now:  its `checked`, the same in every language (a `ui-*` checkbox's `selected`). */
   static isChosen(control: Element): boolean {
-    if (control instanceof HTMLInputElement) return control.checked
-    return !!(control as { selected?: boolean }).selected
+    return !!(control as { checked?: boolean }).checked
   }
 
   /**

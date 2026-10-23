@@ -155,10 +155,11 @@
     background: oklch(from var(--ui-text-color) l c h / 0.08);
     color: var(--_ui-docs-search-color);
   }
+  /* the shortcut's keys close together, so they read as ONE chord, not two presses (Owen, 2026-10-23) */
   .keys {
     flex: none;
     display: inline-flex;
-    gap: 0.1875em;
+    gap: 1px;
   }
   kbd {
     box-sizing: border-box;

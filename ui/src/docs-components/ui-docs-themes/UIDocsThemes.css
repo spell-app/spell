@@ -338,3 +338,24 @@
     }
   }
 }
+
+/*
+ * `compact`:  the theme dropdown as an icon-only palette button, the quiet round icon button of a masthead's row:  no
+ * caret, no fill until hovered;  the dropdown's box is a button (`UIButton.css`), so it takes the button's tokens
+ */
+@layer ui.components.docs-themes.variations {
+  [part~="theme"].compact {
+    --ui-button-background: transparent;
+    --ui-button-background-hover: color-mix(in oklab, currentColor 10%, transparent);
+    --ui-button-background-down: color-mix(in oklab, currentColor 16%, transparent);
+    --ui-button-color: var(--ui-text-muted);
+    --ui-button-color-hover: var(--ui-text-color);
+    --ui-button-padding-block: 0.55em;
+    --ui-button-padding-inline: 0.55em;
+    --ui-button-radius: 50%;
+    --ui-button-box-shadow: none;
+  }
+  [part~="theme"].compact::part(icon) {
+    display: none;
+  }
+}

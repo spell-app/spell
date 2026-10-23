@@ -8889,7 +8889,7 @@
           "name": "modeless",
           "description": {
             "kind": "markdown",
-            "value": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it.\n\nTakes:  flag (present / absent)"
+            "value": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page lands, and closes it as it does;  so do Escape and its own buttons.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -28156,6 +28156,556 @@
               "name": "bottom"
             }
           ]
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ui-toolbar",
+      "description": {
+        "kind": "markdown",
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-select`"
+      },
+      "attributes": [
+        {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Size, `mini` ... `massive`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "color",
+          "description": {
+            "kind": "markdown",
+            "value": "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            }
+          ]
+        },
+        {
+          "name": "appearance",
+          "description": {
+            "kind": "markdown",
+            "value": "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance=\"pointing\" secondary` ~== `secondary pointing`.\n\nTakes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`"
+          },
+          "values": [
+            {
+              "name": "tabular"
+            },
+            {
+              "name": "pointing"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "text"
+            },
+            {
+              "name": "segmented"
+            }
+          ]
+        },
+        {
+          "name": "position",
+          "description": {
+            "kind": "markdown",
+            "value": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).\n\nTakes:  `left` · `right` · `center`"
+          },
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            },
+            {
+              "name": "center"
+            }
+          ]
+        },
+        {
+          "name": "secondary",
+          "description": {
+            "kind": "markdown",
+            "value": "De-emphasized:  no box, rounded items.  Alias of `appearance=\"secondary\"`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "pointing",
+          "description": {
+            "kind": "markdown",
+            "value": "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance=\"pointing\"`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "tabular",
+          "description": {
+            "kind": "markdown",
+            "value": "Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance=\"tabular\"`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "text",
+          "description": {
+            "kind": "markdown",
+            "value": "Plain text items, no box.  Alias of `appearance=\"text\"`.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "vertical",
+          "description": {
+            "kind": "markdown",
+            "value": "Items stacked top to bottom.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "pagination",
+          "description": {
+            "kind": "markdown",
+            "value": "Page links:  compact, centred items.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "icon",
+          "description": {
+            "kind": "markdown",
+            "value": "Icon-only items.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "labeled",
+          "description": {
+            "kind": "markdown",
+            "value": "Labeled icon items:  a large icon above each item's text.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Every item is interactive:  a `<button>` with the link hover.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "fluid",
+          "description": {
+            "kind": "markdown",
+            "value": "Takes the full width of its container.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "stackable",
+          "description": {
+            "kind": "markdown",
+            "value": "Stacks its items on mobile.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "centered",
+          "description": {
+            "kind": "markdown",
+            "value": "Centred in its container, items centred.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "borderless",
+          "description": {
+            "kind": "markdown",
+            "value": "No dividers between items.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "compact",
+          "description": {
+            "kind": "markdown",
+            "value": "Only as wide as its items.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "wrapping",
+          "description": {
+            "kind": "markdown",
+            "value": "Items wrap onto more lines when they don't fit.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "wrapped",
+          "description": {
+            "kind": "markdown",
+            "value": "With `wrapping`:  square corners where the lines meet.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "inverted",
+          "description": {
+            "kind": "markdown",
+            "value": "The dark scheme;  with `color`, filled with the colour.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "floated",
+          "description": {
+            "kind": "markdown",
+            "value": "Floats beside the content;  `right` floats right.\n\nTakes:  flag, or `left` · `right`"
+          },
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "fitted",
+          "description": {
+            "kind": "markdown",
+            "value": "No item padding;  `horizontally` / `vertically` keep the other axis' padding.\n\nTakes:  flag, or `horizontally` · `vertically`"
+          },
+          "values": [
+            {
+              "name": "horizontally"
+            },
+            {
+              "name": "vertically"
+            }
+          ]
+        },
+        {
+          "name": "attached",
+          "description": {
+            "kind": "markdown",
+            "value": "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.\n\nTakes:  flag, or `top` · `bottom`"
+          },
+          "values": [
+            {
+              "name": "top"
+            },
+            {
+              "name": "bottom"
+            }
+          ]
+        },
+        {
+          "name": "fixed",
+          "description": {
+            "kind": "markdown",
+            "value": "Fixed to an edge of the viewport.\n\nTakes:  flag, or `top` · `bottom` · `left` · `right`"
+          },
+          "values": [
+            {
+              "name": "top"
+            },
+            {
+              "name": "bottom"
+            },
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "alignment",
+          "description": {
+            "kind": "markdown",
+            "value": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment=\"center\"` => `center aligned`.\n\nTakes:  `fluid` · `left` · `center` · `right`"
+          },
+          "values": [
+            {
+              "name": "fluid"
+            },
+            {
+              "name": "left"
+            },
+            {
+              "name": "center"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "equal",
+          "description": {
+            "kind": "markdown",
+            "value": "Every item the same width, from the items themselves (no count):  with `alignment=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "items",
+          "description": {
+            "kind": "markdown",
+            "value": "Older, count-based alias of `equal`:  divides the width evenly between N items (`items=\"3\"` => `three item`);  `items=\"equal\"` => `equal width` (Fomantic's, ~== `equal alignment=\"fluid\"`).\n\nTakes:  `1`-`16`, a fraction (`1/4`) or a percentage"
+          },
+          "values": [
+            {
+              "name": "1"
+            },
+            {
+              "name": "2"
+            },
+            {
+              "name": "3"
+            },
+            {
+              "name": "4"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "6"
+            },
+            {
+              "name": "7"
+            },
+            {
+              "name": "8"
+            },
+            {
+              "name": "9"
+            },
+            {
+              "name": "10"
+            },
+            {
+              "name": "11"
+            },
+            {
+              "name": "12"
+            },
+            {
+              "name": "13"
+            },
+            {
+              "name": "14"
+            },
+            {
+              "name": "15"
+            },
+            {
+              "name": "16"
+            }
+          ]
+        },
+        {
+          "name": "interactive",
+          "description": {
+            "kind": "markdown",
+            "value": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "disabled",

@@ -45,7 +45,7 @@
             Flyout
             <ui-header>A flyout is a modal that slides in from a side of the page.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-flyout" show="theme" class="site-themes"></ui-docs-themes>
+          <ui-docs-themes for="ui-flyout" show="theme" compact class="site-themes"></ui-docs-themes>
         </ui-container>
       </ui-segment>
 
@@ -345,7 +345,7 @@
               </ui-section>
               <ui-section id="examples-variations-modeless" label="Modeless" sticky collapsible dividing>
                 <ui-docs-example
-                  description="`modeless` leaves the page usable while it shows:  no dimmer, and a click on the page doesn't close it.  Escape and its close icon still do.  The docs' own side column opens this way on narrow screens."
+                  description="`modeless` leaves the page usable while it shows:  no dimmer, and a click on the page goes where it went, closing the flyout as it does, as do Escape and its close icon.  The docs' own side column opens this way on narrow screens."
                 >
                   <ui-button commandfor="flyout-modeless" command="--toggle">Toggle</ui-button>
                   <ui-flyout

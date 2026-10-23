@@ -327,7 +327,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-docs-themes": {
     folder: "ui-docs-themes",
     skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["for", "show", "size", "inverted"]
+    attributes: ["for", "show", "size", "inverted", "compact"]
   },
   "ui-docs-toc": {
     folder: "ui-docs-toc",
@@ -1496,6 +1496,41 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "pause-on-hover",
       "compact",
       "actions"
+    ]
+  },
+  "ui-toolbar": {
+    folder: "ui-toolbar",
+    skeleton: { display: "inline", width: "24em", height: "2.5em" },
+    attributes: [
+      "size",
+      "color",
+      "appearance",
+      "position",
+      "secondary",
+      "pointing",
+      "tabular",
+      "text",
+      "vertical",
+      "pagination",
+      "icon",
+      "labeled",
+      "link",
+      "fluid",
+      "stackable",
+      "centered",
+      "borderless",
+      "compact",
+      "wrapping",
+      "wrapped",
+      "inverted",
+      "floated",
+      "fitted",
+      "attached",
+      "fixed",
+      "alignment",
+      "equal",
+      "items",
+      "interactive"
     ]
   },
   "ui-transition": {

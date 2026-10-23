@@ -14,9 +14,12 @@ import exampleCSS from "./UIDocsExample.css?inline"
  * A header and description, its own children LIVE, and their source in a code pane the code button shows and hides.
  *
  * - Its shadow DOM:  `<section class="ui [bare] [variation] example" part="example">` holding
- *   - the header row (`<ui-header>` + the code `<ui-button>`), then the description
- *   - `<ui-segment part="demo">` around the default slot (the live example:  the element's own children)
- *   - while `code` is on, `<ui-segment part="code">`, with the markup in a `<ui-code>`.
+ *   - the header row (`<ui-header>`), when there's a header;  then the description:  both on the page, outside
+ *     the frame (Owen, 2026-10-23, epic `debut`:  "Text for the example should be OUTSIDE the ring")
+ *   - `<div class="frame">`:
+ *     - the code `<ui-button part="toggle">`, over the frame's top right corner
+ *     - `<ui-segment part="demo">` around the default slot (the live example:  the element's own children)
+ *     - while `code` is on, `<ui-segment part="code">`, with the markup in a `<ui-code>`.
  * - The markup shown is read ONCE, on first connect (`ExampleSource.of()`):
  *   - a `<template>` child
  *   - else the page snapshot the site entry took before any family loaded
@@ -99,8 +102,8 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   render(): JSX.Element {
     return (
       <section class={this.rootClass} part={this.partForName("example")}>
-        <div class={HEADING_CLASS}>
-          <Show when={this.header}>
+        <Show when={this.header}>
+          <div class={HEADING_CLASS}>
             <ui-header
               part={this.partForName("header")}
               level={HeadingLevels.attributeFor(HeadingLevels.levelFor(this.level, LEVELS))}
@@ -108,7 +111,14 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             >
               {this.header}
             </ui-header>
-          </Show>
+          </div>
+        </Show>
+        <Show when={this.description || this.slots.hasContent(this.slotForName("description"))}>
+          <div class={UIT.DESCRIPTION} part={this.partForName("description")}>
+            <slot name={this.slotForName("description")}>{this.descriptionWithCode}</slot>
+          </div>
+        </Show>
+        <div class={FRAME_CLASS}>
           <ui-button
             part={this.partForName("toggle")}
             circular=""
@@ -121,34 +131,29 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             aria-controls={CODE_PANE_ID}
             ref={(button: HTMLElement) => button.addEventListener("click", (event) => this.toggle(event))}
           />
-        </div>
-        <Show when={this.description || this.slots.hasContent(this.slotForName("description"))}>
-          <div class={UIT.DESCRIPTION} part={this.partForName("description")}>
-            <slot name={this.slotForName("description")}>{this.descriptionWithCode}</slot>
-          </div>
-        </Show>
-        <ui-segment
-          part={this.partForName("demo")}
-          basic={this.demoIsFramed ? undefined : ""}
-          attached={this.demoIsFramed ? UIT.TOP : undefined}
-        >
-          <slot />
-        </ui-segment>
-        <Show when={this.isCodeOpen}>
           <ui-segment
-            id={CODE_PANE_ID}
-            part={this.partForName("code")}
-            secondary=""
-            attached={this.bare ? undefined : UIT.BOTTOM}
+            part={this.partForName("demo")}
+            basic={this.demoIsFramed ? undefined : ""}
+            attached={this.demoIsFramed ? UIT.TOP : undefined}
           >
-            <ui-code
-              part={this.partForName("source")}
-              language={this.language || DEFAULT_LANGUAGE}
-              copy=""
-              content={this.sourceMarkup}
-            />
+            <slot />
           </ui-segment>
-        </Show>
+          <Show when={this.isCodeOpen}>
+            <ui-segment
+              id={CODE_PANE_ID}
+              part={this.partForName("code")}
+              secondary=""
+              attached={this.bare ? undefined : UIT.BOTTOM}
+            >
+              <ui-code
+                part={this.partForName("source")}
+                language={this.language || DEFAULT_LANGUAGE}
+                copy=""
+                content={this.sourceMarkup}
+              />
+            </ui-segment>
+          </Show>
+        </div>
       </section>
     )
   }
@@ -157,8 +162,11 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UIDocsExample extends E.AttributeValues<typeof docsExampleVocabulary> {}
 
-/** Class word of the header row:  the title and the code button. */
+/** Class word of the header row:  the title. */
 const HEADING_CLASS = "heading"
+
+/** Class word of the frame:  the live example, the code pane, and the code button over their top right corner. */
+const FRAME_CLASS = "frame"
 
 /** The icon of the code button:  Fomantic's `code` icon. */
 const CODE_ICON = "code"

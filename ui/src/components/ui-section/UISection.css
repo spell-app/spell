@@ -343,9 +343,17 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+  /*
+   * Keyboard focus rings the WHOLE title line, very lightly rounded, not only the heading's text
+   * (Owen, 2026-10-23, epic `debut`:  "Focus on entire line, very light rounding")
+   */
   .ui.section > .title > .heading > button.toggle:focus-visible {
+    outline: none;
+  }
+  .ui.section > .title:has(> .heading > button.toggle:focus-visible) {
     outline: var(--ui-focus-width) solid var(--ui-focus-color);
-    outline-offset: var(--ui-focus-offset);
+    outline-offset: calc(var(--ui-focus-width) * -1);
+    border-radius: 3px;
   }
   .ui.section > .title > .heading > .toggle > .header {
     min-width: 0;

@@ -8333,7 +8333,7 @@ export interface UIFlyoutAttributes {
    */
   "prop:blurring"?: boolean | ""
   /**
-   * No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it.
+   * No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page lands, and closes it as it does;  so do Escape and its own buttons.
    * - takes:  flag (present / absent)
    */
   modeless?: boolean | ""
@@ -26544,6 +26544,496 @@ export interface UIToastAttributes {
 export interface UIToastJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIToastEventMap>>, keyof UIToastAttributes>, UIToastAttributes {}
 
+/** `<ui-toolbar>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIToolbarEventMap {
+  /**
+   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-select": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+}
+
+/** `<ui-toolbar>`'s own attributes, from its vocabulary. */
+export interface UIToolbarAttributes {
+  /**
+   * Size, `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black`
+   */
+  color?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+  /**
+   * The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance="pointing" secondary` ~== `secondary pointing`.
+   * - takes:  `tabular` · `pointing` · `secondary` · `text` · `segmented`
+   */
+  appearance?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: "tabular" | "pointing" | "secondary" | "text" | "segmented"
+  /**
+   * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
+   * - takes:  `left` · `right` · `center`
+   */
+  position?: "left" | "right" | "center"
+  /**
+   * `position`, as the DOM element's property.
+   * @deprecated write `position` -- `prop:` stays only for compiled spell
+   */
+  "prop:position"?: "left" | "right" | "center"
+  /**
+   * De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.
+   * - takes:  flag (present / absent)
+   */
+  secondary?: boolean | ""
+  /**
+   * `secondary`, as the DOM element's property.
+   * @deprecated write `secondary` -- `prop:` stays only for compiled spell
+   */
+  "prop:secondary"?: boolean | ""
+  /**
+   * The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance="pointing"`.
+   * - takes:  flag (present / absent)
+   */
+  pointing?: boolean | ""
+  /**
+   * `pointing`, as the DOM element's property.
+   * @deprecated write `pointing` -- `prop:` stays only for compiled spell
+   */
+  "prop:pointing"?: boolean | ""
+  /**
+   * Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance="tabular"`.
+   * - takes:  flag (present / absent)
+   */
+  tabular?: boolean | ""
+  /**
+   * `tabular`, as the DOM element's property.
+   * @deprecated write `tabular` -- `prop:` stays only for compiled spell
+   */
+  "prop:tabular"?: boolean | ""
+  /**
+   * Plain text items, no box.  Alias of `appearance="text"`.
+   * - takes:  flag (present / absent)
+   */
+  text?: boolean | ""
+  /**
+   * `text`, as the DOM element's property.
+   * @deprecated write `text` -- `prop:` stays only for compiled spell
+   */
+  "prop:text"?: boolean | ""
+  /**
+   * Items stacked top to bottom.
+   * - takes:  flag (present / absent)
+   */
+  vertical?: boolean | ""
+  /**
+   * `vertical`, as the DOM element's property.
+   * @deprecated write `vertical` -- `prop:` stays only for compiled spell
+   */
+  "prop:vertical"?: boolean | ""
+  /**
+   * Page links:  compact, centred items.
+   * - takes:  flag (present / absent)
+   */
+  pagination?: boolean | ""
+  /**
+   * `pagination`, as the DOM element's property.
+   * @deprecated write `pagination` -- `prop:` stays only for compiled spell
+   */
+  "prop:pagination"?: boolean | ""
+  /**
+   * Icon-only items.
+   * - takes:  flag (present / absent)
+   */
+  icon?: boolean | ""
+  /**
+   * `icon`, as the DOM element's property.
+   * @deprecated write `icon` -- `prop:` stays only for compiled spell
+   */
+  "prop:icon"?: boolean | ""
+  /**
+   * Labeled icon items:  a large icon above each item's text.
+   * - takes:  flag (present / absent)
+   */
+  labeled?: boolean | ""
+  /**
+   * `labeled`, as the DOM element's property.
+   * @deprecated write `labeled` -- `prop:` stays only for compiled spell
+   */
+  "prop:labeled"?: boolean | ""
+  /**
+   * Every item is interactive:  a `<button>` with the link hover.
+   * - takes:  flag (present / absent)
+   */
+  link?: boolean | ""
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: boolean | ""
+  /**
+   * Takes the full width of its container.
+   * - takes:  flag (present / absent)
+   */
+  fluid?: boolean | ""
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
+  "prop:fluid"?: boolean | ""
+  /**
+   * Stacks its items on mobile.
+   * - takes:  flag (present / absent)
+   */
+  stackable?: boolean | ""
+  /**
+   * `stackable`, as the DOM element's property.
+   * @deprecated write `stackable` -- `prop:` stays only for compiled spell
+   */
+  "prop:stackable"?: boolean | ""
+  /**
+   * Centred in its container, items centred.
+   * - takes:  flag (present / absent)
+   */
+  centered?: boolean | ""
+  /**
+   * `centered`, as the DOM element's property.
+   * @deprecated write `centered` -- `prop:` stays only for compiled spell
+   */
+  "prop:centered"?: boolean | ""
+  /**
+   * No dividers between items.
+   * - takes:  flag (present / absent)
+   */
+  borderless?: boolean | ""
+  /**
+   * `borderless`, as the DOM element's property.
+   * @deprecated write `borderless` -- `prop:` stays only for compiled spell
+   */
+  "prop:borderless"?: boolean | ""
+  /**
+   * Only as wide as its items.
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
+  /**
+   * Items wrap onto more lines when they don't fit.
+   * - takes:  flag (present / absent)
+   */
+  wrapping?: boolean | ""
+  /**
+   * `wrapping`, as the DOM element's property.
+   * @deprecated write `wrapping` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrapping"?: boolean | ""
+  /**
+   * With `wrapping`:  square corners where the lines meet.
+   * - takes:  flag (present / absent)
+   */
+  wrapped?: boolean | ""
+  /**
+   * `wrapped`, as the DOM element's property.
+   * @deprecated write `wrapped` -- `prop:` stays only for compiled spell
+   */
+  "prop:wrapped"?: boolean | ""
+  /**
+   * The dark scheme;  with `color`, filled with the colour.
+   * - takes:  flag (present / absent)
+   */
+  inverted?: boolean | ""
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
+  "prop:inverted"?: boolean | ""
+  /**
+   * Floats beside the content;  `right` floats right.
+   * - takes:  flag, or `left` · `right`
+   */
+  floated?: boolean | "" | "left" | "right"
+  /**
+   * `floated`, as the DOM element's property.
+   * @deprecated write `floated` -- `prop:` stays only for compiled spell
+   */
+  "prop:floated"?: boolean | "" | "left" | "right"
+  /**
+   * No item padding;  `horizontally` / `vertically` keep the other axis' padding.
+   * - takes:  flag, or `horizontally` · `vertically`
+   */
+  fitted?: boolean | "" | "horizontally" | "vertically"
+  /**
+   * `fitted`, as the DOM element's property.
+   * @deprecated write `fitted` -- `prop:` stays only for compiled spell
+   */
+  "prop:fitted"?: boolean | "" | "horizontally" | "vertically"
+  /**
+   * Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.
+   * - takes:  flag, or `top` · `bottom`
+   */
+  attached?: boolean | "" | "top" | "bottom"
+  /**
+   * `attached`, as the DOM element's property.
+   * @deprecated write `attached` -- `prop:` stays only for compiled spell
+   */
+  "prop:attached"?: boolean | "" | "top" | "bottom"
+  /**
+   * Fixed to an edge of the viewport.
+   * - takes:  flag, or `top` · `bottom` · `left` · `right`
+   */
+  fixed?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /**
+   * `fixed`, as the DOM element's property.
+   * @deprecated write `fixed` -- `prop:` stays only for compiled spell
+   */
+  "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
+  /**
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.
+   * - takes:  `fluid` · `left` · `center` · `right`
+   */
+  alignment?: "fluid" | "left" | "center" | "right"
+  /**
+   * `alignment`, as the DOM element's property.
+   * @deprecated write `alignment` -- `prop:` stays only for compiled spell
+   */
+  "prop:alignment"?: "fluid" | "left" | "center" | "right"
+  /**
+   * Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.
+   * - takes:  flag (present / absent)
+   */
+  equal?: boolean | ""
+  /**
+   * `equal`, as the DOM element's property.
+   * @deprecated write `equal` -- `prop:` stays only for compiled spell
+   */
+  "prop:equal"?: boolean | ""
+  /**
+   * Older, count-based alias of `equal`:  divides the width evenly between N items (`items="3"` => `three item`);  `items="equal"` => `equal width` (Fomantic's, ~== `equal alignment="fluid"`).
+   * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
+   */
+  items?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
+   * `items`, as the DOM element's property.
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
+   */
+  "prop:items"?:
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16"
+    | (string & {})
+  /**
+   * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
+   * - takes:  flag (present / absent)
+   */
+  interactive?: boolean | ""
+  /**
+   * `interactive`, as the DOM element's property.
+   * @deprecated write `interactive` -- `prop:` stays only for compiled spell
+   */
+  "prop:interactive"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-select"?: (event: UIToolbarEventMap["ui-select"]) => void
+}
+
+/** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIToolbarJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIToolbarEventMap>>, keyof UIToolbarAttributes>,
+    UIToolbarAttributes {}
+
 /** `<ui-transition>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITransitionEventMap {
   /**
@@ -28091,6 +28581,18 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-toast": UIToastJSXAttributes
       /**
+       * `<ui-toolbar>`:  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.
+       * - also known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu
+       * - slots:
+       *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `icon`:  First, at the start:  an icon or an icon button (a menu button).
+       *   - `title`:  After the icon:  the title, never squeezed.
+       *   - `center`:  After the title, taking the room left:  e.g. a row of links.
+       *   - `right`:  Last, pushed to the end:  e.g. search and settings.
+       * - events:  `ui-select`
+       */
+      "ui-toolbar": UIToolbarJSXAttributes
+      /**
        * `<ui-transition>`:  A transition is an animation used to show or hide content, or to draw attention to it.
        * - also known as:  animate, fade, slide, motion, effect
        * - slots:
@@ -28282,6 +28784,7 @@ declare global {
     "ui-textarea": UIHTMLElement<UITextareaEventMap>
     "ui-title": HTMLElement
     "ui-toast": UIHTMLElement<UIToastEventMap>
+    "ui-toolbar": UIHTMLElement<UIToolbarEventMap>
     "ui-transition": UIHTMLElement<UITransitionEventMap>
     "ui-tree-diagram": HTMLElement
     "ui-value": HTMLElement

@@ -51,6 +51,13 @@ export const docsThemesVocabulary = {
       name: "inverted",
       kind: "keyOnly",
       description: "For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown."
+    },
+    {
+      name: "compact",
+      kind: "keyOnly",
+      description:
+        'With `show="theme"`:  the dropdown is an icon-only palette button, its text (`3 themes`) its tooltip and ' +
+        "name, for a masthead's row of icon buttons."
     }
   ],
   events: [

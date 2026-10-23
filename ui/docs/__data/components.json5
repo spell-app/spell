@@ -8188,7 +8188,7 @@
         {
           "name": "modeless",
           "kind": "keyOnly",
-          "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it."
+          "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page lands, and closes it as it does;  so do Escape and its own buttons."
         },
         {
           "name": "width",
@@ -25489,6 +25489,448 @@
       "href": "ui-toast.html"
     },
     {
+      "tag": "ui-toolbar",
+      "name": "Toolbar",
+      "folder": "ui-toolbar",
+      "topics": [
+        "menus",
+        "navigation",
+        "collections"
+      ],
+      "aka": [
+        "toolbar",
+        "tool bar",
+        "scrolling tabs",
+        "overflow menu",
+        "chip bar",
+        "scrollable menu"
+      ],
+      "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.",
+      "noun": "menu",
+      "attributes": [
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size, `mini` ... `massive`;  `medium` is the default."
+        },
+        {
+          "name": "color",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black"
+          ],
+          "valueSet": "hues",
+          "description": "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill."
+        },
+        {
+          "name": "appearance",
+          "kind": "valueOnly",
+          "values": [
+            "tabular",
+            "pointing",
+            "secondary",
+            "text",
+            "segmented"
+          ],
+          "description": "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance=\"pointing\" secondary` ~== `secondary pointing`."
+        },
+        {
+          "name": "position",
+          "kind": "valueOnly",
+          "values": [
+            "left",
+            "right",
+            "center"
+          ],
+          "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`)."
+        },
+        {
+          "name": "secondary",
+          "kind": "keyOnly",
+          "description": "De-emphasized:  no box, rounded items.  Alias of `appearance=\"secondary\"`."
+        },
+        {
+          "name": "pointing",
+          "kind": "keyOnly",
+          "description": "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance=\"pointing\"`."
+        },
+        {
+          "name": "tabular",
+          "kind": "keyOnly",
+          "description": "Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance=\"tabular\"`."
+        },
+        {
+          "name": "text",
+          "kind": "keyOnly",
+          "description": "Plain text items, no box.  Alias of `appearance=\"text\"`."
+        },
+        {
+          "name": "vertical",
+          "kind": "keyOnly",
+          "description": "Items stacked top to bottom."
+        },
+        {
+          "name": "pagination",
+          "kind": "keyOnly",
+          "description": "Page links:  compact, centred items."
+        },
+        {
+          "name": "icon",
+          "kind": "keyOnly",
+          "description": "Icon-only items."
+        },
+        {
+          "name": "labeled",
+          "kind": "keyOnly",
+          "description": "Labeled icon items:  a large icon above each item's text."
+        },
+        {
+          "name": "link",
+          "kind": "keyOnly",
+          "description": "Every item is interactive:  a `<button>` with the link hover."
+        },
+        {
+          "name": "fluid",
+          "kind": "keyOnly",
+          "description": "Takes the full width of its container."
+        },
+        {
+          "name": "stackable",
+          "kind": "keyOnly",
+          "description": "Stacks its items on mobile."
+        },
+        {
+          "name": "centered",
+          "kind": "keyOnly",
+          "description": "Centred in its container, items centred."
+        },
+        {
+          "name": "borderless",
+          "kind": "keyOnly",
+          "description": "No dividers between items."
+        },
+        {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "Only as wide as its items."
+        },
+        {
+          "name": "wrapping",
+          "kind": "keyOnly",
+          "description": "Items wrap onto more lines when they don't fit."
+        },
+        {
+          "name": "wrapped",
+          "kind": "keyOnly",
+          "description": "With `wrapping`:  square corners where the lines meet."
+        },
+        {
+          "name": "inverted",
+          "kind": "keyOnly",
+          "description": "The dark scheme;  with `color`, filled with the colour."
+        },
+        {
+          "name": "floated",
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "left",
+            "right"
+          ],
+          "description": "Floats beside the content;  `right` floats right."
+        },
+        {
+          "name": "fitted",
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "horizontally",
+            "vertically"
+          ],
+          "description": "No item padding;  `horizontally` / `vertically` keep the other axis' padding."
+        },
+        {
+          "name": "attached",
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "top",
+            "bottom"
+          ],
+          "description": "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle."
+        },
+        {
+          "name": "fixed",
+          "kind": "keyOrValueAndKey",
+          "values": [
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ],
+          "description": "Fixed to an edge of the viewport."
+        },
+        {
+          "name": "alignment",
+          "kind": "valueAndKey",
+          "values": [
+            "fluid",
+            "left",
+            "center",
+            "right"
+          ],
+          "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment=\"center\"` => `center aligned`."
+        },
+        {
+          "name": "equal",
+          "kind": "keyOnly",
+          "description": "Every item the same width, from the items themselves (no count):  with `alignment=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed."
+        },
+        {
+          "name": "items",
+          "kind": "width",
+          "values": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16"
+          ],
+          "valueSet": "widths",
+          "description": "Older, count-based alias of `equal`:  divides the width evenly between N items (`items=\"3\"` => `three item`);  `items=\"equal\"` => `equal width` (Fomantic's, ~== `equal alignment=\"fluid\"`)."
+        },
+        {
+          "name": "interactive",
+          "kind": "boolean",
+          "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
+        },
+        {
+          "name": "icon",
+          "description": "First, at the start:  an icon or an icon button (a menu button)."
+        },
+        {
+          "name": "title",
+          "description": "After the icon:  the title, never squeezed."
+        },
+        {
+          "name": "center",
+          "description": "After the title, taking the room left:  e.g. a row of links."
+        },
+        {
+          "name": "right",
+          "description": "Last, pushed to the end:  e.g. search and settings."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-select",
+          "detail": "{ value: string, item: Element, originalEvent?: Event }",
+          "cancelable": true,
+          "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice."
+        }
+      ],
+      "parts": [
+        {
+          "name": "menu",
+          "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+        },
+        {
+          "name": "icon",
+          "description": "The `icon` slot's box."
+        },
+        {
+          "name": "title",
+          "description": "The `title` slot's box."
+        },
+        {
+          "name": "center",
+          "description": "The `center` slot's box."
+        },
+        {
+          "name": "right",
+          "description": "The `right` slot's box."
+        },
+        {
+          "name": "toolbar",
+          "description": "The box around the menu and its scroll buttons."
+        },
+        {
+          "name": "scroll-start",
+          "description": "The `‹` button, shown while there's more to scroll back to."
+        },
+        {
+          "name": "scroll-end",
+          "description": "The `›` button, shown while there's more to scroll on to."
+        }
+      ],
+      "states": [
+        {
+          "name": "interactive",
+          "description": "A menubar (`interactive`)."
+        },
+        {
+          "name": "vertical",
+          "description": "Items stacked (`vertical`)."
+        },
+        {
+          "name": "overflowing",
+          "description": "Its items don't all fit:  they scroll sideways."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "scrollStart",
+          "text": "Scroll back",
+          "description": "Accessible name and tooltip of the `‹` button."
+        },
+        {
+          "key": "scrollEnd",
+          "text": "Scroll on",
+          "description": "Accessible name and tooltip of the `›` button."
+        }
+      ],
+      "mainTag": "ui-toolbar",
+      "main": true,
+      "page": true,
+      "href": "ui-toolbar.html"
+    },
+    {
       "tag": "ui-transition",
       "name": "Transition",
       "folder": "ui-transition",
@@ -27809,6 +28251,11 @@
           "description": "For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown."
         },
         {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "With `show=\"theme\"`:  the dropdown is an icon-only palette button, its text (`3 themes`) its tooltip and name, for a masthead's row of icon buttons."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -28793,7 +29240,8 @@
         },
         {
           "name": "--ui-breadcrumb-divider-spacing",
-          "default": "0.25em",
+          "default": "0.4em",
+          "description": "each side of a divider: half what the old margin plus the markup's space between sections came to, so it sits midway (Owen, 2026-10-23: \"Spacing on either side of the divider should be the same\")",
           "type": "length"
         },
         {
@@ -30123,7 +30571,7 @@
       "tokens": [
         {
           "name": "--ui-docs-example-margin",
-          "default": "2em 0",
+          "default": "1.25em 0",
           "description": "Space above and below the block.",
           "type": "length"
         },
@@ -30141,15 +30589,65 @@
         },
         {
           "name": "--ui-docs-example-toggle-opacity",
-          "default": "0.5",
-          "description": "Opacity of the code button at rest; it brightens on hover, as in Fomantic.",
+          "default": "1",
+          "description": "Opacity of the code button at rest: whole, so it stands out on the frame (Fomantic dimmed it to 0.5)",
           "type": "number"
         },
         {
+          "name": "--ui-docs-example-toggle-background",
+          "default": "light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))",
+          "description": "The code button's fill: whiter than the frame, so it stands out on it",
+          "type": "color"
+        },
+        {
+          "name": "--ui-docs-example-toggle-inset",
+          "default": "0.8em",
+          "description": "Space from the frame's top and right edges to the code button, the same both ways: about what centres it beside one line of text (Owen, 2026-10-23: \"\"code\" button should look centered vertically here\"; 0.5em before)",
+          "type": "length"
+        },
+        {
           "name": "--ui-docs-example-gap",
-          "default": "1em",
+          "default": "0.5em",
           "description": "Space between the header, description and example.",
           "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 45%, transparent)",
+          "description": "The frame round an example: a faint see-through card, so it never runs into the prose round it.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-docs-example-frame-border",
+          "default": "var(--ui-border-width, 1px) solid var(--ui-border-color)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-frame-radius",
+          "default": "var(--ui-radius-l, 0.75em)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-padding",
+          "default": "0.75em 1em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-shadow",
+          "default": "var(--ui-shadow-subtle, none)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-frame-filter",
+          "default": "none",
+          "description": "What the frame does to what's behind it: a theme's glass (`backdrop-filter`)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-demo-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 60%, transparent)",
+          "description": "The live demo while the code shows: a very light tint, so its edge reads (pure white read as a missing border)",
+          "type": "color"
         }
       ]
     },
@@ -30235,6 +30733,12 @@
           "name": "--ui-docs-nav-shadow",
           "default": "var(--ui-shadow-raised)",
           "description": "Shadow of the panel (the brand's `--shadow-sm`).",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-nav-header-shadow",
+          "default": "0 1px 0 var(--ui-border-color), 0 6px 12px -8px oklch(0 0 0 / 0.3)",
+          "description": "Shadow under the header band once the list scrolls under it, so the cut reads cleanly.",
           "type": "other"
         },
         {
@@ -31164,7 +31668,13 @@
         },
         {
           "name": "--ui-flyout-duration",
-          "default": "var(--ui-duration-slower)",
+          "default": "220ms",
+          "description": "opening: quick, easing out; closing: quicker, easing in (macOS's pace)",
+          "type": "time"
+        },
+        {
+          "name": "--ui-flyout-close-duration",
+          "default": "160ms",
           "type": "time"
         },
         {
@@ -33438,6 +33948,11 @@
           "name": "--ui-menu-segmented-active-shadow",
           "default": "none",
           "type": "other"
+        },
+        {
+          "name": "--ui-menu-thumb-duration",
+          "default": "200ms",
+          "type": "time"
         },
         {
           "name": "--ui-menu-font-family",
@@ -36642,6 +37157,44 @@
         }
       ]
     },
+    "ui-toolbar": {
+      "folder": "ui-toolbar",
+      "mainTag": "ui-toolbar",
+      "title": "Toolbar",
+      "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-toolbar"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-toolbar-gap",
+          "default": "0.25em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toolbar-button-size",
+          "default": "1.75em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toolbar-button-background",
+          "default": "transparent",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toolbar-button-hover-background",
+          "default": "oklch(from var(--ui-ink) l c h / 0.08)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toolbar-button-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        }
+      ]
+    },
     "ui-transition": {
       "folder": "ui-transition",
       "mainTag": "ui-transition",
@@ -39331,6 +39884,7 @@
         "ui-checkbox",
         "ui-code",
         "ui-dimmer",
+        "ui-docs-example",
         "ui-docs-nav",
         "ui-dropdown",
         "ui-flyout",
@@ -39347,7 +39901,8 @@
         "ui-segment",
         "ui-statistic",
         "ui-table",
-        "ui-toast"
+        "ui-toast",
+        "ui-toolbar"
       ],
       "global": true
     },

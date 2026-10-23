@@ -76,6 +76,7 @@
     "./dist/ui-calendar.js",
     "./dist/ui-section.js",
     "./dist/ui-panel.js",
+    "./dist/ui-toolbar.js",
     "./dist/ui-property-editor.js",
     "./dist/ui-markdown.js",
     "./dist/ui-code.js",
@@ -389,6 +390,11 @@
       "spell-ui-source": "./src/components/ui-transition/index.ts",
       "types": "./dist-types/src/components/ui-transition/index.d.ts",
       "default": "./src/components/ui-transition/index.ts"
+    },
+    "./components/ui-toolbar": {
+      "spell-ui-source": "./src/components/ui-toolbar/index.ts",
+      "types": "./dist-types/src/components/ui-toolbar/index.d.ts",
+      "default": "./src/components/ui-toolbar/index.ts"
     },
     "./components/ui-tree-diagram": {
       "spell-ui-source": "./src/components/ui-tree-diagram/index.ts",
@@ -793,6 +799,10 @@
       "./ui-include": {
         "types": "./dist/components/ui-include/index.d.ts",
         "import": "./dist/ui-include.js"
+      },
+      "./ui-toolbar": {
+        "types": "./dist/components/ui-toolbar/index.d.ts",
+        "import": "./dist/ui-toolbar.js"
       },
       "./ui-tree-diagram": {
         "types": "./dist/components/ui-tree-diagram/index.d.ts",

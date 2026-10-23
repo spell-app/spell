@@ -81,6 +81,26 @@ describe("<ui-property-editor> schema", () => {
     expect(control(host, "dark").localName).toBe("ui-checkbox")
   })
 
+  it("a schema naming a tag defined later:  its properties are made again, by its vocabulary, once it is (outline-spell P29)", async () => {
+    const host = await ElementFixture.render<Editor>(
+      `<ui-property-editor schema="x-later-task"><ui-property name="done"></ui-property></ui-property-editor>`
+    )
+    host.value = { done: true }
+    await settle(host)
+    // no such tag yet:  a plain field
+    expect(control(host, "done").localName).toBe("ui-input")
+    // e.g. a program's `<task-list-task>`, defined as its first task is drawn
+    UI.vocabulary.register({
+      tag: "x-later-task",
+      noun: "task",
+      description: "A task, defined after the editor.",
+      attributes: [{ name: "done", kind: "boolean", description: "Is it done?" }]
+    } as never)
+    customElements.define("x-later-task", class extends HTMLElement {})
+    await settle(host)
+    expect(control(host, "done").localName).toBe("ui-checkbox")
+  })
+
   it("keeps the author's layout:  only the properties written, in groups;  `as` picks the control", async () => {
     const host = await editor(
       `<ui-property-group label="Look">

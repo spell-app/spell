@@ -41,7 +41,7 @@
     --fruity-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
     --fruity-blur: blur(28px) saturate(1.7);
     /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
-    --fruity-bar: light-dark(rgb(255 255 255 / 0.94), rgb(30 28 38 / 0.92));
+    --fruity-bar: light-dark(rgb(255 255 255 / 0.95), rgb(30 28 38 / 0.95));
 
     /* The wallpaper behind the page:  each wash a `light-dark()` colour, so the gradient follows the scheme */
     --fruity-wallpaper:
@@ -161,6 +161,35 @@
     --ui-bar-background: var(--fruity-bar);
     --ui-bar-filter: var(--fruity-blur);
     --ui-bar-color: var(--ui-text-color);
+    /*
+     * a section title:  in place, white glass at 50%;  stuck, 90%, the change eased (Owen, 2026-10-23:  "all of those
+     * headers, 50% opaque white when non-sticky, animated transition to 90% when sticky");  the panel round a page's
+     * tabs, 50% ("make tab surround 50% opaque")
+     */
+    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
+    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.9), rgb(30 28 38 / 0.9));
+    --ui-bar-panel-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
+    --ui-bar-rest-filter: var(--fruity-blur);
+    /*
+     * what a page lays under the bars at its top (the docs site's stuck title line, the strip round its tabs):  the
+     * wallpaper itself, fixed, so they read as the page (Owen, 2026-10-23:  "duplicate the site background color in under
+     * the top stuff, so it doesn't have to go to white")
+     */
+    --ui-bar-wallpaper: var(--fruity-wallpaper);
+    /* a toolbar's ‹ / › keys:  a faint white disc, so they read as buttons (Owen:  "20% white opacity so it's clear what it is") */
+    --ui-toolbar-button-background: rgb(255 255 255 / 0.2);
+    --ui-bar-wallpaper-color: var(--ui-background);
+    /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
+    --ui-bar-tracked: 1;
+    --ui-bar-track: light-dark(#e9e9ee, #3a3846);
+    --ui-bar-track-radius: 9px;
+    --ui-bar-track-width: fit-content;
+    --ui-bar-track-padding: 2px;
+    --ui-bar-item-padding: 0 1.1em;
+    --ui-bar-item-radius: 7px;
+    --ui-bar-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
+    --ui-bar-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
+    --ui-bar-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
     --ui-panel-shadow: var(--ui-shadow-raised);
     --ui-menu-background: var(--fruity-glass);
     --ui-popup-background: var(--fruity-glass-strong);
@@ -301,7 +330,7 @@
     --ui-progress-text-color: var(--ui-primary-on);
 
     /* Menus:  the selected item the accent's wash, its text the accent */
-    --ui-menu-hover-background: var(--fruity-track);
+    --ui-menu-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
     --ui-menu-active-background: var(--fruity-accent-wash);
     --ui-menu-active-color: var(--fruity-accent-text);
 
@@ -313,11 +342,20 @@
     --ui-menu-segmented-border: none;
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;
-    --ui-menu-segmented-item-padding: 0.3em 1em;
-    --ui-menu-segmented-item-radius: 6px;
+    --ui-menu-segmented-item-padding: 0.35em 1.5em;
+    /* fully round pills, the track and every option (Owen, 2026-10-23:  "All should be fully rounded pills") */
+    --ui-menu-segmented-radius: var(--ui-radius-pill);
+    --ui-menu-segmented-item-radius: var(--ui-radius-pill);
+    /* a border round a page's SECOND row of tabs (the docs' section toolbar):  none yet, one line to give it one */
+    --ui-bar-subtabs-border: none;
+    /* a toolbar's key tip (the docs' "Type T to jump to this section"):  a pill of dark glass, in both schemes */
+    --ui-bar-tip-background: rgb(24 22 36 / 0.62);
+    --ui-bar-tip-filter: blur(14px) saturate(160%);
     --ui-menu-segmented-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-menu-segmented-active-color: var(--ui-text-color);
     --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    /* the chosen segment under the pointer stays the white key;  an unchosen one a shade darker than the track */
+    --ui-menu-segmented-active-hover-background: var(--ui-menu-segmented-active-background);
     --ui-menu-active-focus-color: var(--ui-focus-color);
 
     /* The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash */
@@ -328,6 +366,13 @@
     --ui-docs-nav-border-color: var(--fruity-hairline);
     --ui-docs-nav-current-background: var(--fruity-accent-wash);
     --ui-docs-nav-current-color: var(--fruity-accent-text);
+
+    /* Docs examples (`<ui-docs-example>`):  a glass frame;  the open demo a very light white, not pure white */
+    --ui-docs-example-frame-background: light-dark(rgb(255 255 255 / 0.35), rgb(30 28 38 / 0.35));
+    --ui-docs-example-frame-border: 1px solid var(--fruity-edge);
+    --ui-docs-example-frame-filter: var(--fruity-blur);
+    --ui-docs-example-demo-background: light-dark(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.05));
+    --ui-docs-example-toggle-background: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.18));
 
     /* Headers:  San Francisco Display, tight;  ledes muted, never italic */
     --ui-header-font-weight: var(--ui-font-weight-semibold);
@@ -372,6 +417,14 @@
   .ui.toast {
     backdrop-filter: var(--fruity-blur);
   }
+  /*
+   * an INVERTED surface on a light page (a dark segment, the inverted examples):  dark glass that reads as dark, not
+   * the translucent grey the dark scheme's glass makes over a light wallpaper (Owen:  "inversion surround should be
+   * darker")
+   */
+  .ui.inverted.segment:not(.basic) {
+    background-color: rgb(28 26 36 / 0.9);
+  }
   /* the docs' side column, docked or in its flyout (page only:  the panel is the element's own box) */
   ui-docs-nav {
     backdrop-filter: var(--fruity-blur);
@@ -389,6 +442,11 @@
   :where(h1, h2, h3, h4, h5, h6) {
     text-wrap-style: balance;
   }
+  /* a segmented menu's focus ring:  the violet focus colour, not its chosen segment's text colour (black) */
+  .ui.segmented.menu {
+    --_ui-menu-active-focus-color: var(--ui-focus-color);
+  }
+
   :is(h1, h2).ui.header,
   .ui.header:is(.huge, .massive) {
     font-weight: var(--ui-font-weight-bold);
@@ -397,15 +455,84 @@
   :where(.ui-typography) :where(h1, h2) {
     letter-spacing: -0.02em;
   }
-  /* the tight tracking is the heading's, not its lede's */
+  /* the tight tracking is the heading's, not its lede's;  a lede wraps `pretty` (no lone last word) */
   :host(:state(in-header)) > .header,
   .in-header.header {
     letter-spacing: normal;
+    text-wrap-style: pretty;
   }
+
+  /* Anchors land below a sticky header (page only:  `:root` matches nothing in a shadow root) */
+  :root :where(h1, h2, h3, h4, h5, h6, section, ui-section) {
+    scroll-margin-top: calc(var(--spell-site-header-height, 0px) + 1em);
+  }
+
+  /*******************************
+       Numbers, links, images, text
+  *******************************/
 
   :is(.ui.table, :where(ui-table) > table),
   .ui.statistic,
   .ui.statistics {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* underlines never cross descenders;  softer at rest, full on hover, only where the device hovers */
+  :where(a) {
+    text-underline-position: from-font;
+    text-decoration-skip-ink: auto;
+  }
+  @media (hover: hover) {
+    :where(.ui-typography) :where(a) {
+      text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+    }
+    :where(.ui-typography) :where(a:hover) {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* a white picture doesn't melt into the page:  a 1px 8% outline inside its edge */
+  :where(img) {
+    outline: 1px solid light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08));
+    outline-offset: -1px;
+  }
+
+  /* long words, links and ids break rather than run off the page */
+  :where(.ui-typography) {
+    overflow-wrap: break-word;
+  }
+
+  /*******************************
+               Motion
+  *******************************/
+
+  /* Buttons press in (0.97, 200ms ease-out);  the property list restates the button's own (`UIButton.css`) */
+  @media (prefers-reduced-motion: no-preference) {
+    .ui.button:not(.loading) {
+      transition-property: opacity, background-color, color, box-shadow, scale;
+      transition-duration:
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)),
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)), 200ms;
+      transition-timing-function: var(--ui-ease), var(--ui-ease), var(--ui-ease), var(--ui-ease), ease-out;
+    }
+    .ui.button:not(.disabled, :disabled, .loading):active {
+      scale: 0.97;
+    }
+  }
+
+  /*
+   * Switching scheme:  `ThemePreference.applyScheme()` puts `ui-scheme-switching` on `<html>` for one frame;  the flag
+   * inherits into every shadow root, where the style query finds it, so no colour animates across the switch.
+   * - `!important`:  a transition set by ANY component layer must lose for that frame.
+   */
+  :root.ui-scheme-switching {
+    --spell-scheme-switching: on;
+  }
+  @container style(--spell-scheme-switching: on) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
+    }
   }
 }

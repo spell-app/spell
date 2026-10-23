@@ -60,6 +60,12 @@
     --_ui-docs-nav-radius: var(--ui-docs-nav-radius, var(--ui-radius-l));
     /* Shadow of the panel (the brand's `--shadow-sm`). */
     --_ui-docs-nav-shadow: var(--ui-docs-nav-shadow, var(--ui-shadow-raised));
+    /* Shadow under the header band once the list scrolls under it, so the cut reads cleanly. */
+    --_ui-docs-nav-header-shadow: var(
+      --ui-docs-nav-header-shadow,
+      0 1px 0 var(--ui-border-color),
+      0 6px 12px -8px oklch(0 0 0 / 0.3)
+    );
     /* Fill of the header band (`accent-100`;  dark:  the brand's warm surface). */
     --_ui-docs-nav-header-background: var(--ui-docs-nav-header-background, var(--ui-brown-background));
     /* Fill of a group's band (`accent-75`):  halfway between the header band and the panel. */
@@ -118,6 +124,8 @@
     background: var(--_ui-docs-nav-background);
     box-shadow: var(--_ui-docs-nav-shadow);
     color: var(--_ui-docs-nav-row-color);
+    /* the list's scroll, named for the header band above it (its shadow) */
+    timeline-scope: --ui-docs-nav-list;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     line-height: 1.25;
@@ -130,6 +138,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scroll-timeline: --ui-docs-nav-list block;
     padding-block-end: 0.5em;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
@@ -149,22 +158,41 @@
     padding: 0.875em 1em 1em;
     background: var(--_ui-docs-nav-header-background);
   }
+  /*
+   * once the list scrolls under the band, a shadow under it (Owen, 2026-10-23, epic `debut`:  "sticky headers like this
+   * need a shadow when sticky so you can see where content is cut off cleanly"):  it comes in over the list's first
+   * 16px of scrolling (a scroll-driven animation;  without one, none)
+   */
+  @supports (animation-timeline: scroll()) {
+    .masthead {
+      position: relative;
+      z-index: 1;
+      animation: ui-docs-nav-header-shadow linear both;
+      animation-timeline: --ui-docs-nav-list;
+      animation-range: 0 16px;
+    }
+  }
+  @keyframes ui-docs-nav-header-shadow {
+    to {
+      box-shadow: var(--_ui-docs-nav-header-shadow);
+    }
+  }
   .slotted.header {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
   }
-  /* the site search gets the band's whole width (the brand's pill, its shortcut hint);
-     the view switch goes under it */
+  /* the site search takes the band's width (the brand's pill, its shortcut hint), the view switch beside it on the same
+     line (Owen, 2026-10-23:  "Search / sort buttons on the same line") */
   .tools {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5em;
     align-items: center;
     justify-content: flex-end;
   }
   .tools > [part~="search"] {
-    flex: 1 1 100%;
+    flex: 1 1 0;
     min-width: 0;
   }
   .tools > [part~="views"] {
@@ -176,9 +204,19 @@
   }
 
   /* ## Bands:  a group's is the brand's sub-head band (a tint, a hairline above, bold caps);  a click folds it. */
+  /*
+   * a group's band sticks at the list's top while its rows scroll under it (Owen, 2026-10-23, epic `debut`:  ""Get
+   * Started", "Components" etc headers sticky"):  each the next one's to push away, as its group ends
+   */
   .heading {
     margin: 0;
     font: inherit;
+  }
+  /* the groups' bands only:  a topic's band (Basic, Layout ...) inside a group scrolls on under its group's */
+  .group > .heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   .band {
     box-sizing: border-box;
@@ -191,7 +229,9 @@
     padding: 0.25em 1em;
     border: 0;
     border-block-start: 1px solid var(--_ui-docs-nav-border-color);
-    background: var(--_ui-docs-nav-band-background);
+    /* over the page's opaque fill:  a see-through tint (a theme's glass panel) would show the rows scrolling under it */
+    background:
+      linear-gradient(var(--_ui-docs-nav-band-background), var(--_ui-docs-nav-band-background)), var(--ui-background);
     color: var(--_ui-docs-nav-band-color);
     font: var(--ui-font-weight-bold) 0.75em / 1 var(--ui-font-family);
     letter-spacing: 0.01em;

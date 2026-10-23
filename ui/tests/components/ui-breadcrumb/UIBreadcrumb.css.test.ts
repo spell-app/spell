@@ -178,7 +178,8 @@ describe("UIBreadcrumb.css in shadow roots", () => {
     expect(getComputedStyle(breadcrumb).display).toBe("contents")
     expect(getComputedStyle(sections[0]!).display).toBe("contents")
     expect(getComputedStyle(divider(0)).display).toBe("none")
-    expect(getComputedStyle(divider(1)).display).toBe("inline-block")
+    // shown:  a flex item of the list's row (`block`), so the white space between sections draws nothing
+    expect(getComputedStyle(divider(1)).display).toBe("block")
     expect(getComputedStyle(divider(1), "::before").content).toBe('"/"')
     const link = Fixture.render(`<span style="color: var(--ui-link)"></span>`)
     expect(getComputedStyle(sections[0]!.shadowRoot!.querySelector("a")!).color).toBe(getComputedStyle(link).color)

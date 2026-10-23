@@ -4,10 +4,12 @@
  * built of `<ui-*>` widgets:  this sheet only LAYS THEM OUT.
  * - It styles the component's shadow DOM:
  *   `<section class="ui [bare] [variation] example" part="example">`, holding:
- *   - `<div class="heading">`:  the `<ui-header part="header">` and the `<ui-button part="toggle">`
+ *   - `<div class="heading">`:  the `<ui-header part="header">` (only when there is a header)
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
- *   - the `<ui-segment part="demo">` around the default slot
- *   - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
+ *   - `<div class="frame">`:  the `<ui-button part="toggle">` over its top right corner, the `<ui-segment
+ *     part="demo">` around the default slot, and while open the `<ui-segment part="code">` holding the
+ *     `<ui-code part="source">`
+ *   - the header and description sit on the page, outside the frame;  the frame holds only the example and its code
  * - The frame and the code are the widgets' own look:
  *   - closed, the demo segment is `basic` and unpadded (Fomantic shows the live markup bare)
  *   - open, it's `attached="top"` and the code pane `attached="bottom"`
@@ -30,15 +32,44 @@
   /* Tokens:  Fomantic's docs measures. */
   .ui.example {
     /* Space above and below the block. */
-    --_ui-docs-example-margin: var(--ui-docs-example-margin, 2em 0);
+    --_ui-docs-example-margin: var(--ui-docs-example-margin, 1.25em 0);
     /* Widest the description runs:  Fomantic's 700px. */
     --_ui-docs-example-description-width: var(--ui-docs-example-description-width, 50em);
     /* Colour of the description text. */
     --_ui-docs-example-description-color: var(--ui-docs-example-description-color, var(--ui-text-color));
-    /* Opacity of the code button at rest;  it brightens on hover, as in Fomantic. */
-    --_ui-docs-example-toggle-opacity: var(--ui-docs-example-toggle-opacity, 0.5);
+    /* Opacity of the code button at rest:  whole, so it stands out on the frame (Fomantic dimmed it to 0.5) */
+    --_ui-docs-example-toggle-opacity: var(--ui-docs-example-toggle-opacity, 1);
+    /* The code button's fill:  whiter than the frame, so it stands out on it */
+    --_ui-docs-example-toggle-background: var(
+      --ui-docs-example-toggle-background,
+      light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))
+    );
+    /*
+     * Space from the frame's top and right edges to the code button, the same both ways:  about what centres it beside
+     * one line of text (Owen, 2026-10-23:  ""code" button should look centered vertically here";  0.5em before)
+     */
+    --_ui-docs-example-toggle-inset: var(--ui-docs-example-toggle-inset, 0.8em);
     /* Space between the header, description and example. */
-    --_ui-docs-example-gap: var(--ui-docs-example-gap, 1em);
+    --_ui-docs-example-gap: var(--ui-docs-example-gap, 0.5em);
+    /* The frame round an example:  a faint see-through card, so it never runs into the prose round it. */
+    --_ui-docs-example-frame-background: var(
+      --ui-docs-example-frame-background,
+      color-mix(in oklab, var(--ui-surface) 45%, transparent)
+    );
+    --_ui-docs-example-frame-border: var(
+      --ui-docs-example-frame-border,
+      var(--ui-border-width, 1px) solid var(--ui-border-color)
+    );
+    --_ui-docs-example-frame-radius: var(--ui-docs-example-frame-radius, var(--ui-radius-l, 0.75em));
+    --_ui-docs-example-frame-padding: var(--ui-docs-example-frame-padding, 0.75em 1em);
+    --_ui-docs-example-frame-shadow: var(--ui-docs-example-frame-shadow, var(--ui-shadow-subtle, none));
+    /* What the frame does to what's behind it:  a theme's glass (`backdrop-filter`) */
+    --_ui-docs-example-frame-filter: var(--ui-docs-example-frame-filter, none);
+    /* The live demo while the code shows:  a very light tint, so its edge reads (pure white read as a missing border) */
+    --_ui-docs-example-demo-background: var(
+      --ui-docs-example-demo-background,
+      color-mix(in oklab, var(--ui-surface) 60%, transparent)
+    );
   }
 
   .ui.example {
@@ -55,45 +86,54 @@
 }
 
 @layer ui.components.docs-example.content {
-  /* Header row:  the title on the left, the code button on the right. */
+  /* Header row:  the title, on the page above the frame. */
   .heading {
     display: flex;
     align-items: center;
     gap: var(--_ui-docs-example-gap);
-    margin-bottom: 0.5em;
+    margin-bottom: var(--_ui-docs-example-gap);
   }
   .heading > [part~="header"] {
     flex: 1 1 auto;
     --ui-header-margin-top: 0;
     --ui-header-margin-bottom: 0;
   }
-  .heading > [part~="toggle"] {
-    flex: none;
-    margin-inline-start: auto;
+
+  /*
+   * The frame's box, and the code button over its top right corner (Owen, 2026-10-23, epic `debut`:  "When no text
+   * between, overlay show code over the example, so no whitespace above the example inside the frame"):  the same
+   * inset from the top and the right edge in every case, a whiter fill than the frame so it stands out on it
+   */
+  .frame {
+    position: relative;
+  }
+  .frame > [part~="toggle"] {
+    position: absolute;
+    /* in a frame too short for that inset, centred top to bottom instead (the button is about 1.35em tall) */
+    inset-block-start: min(calc(50% - 0.675em), var(--_ui-docs-example-toggle-inset));
+    inset-inline-end: var(--_ui-docs-example-toggle-inset);
+    /* over the demo, which is over the code */
+    z-index: 2;
+    margin: 0;
     opacity: var(--_ui-docs-example-toggle-opacity);
     transition: opacity 0.3s ease-out;
   }
-  /*
-   * No header, but a description (Fomantic's `.another.example`, or an example under a `<ui-section>`'s title):
-   * the code button sits at the top right BESIDE the description, not on a row of its own.
-   * Without a description it keeps its row:  it would cover the example.
-   */
-  .heading:not(:has(> [part~="header"])):has(+ .description) {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: 0;
-    z-index: 1;
+  .frame > [part~="toggle"]::part(button) {
+    /* one width at every size, so the code's copy button can sit centred under it */
+    box-sizing: border-box;
+    width: 28px;
+    min-width: 0;
+    padding-inline: 0;
+    justify-content: center;
     margin: 0;
+    background: var(--_ui-docs-example-toggle-background);
+    box-shadow:
+      0 0 0 1px var(--ui-border-color),
+      var(--ui-shadow-subtle, 0 0 #0000);
   }
-  .heading:not(:has(> [part~="header"])) + .description {
-    padding-inline-end: 3em;
-  }
-  .ui.example:hover .heading > [part~="toggle"],
-  .heading > [part~="toggle"]:focus-within {
-    opacity: 0.85;
-  }
-  .heading > [part~="toggle"]:hover,
-  :host(:state(open)) .heading > [part~="toggle"] {
+  .frame > [part~="toggle"]:hover,
+  .frame > [part~="toggle"]:focus-within,
+  :host(:state(open)) .frame > [part~="toggle"] {
     opacity: 1;
   }
 
@@ -124,6 +164,132 @@
   /* Floated example content stays inside the frame (Fomantic's `.example` clears its floats too). */
   [part~="demo"]::part(segment) {
     display: flow-root;
+  }
+
+  /*
+   * THE FRAME (Owen, 2026-10-23, epic `debut`:  "Example panes bleed into the text, need some framing.  Something
+   * closer to glass framing when expanded"):  every example but a `bare` one sits in a faint card, open or not
+   * - a hairline, rounded, a little padding, the theme's glass behind it (fruity's blur)
+   * - round the example and its code only:  its header and description stay on the page above it
+   * - closed, the demo starts at the frame's top padding, the code button over its corner
+   * - open:  the demo a very light tint, no box of its own;  the code under it plain, with no frame of its own
+   *   ("Don't need secondary frame around the HTML inside panel ... just visual noise")
+   * - the segments' look set on their boxes (`::part(segment)`), NOT through `--ui-segment-*` tokens, which would
+   *   inherit into every segment the example shows
+   */
+  .ui.example:not(.bare) > .frame {
+    padding: var(--_ui-docs-example-frame-padding);
+    border: var(--_ui-docs-example-frame-border);
+    border-radius: var(--_ui-docs-example-frame-radius);
+    background: var(--_ui-docs-example-frame-background);
+    box-shadow: var(--_ui-docs-example-frame-shadow);
+    backdrop-filter: var(--_ui-docs-example-frame-filter);
+  }
+  /* the demo flush with the frame's padding, open or closed:  as much room above it as below (Owen, 2026-10-23) */
+  .ui.example:not(.bare) [part~="demo"]::part(segment) {
+    margin: 0;
+  }
+  /*
+   * the frame is the glass:  the demo and the code inside it blur nothing again (a theme's segment glass did, a shade
+   * off the frame round it;  Owen, 2026-10-23:  "Lose whatever is causing background color shift under code")
+   */
+  .ui.example:not(.bare) :is([part~="demo"], [part~="code"])::part(segment) {
+    backdrop-filter: none;
+  }
+  /*
+   * OPEN, the code is a panel BEHIND the example, rolling down from under it (Owen, 2026-10-23, epic `debut`:  "show it
+   * like it is a panel behind the example which rolls open from the top.  The example shadow should be over the code
+   * content.  Code button should look depressed when the panel is open"):
+   * - the demo over it, casting its shadow down onto it
+   * - the code panel tucked up under the demo's rounded bottom, a shade deeper, rolling open (its height from 0;  at
+   *   once where the browser can't ease to `auto`)
+   * - the code button pressed in
+   */
+  :host(:state(open)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 1em;
+    border: none;
+    border-radius: var(--_ui-docs-example-demo-radius);
+    background: var(--_ui-docs-example-demo-background);
+    box-shadow: 0 6px 14px -8px oklch(0 0 0 / 0.3);
+  }
+  .ui.example {
+    --_ui-docs-example-demo-radius: calc(var(--_ui-docs-example-frame-radius) * 0.66);
+  }
+  .ui.example:not(.bare) [part~="code"]::part(segment) {
+    box-sizing: border-box;
+    height: auto;
+    margin: calc(-1 * var(--_ui-docs-example-demo-radius)) 0 0;
+    padding: calc(var(--_ui-docs-example-demo-radius) + 0.5em) 0 0;
+    overflow: hidden;
+    border: none;
+    border-radius: 0 0 var(--_ui-docs-example-demo-radius) var(--_ui-docs-example-demo-radius);
+    background: color-mix(in oklab, var(--ui-text-color) 4%, transparent);
+    box-shadow: none;
+    interpolate-size: allow-keywords;
+    transition: height 0.26s var(--ui-ease-out, ease-out);
+  }
+  @starting-style {
+    .ui.example:not(.bare) [part~="code"]::part(segment) {
+      height: 0;
+    }
+  }
+  :host(:state(open)) .frame > [part~="toggle"]::part(button) {
+    background: color-mix(in oklab, var(--ui-text-color) 10%, var(--_ui-docs-example-toggle-background));
+    box-shadow:
+      inset 0 1px 3px oklch(0 0 0 / 0.22),
+      0 0 0 1px var(--ui-border-color);
+  }
+  .ui.example:not(.bare) [part~="source"] {
+    --ui-code-border: none;
+    --ui-code-background: transparent;
+    /* room on the right for the copy icon, which sits over the first line */
+    --ui-code-padding: 0.5em 2.5em 0.5em 0;
+  }
+
+  /*
+   * The code's copy button:  an icon, no border (Owen:  "Change "Copy" to copy icon, no border").  `<ui-code>`'s
+   * button keeps its words ("Copy", "Copied") as its accessible name;  they're hidden, and its icon is painted
+   * through a mask in the text's colour (two sheets;  a check once it has copied)
+   */
+  [part~="source"]::part(copy) {
+    /*
+     * centred under the code button (Owen, 2026-10-23:  "Line up the copy button center with the code button center"):
+     * the same width (28px) and right edge;  the code's box ends the frame's padding in from the frame's edge, the
+     * button its inset, 1px further out (measured;  in px, as the copy button's own font size is 0)
+     */
+    inset-inline-end: -1px;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 0;
+    color: var(--ui-text-muted);
+  }
+  [part~="source"]::part(copy)::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: currentColor;
+    mask: var(--_ui-docs-example-copy-icon) center / 15px no-repeat;
+  }
+  [part~="source"]:state(copied)::part(copy)::before {
+    mask-image: var(--_ui-docs-example-copied-icon);
+  }
+  [part~="source"]::part(copy):hover,
+  [part~="source"]::part(copy):focus-visible {
+    background: color-mix(in oklab, var(--ui-text-color) 8%, transparent);
+    color: var(--ui-text-color);
+  }
+  .ui.example {
+    --_ui-docs-example-copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='12' height='12' rx='2.5'/%3E%3Cpath d='M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8'/%3E%3C/svg%3E");
+    --_ui-docs-example-copied-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
   }
   /* Phones:  an example wider than the column scrolls inside its frame, never the page. */
   @media (--ui-mobile) {

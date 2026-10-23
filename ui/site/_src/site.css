@@ -23,7 +23,7 @@
     --site-gutter: 3em;
     --site-aside-width: 280px;
     /* The narrow screens' top bar (`.site-topbar`). */
-    --site-topbar-height: 52px;
+    --site-topbar-height: 44px;
     /*
      * What sticks to the top of the viewport above everything else:  nothing on wide screens (the site header is
      * docked in the right column), the top bar on narrower ones (set below).
@@ -84,10 +84,10 @@
 
   /*
    * ## Top bar:  only while the right column is hidden (below 1200px;  see there).  A slim bar of the page's own
-   * colours:  the menu button and the brand (below 992px), the docked site header, search (below 992px), the look
-   * controls.
-   * GAP:  a bar like this has no widget of its own (a `ui-menu` brings Fomantic's menu look);  its look is these
-   * few rules, on the theme's tokens.
+   * colours, a `<ui-toolbar>`'s bar slots (epic `debut`;  Owen:  "slots icon, title, center and right"):
+   * - `icon` the menu button and `title` the brand (below 992px), `center` the docked site header,
+   *   `right` search (below 992px) and the look controls, at the right edge at every width
+   * - the toolbar has no items of its own:  its menu box takes no room
    */
   body {
     margin: 0;
@@ -95,7 +95,8 @@
   .site-topbar {
     position: sticky;
     top: 0;
-    z-index: 20;
+    /* above the sticky tabs (+2) and titles, so they slide under it as the page scrolls past them */
+    z-index: calc(var(--ui-z-sticky) + 3);
     box-sizing: border-box;
     display: none;
     align-items: center;
@@ -106,39 +107,141 @@
     backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
   }
-  .site-topbar > spell-site-header {
+  /* the bar's box fills the bar, its slots in one row */
+  .site-topbar::part(toolbar) {
+    height: 100%;
     flex: 1 1 auto;
-    min-width: 0;
+    /* tight (Owen, 2026-10-23:  "less space between SpellUI and breadcrumb ... between search and theme") */
+    gap: 4px;
   }
-  /* one row:  the links scroll sideways when they don't fit, so the bar keeps its height (the tabs stick below it) */
-  .site-topbar > spell-site-header::part(bar) {
+  .site-topbar::part(right) {
+    gap: 0;
+  }
+  /*
+   * its icon buttons (menu, search, the palette) plain:  no ring, a tint under the pointer (Owen, 2026-10-23, epic
+   * `debut`:  "lose ring around hamburger, search, pallette icons")
+   */
+  .site-topbar > ui-button {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-box-shadow: none;
+  }
+  /*
+   * each the palette's size, a square round its glyph:  the menu button's glyph as far in from the left edge as the
+   * palette's from the right, and search right beside the palette (Owen, 2026-10-23:  "Hamburger to left, match right
+   * padding of top palette ... search / theme buttons closer together")
+   */
+  .site-topbar > ui-button::part(button) {
+    box-sizing: border-box;
+    width: var(--site-topbar-button);
+    min-width: 0;
+    height: var(--site-topbar-button);
+    padding: 0;
+    justify-content: center;
+  }
+  .site-topbar {
+    /* the palette's box (`<ui-docs-themes size="small">`) */
+    --site-topbar-button: 29.5px;
+  }
+  .site-topbar-themes::part(palette) {
+    background: transparent;
+    box-shadow: none;
+  }
+  .site-topbar-themes::part(palette):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+  }
+  /*
+   * at the top of the page the bar is see-through over the masthead;  it fills in over the first 32px of scrolling,
+   * once the page slides under it (a scroll-driven animation;  without one, it stays filled)
+   */
+  @supports (animation-timeline: scroll()) {
+    .site-topbar {
+      animation: site-topbar-fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 32px;
+    }
+  }
+  @keyframes site-topbar-fill {
+    from {
+      background-color: transparent;
+      border-block-end-color: transparent;
+      backdrop-filter: none;
+    }
+  }
+  /*
+   * the site's links:  the bar's own items, ONE row at every width, scrolling sideways with `‹` / `›` at either side while
+   * there's more that way (Owen, 2026-10-23:  "center buttons to scroll with < > arrows on either side");  the header's
+   * row at its own width, so the bar's items box is what scrolls
+   */
+  .site-topbar-links {
+    flex: none;
+  }
+  /* the items box is only a scroller:  no menu box (a theme's menu fill and shadow) round the links */
+  .site-topbar::part(menu) {
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .site-topbar-links::part(bar),
+  .site-topbar-links::part(nav) {
     flex-wrap: nowrap;
   }
-  .site-topbar > spell-site-header::part(nav) {
-    flex: 0 1 auto;
-    min-width: 0;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
+  /* the links on the bar's middle line, level with its buttons (Owen:  "page links don't line up") */
+  .site-topbar::part(menu) {
+    align-self: center;
+    align-items: center;
   }
-  /* the look controls at the right edge, whatever is shown before them */
-  .site-topbar-themes {
-    margin-inline-start: auto;
+  .site-topbar-links {
+    align-self: center;
   }
-  .site-topbar-brand {
-    --ui-header-margin-top: 0;
-    --ui-header-margin-bottom: 0;
+  .site-topbar-links::part(bar) {
+    align-items: center;
+    height: auto;
+  }
+  /*
+   * the brand:  the hat and "Spell UI", a plain link set as a heading (a `<ui-header>` there would draw as a menu's
+   * header);  the same in the top bar and the nav panel (Owen, 2026-10-23:  "Do `Spell UI` consistently with Docs
+   * header")
+   */
+  .site-wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
+    letter-spacing: -0.01em;
     white-space: nowrap;
-  }
-  .site-topbar-brand > a {
-    color: inherit;
+    color: var(--ui-text-dark);
     text-decoration: none;
+  }
+  /*
+   * the hat before "Spell UI" (Owen, 2026-10-23:  "Hat to the left of SpellUI"):  the site header's own mark, drawn
+   * here by the site (`site.ts`), the header's own hidden while the brand shows
+   */
+  .site-hat {
+    display: inline-flex;
+    color: var(--ui-primary-text);
+  }
+  .site-hat > svg {
+    display: block;
+    width: auto;
+    height: 0.95em;
+  }
+  @media not (--ui-computer) {
+    .site-topbar-links::part(brand) {
+      display: none;
+    }
   }
   /* the menu and search buttons open the nav flyout, and the brand shows:  only where the nav column is hidden */
   @media (--ui-computer) {
     .site-menu-button,
     .site-search-button,
     .site-topbar-brand {
+      display: none;
+    }
+    /* and their slots' boxes, so no gap is left where they were */
+    .site-topbar::part(icon),
+    .site-topbar::part(title) {
       display: none;
     }
   }
@@ -155,10 +258,16 @@
   .site-nav-flyout > ui-docs-nav {
     margin: var(--site-nav-margin);
   }
+  /* the other sets' flyouts still hold the site header, for phones only (Spell UI's holds none:  the top bar has it) */
   @media not (--ui-mobile) {
     .site-flyout-header {
       display: none;
     }
+  }
+  /* its close button small and dimmed until hovered (Owen, 2026-10-23:  ""X" smaller, dimmed until hover") */
+  .site-nav-flyout {
+    --ui-flyout-close-size: 0.875em;
+    --ui-flyout-close-opacity: 0.45;
   }
 
   /*
@@ -198,23 +307,280 @@
     max-width: none;
     margin-inline: var(--site-gutter);
   }
+  /* less air round the page's header (Owen, 2026-10-23:  "too much whitespace") */
   .site-masthead::part(segment) {
-    padding-block: 3em;
+    /* 8px more under the title line (Owen, 2026-10-23:  "8px additional space below breadcrumb and subhead") */
+    padding-block: 1.25em calc(0.25em + 8px);
   }
   .site-body::part(container) {
     position: relative;
-    padding-block: 2em 7em;
+    /* close under the page header (Owen:  the gap above the tabs read as empty) */
+    padding-block: 0.5em 7em;
   }
+  /*
+   * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large;  on its
+   * right, ONE quiet row of the page's icon buttons, level with it (Owen:  "send|wand|bullhorn in a single group.  then
+   * some space, then bug | theme | new window"):
+   * - Send, Review Now and the page's bullhorn as one pill
+   * - a space
+   * - report a bug, the page's themes as a palette (`<ui-docs-themes compact>`), the original page:  the two links of
+   *   `.site-page-links` and the palette between them, each a cell of the grid (the menu and its items box-less)
+   * - the row ends where the top bar's palette is centred, so the last icon sits right under it ("Align new window icon
+   *   with palette icon on top bar"):  `--_site-head-end`, the gutter on wide screens, which have no bar
+   * Its title line sticks;  the subhead below it scrolls (`SiteSections.splitSubtitle()`).
+   */
+  .site-masthead {
+    --_site-head-end: var(--site-gutter);
+    /* each icon's cell, as far apart as the top bar's icons (Owen:  "match icon spacing in top bar") */
+    --_site-head-icon: 33px;
+  }
+  @media not (--ui-large-monitor) {
+    .site-masthead {
+      /* the top bar's palette is centred its padding (8px) and half its box in;  so is the last icon's cell here */
+      --_site-head-end: calc(8px + var(--site-topbar-button, 29.5px) / 2 - var(--_site-head-icon) / 2);
+    }
+  }
+  .site-masthead > ui-container::part(container) {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr) var(--_site-send-width, 0px) var(--_site-mark-width, 0px) 0.75em
+      var(--_site-head-icon) var(--_site-head-icon) var(--_site-head-icon);
+    /* the cells touch:  their own width is the spacing;  the title keeps clear of the row by its own padding */
+    column-gap: 0;
+    align-items: start;
+    margin-inline-end: var(--_site-head-end);
+  }
+  /*
+   * Send and the page's bullhorn:  the comments put them in the masthead's segment, beside its container, not in it
+   * (`addHeadTool()`, spell-epic's);  the container keeps their two columns empty (`--_site-send-width`,
+   * `--_site-mark-width`), and they're laid over them:  the segment's box one cell, holding the container and both
+   */
+  .site-masthead::part(segment) {
+    display: grid;
+    grid-template-areas: "head";
+  }
+  .site-masthead > ui-container::part(container),
+  .site-main > .site-masthead > [data-head-tool="send"],
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    grid-area: head;
+  }
+  .site-masthead:has(> [data-head-tool="send"]) {
+    --_site-send-width: 3.5em;
+  }
+  .site-masthead:has(> .spell-comment-mark.at-page) {
+    /* no more than the bullhorn and a little air before the pill's end (Owen:  "Too much space to right of bullhorn") */
+    --_site-mark-width: 1.6em;
+  }
+  .site-main > .site-masthead > [data-head-tool="send"],
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    position: static;
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25em;
+    margin: 0.2em var(--site-gutter) 0;
+  }
+  /* laid over their columns:  the bullhorn past the three icons' cells and the space (0.75em) */
+  .site-main > .site-masthead > [data-head-tool="send"] {
+    width: var(--_site-send-width);
+    margin-inline-end: calc(var(--_site-head-end) + 3 * var(--_site-head-icon) + 0.75em + var(--_site-mark-width, 0px));
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    width: var(--_site-mark-width);
+    margin-inline-end: calc(var(--_site-head-end) + 3 * var(--_site-head-icon) + 0.75em);
+  }
+  /* ... and drawn as ONE pill:  Send's ring opens on its right, the bullhorn closes it */
+  .site-masthead:has(> .spell-comment-mark.at-page) > [data-head-tool="send"] {
+    justify-content: flex-end;
+  }
+  .site-masthead:has(> .spell-comment-mark.at-page) epic-send-buttons::part(base) {
+    border-inline-end: 0;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    justify-content: flex-start;
+    box-sizing: border-box;
+    /* Send's ring, closed round the bullhorn:  its height (`--epic-send-buttons-size`, 28px) and colour */
+    height: 28px;
+    margin-block-start: calc(0.2em + (2.25em - 28px) / 2);
+    padding-inline-end: 2px;
+    border: 1px solid var(--epic-send-buttons-rule, var(--ui-border-color));
+    border-inline-start: 0;
+    border-radius: 0 999px 999px 0;
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page > ui-button {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-box-shadow: none;
+  }
+  /* boxes of their own (both hosts are `display: contents` by default), so the grid places them */
   .site-title {
     --ui-header-margin-top: 0;
+    --ui-header-margin-bottom: 0;
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline-end: 0.5em;
+    /* never broken inside a word ("Breadcrum / b"):  between words only */
+    overflow-wrap: normal;
+  }
+  /* phones:  a smaller title, so a one-word name fits beside the icons */
+  @media (--ui-mobile) {
+    .site-title {
+      font-size: 0.75em;
+    }
+  }
+  /*
+   * the TITLE LINE sticks under the top bar for the whole page, and everything scrolls under it (Owen, 2026-10-23:
+   * "leave just the top header line, content goes below it"):  the subhead moved out below it
+   * (`SiteSections.splitSubtitle()`), and the sticky lines below start under it (`--site-head-height`)
+   * - at the top of the page it's see-through over the page, as the top bar is;  it fills in over the first 32px of
+   *   scrolling, with the bar's glass (a scroll-driven animation;  without one, it stays filled)
+   */
+  /* on the segment's own box:  the element is `display: contents`, so the box's parent is the page column */
+  .site-main > .site-masthead::part(segment) {
+    position: sticky;
+    top: var(--site-top);
+    /* over the sticky tabs (+2) and titles;  under the top bar's flyout and menus */
+    z-index: calc(var(--ui-z-sticky) + 3);
+    /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`);  else the bar's glass */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-bar-background, var(--ui-background)));
+    background-image: var(--ui-bar-wallpaper, none);
+    background-attachment: fixed;
+    backdrop-filter: var(--ui-bar-filter, none);
+  }
+  @supports (animation-timeline: scroll()) {
+    .site-masthead::part(segment) {
+      animation: site-masthead-fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 32px;
+    }
+  }
+  @keyframes site-masthead-fill {
+    from {
+      /* a theme's wallpaper is the page's own, so it needs no fading in:  a clear fill under it drew the page's gradient
+         twice, a shade off the page round it (Owen:  "lose whatever is making that background shift") */
+      background-color: var(--ui-bar-wallpaper-color, transparent);
+      backdrop-filter: none;
+    }
+  }
+  /*
+   * stuck, the title line is tighter:  half its space above, a quarter of its space below (Owen, 2026-10-23:  "When
+   * Breadcrumb top header is sticky, reduce padding to 1/2 of what's on the top, 1/4 of what's on bottom"), eased in
+   * once the page has scrolled at all (`main.site-head-stuck`, `SiteSections.markTabsStuck()`);  the lines below follow
+   * its height (`SiteSections.measure()`)
+   */
+  .site-main > .site-masthead::part(segment) {
+    transition:
+      padding-block var(--ui-duration-normal, 200ms) var(--ui-ease, ease),
+      margin-block-end var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
+  }
+  /*
+   * ... the space it gives up kept as a margin below it, so nothing under it moves:  a shorter box there moved the page
+   * up, the browser scrolled back to keep its place, and near the top that undid the scroll that tightened it
+   */
+  .site-main.site-head-stuck > .site-masthead::part(segment) {
+    padding-block: 0.625em calc((0.25em + 8px) / 4);
+    margin-block-end: calc(0.625em + (0.25em + 8px) * 0.75);
+  }
+  /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
+  .site-subtitle {
+    margin: 0 var(--site-gutter);
+    /* 8px more under it (Owen:  "8px additional space below breadcrumb and subhead") */
+    padding-block-end: calc(0.25em + 8px);
+    font-family: var(--ui-font-family-heading);
+    font-size: 1.34em;
+    line-height: 1.2;
+    color: var(--ui-text-muted);
+  }
+  /* the icon row:  every button the same 2.25em box, centred on the title's first line */
+  .site-masthead .site-page-links,
+  .site-themes {
+    grid-row: 1;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    height: 2.25em;
+    margin-block-start: 0.2em;
+  }
+  /* the menu and its items box-less, so each link's own box is a cell:  bug, then (the palette), then the original page */
+  .site-masthead .site-page-links,
+  .site-masthead .site-page-links::part(menu) {
+    display: contents;
+  }
+  .site-masthead .site-page-links > ui-item::part(item) {
+    grid-row: 1;
+    align-self: start;
+    margin-block-start: 0.2em;
+  }
+  .site-masthead .site-page-links > ui-item:first-of-type::part(item) {
+    grid-column: 5;
+  }
+  .site-masthead .site-page-links > ui-item:last-of-type::part(item) {
+    grid-column: 7;
   }
   .site-themes {
-    display: inline-block;
-    margin-block-start: 1em;
+    grid-column: 6;
   }
-  /* the panes sit flush in the column, as Fomantic's sections do (a `basic` pane keeps a segment's padding) */
+  /* who is listening:  the pill's own tooltip says it;  in the icon row the words would push the title over */
+  .site-masthead .spell-send-who {
+    display: none;
+  }
+  /* the palette the links' size and look:  a plain round icon button */
+  .site-themes::part(palette) {
+    width: var(--_site-head-icon, 2.25em);
+    height: 2.25em;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ui-text-muted);
+  }
+  .site-themes::part(palette):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    color: var(--ui-text-color);
+  }
+  /* the page's links:  plain round icon buttons, a tint under the pointer;  no menu box round them */
+  .site-page-links {
+    --ui-menu-background: transparent;
+    --ui-menu-border: none;
+    --ui-menu-shadow: none;
+    --ui-menu-divider-display: none;
+    float: none;
+  }
+  .site-page-links::part(menu) {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    gap: 0.25em;
+  }
+  .site-page-links > ui-item::part(item) {
+    width: var(--_site-head-icon, 2.25em);
+    height: 2.25em;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ui-text-muted);
+  }
+  .site-page-links > ui-item::part(item):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    color: var(--ui-text-color);
+  }
+  /*
+   * the panes sit flush in the column, as Fomantic's sections do (a `basic` pane keeps a segment's padding);  and
+   * right under the tabs:  the panel round them keeps the space (`--site-tabs-gap`), and the section toolbar first in a
+   * pane is the panel's lower half, so it must meet the tabs' track
+   */
   .site-tabs > ui-tab::part(tab) {
+    margin-block-start: 0;
     padding-inline: 0;
+    padding-block-start: 0;
   }
 
   /*
@@ -250,37 +616,146 @@
   /*
    * ## Sections and tabs:  the pages' nested `<ui-section sticky collapsible dividing>`s (`yarn site:sections`) and
    * the tabs' bar above them (`_src/SiteSections.ts` measures and lands).
-   * - The tabs' bar sticks at the top of the page column, above the stuck section titles (`--ui-z-sticky` + 1);
-   *   a band round it (`--site-tabs-band`, in the bar's colour) hides the titles sliding away under it.
-   * - Top-level titles stick right below it:  `offset` (px, set by `SiteSections` from the bar's height + the band +
-   *   `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by `SiteSections`)
-   *   is that line, for the anchors the browser scrolls to itself.
-   * - Stuck titles and the bars take the page's background, not the surface's (the theme may tint the page),
-   *   unless the theme gives bars their own (`--ui-bar-background`, and `--ui-bar-filter` behind them:  fruity's glass).
-   * - Stuck titles reach the column's edges (the gutter), their text where it was.
-   * - A title is a bar only while stuck:  in place it sits on the page, so no band of its own between paragraphs.
+   * - The tabs and the shown pane's section toolbar share ONE PANEL (Owen, 2026-10-23, epic `debut`:  "these two tab
+   *   bars ... in a single glass surround, with a little bit of padding between them"), floating in the column, not
+   *   out to its edges:
+   *   - the tabs' track draws the panel's top (a rounded shadow of the panel's colour, `--site-tabs-band` wide);  the
+   *     toolbar's sticky box the rest (spell-epic's `spell-toolbar.css`, "Under a page's tabs")
+   *   - a gap above and below it (`--site-tabs-gap`):  from the top bar when stuck, from the titles under it
+   *   - above the stuck section titles (`--ui-z-sticky` + 1)
+   * - The page's TITLE shows in the top bar once the masthead has scrolled away (`SiteSections.stickTitle()`):
+   *   no bar of its own, so nothing here makes room for it.
+   * - Top-level titles stick below all that:  `offset` (px, set by `SiteSections` from the bars' heights, the band,
+   *   the gaps and `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by
+   *   `SiteSections`) is that line, for the anchors the browser scrolls to itself.
+   * - Bars take the page's background, not the surface's (the theme may tint the page), unless the theme gives bars
+   *   their own:  a stuck title `--ui-bar-title-background`, in place `--ui-bar-rest-background` (fruity:  white glass,
+   *   90% and 50%), the panel `--ui-bar-panel-background` (50%);  `--ui-bar-filter` / `--ui-bar-rest-filter` behind them.
+   *   While the panel is stuck, a strip in the stuck titles' colour fills round it (spell-toolbar.css), so nothing
+   *   scrolling under shows in its gaps.
+   * - Section titles reach the column's edges (the gutter), their text where it was.
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
-    --site-tabs-band: 8px;
-    --ui-section-sticky-background: var(--ui-bar-background, var(--ui-background));
+    --site-tabs-band: 10px;
+    --site-tabs-gap: 10px;
+    /* the tabs' panel, in from the column's edges (its band reaching out past this) */
+    --site-tabs-inset: 40px;
+  }
+  /* phones:  the tabs need the width */
+  @media (--ui-mobile) {
+    .site-main {
+      --site-tabs-inset: 0px;
+    }
+  }
+  .site-main {
+    --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
+    --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
+  }
+  /*
+   * a title's fill:  set HERE in both states, as a colour (`background-color`), so the switch as it sticks eases
+   * (Owen, 2026-10-23:  "50% opaque white when non-sticky, animated transition to 90% when sticky");  left to the
+   * section's own sheet when stuck, the switch was between two different properties' values, and never eased
+   */
+  /*
+   * every title's fold chevron in ONE cell, a fixed width, and the same gap after it:  the chevrons' points line up,
+   * and so do the titles' text, top-level and nested (Owen, 2026-10-23:  "Points of the down arrows and left of the
+   * text edge should match up vertically");  a bigger heading's chevron is bigger, centred in the same cell
+   */
+  .site-main ui-section[sticky] {
+    --ui-section-title-gap: 10px;
+  }
+  .site-main ui-section[sticky]::part(fold-icon) {
+    width: 20px;
+    justify-content: center;
   }
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
+    padding-block: 0.4em;
+    background-color: var(--ui-section-sticky-background);
     backdrop-filter: var(--ui-bar-filter, none);
+    transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    background: none;
-    backdrop-filter: none;
+    background-color: var(--ui-bar-rest-background, transparent);
+    backdrop-filter: var(--ui-bar-rest-filter, none);
+  }
+  /*
+   * a section's first nested title sits right under its own, open:  no gap (Owen, 2026-10-23:  "No space between
+   * header and first section when expanded";  a 0.5em gap here read his earlier "No space between types/breadcrumb"
+   * as a complaint, when it was the ask)
+   */
+  .site-main ui-section > ui-section[sticky]:first-of-type::part(section) {
+    margin-block-start: 0;
+  }
+  /* ... nor the parent body's own top padding, when that nested section is the first thing in it */
+  .site-main ui-section[sticky]:has(> ui-section[sticky]:not(:not([slot]) ~ *))::part(content) {
+    padding-block-start: 0;
+  }
+  /*
+   * a FOLDED section keeps no space below its title:  the next title sits right under it, as a list of folded rows
+   * (Owen, 2026-10-23:  "No space between types and content when types is collapsed";  the dividing look's 1.5em
+   * margins, its own below and the next one's above, stood between them)
+   */
+  .site-main ui-section[sticky][collapsed]::part(section),
+  .site-main ui-section[sticky][collapsed] + ui-section[sticky]::part(section) {
+    margin-block: 0;
+  }
+  /*
+   * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it, so the two read as
+   * two bars;  the same white as its parent's (Owen, 2026-10-23:  ""Breadcrumb" subheader should read as white rather
+   * than grey";  a slightly deeper fill before)
+   */
+  .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
+    box-shadow: inset 0 1px 0 var(--ui-border-color);
   }
   .site-tabs::part(menu) {
     position: sticky;
-    top: var(--site-top);
-    z-index: calc(var(--ui-z-sticky) + 1);
-    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
-    backdrop-filter: var(--ui-bar-filter, none);
+    /* the panel's top edge a gap below the top bar */
+    top: calc(var(--site-top) + var(--site-head-height, 0px) + var(--site-tabs-gap) + var(--site-tabs-band));
+    /* above the section toolbar, whose box draws the panel behind it */
+    z-index: calc(var(--ui-z-sticky) + 2);
+    margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+    /* at a pane's end, up with its section toolbar as it leaves (`--site-tabs-leave`, `SiteSections.markTabsStuck()`) */
+    translate: 0 calc(-1 * var(--site-tabs-leave, 0px));
+    /* in from the column's edges (Owen, 2026-10-23:  "Add 40px margin on left/right of this section") */
+    margin-inline: var(--site-tabs-inset);
+    /* the top row a little larger than the section toolbar's row under it (Owen:  "use slightly larger font on the top") */
+    font-size: calc(var(--ui-font-size) * 1.0667);
   }
+  /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
+  .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
+    margin-block-end: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+    box-shadow: 0 0 0 var(--site-tabs-band)
+      var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)));
+  }
+  /*
+   * ... and while they're stuck (`main.site-tabs-stuck`, `SiteSections.markTabsStuck()`), a strip in the stuck titles'
+   * colour behind that panel, out to the column's edges and over the gaps above and below it, so nothing scrolling
+   * under shows round them (the section toolbar draws its own:  spell-toolbar.css):  a shadow as wide as everything,
+   * cut to the strip's box
+   */
+  .site-tabs-stuck .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
+    box-shadow:
+      0 0 0 var(--site-tabs-band) var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))),
+      0 0 0 100vmax var(--ui-section-sticky-background, var(--ui-background));
+    clip-path: inset(
+      calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap))) calc(-1 * (var(--site-gutter) + var(--site-tabs-inset)))
+        calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap)))
+    );
+  }
+
+  /*
+   * an example that is one line of text (a breadcrumb) sits optically centred in its frame:  its words have no capitals
+   * past the first, so the space over the lowercase letters read as more than the space under the line (Owen,
+   * 2026-10-23:  "Uneven amount of space above and below the breadcrumbs here, bottom looks good";  measured:  18.9px
+   * over the capitals, 18px under the baseline)
+   */
+  ui-docs-example:has(> ui-breadcrumb) {
+    --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
+  }
+
   .site-main ui-section[id] {
     scroll-margin-top: var(--site-sections-top, var(--site-top));
   }
@@ -335,18 +810,8 @@
     }
   }
 
-  /* ## Phone:  no page links in the masthead;  the top bar keeps its look controls (the flyout needs no copy) */
+  /* ## Phone:  the top bar keeps its look controls (the flyout needs no copy) */
   @media (--ui-mobile) {
-    .site-page-links {
-      display: none;
-    }
-    /* no room for the site row in the top bar:  the brand takes the space */
-    .site-topbar > spell-site-header {
-      display: none;
-    }
-    .site-topbar-brand {
-      flex: 1 1 auto;
-    }
   }
   .site-flyout-themes {
     display: none;
