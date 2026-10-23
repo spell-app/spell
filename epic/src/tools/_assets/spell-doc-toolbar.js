@@ -166,15 +166,23 @@ let accessLettersWired = false
  * "Type T to jump to this section", the letter as a key cap.
  * - ONE tip per page (`.spell-toolbar-tip`), a `popover` in the top layer:  the toolbar's row scrolls sideways, which
  *   would clip a tip inside it
- * - placed under the item, centred on it, kept inside the window;  gone as the pointer leaves, focus moves on, the
- *   page scrolls or the item is clicked
+ * - placed under the item, centred on it, kept inside the window;  gone at once as the pointer leaves, focus moves on,
+ *   the page scrolls or the item is clicked
+ * - under the pointer only after a second of resting on the item (Owen, 2026-10-23:  "should wait 1 second before
+ *   displaying");  the keyboard's focus shows it at once
  * - the item's accessible name says the same (`aria-keyshortcuts`):  the tip is for the eye only (`aria-hidden`)
  */
 function wireKeyTips(toolbar) {
   const tip = keyTip()
+  let waiting
   const show = (event) => {
     const item = event.target.closest?.("ui-item[data-key]")
     if (!item || !toolbar.contains(item)) return
+    clearTimeout(waiting)
+    if (event.type === "pointerover") waiting = setTimeout(() => showUnder(item), TIP_DELAY_MS)
+    else showUnder(item)
+  }
+  const showUnder = (item) => {
     const box = item.shadowRoot?.querySelector('[part~="item"]')?.getBoundingClientRect() ?? item.getBoundingClientRect()
     tip.querySelector("kbd").textContent = item.dataset.key.toUpperCase()
     if (!tip.matches(":popover-open")) tip.showPopover()
@@ -182,13 +190,19 @@ function wireKeyTips(toolbar) {
     tip.style.left = `${Math.max(8, Math.min(innerWidth - width - 8, box.left + box.width / 2 - width / 2))}px`
     tip.style.top = `${box.bottom + 6}px`
   }
-  const hide = () => tip.matches(":popover-open") && tip.hidePopover()
+  const hide = () => {
+    clearTimeout(waiting)
+    if (tip.matches(":popover-open")) tip.hidePopover()
+  }
   toolbar.addEventListener("pointerover", show)
   toolbar.addEventListener("focusin", show)
   toolbar.addEventListener("pointerleave", hide)
   toolbar.addEventListener("focusout", hide)
   toolbar.addEventListener("click", hide)
 }
+
+/** How long the pointer rests on an item before its key tip shows (`wireKeyTips()`). */
+const TIP_DELAY_MS = 1000
 
 /** The page's one key tip (`wireKeyTips()`), made the first time a toolbar asks. */
 function keyTip() {

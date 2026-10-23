@@ -258,30 +258,36 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   color: var(--ui-text-dark, currentColor);
   text-decoration: none;
 }
-/* the KEY TIP (`wireKeyTips()`):  a small dark pill under the item, its letter a key cap */
+/*
+ * the KEY TIP (`wireKeyTips()`):  a pill of DARK GLASS under the item, in both schemes, its letter a key cap (Owen,
+ * 2026-10-23:  "Doesn't match theme, should be dark glass pill");  a theme's glass (`--ui-bar-tip-background`,
+ * `--ui-bar-tip-filter`), else a plain dark pill
+ */
 .spell-toolbar-tip {
   position: fixed;
   inset: auto;
   margin: 0;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border: 0;
-  border-radius: 6px;
-  background: light-dark(rgb(29 29 31 / 0.92), rgb(245 245 247 / 0.95));
-  color: light-dark(#fff, #1d1d1f);
+  border-radius: var(--ui-radius-pill, 9999px);
+  background: var(--ui-bar-tip-background, rgb(29 29 31 / 0.92));
+  backdrop-filter: var(--ui-bar-tip-filter, none);
+  color: #fff;
   font: 500 12px/1.3 var(--spell-sans);
   white-space: nowrap;
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+  /* a faint light ring, so the dark glass shows on a dark page too */
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14), 0 4px 14px rgb(0 0 0 / 0.18);
   pointer-events: none;
 }
 .spell-toolbar-tip kbd {
   display: inline-block;
-  background: light-dark(rgb(255 255 255 / 0.16), rgb(0 0 0 / 0.08));
+  background: rgb(255 255 255 / 0.16);
   color: inherit;
   min-width: 1.3em;
   margin-inline: 2px;
   padding: 0 4px;
-  border: 1px solid light-dark(rgb(255 255 255 / 0.35), rgb(0 0 0 / 0.25));
-  border-radius: 4px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 6px;
   font: 700 11px/1.4 var(--spell-sans);
   text-align: center;
 }
@@ -432,24 +438,58 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   margin-block: 0 var(--site-tabs-gap, 10px);
   /* as wide as the tabs' half:  its band out past the column, the track in it */
   margin-inline: calc(-1 * var(--site-tabs-band, 8px));
-  padding: var(--site-tabs-band, 8px);
-  border-radius: var(--site-panel-radius, 18px);
-  /* the panel is drawn behind it (`::before`), so this box only places the track */
+  /* the gap between the rows above the track;  the toolbar's own box draws the band round it (below) */
+  padding: var(--site-tabs-band, 8px) var(--site-tabs-band, 8px) 0;
+  /* the panel is drawn behind it (`::before`) and by the toolbar, so this box only places the track */
   --_panel-up: calc(var(--site-tabs-track, 34px) + var(--site-tabs-band, 8px));
+  --_panel-glass: var(--ui-bar-panel-background, var(--ui-bar-background, var(--spell-rail-fill)));
 }
 /*
- * ONE panel (Owen:  "doesn't look like one bar (notches)";  "make tab surround 50% opaque"):  a box of its own behind
- * the toolbar, reaching up behind the tabs (`--site-tabs-track`, measured by `SiteSections`);  a theme's panel glass
- * (`--ui-bar-panel-background`), blurring what's behind it
+ * ONE panel, shaped like a T (Owen, 2026-10-23:  "doesn't look like one bar (notches)";  "make tab surround 50% opaque";
+ * then, with a picture, a glass surround that HUGS each row):  a theme's panel glass (`--ui-bar-panel-background`),
+ * blurring what's behind it, `--site-tabs-band` of it round each row's track
+ * - the TOP band:  this box, behind the tabs' track (reaching up by `--site-tabs-track`, measured by `SiteSections`),
+ *   as wide as the panel, its ends fully round;  its lower edge is the gap between the two rows
+ * - the LOWER band:  the section toolbar's own box (below), only as wide as its track, its bottom corners round, and
+ *   two concave curves where it meets the top band, so the outline has no square corner
+ * - the two never overlap:  see-through glass laid twice would show a darker seam
  */
 ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
   content: "";
   position: absolute;
-  inset: calc(-1 * var(--_panel-up)) 0 0;
+  inset: calc(-1 * var(--_panel-up)) 0 auto;
+  height: calc(var(--_panel-up) + var(--site-tabs-band, 8px));
   z-index: -1;
-  border-radius: var(--site-panel-radius, 18px);
-  background: var(--ui-bar-panel-background, var(--ui-bar-background, var(--spell-rail-fill)));
+  border-radius: var(--ui-radius-pill, 9999px);
+  background: var(--_panel-glass);
   backdrop-filter: var(--ui-bar-filter, none);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0 var(--site-tabs-band, 8px) var(--site-tabs-band, 8px);
+  /* round the track's ends:  half its height (24px) and the band */
+  border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
+  background: var(--_panel-glass);
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+/* the concave curves where the lower band meets the top band:  a band's width of glass outside a quarter circle */
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before,
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: var(--site-tabs-band, 8px);
+  height: var(--site-tabs-band, 8px);
+  pointer-events: none;
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before {
+  right: 100%;
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--site-tabs-band, 8px) - 0.5px), var(--_panel-glass) var(--site-tabs-band, 8px));
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
+  left: 100%;
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--site-tabs-band, 8px) - 0.5px), var(--_panel-glass) var(--site-tabs-band, 8px));
 }
 /*
  * while the tabs are stuck (`main.site-tabs-stuck`, set by the site;  through a pane's end too, as the panel leaves), a
@@ -469,8 +509,11 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: 0px;
   margin-inline: 0;
-  background: none;
   box-shadow: none;
+}
+/* no band of its own, but the segmented tabs' lower band of the panel (above) */
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-segmented) {
+  background: none;
   backdrop-filter: none;
 }
 /* the track as wide as its buttons, centred under the tabs (Owen:  "second tab group doesn't need to be full width") */
@@ -486,4 +529,21 @@ ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
   justify-content: center;
+}
+/*
+ * the SECOND row of tabs:  no taller than the tabs above it (Owen:  "Second level tabs are taller than the top set")
+ * - a size smaller than the top row's, the same line height as its buttons (`1`), and its own height:  every toolbar
+ *   button is 30px tall (above), the tabs' 27px
+ * - its border, a theme's (`--ui-bar-subtabs-border`;  fruity's:  none yet), else the segmented menu's own
+ */
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
+  --ui-menu-segmented-border: var(--ui-bar-subtabs-border);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::part(menu) {
+  font-size: calc(var(--ui-font-size, 16px) * 0.9333);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented > ui-item::part(item) {
+  /* its own height, as a tab's:  not the toolbar's fixed 30px button */
+  height: auto;
+  line-height: 1;
 }
