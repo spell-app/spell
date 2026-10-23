@@ -213,6 +213,27 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   }
 
   /**
+   * Attribute `name`'s value, by its canonical name, whatever a translation calls it:
+   * `valueNamed("selected")` of a Spanish `<es-casilla>`, whose property is `seleccionado`.
+   * - For code that works on any tag, in any language:  `<ui-form>` reading a checkbox.
+   * - throws a `TypeError` for a name the tag has no attribute by
+   */
+  valueNamed(name: string): unknown {
+    return this.attributeValues[this.tagSetup.elementDefinition.attribute(name).key]
+  }
+
+  /**
+   * SIDE EFFECT:  set attribute `name`'s value by its canonical name, as writing its property does
+   * (`setValueNamed("selected", true)`) -- see `valueNamed()`.
+   * - throws a `TypeError` for a name the tag has no attribute by
+   */
+  setValueNamed(name: string, value: unknown): void {
+    const { elementDefinition } = this.tagSetup
+    const attribute = elementDefinition.attribute(name)
+    this.setValue(attribute, elementDefinition.convert(attribute, value), "property")
+  }
+
+  /**
    * Store `value` for `attribute`, write it back to the attribute when it came from a property,
    * then call the change callbacks.
    * - Callbacks run on every write, equal or not:  setting the same value again is still a decision.

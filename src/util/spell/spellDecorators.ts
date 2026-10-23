@@ -25,14 +25,15 @@ const THING_CLASS = Symbol("thingClass")
  * - Exactly once, however `@thing` classes nest:  whoever constructs checks `runsCreate()` first.
  * - The wrapper keeps the decorated class's `name`, so `Thing.type` and error messages are unchanged.
  */
-export function thing<C extends new (...args: any[]) => { create(): void }>(
+export function thing<C extends new (...args: any[]) => { create(props?: Record<string, unknown>): void }>(
   Base: C,
   _context: ClassDecoratorContext<C>
 ) {
   const Wrapped = class extends Base {
     constructor(...args: any[]) {
       super(...args)
-      if (runsCreate(Wrapped, new.target)) this.create()
+      // what it was made with, as `Thing` / `List` hand it on
+      if (runsCreate(Wrapped, new.target)) this.create(args[0] as Record<string, unknown> | undefined)
     }
   }
   Object.defineProperty(Wrapped, "name", { value: Base.name })

@@ -52,11 +52,12 @@ import {
  *   - why:  VS Code's side bar (Electron 38 and up, on macOS) shows a `title` only on the element under the
  *     pointer, not on its parent (electron/electron#49843;  epic `epic-engine` I43)
  * - `docked`:  a compact row in place, not a fixed bar, inside the page's own chrome
+ * - `no-tools`:  no edit button and no "open in VS Code" link (the Spell UI site's chrome, where they did nothing)
  *   (the Spell UI site's side column and top bar)
  *   - no light / dark button (the page has its own)
  *   - no room kept on the page (`--spell-site-header-height` is 0)
  * - Parts, for a page that docks it:  `bar` (the row), `nav` (its links;  the Spell UI site's top bar keeps them on one
- *   line, scrolling sideways)
+ *   line, scrolling sideways), `brand` (the hat;  that bar hides it where its own brand shows the hat)
  * - Re-draws on `spell-site:page` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
@@ -209,11 +210,14 @@ export class SiteHeader extends HTMLElement {
     // framed (VS Code's side bar):  no "open in VS Code" (a framed page can't follow a `vscode://` link) and no edit
     // mode -- they did nothing there (Owen, 2026-10-08);  a browser tab keeps both
     const framed = window.self !== window.top
-    const file = framed ? undefined : this.sourceFile
+    // `no-tools`:  a page whose chrome has no use for them (the Spell UI site's, Owen 2026-10-23:  "they don't do
+    // anything anyway")
+    const noTools = this.hasAttribute("no-tools")
+    const file = framed || noTools ? undefined : this.sourceFile
     const vscode = file
       ? `<a class="tool" href="vscode://file${escape(encodeURI(file))}" title="Open the source in VS Code" aria-label="Open the source in VS Code">${ICONS.code}</a>`
       : ""
-    const canEdit = !framed && Boolean(serverConfig()?.token)
+    const canEdit = !framed && !noTools && Boolean(serverConfig()?.token)
     const editing = canEdit && readEdit()
     const edit = canEdit
       ? `<button class="tool${editing ? " on" : ""}" data-action="edit" aria-pressed="${editing}" title="Edit sections in place" aria-label="Edit sections in place">${ICONS.pencil}</button>`
@@ -223,7 +227,7 @@ export class SiteHeader extends HTMLElement {
     const themeLabel = this.themeLabel()
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
-  <a class="brand" href="${escape(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
+  <a class="brand" part="brand" href="${escape(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
   <nav part="nav" aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
@@ -322,8 +326,13 @@ export function serverConfig(): ServerConfig | undefined {
   return (window as unknown as { SPELL_SERVER?: ServerConfig }).SPELL_SERVER
 }
 
-/** Whether edit mode is on in this tab. */
+/**
+ * Whether edit mode is on in this tab.
+ * - never on a page whose header hides the tools (`no-tools`):  its switch is gone, so it couldn't be turned off
+ *   there (Owen, 2026-10-23, on an "edit #examples-content-divider" pill stuck over a Spell UI page)
+ */
 export function readEdit(): boolean {
+  if (document.querySelector(`${SiteHeader.tag}[no-tools]`)) return false
   try {
     return sessionStorage.getItem(EDIT_KEY) === "1"
   } catch {

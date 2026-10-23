@@ -12,7 +12,7 @@
  *
  * What it does, in each repo there (the kit's and each child repo's tracked files, by `git ls-files`):
  * 1. Every text file:  `spell-kit` => `spell`, `spell-lang` => `spell-parser`, as whole names only
- *    (`spell-language` stays);  `yarn.lock` is left to `yarn install`.
+ *    (`spell-language` stays), and `spell lang ...` => `spell parser ...`;  `yarn.lock` is left to `yarn install`.
  * 2. spell-lang's folder becomes `spell-parser`:  a worktree by `git worktree move`, a main checkout by renaming it
  *    and repairing its worktrees;  its `origin` follows the GitHub repo.
  * - Prints each file it changed, with how many names;  `--dry-run` changes nothing.
@@ -29,7 +29,11 @@ const TOP = resolve(import.meta.dirname, "..")
 const RENAMES: [RegExp, string][] = [
   [/(?<![\w-])spell-kit(?!\w)/g, "spell"],
   [/(?<![\w-])spell-lang(?!\w)/g, "spell-parser"],
-  [/\bspellLangRepo\b/g, "spellParserRepo"]
+  [/\bspellLangRepo\b/g, "spellParserRepo"],
+  // spell-parser's own commands go under `spell parser` (epic `repo-split` J195)
+  [/\bspell lang\b(?!-)/g, "spell parser"],
+  [/\bspell\(\["lang", /g, 'spell(["parser", '],
+  [/command\.name\(\) === "lang"\)/g, 'command.name() === "parser")']
 ]
 
 /** spell-lang's folder:  old name, new name. */
@@ -39,8 +43,13 @@ const NEW_FOLDER = "spell-parser"
 /** Its GitHub repo, renamed 2026-10-23 (GitHub redirects the old address). */
 const NEW_URL = "git@github.com:spell-app/spell-parser.git"
 
-/** Files never rewritten:  what a tool regenerates, and this file, which names the old names on purpose. */
-const SKIPPED = /(^|\/)yarn\.lock$|^tools\/rename-packages\.ts$/
+/**
+ * Files never rewritten:  what a tool regenerates, and the files that name the old names on purpose
+ * - this one;  the kit's install links (`tools/repos.ts`, which removes the old `node_modules/spell-kit`);
+ *   spell-epic's lookup of the kit by either name (`packageDir.ts`, `command.types.ts`)
+ */
+const SKIPPED =
+  /(^|\/)yarn\.lock$|^tools\/(rename-packages|repos)\.ts$|^src\/tools\/packageDir\.ts$|^src\/command\/command\.types\.ts$/
 
 const dryRun = process.argv.includes("--dry-run")
 let changedFiles = 0

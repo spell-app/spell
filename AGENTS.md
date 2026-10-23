@@ -125,7 +125,7 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   every command, every repo's:  [README-cli.md](README-cli.md).
   - Every installed repo adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by repo.
-  - A word two repos both want goes under each one's short name (`spell lang check`, `spell app check`).
+  - A word two repos both want goes under each one's short name (`spell parser check`, `spell app check`).
 - The READMEs (every repo's `README.md` and `README-*.md`):
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and

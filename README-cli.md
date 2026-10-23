@@ -93,9 +93,10 @@ spell lint @spell/examples
 @spell/examples holds several projects -- name one, or pass --all:
   @spell/examples/calculator
   @spell/examples/fizzbuzz
+  @spell/examples/ListaDeTareas
   @spell/examples/Solitaire
   @spell/examples/Solitario
-  @spell/examples/todos-form-based
+  @spell/examples/TaskList
 ```
 
 </details>
@@ -110,9 +111,10 @@ spell lint --all @spell/examples
 ```text
 ✓ @spell/examples/calculator
 ✓ @spell/examples/fizzbuzz
+✓ @spell/examples/ListaDeTareas
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
-✓ @spell/examples/todos-form-based
+✓ @spell/examples/TaskList
 ```
 
 </details>
@@ -181,7 +183,7 @@ _Each repo hands its commands to the kit's base.
 
   ```text
   $ spell check
-  "check" is in 2 repos:  spell lang check, or spell app check
+  "check" is in 2 repos:  spell parser check, or spell app check
   ```
 
 - `spell-app`'s commands live under `app` on purpose, clash or not:  `spell app create`, `spell app serve`.
@@ -540,16 +542,37 @@ each language pack registers every rule again, with its own words.
 
 ### Translating a project
 
-`spell parser translate` writes a project in another language, rule by rule:
-each line is read in its own language, then written again with the same rule's words in the other.
-- The names its people chose (types, properties, methods, values, texts) come from a dictionary beside it,
-  `<Project>.<lang>.names.json5`, for a person to review.
-- A name the dictionary lacks is drafted once by `claude -p`, then saved there.
+`spell parser translate` writes a project in another language, in three passes:
+1. Names:  every name its people chose (types, properties, values, methods, texts, comments).
+   - First from the language's shared glossary:  a name another project chose costs no call, and reads the same.
+   - The rest by Claude:  the types alone in one small call, then the other names in a few calls at once,
+     each shown the types and the glossary, so one thing has one word everywhere.
+   - Each noun comes with its gender, and each name is checked readable by the other language's grammar first.
+2. Lines:  each line read in its own language, then written again with the same rule's words in the other.
+3. Fix-ups:  the translation is linted, its tests run, and each line compiled beside its English:
+   each line that fails, compiles to a different program, couldn't be written, or may read in the wrong order
+   goes back to Claude, in context, a few rounds at most.
+
+- It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
+  - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
+  - On Solitaire, cold, through `claude -p`:  31-41 s in all, the names 22-31 s, the fix-ups 9-10 s, in 7 or 8 calls.
+  - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
+    system prompt, which the API caches across the calls.
+  - `--effort fast|balanced|best` says how much each pass spends on its answers, `balanced` unless asked;
+    the runner picks a model and how hard it thinks for each pass at each one.
+    - On Solitaire and todos, more thought made no better names, only slower ones, so today `fast` and `balanced`
+      ask the same, and `best` thinks harder only over the fix-ups.
+
+- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
+- The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-parser:
+  card games' words and common ones, each with its gender and where it came from.
 - Its work is spell-app's (it finds the project the app's way), then `spell-parser`'s `translateProject.ts`.
 
 | Command | What it does |
 | --- | --- |
-| `spell parser translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person |
+| `spell parser translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
+| `spell parser translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
+| `spell parser translate-time [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -557,17 +580,78 @@ each line is read in its own language, then written again with the same rule's w
 | Option | What it does |
 | --- | --- |
 | `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
-| `--no-ai` | leaves each name the dictionary lacks as `TODO` in it, instead of asking `claude -p` |
+| `--no-ai` | never asks Claude:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
+| `--effort <tier>` | how much every pass spends on its answers:  `fast`, `balanced` (the default) or `best` |
+| `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
+| `--cold` | for timing:  starts from nothing worked out before (below, "Timing it");  needs `--out` |
 
+- It says how long each pass took, and each call to Claude:
+  the types in one, the other names in up to 6 at the same time, one more for any name it couldn't read
+  (or that two calls gave the same word), one per round of fix-ups.
+- A fix-up answer that isn't JSON anyway (cut off, say) is asked again in two halves, so the round isn't lost.
+- Through the API, a 429 (too many requests) or an overloaded API is asked again a few times, a few seconds apart;
+  any other failure says what it was (`Claude API (claude-opus-5-5):  401 authentication_error:  ...`).
+- And the shape check:  how many statements compile to the same program as the English, names and texts aside.
+  A line that reads and lints but means something else (`si no está boca arriba` for `if it is face up`)
+  is named, with where the two programs differ.
+- And each name the project chose otherwise than the glossary, so drift between projects shows.
 - A line it can't write keeps its English, marked `// TODO: translate (why)`:
   a name still missing, or a rule it can't write in that language yet.
-- Comments go through the dictionary too;  one it lacks stays as it was, and is no TODO.
-- JSX keeps its tags and attributes;  each `{expression}` in it is translated.
-- A text glued from pieces (`its color + " joker"`) keeps its order:
-  a language that says it the other way round (`"comodín " + su color`) needs the dictionary's text to fit,
-  or a person, once:  `--update` keeps their line.
+  The fix-up pass writes it, unless `--no-ai`.
+- A text glued from pieces (`its color + " joker"`) may need its words in another order (`"comodín " + su color`):
+  each such line goes to the fix-up pass even when it lints.
+- Each fix-up is kept in the record, so `--update` writes the same line again without asking;
+  a line kept as it was (a hand edit) is never sent.
+- `<ui-*>` tags, their attributes and values become Spell UI's in that language (`<es-texto color="rojo">`),
+  and a style sheet's selectors with them;  the project's own drawable things follow its types' new names.
+- A project it imports keeps its own words (`increment el contador`):
+  the other language's grammar reads them as the import declares them.
+
+</details>
+
+#### Timing it
+
+A translation usually starts from lists earlier runs worked out, so a second run is quicker than the first
+without saying why.
+- Those lists:
+  - the language's shared glossary
+  - the project's own dictionary, `<Project>.<lang>.names.json5`
+  - with `--update`, the record of each fix-up, `<Project>.<lang>.translated.json5`
+  - with `--seed`, a person's translation
+- `--cold` uses none of them, whatever is on disk:  every name is asked for, every fix-up made again.
+  - It writes only into `--out`, its dictionary and record too:  never the project's folder, never the glossary.
+  - So it needs `--out`, and refuses `--update`, `--seed` and `--learn`.
+- Every report says which it started from, e.g. `pre-calculated:  none (--cold)`,
+  or `pre-calculated:  the Spanish glossary (109 names), the project's dictionary (88 names)`.
+
+`spell parser translate-time` does the timing for you.
+- Each run copies the project to a scratch folder of its own (without its dictionary and record), translates it,
+  and deletes the folder, even when the run fails.
+- With no projects, it times Solitaire and todos-form-based, the two the numbers above were measured on.
+- Then a table for each project, mode and tier:  the min, median and max over its runs, of
+  - each pass's time, and the calls to Claude
+  - the problems left, lint's, and lines still `TODO`
+  - the tests passed, and statements with the same shape as their English
+  - how many of the names Claude drafted are the same as a person's translation, where there is one
+    (Solitaire's is Solitario)
+
+<details>
+<summary>Its options</summary>
+
+| Option | What it does |
+| --- | --- |
+| `--to <lang>` | the language, e.g. `es` |
+| `--runs <count>` | runs of each project, mode and tier (default 1) |
+| `--effort <tiers>` | the tiers to compare, e.g. `fast,balanced` (default `balanced`) |
+| `--mode <modes>` | what each run starts from (default `cold,glossary`):  `cold` (`--cold`), `glossary` (the shared glossary only, as a project translated for the first time), `update` (translated, one English comment changed, then `--update`:  only that run timed) |
+| `--reference <project>` | a person's translation of the one project timed, to compare names with |
+| `--json <file>` | every run's numbers and the table, for comparing over time |
+
+- A run that fails says why, and the rest still run;  it exits 1 if any failed.
+- Its work is spell-app's (it finds the projects, and translates each copy as `spell parser translate` does),
+  then `spell-parser`'s `translateTimes.ts`.
 
 </details>
 
@@ -704,7 +788,7 @@ spell projects
 
 ```text
 owen@spell       Projects       ...
-@spell/examples  Examples       5 projects
+@spell/examples  Examples       6 projects
 @spell/guides    Guides         0 projects
 @spell/library   Libraries      1 project
 @spell/test      Test fixtures  7 projects
