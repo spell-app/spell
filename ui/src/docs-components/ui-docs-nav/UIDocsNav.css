@@ -60,6 +60,12 @@
     --_ui-docs-nav-radius: var(--ui-docs-nav-radius, var(--ui-radius-l));
     /* Shadow of the panel (the brand's `--shadow-sm`). */
     --_ui-docs-nav-shadow: var(--ui-docs-nav-shadow, var(--ui-shadow-raised));
+    /* Shadow under the header band once the list scrolls under it, so the cut reads cleanly. */
+    --_ui-docs-nav-header-shadow: var(
+      --ui-docs-nav-header-shadow,
+      0 1px 0 var(--ui-border-color),
+      0 6px 12px -8px oklch(0 0 0 / 0.3)
+    );
     /* Fill of the header band (`accent-100`;  dark:  the brand's warm surface). */
     --_ui-docs-nav-header-background: var(--ui-docs-nav-header-background, var(--ui-brown-background));
     /* Fill of a group's band (`accent-75`):  halfway between the header band and the panel. */
@@ -118,6 +124,8 @@
     background: var(--_ui-docs-nav-background);
     box-shadow: var(--_ui-docs-nav-shadow);
     color: var(--_ui-docs-nav-row-color);
+    /* the list's scroll, named for the header band above it (its shadow) */
+    timeline-scope: --ui-docs-nav-list;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
     line-height: 1.25;
@@ -130,6 +138,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scroll-timeline: --ui-docs-nav-list block;
     padding-block-end: 0.5em;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
@@ -148,6 +157,25 @@
     gap: 0.75em;
     padding: 0.875em 1em 1em;
     background: var(--_ui-docs-nav-header-background);
+  }
+  /*
+   * once the list scrolls under the band, a shadow under it (Owen, 2026-10-23, epic `debut`:  "sticky headers like this
+   * need a shadow when sticky so you can see where content is cut off cleanly"):  it comes in over the list's first
+   * 16px of scrolling (a scroll-driven animation;  without one, none)
+   */
+  @supports (animation-timeline: scroll()) {
+    .masthead {
+      position: relative;
+      z-index: 1;
+      animation: ui-docs-nav-header-shadow linear both;
+      animation-timeline: --ui-docs-nav-list;
+      animation-range: 0 16px;
+    }
+  }
+  @keyframes ui-docs-nav-header-shadow {
+    to {
+      box-shadow: var(--_ui-docs-nav-header-shadow);
+    }
   }
   .slotted.header {
     display: flex;
