@@ -138,7 +138,7 @@ So the scheme can change at any element, and everything below it follows, throug
 One name trips people up:  `theme` on `<ui-root>` is the colour SCHEME, `light` or `dark`.
 A look like `github` is applied with `UI.themes.apply()` (recipe 3).
 
-### The themes:  `classic`, 23 of Fomantic's, and our own three
+### The themes:  `classic`, 23 of Fomantic's, and Spell's own
 
 Each theme is one sheet in [the themes folder](src/styles/themes/), and there's no list of them anywhere else:
 the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
@@ -153,7 +153,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
 - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
   pill buttons, an aubergine dark mode.
   It ships no font either:  the serif is whichever Palatino the system has.
-- `spell-brand`:  `spell` plus the brand's own roles (warm and inverse surfaces), converging on the brand pages.
+- a third of Spell's own, `spell` with warm and inverse surfaces added, for Spell's own pages:  `themes.own` names it.
 - `fruity`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
   and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, over a soft wallpaper.
   - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
@@ -277,7 +277,7 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Both sheets sit in `ui.theme`, `classic` first, so the theme wins every tie by coming second.
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
-- `themes.own` lists Spell UI's own themes, `spell`, `spell-brand` and `fruity`:  a picker shows them apart from `names`.
+- `themes.own` lists Spell UI's own three themes, `spell` and `fruity` among them:  a picker shows them apart from `names`.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
   So does `apply("dark")`, since dark is a scheme (above):
 
