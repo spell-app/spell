@@ -84,10 +84,10 @@
 
   /*
    * ## Top bar:  only while the right column is hidden (below 1200px;  see there).  A slim bar of the page's own
-   * colours:  the menu button and the brand (below 992px), the docked site header, search (below 992px), the look
-   * controls.
-   * GAP:  a bar like this has no widget of its own (a `ui-menu` brings Fomantic's menu look);  its look is these
-   * few rules, on the theme's tokens.
+   * colours, a `<ui-toolbar>`'s bar slots (epic `debut`;  Owen:  "slots icon, title, center and right"):
+   * - `icon` the menu button and `title` the brand (below 992px), `center` the docked site header,
+   *   `right` search (below 992px) and the look controls, at the right edge at every width
+   * - the toolbar has no items of its own:  its menu box takes no room
    */
   body {
     margin: 0;
@@ -106,6 +106,12 @@
     background: var(--ui-bar-background, var(--ui-background));
     backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
+  }
+  /* the bar's box fills the bar, its slots in one row */
+  .site-topbar::part(toolbar) {
+    height: 100%;
+    flex: 1 1 auto;
+    gap: 12px;
   }
   /*
    * at the top of the page the bar is see-through over the masthead;  it fills in over the first 32px of scrolling,
@@ -140,17 +146,12 @@
     overflow-x: auto;
     scrollbar-width: none;
   }
-  /* the look controls at the right edge, whatever is shown before them */
-  .site-topbar-themes {
-    margin-inline-start: auto;
-  }
+  /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
   .site-topbar-brand {
-    --ui-header-margin-top: 0;
-    --ui-header-margin-bottom: 0;
+    font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
+    letter-spacing: -0.01em;
     white-space: nowrap;
-  }
-  .site-topbar-brand > a {
-    color: inherit;
+    color: var(--ui-text-dark);
     text-decoration: none;
   }
   /* the menu and search buttons open the nav flyout, and the brand shows:  only where the nav column is hidden */
@@ -158,6 +159,11 @@
     .site-menu-button,
     .site-search-button,
     .site-topbar-brand {
+      display: none;
+    }
+    /* and their slots' boxes, so no gap is left where they were */
+    .site-topbar::part(icon),
+    .site-topbar::part(title) {
       display: none;
     }
   }
@@ -231,9 +237,15 @@
     display: inline-block;
     margin-block-start: 1em;
   }
-  /* the panes sit flush in the column, as Fomantic's sections do (a `basic` pane keeps a segment's padding) */
+  /*
+   * the panes sit flush in the column, as Fomantic's sections do (a `basic` pane keeps a segment's padding);  and
+   * right under the tabs:  the panel round them keeps the space (`--site-tabs-gap`), and the section toolbar first in a
+   * pane is the panel's lower half, so it must meet the tabs' track
+   */
   .site-tabs > ui-tab::part(tab) {
+    margin-block-start: 0;
     padding-inline: 0;
+    padding-block-start: 0;
   }
 
   /*
@@ -269,30 +281,40 @@
   /*
    * ## Sections and tabs:  the pages' nested `<ui-section sticky collapsible dividing>`s (`yarn site:sections`) and
    * the tabs' bar above them (`_src/SiteSections.ts` measures and lands).
-   * - The tabs' bar sticks at the top of the page column, above the stuck section titles (`--ui-z-sticky` + 1);
-   *   a band round it (`--site-tabs-band`, in the bar's colour) hides the titles sliding away under it.
-   * - Top-level titles stick right below it:  `offset` (px, set by `SiteSections` from the bar's height + the band +
-   *   `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by `SiteSections`)
-   *   is that line, for the anchors the browser scrolls to itself.
-   * - Stuck titles and the bars take the page's background, not the surface's (the theme may tint the page),
-   *   unless the theme gives bars their own (`--ui-bar-background`, and `--ui-bar-filter` behind them:  fruity's glass).
-   * - Stuck titles reach the column's edges (the gutter), their text where it was.
-   * - A title is a bar only while stuck:  in place it sits on the page, so no band of its own between paragraphs.
+   * - The tabs and the shown pane's section toolbar share ONE PANEL (Owen, 2026-10-23, epic `debut`:  "these two tab
+   *   bars ... in a single glass surround, with a little bit of padding between them"), floating in the column, not
+   *   out to its edges:
+   *   - the tabs' track draws the panel's top (a rounded shadow of the panel's colour, `--site-tabs-band` wide);  the
+   *     toolbar's sticky box the rest (spell-epic's `spell-toolbar.css`, "Under a page's tabs")
+   *   - a gap above and below it (`--site-tabs-gap`):  from the top bar when stuck, from the titles under it
+   *   - above the stuck section titles (`--ui-z-sticky` + 1)
+   * - The page's TITLE sticks too, once the masthead has scrolled away (`.site-page-title`, made by `SiteSections`):
+   *   a compact bar right under the top bar, the panel below it (`--site-page-title-height`, set while it shows).
+   * - Top-level titles stick below all that:  `offset` (px, set by `SiteSections` from the bars' heights, the band,
+   *   the gaps and `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by
+   *   `SiteSections`) is that line, for the anchors the browser scrolls to itself.
+   * - Bars take the page's background, not the surface's (the theme may tint the page), unless the theme gives bars
+   *   their own:  `--ui-bar-background` while stuck, `--ui-bar-rest-background` in place (fruity:  white glass, 95%
+   *   and 30%), `--ui-bar-filter` / `--ui-bar-rest-filter` behind them.
+   * - Section titles reach the column's edges (the gutter), their text where it was.
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
     --site-tabs-band: 8px;
-    --ui-section-sticky-background: var(--ui-bar-background, var(--ui-background));
+    --site-tabs-gap: 10px;
+    --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
+    --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
     padding-block: 0.4em;
     backdrop-filter: var(--ui-bar-filter, none);
+    transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    background: none;
-    backdrop-filter: none;
+    background: var(--ui-bar-rest-background, none);
+    backdrop-filter: var(--ui-bar-rest-filter, none);
   }
   /*
    * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it and a slightly
@@ -303,17 +325,61 @@
     box-shadow: inset 0 1px 0 var(--ui-border-color);
   }
   .site-tabs::part(menu) {
-    --_site-band: var(--ui-bar-band, var(--ui-bar-background, var(--ui-background)));
     position: sticky;
-    /* its band's width below the top bar, so the band never laps over it */
-    top: calc(var(--site-top) + var(--site-tabs-band));
-    z-index: calc(var(--ui-z-sticky) + 1);
-    /* the band:  round the bar, and out to the column's edges (a strip, not a frame) */
-    box-shadow:
-      0 0 0 var(--site-tabs-band) var(--_site-band),
-      calc(var(--site-tabs-band) - var(--site-gutter)) 0 0 var(--site-tabs-band) var(--_site-band),
-      calc(var(--site-gutter) - var(--site-tabs-band)) 0 0 var(--site-tabs-band) var(--_site-band);
-    backdrop-filter: var(--ui-bar-filter, none);
+    /* the panel's top edge a gap below the top bar (and the page's title, while it shows) */
+    top: calc(var(--site-top) + var(--site-page-title-height, 0px) + var(--site-tabs-gap) + var(--site-tabs-band));
+    /* above the section toolbar, whose box draws the panel behind it */
+    z-index: calc(var(--ui-z-sticky) + 2);
+    margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+  }
+  /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
+  .site-tabs:not(:has(ui-sticky.spell-site-toolbar))::part(menu) {
+    margin-block-end: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
+  }
+
+  /*
+   * The page's TITLE, stuck (`SiteSections.stickTitle()`):  a line of no height first in the column, holding a bar
+   * that shows once the masthead has scrolled away (`main.site-title-away`):  watched through a marker of no height just
+   * before the column, `.site-title-marker`, so it shows as it pins;  the title in the heading face,
+   * out to the column's edges as the section titles are.
+   */
+  .site-page-title {
+    position: sticky;
+    top: var(--site-top);
+    z-index: calc(var(--ui-z-sticky) + 2);
+    height: 0;
+  }
+  .site-page-title > span {
+    position: absolute;
+    inset-inline: calc(-1 * var(--site-gutter));
+    top: 0;
+    box-sizing: border-box;
+    height: var(--site-page-title-bar, 40px);
+    padding: 0 var(--site-gutter);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    /* the page's own background (Owen:  "should be page bg, not white") */
+    background: var(--ui-background);
+    border-block-end: 1px solid var(--ui-border-color);
+    color: var(--ui-text-dark);
+    font: var(--ui-font-weight-bold, 700) 1.125em / 1 var(--ui-font-family-heading);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--ui-duration-fast, 150ms) var(--ui-ease, ease),
+      visibility var(--ui-duration-fast, 150ms) allow-discrete;
+  }
+  .site-title-away {
+    --site-page-title-height: var(--site-page-title-bar, 40px);
+  }
+  .site-title-away .site-page-title > span {
+    opacity: 1;
+    visibility: visible;
   }
   .site-main ui-section[id] {
     scroll-margin-top: var(--site-sections-top, var(--site-top));

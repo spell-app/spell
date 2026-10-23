@@ -102,3 +102,33 @@ describe("<ui-toolbar>", () => {
     }
   })
 })
+
+describe("<ui-toolbar> bar slots", () => {
+  /** A 600px bar:  icon, title, center and right around three items. */
+  const BAR =
+    '<button slot="icon">=</button><b slot="title">Title</b><span slot="center">links</span>' +
+    '<ui-item href="#a">A</ui-item><ui-item href="#b">B</ui-item><button slot="right">?</button>'
+
+  it("draws a box per filled slot, in order:  icon, title, center, the items, right at the end", async () => {
+    const { host, menu } = await toolbar(600, BAR)
+    const shadow = host.shadowRoot!
+    const box = (name: string) => shadow.querySelector<HTMLElement>(`[part~=${name}]`)!
+    const left = (element: Element) => element.getBoundingClientRect().left
+    expect(left(box("icon"))).toBeLessThan(left(box("title")))
+    expect(left(box("title"))).toBeLessThan(left(box("center")))
+    expect(left(box("center"))).toBeLessThan(left(menu))
+    const bar = box("toolbar").getBoundingClientRect()
+    expect(Math.round(box("right").getBoundingClientRect().right)).toBe(Math.round(bar.right))
+  })
+
+  it("an empty slot draws no box;  with no items, the menu's box takes no room and right still ends the bar", async () => {
+    const { host, menu } = await toolbar(600, '<b slot="title">Title</b><button slot="right">?</button>')
+    const shadow = host.shadowRoot!
+    expect(shadow.querySelector("[part~=icon]")).toBeNull()
+    expect(shadow.querySelector("[part~=center]")).toBeNull()
+    expect(getComputedStyle(menu).display).toBe("none")
+    const bar = shadow.querySelector("[part~=toolbar]")!.getBoundingClientRect()
+    const right = shadow.querySelector("[part~=right]")!.getBoundingClientRect()
+    expect(Math.round(right.right)).toBe(Math.round(bar.right))
+  })
+})

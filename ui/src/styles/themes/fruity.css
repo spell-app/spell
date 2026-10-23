@@ -41,7 +41,7 @@
     --fruity-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
     --fruity-blur: blur(28px) saturate(1.7);
     /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
-    --fruity-bar: light-dark(rgb(255 255 255 / 0.94), rgb(30 28 38 / 0.92));
+    --fruity-bar: light-dark(rgb(255 255 255 / 0.95), rgb(30 28 38 / 0.95));
 
     /* The wallpaper behind the page:  each wash a `light-dark()` colour, so the gradient follows the scheme */
     --fruity-wallpaper:
@@ -161,6 +161,13 @@
     --ui-bar-background: var(--fruity-bar);
     --ui-bar-filter: var(--fruity-blur);
     --ui-bar-color: var(--ui-text-color);
+    /*
+     * a section title:  in place, near-solid white (85%);  stuck, a lighter glass (60%) that blurs what slides under it
+     * (Owen, 2026-10-23:  "more opaque when not sticky, less when sticky, transition the opacity")
+     */
+    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.85), rgb(30 28 38 / 0.85));
+    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.6), rgb(30 28 38 / 0.6));
+    --ui-bar-rest-filter: var(--fruity-blur);
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;
     --ui-bar-track: light-dark(#e9e9ee, #3a3846);
@@ -172,8 +179,6 @@
     --ui-bar-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
     --ui-bar-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-bar-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
-    /* round the tab bar:  a lighter band than the bars themselves */
-    --ui-bar-band: light-dark(rgb(255 255 255 / 0.72), rgb(30 28 38 / 0.72));
     --ui-panel-shadow: var(--ui-shadow-raised);
     --ui-menu-background: var(--fruity-glass);
     --ui-popup-background: var(--fruity-glass-strong);

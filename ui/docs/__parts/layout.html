@@ -29,9 +29,12 @@
       <!--
         Top bar:  ONLY while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
         top bar entirely").  The menu button and the brand only below 992px, where the nav panel moves into the flyout.
+        A `<ui-toolbar>`'s bar slots:  `icon` the menu button, `title` the brand, `center` the site's links, `right` search
+        and the look controls (at the right edge, whatever shows before them).
       -->
-      <header class="site-topbar">
+      <ui-toolbar class="site-topbar" aria-label="Site">
         <ui-button
+          slot="icon"
           class="site-menu-button"
           icon="bars"
           basic
@@ -41,9 +44,10 @@
           commandfor="site-nav-flyout"
           command="--show"
         ></ui-button>
-        <ui-header class="site-topbar-brand"><a href="../index.html">Spell UI</a></ui-header>
-        <spell-site-header docked root="../../.."></spell-site-header>
+        <a slot="title" class="site-topbar-brand" href="../index.html">Spell UI</a>
+        <spell-site-header slot="center" docked root="../../.."></spell-site-header>
         <ui-button
+          slot="right"
           class="site-search-button"
           icon="search"
           basic
@@ -51,8 +55,8 @@
           aria-label="Search"
           title="Search (⌘K)"
         ></ui-button>
-        <ui-docs-themes size="small" class="site-topbar-themes"></ui-docs-themes>
-      </header>
+        <ui-docs-themes slot="right" size="small" class="site-topbar-themes"></ui-docs-themes>
+      </ui-toolbar>
 
       <!--
         The nav panel's brand:  the Spell lockup (spell-brand's `assets/logo/spell-lockup.svg`, served from every set at

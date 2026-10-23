@@ -16,9 +16,13 @@ import toolbarCSS from "./UIToolbar.css?inline"
  * The component behind `<ui-toolbar>`:  a horizontal menu whose items scroll sideways when they don't fit.
  *
  *     <div class="ui toolbar" part="toolbar">
+ *       <div class="icon" part="icon">  <slot name="icon">  </div>        (each slot's box only while it has content)
+ *       <div class="title" part="title">  <slot name="title">  </div>
+ *       <div class="center" part="center">  <slot name="center">  </div>    (takes the room left)
  *       <button class="scroll start" part="scroll-start" aria-label title>‹</button>
  *       <nav class="ui … menu" part="menu">  <slot>  </nav>       (the menu's own box, which scrolls)
  *       <button class="scroll end" part="scroll-end" aria-label title>›</button>
+ *       <div class="right" part="right">  <slot name="right">  </div>      (pushed to the end)
  *     </div>
  *
  * - It IS a `<ui-menu>` (it extends `UIMenu`):  the same attributes, items, events, `segmented` thumb and menubar.
@@ -30,6 +34,9 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - Neither shows when everything fits;  the one at an end it has reached keeps its room, hidden.
  *   - Out of the Tab order:  the items themselves are what a keyboard reaches, and focusing one scrolls it in.
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
+ * - A BAR's slots around the items (Owen, 2026-10-23, epic `debut`):
+ *   `icon`, `title`, `center` (the room left), `right` (at the end).
+ *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
  * - NOTE: left-to-right only, for now:  in a right-to-left page `scrollLeft` counts the other way.
  ****************/
 export class UIToolbar extends UIMenu {
@@ -99,18 +106,37 @@ export class UIToolbar extends UIMenu {
   // ## Rendering
   ////////////////
 
+  /** Which slots have light-DOM children:  a bar's slot box draws only when it has some. */
+  readonly slots = new E.SlotContent(this.domElement)
+
   render(): JSX.Element {
     return (
-      <div class={TOOLBAR_CLASS} part={this.toolbarPart("toolbar")}>
+      <div class={[TOOLBAR_CLASS, { [EMPTY]: !this.slots.hasContent("") }]} part={this.toolbarPart("toolbar")}>
+        {this.barSlot(ICON)}
+        {this.barSlot(TITLE)}
+        {this.barSlot(CENTER)}
         {this.scrollButton(START)}
         {super.render()}
         {this.scrollButton(END)}
+        {this.barSlot(RIGHT)}
       </div>
     )
   }
 
+  /** Bar slot `name`'s box, only while something is in it. */
+  private barSlot(name: BarSlot): JSX.Element {
+    const slotName = this.slotForName(name as never)
+    return (
+      <Show when={this.slots.hasContent(slotName)}>
+        <div class={name} part={this.toolbarPart(name)}>
+          <slot name={slotName} />
+        </div>
+      </Show>
+    )
+  }
+
   /** A part of the toolbar's own (its vocabulary adds them to the menu's, which TypeScript knows). */
-  private toolbarPart(name: "toolbar" | "scroll-start" | "scroll-end"): string {
+  private toolbarPart(name: "toolbar" | "scroll-start" | "scroll-end" | BarSlot): string {
     return this.partForName(name as never)
   }
 
@@ -163,3 +189,21 @@ const CHEVRON_END = "chevron right"
 
 /** How much of the box's width one click scrolls:  most of it, so the last item seen stays in sight. */
 const PAGE_SHARE = 0.8
+
+/** Class word of a toolbar with no items:  its menu box takes no room. */
+const EMPTY = "empty"
+
+/** The bar's `icon` slot (and its box's class word and part). */
+const ICON = "icon"
+
+/** The bar's `title` slot. */
+const TITLE = "title"
+
+/** The bar's `center` slot:  the room left after the icon and title. */
+const CENTER = "center"
+
+/** The bar's `right` slot:  at the end. */
+const RIGHT = "right"
+
+/** A slot of the bar's layout around the items. */
+type BarSlot = typeof ICON | typeof TITLE | typeof CENTER | typeof RIGHT

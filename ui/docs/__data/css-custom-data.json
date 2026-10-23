@@ -9447,6 +9447,13 @@
       }
     },
     {
+      "name": "::part(center)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-toolbar>`:  The `center` slot's box."
+      }
+    },
+    {
       "name": "::part(checkbox)",
       "description": {
         "kind": "markdown",
@@ -9744,7 +9751,7 @@
       "name": "::part(icon)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-accordion>`:  The dropdown arrow in a title, turned down while the panel is open.\n- `<ui-button>`:  The icon box.\n- `<ui-divider>`:  The icon box.\n- `<ui-dropdown>`:  The caret.\n- `<ui-embed>`:  The icon over the placeholder.\n- `<ui-event>`:  The icon box of the `icon` shorthand.\n- `<ui-icon>`:  The glyph box holding the `<svg>`.\n- `<ui-input>`:  The icon box (the spinner while `loading`).\n- `<ui-item>`:  List / menu:  the icon box of the `icon` shorthand.\n- `<ui-label>`:  The icon box.\n- `<ui-message>`:  The icon box.\n- `<ui-panel>`:  The icon box.\n- `<ui-property-editor>`:  The icon box.\n- `<ui-property-group>`:  The icon box.\n- `<ui-rating>`:  One icon:  a `<label>` around its radio and glyph.\n- `<ui-search>`:  The icon box.\n- `<ui-section>`:  The icon box.\n- `<ui-step>`:  The icon box.\n- `<ui-tabs>`:  A tab's icon, from its pane's `icon`.\n- `<ui-toast>`:  The icon box."
+        "value": "Part of:\n\n- `<ui-accordion>`:  The dropdown arrow in a title, turned down while the panel is open.\n- `<ui-button>`:  The icon box.\n- `<ui-divider>`:  The icon box.\n- `<ui-dropdown>`:  The caret.\n- `<ui-embed>`:  The icon over the placeholder.\n- `<ui-event>`:  The icon box of the `icon` shorthand.\n- `<ui-icon>`:  The glyph box holding the `<svg>`.\n- `<ui-input>`:  The icon box (the spinner while `loading`).\n- `<ui-item>`:  List / menu:  the icon box of the `icon` shorthand.\n- `<ui-label>`:  The icon box.\n- `<ui-message>`:  The icon box.\n- `<ui-panel>`:  The icon box.\n- `<ui-property-editor>`:  The icon box.\n- `<ui-property-group>`:  The icon box.\n- `<ui-rating>`:  One icon:  a `<label>` around its radio and glyph.\n- `<ui-search>`:  The icon box.\n- `<ui-section>`:  The icon box.\n- `<ui-step>`:  The icon box.\n- `<ui-tabs>`:  A tab's icon, from its pane's `icon`.\n- `<ui-toast>`:  The icon box.\n- `<ui-toolbar>`:  The `icon` slot's box."
       }
     },
     {
@@ -10035,6 +10042,13 @@
       }
     },
     {
+      "name": "::part(right)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-toolbar>`:  The `right` slot's box."
+      }
+    },
+    {
       "name": "::part(root-node)",
       "description": {
         "kind": "markdown",
@@ -10227,7 +10241,7 @@
       "name": "::part(title)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-accordion>`:  A panel's `<summary class=\"title\">`:  the control that opens and closes it.\n- `<ui-calendar>`:  The title button:  goes up a level (days => months => years).\n- `<ui-panel>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-editor>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-group>`:  The title bar:  sticks with `sticky`.\n- `<ui-section>`:  The title bar:  sticks with `sticky`.\n- `<ui-step>`:  The `header` shorthand.\n- `<ui-title>`:  The title box."
+        "value": "Part of:\n\n- `<ui-accordion>`:  A panel's `<summary class=\"title\">`:  the control that opens and closes it.\n- `<ui-calendar>`:  The title button:  goes up a level (days => months => years).\n- `<ui-panel>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-editor>`:  The title bar:  sticks with `sticky`.\n- `<ui-property-group>`:  The title bar:  sticks with `sticky`.\n- `<ui-section>`:  The title bar:  sticks with `sticky`.\n- `<ui-step>`:  The `header` shorthand.\n- `<ui-title>`:  The title box.\n- `<ui-toolbar>`:  The `title` slot's box."
       }
     },
     {

@@ -2889,6 +2889,7 @@
         {"id":"examples-types-toolbar","title":"Toolbar","parent":0},
         {"id":"examples-types-segmented","title":"Segmented","parent":0},
         {"id":"examples-types-everything-fits","title":"Everything fits","parent":0},
+        {"id":"examples-types-top-bar","title":"Top bar","parent":0},
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
         {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},

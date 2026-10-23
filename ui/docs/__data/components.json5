@@ -25803,6 +25803,22 @@
         {
           "name": "",
           "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
+        },
+        {
+          "name": "icon",
+          "description": "First, at the start:  an icon or an icon button (a menu button)."
+        },
+        {
+          "name": "title",
+          "description": "After the icon:  the title, never squeezed."
+        },
+        {
+          "name": "center",
+          "description": "After the title, taking the room left:  e.g. a row of links."
+        },
+        {
+          "name": "right",
+          "description": "Last, pushed to the end:  e.g. search and settings."
         }
       ],
       "events": [
@@ -25817,6 +25833,22 @@
         {
           "name": "menu",
           "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+        },
+        {
+          "name": "icon",
+          "description": "The `icon` slot's box."
+        },
+        {
+          "name": "title",
+          "description": "The `title` slot's box."
+        },
+        {
+          "name": "center",
+          "description": "The `center` slot's box."
+        },
+        {
+          "name": "right",
+          "description": "The `right` slot's box."
         },
         {
           "name": "toolbar",

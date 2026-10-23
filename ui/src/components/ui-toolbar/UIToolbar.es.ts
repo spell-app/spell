@@ -12,5 +12,7 @@ export const toolbarEs = {
   name: "barra-herramientas",
   aka: ["barra de herramientas", "pestañas desplazables", "menú desplazable"],
   attributes: { pagination: "paginacion", borderless: "sin-borde", interactive: "interactivo" },
+  slots: { title: "titulo", center: "centro", right: "derecha" },
+  parts: { center: "centro", right: "derecha" },
   texts: { scrollStart: "Desplazar atrás", scrollEnd: "Desplazar adelante" }
 } as const satisfies E.TagDictionary

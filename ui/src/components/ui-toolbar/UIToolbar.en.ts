@@ -5,6 +5,7 @@
  *   so an attribute the menu gains reaches the toolbar with no change here.
  * - Its own:  the `toolbar` box around the menu, the two scroll buttons (`scroll-start`, `scroll-end`) and their
  *   names.
+ * - Its slots, a bar's layout:  `icon`, `title`, `center` and `right` around the items (the default slot).
  * - The same noun (`menu`):  its items draw as a menu's, and `UIMenu.css` styles it.
  */
 
@@ -25,8 +26,19 @@ export const toolbarVocabulary = {
   description:
     "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end " +
     "while there's more to see that way.  It takes every `<ui-menu>` attribute.",
+  slots: [
+    ...menuVocabulary.slots,
+    { name: "icon", description: "First, at the start:  an icon or an icon button (a menu button)." },
+    { name: "title", description: "After the icon:  the title, never squeezed." },
+    { name: "center", description: "After the title, taking the room left:  e.g. a row of links." },
+    { name: "right", description: "Last, pushed to the end:  e.g. search and settings." }
+  ],
   parts: [
     ...menuVocabulary.parts,
+    { name: "icon", description: "The `icon` slot's box." },
+    { name: "title", description: "The `title` slot's box." },
+    { name: "center", description: "The `center` slot's box." },
+    { name: "right", description: "The `right` slot's box." },
     { name: "toolbar", description: "The box around the menu and its scroll buttons." },
     { name: "scroll-start", description: "The `‹` button, shown while there's more to scroll back to." },
     { name: "scroll-end", description: "The `›` button, shown while there's more to scroll on to." }
