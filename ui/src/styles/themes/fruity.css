@@ -170,6 +170,13 @@
     --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.9), rgb(30 28 38 / 0.9));
     --ui-bar-panel-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
     --ui-bar-rest-filter: var(--fruity-blur);
+    /*
+     * what a page lays under the bars at its top (the docs site's stuck title line, the strip round its tabs):  the
+     * wallpaper itself, fixed, so they read as the page (Owen, 2026-10-23:  "duplicate the site background color in under
+     * the top stuff, so it doesn't have to go to white")
+     */
+    --ui-bar-wallpaper: var(--fruity-wallpaper);
+    --ui-bar-wallpaper-color: var(--ui-background);
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;
     --ui-bar-track: light-dark(#e9e9ee, #3a3846);

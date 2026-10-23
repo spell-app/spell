@@ -23,7 +23,7 @@
     --site-gutter: 3em;
     --site-aside-width: 280px;
     /* The narrow screens' top bar (`.site-topbar`). */
-    --site-topbar-height: 52px;
+    --site-topbar-height: 44px;
     /*
      * What sticks to the top of the viewport above everything else:  nothing on wide screens (the site header is
      * docked in the right column), the top bar on narrower ones (set below).
@@ -182,54 +182,6 @@
     align-items: center;
     height: auto;
   }
-  /*
-   * the PAGE'S TITLE in the bar (`SiteSections.titleInBar()`):  once the masthead's title scrolls under the bar
-   * (`:root.site-title-away`), the bar shows it in place of the brand, the page's own buttons (bug, the original page)
-   * before search;  the bar and nothing else, no second element over the page (Owen, 2026-10-23:  "just re-use the
-   * existing top bar")
-   */
-  .site-topbar-page,
-  .site-topbar-page-tools {
-    display: none;
-  }
-  :root.site-title-away .site-topbar-brand {
-    display: none;
-  }
-  :root.site-title-away .site-topbar-page {
-    display: block;
-    margin-inline-end: 0.5em;
-    overflow: hidden;
-    font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--ui-text-dark);
-  }
-  :root.site-title-away .site-topbar-page-tools {
-    display: flex;
-    align-self: center;
-    align-items: center;
-  }
-  /* the copy of the page's links:  centred in the bar, as the masthead's are on the title's line */
-  .site-topbar-page-tools > .site-page-links {
-    display: flex;
-    align-items: center;
-  }
-  /* inside the bar (a menu itself) the links draw as a sub-menu's, which tops their icons:  each a centred box again */
-  .site-topbar-page-tools > .site-page-links > ui-item::part(item) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25em;
-    height: 2.25em;
-    padding: 0;
-  }
-  /* phones:  no room for the site's tabs beside the page's title and buttons, so they make way while it's there */
-  @media (--ui-mobile) {
-    :root.site-title-away .site-topbar-links {
-      display: none;
-    }
-  }
   /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
   .site-topbar-brand {
     font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
@@ -248,29 +200,6 @@
     /* and their slots' boxes, so no gap is left where they were */
     .site-topbar::part(icon),
     .site-topbar::part(title) {
-      display: none;
-    }
-    /* the page's title still shows, once it has scrolled up into the bar */
-    :root.site-title-away .site-topbar::part(title) {
-      display: flex;
-    }
-  }
-  /*
-   * wide screens have no bar at rest (the site's header is in the right column):  it comes in once the page's title
-   * scrolls away, holding that title and the page's buttons only, and the sticky lines below move down for it
-   */
-  @media (--ui-large-monitor) {
-    :root.site-title-away {
-      --site-top: var(--site-topbar-height);
-    }
-    /* over the page column, fixed:  in the page's flow it would push the page down as it came, and back as it went */
-    :root.site-title-away .site-topbar {
-      position: fixed;
-      inset-inline: var(--site-nav-width) var(--site-aside-width);
-      display: flex;
-    }
-    :root.site-title-away .site-topbar-links,
-    :root.site-title-away .site-topbar-themes {
       display: none;
     }
   }
@@ -396,7 +325,48 @@
     --ui-header-margin-bottom: 0;
     display: block;
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 1;
+  }
+  /*
+   * the TITLE LINE sticks under the top bar for the whole page, and everything scrolls under it (Owen, 2026-10-23:
+   * "leave just the top header line, content goes below it"):  the subhead moved out below it
+   * (`SiteSections.splitSubtitle()`), and the sticky lines below start under it (`--site-head-height`)
+   * - at the top of the page it's see-through over the page, as the top bar is;  it fills in over the first 32px of
+   *   scrolling, with the bar's glass (a scroll-driven animation;  without one, it stays filled)
+   */
+  /* on the segment's own box:  the element is `display: contents`, so the box's parent is the page column */
+  .site-main > .site-masthead::part(segment) {
+    position: sticky;
+    top: var(--site-top);
+    /* over the sticky tabs (+2) and titles;  under the top bar's flyout and menus */
+    z-index: calc(var(--ui-z-sticky) + 3);
+    /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`);  else the bar's glass */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-bar-background, var(--ui-background)));
+    background-image: var(--ui-bar-wallpaper, none);
+    background-attachment: fixed;
+    backdrop-filter: var(--ui-bar-filter, none);
+  }
+  @supports (animation-timeline: scroll()) {
+    .site-masthead::part(segment) {
+      animation: site-masthead-fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 32px;
+    }
+  }
+  @keyframes site-masthead-fill {
+    from {
+      background-color: transparent;
+      backdrop-filter: none;
+    }
+  }
+  /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
+  .site-subtitle {
+    margin: 0 var(--site-gutter);
+    padding-block-end: 0.25em;
+    font-family: var(--ui-font-family-heading);
+    font-size: 1.34em;
+    line-height: 1.2;
+    color: var(--ui-text-muted);
   }
   /* the icon row:  every button the same 2.25em box, centred on the title's first line */
   .site-masthead .site-page-links,
@@ -593,7 +563,7 @@
   .site-tabs::part(menu) {
     position: sticky;
     /* the panel's top edge a gap below the top bar */
-    top: calc(var(--site-top) + var(--site-tabs-gap) + var(--site-tabs-band));
+    top: calc(var(--site-top) + var(--site-head-height, 0px) + var(--site-tabs-gap) + var(--site-tabs-band));
     /* above the section toolbar, whose box draws the panel behind it */
     z-index: calc(var(--ui-z-sticky) + 2);
     margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));

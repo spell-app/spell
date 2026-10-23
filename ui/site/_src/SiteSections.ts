@@ -70,14 +70,7 @@ export class SiteSections {
     for (const type of ["wheel", "touchstart", "keydown", "pointerdown"])
       window.addEventListener(type, () => (this.hasReaderMoved = true), { capture: true, passive: true })
     window.addEventListener("resize", () => this.measure(), { passive: true })
-    window.addEventListener(
-      "scroll",
-      () => {
-        this.followTitle()
-        this.markTabsStuck()
-      },
-      { passive: true }
-    )
+    window.addEventListener("scroll", () => this.markTabsStuck(), { passive: true })
   }
 
   /**
@@ -130,7 +123,7 @@ export class SiteSections {
   show(main: HTMLElement, { isFirst = false }: { isFirst?: boolean } = {}): void {
     this.main = main
     this.restoreFolds(main, { isInstant: !isFirst })
-    this.titleInBar(main)
+    SiteSections.splitSubtitle(main)
     this.measure()
     TocIndex.whenReady(main, () => {
       if (this.main !== main) return
@@ -138,19 +131,28 @@ export class SiteSections {
       this.resized.disconnect()
       const bar = SiteSections.barOf(main)
       if (bar) this.resized.observe(bar)
+      // and the page header's title line, which grows as its tools (Send, the bullhorn) arrive
+      const head = SiteSections.headOf(main)
+      if (head) this.resized.observe(head)
     })
   }
 
   /**
    * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bar:
-   * `--site-top`, plus the tabs' bar and its band above and below when the page has tabs.
+   * `--site-top`, plus the masthead's title line (its height on `main` as `--site-head-height`), plus the tabs' bar and
+   * its band above and below when the page has tabs.
    */
   private measure(): void {
     const main = this.main
     if (!main?.isConnected) return
     const style = getComputedStyle(main)
     const lengthOf = (name: string) => parseFloat(style.getPropertyValue(name)) || 0
-    const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
+    // the masthead's title line sticks under the site top:  everything else sticks under it
+    const head = SiteSections.headOf(main)
+    const headHeight = Math.round(head?.getBoundingClientRect().height ?? 0)
+    const headValue = `${headHeight}px`
+    if (main.style.getPropertyValue(HEAD_HEIGHT) !== headValue) main.style.setProperty(HEAD_HEIGHT, headValue)
+    const siteTop = (parseFloat(getComputedStyle(this.probe).top) || 0) + headHeight
     const bar = SiteSections.barOf(main)
     const band = lengthOf("--site-tabs-band")
     const gap = lengthOf("--site-tabs-gap")
@@ -179,55 +181,26 @@ export class SiteSections {
   }
 
   /**
-   * The page's title moves into the TOP BAR once it scrolls under it (Owen, 2026-10-23, epic `debut`:  "shouldn't need
-   * an extra element for this, just re-use the existing top bar"):  the bar shows the title in place of the brand, and
-   * the page's own buttons (report a bug, the original page) beside its search (`site.css`, "Top bar").
-   * - the bar's two spots for them are in the layout (`.site-topbar-page`, `.site-topbar-page-tools`):  this fills them
-   *   with the page's title text and a copy of its buttons;  none without a masthead title
-   * - `<html>` gets `site-title-away` once the title's top passes under the bar (`followTitle()`, on every scroll);
-   *   on wide screens, which have no bar at rest, the bar comes in then, over the page column, and the offsets follow
-   *   it (`measure()`)
-   * - SIDE EFFECT:  the bar's two spots filled
+   * The masthead's TITLE LINE sticks under the top bar, and the rest of the page scrolls under it (Owen, 2026-10-23,
+   * epic `debut`:  "leave just the top header line, content goes below it";  before, the title moved into the top bar
+   * once it scrolled away):  the title, its icon buttons, Send and the bullhorn stay;  the subhead scrolls on.
+   * - The subhead is written inside the title (`<ui-header level="1">Title <ui-header>Subhead</ui-header>`):  this takes
+   *   it out, into a paragraph right after the masthead (`.site-subtitle`), so the masthead holds the line alone and
+   *   sticks for the whole page (`site.css`, "The page header")
+   * - its words as written (links, code ...) move, not a copy;  `data-spell-added`, as the runtime's own boxes are
+   * - SIDE EFFECT:  `main`'s DOM;  once per page (a page shown again is a fresh `main`)
    */
-  private titleInBar(main: HTMLElement): void {
-    this.pageTitle = undefined
-    document.documentElement.classList.remove(TITLE_AWAY)
-    const title = main.querySelector<HTMLElement>(MASTHEAD_TITLE)
-    const spot = document.querySelector<HTMLElement>(BAR_TITLE)
-    const tools = document.querySelector<HTMLElement>(BAR_TOOLS)
-    if (spot) spot.textContent = ""
-    tools?.replaceChildren()
-    if (!title || !spot) return
-    spot.textContent = [...title.childNodes]
-      .filter((node) => node.nodeType === Node.TEXT_NODE)
-      .map((node) => node.textContent)
-      .join("")
-      .trim()
-    const links = main.querySelector(PAGE_LINKS)
-    if (links && tools) tools.append(links.cloneNode(true))
-    this.pageTitle = title
-    this.followTitle()
+  private static splitSubtitle(main: HTMLElement): void {
+    const subhead = main.querySelector<HTMLElement>(MASTHEAD_SUBHEAD)
+    const masthead = subhead?.closest<HTMLElement>(MASTHEAD)
+    if (!subhead || !masthead) return
+    const subtitle = document.createElement("p")
+    subtitle.className = SUBTITLE_CLASS
+    subtitle.dataset.spellAdded = ""
+    subtitle.append(...subhead.childNodes)
+    subhead.remove()
+    masthead.after(subtitle)
   }
-
-  /**
-   * `<html>`'s `site-title-away`:  on once the masthead's title has scrolled under the top bar's line, off once it's back
-   * (`titleInBar()`);  the offsets follow (`measure()`).
-   * - The line is the bar's height whether the bar shows or not:  wide screens show it only while away, over the page
-   *   (fixed, `site.css`), so the title doesn't move as it comes and goes.
-   */
-  private followTitle(): void {
-    const title = this.pageTitle
-    if (!title?.isConnected) return
-    const root = document.documentElement
-    const barTop = parseFloat(getComputedStyle(root).getPropertyValue(BAR_HEIGHT)) || 0
-    const isAway = title.getBoundingClientRect().top < barTop
-    if (root.classList.contains(TITLE_AWAY) === isAway) return
-    root.classList.toggle(TITLE_AWAY, isAway)
-    this.measure()
-  }
-
-  /** The masthead's title the top bar copies (`titleInBar()`), watched on every scroll (`followTitle()`). */
-  private pageTitle?: HTMLElement
 
   ////////////////
   // ## Folds
@@ -414,6 +387,14 @@ export class SiteSections {
   }
 
   /**
+   * The page header's box, whose title line sticks (`splitSubtitle()`):  its segment's, as the element itself has none
+   * and the tools laid over it (Send) may reach past it.
+   */
+  private static headOf(main: HTMLElement): HTMLElement | undefined {
+    return main.querySelector(MASTHEAD)?.shadowRoot?.querySelector<HTMLElement>('[part~="segment"]') ?? undefined
+  }
+
+  /**
    * Height of `element`'s box, px.
    * - A box-less element (`display: contents`, as `<ui-sticky>` and many `ui-*` elements are):
    *   the tallest box in its shadow root, else among its children, looking through box-less ones the same way.
@@ -534,17 +515,17 @@ const PAGE_BAR = "ui-sticky.site-sticky-bar"
 /** A page bar that is the tabs' panel's lower half:  the section toolbar in a tab's pane (spell-epic's). */
 const JOINED_BAR = "ui-tabs ui-sticky.spell-site-toolbar"
 
-/** The masthead's title, which the top bar shows once it scrolls away (`titleInBar()`). */
-const MASTHEAD_TITLE = ".site-masthead .site-title"
+/** The page header, whose title line sticks under the top bar (`splitSubtitle()`, `measure()`). */
+const MASTHEAD = ".site-masthead"
 
-/** The top bar's spot for the page's title (`titleInBar()`, the layout's top bar). */
-const BAR_TITLE = ".site-topbar-page"
+/** The subhead written inside the masthead's title, moved out below it (`splitSubtitle()`). */
+const MASTHEAD_SUBHEAD = ".site-masthead .site-title > ui-header"
 
-/** The top bar's spot for the page's own buttons (`titleInBar()`). */
-const BAR_TOOLS = ".site-topbar-page-tools"
+/** The paragraph the subhead's words move into (`site.css`). */
+const SUBTITLE_CLASS = "site-subtitle"
 
-/** `:root`'s custom property:  the top bar's height, the line the title is away at (`site.css`). */
-const BAR_HEIGHT = "--site-topbar-height"
+/** `main`'s custom property:  the masthead's stuck height, px, the sticky lines below it start under (`measure()`). */
+const HEAD_HEIGHT = "--site-head-height"
 
 /** `main`'s class while the tabs' bar is stuck (`markTabsStuck()`). */
 const TABS_STUCK = "site-tabs-stuck"
@@ -554,12 +535,6 @@ const TABS_LEAVE = "--site-tabs-leave"
 
 /** `main`'s custom property:  the tabs' track height, px, for the panel the section toolbar draws behind it. */
 const TABS_TRACK = "--site-tabs-track"
-
-/** The masthead's icon links (report a bug, the original page), copied into the top bar (`titleInBar()`). */
-const PAGE_LINKS = ".site-masthead .site-page-links"
-
-/** `<html>`'s class while the masthead's title is scrolled away:  the top bar shows it (`titleInBar()`). */
-const TITLE_AWAY = "site-title-away"
 
 /** What can't be a page section:  a demo inside an example, a template. */
 const NOT_PAGE = "ui-docs-example, template"
