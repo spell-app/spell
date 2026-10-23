@@ -44,12 +44,12 @@ Names people choose keep their accents.
 | where | `donde` |
 | whose | `(cuyo|cuya|cuyos|cuyas)` |
 | which / that | `que` |
-| its | `(su|sus)` |
+| its | `(su|sus)`:  a plural name says `sus ... son`, `- sus "comodines" son sí o no` (`su "x" es` too) |
 | it (the subject) | left out:  Spanish drops it (`subject_implied`;  before `es` / `está` / `puede` in an expression, `implied_it`:  `si es un trébol`);  where a word is needed, `(él|el|ella)` is NOT used |
 | if | `si` |
 | then | `entonces` |
 | else / otherwise | `(si no|sino|de lo contrario)` |
-| otherwise it is | `de lo contrario es` |
+| otherwise it is | `de lo contrario es`:  the other value, never a comparison, in a getter's line and inside an expression alike, `"↑" si está boca arriba de lo contrario es "↓"` |
 | true / false | `verdadero` / `falso` |
 | yes / no | `(sí|si)` / `no` |
 | ok / cancel | `(aceptar|ok)` / `cancelar` |
@@ -99,7 +99,7 @@ Names people choose keep their accents.
 | wait for / pause for N seconds | `esperar (a)?` / `pausar N segundos` |
 | start / stop / end / finish / cancel | `iniciar` / `detener` / `terminar` / `terminar` / `cancelar` |
 | test / expect that / should be | `probar` (`para probar ...`) / `esperar que` / `(debería|deberia) ser` |
-| on (an event) / trigger / fire | `al` / `(disparar|lanzar)` |
+| on (an event) / trigger / fire | `al` / `(disparar|lanzar)`;  an event's name may hold `en`, `de`, `del`, `sobre` between its words, ending at `con`:  `al clic en carta con una carta`, `disparar evento clic en carta con carta = eso` |
 | create a X | `crear (un|una) X` |
 | a new X with p = v | `(un nuevo|una nueva) X con p = v` |
 | to create it (what runs as it's made) | `para crearlo` (`crearla`, `crear eso`), or `para crear un mazo` -- the `create()` hook (`create_method`) |

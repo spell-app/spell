@@ -1325,7 +1325,14 @@
         },
         {
           "className": "Synonyms",
-          "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
+          "ruleNames": [
+            "indefinite_article",
+            "definite_article",
+            "is_or_are",
+            "has_or_belongs",
+            "event_name_link",
+            "receiver_of"
+          ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
           "line": 14,
@@ -1342,6 +1349,9 @@
             },
             {
               "syntax": "(tiene|pertenece)/i"
+            },
+            {
+              "syntax": "(en|de|del|sobre)"
             },
             {
               "syntax": "(de|del)"
@@ -4327,7 +4337,7 @@
               "syntax": "{type:subject_it} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} es {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
               "syntax": "{type:subject_implied} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
@@ -4339,7 +4349,7 @@
               "syntax": "{type:subject_implied} {property:body_member_words} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} es {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_its} {property:member_words} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -4569,10 +4579,10 @@
               }
             },
             {
-              "syntax": "{type:subject_its} {property:quoted_member} es :? {expression_body}?"
+              "syntax": "{type:subject_its} {property:quoted_member} (es|son) :? {expression_body}?"
             },
             {
-              "syntax": "{type:subject_its} {property:member_words} es :? {expression_body}?"
+              "syntax": "{type:subject_its} {property:member_words} (es|son) :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_implied} {property:quoted_member} (es|son) :? {expression_body}?"
@@ -5810,7 +5820,7 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 13,
+          "line": 17,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -5903,11 +5913,11 @@
           "ruleNames": ["backwards_if"],
           "internal": false,
           "file": "src/spell/rules/if/BackwardsIf.ts",
-          "line": 14,
+          "line": 16,
           "purpose": "Postfix ternary, `{expr} if {condition} (else|otherwise) {expr}`.",
           "syntaxes": [
             {
-              "syntax": "si {operator:expression} (si no|sino|de lo contrario) {expression}",
+              "syntax": "si {operator:expression} (si no|sino|de lo contrario) es? {expression}",
               "example": "imprimir 1 si bar si no 2",
               "outputs": {
                 "js": {

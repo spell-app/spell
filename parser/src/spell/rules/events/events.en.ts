@@ -6,10 +6,15 @@
  */
 import { P } from "spell-lang/parser"
 
+import { Synonyms } from "spell-lang/spell/rules/expressions"
+
 import { events } from "./events.parser"
 import { EventWords } from "./EventWords"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
+
+// a word that may link two words of an event's name -- `on` is a plain word in English already (`card click on table`)
+events.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "on" })
 
 events.addRule(EventWords)
 

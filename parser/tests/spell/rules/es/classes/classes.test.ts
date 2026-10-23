@@ -88,6 +88,18 @@ describe("testing spell module classes, in Spanish", () => {
       expect(errors).toEqual([])
     })
 
+    test('a plural name:  `- sus "comodines" son sí o no`, and a getter\'s `- sus "nombres" son ...` (epic `spanish` I10)', () => {
+      const { code, errors } = compiled("outline-plural", [
+        "un mazo es una cosa donde:",
+        '\t- sus "comodines" son sí o no',
+        '\t- su "palo" es uno de tréboles o espadas',
+        '\t- sus "nombres" son "a" + "b"'
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain('this.declareProp("comodines", { type: "choice" })')
+      expect(code).toContain("get nombres() {")
+    })
+
     test("a property's rules:  `, que no debe estar vacío`, and indented under it", () => {
       const { code, errors } = compiled("outline-rules", [
         "una person es una cosa donde:",

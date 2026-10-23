@@ -215,7 +215,7 @@ _if_.addRule(Else, {
 })
 
 _if_.addRule(BackwardsIf, {
-  syntax: "if {operator:expression} (else|otherwise) {expression}",
+  syntax: "if {operator:expression} (else|otherwise) (it is)? {expression}",
   tests: [
     {
       title: "correctly matches single-line backwards_if statements",
@@ -237,6 +237,11 @@ _if_.addRule(BackwardsIf, {
         {
           input: `set color to "red" if 1 + 1 else "black"`,
           js: 'export const color = 1 + 1 ? "red" : "black"'
+        },
+        {
+          title: "`otherwise it is X` is the other value, never a comparison with it (epic `spanish` I8)",
+          input: `set color to "red" if bar otherwise it is "black"`,
+          js: 'export const color = bar ? "red" : "black"'
         }
       ]
     }

@@ -38,7 +38,13 @@ const PAIRS: Array<[singular: string, plural: string]> = [
   ["cosa", "cosas"],
   ["fecha", "fechas"],
   ["pan", "panes"],
-  ["mes", "meses"]
+  ["mes", "meses"],
+  // a singular ending in -se, not -s (epic `spanish` I9:  `las bases` read as `bas`)
+  ["base", "bases"],
+  ["clase", "clases"],
+  ["frase", "frases"],
+  ["autobús", "autobuses"],
+  ["compás", "compases"]
 ]
 
 describe("Spanish's inflector", () => {
