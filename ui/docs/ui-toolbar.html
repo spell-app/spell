@@ -97,6 +97,20 @@
                   </ui-toolbar>
                 </ui-docs-example>
               </ui-section>
+              <ui-section id="examples-types-top-bar" label="Top bar" sticky collapsible dividing>
+                <ui-docs-example
+                  description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room."
+                >
+                  <ui-toolbar secondary aria-label="App">
+                    <ui-button slot="icon" basic circular icon="bars" aria-label="Menu" title="Menu"></ui-button>
+                    <b slot="title">Spell UI</b>
+                    <ui-item href="#guides" selected>Guides</ui-item>
+                    <ui-item href="#components">Components</ui-item>
+                    <ui-item href="#themes">Themes</ui-item>
+                    <ui-button slot="right" basic circular icon="search" aria-label="Search" title="Search"></ui-button>
+                  </ui-toolbar>
+                </ui-docs-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 

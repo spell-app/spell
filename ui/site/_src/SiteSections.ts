@@ -85,6 +85,7 @@ export class SiteSections {
   show(main: HTMLElement, { isFirst = false }: { isFirst?: boolean } = {}): void {
     this.main = main
     this.restoreFolds(main, { isInstant: !isFirst })
+    this.stickTitle(main)
     this.measure()
     TocIndex.whenReady(main, () => {
       if (this.main !== main) return
@@ -102,16 +103,24 @@ export class SiteSections {
   private measure(): void {
     const main = this.main
     if (!main?.isConnected) return
-    const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
+    const style = getComputedStyle(main)
+    const lengthOf = (name: string) => parseFloat(style.getPropertyValue(name)) || 0
+    // the page's title, stuck under the top bar while the masthead's is scrolled away
+    const siteTop = (parseFloat(getComputedStyle(this.probe).top) || 0) + lengthOf(TITLE_HEIGHT)
     const bar = SiteSections.barOf(main)
-    const band = parseFloat(getComputedStyle(main).getPropertyValue("--site-tabs-band")) || 0
-    // the bar sticks a band below the site top, its band below it too
-    let top = siteTop + (bar ? band + bar.getBoundingClientRect().height + band : 0)
-    // a page's own sticky bar (the kitchen sink's theme picker):  stuck below that, the titles below it
+    const band = lengthOf("--site-tabs-band")
+    const gap = lengthOf("--site-tabs-gap")
+    // the panel round the tabs:  a gap below the site top, its band, the track;  its band and a gap below it
+    const trackBottom = siteTop + gap + band + (bar?.getBoundingClientRect().height ?? 0)
+    let top = bar ? trackBottom + band + gap : siteTop
+    // a page's own sticky bar:  the section toolbar under the tabs is the panel's lower half, stuck right under the
+    // track;  another (the kitchen sink's theme picker) below the panel;  the titles below either
     const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
     if (pageBar) {
-      SiteSections.setOffset(pageBar, String(Math.round(top)))
-      top += SiteSections.heightOf(pageBar)
+      const isJoined = !!bar && pageBar.matches(JOINED_BAR)
+      const at = isJoined ? trackBottom : top
+      SiteSections.setOffset(pageBar, String(Math.round(at)))
+      top = at + SiteSections.heightOf(pageBar) + (isJoined ? gap : 0)
     }
     this.top = Math.round(top)
     const value = `${this.top}px`
@@ -119,6 +128,56 @@ export class SiteSections {
     const offset = String(this.top)
     for (const section of SiteSections.topSections(main)) SiteSections.setOffset(section, offset)
   }
+
+  /**
+   * The page's title sticks (Owen, 2026-10-23, epic `debut`:  "Breadcrumb title isn't sticky"):  a compact bar under
+   * the top bar, showing while the masthead's title is scrolled away (`site.css`, `.site-page-title`).
+   * - the line goes first in the column (`.site-body`), the masthead's title text in it;  none without a masthead title
+   * - `main` gets `site-title-away` while it shows, which makes room for it in every offset below (`measure()`)
+   * - SIDE EFFECT:  the line in `main`;  one `IntersectionObserver` on the masthead's title, replaced per page
+   */
+  private stickTitle(main: HTMLElement): void {
+    this.titleWatch?.disconnect()
+    const title = main.querySelector<HTMLElement>(MASTHEAD_TITLE)
+    const column = main.querySelector<HTMLElement>(".site-body")
+    if (!title || !column) return
+    const words = [...title.childNodes]
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent)
+      .join("")
+      .trim()
+    let line = column.querySelector<HTMLElement>(`:scope > .${PAGE_TITLE}`)
+    if (!line) {
+      line = document.createElement("div")
+      line.className = PAGE_TITLE
+      line.setAttribute("aria-hidden", "true")
+      line.append(document.createElement("span"))
+      column.prepend(line)
+    }
+    line.firstElementChild!.textContent = words
+    // the title's host draws no box of its own (`display: contents`):  a marker of no height just after it is watched
+    let marker = title.nextElementSibling
+    if (!marker?.classList.contains(TITLE_MARKER)) {
+      marker = document.createElement("div")
+      marker.className = TITLE_MARKER
+      marker.setAttribute("aria-hidden", "true")
+      title.after(marker)
+    }
+    const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
+    this.titleWatch = new IntersectionObserver(
+      ([entry]) => {
+        const isAway = !entry.isIntersecting && entry.boundingClientRect.bottom <= siteTop + 1
+        if (main.classList.contains(TITLE_AWAY) === isAway) return
+        main.classList.toggle(TITLE_AWAY, isAway)
+        this.measure()
+      },
+      { rootMargin: `-${Math.round(siteTop)}px 0px 0px 0px` }
+    )
+    this.titleWatch.observe(marker)
+  }
+
+  /** Watches the masthead's title, for the stuck page title (`stickTitle()`). */
+  private titleWatch?: IntersectionObserver
 
   ////////////////
   // ## Folds
@@ -415,6 +474,24 @@ const API_WAIT_MS = 5000
  * - One per page.
  */
 const PAGE_BAR = "ui-sticky.site-sticky-bar"
+
+/** A page bar that is the tabs' panel's lower half:  the section toolbar in a tab's pane (spell-epic's). */
+const JOINED_BAR = "ui-tabs ui-sticky.spell-site-toolbar"
+
+/** `main`'s custom property:  the stuck page title's height while it shows (`site.css`), else none. */
+const TITLE_HEIGHT = "--site-page-title-height"
+
+/** The masthead's title, which the stuck page title copies (`stickTitle()`). */
+const MASTHEAD_TITLE = ".site-masthead .site-title"
+
+/** The stuck page title's line, first in the column (`site.css`). */
+const PAGE_TITLE = "site-page-title"
+
+/** A marker of no height just after the masthead's title, which `stickTitle()` watches (`site.css`). */
+const TITLE_MARKER = "site-title-marker"
+
+/** `main`'s class while the masthead's title is scrolled away:  the stuck page title shows. */
+const TITLE_AWAY = "site-title-away"
 
 /** What can't be a page section:  a demo inside an example, a template. */
 const NOT_PAGE = "ui-docs-example, template"

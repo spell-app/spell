@@ -28298,7 +28298,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default\n\n**Events:**  `ui-select`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-select`"
       },
       "attributes": [
         {

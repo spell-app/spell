@@ -40,6 +40,32 @@
     min-width: 0;
   }
 
+  /*
+   * A bar's slots around the items:  the icon and title at their own width, the center taking the room left,
+   * the right pushed to the end;  with no items, the menu's box takes no room
+   */
+  .ui.toolbar > :is(.icon, .title, .center, .right) {
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-toolbar-gap);
+    min-width: 0;
+  }
+  .ui.toolbar > :is(.icon, .title, .right) {
+    flex: none;
+  }
+  .ui.toolbar > .title {
+    white-space: nowrap;
+  }
+  .ui.toolbar > .center {
+    flex: 1 1 auto;
+  }
+  .ui.toolbar > .right {
+    margin-inline-start: auto;
+  }
+  .ui.toolbar.empty > .ui.menu {
+    display: none;
+  }
+
   /* the menu's own box scrolls:  its items on one line, never shrunk */
   .ui.toolbar > .ui.menu {
     --_ui-menu-item-flex: 0 0 auto;

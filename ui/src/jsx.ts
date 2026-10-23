@@ -28585,6 +28585,10 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `icon`:  First, at the start:  an icon or an icon button (a menu button).
+       *   - `title`:  After the icon:  the title, never squeezed.
+       *   - `center`:  After the title, taking the room left:  e.g. a row of links.
+       *   - `right`:  Last, pushed to the end:  e.g. search and settings.
        * - events:  `ui-select`
        */
       "ui-toolbar": UIToolbarJSXAttributes
