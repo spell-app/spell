@@ -439,7 +439,7 @@ ui-sticky.spell-site-toolbar::part(sticky) {
 ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   margin-block: 0 var(--site-tabs-gap, 10px);
   /* as wide as the tabs' half:  its band out past the column, the track in it */
-  margin-inline: calc(-1 * var(--site-tabs-band, 8px));
+  margin-inline: calc(var(--site-tabs-inset, 0px) - var(--site-tabs-band, 8px));
   /* the gap between the rows above the track;  the toolbar's own box draws the band round it (below) */
   padding: var(--site-tabs-band, 8px) var(--site-tabs-band, 8px) 0;
   /* the panel is drawn behind it (`::before`) and by the toolbar, so this box only places the track */
@@ -511,7 +511,8 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
   content: "";
   position: absolute;
   inset: calc(-1 * (var(--_panel-up) + var(--site-tabs-gap, 10px)))
-    calc(var(--site-tabs-band, 8px) - var(--site-gutter, 3em)) calc(-1 * var(--site-tabs-gap, 10px));
+    calc(var(--site-tabs-band, 8px) - var(--site-tabs-inset, 0px) - var(--site-gutter, 3em))
+    calc(-1 * var(--site-tabs-gap, 10px));
   z-index: -2;
   /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`, Owen:  "so it doesn't
      have to go to white");  else the stuck titles' colour */
