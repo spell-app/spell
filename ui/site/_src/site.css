@@ -561,9 +561,17 @@
     background-color: var(--ui-bar-rest-background, transparent);
     backdrop-filter: var(--ui-bar-rest-filter, none);
   }
-  /* a section's first nested title, in place, a little below its own (Owen:  "No space between types/breadcrumb") */
-  .site-main ui-section > ui-section[sticky]:first-of-type::part(title) {
-    margin-block-start: 0.5em;
+  /*
+   * a section's first nested title sits right under its own, open:  no gap (Owen, 2026-10-23:  "No space between
+   * header and first section when expanded";  a 0.5em gap here read his earlier "No space between types/breadcrumb"
+   * as a complaint, when it was the ask)
+   */
+  .site-main ui-section > ui-section[sticky]:first-of-type::part(section) {
+    margin-block-start: 0;
+  }
+  /* ... nor the parent body's own top padding, when that nested section is the first thing in it */
+  .site-main ui-section[sticky]:has(> ui-section[sticky]:not(:not([slot]) ~ *))::part(content) {
+    padding-block-start: 0;
   }
   /*
    * a FOLDED section keeps no space below its title:  the next title sits right under it, as a list of folded rows
