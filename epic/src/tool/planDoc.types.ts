@@ -540,6 +540,8 @@ export type KeptNote = {
   when?: string
   /** when he marked it (ISO), else now */
   at?: string
+  /** a test run's screenshot with it (from the epic page's folder), shown under his words */
+  shot?: string
 }
 
 ////////////////

@@ -47,8 +47,18 @@ export const epicTestRunVocabulary = {
   slots: [],
   parts: [
     { name: "base", description: "The run:  its head, the progress bar, then the card." },
-    { name: "head", description: 'Its head:  "Testing", "4 of 9", and Done testing.' },
-    { name: "progress", description: "The thin bar under the head:  how many tests are answered (`<ui-progress>`)." },
+    {
+      name: "head",
+      description:
+        'Its head:  "Testing", "4 of 9", and Done testing;  with the bar under it, a full-width band, sticky under ' +
+        "the page's header."
+    },
+    {
+      name: "progress",
+      description:
+        'The thin bar under the head:  where the run is, as "4 of 9" says;  how many are answered, its tooltip ' +
+        "(`<ui-progress>`)."
+    },
     { name: "card", description: "The current test's card, or the summary's." },
     {
       name: "answers",
@@ -62,9 +72,11 @@ export const epicTestRunVocabulary = {
     },
     {
       name: "failure",
-      description: "Under the comment once Failed:  the screenshot's paste and drop area."
+      description:
+        "Under the comment on every card:  the screenshot's area (paste, drop or choose one), going with whichever " +
+        "answer is picked;  its part name from when only Failed had it."
     },
-    { name: "moves", description: "Back and Next, at the card's foot." },
+    { name: "moves", description: "Back and Next:  a full-width band of their own, pinned to the window's bottom." },
     {
       name: "summary",
       description: "The summary card:  the counts, the tests commented on, Send results, the next epic."

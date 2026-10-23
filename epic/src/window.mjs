@@ -384,6 +384,9 @@ export class Window {
    *   written when missing (`ensureRepoWindow()`)
    * - a worktree's window (`<windowsFolder>/ongoing/`):  its `files.exclude`, and the content folder when it lacks it,
    *   a folder that's gone (an old content folder) dropped (`withContentFolder()`)
+   *   - a worktree-only window (`windows.worktreeOnly`):  the main checkout's folder dropped too, as a new one never has
+   *     it (Owen, 2026-10-22:  Quick Open listed every file twice, the main checkout's beside the worktree's:  the
+   *     `.spell-main` hiding works in the Explorer only)
    * - an existing file VS Code can't read as JSON (comments) is left alone
    * - NOTE:  a package window that changes folders while open re-reads its workspace;  its Claude panel may reload
    */
@@ -413,7 +416,12 @@ export class Window {
       const file = join(ongoing, name)
       const old = !CONFIG.worktreeOnlyWindow(name.replace(/\.code-workspace$/, ""))
       const refreshed = refresh(file, (workspace) => {
-        workspace.folders = Window.withContentFolder(workspace.folders ?? [], ongoing)
+        const folders = Window.withContentFolder(workspace.folders ?? [], ongoing)
+        // worktree-only:  the main checkout goes too, its files were the second copy of each in Quick Open;  never a
+        // FIRST folder, which would restart the window's extensions (a window written with the main checkout first)
+        workspace.folders = old
+          ? folders
+          : folders.filter((folder, index) => index === 0 || !RealPath.same(resolve(ongoing, folder.path), MAIN_ROOT))
         workspace.settings = { ...workspace.settings, "files.exclude": Window.filesExclude({ worktree: old }) }
       })
       if (refreshed) written.push(relative(MAIN_ROOT, file))

@@ -41,8 +41,8 @@
         <article class="site-article">
           <p class="lede">
             <code>&lt;epic-test-run&gt;</code> is a TEST RUN: it steps Owen through an epic page's open tests, one big
-            card at a time, and he answers each on the page: Passed, Failed (with a pasted screenshot), Skip or Not
-            now, with a comment on any of them. The listening session closes the passed ones and files each failure as an issue.
+            card at a time, and he answers each on the page: Passed, Failed, Skip or Not
+            now, with a comment and a screenshot on any of them. The listening session closes the passed ones and files each failure as an issue.
           </p>
           <p class="meta">
             For anyone changing how hand checks are run, or how a test is written.<br />
@@ -166,7 +166,7 @@
                 </thead>
                 <tbody>
                   <tr><td>Passed</td><td>P</td><td>green</td><td>the next test; applied, the test closes</td></tr>
-                  <tr><td>Failed</td><td>F</td><td>red</td><td>a screenshot (paste, drop or choose a file); applied, an issue with the comment and the screenshot</td></tr>
+                  <tr><td>Failed</td><td>F</td><td>red</td><td>applied, an issue with the comment and the screenshot</td></tr>
                   <tr><td>Skip</td><td>S</td><td>grey</td><td>the next test; applied, canceled</td></tr>
                   <tr><td>Not now</td><td>N</td><td>yellow</td><td>the next test; applied, deferred, last next run</td></tr>
                 </tbody>
@@ -190,12 +190,12 @@
                 <tbody>
                   <tr><td><code>base</code></td><td>The run.</td></tr>
                   <tr><td><code>head</code></td><td>"Testing", "4 of 9", Done testing.</td></tr>
-                  <tr><td><code>progress</code></td><td>The thin bar: how many are answered.</td></tr>
+                  <tr><td><code>progress</code></td><td>The thin bar: where the run is, as "4 of 9" says; how many are answered, its tooltip.</td></tr>
                   <tr><td><code>card</code></td><td>The current test's card.</td></tr>
                   <tr><td><code>answers</code></td><td>The four answers, one group.</td></tr>
                   <tr><td><code>comment</code></td><td>Every card's comment box, under the answers.</td></tr>
-                  <tr><td><code>failure</code></td><td>Once failed: the screenshot's area.</td></tr>
-                  <tr><td><code>moves</code></td><td>Back and Next.</td></tr>
+                  <tr><td><code>failure</code></td><td>The screenshot's area, on every card (paste, drop or choose a file):  it goes with whichever answer is picked.</td></tr>
+                  <tr><td><code>moves</code></td><td>Back and Next:  a full-width band of their own, pinned to the window's bottom.</td></tr>
                   <tr><td><code>summary</code></td><td>The summary card: the counts, the tests commented on, Send results, the next epic.</td></tr>
                 </tbody>
               </table>
@@ -222,7 +222,7 @@
               <li>Side bar first: at 390px the answers sit two by two; on a wide card, four in a row.</li>
               <li>The card: the test's id chip in its state's colour, its title, then each field under a small mono label.</li>
               <li>The answers by the fill rule: a grey outline at rest (the icon in its colour), dashed in its colour once chosen, outlined once sent.</li>
-              <li>Owen's words on his ivory: the comment box on every card;  a failure's screenshot area, dashed, its thumbnail and ×.</li>
+              <li>Owen's words on his ivory: the comment box and the screenshot area on every card, the area dashed, its thumbnail and ×.</li>
               <li>Light and dark through the page's tokens;  no motion of its own.</li>
             </ul>
           </ui-section>

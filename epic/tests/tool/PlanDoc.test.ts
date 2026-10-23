@@ -2101,6 +2101,20 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  // the run takes a screenshot on every card since 2026-10-22:  any answer's goes in his reply, under his words
+  test("passed with a screenshot:  it shows in his reply;  a screenshot alone is a reply of its own", () => {
+    const plan = withTests()
+    plan.applyMark({ id: "v1", action: "test", result: "passed", note: "fine", shot: "tests/v1-20261022-1200.png" })
+    const reply = el(plan, "v1").querySelector('epic-reply[from="Owen"]')!
+    expect(reply.querySelector("p")?.textContent).toBe("fine")
+    expect(reply.querySelector("img")?.getAttribute("src")).toBe("tests/v1-20261022-1200.png")
+    plan.applyMark({ id: "v2", action: "test", result: "notnow", shot: "tests/v2-20261022-1200.png" })
+    expect(el(plan, "v2").querySelector('epic-reply[from="Owen"] img')?.getAttribute("src")).toBe(
+      "tests/v2-20261022-1200.png"
+    )
+    expect(problems(plan)).toEqual([])
+  })
+
   test("failed:  a NEW issue with his note and screenshot, linked both ways;  the test stays open, `failed`", () => {
     const plan = withTests()
     const result = plan.applyMark({
