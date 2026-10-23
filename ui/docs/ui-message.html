@@ -453,17 +453,15 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <Show when={shown()}>
                     <ui-message
                       dismissible
                       header="Saved"
-                      ref={(el) =>
-                        el.addEventListener("ui-dismiss", (event) => {
-                          event.preventDefault()
-                          setShown(false)
-                        })
-                      }
+                      on-ui-dismiss={(event) => {
+                        event.preventDefault()
+                        setShown(false)
+                      }}
                     />
                   </Show>
                 </script>

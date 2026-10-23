@@ -369,7 +369,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
     if (!table.title) return grid
     return (
       <section class={GROUP_CLASS} part={this.partForName("group")}>
-        <ui-header part={this.partForName("header")} level={String(this.headingLevel)}>
+        <ui-header part={this.partForName("header")} level={HeadingLevels.attributeFor(this.headingLevel)}>
           {table.title}
         </ui-header>
         <Show when={table.description}>
@@ -495,4 +495,4 @@ const VISUALLY_HIDDEN_CLASS = "ui-visually-hidden"
 const LEVELS: HeadingBounds = { min: 1, max: 6, fallback: 3 }
 
 /** `SiteToken.type` of a colour:  a live swatch, and a colour input in the playground. */
-const COLOR_TYPE: SiteTokenType = "color"
+const COLOR_TYPE = "color" satisfies SiteTokenType

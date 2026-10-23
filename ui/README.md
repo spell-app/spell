@@ -173,7 +173,7 @@ Each framework's recipe, and a fourth rule (`ready`, and custom states):
 [README-frameworks.md](README-frameworks.md#the-contract--four-rules-every-element-keeps).
 
 No page checks Svelte, Angular or Preact yet, though the same rules should hold;
-and your JSX doesn't know the tags, since Spell UI ships no JSX typings.
+and only Solid's JSX knows the tags (`spell-ui/jsx`):  other frameworks' JSX has no typings yet.
 
 ### Your CSS stops at the shadow root;  four doors let it in
 
@@ -436,8 +436,8 @@ The page at the top paid for five things once, and then a few kB for each family
 That's 115.7 kB, and none of it is paid twice, however many elements follow.
 After that, each family costs its own code, once:  5.7 kB on average, from Text's 1.2 kB to Form's 16.9 kB.
 The first form control on a page adds the shared `forms` chunk, 6.8 kB.
-The page at the top used three families, with the two chunks they share with others:  21.6 kB,
-so 137.3 kB in all, before its icon.
+The page at the top used three families, with the two chunks they share with others:
+21.6 kB, so 137.3 kB in all, before its icon.
 Import every family at once (`import "spell-ui"`) and it's 421 kB, Solid included.
 
 - The changelog's budget, 8 kB a family, holds for 49 of the 62;  nothing checks it.
@@ -531,7 +531,7 @@ each example's plain class markup on the left, the same example as elements on t
 | [scripts/](scripts/) | one file per yarn script, named for it (`site:data` → `site-data.ts`);  what they share is in `src/tools/` |
 | [docs/](docs/) | the docs site's PAGES, a component set served at `/components/ui/`:  `*.html`, `__parts/`, `__data/` |
 | [site/](site/) | the docs site's BUILD:  the bundle's entry (`_src/`) and the bundle (`_assets/`, git-ignored) |
-| [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the browser code's TypeScript settings, and the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs):  no aliases, every file by its package name |
+| [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the browser code's TypeScript settings (the generated JSX types, `src/jsx.ts`, too) and the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs):  no aliases, every file by its package name |
 | [vite.config.ts](vite.config.ts), [vitest.config.ts](vitest.config.ts), [vite.site.config.ts](vite.site.config.ts) | the library build (its families in `COMPONENTS`), the tests (two projects, `ssr` and `browser`), the docs site's bundle |
 | `results/` | what the tools write (git-ignored) |
 | *(none:  `spell-app`'s [`<spell-code>`](https://github.com/spell-app/spell-app/tree/main/src/app/components/spell-code))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |
@@ -618,7 +618,7 @@ The rest is on the page that owns each one:
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  eighteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
 | [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and 25 themes</li><li>four recipes, from tokens on `:root` to the app stylesheet</li><li>🌱 picking and making themes</li></ul> |
-| [README-frameworks.md](README-frameworks.md) | <ul><li>the contract:  four rules every element keeps, and who decides the value</li><li>plain JavaScript, React 19, Vue 3 and Solid 2, each checked by a page that runs;  Svelte, Angular, Preact</li><li>types:  your editor knows every tag, your JSX doesn't</li><li>using it today with an import map;  what the smoke pages prove, and what they don't</li></ul> |
+| [README-frameworks.md](README-frameworks.md) | <ul><li>the contract:  four rules every element keeps, and who decides the value</li><li>plain JavaScript, React 19, Vue 3 and Solid 2, each checked by a page that runs;  Svelte, Angular, Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today with an import map;  what the smoke pages prove, and what they don't</li></ul> |
 | [README-migrating.md](README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React:  your classes moved inside</li><li>a whole card, three ways;  every class word becomes an attribute</li><li>what changes under the words:  your CSS, jQuery calls, a few words</li><li>from Semantic UI React, no wrappers;  moving a page by hand;  🌱 the migration tool</li></ul> |
 | [README-site.md](README-site.md) | <ul><li>the docs site, 84 pages and 1,740 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |
 

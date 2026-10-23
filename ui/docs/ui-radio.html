@@ -394,14 +394,14 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <For each={sizes}>
                     {(size) => (
                       <ui-radio
                         name="size"
                         value={size()}
-                        prop:selected={chosen() === size()}
-                        ref={(el) => el.addEventListener("ui-change", () => setChosen(size()))}
+                        selected={chosen() === size()}
+                        on-ui-change={() => setChosen(size())}
                       >
                         {size()}
                       </ui-radio>

@@ -417,12 +417,12 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref;  `prop:` for the property
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-select
                     name="size"
-                    prop:options={sizes}
+                    options={sizes}
                     value={size()}
-                    ref={(el) => el.addEventListener("ui-change", (e) => setSize(e.detail.value))}
+                    on-ui-change={(e) => setSize(e.detail.value)}
                   />
                 </script>
               </ui-code>

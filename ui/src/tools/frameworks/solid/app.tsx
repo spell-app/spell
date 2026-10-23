@@ -1,6 +1,7 @@
 import { createContext, createSignal, Show, useContext } from "solid-js"
 import { render } from "@solidjs/web"
 
+import type {} from "spell-ui/jsx"
 import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
 
 /**
@@ -129,17 +130,5 @@ function eventually(test: () => boolean): Promise<boolean> {
     if (test()) resolve(true)
     else if (performance.now() - start > 3000) resolve(false)
     else setTimeout(() => poll(resolve), 20)
-  }
-}
-
-declare module "@solidjs/web/types/jsx.js" {
-  // NOTE: `interface`, not `type`:  declaration merging is the only way to add a custom tag to Solid's JSX
-  namespace JSX {
-    // NOTE: `<ui-dropdown>`'s JSX type is the docs elements' (`DocsJSXTags`, `docs-components.types.ts`):
-    // one declaration per program, and every program this file is in holds that one
-    interface IntrinsicElements {
-      /** the app's value for the elements inside it (`UIComponent.appContext`) */
-      "ui-root": JSX.HTMLAttributes<HTMLElement> & { appContext?: unknown }
-    }
   }
 }

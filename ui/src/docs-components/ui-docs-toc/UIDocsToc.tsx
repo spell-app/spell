@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
+import type { UIMenuAttributes } from "spell-ui/jsx"
 import { docsTocVocabulary } from "./UIDocsToc.en"
 import { TocIndex } from "./TocIndex"
 import {
@@ -152,7 +153,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
   }
 
   /** `size`, else the default (an empty or unknown `size` too). */
-  private get menuSize(): string {
+  private get menuSize(): UIMenuAttributes["size"] {
     return this.size || DEFAULT_SIZE
   }
 

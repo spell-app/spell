@@ -357,7 +357,6 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         floating=""
         scrolling=""
         button=""
-        basic={this.inverted ? undefined : ""}
         inverted={this.inverted ? "" : undefined}
         size={this.size}
         text={this.translationForKey("themeName")}

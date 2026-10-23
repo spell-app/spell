@@ -185,6 +185,20 @@
   .ui.grid > ::slotted(*) {
     padding-inline: calc(var(--_grid-gutter) / 2);
   }
+  /*
+   * Anything else in a grid WITH a column count is a cell of its own, as a column is:
+   * `<ui-grid columns="7">` lays seven children to a line, with no `<ui-row>` or `<ui-column>` around them.
+   * - Without a count, `--_grid-count` and `--_grid-columns` are both unset:  the `calc()`s are invalid,
+   *   so width and padding stay as they were.
+   * - `doubling` and `stackable` reach them too (`Responsive`, below).
+   */
+  .ui.grid > ::slotted(:not(ui-row, ui-column, ui-grid)) {
+    box-sizing: border-box;
+    flex: var(--_grid-grow, 0) 1 auto;
+    width: calc(100% / var(--_grid-count, var(--_grid-columns)));
+    /* `0px *` a count:  invalid, so no padding, when the grid has none */
+    padding-block: calc(var(--_grid-row-spacing) / 2 + 0px * var(--_grid-count, var(--_grid-columns)));
+  }
 
   /* Rows and columns in a grid are `display: contents` DOM elements;  content in a column starts afresh. */
   .ui.grid > slot,
@@ -1131,6 +1145,9 @@
         padding-block: calc(var(--_grid-row-spacing) / 2);
         box-shadow: none;
       }
+      .ui.grid > ::slotted(:not(ui-row, ui-column, ui-grid)) {
+        --_grid-count: var(--_grid-columns-mobile);
+      }
     }
     /* Stackable:  one column per line, full width. */
     @container style(--_grid-stackable: 1) {
@@ -1139,7 +1156,8 @@
         padding: 0;
         box-shadow: none;
       }
-      .ui.column:not(.grid, .row) {
+      .ui.column:not(.grid, .row),
+      .ui.grid > ::slotted(:not(ui-row, ui-column, ui-grid)) {
         width: 100%;
         margin: 0;
         padding: calc(var(--_ui-grid-row-spacing) / 2) calc(var(--_ui-grid-gutter) / 2);
@@ -1230,6 +1248,9 @@
         margin: 0;
         padding-block: calc(var(--_grid-row-spacing) / 2);
         box-shadow: none;
+      }
+      .ui.grid > ::slotted(:not(ui-row, ui-column, ui-grid)) {
+        --_grid-count: var(--_grid-columns-tablet);
       }
     }
   }

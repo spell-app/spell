@@ -5,7 +5,7 @@ import { readJSON5File } from "spell-kit/util/node/json5"
 
 import { DesignComponents } from "./DesignComponents.ts"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
-import type { DesignExample, DesignSource } from "./tools.types.ts"
+import { COMPONENTS, type DesignExample, type DesignSource } from "./tools.types.ts"
 
 /****************
  * ### `DesignBrand`
@@ -24,7 +24,7 @@ import type { DesignExample, DesignSource } from "./tools.types.ts"
 export class DesignBrand {
   /** the brand's package folder, absolute */
   readonly folder: string
-  /** `packages/ui`, absolute:  the paths the export records are relative to it */
+  /** Spell UI's folder (`spell-ui`), absolute:  the paths the export records are relative to it */
   readonly uiFolder: string
   /** the brand's site data */
   readonly data: SiteDataFile
@@ -44,7 +44,7 @@ export class DesignBrand {
     return new DesignBrand({ folder, uiFolder, data: readJSON5File<SiteDataFile>(file) }).source()
   }
 
-  /** The brand's folder as the export records it:  relative to `packages/ui`, e.g. `../brand`. */
+  /** The brand's folder as the export records it:  relative to Spell UI's, e.g. `../spell-brand`. */
   get shownFolder(): string {
     return relative(this.uiFolder, this.folder)
   }
@@ -54,7 +54,7 @@ export class DesignBrand {
     return {
       group: GROUP,
       data: this.data,
-      componentsPath: `${this.shownFolder}/components`,
+      componentsPath: `${this.shownFolder}/${COMPONENTS}`,
       docsPaths: [`${this.shownFolder}/${DATA}`, `${this.shownFolder}/${PAGES}/brand-*.html`],
       intro:
         "Spell's own elements (`<brand-*>`):  its colour tools, the inspector field, the composer, the build " +
@@ -106,7 +106,7 @@ export class DesignBrand {
 export type DesignBrandProps = {
   /** the brand's package folder, absolute */
   folder: string
-  /** `packages/ui`, absolute */
+  /** Spell UI's folder (`spell-ui`), absolute */
   uiFolder: string
   /** the brand's site data */
   data: SiteDataFile

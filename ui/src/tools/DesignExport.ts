@@ -10,6 +10,7 @@ import { DesignComponents } from "./DesignComponents.ts"
 import { DesignTokens } from "./DesignTokens.ts"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 import {
+  COMPONENTS,
   SITE_DATA,
   type DesignExportResult,
   type DesignFamily,
@@ -40,7 +41,7 @@ import {
  *   Without them the export has no Brand cards and no content rules, and its README says so.
  ****************/
 export class DesignExport {
-  /** `packages/ui`, absolute */
+  /** Spell UI's folder (`spell-ui`), absolute */
   readonly uiFolder: string
   /** site data, as `yarn site:data` wrote it */
   readonly data: SiteDataFile
@@ -171,7 +172,7 @@ export class DesignExport {
   private notSynced(tokens: DesignTokensFile, skipped: DesignSkip[]): string[] {
     const lines = ["---", "", "## Not synced", ""]
     lines.push(
-      `- Made by \`yarn design:build\` (packages/ui) from ${tokens.meta.repo}@${this.git.sha}:  the vocabularies ` +
+      `- Made by \`yarn design:build\` (spell-ui) from ${tokens.meta.repo}@${this.git.sha}:  the vocabularies ` +
         "(`docs/__data/components.json5`), the element examples and the `spell-brand` theme's sheets" +
         this.sources
           .map(
@@ -212,9 +213,10 @@ export class DesignExport {
     const folders = [...new Set(this.allData.components.map((tag) => tag.folder))].sort()
     return {
       source: "github",
-      repo: "spell-app/spell-app",
+      repo: "spell-app/spell-ui",
       ref: `${this.git.branch}@${this.git.sha}`,
-      package: "packages/ui",
+      // the repo IS the package (epic `repo-split` P8)
+      package: ".",
       paths: {
         tokens: [
           "src/styles/tokens.css",
@@ -225,7 +227,7 @@ export class DesignExport {
         ],
         docs: [
           `${SITE_DATA}/components.json5`,
-          "components/*/examples/elements/*.html",
+          `${COMPONENTS}/*/examples/elements/*.html`,
           ...(this.brandBook === undefined ? [] : [relative(this.uiFolder, this.brandBook)]),
           ...this.sources.flatMap((source) => source.docsPaths)
         ]
@@ -234,7 +236,7 @@ export class DesignExport {
         folders.map((folder) => {
           const main = this.allData.families[folder]?.mainTag ?? folder
           const path = this.sources.find((source) => folder in source.data.families)?.componentsPath
-          return [main, `${path ?? "components"}/${folder}/`]
+          return [main, `${path ?? COMPONENTS}/${folder}/`]
         })
       ),
       synced: this.now.toISOString().slice(0, 10)
@@ -259,7 +261,7 @@ export class DesignExport {
       lastChange: {
         by: this.git.user,
         at,
-        via: `GitHub · spell-app/spell-app@${this.git.sha}`,
+        via: `GitHub · spell-app/spell-ui@${this.git.sha}`,
         note: "Built by `yarn design:build` from Spell UI's vocabularies, examples and the Spell theme"
       }
     }
@@ -348,7 +350,7 @@ export class DesignExport {
 
 /** What `DesignExport` is built from;  every field defaults to this checkout's. */
 export type DesignExportOptions = {
-  /** `packages/ui`, absolute */
+  /** Spell UI's folder (`spell-ui`), absolute */
   uiFolder?: string
   /** site data;  default:  `docs/__data/components.json5` */
   data?: SiteDataFile
@@ -375,7 +377,7 @@ export type DesignGit = {
   user: string
 }
 
-/** `packages/ui`, absolute. */
+/** Spell UI's folder (`spell-ui`), absolute. */
 const UI_FOLDER = fileURLToPath(new URL("../../", import.meta.url))
 
 /** The design system's title on claude.ai (Owen, 2026-10-05). */

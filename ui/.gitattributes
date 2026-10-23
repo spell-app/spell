@@ -16,6 +16,7 @@ docs/__data/icons.json5                                       linguist-generated
 docs/__data/search.json5                                      linguist-generated merge=binary
 docs/__data/custom-elements.json                              linguist-generated merge=binary
 docs/__data/html-custom-data.json                             linguist-generated merge=binary
+docs/__data/css-custom-data.json                              linguist-generated merge=binary
 
 # emoji data, from a reference clone (`yarn gen:emoji`):  collapsed only, never regenerated on a merge
 src/components/ui-emoji/data/**                               linguist-generated -diff

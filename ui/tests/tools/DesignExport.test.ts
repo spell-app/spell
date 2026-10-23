@@ -131,9 +131,9 @@ describe("DesignExport.build() tokens.json", () => {
     }
     expect(tokens.meta).toMatchObject({
       source: "github",
-      repo: "spell-app/spell-app",
+      repo: "spell-app/spell-ui",
       ref: "main@abc1234",
-      package: "packages/ui"
+      package: "."
     })
   })
 })

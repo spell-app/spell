@@ -41,7 +41,7 @@ describe("DesignBrand.read()", () => {
     const source = DesignBrand.read(BRAND, UI)!
     expect(source).toMatchObject({
       group: "Brand",
-      componentsPath: "tests/tools/fixtures/brand/components",
+      componentsPath: "tests/tools/fixtures/brand/src/components",
       docsPaths: [
         "tests/tools/fixtures/brand/docs/__data/components.json5",
         "tests/tools/fixtures/brand/docs/brand-*.html"

@@ -3323,13 +3323,13 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-table
                     celled
                     sortable
-                    prop:rows={rows()}
-                    prop:columnDefs={columns}
-                    ref={(el) => el.addEventListener("ui-sort", (event) => setSort(event.detail))}
+                    rows={rows()}
+                    columnDefs={columns}
+                    on-ui-sort={(event) => setSort(event.detail)}
                   />
                 </script>
               </ui-code>

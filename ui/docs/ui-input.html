@@ -496,13 +496,13 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-input
                     name="email"
                     type="email"
-                    prop:value={email()}
-                    prop:rules={["email"]}
-                    ref={(el) => el.addEventListener("ui-input", (e) => setEmail(e.detail.value))}
+                    value={email()}
+                    rules={["email"]}
+                    on-ui-input={(e) => setEmail(e.detail.value)}
                   />
                 </script>
               </ui-code>

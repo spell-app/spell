@@ -8963,7 +8963,7 @@
       "slots": [
         {
           "name": "",
-          "description": "`<ui-row>`s and `<ui-column>`s."
+          "description": "`<ui-row>`s and `<ui-column>`s;  or, with `columns`, any elements, each a cell of its own (`<ui-grid columns=\"3\"><div>...</div><div>...</div></ui-grid>`)."
         }
       ],
       "events": [],
@@ -17466,12 +17466,12 @@
       "events": [
         {
           "name": "ui-invalid",
-          "detail": "as `<ui-form>`'s",
+          "detail": "{ field: string, value: FieldValue, errors: string[], values: Record<string, FieldValue> }",
           "description": "A property in the group failed validation (the editor sends it on the group too)."
         },
         {
           "name": "ui-success",
-          "detail": "as `<ui-form>`'s",
+          "detail": "{ values: Record<string, FieldValue>, originalEvent?: Event }",
           "description": "The editor's submit or Save passed validation (sent on each group too)."
         },
         {

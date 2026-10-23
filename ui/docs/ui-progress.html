@@ -517,12 +517,12 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-progress
                     value={done()}
                     total="20"
                     bar-text="ratio"
-                    ref={(el) => el.addEventListener("ui-complete", () => setFinished(true))}
+                    on-ui-complete={() => setFinished(true)}
                   />
                 </script>
               </ui-code>

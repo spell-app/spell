@@ -303,13 +303,13 @@ export type ImportMap = {
 ////////////////
 
 /**
- * Spell UI's docs site's PAGES, from `packages/ui/`:  its `docs/` folder, a component set laid out as every set is
+ * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
  * (epic `people-and-orgs` P18;  until then shared content, the checkout's `ui/`, from claude-design P6).
  * - What's in it:
  *   - the pages, `*.html`, flat:  an element's page is its tag, `ui-button.html`
  *   - the component index, `components.html`
  *   - the layout (`__parts/`), the data (`__data/`, `SITE_DATA`)
- *   - the files examples load (`examples/`), Fomantic's images (`images/`), the site's `README.md`
+ *   - the files examples load (`examples/`), Fomantic's images (`images/`)
  * - Tracked with the branch, so a page changes in the same commit as its element.
  * - The page server serves it at `/components/ui/`, with the site bundle (`SITE_BUILD`'s `_assets/`) laid over it,
  *   so a page's `_assets/site.js` resolves (the page server's `componentSets` setting).
@@ -317,16 +317,22 @@ export type ImportMap = {
 export const SITE_PAGES = "docs"
 
 /**
- * Spell UI's docs site's DATA, from `packages/ui/`:  `docs/__data/`.
+ * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.
  * - GENERATED, committed (`yarn site:data`):
  *   - `components.json5`, `icons.json5`, `search.json5`
- *   - `custom-elements.json`, `html-custom-data.json`
+ *   - `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`
  * - hand-kept:  `pages.json5`, the per-family facts they're built from
  */
 export const SITE_DATA = `${SITE_PAGES}/__data`
 
 /**
- * Spell UI's docs site's BUILD, from `packages/ui/`:  `site/`.
+ * Where a package's element families are, from its folder:  Spell UI's and the brand's alike,
+ * `src/components/<family>/` (every repo's code is under ONE `src/`, epic `repo-split` P14).
+ */
+export const COMPONENTS = "src/components"
+
+/**
+ * Spell UI's docs site's BUILD, from the repo's root:  `site/`.
  * - `_src/`:  the bundle's entry;  `_assets/`:  the bundle (`yarn site:bundle`), never committed
  */
 export const SITE_BUILD = "site"
@@ -680,9 +686,10 @@ export type DesignSource = {
   group: string
   /** its site data, as its `yarn site:data` wrote it */
   data: SiteDataFile
-  /** where its family folders are, relative to `packages/ui` (for `tokens.json`'s `meta`), e.g. `../brand/components` */
+  /** where its family folders are, from Spell UI's folder (for `tokens.json`'s `meta`):
+   * `../spell-brand/src/components` */
   componentsPath: string
-  /** the files its cards are read from, relative to `packages/ui` (for the same), e.g. `../brand/docs/brand-*.html` */
+  /** the files its cards are read from, from Spell UI's folder (for the same):  `../spell-brand/docs/brand-*.html` */
   docsPaths: string[]
   /** what the README says about the group, under its heading */
   intro: string
@@ -728,4 +735,24 @@ export type HtmlCustomData = {
     description: { kind: "markdown"; value: string }
     attributes: { name: string; description: { kind: "markdown"; value: string }; values?: { name: string }[] }[]
   }[]
+}
+
+/** VS Code's CSS custom data, version 1.1:  only the fields we write. */
+export type CssCustomData = {
+  /** `1.1` */
+  version: number
+  /** every family's CSS custom properties (`--ui-button-radius`):  completed as property names, with hover docs */
+  properties: CssCustomDataEntry[]
+  /** every part name, as `::part(<name>)`:  for any tag, as VS Code can't tell which tag a selector names */
+  pseudoElements: CssCustomDataEntry[]
+  /** every custom state, as `:state(<name>)`:  for any tag, likewise */
+  pseudoClasses: CssCustomDataEntry[]
+}
+
+/** One entry of VS Code's CSS custom data:  its name and markdown docs. */
+export type CssCustomDataEntry = {
+  /** as typed:  `--ui-button-radius`, `::part(icon)`, `:state(open)` */
+  name: string
+  /** hover and completion docs */
+  description: { kind: "markdown"; value: string }
 }

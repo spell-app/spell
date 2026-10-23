@@ -8877,7 +8877,7 @@
           "slots": [
             {
               "name": "",
-              "description": "`<ui-row>`s and `<ui-column>`s."
+              "description": "`<ui-row>`s and `<ui-column>`s;  or, with `columns`, any elements, each a cell of its own (`<ui-grid columns=\"3\"><div>...</div><div>...</div></ui-grid>`)."
             }
           ],
           "cssParts": [
@@ -21008,14 +21008,14 @@
               "name": "ui-invalid",
               "description": "A property in the group failed validation (the editor sends it on the group too).",
               "type": {
-                "text": "CustomEvent<as `<ui-form>`'s>"
+                "text": "CustomEvent<{ field: string, value: FieldValue, errors: string[], values: Record<string, FieldValue> }>"
               }
             },
             {
               "name": "ui-success",
               "description": "The editor's submit or Save passed validation (sent on each group too).",
               "type": {
-                "text": "CustomEvent<as `<ui-form>`'s>"
+                "text": "CustomEvent<{ values: Record<string, FieldValue>, originalEvent?: Event }>"
               }
             },
             {

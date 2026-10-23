@@ -27,7 +27,7 @@ function inBox(width: number, html: string) {
 }
 
 /** Width of each `<ui-column>` root under `box`, as a fraction of its grid root's width. */
-function fractions(box: Element, grid = box.querySelector("ui-grid")!): number[] {
+function fractions(box: Element, grid: Element = box.querySelector("ui-grid")!): number[] {
   const total = rootOf(grid).getBoundingClientRect().width
   return [...grid.querySelectorAll(":scope > ui-column, :scope > ui-row > ui-column")].map(
     (column) => rootOf(column).getBoundingClientRect().width / total
@@ -158,6 +158,32 @@ describe("<ui-grid> layout across shadow roots", () => {
       `<ui-grid columns="equal"><ui-column>A</ui-column><ui-column>B</ui-column><ui-column>C</ui-column></ui-grid>`
     )
     for (const fraction of fractions(box)) expect(fraction).toBeCloseTo(1 / 3, 2)
+  })
+
+  it("makes any child a cell when the grid has a count:  no rows or columns needed", async () => {
+    const box = await inBox(
+      800,
+      `<ui-grid columns="4"><div>A</div><div>B</div><div>C</div><div>D</div><div>E</div></ui-grid>`
+    )
+    const total = rootOf(box.querySelector("ui-grid")!).getBoundingClientRect().width
+    const cells = [...box.querySelectorAll("div > ui-grid > div")].map((cell) => cell.getBoundingClientRect())
+    for (const cell of cells) expect(cell.width / total).toBeCloseTo(0.25, 3)
+    // four to a line, the fifth on the next
+    expect(new Set(cells.slice(0, 4).map((cell) => cell.top)).size).toBe(1)
+    expect(cells[4]!.top).toBeGreaterThan(cells[0]!.top)
+  })
+
+  it("leaves a child's width alone in a grid with no count", async () => {
+    const box = await inBox(800, `<ui-grid><span style="display: block; width: 100px">A</span></ui-grid>`)
+    expect(box.querySelector("span")!.getBoundingClientRect().width).toBe(100)
+  })
+
+  it("stacks plain children of a `stackable` grid in a narrow container", async () => {
+    const box = await inBox(400, `<ui-grid columns="4" stackable><div>A</div><div>B</div></ui-grid>`)
+    const total = rootOf(box.querySelector("ui-grid")!).getBoundingClientRect().width
+    for (const cell of box.querySelectorAll("div > ui-grid > div")) {
+      expect(cell.getBoundingClientRect().width / total).toBeCloseTo(1, 3)
+    }
   })
 
   it("keeps a nested grid clean of its parent's column count", async () => {

@@ -57,8 +57,8 @@ The first three are the DOM's own, so a framework that can drive a `<video>` alr
    - `ready` resolves when an element fails, too.
      It then has `:state(errored)` and has sent a cancelable `ui-error`, and the rest of the page carries on.
 
-Define the elements BEFORE the framework renders them:  `import "spell-ui"` for every family,
-or `import "spell-ui/ui-dropdown"` for one.
+Define the elements BEFORE the framework renders them:
+`import "spell-ui"` for every family, or `import "spell-ui/ui-dropdown"` for one.
 As a backstop, a property set before the tag is defined is kept, and applied once it is.
 
 ```mermaid
@@ -283,39 +283,65 @@ The contract above asks nothing of a framework but setting properties and listen
 which is why they should work;  until a page checks one, treat it as untested.
 The docs site's [getting-started page](docs/getting-started.html) has a one-line binding for each, unchecked too.
 
-## Types:  your editor knows every tag;  your JSX doesn't
+## Types:  your editor knows every tag, and Solid's JSX does too
 
-Spell UI ships no JSX typings for `<ui-*>` tags, in any framework.
-It ships what an editor reads instead:  two files, each describing all 104 tags.
+Spell UI ships what an editor reads, four files describing all 104 tags:
 
 - [`custom-elements.json`](docs/__data/custom-elements.json), a Custom Elements Manifest (schema 2.1.0),
   named by `package.json`'s `"customElements"`:
   every tag's attributes, properties, events, slots, parts, custom states and CSS custom properties
 - [`html-custom-data.json`](docs/__data/html-custom-data.json), VS Code's HTML data:
   autocomplete and hover docs for `<ui-*>` in HTML files
-- `yarn site:data` writes both, from the same vocabularies as everything else.
+- [`css-custom-data.json`](docs/__data/css-custom-data.json), VS Code's CSS data:
+  every `--ui-*` custom property, part (`::part(icon)`) and custom state (`:state(open)`) in CSS files,
+  with hover docs
+- [`spell-ui/jsx`](src/jsx.ts), the JSX types for Solid 2:
+  autocomplete, hover docs and checks for `<ui-*>` in `.tsx` files
+- `yarn site:data` writes all four, from the same vocabularies as everything else.
 
-For JSX, declare the tags in your own program.
-The Spell app's own code does it for Solid, every `ui-*` tag at once
-([`solid.types.ts`](https://github.com/spell-app/spell-app/blob/main/src/app/solid/solid.types.ts)):
+For Solid's JSX, import the types once, in any file of your program:
 
 ```ts
-import type { JSX } from "@solidjs/web"
-
-declare module "@solidjs/web/types/jsx.js" {
-  namespace JSX {
-    interface IntrinsicElements {
-      [tag: `ui-${string}`]: UIElementAttributes
-    }
-  }
-}
-
-/** Attributes of any `<ui-*>` element in JSX:  HTML attributes, plus any attribute the element defines, any value. */
-export type UIElementAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+import type {} from "spell-ui/jsx"
 ```
 
+- Then every `<ui-*>` tag is checked:
+  a misspelt attribute (`sise="large"`), or a value its set doesn't hold (`size="enormous"`), is an error.
+- HTML's global attributes (`class`, `id`, `slot`, `onClick`, `aria-*` ...) stay allowed.
+- A name with a dash in it (`data-*`) is never checked:  TypeScript lets any through.
+- Flags:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it.
+- Rich data is a plain prop:  `options={[...]}`.
+  It reaches the element whole, as its property (Solid's "How", above).
+- So are the few properties no attribute stands for:
+  - `appContext` on `<ui-root>`:  your app's value, which every component inside reads
+  - `content` on the elements that show a file (`<ui-code>`, `<ui-markdown>`, `<ui-include>`):  the text shown
+- Each attribute and property is typed as `prop:<name>` too, struck through in your editor (`@deprecated`):
+  only compiled Spell still writes `prop:`.  Write the plain name.
 - It augments `@solidjs/web/types/jsx.js`, not `@solidjs/web`, which only re-exports `JSX`.
-- The cost:  it's loose on purpose, so a misspelt attribute isn't caught.
+- Other frameworks' JSX (React's, Preact's):  no types yet;  declare the tags in your own program.
+
+### Events:  `event.detail` typed, in JSX and in plain DOM code
+
+Every event a tag sends is typed, its `detail` too, from the same vocabularies:
+
+```tsx
+<ui-input on-ui-change={(event) => setName(event.detail.value)} />
+
+const button = document.querySelector("ui-button")!
+button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
+```
+
+- In JSX:  `on-` plus the event's name, `on-ui-change`, one per event the tag sends.
+  - Solid hands your function to the element, which listens for that event (Solid's "How", above).
+  - A misspelt `on-ui-chnage` isn't an error (it has a dash);  the app's VS Code extension warns on it.
+- In plain DOM code:  `querySelector("ui-button")` gives a `<ui-button>` that knows its own events,
+  and so does a JSX `ref`'s element.
+  - Its `addEventListener()` types each one's `event.detail`.
+  - Only its events:  for its other members (`value`, `open()` ...), cast to its class.
+- On any other element, or the document, every `ui-*` name completes, but its `detail` is `unknown`.
+  - The same name is many tags' (`ui-change` is 18 of Spell UI's, and other sets' too), each with its own `detail`.
+  - Narrow it yourself, or listen on the tag.
+- Each tag's own events, by name:  `UIInputEventMap` ..., exported by `spell-ui/jsx`.
 
 ## Using it today:  the kit's build and an import map
 
@@ -337,8 +363,8 @@ A page then maps the names onto those folders, exactly as the smoke pages do:
 </script>
 ```
 
-- `spell-ui` is every family, `spell-ui/ui-<family>` one;  `spell-ui/core`, `spell-ui/forms` and `spell-ui/api`
-  are the shared entries.
+- `spell-ui` is every family, `spell-ui/ui-<family>` one.
+  - `spell-ui/core`, `spell-ui/forms` and `spell-ui/api` are the shared entries.
 - `yarn vendor` writes the two Solid lines to `vendor/importmap.json`,
   after compiling the Solid smoke app when it's out of date.
 - `yarn serve` serves `dist/`, `vendor/` and `src/` with the whole map injected into every page,

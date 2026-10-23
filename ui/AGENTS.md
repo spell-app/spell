@@ -37,7 +37,7 @@ with live elements to click.
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/`, git-ignored here.
   - Made by every `yarn install` in the kit (its `postinstall`).
 - Its design notes are in the content repo since epic `repo-split` P9 (Q34):
-  [guides/ui/notes/](../spell.epics/guides/ui/notes/).
+  [its ui notes folder](../spell.epics/guides/ui/notes/).
 
 ## Overview
 
@@ -164,8 +164,10 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `<ui-root>` knows them (`yarn gen:root` scans this folder too),
     but loads them only where the page's bundle called `DocsFamilies.add()`.
     - The site's bundle does;  the library's own `RootLoader` never does (epic `wwod-spell-ui`, I12).
-  - A family that renders other widgets in its shadow root imports their families in its barrel,
-    and adds their tags to `DocsJSXTags`.
+  - A family that renders other widgets in its shadow root imports their families in its barrel.
+    - Their JSX types:
+      - a component tag's are generated (`spell-ui/jsx`)
+      - a docs tag (`<ui-docs-search>`) goes in `DocsJSXTags`, loose:  the generated set leaves the docs tags out
   - They read the site's data through `SiteData` ([the components data](docs/__data/components.json5)),
     NEVER the vocabularies.
   - The barrel's header says how to add one.
@@ -227,7 +229,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - Node code:  [tsconfig.node.json](tsconfig.node.json) type-checks it, with `src/cli/`, `scripts/` and the configs.
   - bundle measurement, peer vendoring, import-map smoke pages (framework hosts), LOC, report tables
   - the HMR end-to-end test
-  - `src/tools/demo/`:  the `yarn dev` site;  `src/tools/visual/`:  the visual tests
+  - [the demo](src/tools/demo/):  the `yarn dev` site;  [the visual tests](src/tools/visual/)
   - Results go to `results/` (git-ignored), at the repo's root:  generated output stays out of `src/`.
   - The generic ones are the kit's since epic `repo-split` P10,
     [its element-tools/](../src/element-tools/) (`spell-kit/element-tools/<Name>`):
@@ -435,8 +437,13 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `components.json5`
   - `icons.json5`:  the icon browser's search terms
   - `search.json5`:  every page's sections
-  - Written by `yarn site:data`;  with them, the editors' manifests:
-    `custom-elements.json`, `html-custom-data.json`.
+  - Written by `yarn site:data`, with the editors' manifests beside them:
+    `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`.
+  - And, in `src/`, the JSX types of every `<ui-*>` tag, [`spell-ui/jsx`](src/jsx.ts):
+    - each tag's attributes and events
+    - each tag's element in the DOM's types (`querySelector("ui-button")`)
+    - They type-check in Spell UI's main program, so its own JSX (the docs elements') uses them.
+    - Their test, [the JSX check](tests/jsx/jsx.check.tsx), type-checks in the tests' program.
   - Their shapes, `SiteDataFile` / `SiteIconsFile` / `SiteSearchFile`:
     [the docs components' types](src/docs-components/docs-components.types.ts).
   - And `pages.json5`, hand-kept per-family facts it reads:
@@ -475,7 +482,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - The families:  [the static families](src/tools/visual/StaticFamilies.ts).
     - Report only:  `static-parity.md`, in the visual tests' results.
     - `--os local` by default.
-- `yarn dev`:  `src/tools/demo/`, every example as class grammar beside elements.
+- `yarn dev`:  [the demo](src/tools/demo/), every example as class grammar beside elements.
   Edits hot-reload.
 - `yarn icons:pack`:  verifies a folder of SVGs, and writes its `pack.js` (keeping hand edits).
 
@@ -530,9 +537,11 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Written to `<dir>/project/`;  by default `build/design-system/` (git-ignored).
   - Made from the site's components data, the element examples and the Spell theme.
   - Run `yarn site:data` first, after a vocabulary change.
-    - It also writes `custom-elements.json` and `html-custom-data.json`, in `docs/__data/`:
-      VS Code's autocomplete for `<ui-*>` ([the element manifests](src/tools/ElementManifests.ts)).
-    - [The design export's test](./tests/tools/DesignExport.test.ts) fails while they're stale.
+    - It also writes what editors read ([the element manifests](src/tools/ElementManifests.ts)):
+      - in `docs/__data/`, `custom-elements.json`, `html-custom-data.json` and `css-custom-data.json`:
+        VS Code's autocomplete for `<ui-*>`, and for their custom properties, parts and states in CSS
+      - the JSX types, [`spell-ui/jsx`](src/jsx.ts)
+    - [The element manifests' test](./tests/tools/ElementManifests.test.ts) fails while they're stale.
 - `yarn site:check <page...> | --all`:
   loads the `docs/` pages from the page server, at `/components/ui/` (Playwright).
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
@@ -996,6 +1005,14 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
       Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
   - A THIRD-PARTY Solid app does the same ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
+    - `spell-ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
+      - the `ref`'s element knows its tag's events, `event.detail` too
+      - `on-ui-change`, one prop per event, typed
+      - rich data by its plain name (`options`);  its `prop:` name is typed too, `@deprecated`:
+        only compiled Spell still writes it
+    - So an event's `detail` in its vocabulary is TypeScript.
+      A Spell UI type it names goes in `JSX_DETAIL_TYPES` ([the element manifests](src/tools/ElementManifests.ts)),
+      else `yarn site:data` throws.
   - Listeners OUTSIDE a component see `event.target === domElement` (`composedPath()[0]` is the inner element),
     and an app's delegated `onClick` on a `ui-*` tag runs once.
     - `ShadowEvents` guarantees it, by undoing what Solid's shadow-root delegation leaves on the event:

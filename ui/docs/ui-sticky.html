@@ -440,8 +440,8 @@
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  // no `on:` namespace:  listen through a ref
-                  <ui-sticky offset="60" ref={(el) => el.addEventListener("ui-stick", () => setStuck(true))}>
+                  // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+                  <ui-sticky offset="60" on-ui-stick={() => setStuck(true)}>
                     ...
                   </ui-sticky>
                 </script>
