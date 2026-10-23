@@ -149,7 +149,9 @@ export class Worktrees {
           for (const report of reports)
             for (const line of report.error ? [`${report.repo}:  FAILED:  ${report.error}`] : mergeMainLines(report))
               out(report.repo && !report.error ? `${report.repo}:  ${line}` : line)
-        return reports.some((report) => report.result === "conflicts" || report.error) ? EXIT.ERRORS : EXIT.OK
+        const failed = (report: MergeMainReport) =>
+          report.result === "conflicts" || report.error || report.installed?.ok === false
+        return reports.some(failed) ? EXIT.ERRORS : EXIT.OK
       }
       case "patch": {
         const here = Git.nearestCheckout({ marker: ".git" })
@@ -681,9 +683,14 @@ function repoLines(states: RepoState[]): string[] {
 
 /** `merge-main`'s report, for a person. */
 function mergeMainLines(report: MergeMainReport): string[] {
-  const { branch, result, conflicts, untracked, regenerated, review, unstaged } = report
+  const { branch, result, conflicts, untracked, regenerated, review, unstaged, installed } = report
+  const install = !installed
+    ? []
+    : installed.ok
+      ? [`  installed the packages:  \`${installed.command}\` (${installed.lockfiles.join(", ")} changed)`]
+      : [`  \`${installed.command}\` FAILED (${installed.lockfiles.join(", ")} changed):  run it yourself`]
   if (result === "up-to-date") return [`${branch}:  main is already in it`]
-  if (result === "fast-forward") return [`${branch}:  fast-forwarded to main`]
+  if (result === "fast-forward") return [`${branch}:  fast-forwarded to main`, ...install]
   if (result === "conflicts") {
     return [
       `${branch}:  stopped mid-merge;  resolve these, \`git add\` them, then \`epic worktree merge-main --continue\`:`,
@@ -698,6 +705,7 @@ function mergeMainLines(report: MergeMainReport): string[] {
       `  REVIEW ${file}:  neither side had these values`,
       ...keys.map((key) => `    ${key}`)
     ]),
-    ...(unstaged.length ? ["  changed by regenerating, NOT committed:", ...unstaged.map((file) => `    ${file}`)] : [])
+    ...(unstaged.length ? ["  changed by regenerating, NOT committed:", ...unstaged.map((file) => `    ${file}`)] : []),
+    ...install
   ]
 }

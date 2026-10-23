@@ -453,6 +453,13 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
           - Never `ExitWorktree` and back for it:  entering asks Owen every time (epic `epic-engine` P12, r11).
           - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
+          - STRAY files in a main checkout (epic `epic-engine` I77;  Owen:  "ask if I want to ditch them before merging
+            rather than just bailing"):
+            - a test's snapshot, a repo's generated output:  it moves them aside by itself, and says so
+            - one to three others (a `settings.json5` ...):  it refuses, listing them.  Ask Owen in a modal, "Ditch
+              these in main?", each file named;  on a yes, `epic merge <name> --ditch`
+            - moved aside, never deleted:  into `~/.spell-epic/ditched/<time>/`, which it prints
+            - more than three is somebody's work:  `add <name>#I`, as above
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
      - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.

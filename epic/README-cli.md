@@ -283,7 +283,7 @@ these are the verbs under it.
 | `epic file <epic>#P3 <rN>` | files a request into a phase:  its words, context and screenshots into the phase's Requests field, the request marked filed there |
 | `epic file <epic> <rN> "where it went"` | marks a request with no phase, saying where it went:  `"dropped:  done in P2"` |
 | `epic home [<epic>]` | prints the tooling home, the epic that requests about the tooling itself go to;  with an epic, sets it |
-| `epic merge <epic>` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in;  run it in the main checkout |
+| `epic merge <epic> [--ditch]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in;  run it in the main checkout.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once Owen says so |
 
 - A request is written BEFORE anyone is told, so nothing is lost when the epic's own session is closed.
 
@@ -471,7 +471,7 @@ Lost track?  `epic status`.
 | `epic worktree path <name>` | prints a worktree's folder, or where a new one would go;  a session enters it by name, never by this path, or Claude Code would ask |
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
-| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed `yarn.lock` (the repo's install command);  `--continue` after you resolve any other conflict (below);  `--json` |
 | `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |

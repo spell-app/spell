@@ -11,6 +11,8 @@ import {
   EpicCommandError,
   parseVerbArgs,
   type EpicRequest,
+  type MergeOptions,
+  type MergeResult,
   type PastedImage,
   type SendRequestProps,
   type SentRequest,
@@ -20,6 +22,7 @@ import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
 import { Git } from "./Git"
 import { Sessions } from "./Sessions"
+import { StrayFiles } from "./StrayFiles"
 
 /****************
  * ### `Requests`
@@ -44,8 +47,11 @@ import { Sessions } from "./Sessions"
  *     - `file <epic> <id> "<where>"`, no phase:  only marked filed, saying where it went (`"dropped:  done in P3"`)
  *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
  *   - `home [<epic>]`:  the TOOLING HOME, the epic dev-tooling requests go to;  with `<epic>`, set it
- *   - `merge <epic>`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main checkout
+ *   - `merge <epic> [--ditch]`:  a STANDING epic's phase onto `main` at once, fast-forward only;  run in the main
+ *     checkout
  *     - a multi-repo top (epic `epic-engine` P10):  each repo whose branch `<epic>` has commits (`mergeEach()`)
+ *     - stray files in a main checkout (`StrayFiles`):  generated ones moved aside by themselves;  `--ditch`, once Owen
+ *       says so, the few others too
  ****************/
 export class Requests {
   /** the checkout it runs for:  STATIC for the object's life */
@@ -73,12 +79,16 @@ export class Requests {
 
   /** Run `epic <verb> <args>` for one of this group's verbs;  resolves to the exit code. */
   async run([verb, ...args]: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["json"])
+    const { positional, flags } = parseVerbArgs(args, ["json", "ditch"])
     const [named, ...rest] = positional
     if (!verb) throw new EpicCommandError(`which verb?  ${VERBS}`)
     if (verb === "merge") {
       if (!named) throw new EpicCommandError("merge:  which epic?")
-      const merged = Requests.mergeEach(named)
+      const merged = Requests.mergeEach(named, undefined, { ditch: Boolean(flags.ditch) })
+      for (const { repo, ditched, ditchedTo } of merged.filter(({ ditched }) => ditched.length)) {
+        out(`${repo ? `${repo}:  ` : ""}moved ${ditched.length} stray file(s) aside, into ${ditchedTo}:`)
+        for (const file of ditched) out(`  ${file}`)
+      }
       if (merged.length === 1 && !merged[0]!.repo) {
         const { commits } = merged[0]!
         out(commits.length ? `main fast-forwarded to ${named}:` : `nothing to merge:  main already has ${named}`)
@@ -406,35 +416,56 @@ export class Requests {
    *   - Before epic `epic-engine` P12 it refused outside the main checkout, so the epic's session left its worktree
    *     (`ExitWorktree`) and came back (`EnterWorktree`):  Claude Code asked Owen to enter every time (r11).
    * - Fast-forward only, after the checks `/isolate done` makes (its "Finish", step 7):
-   *   - this is the main checkout, on `main`, with nothing uncommitted (another session may work there)
+   *   - this is the main checkout, on `main`
+   *   - nothing uncommitted there (another session may work there), but for STRAY files (`StrayFiles`;  epic
+   *     `epic-engine` I77):
+   *     - generated ones (a test's snapshot, a repo's generated output) are moved aside
+   *     - with `ditch`, up to `StrayFiles.ASK_LIMIT` others too:  only once Owen said so;  more is somebody's work
+   *     - moved aside into `ditched` (`StrayFiles.folderFor()`), never deleted, and only once every check passed
    *   - branch `<epic>` holds all of `main`:  else `main` moved, and the branch merges it first
    *     (`epic worktree merge-main`, in its worktree)
-   * - Returns the commits it brought onto `main`, oldest first;  `[]` when there was nothing to merge.
-   * - throws an `EpicCommandError` saying what to do, for any check that fails
+   * - Returns the commits it brought onto `main`, oldest first (`[]`:  nothing to merge), and what it moved aside.
+   * - throws an `EpicCommandError` saying what to do, for any check that fails:  then nothing moved, nothing merged
    * - static:  about the repo `cwd` is in, not the epics folder
    */
-  static merge(epic: string, cwd = process.cwd()): string[] {
+  static merge(
+    epic: string,
+    cwd = process.cwd(),
+    { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout" }: MergeOptions = {}
+  ): MergeResult {
     const main = Git.mainRoot(cwd)
     const base = new EpicConfig(main).baseBranch
+    const moved = Requests.mergeCheck(epic, main, { ditch, label }).ditch({ folder: ditched, ditch })
+    const result: MergeResult = { base, commits: [], ditched: moved, ...(moved.length ? { ditchedTo: ditched } : {}) }
+    const commits = Git.run(["log", "--reverse", "--oneline", `${base}..${epic}`], main)
+      .out.split("\n")
+      .filter(Boolean)
+    if (!commits.length) return result
+    const merged = Git.run(["merge", "--ff-only", epic], main)
+    if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
+    return { ...result, commits }
+  }
+
+  /**
+   * `merge()`'s checks on main checkout `main`, changing nothing:  its stray files, to move aside once all pass.
+   * - throws an `EpicCommandError` naming the checkout (`label`) for a check that fails
+   */
+  private static mergeCheck(epic: string, main: string, { ditch, label }: { ditch: boolean; label: string }) {
+    const base = new EpicConfig(main).baseBranch
     const branch = Git.run(["branch", "--show-current"], main).out
-    if (branch !== base) throw new EpicCommandError(`merge:  the main checkout is on '${branch}', not ${base}`)
-    const dirty = Git.run(["status", "--short"], main).out
-    if (dirty) throw new EpicCommandError(`merge:  the main checkout has uncommitted changes:\n${dirty}`)
+    if (branch !== base) throw new EpicCommandError(`merge:  ${label} is on '${branch}', not ${base}`)
+    const stray = new StrayFiles(main)
+    stray.check({ label, epic, ditch })
     if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], main).ok) {
       throw new EpicCommandError(`merge:  no branch '${epic}'`)
     }
     if (!Git.run(["merge-base", "--is-ancestor", base, epic], main).ok) {
       throw new EpicCommandError(
-        `merge:  ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, then again`
+        `merge:  ${label}'s ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, ` +
+          "then again;  nothing merged"
       )
     }
-    const commits = Git.run(["log", "--reverse", "--oneline", `${base}..${epic}`], main)
-      .out.split("\n")
-      .filter(Boolean)
-    if (!commits.length) return []
-    const merged = Git.run(["merge", "--ff-only", epic], main)
-    if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
-    return commits
+    return stray
   }
 
   /**
@@ -443,31 +474,26 @@ export class Requests {
    * - run anywhere in the top or a child repo, their worktrees included:  each repo's own main checkout is merged into
    * - ONLY the repos whose branch `<epic>` has commits beyond their base branch:  a repo the epic never touched, or
    *   with no branch `<epic>`, is skipped
-   * - EVERY repo checked before any moves (on its base branch, clean, the branch holding all of it):  one failing
-   *   check throws, naming the repo, and nothing is merged
+   * - EVERY repo checked before any moves (on its base branch, no stray file it may not move aside, the branch
+   *   holding all of it):  one failing check throws, naming the repo, and nothing is moved aside or merged
+   * - `ditch`:  `merge()`'s;  one folder of moved files for the whole run, a folder per repo in it
    */
-  static mergeEach(epic: string, cwd = process.cwd()): { repo?: string; base: string; commits: string[] }[] {
+  static mergeEach(epic: string, cwd = process.cwd(), { ditch = false }: MergeOptions = {}): MergeResult[] {
     const main = Git.mainRoot(cwd)
     const top = new EpicConfig(main).top
-    if (!top) return [{ base: new EpicConfig(main).baseBranch, commits: Requests.merge(epic, cwd) }]
+    if (!top) return [Requests.merge(epic, cwd, { ditch })]
     const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout }) => {
       const base = new EpicConfig(checkout).baseBranch
       if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok) return []
       const ahead = Number(Git.run(["rev-list", "--count", `${base}..${epic}`], checkout).out || 0)
-      return ahead ? [{ repo, checkout, base }] : []
+      return ahead ? [{ repo, checkout, label: `${repo}'s main checkout` }] : []
     })
-    for (const { repo, checkout, base } of repos) {
-      const branch = Git.run(["branch", "--show-current"], checkout).out
-      if (branch !== base) throw new EpicCommandError(`merge:  ${repo}'s main checkout is on '${branch}', not ${base}`)
-      const dirty = Git.run(["status", "--short"], checkout).out
-      if (dirty) throw new EpicCommandError(`merge:  ${repo}'s main checkout has uncommitted changes:\n${dirty}`)
-      if (!Git.run(["merge-base", "--is-ancestor", base, epic], checkout).ok)
-        throw new EpicCommandError(
-          `merge:  ${repo}'s ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, ` +
-            "then again;  nothing merged"
-        )
-    }
-    return repos.map(({ repo, checkout, base }) => ({ repo, base, commits: Requests.merge(epic, checkout) }))
+    for (const { checkout, label } of repos) Requests.mergeCheck(epic, checkout, { ditch, label })
+    const folder = StrayFiles.folderFor()
+    return repos.map(({ repo, checkout, label }) => ({
+      repo,
+      ...Requests.merge(epic, checkout, { ditch, ditched: join(folder, repo), label })
+    }))
   }
 
   /**

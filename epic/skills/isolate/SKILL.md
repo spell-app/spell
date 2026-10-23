@@ -348,12 +348,12 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    - On a hook-made worktree, `remove` refuses without `discard_changes` anyway.
 7. Merging, only after "Merge now" got the branch ready.
    Now in the main checkout:
-   - It must be on `main`, with nothing uncommitted:  another session may be working there.
-     - The checks:  `git branch --show-current`, `git status --short`.
-     - Either fails:  say which, and don't merge.
-   - `git merge --ff-only <name>`.
-     - Refused (`main` moved since step 2):  say so, and don't merge.
-     - A multi-repo top:  `epic merge <name>` in the main TOP checkout instead.
+   - `epic merge <name>`:  it checks the main checkout is on `main`, with nothing uncommitted (another session may be
+     working there), then fast-forwards.
+     - Stray files there:  as the epic skill's "5. Each phase", step 4 says (a snapshot moved aside by itself;  a few
+       others only once Owen says so, `--ditch`).
+     - Refused (`main` moved since step 2, somebody's work there):  say so, and don't merge.
+     - A multi-repo top:  `epic merge <name>` in the main TOP checkout.
        - It fast-forwards ONLY the repos whose `<name>` branch has commits beyond their `main`, each in its own
          main checkout, after checking them all (on `main`, clean, holding all of `main`):  one failing check
          merges nothing, and says which repo.
