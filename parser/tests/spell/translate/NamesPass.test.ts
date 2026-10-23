@@ -197,6 +197,40 @@ describe("NamesPass:  every name in one go, before any line", () => {
     expect(pass.notes.some((note) => note.startsWith("left TODO:  `picture`"))).toBe(true)
   })
 
+  test("a type's name must read as one type, singular (epic `spanish` P28)", () => {
+    const { pass } = namesPass({})
+    const type = (name: string) =>
+      pass.problemWith({ kind: "types", words: "todos app" }, { name, gender: "masculine" })
+    expect(type("tareas")).toBe("reads as a plural (of `tarea`):  a type's name is singular, e.g. `agenda`")
+    // its form kept:  `todos app` is words, so its name is too
+    expect(type("gestorTareas")).toBe("keeps its form:  words, as `todos app` is, not camelCase")
+    expect(type("gestor-de-tareas")).toBeUndefined()
+    // its first word says how many:  a manager of tasks is one
+    expect(type("gestor-tareas")).toBeUndefined()
+    expect(type("agenda")).toBeUndefined()
+    expect(type("pila de reserva")).toBe("holds `de`, one of spell's own words")
+  })
+
+  test("a name keeps its form:  camelCase stays one word, words stay words (epic `spanish` P28)", () => {
+    const { pass } = namesPass({})
+    const name = (words: string, value: string) => pass.problemWith({ kind: "names", words }, value)
+    expect(name("newTaskName", "nombreNuevaTarea")).toBeUndefined()
+    expect(name("newTaskName", "nombre")).toBeUndefined()
+    expect(name("newTaskName", "nombre-nueva-tarea")).toBe(
+      "keeps its form:  one word in camelCase, as `newTaskName` is"
+    )
+    expect(name("shown tasks", "tareasVisibles")).toBe("keeps its form:  words, as `shown tasks` is, not camelCase")
+  })
+
+  test("a type written with a dash and declared with a space is one name, asked for once", () => {
+    const { pass } = namesPass({})
+    const wanted = pass.wanted([
+      { kind: "types", words: "todos-app" },
+      { kind: "types", words: "todos app" }
+    ])
+    expect(wanted.filter(({ words }) => /todos/.test(words)).map(({ words }) => words)).toEqual(["todos-app"])
+  })
+
   test("a claude that fails, or answers what isn't JSON, adds nothing, and says so", async () => {
     const { pass, names } = namesPass({}, ["I'd rather not."])
     expect(await pass.draft(pass.wanted([]))).toBe(0)

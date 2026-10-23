@@ -158,7 +158,7 @@ expressionsEs.addRule(CompoundExpression, {
       beforeEach(scope: P.Scope) {
         scope.variables?.add("card")
       },
-      tests: [[`el suit de la card es "ace"`, `(card.suit == "ace")`]]
+      tests: [[`el suit de la card es "ace"`, '(card.suit === "ace")']]
     },
     {
       title: "postfix binds like a comparison:  after arithmetic, before `y`",
@@ -170,7 +170,7 @@ expressionsEs.addRule(CompoundExpression, {
       // `y` is Spanish's `and`:  English's variable `y` is `z` here
       tests: [
         ["x + z está vacío", "core.isEmpty(x + z)"],
-        ["x es 1 y z está vacío", "(x == 1 && core.isEmpty(z))"]
+        ["x es 1 y z está vacío", "(x === 1 && core.isEmpty(z))"]
       ]
     }
   ]
@@ -205,7 +205,7 @@ expressionsEs.addRule(And, {
       tests: [
         ["thing y other", "(thing && other)"],
         ["thing y other y yet-another", "(thing && other && yetAnother)"],
-        ["thing es 1 y other es 2", "(thing == 1 && other == 2)"]
+        ["thing es 1 y other es 2", "(thing === 1 && other === 2)"]
       ]
     }
   ]
@@ -235,9 +235,9 @@ expressionsEs.addRule(IsEqual, {
         scope.variables?.add("other")
       },
       tests: [
-        ["thing es other", "(thing == other)"],
-        ["thing no es other", "(thing != other)"],
-        ["thing está other", "(thing == other)"]
+        ["thing es other", "(thing === other)"],
+        ["thing no es other", "(thing !== other)"],
+        ["thing está other", "(thing === other)"]
       ]
     },
     // a thing compared to one of the values its type lists:  the property that lists it
@@ -254,8 +254,8 @@ expressionsEs.addRule(IsEqual, {
         )
       },
       tests: [
-        ["card es tréboles", '(card.palo == "tréboles")'],
-        ["card no es corazones", '(card.palo != "corazones")']
+        ["card es tréboles", '(card.palo === "tréboles")'],
+        ["card no es corazones", '(card.palo !== "corazones")']
       ]
     }
   ]
@@ -380,7 +380,7 @@ expressionsEs.addRule(IsIn, {
       tests: [
         ["thing es green o blue", 'core.includes(["green", "blue"], thing)'],
         ["thing no es green o blue", '!core.includes(["green", "blue"], thing)'],
-        ["thing es green o thing es blue", '(thing == "green" || thing == "blue")']
+        ["thing es green o thing es blue", '(thing === "green" || thing === "blue")']
       ]
     }
   ]

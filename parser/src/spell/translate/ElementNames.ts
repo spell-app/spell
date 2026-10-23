@@ -1,4 +1,4 @@
-import { elementTagFor } from "spell-kit/util"
+import { camelCase, elementTagFor } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import type { TranslationNames } from "./TranslationNames"
 import type { MissingName, UIVocabulary } from "./translate.types"
@@ -11,6 +11,8 @@ import type { MissingName, UIVocabulary } from "./translate.types"
  *   - A text people read (`aria-label`, `content` ...) through the project's dictionary's texts:
  *     `aria-label="Auto play"` => `aria-label="Jugar solo"`.
  *   - `part` names one of the project's own parts:  through its names, `part="picture"` => `part="imagen"`.
+ *   - A form control's `name` binds it to a property of the thing the form shows (epic `spanish` P28):
+ *     through the project's names, as compiled code names the property, `name="newTaskName"` => `name="nombreNuevaTarea"`.
  * - The project's own drawable things by their types' names in the other language, as compiled code names them:
  *   `<solitaire-tableau layout="stacked">` => `<solitario-columna disposición="apilada">`.
  * - Anything else stays as written:  plain HTML (`<div class="Board">`), names it doesn't know.
@@ -67,6 +69,8 @@ export class ElementNames {
   attribute(tag: string, attribute: string, value?: string): { attribute: string; value?: string } {
     const isText = TEXT_ATTRIBUTES.has(attribute)
     const isPart = attribute === "part"
+    // a form control's `name`, not one that names one of its own values (`<ui-icon name="star">`)
+    const isBinding = BINDING_ATTRIBUTES.has(attribute) && !!value && !this.takesValues(tag, attribute)
     let name = attribute
     let translated = value
     if (this.ui?.tag(tag)) {
@@ -81,7 +85,22 @@ export class ElementNames {
     }
     if (isText && value) translated = this.quietly(() => this.names.text(value)) ?? value
     if (isPart && value) translated = this.quietly(() => this.names.name(value)) ?? value
+    if (isBinding) translated = this.boundProperty(value) ?? value
     return { attribute: name, value: translated }
+  }
+
+  /**
+   * The property `value` names in a form control's `name` (`newTaskName`, `title`), in the other language,
+   * as compiled code names it:  `nombreNuevaTarea`, `título`;  `undefined` if the project declares no such name.
+   * - Its words as written, else split where a capital starts one (`stock pile` is `stockPile` in code).
+   * - Only the project's own names:  a field's name the program never declares stays as written, quietly.
+   */
+  boundProperty(value: string): string | undefined {
+    const words = value.replace(/(?<=\p{Ll})(?=\p{Lu})/gu, " ").toLowerCase()
+    const found = [value, words].find((each) => this.names.hasOwnName(each))
+    if (!found) return undefined
+    const translated = this.quietly(() => this.names.name(found))
+    return translated && camelCase(translated.trim().replace(/\s+/g, "-"))
   }
 
   /** `lookup()`'s answer;  any name it asked for and didn't find is noted in `takeMissed()`, not as missing. */
@@ -150,6 +169,9 @@ export class ElementNames {
     )
   }
 }
+
+/** The attributes whose value names a property the element is bound to:  a form control's `name`. */
+const BINDING_ATTRIBUTES = new Set(["name"])
 
 /** The attributes whose value is a text people read:  translated as the project's texts are. */
 const TEXT_ATTRIBUTES = new Set([

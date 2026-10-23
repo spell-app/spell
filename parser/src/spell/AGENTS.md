@@ -72,15 +72,21 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - `NamesPass`:  every name the project declares and its lines lack, and the glossary doesn't have, by Claude:
     the types in one call, then the rest in up to 6 calls at once, each checked readable,
     the unreadable (and any word two calls both chose) asked for again once
+    - each keeps its English name's form:  words stay words (`todos-app` => `gestor-de-tareas`), camelCase stays
+      camelCase (`newTaskName` => `nombreNuevaTarea`);  a type's name never a plural, `tareas`
+      (its first word says how many:  `gestor-tareas`, a manager of tasks, is one;  epic `spanish` P28)
   - `Translator`:  each line written again with its rule's twin in the other language's pack
     (the same class, registered in the same place), its slots filled with its children, translated the same way;
-    it flags the lines whose word order may be wrong (`risky`)
+    it flags the lines whose word order may be wrong (`risky`);
+    a type's creation hook (`- when created:`) in the other language's own words, `- al crearla:`
   - `ShapeCheck`:  each translated line compiled beside its source line, names and texts aside (`shapeOf()`):
     a line that compiles to a different program "means something else"
   - `FixUps`:  each line that fails lint, a test or the shape check, or the writer couldn't write or flagged,
     written again by Claude in context, one call a round;  an answer that isn't JSON, asked again in two halves
   - `ElementNames`:  the tags, attributes and values a project draws with, `<ui-*>` through Spell UI's names
     (handed in by spell-app:  spell-lang never imports Spell UI), in its JSX and its style sheets
+    - a form control's `name` binds it to a property:  the property's name in the other language, as code names it
+      (`name="newTaskName"` => `name="nombreNuevaTarea"`;  epic `spanish` P28)
   - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`, with its nouns' genders;
     beneath it, the names of the projects it imports
   - `NamesSeeder`:  fills one from a translation a person made (`--seed`)

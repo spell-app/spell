@@ -431,8 +431,9 @@ listsEs.addRule(PositionExpression, {
   ]
 })
 
+// its article may be in a `del` / `al` before it:  `el título del primer elemento de la lista` (epic `spanish` P28)
 listsEs.addRule(OrdinalPositionExpression, {
-  syntax: "(el|la) {ordinal} {arg:singular_identifier} (en|de|del) {expression:operand}",
+  syntax: "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {expression:operand}",
   tests: [
     {
       compileAs: "expression",
@@ -444,7 +445,8 @@ listsEs.addRule(OrdinalPositionExpression, {
       tests: [
         ["el primer item de my-list", "core.getItemAt(myList, 0)"],
         ["la décima card de deck", "core.getItemAt(deck, 9)"],
-        ["la penúltima word en words", "core.getItemAt(words, -2)"]
+        ["la penúltima word en words", "core.getItemAt(words, -2)"],
+        ["primer item de my-list", "core.getItemAt(myList, 0)"]
       ]
     }
   ]
@@ -470,7 +472,7 @@ listsEs.addRule(OrdinalPositionExpression.specialize({ priority: Priority.specif
 })
 
 listsEs.addRule(OrdinalWhereExpression, {
-  syntax: "(el|la) {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
+  syntax: "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
   tests: [
     {
       compileAs: "expression",
@@ -616,10 +618,10 @@ listsEs.addRule(ListMembershipTest, {
       },
       tests: [
         ["my-list tiene items donde", "core.any(myList, () => {})"],
-        ["my-list tiene items donde el item es 1", "core.any(myList, (item) => item == 1)"],
-        ["my-list tiene items donde su foo es 1", "core.any(myList, (item) => item.foo == 1)"],
-        ["my-list no tiene items donde item es 1", "!core.any(myList, (item) => item == 1)"],
-        ["el foo del bar no tiene items donde item es 1", "!core.any(bar.foo, (item) => item == 1)"]
+        ["my-list tiene items donde el item es 1", "core.any(myList, (item) => item === 1)"],
+        ["my-list tiene items donde su foo es 1", "core.any(myList, (item) => item.foo === 1)"],
+        ["my-list no tiene items donde item es 1", "!core.any(myList, (item) => item === 1)"],
+        ["el foo del bar no tiene items donde item es 1", "!core.any(bar.foo, (item) => item === 1)"]
       ]
     }
   ]
@@ -798,12 +800,12 @@ listsEs.addRule(ListRemoveWhere, {
       },
       tests: [
         ["quitar items de my-list donde", "core.removeWhere(myList, () => {})"],
-        [`quitar items de my-list donde item no es "ace"`, 'core.removeWhere(myList, (item) => item != "ace")'],
+        [`quitar items de my-list donde item no es "ace"`, 'core.removeWhere(myList, (item) => item !== "ace")'],
         [
           "eliminar las cartas en deck donde el suit de la carta es clubs",
-          'core.removeWhere(deck, (carta) => carta.suit == "clubs")'
+          'core.removeWhere(deck, (carta) => carta.suit === "clubs")'
         ],
-        ["quitar cartas en deck donde su suit es clubs", 'core.removeWhere(deck, (carta) => carta.suit == "clubs")']
+        ["quitar cartas en deck donde su suit es clubs", 'core.removeWhere(deck, (carta) => carta.suit === "clubs")']
       ]
     }
   ]
@@ -1026,6 +1028,11 @@ listsEs.addRule(ListRangeIteration, {
         [
           "para cada number de 1 a 10:\n\timprimir el number",
           "core.getRange(1, 10).forEach((number) => core.console.log(number))"
+        ],
+        // a name starting with an accented letter keeps its parameter (epic `spanish` P28)
+        [
+          "para índice de 1 a 7: imprimir el índice",
+          "core.getRange(1, 7).forEach((índice) => core.console.log(índice))"
         ]
       ]
     }

@@ -200,7 +200,8 @@ export type ClaudeOptions = {
 /** A JSON schema, as `ClaudeOptions.schema` takes it. */
 export type JsonSchema = { [key: string]: unknown }
 
-export type ClaudeEffort = "low" | "medium" | "high"
+/** How hard Claude thinks, as `claude --effort` takes it:  less is faster. */
+export type ClaudeEffort = "low" | "medium" | "high" | "xhigh" | "max"
 
 /** Something wrong with one line of a translated project, as lint or a failed test says (epic `spanish` P25). */
 export type LineProblem = {

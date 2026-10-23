@@ -55,11 +55,13 @@ export class Thing extends Eventful(Observable) {
     registerThing(this)
     // make its early starting values now (`PropInfo.early`), e.g. a solitaire's piles -- unless `props` gave them
     for (const name of schemaOf(new.target).earlyProps()) this.getProp(name)
-    if (runsCreate(Thing, new.target)) this.create()
+    if (runsCreate(Thing, new.target)) this.create(props)
   }
 
   /**
    * Called once per instance, after constructor props are assigned -- override in a subclass to set up initial state.
+   * - `props`:  what it was made with, `new Task({ title })`, for a hook that takes them,
+   *   `- when created (with title as text):` (epic `spanish` P28).
    * - Exactly once, whichever runs it.
    * - NOTE: runs from THIS constructor, before any subclass field initializer:
    *   a plain field set here is clobbered by its initializer.
@@ -67,7 +69,7 @@ export class Thing extends Eventful(Observable) {
    *   - A hand-written subclass with fields MUST be `@thing` (`spell-kit/util`),
    *     which runs `create()` after them instead.
    */
-  create(): void {}
+  create(_props?: Record<string, unknown>): void {}
 
   /**
    * Set reactive `property` to `value` -- see `Observable.setProp()`.

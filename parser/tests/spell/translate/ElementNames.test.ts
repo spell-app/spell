@@ -18,7 +18,12 @@ const ENGLISH = SP.Language.for("en")!
 const SPANISH = SP.Language.for("es")!
 
 /** A few of Spell UI's Spanish names:  tags, attributes, and the values of the attributes that take a set. */
-const UI_TAGS: Record<string, string> = { "ui-text": "es-texto", "ui-item": "es-elemento", "ui-popup": "es-emergente" }
+const UI_TAGS: Record<string, string> = {
+  "ui-text": "es-texto",
+  "ui-item": "es-elemento",
+  "ui-popup": "es-emergente",
+  "ui-input": "es-entrada"
+}
 const UI_ATTRIBUTES: Record<string, string> = {
   type: "tipo",
   content: "contenido",
@@ -90,6 +95,19 @@ describe("ElementNames:  the elements a project draws with, in the other languag
     )
   })
 
+  test("a form control's `name` binds a property:  its name in the other language, as code names it", () => {
+    const source = `a "card" is a drawable thing where:
+	- its "picture" is a text
+	- its "pictureColor" is a text
+	- to draw it:
+		return <ui-text><ui-input name="picture"/><ui-input name="pictureColor" placeholder="Auto play"/><ui-input name="zip"/></ui-text>
+`
+    const names = { ...NAMES, names: { ...NAMES.names, pictureColor: "color de imagen" } }
+    expect(translated(source, { names })[4]).toBe(
+      '\t\tdevolver <es-texto><es-entrada name="imagen"/><es-entrada name="colorDeImagen" placeholder="Jugar solo"/><es-entrada name="zip"/></es-texto>'
+    )
+  })
+
   test("without Spell UI's names, its tags stay as written", () => {
     expect(translated(CARD, { ui: false })[5]).toBe("\t\t\t<ui-text")
   })
@@ -124,8 +142,8 @@ describe("ElementNames:  the elements a project draws with, in the other languag
 ////////////////
 
 /** Elements named with `NAMES`, Spell UI's fake names, Solitaire as Solitario. */
-function elementNames({ ui = true }: { ui?: boolean } = {}) {
-  const names = new TranslationNames(NAMES, { from: ENGLISH, to: SPANISH })
+function elementNames({ ui = true, names: data = NAMES }: { ui?: boolean; names?: NamesData } = {}) {
+  const names = new TranslationNames(data, { from: ENGLISH, to: SPANISH })
   return new ElementNames({
     names,
     ui: ui ? UI_SPANISH : undefined,
@@ -134,7 +152,7 @@ function elementNames({ ui = true }: { ui?: boolean } = {}) {
 }
 
 /** `source` (one English file), translated with `NAMES` and Spell UI's names:  its lines. */
-function translated(source: string, options: { ui?: boolean } = {}): string[] {
+function translated(source: string, options: { ui?: boolean; names?: NamesData } = {}): string[] {
   const { files } = parseSpellProject([{ path: "/Card.spell", contents: source }])
   const elements = elementNames(options)
   const translator = new Translator({ from: ENGLISH, to: SPANISH, names: elements.names, elements })

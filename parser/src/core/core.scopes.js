@@ -10,7 +10,7 @@
         { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "new_thing", syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?" },
-        { name: "create_thing", syntax: "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?" }
+        { name: "create_thing", syntax: "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?" }
       ]
     },
     {

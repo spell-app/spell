@@ -728,8 +728,9 @@ export class ASTNotExpression extends ASTExpression {
 
 /**
  * What an infix operator MEANS, in spell's words -- a writer spells it in its language, e.g. `JSWriter`:
- * `equals` => `==`, `exactly equals` => `===`, `and` => `&&`.
- * - `equals` is spell's `is`:  forgiving, `"2"` is `2`;  `exactly equals` is `is exactly`.
+ * `equals` => `===`, `and` => `&&`.
+ * - `equals` is spell's `is`;  `exactly equals` is `is exactly`.
+ *   Javascript writes both `===` (epic `spanish` P28):  `is` was a forgiving `==` before, `"2"` was `2`.
  * - `plus` adds numbers or joins text:  which, a writer can tell from the sides' datatypes.
  */
 export const AST_OPERATORS = [

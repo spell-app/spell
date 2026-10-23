@@ -97,8 +97,11 @@ export class NamesPass {
       })
     const declaredKeys = new Set(declared.map(({ kind, words }) => `${kind}:${words}`))
     const seen = new Set<string>()
+    // one type, however its words are joined:  `todos-app` is `todos app`
+    const keyOf = (kind: NamesKind, words: string) =>
+      `${kind}:${kind === "types" ? TranslationNames.typeKey(words) : words}`
     return [...declared, ...missing].filter(({ kind, words }) => {
-      const key = `${kind}:${words}`
+      const key = keyOf(kind, words)
       const ownOnly = declaredKeys.has(key)
       if (seen.has(key) || this.has(kind, words, ownOnly) || (kind === "types" && isKind(words))) return false
       seen.add(key)
@@ -250,10 +253,10 @@ export class NamesPass {
       const type = value as TranslatedType
       if (typeof type?.name !== "string" || !type.name) return "a type is `{ name, gender }`"
       if (to.articles?.genderOf && !type.gender) return "no gender"
-      return this.unreadable("names", type.name)
+      return formChange(name.words, type.name) ?? this.unreadableType(type.name) ?? this.unreadable("names", type.name)
     }
     if (typeof value !== "string") return "not a text"
-    if (name.kind === "names") return this.unreadable("names", value)
+    if (name.kind === "names") return formChange(name.words, value) ?? this.unreadable("names", value)
     if (name.kind !== "phrases") return undefined
     const slots = (text: string) => (text.match(/\([^)]*\)/g) ?? []).length
     if (slots(value) !== slots(name.words)) return `keeps ${slots(name.words)} \`(slots)\`, not ${slots(value)}`
@@ -265,6 +268,17 @@ export class NamesPass {
       return `keeps its \`it\`:  \`${[...(to.words.itWords ?? ["it"])][0]}\` straight after the verb`
     }
     return this.unreadable("phrases", value)
+  }
+
+  /**
+   * Why spell can't read `name` as a TYPE's name, if it can't (epic `spanish` P28):
+   * a plural, as spell reads the other language -- `tareas`, not `agenda`, `gestor-tareas` or `gestorTareas`,
+   * whose first word says it's one
+   */
+  unreadableType(name: string): string | undefined {
+    const singular = this.names.to.inflector.singularize(name)
+    if (singular !== name) return `reads as a plural (of \`${singular}\`):  a type's name is singular, e.g. \`agenda\``
+    return undefined
   }
 
   /**
@@ -372,6 +386,9 @@ export class NamesPass {
       "Translate them ALL together, so one thing has one word everywhere and the program reads as one language.",
       "Fill in every empty value below, and answer with ONE JSON object of only those keys, and `genders`:",
       '- `types`:  each type\'s name, singular, as `{ "name": "...", "gender": "masculine" | "feminine" }`',
+      "  - singular, as the language reads it:  `todos-app` => `agenda` or `gestor-tareas`, never `tareas`",
+      "- KEEP EACH NAME'S FORM:  words stay words, plain or dashed (`todos-app` => `agenda` or `gestor-de-tareas`,",
+      "  never `gestorTareas`);  camelCase stays camelCase (`newTaskName` => `nombreNuevaTarea`)",
       "- `names`:  each property, variable, value or event, as written (a plural stays plural)",
       `  - NEVER with one of spell's own small words inside, which end a name:  ${smallWords(to)}`,
       "    e.g. `test card` => `candidata`, not `carta de prueba`;  one word is best",
@@ -458,6 +475,20 @@ export class NamesPass {
     }
     return filled(own[words]) || (!ownOnly && filled(imported[words]))
   }
+}
+
+/**
+ * Why `theirs` isn't written in the same FORM as `ours`, if it isn't (Owen, 2026-10-23, epic `spanish` P28:
+ * "why is the type name being created camelCase at all?"):
+ * - words stay words, plain or dashed:  `todos-app` => `agenda` or `gestor-de-tareas`, never `gestorTareas`
+ * - camelCase stays one word:  `newTaskName` => `nombreNuevaTarea`, never `nombre nueva tarea`
+ * - `ours` as the program has it:  a type's as declared, `todos app`, its dashes made spaces
+ */
+export function formChange(ours: string, theirs: string): string | undefined {
+  const isCamel = (words: string) => /\p{Ll}\p{Lu}/u.test(words)
+  if (!isCamel(ours) && isCamel(theirs)) return `keeps its form:  words, as \`${ours}\` is, not camelCase`
+  if (isCamel(ours) && /[\s-]/.test(theirs)) return `keeps its form:  one word in camelCase, as \`${ours}\` is`
+  return undefined
 }
 
 /** A `claude` call of the names pass:  the types (stage 1), the rest (stage 2), or asking again. */

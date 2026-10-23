@@ -885,7 +885,7 @@ describe("outline style", () => {
         '\t\t\treturn <div class="back"/>',
         '\t\treturn <div class="front"/>'
       ])
-      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction == "down"\) return h\("div", \{ class: "back" \}\)/)
+      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction === "down"\) return h\("div", \{ class: "back" \}\)/)
     })
 
     test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {

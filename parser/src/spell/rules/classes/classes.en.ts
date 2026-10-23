@@ -867,7 +867,7 @@ classes.addRule(NewList, {
 })
 
 classes.addRule(CreateThing, {
-  syntax: "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
+  syntax: "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
   tests: [
     {
       title: "creates normal objects properly",
@@ -877,7 +877,9 @@ classes.addRule(CreateThing, {
       },
       tests: [
         [`create a Thing`, `new Thing()`],
-        [`create a Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`]
+        [`create a Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`],
+        // `new` may be said:  `create a new task with title = "Shop"` (epic `spanish` P28)
+        [`create a new Thing with a = 1`, "new Thing({ a: 1 })"]
       ]
     },
     {

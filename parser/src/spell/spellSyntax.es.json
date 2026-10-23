@@ -885,17 +885,17 @@
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
           "line": 9,
-          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `==`/`!=`.",
+          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing es other",
               "outputs": {
                 "js": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "ts": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "py": {
                   "code": "(thing == other)"
@@ -1376,6 +1376,7 @@
             "url_or_email",
             "draw_method",
             "create_method",
+            "create_hook_words",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1426,6 +1427,9 @@
             },
             {
               "syntax": "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
+            },
+            {
+              "syntax": "(create:crearla|crearlo|crearlas|crearlos|crear (la|lo|las|los)?)"
             },
             {
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
@@ -2268,7 +2272,7 @@
           "purpose": "Ordinal-word index expression: e.g. `the first item of my-list`, `the tenth card of deck`.",
           "syntaxes": [
             {
-              "syntax": "(el|la) {ordinal} {arg:singular_identifier} (en|de|del) {expression:operand}",
+              "syntax": "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {expression:operand}",
               "example": "el primer item de my-list",
               "outputs": {
                 "js": {
@@ -2309,7 +2313,7 @@
           "purpose": "The first (second, last ...) item of a list that passes a test (epic page `outline-spell`, P26).",
           "syntaxes": [
             {
-              "syntax": "(el|la) {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
+              "syntax": "(el|la)? {ordinal} {arg:singular_identifier} (en|de|del) {list:expression} donde {inline_expression}?",
               "example": "el primer item en my-list donde su id > 1",
               "outputs": {
                 "js": {
@@ -3483,7 +3487,7 @@
           "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
-              "syntax": "crear (un|una) {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?",
+              "syntax": "crear (un|una) (nuevo|nueva)? {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?",
               "example": "crear una Thing",
               "outputs": {
                 "js": {
@@ -4363,22 +4367,22 @@
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
-              "example": "un player tiene un name como texto",
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
+              "example": "un gestor-tareas tiene un nombre como texto",
               "outputs": {
                 "js": {
-                  "code": "Player.declareProp(\"name\", { type: \"text\" })\nObject.defineProperty(Player.prototype, \"name\", {\n  get() { return this.getProp(\"name\") },\n  set(value) { this.setProp(\"name\", value) },\n  configurable: true\n})"
+                  "code": "GestorTareas.declareProp(\"nombre\", { type: \"text\" })\nObject.defineProperty(GestorTareas.prototype, \"nombre\", {\n  get() { return this.getProp(\"nombre\") },\n  set(value) { this.setProp(\"nombre\", value) },\n  configurable: true\n})"
                 },
                 "ts": {
-                  "code": "export interface Player { name: string }\nPlayer.declareProp(\"name\", { type: \"text\" })\nObject.defineProperty(Player.prototype, \"name\", {\n  get(this: Player): string { return this.getProp(\"name\") as string },\n  set(this: Player, value: string) { this.setProp(\"name\", value) },\n  configurable: true\n})"
+                  "code": "export interface GestorTareas { nombre: string }\nGestorTareas.declareProp(\"nombre\", { type: \"text\" })\nObject.defineProperty(GestorTareas.prototype, \"nombre\", {\n  get(this: GestorTareas): string { return this.getProp(\"nombre\") as string },\n  set(this: GestorTareas, value: string) { this.setProp(\"nombre\", value) },\n  configurable: true\n})"
                 },
                 "py": {
-                  "code": "name = prop(type=\"text\")"
+                  "code": "nombre = prop(type=\"text\")"
                 }
               }
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?",
               "example": "las cartas tienen una dirección como o bien up o down",
               "outputs": {
                 "js": {
@@ -4393,19 +4397,19 @@
               }
             },
             {
-              "syntax": "(un|una) {type:singular_type} tiene (un|una|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(un|una) {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "(los|las)? {type:plural_type} tienen (un|una|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
               "syntax": "{type:subject_its} {property:quoted_member} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
+              "syntax": "{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? (,? que {rule:must_rule})? {nested_statements}?"
             },
             {
               "syntax": "{type:subject_implied} {property:quoted_member} (es|son) {specifier:outline_specifier} (,? que {rule:must_rule})? {nested_statements}?"
@@ -6035,10 +6039,10 @@
               "example": "para elegir un color:\n\tred si suit es \"hearts\"",
               "outputs": {
                 "js": {
-                  "code": "export function elegirUnColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function elegirUnColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "ts": {
-                  "code": "export function elegirUnColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function elegirUnColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "py": {
                   "code": "def elegir_un_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
@@ -6199,6 +6203,32 @@
             },
             {
               "syntax": "{type:subject_implied} {signature:quoted_method_signature} si? :? {expression_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CreateHook",
+          "ruleNames": ["create_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CreateHook.ts",
+          "line": 20,
+          "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when created (with title as text):`.",
+          "syntaxes": [
+            {
+              "syntax": "al {signature:method_signature} :? {statement_body}?",
+              "example": "una tarea es una cosa donde:\n\t- al crearla (con título como texto, hecha como una opción):\n\t\timprimir el título",
+              "outputs": {
+                "js": {
+                  "code": "export class Tarea extends Thing {\n  create(props = {}) {\n    const { título, hecha } = props\n    core.console.log(título)\n  }\n}"
+                },
+                "ts": {
+                  "code": "@thing\nexport class Tarea extends Thing {\n  create(props: { título?: string; hecha?: boolean } = {}) {\n    const { título, hecha } = props\n    core.console.log(título)\n  }\n}"
+                },
+                "py": {
+                  "code": "class Tarea(Thing):\n    def create(self, props: Any = {}) -> None:\n        título = props.título\n        hecha = props.hecha\n        core.console.log(título)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

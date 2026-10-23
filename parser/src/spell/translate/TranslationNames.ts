@@ -57,7 +57,8 @@ export class TranslationNames {
     for (const statement of statements) {
       if (statement.type) types.add(wordsOfTypeName(statement.type))
       if (statement.property) names.add(unquote(statement.property))
-      if (statement.name && (statement.kind === "method" || statement.kind === "function")) {
+      // a hook nothing calls by its words (`- when created:`, no `output`) is written in the other language's own
+      if (statement.name && statement.output && (statement.kind === "method" || statement.kind === "function")) {
         phrases.add(unquote(statement.name))
       }
       addValues(statement.enumeration)
@@ -106,7 +107,7 @@ export class TranslationNames {
     const kind = words.includes(" ") ? this.kindName(words) : undefined
     if (kind) return { name: kind }
     const found = this.typeEntry(words) ?? this.typeEntry(singular)
-    if (!found) return this.miss("types", singular)
+    if (!found) return this.miss("types", TranslationNames.typeKey(singular))
     const isPlural = singular !== words && !this.typeEntry(words)
     return isPlural ? { ...found, name: this.to.inflector.pluralize(found.name) } : found
   }
@@ -131,6 +132,16 @@ export class TranslationNames {
     const type = this.typeEntry(singular)
     if (type) return singular === words ? type.name : this.to.inflector.pluralize(type.name)
     return this.kindName(words) ?? this.miss("names", words)
+  }
+
+  /** A type's words as the dictionary keys them:  lowercase, a space between words, `todos-app` => `todos app`. */
+  static typeKey(words: string): string {
+    return words.toLowerCase().replace(/[-_\s]+/g, " ")
+  }
+
+  /** Is `words` one of our own names (a property, variable or value), not an import's:  filled in or not? */
+  hasOwnName(words: string): boolean {
+    return words in this.data.names
   }
 
   /** Phrase `words` -- a method's or a quoted phrase's, as declared -- in the other language;  `undefined` if missing. */
@@ -251,10 +262,14 @@ export class TranslationNames {
     return undefined
   }
 
-  /** Type `words` in `types`, if there and filled in;  ours, else an import's. */
+  /**
+   * Type `words` in `types`, if there and filled in;  ours, else an import's.
+   * - Its words joined by a dash or a space are one type, as its class says:  `todos-app` is `todos app`, `TodosApp`.
+   */
   private typeEntry(words: string): TranslatedType | undefined {
+    const spaced = TranslationNames.typeKey(words)
     for (const types of [this.data.types, this.imported.types]) {
-      const found = types[words] ?? types[words.toLowerCase()]
+      const found = types[words] ?? types[words.toLowerCase()] ?? types[spaced]
       if (!isMissing(found?.name)) return found
     }
     return undefined

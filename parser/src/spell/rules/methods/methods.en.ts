@@ -10,6 +10,7 @@ import { Synonyms, Wording } from "spell-lang/spell/rules/expressions"
 import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
+import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
@@ -30,6 +31,11 @@ methods.addRule(Synonyms.specialize({ ruleName: "receiver_of" }), { syntax: "of"
 // another language's are its own, `- para crearlo:` -- see `MethodDefinition.hookOf()`
 methods.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["create"] }), {
   syntax: "(create:create it|create them)"
+})
+
+// the words of what runs as a thing is made, in its type's outline:  `- when created:` -- see `CreateHook`
+methods.addRule(Wording.specialize({ ruleName: "create_hook_words", meanings: ["create"] }), {
+  syntax: "(create:created|creating it)"
 })
 
 methods.addRule(MethodKeyword)
@@ -1020,4 +1026,45 @@ methods.addRule(QuotedTypeExpression, {
 // - NOT `is`:  `- "suit" is ...` is a property, as `its "suit" is ...` -- see `isPropertyWithoutSubject()`
 methods.addRule(QuotedTypeExpression, {
   syntax: "{type:subject_implied} {signature:quoted_method_signature} if? :? {expression_body}?"
+})
+
+// what runs as a thing is made, in its type's outline:  `- when created (with ...):`, also `- when creating it:` (epic `spanish` P28)
+methods.addRule(CreateHook, {
+  syntax: "when {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          [
+            "a task is a thing where:",
+            "\t- when created (with title as text, done as a choice):",
+            "\t\tprint the title"
+          ],
+          [
+            "export class Task extends Thing {",
+            "  create(props = {}) {",
+            "    const { title, done } = props",
+            "    core.console.log(title)",
+            "  }",
+            "}"
+          ],
+          [
+            "@thing",
+            "export class Task extends Thing {",
+            "  create(props: { title?: string; done?: boolean } = {}) {",
+            "    const { title, done } = props",
+            "    core.console.log(title)",
+            "  }",
+            "}"
+          ]
+        ],
+        [
+          ["a task is a thing where:", "\t- when creating it:", "\t\tprint 1"],
+          ["export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Task extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
+        ]
+      ]
+    }
+  ]
 })
