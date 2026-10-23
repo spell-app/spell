@@ -24,8 +24,8 @@ import {
   type SharedSize,
   type Size
 } from "./tools.types.ts"
-import { NodePackage } from "spell-kit/element-tools/NodePackage"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { NodePackage } from "spell/element-tools/NodePackage"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
  * ### `BundleMeasure`

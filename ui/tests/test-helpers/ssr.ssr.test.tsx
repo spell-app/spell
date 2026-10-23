@@ -7,7 +7,7 @@ import { resolve } from "node:path"
 
 import { foundationCSS } from "spell-ui/styles"
 import { buttonVocabulary } from "spell-ui/components/ui-button/UIButton.en"
-import { ElementDefinition, type DOMElement } from "spell-kit/element"
+import { ElementDefinition, type DOMElement } from "spell/element"
 import { UIButton } from "spell-ui/components/ui-button/UIButton"
 
 import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"

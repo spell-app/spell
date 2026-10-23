@@ -2,7 +2,7 @@
 
 import { fileURLToPath } from "node:url"
 
-import { NodePackage } from "spell-kit/element-tools/NodePackage"
+import { NodePackage } from "spell/element-tools/NodePackage"
 import type { VisualBrowser, VisualOs } from "./visual.types.ts"
 
 /**

@@ -1,15 +1,15 @@
 import { existsSync, readdirSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { CLI } from "spell-kit/cli"
-import { ComponentPack } from "spell-kit/element-tools/ComponentPack"
-import { ComponentPackError } from "spell-kit/element-tools/tools.types"
+import { CLI } from "spell/cli"
+import { ComponentPack } from "spell/element-tools/ComponentPack"
+import { ComponentPackError } from "spell/element-tools/tools.types"
 
 import type { PackBuildReport, PackCheckReport } from "./cli.types"
 
 /**
  * `spell pack build <pack>`:  pack `name` of kit `root` built by the kit's pack tooling, `ComponentPack`
- * (`spell-kit/element-tools/ComponentPack`), which every pack's own `yarn pack:build` runs too (`spell-pack build`).
+ * (`spell/element-tools/ComponentPack`), which every pack's own `yarn pack:build` runs too (`spell-pack build`).
  * - What this adds:  the pack found BY NAME in the kit (`readPack()`), paths relative to the kit, `CliError`s.
  * - Node built-ins, `ComponentPack` and (only while building) Vite.
  * - Throws `CliError` for a name that's no pack, a tag without the pack's prefix, or an import of Spell UI or

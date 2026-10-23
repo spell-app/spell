@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { UI } from "spell-ui/runtime"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui/components/ui-button"
 import "spell-ui/components/ui-modal"

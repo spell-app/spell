@@ -1,5 +1,5 @@
 import { numberToWord, proto, suggest } from "spell-ui/util"
-import type { AttributeKind, AttributeSpec, ValueSetName } from "spell-kit/element/vocabulary.types"
+import type { AttributeKind, AttributeSpec, ValueSetName } from "spell/element/vocabulary.types"
 
 /****************
  * ### `ValueSets`
@@ -351,7 +351,7 @@ type KindDefaults = typeof KIND_VALUES
  * typed), so a vocabulary's `values: "hues"` and its `topics` are checked against this class.
  * - And an attribute of a set reads as its values:  `this.size` is `"mini" | ... | "massive"`, not any text.
  */
-declare module "spell-kit/element/vocabulary.types" {
+declare module "spell/element/vocabulary.types" {
   interface ValueSetValues extends ValuesBySet {}
   interface KindValueSets extends KindDefaults {}
   interface TopicNames extends Record<(typeof ValueSets.topics)[number], true> {}

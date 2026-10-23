@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { RovingTabindex } from "spell-ui/runtime/RovingTabindex"
 
 /** Dispatch a `keydown` from `target`. */

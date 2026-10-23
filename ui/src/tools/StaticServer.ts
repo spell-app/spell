@@ -2,7 +2,7 @@
 
 import { transformSync } from "esbuild"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import type { ImportMap } from "./tools.types.ts"
 
@@ -10,7 +10,7 @@ import type { ImportMap } from "./tools.types.ts"
  * ### `StaticServer`
  * A tiny static file server for the smoke pages:  URL prefixes mapped to directories, nothing else.
  * - A thin wrapper over `SRV.WebServer`, which owns the mime table, path safety and http plumbing
- *   (`spell-kit/server`:  node built-ins only).
+ *   (`spell/server`:  node built-ins only).
  * - No Vite dev server:  pages load BUILT files (`dist/`, vendored peers) exactly as a CDN would serve them.
  * - `.ts` files are transpiled on the fly (esbuild `transform`, types stripped, no bundling), so a
  *   type-only-importing helper like `PerfRun.ts` or a dictionary file can be loaded as-is.

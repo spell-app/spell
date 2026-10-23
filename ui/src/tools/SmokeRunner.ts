@@ -7,7 +7,7 @@ import { chromium, type Browser } from "playwright"
 import type { ImportMap, PageResult, SmokePage, SmokePageKind, SmokeResults } from "./tools.types.ts"
 import { HostApp } from "./HostApp.ts"
 import { StaticServer } from "./StaticServer.ts"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
  * ### `SmokeRunner`

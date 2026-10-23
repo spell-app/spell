@@ -7,7 +7,7 @@ import type { InlineConfig } from "vite"
 
 import type { ImportMap } from "./tools.types.ts"
 import { BundleMeasure } from "./BundleMeasure.ts"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
  * ### `PeerVendor`

@@ -4,7 +4,7 @@ import { ClassBuilder } from "spell-ui/elements"
 import { colorsCSS, foundationCSS } from "spell-ui/styles"
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 import { buttonsVocabulary } from "spell-ui/components/ui-button/UIButtons.en"
 import { buttonVocabulary } from "spell-ui/components/ui-button/UIButton.en"

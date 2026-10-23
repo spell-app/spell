@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SpellSolid, UIComponent } from "spell-kit/element"
+import { SpellSolid, UIComponent } from "spell/element"
 
 import "spell-ui/core"
 
-/** `SpellUISettings`:  what Spell UI hands `spell-kit/element` as its core loads. */
+/** `SpellUISettings`:  what Spell UI hands `spell/element` as its core loads. */
 describe("SpellUISettings", () => {
   test("Spell UI's settings are installed as its core loads", () => {
     expect(SpellSolid.isInstalled).toBe(true)

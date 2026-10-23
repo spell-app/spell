@@ -1,12 +1,12 @@
 {
   // spell-__pack__'s code, ONE TypeScript program:  everything in `src/`, the `<__prefix__*>` elements
   // (`src/components/`), with the Vite configs.
-  // - It extends the settings every repo shares, the kit's toolchain's (`spell-kit/toolchain/tsconfig.base.json`).
+  // - It extends the settings every repo shares, the kit's toolchain's (`spell/toolchain/tsconfig.base.json`).
   // - NO `paths`:  every file is imported by its package name and its path under `src/`
   //   (`spell-__pack__/components/__prefix__card`), the pack's own files too.
   //   `customConditions` makes TypeScript read the pack's SOURCE for its own name (`exports`, `spell-__pack__-source`),
   //   where another repo reads its built declarations (`types`).
-  "extends": "spell-kit/toolchain/tsconfig.base.json",
+  "extends": "spell/toolchain/tsconfig.base.json",
   "compilerOptions": {
     "customConditions": ["spell-__pack__-source"],
     "target": "ES2022",
@@ -14,7 +14,7 @@
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
     // the toolchain's global types:  the repo's ambient helpers (`Prettify` ...), used bare (WWOD §9)
-    "types": ["vite/client", "node", "spell-kit/toolchain/types"]
+    "types": ["vite/client", "node", "spell/toolchain/types"]
   },
   "include": ["src", "vite.config.ts", "vitest.config.ts"],
   // `src/components/__pack/` is generated (`spell pack build __pack__`):  not ours to check

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { UI } from "spell-ui/runtime"
-import { LEGACY_SCHEME_KEYS, SCHEME_KEY } from "spell-kit/server/site/site.types"
+import { LEGACY_SCHEME_KEYS, SCHEME_KEY } from "spell/server/site/site.types"
 
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
 import {
@@ -25,7 +25,7 @@ afterEach(async () => {
 })
 
 describe("DOCS_LOOK_KEYS.scheme", () => {
-  test("ONE scheme key for every doc site:  the site header's (`spell-kit/server/site`)", () => {
+  test("ONE scheme key for every doc site:  the site header's (`spell/server/site`)", () => {
     expect(DOCS_LOOK_KEYS.scheme).toBe(SCHEME_KEY)
     expect([...DOCS_LEGACY_SCHEME_KEYS]).toEqual([...LEGACY_SCHEME_KEYS])
   })

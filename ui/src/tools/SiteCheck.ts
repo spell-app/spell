@@ -13,7 +13,7 @@ import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { KIT_ROOT, SPELL_CLI } from "./pageServer.ts"
 import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
  * ### `SiteCheck`
@@ -441,7 +441,7 @@ export class SiteCheck {
    * - ignores console "Failed to load resource" lines
    *   (the response / request listeners report those, with their URL)
    * - NOTE:  a favicon 404 is a problem too, since 2026-10-04:
-   *   the page server answers `/favicon.ico` and injects its own icon links (`spell-kit/server`'s `WebServer`)
+   *   the page server answers `/favicon.ico` and injects its own icon links (`spell/server`'s `WebServer`)
    * - `net::ERR_ABORTED` is a note:  a navigation (the next tab's fresh load) cancels what's still in flight
    */
   private async open(check: CheckContext, options: BrowserContextOptions, label: string): Promise<Page> {

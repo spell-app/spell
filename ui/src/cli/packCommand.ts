@@ -1,4 +1,4 @@
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 import type { PackOptions, PackScaffoldReport } from "./cli.types"
 import { buildPack, checkPack, packNames } from "./packBuild"
@@ -7,7 +7,7 @@ import { addElement, createPack, nextSteps } from "./packCreate"
 /**
  * `spell pack <verb> ...`:  component packs (epic `epic-components`) -- another repo's custom elements, which a page
  * loads on demand through `<ui-root>`.  The logic:  `packCreate.ts`, and the kit's pack tooling
- * (`spell-kit/element-tools/ComponentPack`) for `build` and `check`, through `packBuild.ts`.
+ * (`spell/element-tools/ComponentPack`) for `build` and `check`, through `packBuild.ts`.
  * - Which kit:  the nearest one from the current folder up (`CLI.findCheckout(CLI.KIT_MARKER)`), so a worktree's packs.
  * - `--json`:  the report as JSON.
  * - Was `spell dev pack new | element | build | check`, spell-app's, until epic `repo-split` P13.

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 
 import { DesignComponents } from "./DesignComponents.ts"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"

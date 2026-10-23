@@ -3,7 +3,7 @@ import { describe, expect, it } from "vite-plus/test"
 import { foundationCSS } from "spell-ui/styles"
 import { nextFrame } from "spell-ui/util"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { stickyVocabulary } from "spell-ui/components/ui-sticky/UISticky.en"

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
 import { nextFrame } from "spell-ui/util"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { Visibility } from "spell-ui/runtime/Visibility"
 import type { VisibilityCalculations, VisibilityCallbacks } from "spell-ui/runtime/runtime.types"
 

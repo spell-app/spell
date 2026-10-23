@@ -4,7 +4,7 @@ import { AnimationNames } from "spell-ui/runtime"
 import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell-ui/styles"
 import { StyleGenerator } from "spell-ui/styles/StyleGenerator"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 import layersRaw from "spell-ui/styles/layers.css?raw"
 import tokensRaw from "spell-ui/styles/tokens.css?raw"

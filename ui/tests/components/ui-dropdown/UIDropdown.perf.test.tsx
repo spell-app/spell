@@ -2,7 +2,7 @@ import { expect, inject, it } from "vite-plus/test"
 import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { PerfRun } from "spell-ui/test-helpers/PerfRun"
 
 import "spell-ui/components/ui-dropdown"

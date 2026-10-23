@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 
 import { SharedVocabulary } from "spell-ui/vocabulary/SharedVocabulary"
 import { ValueSets } from "spell-ui/vocabulary/ValueSets"
@@ -16,13 +16,13 @@ import {
   type SiteTag,
   type SiteTagPage
 } from "spell-ui/docs-components/docs-components.types"
-import type { AttributeSpec, ComponentVocabulary, ValueSetName } from "spell-kit/element/vocabulary.types"
+import type { AttributeSpec, ComponentVocabulary, ValueSetName } from "spell/element/vocabulary.types"
 import { SITE_DATA, SITE_PAGES } from "./tools.types.ts"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
 import { SiteSearchBuilder } from "./SiteSearchBuilder.ts"
 import { ThemeFamilies } from "./ThemeFamilies.ts"
-import { VocabularyFiles } from "spell-kit/element-tools/VocabularyFiles"
+import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
 /****************
  * ### `SiteDataBuilder`

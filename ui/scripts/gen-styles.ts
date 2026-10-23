@@ -8,7 +8,7 @@ import { writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { StyleGenerator } from "spell-ui/styles/StyleGenerator"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 import { formatFiles } from "spell-ui/tools/generatedFiles"
 

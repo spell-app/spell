@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_PAGES } from "spell-ui/tools/tools.types"
 
 import { formatFiles } from "spell-ui/tools/generatedFiles"

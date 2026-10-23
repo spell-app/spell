@@ -5,7 +5,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { lazy, proto, protoMerged } from "spell-ui/util"
 import { E, UI, type UIT } from "spell-ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
-import { UIComponent, cssState, watches, onChange, state, untracked } from "spell-kit/element"
+import { UIComponent, cssState, watches, onChange, state, untracked } from "spell/element"
 // Import directly to avoid circular import
 import { DOMLoadableElement } from "./DOMLoadableElement"
 import { SOURCE_LOADER_TAG, SOURCE_MESSAGE_TAG } from "./elements.types"

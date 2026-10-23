@@ -1,6 +1,6 @@
 /**
  * Shared types for `spell-ui/elements`, Spell UI's own half of the element core.
- * - What makes an element at all is `spell-kit/element`'s:  `UIComponent`, `DOMElement` and their types.
+ * - What makes an element at all is `spell/element`'s:  `UIComponent`, `DOMElement` and their types.
  * - Here:
  *   - the parts with no Solid:  class building, validation, menu options, shorthand, native fallbacks
  *   - the elements that show a text file, the dropdown's entries, the sticky watch
@@ -14,7 +14,7 @@
 
 import type { E } from "spell-ui/core"
 // a constant `SourceEvent` reads as it's made:  spell-element's types file, which loads nothing
-import { ERROR_EVENT } from "spell-kit/element/elements.types"
+import { ERROR_EVENT } from "spell/element/elements.types"
 
 ////////////////
 // ## Class builder

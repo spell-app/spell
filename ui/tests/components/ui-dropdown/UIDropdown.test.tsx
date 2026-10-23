@@ -4,10 +4,10 @@ import { userEvent } from "vite-plus/test/browser"
 import { UI } from "spell-ui/runtime"
 import type { DropdownOptions } from "spell-ui/components/components.types"
 import { FlagCountry } from "spell-ui/components/ui-flag"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui/components/ui-dropdown"
 

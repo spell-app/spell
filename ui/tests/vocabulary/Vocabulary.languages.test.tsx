@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import type { DOMElement } from "spell-kit/element"
+import type { DOMElement } from "spell/element"
 import { UI } from "spell-ui/core"
 import { UIButton } from "spell-ui/components/ui-button"
 import { es } from "spell-ui/components/components.es"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /** The page's runtime, with Spanish defined:  once for the file (a page picks its language once). */
 const ui = await UI.load()

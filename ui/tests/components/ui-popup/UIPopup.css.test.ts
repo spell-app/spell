@@ -4,9 +4,9 @@ import { Keys } from "spell-ui/test-helpers/Keys"
 
 import { colorsCSS, foundationCSS, nativeCSS } from "spell-ui/styles"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Fixture } from "spell/test-helpers/Fixture"
+import type { DOMElement } from "spell/element"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import "spell-ui/components/ui-button"

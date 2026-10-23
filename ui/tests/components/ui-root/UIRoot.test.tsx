@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vite-plus/test"
 import type { JSX } from "@solidjs/web"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Viewport } from "spell-kit/test-helpers/Viewport"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { Fixture } from "spell/test-helpers/Fixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Viewport } from "spell/test-helpers/Viewport"
 import { E } from "spell-ui/core"
-import { DOMElement } from "spell-kit/element"
+import { DOMElement } from "spell/element"
 
 import { UIRoot, type RootFailure } from "spell-ui/components/ui-root"
 

@@ -596,7 +596,7 @@ export type SourceSaveResult = {
 
 /**
  * Writes text back to where it came from;  `UI.sources.saver`.
- * - `ui` ships none:  it can't know the server.  The page server's lives in `spell-kit/server` (`SPELL_SERVER.saveFile`),
+ * - `ui` ships none:  it can't know the server.  The page server's lives in `spell/server` (`SPELL_SERVER.saveFile`),
  *   registered by the docs runtime.
  * - MUST throw on failure:  a `SourceError` (`conflict` for a 409 / 412, `save` otherwise), or -- from code that
  *   can't import it (a page's classic script) -- any object with a `kind` of `SourceErrorKind`, a `message` and

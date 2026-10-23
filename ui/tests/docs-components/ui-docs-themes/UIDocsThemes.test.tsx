@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UI } from "spell-ui/runtime"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"

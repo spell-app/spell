@@ -239,7 +239,7 @@ render(
 - Neither namespace:  Solid 2 has no `on:` (a compile error since rc.17), and `prop:` is no longer needed.
 - **The catch:**  your app must run the SAME Solid as Spell UI, `solid-js` and `@solidjs/web` 2.0.0-rc.17.
   Two copies of Solid on one page break silently:
-  two registries, two owners ([the element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md)).
+  two registries, two owners ([the element framework](https://github.com/spell-app/spell/blob/main/README-element.md)).
   - In Vite, that's `resolve.dedupe`:  `["solid-js", "@solidjs/web"]`, as every Spell build sets it.
 - Solid's context stops at the element:  each element draws in a Solid root of its own,
   so your providers don't reach inside.
@@ -431,6 +431,6 @@ PASS /src/tools/demo/fallback.html (every form control, working + failed)
 - [README.md](README.md):  Spell UI's front page:  `<ui-root>`, and the other ways to load the families
 - [README-components.md](README-components.md):  every family, for the attributes, properties and events
   your next snippet needs
-- [The kit's element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md):  why each tag is two objects,
+- [The kit's element framework](https://github.com/spell-app/spell/blob/main/README-element.md):  why each tag is two objects,
   and why each one is its own error boundary
 - [README-site.md](README-site.md):  `yarn smoke` beside the other tools, and the order to run them in

@@ -3,10 +3,10 @@
 import { spawnSync, type SpawnSyncReturns } from "node:child_process"
 import { existsSync } from "node:fs"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
-import { NodePackage } from "spell-kit/element-tools/NodePackage"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { NodePackage } from "spell/element-tools/NodePackage"
+import { Terminal } from "spell/element-tools/Terminal"
 import { VisualError } from "./visual.types.ts"
 import { VisualSettings } from "./VisualSettings.ts"
 

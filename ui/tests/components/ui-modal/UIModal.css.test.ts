@@ -3,7 +3,7 @@ import { page } from "vite-plus/test/browser"
 
 import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { modalVocabulary } from "spell-ui/components/ui-modal/UIModal.en"

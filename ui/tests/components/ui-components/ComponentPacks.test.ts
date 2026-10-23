@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
 import * as core from "spell-ui/core"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import type { DOMElement } from "spell-kit/element"
+import { Fixture } from "spell/test-helpers/Fixture"
+import type { DOMElement } from "spell/element"
 
 import { ComponentPacks, registerPack } from "spell-ui/components/ui-components"
 import type { RootFailure, UIRoot } from "spell-ui/components/ui-root"

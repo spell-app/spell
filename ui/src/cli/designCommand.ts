@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import { CLI } from "spell-kit/cli"
+import { contentFolderOf } from "spell/server/contentFolder"
+import { CLI } from "spell/cli"
 
 /**
  * `spell design <verb> ...`:  Spell's claude.ai design system (epic `claude-design`), the nearest kit's tools, their

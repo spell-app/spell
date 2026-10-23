@@ -4,7 +4,7 @@ import { Dynamic, type JSX } from "@solidjs/web"
 import { protoMerged } from "spell-ui/util"
 import { E } from "spell-ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
-import { UIComponent } from "spell-kit/element"
+import { UIComponent } from "spell/element"
 
 import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
 

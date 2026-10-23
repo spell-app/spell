@@ -2,9 +2,9 @@ import { describe, expect, test } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { E } from "spell-ui/core"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-form"
 import "spell-ui/components/ui-input"

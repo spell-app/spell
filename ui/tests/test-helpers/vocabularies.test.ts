@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
-import { SkeletonText } from "spell-kit/element/SkeletonText"
+import { SkeletonText } from "spell/element/SkeletonText"
 import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
 import { MemberClashes } from "spell-ui/test-helpers/MemberClashes"
 

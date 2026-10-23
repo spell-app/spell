@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { UI } from "spell-ui/runtime"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { Fixture } from "spell/test-helpers/Fixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
 import { FallbackStub, type StubHost } from "spell-ui/test-helpers/FallbackStub"
 
 import { ButtonFallback } from "spell-ui/components/ui-button/UIButton.fallback"

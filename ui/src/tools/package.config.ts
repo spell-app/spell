@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import type { Bucket, ImportMap, PackageConfig } from "./tools.types.ts"
 import { COMPONENTS, ENTRIES, SHARED_ENTRIES, SOLID_EXTERNAL } from "spell-ui/vite.config.ts"
-import { VocabularyFiles } from "spell-kit/element-tools/VocabularyFiles"
+import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
 /** Repo root, absolute, with a trailing slash. */
 const ROOT = fileURLToPath(new URL("../../", import.meta.url))

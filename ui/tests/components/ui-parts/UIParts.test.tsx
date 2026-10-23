@@ -1,13 +1,13 @@
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 import { PartNouns } from "spell-ui/components/ui-parts/UIParts.types"
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
 
-import { UIComponent, type PartContext, type UIComponentClass, type DOMElement } from "spell-kit/element"
+import { UIComponent, type PartContext, type UIComponentClass, type DOMElement } from "spell/element"
 import { UI } from "spell-ui/runtime"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { StubOwner } from "spell-ui/test-helpers/StubOwner"
 
 import "spell-ui/components/ui-parts"

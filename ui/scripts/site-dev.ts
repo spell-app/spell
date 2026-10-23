@@ -16,7 +16,7 @@
  * - A watch rebuild doesn't clear `_assets/`, so a chunk whose hash changed leaves its old file behind.
  *   - Harmless, since `_assets/` isn't committed.
  *   - The page server's next start rebuilds it clean:
- *     its `site.js` is newer than the last recorded build (`spell-kit/server`'s `Bundle`).
+ *     its `site.js` is newer than the last recorded build (`spell/server`'s `Bundle`).
  * - `Ctrl-C` stops the watch;  the page server keeps running (`spell server stop`).
  */
 import { execFileSync } from "node:child_process"
@@ -24,7 +24,7 @@ import path from "node:path"
 import { build, type Rolldown } from "vite"
 
 import { KIT_ROOT, SPELL_CLI } from "spell-ui/tools/pageServer"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /** Spell UI's folder. */
 const UI = path.resolve(import.meta.dirname, "..")

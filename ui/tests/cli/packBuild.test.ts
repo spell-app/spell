@@ -5,7 +5,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 import { buildPack, checkPack, packNames, readPack } from "spell-ui/cli/packBuild"
 import { addElement, createPack } from "spell-ui/cli/packCreate"
 
@@ -13,7 +13,7 @@ import { addElement, createPack } from "spell-ui/cli/packCreate"
  * ONE throwaway kit, with a tiny pack repo in it:  `pack create` + `pack add` (unbuilt), on a kit's root files
  *   (`fixtures/kit/`).
  * - `node_modules` is a link to the install's:  the pack's `tsconfig.json` extends
- *   `spell-kit/toolchain/tsconfig.base.json`, and its elements import Spell UI by its npm name (`spell-ui/core`)
+ *   `spell/toolchain/tsconfig.base.json`, and its elements import Spell UI by its npm name (`spell-ui/core`)
  * - the tests run in order
  */
 const ROOT = realpathSync(mkdtempSync(join(tmpdir(), "pack-build-")))
@@ -27,7 +27,7 @@ const PACK = join(ROOT, "spell-demo")
 const CARD = join(PACK, "src", "components", "demo-card")
 
 /** The kit `spell` runs from:  its root, where its install's `node_modules` is. */
-const KIT = dirname(fileURLToPath(import.meta.resolve("spell-kit/package.json")))
+const KIT = dirname(fileURLToPath(import.meta.resolve("spell/package.json")))
 
 /** The real `spell` command, the kit's. */
 const SPELL = join(KIT, "bin", "spell.mjs")

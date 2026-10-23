@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { UI, type SourceSaver } from "spell-ui/runtime"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import { UIInclude } from "spell-ui/components/ui-include/UIInclude"
 import type { DOMIncludeElement } from "spell-ui/components/ui-include/UIInclude"

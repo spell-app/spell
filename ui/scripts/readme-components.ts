@@ -25,10 +25,10 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 import { chromium, type Page } from "playwright"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 
 import type { SiteDataFile, SiteFamily } from "spell-ui/docs-components/docs-components.types"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
 import { STATUS_TEXT, spliceGenerated, writeOrCheck } from "spell-ui/tools/generatedFiles"

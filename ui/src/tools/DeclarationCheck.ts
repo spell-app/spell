@@ -11,7 +11,7 @@ import { dirname, join, normalize, relative, resolve } from "node:path"
  * - Every import / export STATEMENT is a bare package name, or a relative path that resolves INSIDE `dist/`:
  *   - no `#...` alias, which a consumer can't resolve
  *   - no `spell-ui/...`:  `dist/` names its own files relatively (the published `exports` name only the entries)
- *   - no `spell-kit/util` or `spell-kit/element`:  not published on their own, their declarations ship in
+ *   - no `spell/util` or `spell/element`:  not published on their own, their declarations ship in
  *     `dist/_util/` and `dist/_spell-element/`
  *   - nothing escaping `dist/`
  *   - Doc comments may mention any of them.
@@ -122,4 +122,4 @@ export class DeclarationCheck {
 const SELF = /^spell-ui(\/|$)/
 
 /** The kit's folders whose declarations ship inside `spell-ui`'s `dist/` (`declarations()`):  never named by a `.d.ts`. */
-const UNPUBLISHED = /^spell-kit\/(util|element)(\/|$)/
+const UNPUBLISHED = /^spell\/(util|element)(\/|$)/

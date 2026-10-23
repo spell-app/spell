@@ -11,9 +11,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { keepingCommentsIn } from "spell-kit/util/node/json5"
+import { keepingCommentsIn } from "spell/util/node/json5"
 
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 ////////////////
 // ## Files

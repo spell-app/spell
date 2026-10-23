@@ -8,7 +8,7 @@
  * - NOTE: the kit's `spell commands` reads this file's TEXT, for each `spell.command(...)` and `<group>.command(...)`
  *   call:  keep each command's name a literal at its call, and each group a `const`.
  */
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 import type { IconsOptions, PackOptions, SsrOptions } from "spell-ui/cli/cli.types"
 

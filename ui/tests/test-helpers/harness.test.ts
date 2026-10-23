@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { A11y, expectAccessible } from "spell-kit/test-helpers/A11y"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { A11y, expectAccessible } from "spell/test-helpers/A11y"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 /**
  * Smoke test for the harness itself:  browser mode, custom elements with shadow roots, `Fixture`, axe.

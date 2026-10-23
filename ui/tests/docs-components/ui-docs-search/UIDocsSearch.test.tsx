@@ -1,10 +1,10 @@
 import { flush } from "solid-js"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import type { DOMElement } from "spell-kit/element"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Fixture } from "spell/test-helpers/Fixture"
+import type { DOMElement } from "spell/element"
 import { DATA, PAGE, SEARCH } from "spell-ui/test-helpers/docsSearch.fixtures"
 import { SiteData } from "spell-ui/docs-components"
 

@@ -1,9 +1,9 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import type { DOMElement } from "spell-kit/element"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import type { DOMElement } from "spell/element"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-progress"
 import "spell-ui/components/ui-segment"

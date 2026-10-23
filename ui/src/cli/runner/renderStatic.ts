@@ -7,7 +7,7 @@
  *   `UI` runtime it installs on `globalThis` and its console out of the CLI.
  * - Talks in `StaticMessage`s:  says `ready` once Vite is up, takes ONE `job`, answers a `page` per page (in
  *   order), then a `stylesheet` per shared sheet, then `done`, and exits.
- * - NEVER imports the kit's `spell-kit/cli`:  this process needs only Spell UI.
+ * - NEVER imports the kit's `spell/cli`:  this process needs only Spell UI.
  */
 import { StaticRenderer } from "spell-ui/tools/StaticRenderer"
 import type { StaticDocumentModule } from "spell-ui/tools/tools.types"

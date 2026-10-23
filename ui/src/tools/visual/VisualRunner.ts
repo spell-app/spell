@@ -3,10 +3,10 @@
 import { spawn, type ChildProcess } from "node:child_process"
 import { existsSync, readdirSync, rmSync } from "node:fs"
 
-import { DevServer } from "spell-kit/element-tools/DevServer"
+import { DevServer } from "spell/element-tools/DevServer"
 import { VisualVariables } from "spell-ui/tools/environment"
-import { NodePackage } from "spell-kit/element-tools/NodePackage"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { NodePackage } from "spell/element-tools/NodePackage"
+import { Terminal } from "spell/element-tools/Terminal"
 import { VisualError, type VisualBrowser, type VisualOs } from "./visual.types.ts"
 import { DockerBrowserServer } from "./DockerBrowserServer.ts"
 import { ParityReport } from "./ParityReport.ts"

@@ -28,8 +28,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { contentFolderOf } from "spell/server/contentFolder"
+import { Terminal } from "spell/element-tools/Terminal"
 
 import {
   BundleMeasure,
