@@ -125,8 +125,20 @@ function nodeModulesDir(): string {
  *   spell-lang never imports Spell UI, a repo above it.
  *   - The folder finds Spell UI as it finds the app:  installed beside spell-lang, through its `node_modules` link.
  * - Types only:  nothing of Spell UI's runs here.
+ * - Translated tags (a Spanish program's `<es-boton>`) stay loose, as the app types them:
+ *   the generated types name the English tags only.
  */
-const UI_JSX_TYPES = `import type {} from "spell-ui/jsx"\n`
+const UI_JSX_TYPES = `import type { JSX } from "@solidjs/web"
+import type {} from "spell-ui/jsx"
+
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      [tag: \`es-\${string}\`]: JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+    }
+  }
+}
+`
 
 /** The file in the checked folder holding `UI_JSX_TYPES`. */
 const UI_JSX_FILE = "ui-jsx.types.ts"
