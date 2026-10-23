@@ -74,39 +74,45 @@ Most of them work on Spell projects, and you name a project the way the editor d
 | --- | --- |
 | `Card.spell`, `./path/to/Project`, `.` | a Spell file, or the project in a folder;  a lone `.spell` file counts as a one-file project |
 | `@here` | the project in the current folder |
-| `@spell/library/cards`, `owen@spell/x` | one project, by its address |
-| `@spell/library/cards/Card.spell` | one file in a project:  its name has a dot |
-| `@spell/library`, `owen@spell`, `@spell` | a group, or every group of a space:  pick from their projects, or pass `--all` |
+| `@spell/examples/Solitaire`, `owen@spell/x` | one project, by its address |
+| `@spell/examples/Solitaire/Card.spell` | one file in a project:  its name has a dot |
+| `@spell/examples`, `owen@spell`, `@spell` | a group, or every group of a space:  pick from their projects, or pass `--all` |
 | nothing | the project here;  outside one, `spell` asks, completing as you type |
 
 A group asks which of its projects you mean, with "All projects" at the top of the list.
 In a script, with no terminal to ask on, it lists them and exits 2;  `--all` takes the lot without asking:
 
 ```sh
-spell lint @spell/library
+spell lint @spell/examples
 ```
 
 <details>
 <summary>Output</summary>
 
 ```text
-@spell/library holds several projects -- name one, or pass --all:
-  @spell/library/cards
-  @spell/library/people
+@spell/examples holds several projects -- name one, or pass --all:
+  @spell/examples/calculator
+  @spell/examples/fizzbuzz
+  @spell/examples/Solitaire
+  @spell/examples/Solitario
+  @spell/examples/todos-form-based
 ```
 
 </details>
 
 ```sh
-spell lint --all @spell/library
+spell lint --all @spell/examples
 ```
 
 <details>
 <summary>Output</summary>
 
 ```text
-✓ @spell/library/cards  2 warnings
-✓ @spell/library/people
+✓ @spell/examples/calculator
+✓ @spell/examples/fizzbuzz
+✓ @spell/examples/Solitaire
+✓ @spell/examples/Solitario
+✓ @spell/examples/todos-form-based
 ```
 
 </details>
@@ -332,22 +338,26 @@ No test runner to configure:  a project's tests are its `to test ...` sections, 
 | `spell test [projects...]` | runs each `to test ...` in a project and reports ✓, or ✗ with the checks that failed;  exit 1 on a failure |
 
 ```sh
-spell test @spell/test/solitaire 2>/dev/null
+spell test @spell/examples/Solitaire 2>/dev/null
 ```
 
 <details>
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (22 checks)
-✓ test deck creation  (6 checks)
+✓ test card setup  (30 checks)
+✓ test jokers  (15 checks)
+✓ test deck creation  (7 checks)
+✓ test deck with jokers  (5 checks)
+✓ test piles  (8 checks)
+✓ test the moves  (11 checks)
 
-2 passed
+6 passed
 ```
 
 </details>
 
-The compile line and its five warnings went to stderr, and each warning is a fix, written in Spell:
+The compile line went to stderr, and so would any warning, each one a fix written in Spell:
 `Say what "card-names" holds, e.g. "set card-names to a new list of text"`.
 
 <details>
@@ -412,7 +422,7 @@ e.g. print "Yo!"
 </details>
 
 ```sh
-spell describe @spell/library/cards Card color
+spell describe @spell/examples/Solitaire Card color
 ```
 
 <details>
@@ -420,7 +430,7 @@ spell describe @spell/library/cards Card color
 
 ```text
 property color of Card
-spell-app/spaces/@spell/library/cards/Card.spell:25
+spell-app/spaces/@spell/examples/Solitaire/Card.spell:25
 
 Spell
     - its "color" is the color of its suit
@@ -437,7 +447,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | Option | What it does |
 | --- | --- |
 | `spell parse --rule <name>` | parses as that rule only, e.g. `expression`;  default:  as a statement, then as an expression |
-| `spell parse --in <project>` | parses in that project's scope, e.g. `@spell/test/solitaire` |
+| `spell parse --in <project>` | parses in that project's scope, e.g. `@spell/examples/Solitaire` |
 | `spell parse --tree` | prints the Spell tree, what it means, not the match tree;  with `--json`, its data |
 | `spell parse --html` | with `--tree`:  prints it as a `<ui-tree-diagram>`, for a docs page |
 | `spell parse --json` | the result as JSON |
@@ -660,8 +670,8 @@ spell projects
 owen@spell       Projects       ...
 @spell/examples  Examples       5 projects
 @spell/guides    Guides         0 projects
-@spell/library   Libraries      2 projects
-@spell/test      Test fixtures  12 projects
+@spell/library   Libraries      1 project
+@spell/test      Test fixtures  6 projects
 ```
 
 </details>
