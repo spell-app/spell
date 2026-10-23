@@ -195,14 +195,19 @@ function sectionLabel(section) {
   return slotted?.textContent.replace(/\s+/g, " ").trim() ?? section.id
 }
 
-/** The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first. */
+/**
+ * The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first.
+ * - at the page's end, the last one showing on screen:  a short last section can't scroll up to the line, so a click
+ *   on it would leave the one above marked (Owen, 2026-10-23:  "Not showing Themes as selected when I click it")
+ */
 function currentSection(main, sections) {
   const line = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
+  const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 2
   let current
   for (const section of sections) {
     const box = section.getBoundingClientRect()
     if (!box.height && !box.width) continue
-    if (box.top > line) break
+    if (box.top > (atEnd ? innerHeight - 1 : line)) break
     current = section
   }
   return current
