@@ -36,7 +36,9 @@ describe("ElementManifests.jsxTypes()", () => {
     expect(text).toContain("export interface UIButtonJSXAttributes")
     expect(text).toContain("  options?: unknown")
     expect(text).toContain('  "prop:options"?: unknown')
-    expect(text).toContain("   * @deprecated write `options` -- `prop:` stays only for compiled spell\n   */\n  \"prop:options\"")
+    expect(text).toContain(
+      '   * @deprecated write `options` -- `prop:` stays only for compiled spell\n   */\n  "prop:options"'
+    )
   })
 
   test("types every tag's events:  its own map, `on-<event>`, and the DOM's maps", () => {
