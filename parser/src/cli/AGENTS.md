@@ -13,7 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
-  lang packs check  lang packs fix
+  lang packs check  lang packs fix  lang translate
   ```
 
   - Owen's names (epic `repo-split` P13):
@@ -37,6 +37,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
+- `spell lang translate` (epic `spanish` P24) is half and half:
+  - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does
+  - then [translateProject.ts](translateProject.ts), here, does the rest:  the dictionary, `claude -p`, the files
+  - the translating itself is spell's [translate/](../spell/translate/), `Translator`, on parsed files:  no node
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape
@@ -52,3 +56,5 @@ As WWOD §20, plus:
 - The commands themselves run end to end in [spell-app's tests](../../../spell-app/tests/cli/cli.test.ts):
   their work is spell-app's.
 - `spell lang packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
+- `spell lang translate`'s:  the `Translator`'s own tests, [tests/spell/translate/](../../tests/spell/translate/);
+  the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).

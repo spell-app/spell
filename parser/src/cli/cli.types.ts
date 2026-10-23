@@ -29,6 +29,7 @@ export type LanguageCommands = {
   parse(text: string[], options: ParseOptions): Promise<number>
   repl(project: string[], options: GlobalOptions): Promise<number>
   explain(word: string[], options: ExplainOptions): Promise<number>
+  translate(project: string[], options: TranslateOptions): Promise<number>
 }
 
 /** One of the language's commands, by name:  `compile`, `lint` ... */
@@ -37,6 +38,22 @@ export type LanguageCommand = keyof LanguageCommands
 ////////////////
 // ## Flags
 ////////////////
+
+/**
+ * `spell lang translate` flags (epic `spanish` P24).
+ * - `to`:  the language to write the project in, by its code, e.g. `es`
+ * - `out`:  the folder to write it to -- default beside it, named as the dictionary names the project
+ * - `update`:  re-translate only the lines changed since the last run;  the rest stay as they are, hand edits too
+ * - `ai`:  `false` (`--no-ai`) leaves each name the dictionary lacks as `TODO`, instead of asking `claude -p`
+ * - `seed`:  a project translated by hand, whose names fill the dictionary first, e.g. `@spell/examples/Solitario`
+ */
+export type TranslateOptions = GlobalOptions & {
+  to: string
+  out?: string
+  update?: boolean
+  ai?: boolean
+  seed?: string
+}
 
 /**
  * `spell compile` flags.

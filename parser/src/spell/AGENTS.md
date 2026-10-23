@@ -63,6 +63,13 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - Other repos import these files by name, e.g. `spell-lang/spell/node/buildTsx`.
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell-lang/spell`'s barrel may import it (WWOD §8 › "Barrels").
+- `translate/` (epic `spanish` P24):  writing a project in another language, rule by rule
+  (`spell lang translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
+  - `Translator`:  each line written again with its rule's twin in the other language's pack
+    (the same class, registered in the same place), its slots filled with its children, translated the same way
+  - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`
+  - `NamesSeeder`:  fills one from a translation a person made (`--seed`)
+  - Imported by path, never through the barrel:  `spell-lang/spell/translate/Translator`.
 - `highlight/`:  `SpellHighlighter`.
   - It colours a snippet without a project, for `<ui-code language="spell">`.
   - Call it as `SP.SpellHighlighter.spans(text)`.

@@ -409,10 +409,11 @@ Lint first.
 ## The language commands
 
 You've just used four of them.
-The kit's `spell` takes thirteen commands from this repo:
+The kit's `spell` takes fourteen commands from this repo:
 `compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
 `parse`, `repl`, `explain` and `describe` show what Spell made of it;  `speedtest` times the parser;
-and `lang packs check` and `lang packs fix` check the language packs against English.
+`lang packs check` and `lang packs fix` check the language packs against English;
+and `lang translate` writes a project in another language.
 [commands.ts](src/cli/commands.ts) lists them, and spell-lang's `package.json` names that file,
 `"spell": { "commands" }`.
 What each does, every option, with examples:
@@ -436,6 +437,7 @@ The names live here, and each command hands its work to spell-app's `language` h
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
 | [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell lang packs check` and `fix`:  what each language pack lacks against English, and stubs for it |
+| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell lang translate`'s work once spell-app has parsed the project:  its dictionary, `claude -p`, its files |
 | [cli/index.ts](src/cli/index.ts) | `spell-lang/cli`:  the types, for spell-app |
 
 </details>

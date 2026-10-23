@@ -1,7 +1,9 @@
 /**
  * The language's `spell` commands (spell-lang's `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
  * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest;
- * and `spell lang packs check|fix`, for the language packs (epic `spanish` P7).
+ * and `spell lang packs check|fix`, for the language packs (epic `spanish` P7);
+ * and `spell lang translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
+ * finds projects the app's way, then `translateProject.ts`.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
@@ -133,8 +135,9 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print what was found as JSON")
     .action((word: string, _options, command: Command) => language("explain", [word], command))
 
-  // the language's own tools, under `spell lang`:  their work is here, not behind the hook
-  const lang = spell.command("lang").description("tools for spell itself:  its language packs")
+  // the language's own tools, under `spell lang`:  their work is here, not behind the hook -- but `translate`'s
+  const lang = spell.command("lang").description("tools for spell itself:  its language packs, translating a project")
+
   const packs = lang
     .command("packs")
     .description("is each language pack complete, against English?  check, or fix with stubs to translate")
@@ -155,6 +158,26 @@ export default function languageCommands(spell: Command): void {
     .option("--ai", "ask claude -p to translate each stub, marked AI draft:  review")
     .action((lang: string | undefined, _options, command: Command) =>
       CLI.runCommand(async () => (await import("./packsCommand")).fixPacks(lang, command.optsWithGlobals()))
+    )
+
+  lang
+    .command("translate")
+    .description(
+      "write a project in another language, rule by rule, its names from <Project>.<lang>.names.json5 -- " +
+        "exits 1 if any line still needs a person"
+    )
+    .argument("[project]", PROJECT_ARG)
+    .requiredOption("--to <lang>", "the language to write it in, e.g. es")
+    .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
+    .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
+    .option("--no-ai", "leave each name the dictionary lacks as TODO, instead of asking claude -p")
+    .option(
+      "--seed <project>",
+      "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
+    )
+    .addHelpText("after", PROJECT_HELP)
+    .action((project: string | undefined, _options, command: Command) =>
+      language("translate", listOf(project), command)
     )
 }
 
