@@ -429,9 +429,18 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   /* as wide as the tabs' half:  its band out past the column, the track in it */
   margin-inline: calc(-1 * var(--site-tabs-band, 8px));
   padding: var(--site-tabs-band, 8px);
-  border-radius: 0 0 var(--site-panel-radius, 18px) var(--site-panel-radius, 18px);
+  border-radius: var(--site-panel-radius, 18px);
   background: var(--ui-bar-background, var(--spell-rail-fill));
   backdrop-filter: var(--ui-bar-filter, none);
+  /*
+   * ONE panel, no seam (Owen:  "doesn't look like one bar (notches)"):  two copies of this box, moved up by all and by
+   * half of the tabs' track and band (`--site-tabs-track`, measured by `SiteSections`), so its colour reaches up
+   * behind the tabs;  the copies overlap past the corners, so no corner shows where they meet
+   */
+  --_panel-up: calc(var(--site-tabs-track, 34px) + var(--site-tabs-band, 8px));
+  box-shadow:
+    0 calc(-1 * var(--_panel-up)) 0 0 var(--ui-bar-background, var(--spell-rail-bg)),
+    0 calc(-0.5 * var(--_panel-up)) 0 0 var(--ui-bar-background, var(--spell-rail-bg));
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: 0px;
@@ -440,11 +449,17 @@ ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   box-shadow: none;
   backdrop-filter: none;
 }
+/* the track as wide as its buttons, centred under the tabs (Owen:  "second tab group doesn't need to be full width") */
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
-  width: 100%;
-  margin: 0;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
-  flex: 1 0 auto;
   justify-content: center;
 }
