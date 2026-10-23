@@ -249,15 +249,41 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   display: none;
 }
 /*
- * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, underlined, the text's own colour;  the item's letter
- * mark (a section with no icon) only while the titles are hidden, so the letter never shows twice
+ * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, the text's own colour, no underline (Owen,
+ * 2026-10-23:  "Lose underline under T");  the key tip under the item says what it does (`wireKeyTips()`).  The item's
+ * letter mark (a section with no icon) only while the titles are hidden, so the letter never shows twice.
  */
 .spell-toolbar-key {
   font-weight: 700;
   color: var(--ui-text-dark, currentColor);
-  text-decoration: underline;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 2px;
+  text-decoration: none;
+}
+/* the KEY TIP (`wireKeyTips()`):  a small dark pill under the item, its letter a key cap */
+.spell-toolbar-tip {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: light-dark(rgb(29 29 31 / 0.92), rgb(245 245 247 / 0.95));
+  color: light-dark(#fff, #1d1d1f);
+  font: 500 12px/1.3 var(--spell-sans);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+  pointer-events: none;
+}
+.spell-toolbar-tip kbd {
+  display: inline-block;
+  background: light-dark(rgb(255 255 255 / 0.16), rgb(0 0 0 / 0.08));
+  color: inherit;
+  min-width: 1.3em;
+  margin-inline: 2px;
+  padding: 0 4px;
+  border: 1px solid light-dark(rgb(255 255 255 / 0.35), rgb(0 0 0 / 0.25));
+  border-radius: 4px;
+  font: 700 11px/1.4 var(--spell-sans);
+  text-align: center;
 }
 .spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item > b.spell-toolbar-letter {
   display: none;
@@ -387,4 +413,38 @@ ui-sticky.spell-site-toolbar::part(sticky) {
   .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
     --_out: 1em;
   }
+}
+/*
+ * UNDER A PAGE'S TABS (a components page's Examples / Usage / API / Theming;  Owen, 2026-10-23, epic `debut`:  "would
+ * look cool if these two tab bars were shown in a single glass surround, with a little bit of padding between them"):
+ * the toolbar is the lower half of ONE panel with the tabs.
+ * - the site draws the panel's top round the tabs (`site.css`, "Sections and tabs");  this bar draws the rest:  the
+ *   panel's colour and blur, its padding round the track (`--site-tabs-band`), its bottom corners round
+ * - in the column, not out to its edges:  the panel floats, its margin below (`--site-tabs-gap`)
+ * - it sticks right under the tabs' track (`SiteSections`), so the two halves meet with no seam
+ * - the track fills the panel's width, its buttons sharing it, each title centred;  too many, it scrolls
+ */
+ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
+  margin-block: 0 var(--site-tabs-gap, 10px);
+  /* as wide as the tabs' half:  its band out past the column, the track in it */
+  margin-inline: calc(-1 * var(--site-tabs-band, 8px));
+  padding: var(--site-tabs-band, 8px);
+  border-radius: 0 0 var(--site-panel-radius, 18px) var(--site-panel-radius, 18px);
+  background: var(--ui-bar-background, var(--spell-rail-fill));
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
+  --_out: 0px;
+  margin-inline: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+  width: 100%;
+  margin: 0;
+}
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
+  flex: 1 0 auto;
+  justify-content: center;
 }

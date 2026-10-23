@@ -117,7 +117,10 @@ export function toolbarMenu(items, { titled }) {
     "data-spell-added": true
   })
   toolbar.append(...items, ...kept)
-  if (titled) wireAccessLetters()
+  if (titled) {
+    wireAccessLetters()
+    wireKeyTips(toolbar)
+  }
   new MutationObserver((changes) => {
     for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
   }).observe(toolbar, { attributeFilter: ["selected"], subtree: true })
@@ -154,6 +157,52 @@ function wireAccessLetters() {
 /** The page's access letters are listened for (`wireAccessLetters()`). */
 let accessLettersWired = false
 
+/**
+ * A titled toolbar's KEY TIPS (Owen, 2026-10-23, epic `debut`:  "have pretty tooltip which says 'Type <T> to jump to
+ * this section'"):  under the pointer or the keyboard's focus, an item with an access letter shows
+ * "Type T to jump to this section", the letter as a key cap.
+ * - ONE tip per page (`.spell-toolbar-tip`), a `popover` in the top layer:  the toolbar's row scrolls sideways, which
+ *   would clip a tip inside it
+ * - placed under the item, centred on it, kept inside the window;  gone as the pointer leaves, focus moves on, the
+ *   page scrolls or the item is clicked
+ * - the item's accessible name says the same (`aria-keyshortcuts`):  the tip is for the eye only (`aria-hidden`)
+ */
+function wireKeyTips(toolbar) {
+  const tip = keyTip()
+  const show = (event) => {
+    const item = event.target.closest?.("ui-item[data-key]")
+    if (!item || !toolbar.contains(item)) return
+    const box = item.shadowRoot?.querySelector('[part~="item"]')?.getBoundingClientRect() ?? item.getBoundingClientRect()
+    tip.querySelector("kbd").textContent = item.dataset.key.toUpperCase()
+    if (!tip.matches(":popover-open")) tip.showPopover()
+    const width = tip.offsetWidth
+    tip.style.left = `${Math.max(8, Math.min(innerWidth - width - 8, box.left + box.width / 2 - width / 2))}px`
+    tip.style.top = `${box.bottom + 6}px`
+  }
+  const hide = () => tip.matches(":popover-open") && tip.hidePopover()
+  toolbar.addEventListener("pointerover", show)
+  toolbar.addEventListener("focusin", show)
+  toolbar.addEventListener("pointerleave", hide)
+  toolbar.addEventListener("focusout", hide)
+  toolbar.addEventListener("click", hide)
+}
+
+/** The page's one key tip (`wireKeyTips()`), made the first time a toolbar asks. */
+function keyTip() {
+  const found = document.querySelector("body > .spell-toolbar-tip")
+  if (found) return found
+  const tip = el(
+    "div",
+    { class: "spell-toolbar-tip", popover: "manual", "aria-hidden": "true", "data-spell-added": true },
+    "Type ",
+    el("kbd"),
+    " to jump to this section"
+  )
+  document.body.append(tip)
+  addEventListener("scroll", () => tip.matches(":popover-open") && tip.hidePopover(), { passive: true })
+  return tip
+}
+
 /** A focused element that takes letters itself:  a control with a role or a custom element of its own. */
 function takesKeys(element) {
   return element.matches(
@@ -180,7 +229,8 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
       href: `#${id}`,
       "data-rail": id,
       icon: glyph,
-      title: said,
+      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's
+      title: letter ? undefined : said,
       "aria-label": said,
       "aria-keyshortcuts": letter?.toUpperCase(),
       "data-key": letter,
