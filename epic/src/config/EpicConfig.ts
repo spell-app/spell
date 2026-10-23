@@ -1,9 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
-// By the server's package entry (its `exports`, epic `repo-split` P6):  plain `node` loads this file (the hooks,
-// `src/window.mjs`), and finds the server package in `node_modules` (spell-app's, linked in:  `portal:`).  The
-// server's checkout finder:  the main checkout from any worktree, with no `git` run
+// The server's checkout finder:  the main checkout from any worktree, with no `git` run.
+// - By the server's package entry (its `exports`, epic `repo-split` P6):
+//   plain `node` loads this file (the hooks, the window script), and finds the server package in `node_modules`
+//   (the kit's install)
 import { checkoutOf } from "spell-kit/server/checkout"
 
 import { RealPath } from "./RealPath.ts"
@@ -39,11 +40,13 @@ import { RealPath } from "./RealPath.ts"
  * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell-epic/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
- * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  the top repo's file names its child repos
- *   (`"repos": "repos.json5"`);  each child finds it as the folder above its main checkout (`top`).  An epic's
- *   worktree is then the TOP's, `<worktreesFolder>/<epic>/`, with each child's inside it (`repoCheckouts()`);  a
- *   child's `worktreesFolder` is the top's, and its own worktree of an epic `<epic>/<repo>` in it.  No `repos`:  a
- *   single repo, as before.
+ * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  one repo holding others, its child repos.
+ *   - The top repo's file names them (`"repos": "repos.json5"`).
+ *   - Each child finds its top as the folder above its main checkout (`top`).
+ *   - An epic's worktree is then the TOP's, `<worktreesFolder>/<epic>/`, with each child's inside it
+ *     (`repoCheckouts()`).
+ *   - A child's `worktreesFolder` is the top's, and its own worktree of an epic is `<epic>/<repo>` in it.
+ *   - No `repos`:  a single repo, as before.
  * - A repo moved behind a compat link (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
  *   - `main` is the REAL path, and every path compare is real on both sides (`RealPath`), so an old spelling (a
  *     worktree's `.git` file, a session's `cwd`) still matches
@@ -63,7 +66,13 @@ export class EpicConfig {
     installOnCreate: false,
     installTimeout: 600,
     extraInstalls: [],
-    windows: { default: "spell-app", repoName: "spell-app", contentName: "spell-app-dev", worktreeOnly: false },
+    windows: {
+      default: "spell-app",
+      repoName: "spell-app",
+      contentName: "spell-app-dev",
+      worktreeOnly: false,
+      settings: {}
+    },
     linkSessionFolders: false,
     sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"],
     engineFolder: "../spell-epic",
@@ -87,8 +96,8 @@ export class EpicConfig {
   }
 
   /**
-   * where the window files were before epic `epic-eject` P13, from the main checkout:  `epic window move` carries
-   * them from here to `windowsFolder`
+   * where the window files were before epic `epic-eject` P13, from the main checkout:
+   * `epic window move` carries them from here to `windowsFolder`
    */
   static readonly OLD_WINDOWS_FOLDER = "workspaces"
 
@@ -210,11 +219,13 @@ export class EpicConfig {
   }
 
   /**
-   * every folder worktrees may be in, the new place first:  `worktreesFolder`, then the OLD places:  a child repo's
-   * own `worktreesFolder` (its worktrees from before its top's), and the default, `.claude/worktrees`, when the file
-   * moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
-   * - the old places stay on the list for good:  harmless once empty, and a worktree there keeps working until its
-   *   `/isolate done`
+   * every folder worktrees may be in, the new place first:
+   * - `worktreesFolder`
+   * - then the OLD places:
+   *   - a child repo's own `worktreesFolder` (its worktrees from before its top's)
+   *   - the default, `.claude/worktrees`, when the file moved them (epic `epic-eject` P8:  `../spell-app.worktrees`)
+   * - the old places stay on the list for good:
+   *   harmless once empty, and a worktree there keeps working until its `/isolate done`
    */
   get worktreesFolders(): string[] {
     const old = resolve(this.main, EpicConfig.DEFAULTS.worktreesFolder)
@@ -372,8 +383,8 @@ export class EpicConfig {
 
   /**
    * the repo's OWN templates folder, as written:  a path from each checkout's root (a worktree's are its branch's);
-   * `""` (the default):  none, the engine's templates are all there are (spell-epic's `templates/`, epic `epic-eject`
-   * T11)
+   * `""` (the default):  none, the engine's templates are all there are
+   * (spell-epic's `templates/`, epic `epic-eject` T11)
    * - the docs tools list it beside the engine's on the Templates page, and look a template up there first
    *   (`pages.js` `REPO_TEMPLATES`, `templateFile()`)
    */
@@ -382,8 +393,8 @@ export class EpicConfig {
   }
 
   /**
-   * the folder the VS Code window files are in (`epic window`;  epic `epic-eject` P13):  each machine's own, never
-   * tracked
+   * the folder the VS Code window files are in (`epic window`;  epic `epic-eject` P13):
+   * each machine's own, never tracked
    * - package windows and the whole repo's (`windowFile()`), and the worktrees' in its `ongoing/`
    *   (`worktreeWindowFile()`)
    * - where they go:  `newWindowsFolder`
@@ -442,8 +453,8 @@ export class EpicConfig {
   }
 
   /**
-   * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;  else where a new one goes,
-   * `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
+   * Worktree `name`'s folder:  where it IS, in any of `worktreesFolders`;
+   * else where a new one goes, `<worktreesFolder>/<name>` (`newWorktreeFolder()`).
    * - so an old worktree (`.claude/worktrees/seo`) is still found after the file moved new ones beside the repo
    * - a child repo of a multi-repo top (`top`):  ITS worktree, `<top's worktreesFolder>/<name>/<repo>`, else one in
    *   its own old places
@@ -486,8 +497,8 @@ export class EpicConfig {
   }
 
   /**
-   * The NEW worktrees folder as a path inside the checkout (`.claude/worktrees`);  `undefined` when it's outside
-   * the checkout (`../spell-app.worktrees`).
+   * The NEW worktrees folder as a path inside the checkout (`.claude/worktrees`);
+   * `undefined` when it's outside the checkout (`../spell-app.worktrees`).
    */
   get worktreesPattern(): string | undefined {
     return insideOf(this.main, this.worktreesFolder)
@@ -510,9 +521,10 @@ export class EpicConfig {
    * Whether worktree `name`'s window holds only `⎇ <name>` and the content folder, no main checkout
    * (epic `epic-eject` O3):  `windows.worktreeOnly`, or its folder is beside the repo.
    * - a worktree still nested in the checkout keeps the old layout, the main root first (`src/window.mjs`)
-   * - a MULTI-REPO top's epic worktree (`top`;  epic `epic-engine` P10, repo-split's Q9 A):  the top's
-   *   `windows.worktreeOnly` alone, off by default:  the main top checkout first (`~/www/spell`, its files hidden), so
-   *   its Claude panel lists every session, then the epic's worktree, then the content folder
+   * - a MULTI-REPO top's epic worktree (`top`;  epic `epic-engine` P10, repo-split's Q9 A):
+   *   the top's `windows.worktreeOnly` alone, off by default
+   *   - off:  the main top checkout first (`~/www/spell`, its files hidden), so its Claude panel lists every session,
+   *     then the epic's worktree, then the content folder
    */
   worktreeOnlyWindow(name: string): boolean {
     const top = this.top
@@ -593,6 +605,7 @@ export class EpicConfig {
       "windows.repoName": this.windows.repoName,
       "windows.contentName": this.windows.contentName,
       "windows.worktreeOnly": this.windows.worktreeOnly,
+      "windows.settings": JSON.stringify(this.windows.settings),
       linkSessionFolders: this.linkSessionFolders,
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
@@ -673,6 +686,9 @@ export class EpicConfig {
     if (typeof windows !== "object" || windows === null || Array.isArray(windows))
       throw new TypeError(`EpicConfig:  ${file}'s "windows" must be an object, { "default": ..., ... }`)
     const window = windows as Record<string, unknown>
+    const windowSettings = window.settings === undefined ? defaults.windows.settings : window.settings
+    if (typeof windowSettings !== "object" || windowSettings === null || Array.isArray(windowSettings))
+      throw new TypeError(`EpicConfig:  ${file}'s "windows.settings" must be an object of VS Code settings, { ... }`)
     const appGiven = given.app === undefined ? {} : given.app
     if (typeof appGiven !== "object" || appGiven === null || Array.isArray(appGiven))
       throw new TypeError(`EpicConfig:  ${file}'s "app" must be an object, { "url": ..., "start": ... }`)
@@ -689,7 +705,8 @@ export class EpicConfig {
         default: valueOf(window, "default", defaults.windows.default, file, "windows."),
         repoName: valueOf(window, "repoName", defaults.windows.repoName, file, "windows."),
         contentName: valueOf(window, "contentName", defaults.windows.contentName, file, "windows."),
-        worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows.")
+        worktreeOnly: valueOf(window, "worktreeOnly", defaults.windows.worktreeOnly, file, "windows."),
+        settings: windowSettings as Record<string, unknown>
       },
       linkSessionFolders: valueOf(given, "linkSessionFolders", defaults.linkSessionFolders, file),
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
@@ -743,8 +760,8 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   the worktree hook, `epic worktree merge-main`, `epic merge`, the behind-main notice
  * - `worktreesFolder`:  where NEW worktrees go, relative to the main checkout (`.claude/worktrees`), one folder each:
  *   the worktree hook, the window script, the epics list, the page server's `/worktrees/<w>/`
- *   - it may be outside the repo (`../spell-app.worktrees`, epic `epic-eject` P8);  then the old place,
- *     `.claude/worktrees`, is still read for the worktrees left there (`worktreesFolders`)
+ *   - it may be outside the repo (`../spell-app.worktrees`, epic `epic-eject` P8);
+ *     then the old place, `.claude/worktrees`, is still read for the worktrees left there (`worktreesFolders`)
  * - `installCommand`:  what makes a new worktree ready to run (`yarn install`):  `/isolate`, `/epic`, the hook;
  *   `""` for none (a repo with no packages to install)
  * - `installOnCreate`:  whether the worktree hook runs `installCommand` itself, before it hands a NEW worktree over
@@ -753,8 +770,9 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  * - `extraInstalls`:  folders of a new worktree that are yarn projects of their own, NOT workspaces of the one install
  *   (`["spell-epic/vscode", "spell-app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
  *   worktree's root (the top's, in a multi-repo top);  `[]` (the default):  none
- *   - the worktree hook runs `installCommand` in each, after the one at the root, `installTimeout` seconds each;  one
- *     that fails, or isn't there, is a warning:  the worktree works, only what needs that folder's packages doesn't
+ *   - the worktree hook runs `installCommand` in each, after the one at the root, `installTimeout` seconds each
+ *   - one that fails, or isn't there, is a warning:
+ *     the worktree works, only what needs that folder's packages doesn't
  * - `windows`:  the VS Code windows (the window script)
  *   - `default`:  the window file a worktree's window is opened from when the session's window isn't a package's
  *     (`spell-app`:  `<windowsFolder>/spell-app.code-workspace`)
@@ -762,6 +780,11 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - `contentName`:  the content repo's folder name in every window (`spell-app-dev`)
  *   - `worktreeOnly`:  whether EVERY worktree's window holds only the worktree and the content folder (off);
  *     a worktree beside the repo gets that window anyway (`worktreeOnlyWindow()`)
+ *   - `settings`:  VS Code settings every window file gets, the repo's own, e.g. which TypeScript the editor runs
+ *     (`{}`, none:  the default)
+ *     - for WINDOW-scoped settings:  in a window of several folders,
+ *       VS Code ignores them in a folder's `.vscode/settings.json`, and reads them from the window file only
+ *     - `epic window init` writes them into the window files that exist;  a new one gets them as it's made
  * - `linkSessionFolders`:  whether the worktree hook links each NEW worktree's saved-session folder
  *   (`~/.claude/projects/<slug>`) to the main checkout's, so every window's Claude panel lists every session (off;
  *   `SessionFolders`, epic `epic-eject` Q4)
@@ -836,20 +859,28 @@ export type CheckoutPatch = { id: string; date: string; why: string; copy?: stri
 
 /**
  * `EpicSettings.app`:  the repo's app (spell-app's:  the editor), as the epic server opens it (`RepoApp`).
- * - `path`:  its address on the epic server (`/editor/`, the top bar's App tab), and under the repo's prefix
- *   (`/r/<repo>/editor/`)
+ * - `path`:  its address on the epic server (`/editor/`, the top bar's App tab),
+ *   and under the repo's prefix (`/r/<repo>/editor/`)
  * - `url`:  where it answers (`http://localhost:3000/`)
- * - `urlFile`:  OR a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout:  wins over
- *   `url` while it's there (spell-app's `.spell-server.editor.json`, spaces' `EditorServer`;  as its page server's
- *   `/editor` reads it, `appRoutes.ts`)
+ * - `urlFile`:  OR a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout
+ *   - wins over `url` while it's there
+ *   - spell-app's:  `.spell-server.editor.json`, written by spaces' `EditorServer`,
+ *     as its page server's `/editor` reads it (`appRoutes.ts`)
  * - `start`:  the shell command that starts it, run DETACHED from the main checkout when it doesn't answer
  *   (`node ../bin/spell.mjs server start`, the kit's `spell`);  `""`:  nothing to run, the tab says it isn't up
  * - neither `url` nor `urlFile`:  no app (the default)
  */
 export type EpicApp = { path: string; url: string; urlFile: string; start: string }
 
-/** `EpicSettings.windows`:  the default window, the folder names every window shows, and its layout. */
-export type EpicWindows = { default: string; repoName: string; contentName: string; worktreeOnly: boolean }
+/** `EpicSettings.windows`:  the default window, the folder names every window shows, its layout and settings. */
+export type EpicWindows = {
+  default: string
+  repoName: string
+  contentName: string
+  worktreeOnly: boolean
+  /** VS Code settings every window file gets (`settings` in the file), by name */
+  settings: Record<string, unknown>
+}
 
 /** The text of `file`;  `""` when it isn't there. */
 function readOrEmpty(file: string): string {
@@ -861,8 +892,8 @@ function readOrEmpty(file: string): string {
 }
 
 /**
- * Folder `path` as a path from `root` (`.claude/worktrees`), `/`-separated;  `undefined` when it's `root` itself or
- * outside it.
+ * Folder `path` as a path from `root` (`.claude/worktrees`), `/`-separated;
+ * `undefined` when it's `root` itself or outside it.
  * - links followed on both sides (`RealPath.from()`):  an old spelling of either still counts
  */
 function insideOf(root: string, path: string): string | undefined {
@@ -918,8 +949,8 @@ function foldersOf(given: Record<string, unknown>, key: string, fallback: string
 }
 
 /**
- * `given[key]`, a list of folders, each a relative path (`["vscode", "spell-app/vscode"]`);  `fallback` when it's
- * left out.
+ * `given[key]`, a list of folders, each a relative path (`["vscode", "spell-app/vscode"]`);
+ * `fallback` when it's left out.
  * - throws `TypeError` naming the file and the key when it isn't a list of `/`-separated plain names (no absolute path,
  *   no `.`, `..` or empty part)
  */

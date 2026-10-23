@@ -4,9 +4,10 @@
  * - Registry entries go in a temp folder (`SPELL_WINDOWS_DIR`), never `~/.spell/windows`.
  * - The "window" is a stand-in:  our own parent pid (an ancestor, like a session's extension host), a `sleep`
  *   child (alive, but not an ancestor), or a pid that has exited.
- * - The repo the windows are for is a temp one (`EPIC_CHECKOUT`, set before the script loads:  it reads the config
- *   once), with no `.epic/config.json5` settings of its own:  the defaults, spell-app's OLD layout (worktrees nested
- *   in `.claude/worktrees`, the main root in every window).
+ * - The repo the windows are for is a temp one, with no `.epic/config.json5` settings of its own.
+ *   - `EPIC_CHECKOUT`, set before the script loads:  it reads the config once
+ *   - so it has the defaults, spell-app's OLD layout:
+ *     worktrees nested in `.claude/worktrees`, the main root in every window
  *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
  *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
  *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
@@ -315,7 +316,7 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   assert.equal(exclude[".claude/worktrees"], true)
 })
 
-test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back", () => {
+test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole repo's window first;  `init` puts the content folder back, and the repo's own settings in", () => {
   // a repo of its own, as spell-epic's:  its default window named for it, worktrees and the content folder beside it
   const top = mkdtempSync(join(tmpdir(), "window-plain-"))
   const repo = join(top, "repo")
@@ -326,13 +327,20 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
     JSON.stringify({
       worktreesFolder: "../repo.worktrees",
       contentFolder: "../repo.epics",
-      windows: { default: "repo", repoName: "repo", contentName: "repo.epics", worktreeOnly: true }
+      windows: {
+        default: "repo",
+        repoName: "repo",
+        contentName: "repo.epics",
+        worktreeOnly: true,
+        // every window file gets these (epic intellisense P4)
+        settings: { "js/ts.experimental.useTsgo": false }
+      }
     })
   )
   mkdirSync(join(top, "repo.epics"))
   mkdirSync(join(top, "repo.worktrees", "seo"), { recursive: true })
-  // an ongoing window file without the content folder (written while it was missing):  in the windows folder, the
-  // content folder's windows/
+  // an ongoing window file without the content folder (written while it was missing):
+  // in the windows folder, the content folder's windows/
   const ongoing = join(top, "repo.epics", "windows", "ongoing")
   mkdirSync(ongoing, { recursive: true })
   writeFileSync(
@@ -377,11 +385,13 @@ test("a repo with no `packages/` (spell-epic, I15):  `open` writes the whole rep
   ])
   assert.ok(written.includes("../repo.epics/windows/ongoing/old.code-workspace"))
   assert.ok(!written.includes("../repo.epics/windows/repo.code-workspace"))
+  // the repo's own settings (`windows.settings`):  in each new file, and `init` writes them into an old one
+  for (const workspace of [seo, repoWindow, old]) assert.equal(workspace.settings["js/ts.experimental.useTsgo"], false)
 })
 
 test("a repo moved behind a compat link (I59):  `init` drops the content folder that's gone, adds the one found", () => {
-  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;  its config still
-  // names `../repo.epics`, which only the OLD spelling of the checkout finds
+  // spell-epic moved to spell/, its content folder to spell/new.epics, links at the old names;
+  // its config still names `../repo.epics`, which only the OLD spelling of the checkout finds
   const top = realpathSync(mkdtempSync(join(tmpdir(), "window-moved-")))
   const real = join(top, "spell", "repo")
   mkdirSync(join(real, ".git"), { recursive: true })

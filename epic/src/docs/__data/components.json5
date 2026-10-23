@@ -2605,7 +2605,8 @@
         },
         {
           "name": "badge-color",
-          "kind": "string",
+          "kind": "enum",
+          "valueSet": "hues",
           "description": "Its badge's colour, a Spell UI hue (`blue`, `orange` ...);  none:  grey."
         },
         {

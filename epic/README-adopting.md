@@ -34,6 +34,7 @@ The plans live next door, in `my-app.epics`, a git repo of their own.
 
 An issue tracker keeps the plan away from the code, a chat scrollback loses it by morning,
 and a pull request reviews the diff, not the decisions behind it.
+
 Here the plan is a page that stays true, the epic page:
 the agent writes it as it plans and builds, in a worktree of its own,
 and you mark it up when you have time.
@@ -46,9 +47,9 @@ Two things to know before you start:
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
   `/isolate done`'s merge, and the worktree removed after it.
-  The setup on this page has run on a second fresh repo since,
-  as far as an epic page drawn by the epic server and a worktree made and removed.
-  Nine rough edges are listed at the end, not hidden.
+  - The setup on this page has run on a second fresh repo since,
+    as far as an epic page drawn by the epic server and a worktree made and removed.
+  - Nine rough edges are listed at the end, not hidden.
 
 ## The plans live beside your repo, not in it
 
@@ -85,6 +86,7 @@ Once per repo:  one small file in it, and two folders beside it._
 
 The plans are NOT in your repo.
 An epic page is shared content:  ONE copy, in the content folder, which every checkout links in.
+
 So the session in a worktree and you on the main checkout read the same page,
 and it never conflicts on a merge or turns up in a pull request.
 
@@ -103,8 +105,10 @@ And a Spell checkout:  today `spell-epic` installs only inside one.
 
 Four commands, once per machine, the same as for Spell's own repos:
 [the kit's README-agents.md](https://github.com/spell-app/spell-kit/blob/main/README-agents.md#the-epic-plugin) lists them and says what each does.
-They install the plugin for the whole machine, straight from `spell-epic`'s folder,
-link its skills in for a bare `/epic`, and put `epic` on your terminal's `PATH`.
+- They install the plugin for the whole machine, straight from `spell-epic`'s folder.
+- They link its skills in, for a bare `/epic`.
+- They put `epic` on your terminal's `PATH`.
+
 Then check that `epic` answers:
 
 ```sh
@@ -145,10 +149,11 @@ In order, it:
 1. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ("The config file", below).
    A file already there is kept as it is.
-2. Makes the content folder, `../<repo>.epics`, a git repo of its own:
-   the four folders, a `README.md`, and a `.gitignore` for what's never committed.
+2. Makes the content folder, `../<repo>.epics`, a git repo of its own.
+   It holds the four folders, a README, and a `.gitignore` for what's never committed.
 3. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
-4. Lists the links in your `.gitignore`, between `# shared:start` and `# shared:end`.
+4. Lists the links in a block of your `.gitignore`.
+   The block starts `# shared:start` and ends `# shared:end`.
 
 <details>
 <summary>The install command it picks, by lock file</summary>
@@ -185,8 +190,10 @@ epic repo add && epic hub ensure
 ### And the extension
 
 The Review tab, where you mark up a page, and the moves between windows need `spell-epic`'s VS Code extension.
-No script installs it:  you build it in `spell-epic`'s `vscode/` folder, install the `.vsix`, and reload your windows,
-three commands in [README-vscode.md](README-vscode.md#install-it--three-commands-and-a-reload).
+No script installs it:  three commands and a reload, in [README-vscode.md](README-vscode.md#install-it--three-commands-and-a-reload).
+- build it in `spell-epic`'s `vscode/` folder
+- install the `.vsix`
+- reload your windows
 
 Then, in a Claude Code session in your repo, `/epic <name> <what to plan>`:
 
@@ -196,6 +203,7 @@ Then, in a Claude Code session in your repo, `/epic <name> <what to plan>`:
 
 The session titles itself for the epic and makes its worktree, `~/www/my-app.worktrees/seo`.
 Its epic page, `~/www/my-app.epics/epics/seo/seo.plan.html`, opens in the Review tab and fills as it plans.
+
 What happens from there:  [`spell-epic`'s front page](README.md).
 
 ## The content folder:  your plans, in a repo of their own
@@ -221,9 +229,11 @@ Every page the agent writes lands in one of four folders, each linked into your 
 ## <a id="the-config-file"></a>The config file:  one per repo, read from the main checkout
 
 `epic init` wrote this file, and most repos never touch it again.
-You'd open it for one of four things:  a different install command,
-a second project in the repo that installs on its own (`extraInstalls`), an app for the epic server to start (`app`),
-or a repo made of several repos (`repos`).
+You'd open it for one of four things:
+- a different install command
+- a second project in the repo that installs on its own (`extraInstalls`)
+- an app for the epic server to start (`app`)
+- a repo made of several repos (`repos`)
 
 It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`EpicConfig`](src/config/EpicConfig.ts).
 - Every key is optional.
@@ -246,6 +256,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 | `windows.repoName` | the repo's name | the repo root's folder name in every window |
 | `windows.contentName` | `"<repo>.epics"` | the content folder's name in every window |
 | `windows.worktreeOnly` | `true` | whether every worktree's window holds only the worktree and the content folder |
+| `windows.settings` | not written:  `{}` | VS Code settings every window file gets:  the WINDOW settings a folder's `.vscode/settings.json` can't give in a window of several folders (which TypeScript the editor runs, say;  none of Spell's repos names any today);  `epic window init` writes them into the files that exist |
 | `windowsFolder` | `"../<repo>.epics/windows"` | where the VS Code window files go;  worktree windows in its `ongoing/` |
 | `linkSessionFolders` | `true` | whether each worktree's saved Claude sessions show in every window's Claude panel |
 | `sharedFolders` | `epics`, `sagas`, `guides`, `pages` | the content folders each checkout links in at its root |
@@ -261,19 +272,22 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 | `pageVoices` | not written | the voice each kind of page is written in, over the defaults:  `readme` for READMEs and guides, `code` for code and epic pages |
 | `promptAck` | not written | whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy;  on unless `false` |
 
-- Files your build generates (bundles, data) can be listed in `.epic/generators.json5`,
-  each with a `name`, its `outputs`, the `cwd` and the command to `run`.
+- Files your build generates (bundles, data) can be listed in `.epic/generators.json5`:
   `epic worktree merge-main` reruns them on the merged source, instead of line-merging what they wrote.
-  It's read from each checkout, so a branch that adds a generated file lists it, and its own merge knows it.
-- Two real ones to copy from:  the kit's [.epic/config.json5](https://github.com/spell-app/spell-kit/blob/main/.epic/config.json5), multi-repo,
-  with no folders linked in;  and `spell-epic`'s own, [.epic/config.json5](.epic/config.json5).
+  - each entry:  its `name` and `outputs`
+  - and where and how it runs:  the `cwd`, and the command to `run` there
+  - read from each checkout, so a branch that adds a generated file lists it, and its own merge knows it
+- Two real ones to copy from:
+  - the kit's [.epic/config.json5](https://github.com/spell-app/spell-kit/blob/main/.epic/config.json5),
+    multi-repo, with no folders linked in
+  - `spell-epic`'s own, [.epic/config.json5](.epic/config.json5)
 
 <details>
 <summary>The values a key takes when the file leaves it out:  Spell's, not yours</summary>
 
 The built-in defaults describe an older Spell checkout, the one the tooling grew up in.
-`epic init` writes every key but `app`, `repos`, `checkoutPatches`, `voices`, `pageVoices` and `promptAck`,
-whose defaults are neutral:  keep the rest in the file.
+`epic init` writes every key but `app`, `repos`, `checkoutPatches`, `voices`, `pageVoices`, `promptAck` and
+`windows.settings`, whose defaults are neutral:  keep the rest in the file.
 
 | Key | Default |
 | --- | --- |
@@ -284,7 +298,7 @@ whose defaults are neutral:  keep the rest in the file.
 | `installOnCreate` | `false` |
 | `installTimeout` | `600` |
 | `extraInstalls` | `[]` |
-| `windows` | `default` and `repoName` `"spell-app"`, `contentName` `"spell-app-dev"`, `worktreeOnly` `false` |
+| `windows` | `default` and `repoName` `"spell-app"`, `contentName` `"spell-app-dev"`, `worktreeOnly` `false`, `settings` `{}` |
 | `linkSessionFolders` | `false` |
 | `sharedFolders` | seven of Spell's own content folders, among them `epics`, `guides`, `pages`, `goals`, `sagas` and `agents` |
 | `engineFolder` | `"../spell-epic"` |
@@ -296,7 +310,8 @@ whose defaults are neutral:  keep the rest in the file.
 | `promptAck` | `true` |
 
 - NEVER list `agents` in `sharedFolders` in a repo that's also a loaded plugin.
-  Claude Code reads a plugin's root `agents/` as agent types:  `spell-epic`'s own list is `[]`.
+  - Claude Code reads a plugin's root `agents/` as agent types.
+  - `spell-epic`'s own list is `[]`.
 
 </details>
 
@@ -310,7 +325,8 @@ Before it hands the worktree over, the hook:
 - links the content folders in, and the worktrees folder's one link to the content folder,
   `my-app.worktrees/my-app.epics`, so a page's `../my-app.epics/...` links work from a worktree too
 - links the worktree's saved Claude sessions to the main checkout's (`linkSessionFolders`)
-- runs `installCommand` in it (`installOnCreate`), then in each of `extraInstalls`
+- runs `installCommand` in it, when `installOnCreate` is on
+- then in each of `extraInstalls`
 
 <details>
 <summary>Removing one, and the rest</summary>
@@ -329,18 +345,21 @@ Before it hands the worktree over, the hook:
 ## Your AGENTS.md fills in the rest
 
 The skills know how to plan, build and review;  what your project counts as "done" they leave to you.
-They look for it in your repo's own `AGENTS.md`
-(the kit's `CLAUDE.md` loads its `AGENTS.md` with one line, `@AGENTS.md`;  yours can too):
 
+They look for it in your repo's own `AGENTS.md`.
+The kit's `CLAUDE.md` loads its own with one line, `@AGENTS.md`;  yours can too.
+
+What they look for:
 - the checks to run before a phase is done
-- its changelog, if it keeps one:  `epic docs` looks for an epic's entry in the content folder's
-  `guides/changelog.html`
+- its changelog, if it keeps one:
+  `epic docs` looks for an epic's entry in the content folder's guides, in `changelog.html`
 - its house style, and a skill that rewrites text to it, if it has one
 - NOT the pages' formatting:  that's `spell-epic`'s own
 
 ## One epic server for the machine
 
 A dev server runs one per project;  the epic server runs ONE per machine, for every repo that uses `spell-epic`.
+
 `epic hub` serves each registered repo's content folder, the engine's scripts and styles,
 Epic UI (the `<epic-*>` elements' own docs), and the routes the review controls call.
 It's what the Review tab shows.
@@ -395,7 +414,7 @@ What you'd trip on today, roughly in the order you'd meet it.
    So you clone Spell to plan work in a repo that has nothing to do with it.
 2. **Its worktree hook runs in every repo.**
    Installed for the machine, the plugin makes EVERY Claude Code worktree, in repos with no config too,
-   with the defaults:  `.claude/worktrees/<name>`, cut from a branch named `main`.
+   with the defaults:  in the repo's `.claude/worktrees`, cut from a branch named `main`.
    In a repo whose branch is called something else, Claude Code's worktrees fail
    (`fatal: invalid reference: main`) until you run `epic init` there, which reads the branch from git.
 3. **A key you leave out takes Spell's value.**
@@ -411,8 +430,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    and `epic --help` itself use the first name of the person who reviews Spell's epics.
 7. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
-   Saved prompts go to `~/.spell/prompts/`, and `epic worktree merge-main` updates Vitest snapshots
-   with Spell's own command, `yarn vp test run --update`.
+   - Saved prompts go to `~/.spell/prompts/`.
+   - `epic worktree merge-main` updates Vitest snapshots with Spell's own command, `yarn vp test run --update`.
 8. **Claude Code only.**
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
 9. **VS Code and macOS.**
@@ -421,9 +440,15 @@ What you'd trip on today, roughly in the order you'd meet it.
 
 **Real today:**  a repo that isn't Spell, set up in three steps, its epics planned, built in worktrees and reviewed
 on their pages.
-**Not yet:**  an install without Spell, an agent other than Claude Code, two repos reviewed from one server,
-and the keys added since the first outside run (`app`, `extraInstalls`, `windowsFolder`) tried anywhere
-but Spell's own repos.
+**Not yet:**
+- an install without Spell
+- an agent other than Claude Code
+- two repos reviewed from one server
+- the keys added since the first outside run, tried anywhere but Spell's own repos:
+  - `app`
+  - `extraInstalls`
+  - `windowsFolder`
+  - `windows.settings`
 
 🌱 The first two are planned:  `npm install spell-epic`, with no Spell checkout, once the npm packages exist,
 and the same workflow driven from Codex and other agents

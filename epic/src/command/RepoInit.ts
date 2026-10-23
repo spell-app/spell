@@ -24,8 +24,8 @@ import { Shared } from "./Shared"
  *    (`Shared.init()`):  `epics`, `sagas`, `guides`, `pages`
  * 3. links those folders in at the checkout's root (`Shared.link()`)
  * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:  the links
- *    - not the window files (`epic window`:  each machine's own):  they're in the content folder since epic
- *      `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
+ *    - not the window files (`epic window`:  each machine's own):
+ *      they're in the content folder since epic `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
  *
  * - `--dry-run`:  says what it would do, and writes nothing
  * - `--json`:  the report as JSON
@@ -127,10 +127,12 @@ export class RepoInit {
    * - `installOnCreate`:  on when there is one, so a worktree's window never opens without its packages
    * - `extraInstalls`:  none (`[]`);  the file says what it's for
    * - `windows`:  named for the repo and its content folder;  `worktreeOnly` on (every worktree is beside the repo)
+   *   - no VS Code `settings` of its own (`{}`):  left out of the file (`configText()`)
    * - `linkSessionFolders` on:  each worktree's saved sessions show in every window's Claude panel
    * - `sharedFolders`:  what the epic tooling reads and writes (`INIT_FOLDERS`)
    * - `engineFolder`:  `""`, no `spell-epic` link:  only spell-app reaches the engine's code through one
-   * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's (spell-epic's `templates/`, epic `epic-eject` T11)
+   * - `repoTemplates`:  `""`, none:  the engine's templates are the repo's
+   *   (spell-epic's `templates/`, epic `epic-eject` T11)
    * - `windowsFolder`:  `../<repo>.epics/windows`, the content folder's `windows/` (epic `epic-eject` P13)
    * - `app`:  none (the default);  the file shows how to declare one, in a comment
    * - `checkoutPatches`:  none (`[]`);  the file shows one, in a comment
@@ -148,7 +150,7 @@ export class RepoInit {
       installOnCreate: Boolean(installCommand),
       installTimeout: EpicConfig.DEFAULTS.installTimeout,
       extraInstalls: [],
-      windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true },
+      windows: { default: repo, repoName: repo, contentName: `${repo}.epics`, worktreeOnly: true, settings: {} },
       linkSessionFolders: true,
       sharedFolders: [...INIT_FOLDERS],
       engineFolder: "",

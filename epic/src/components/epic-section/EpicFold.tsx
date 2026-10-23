@@ -204,8 +204,8 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   }
 
   /**
-   * The inner section's own `ui-opening` / `ui-closing` (the title clicked, or find-in-page):  this element's
-   * `ui-open` / `ui-close` instead.
+   * The inner section's own `ui-opening` / `ui-closing` (the title clicked, or find-in-page):
+   * this element's `ui-open` / `ui-close` instead.
    * - Heard on the shadow root, which the inner section's events reach on their way out.
    * - A nested fold's events bubble through here too (its DOM element is slotted inside),
    *   and so do those of a `<ui-section>` among the light children:
@@ -347,7 +347,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
           fold-icon="end"
           collapsed={!this.isOpen || this.isVeiled ? "" : undefined}
           loading={this.body.isBusy ? "" : undefined}
-          offset={String(this.offset)}
+          offset={this.offset}
           badge={pieces.badge?.() || undefined}
         >
           <Show when={pieces.icon}>

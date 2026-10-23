@@ -39,6 +39,7 @@ describe("EpicConfig", () => {
       "windows.repoName": "spell-app",
       "windows.contentName": "spell-app-dev",
       "windows.worktreeOnly": false,
+      "windows.settings": "{}",
       linkSessionFolders: false,
       sharedFolders: "epics,guides,pages,brand,goals,sagas,agents",
       engineFolder: join(TOP, "spell-epic"),
@@ -126,6 +127,16 @@ describe("EpicConfig", () => {
       /"installTimeout" must be a number/
     )
     expect(() => EpicConfig.settingsFrom('{ "installTimeout": "9" }', "x.json5")).toThrow(/must be a number/)
+  })
+
+  test("windows.settings (epic intellisense P4):  VS Code settings every window file gets;  none by default", () => {
+    expect(EpicConfig.settingsFrom("").windows.settings).toEqual({})
+    const settings = EpicConfig.settingsFrom('{ "windows": { "settings": { "js/ts.experimental.useTsgo": false } } }')
+    expect(settings.windows.settings).toEqual({ "js/ts.experimental.useTsgo": false })
+    expect(settings.windows.default).toBe("spell-app")
+    expect(() => EpicConfig.settingsFrom('{ "windows": { "settings": [] } }', "x.json5")).toThrow(
+      /"windows.settings" must be an object/
+    )
   })
 
   test("extraInstalls (epic-engine I65):  the folders that are yarn projects of their own, paths from the root", () => {

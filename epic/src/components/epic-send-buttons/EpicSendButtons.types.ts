@@ -5,7 +5,7 @@
  *   roots.
  */
 
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 /** A send asked for:  the event the owner hears and sends on (`@E.on(SEND_ASKED)`, `on-epic-send-asked`). */
 export const SEND_ASKED = "epic-send-asked"
@@ -26,7 +26,7 @@ export type SendState = (typeof SEND_STATES)[number]
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-send-buttons": UIJSXAttributes
+      "epic-send-buttons": EpicJSXAttributes
     }
   }
 }

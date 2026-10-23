@@ -3,11 +3,9 @@
  * its cards (`<epic-card>`) and its sort buttons (`<epic-sort>`), epic `epic-engine` P3.
  * - What a card's attributes say, read the same way by the card (to draw itself) and the list (to place it):
  *   `cardFactsOf()`, `listedCardOf()`
- * - Plain DOM reads, no Solid:  the list reads its cards' attributes, never their components, so a card counts before
- *   it has upgraded.
+ * - Plain DOM reads, no Solid:  the list reads its cards' attributes, never their components,
+ *   so a card counts before it has upgraded.
  */
-
-import type { JSX } from "@solidjs/web"
 
 import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell-epic/list/EpicCards"
 import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
@@ -16,8 +14,10 @@ import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
 export const FAVORITE_API = "/api/epics/favorite"
 
 /**
- * `localStorage` key of the sagas the Epics page shows:  a JSON list of their ids (`""` for No saga);  absent:  every
- * one.  One for every Epics page.  The docs runtime's key before epic `epic-engine` P3, so a choice carries over.
+ * `localStorage` key of the sagas the Epics page shows:  a JSON list of their ids (`""` for No saga).
+ * - absent:  every one
+ * - one for every Epics page
+ * - the docs runtime's key before epic `epic-engine` P3, so a choice carries over
  */
 export const SAGAS_SHOWN_KEY = "spell-epics-sagas"
 
@@ -191,20 +191,5 @@ export function save(key: string, value: string) {
     localStorage.setItem(key, value)
   } catch {
     // private mode:  the choice lasts the visit
-  }
-}
-
-/** Loose attributes of a Spell UI tag drawn in JSX:  HTML attributes, plus any attribute. */
-type UIJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
-
-declare module "@solidjs/web/types/jsx.js" {
-  namespace JSX {
-    interface IntrinsicElements {
-      // the Spell UI card a `<epic-card>` draws
-      "ui-card": UIJSXAttributes
-      "ui-content": UIJSXAttributes
-      "ui-description": UIJSXAttributes
-      "ui-meta": UIJSXAttributes
-    }
   }
 }

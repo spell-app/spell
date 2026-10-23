@@ -1,12 +1,15 @@
 /**
  * Loose types and constants of the `epic-page` family;
- * and the JSX types of the Spell UI tags every `<epic-*>` element draws in its shadow root.
+ * and the JSX types of the tags every `<epic-*>` element draws in its shadow root.
+ * - Spell UI's `<ui-*>` tags:  its exact types, generated (`spell-ui/jsx`), imported here.
+ * - The pack's own `<epic-*>` tags:  loose (`EpicJSXAttributes`), each family declaring the ones it draws.
  * - Data only:  nothing here runs.
  */
 
 import type { JSX } from "@solidjs/web"
 
 import type { E } from "spell-kit/element"
+import type {} from "spell-ui/jsx"
 
 import type { epicPageVocabulary } from "./EpicPage.en"
 
@@ -39,8 +42,13 @@ export type PhaseLine = {
 
 /** The step label:  its look, its words, where it links. */
 export type StepLabel = {
-  /** `blue` the active phase (outlined:  Claude is on it), `green` DONE (solid), `grey` the next one, or FUTURE;  else the
-   * epic state's colour (`red` errors) */
+  /**
+   * its colour:
+   * - `blue`:  the active phase (outlined:  Claude is on it)
+   * - `green`:  DONE (solid)
+   * - `grey`:  the next one, or FUTURE
+   * - else the epic state's colour (`red` errors)
+   */
   color: "blue" | "green" | "grey" | "red"
   icon: string
   /** what it says:  `P4`, `DONE`, `FUTURE` */
@@ -162,7 +170,11 @@ export const SAGA_KIND = "saga"
  */
 export const OLD_CRUMBS = ":scope > .spell-crumbs"
 
-/** The toast saying something was copied (the heading's name, a meta line's code, the review line):  how long it shows, ms;  its id, so a second copy replaces it. */
+/**
+ * The toast saying something was copied (the heading's name, a meta line's code, the review line).
+ * - `COPIED_TOAST_MS`:  how long it shows, ms
+ * - `COPIED_TOAST_ID`:  its id, so a second copy replaces it
+ */
 export const COPIED_TOAST_MS = 2500
 export const COPIED_TOAST_ID = "epic-copied"
 
@@ -194,22 +206,19 @@ export type HeaderMarks = {
 export const PROMPT = 'epic-overview > [slot="prompt"]'
 export const ICON = "icon"
 
-/** Loose attributes of a Spell UI tag drawn in JSX:  HTML attributes, plus any attribute. */
-export type UIJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+/**
+ * Loose attributes of an `<epic-*>` tag drawn in JSX:  HTML attributes, plus any attribute.
+ * - Loose until the pack generates exact types, as Spell UI does (`spell-ui/jsx`).
+ */
+export type EpicJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "ui-section": UIJSXAttributes
-      "ui-label": UIJSXAttributes
-      "ui-message": UIJSXAttributes
-      "ui-code": UIJSXAttributes
-      "ui-breadcrumb": UIJSXAttributes
-      "ui-breadcrumb-section": UIJSXAttributes
-      // the pack's own families it draws in its shadow root
-      "epic-new-item": UIJSXAttributes
-      "epic-agents": UIJSXAttributes
-      "epic-test-run": UIJSXAttributes
+      // the pack's own families it draws in its shadow root (Spell UI's:  `spell-ui/jsx`)
+      "epic-new-item": EpicJSXAttributes
+      "epic-agents": EpicJSXAttributes
+      "epic-test-run": EpicJSXAttributes
     }
   }
 }

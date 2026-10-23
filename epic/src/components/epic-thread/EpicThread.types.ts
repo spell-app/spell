@@ -5,7 +5,7 @@
  * - Data only:  nothing here runs.  The vocabularies read it too.
  */
 
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 ////////////////
 // ## A thread
@@ -78,7 +78,7 @@ export const WHO = "who"
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-thread-message": UIJSXAttributes
+      "epic-thread-message": EpicJSXAttributes
     }
   }
 }

@@ -3,12 +3,12 @@
  * (`<epic-ask>`'s Other, `<epic-option>`'s comment on an answering page, `<epic-choices-bar>`'s feedback).
  * - Types only.
  */
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-text-box": UIJSXAttributes
+      "epic-text-box": EpicJSXAttributes
     }
   }
 }

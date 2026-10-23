@@ -37,15 +37,15 @@ export type CardsProblem = "file" | "server" | "none"
 /** An epic page's file, as the page server announces a change (`spell-server:file`):  the cards ask again. */
 export const EPIC_FILE = /\/epics\/[^/]+\/(?:parts\/[^/]+|[^/]+\.plan)\.html$/
 
-/** Loose attributes of a tag drawn in JSX:  HTML attributes, plus any attribute. */
-type UIJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+/** Loose attributes of an `<epic-*>` tag drawn in JSX:  HTML attributes, plus any attribute. */
+type EpicJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
       // the Epics page's list and cards, which it draws (epic `epic-engine` I39)
-      "epic-list": UIJSXAttributes
-      "epic-card": UIJSXAttributes
+      "epic-list": EpicJSXAttributes
+      "epic-card": EpicJSXAttributes
     }
   }
 }

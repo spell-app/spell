@@ -3,7 +3,7 @@
  * - Types only, plus the JSX declaration:  `<epic-section>` and `<epic-page>` draw the tag in their shadow roots.
  */
 
-import type { UIJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
 
 /** A chip's click:  the event its owners hear (`@E.on(STATE_PICK)`). */
 export const STATE_PICK = "epic-state-pick"
@@ -23,8 +23,8 @@ export type StatePickDetail = {
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      "epic-state-filter": UIJSXAttributes
-      "epic-hidden-note": UIJSXAttributes
+      "epic-state-filter": EpicJSXAttributes
+      "epic-hidden-note": EpicJSXAttributes
     }
   }
 }
