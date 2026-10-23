@@ -927,8 +927,8 @@ const ADD_HELP = `
 Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   C caveat   T todo   V test (checked by hand)   D decision (a question born answered)
 --calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
-A test (V) Owen's test run steps him through, its fields HTML, or plain text with steps as `1. ... 2. ...`, `- `
-bullets and `code` (epic details seo#V3 takes them too):
+A test (V) Owen's test run steps him through, its fields HTML, or plain text:  steps as "1. ... 2. ..." become a
+numbered list, "- " lines bullets (epic details seo#V3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run
   --should <html>     what should happen
   --example <png>     a screenshot of it, copied to tests/<id>.png beside the page;  or a line of text
