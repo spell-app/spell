@@ -294,13 +294,27 @@
     margin-inline-start: auto;
   }
 
-  /* ## Back and Next, at the card's foot */
+  /*
+   * ## Back and Next, at the card's foot
+   * - pinned to the window's bottom while the card runs on below it, over the fields and comment boxes it passes
+   *   (Owen, 2026-10-22):  so Next is always in the same place, a long test or not
+   * - the card's own ground, out to its edges, and a soft shadow above, so what scrolls under it stays readable
+   */
   .moves {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 1;
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    padding-block-start: 10px;
+    /* out to the card's edges and its bottom (its padding:  14px 16px 12px) */
+    margin: 0 -16px -12px;
+    padding: 10px 16px 12px;
     border-block-start: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+    background: var(--_run-card);
+    box-shadow: 0 -8px 12px -10px rgb(0 0 0 / 0.3);
   }
 
   /* ## The summary */
