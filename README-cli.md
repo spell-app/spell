@@ -93,9 +93,10 @@ spell lint @spell/examples
 @spell/examples holds several projects -- name one, or pass --all:
   @spell/examples/calculator
   @spell/examples/fizzbuzz
+  @spell/examples/ListaDeTareas
   @spell/examples/Solitaire
   @spell/examples/Solitario
-  @spell/examples/todos-form-based
+  @spell/examples/TaskList
 ```
 
 </details>
@@ -110,9 +111,10 @@ spell lint --all @spell/examples
 ```text
 ✓ @spell/examples/calculator
 ✓ @spell/examples/fizzbuzz
+✓ @spell/examples/ListaDeTareas
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
-✓ @spell/examples/todos-form-based
+✓ @spell/examples/TaskList
 ```
 
 </details>
@@ -716,7 +718,7 @@ spell projects
 
 ```text
 owen@spell       Projects       ...
-@spell/examples  Examples       5 projects
+@spell/examples  Examples       6 projects
 @spell/guides    Guides         0 projects
 @spell/library   Libraries      1 project
 @spell/test      Test fixtures  7 projects
