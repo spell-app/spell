@@ -149,7 +149,8 @@
               <li>prose: what it did, one or two sentences</li>
             </ul>
             <p>
-              Its link comes from the nearest <code>&lt;epic-page repo&gt;</code>:
+              Its link comes from its own <code>repo</code> (a child repo's commit), else the nearest
+              <code>&lt;epic-page repo&gt;</code>:
               <code>&lt;repo&gt;/commit/&lt;sha&gt;</code>, opening in one shared GitHub tab.
             </p>
           </ui-section>
@@ -172,6 +173,12 @@
                     <td>the commit's full sha (hex)</td>
                     <td>The commit. Drawn as its first 7 characters.</td>
                     <td>yes</td>
+                  </tr>
+                  <tr>
+                    <td><code>repo</code></td>
+                    <td>a GitHub page (<code>https://github.com/spell-app/spell-lang</code>)</td>
+                    <td>The repo the commit is in, when it isn't the page's: a child repo's commit links there.</td>
+                    <td>no</td>
                   </tr>
                 </tbody>
               </table>
@@ -269,11 +276,12 @@
               <li>
                 <code>epic commits &lt;epic&gt; --backfill</code>: every phase and item commit in the
                 doc's git history not listed yet, read from subjects (<code>P3: Name -- summary</code>,
-                <code>Fix I3: ...</code>).
+                <code>&lt;epic&gt; I3: ...</code>). It reads the kit and every child repo, and files a phase commit by
+                the phase's name, not its number alone: a phase renumbered since, or another epic's P3, is left out.
               </li>
               <li>
                 Both write <code>&lt;epic-page repo&gt;</code> from the checkout's <code>origin</code> remote, when it's
-                on GitHub.
+                on GitHub, and a child repo's commit's own <code>repo</code> from that repo's.
               </li>
               <li>
                 The converter turned the old phase and item commit lists into it (<code>CardConverter</code>,

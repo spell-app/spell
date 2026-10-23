@@ -29,8 +29,10 @@ import {
   type AddPhaseOptions,
   type BackfilledCommit,
   type CommitLogEntry,
+  type BackfillOptions,
   type CommitOptions,
   type CommitTarget,
+  type ParsedCommit,
   type ChooseOptions,
   type DecideOptions,
   type FinishedState,
@@ -1610,11 +1612,13 @@ export class PlanDoc extends PlanReader {
     { phase, item }: CommitTarget,
     sha: string,
     sentence: string,
-    { base = null }: CommitOptions = {}
+    { base = null, repo = null }: CommitOptions = {}
   ): "added" | "replaced" {
     const host = phase !== undefined ? this.phase(phase) : this.item(item!)
     if (base && this.page.getAttribute("repo") !== base) Markup.set(this.page, { repo: base })
-    const entry = this.make("epic-commit", { sha }, PlanMarkup.text(sentence))
+    // a child repo's commit links to its own repo;  the page's links the rest
+    const own = repo && repo !== this.page.getAttribute("repo") ? repo : undefined
+    const entry = this.make("epic-commit", { sha, repo: own }, PlanMarkup.text(sentence))
     const old = PlanCommits.findCommit(host, sha)
     if (old) {
       old.replaceWith(entry)
@@ -1630,28 +1634,47 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Fill in commits from the doc's git history:  `log` is `{ sha, subject }`s, newest first (`git log`);
+   * Fill in commits from the doc's git history:  `log` is `{ sha, subject, repo }`s, newest first (`git log`);
    * returns what it added, `{ sha, phase }` / `{ sha, item }`, oldest first.
    * - subjects `PlanCommits.parseCommitSubject()` reads:
    *   phase commits (`P3:  Name -- summary`) and item fixes (`Fix I3:  ...`)
    * - only phases and items the doc has;  a commit already listed there is skipped, so it can run again
+   * - a commit naming another epic first (`other-epic P7:`) is left out (`epic`)
+   * - a phase by its NAME, not its number alone (epic `epic-engine` r17):  phases get renumbered
+   *   - `P27:  Pile Drawing` is P27 only while P27 is called Pile Drawing
+   *   - a title naming ANOTHER phase is that phase's, from before a renumbering:  left out
+   *     (`outline-spell P27:  Doc Review`, once P27 became Pile Drawing)
+   *   - a title naming no phase (`P1 follow-up:  more`) goes by its number
    */
-  backfillCommits(log: Iterable<CommitLogEntry>, { base = null }: CommitOptions = {}): BackfilledCommit[] {
+  backfillCommits(log: Iterable<CommitLogEntry>, { base = null, epic }: BackfillOptions = {}): BackfilledCommit[] {
     const added: BackfilledCommit[] = []
-    for (const { sha, subject } of Array.from(log).reverse()) {
+    for (const { sha, subject, repo } of Array.from(log).reverse()) {
       const parsed = PlanCommits.parseCommitSubject(subject)
-      if (!parsed) continue
+      if (!parsed || (epic && parsed.epic && parsed.epic !== epic)) continue
       const targets: CommitTarget[] = [
-        ...parsed.phases.filter((n) => this.phases.some((phase) => phase.n === n)).map((n) => ({ phase: n })),
+        ...this.phasesNamedBy(parsed).map((n) => ({ phase: n })),
         ...parsed.items.filter((id) => this.hasItem(id)).map((id) => ({ item: id }))
       ]
       for (const target of targets) {
         if (this.hasCommit(target, sha)) continue
-        this.addCommit(target, sha, parsed.sentence, { base })
+        this.addCommit(target, sha, parsed.sentence, { base, repo })
         added.push({ sha, ...target })
       }
     }
     return added
+  }
+
+  /**
+   * The phases a commit is for (`backfillCommits()`):  each number it names whose phase its title names, or whose
+   * title names no other phase.
+   */
+  private phasesNamedBy({ phases, title }: ParsedCommit): number[] {
+    return phases.filter((n) => {
+      const phase = this.phases.find((each) => each.n === n)
+      if (!phase) return false
+      if (PlanCommits.titleNames(title, phase.name)) return true
+      return !this.phases.some((other) => other.name !== phase.name && PlanCommits.titleNames(title, other.name))
+    })
   }
 
   ////////////////

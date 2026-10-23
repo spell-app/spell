@@ -440,11 +440,15 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - Commit messages, so the doc can list them (its phase's and items' "Commits"):
      - a phase:  `P<n>:  <Name> -- <summary>`
        - `P4 + P5:` for two;  `WIP P3:` for a parked part
+       - the phase's NAME right after the colon:  `commits --backfill` files a phase commit by its name, not its
+         number alone (epic `epic-engine` r17:  phases get renumbered), and leaves out one naming another phase
+       - `<name> P<n>:` once the epic's name leads it;  one naming another epic first is left out
      - an item fix:  `<name> I3:  ...`.
        It MUST carry the epic's name:  `commits --backfill` ignores a bare `Fix I3:`, since it can't tell which epic.
    - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
      folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
-   - After the phase's commit:  `epic commits <name> --backfill`, which finds them by subject.
+   - After the phase's commit:  `epic commits <name> --backfill`, which finds them by subject, in the kit and every
+     child repo (a child repo's commit links to that repo on GitHub).
      - The epic page is never in that commit:
        it's shared content, committed for you (see "Shared content" at the top).
    - A STANDING epic:  the phase goes onto `main` AT ONCE (Q8 of `epic-workflow`),

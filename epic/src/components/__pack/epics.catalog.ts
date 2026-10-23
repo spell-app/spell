@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  cebaa4ece07d299d
+// sources:  4ca4d9b4a7a3a69a
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -17,7 +17,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-choices-bar": {"folder":"epic-choices-bar","skeleton":{"height":"3em"},"attributes":[]},
   "epic-code": {"folder":"epic-code","attributes":["title","language","open"]},
   "epic-comment-pane": {"folder":"epic-comment-pane","attributes":["headline","about","saved","failed","deletable","near"]},
-  "epic-commit": {"folder":"epic-commit","attributes":["sha"]},
+  "epic-commit": {"folder":"epic-commit","attributes":["sha","repo"]},
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","label"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},

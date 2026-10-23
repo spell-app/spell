@@ -129,6 +129,7 @@ export type AttributeTest = {
  * - `anchor` -- any id a link may land on (`d7`, an old decision's, kept on its answer)
  * - `ids` -- anchors, space-separated (`data-part-ids` today)
  * - `sha` -- a git commit, 7 to 40 hex digits
+ * - `url` -- a web address, `https://github.com/spell-app/spell-lang`
  * - `letter` -- an option's letter, `A` to `Z`
  * - `epic name` -- the epic's folder name, `epic-components`
  * - `saga id` -- a saga's id, one or two words:  `drawable-spell`, `epics` (`sagas/sagas.json5`;  epic `epic-workflow` P15)
@@ -141,6 +142,7 @@ export const Formats = {
   anchor: /^[A-Za-z][\w-]*$/,
   ids: /^[A-Za-z][\w-]*( [A-Za-z][\w-]*)*$/,
   sha: /^[0-9a-f]{7,40}$/,
+  url: /^https?:\/\/\S+$/,
   letter: /^[A-Z]$/,
   "epic name": /^[a-z0-9]+(-[a-z0-9]+)*$/,
   "saga id": /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/

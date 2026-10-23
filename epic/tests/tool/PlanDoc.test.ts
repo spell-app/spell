@@ -1039,10 +1039,20 @@ describe("PlanDoc commits", () => {
   test("reads phase and item commits from subjects", () => {
     const parse = (subject: string) => PlanCommits.parseCommitSubject(subject)!
     expect(parse("P1:  Side Bar And Chrome -- Spell Docs + Review tabs")).toEqual({
+      epic: null,
       phases: [1],
       items: [],
+      title: "Side Bar And Chrome",
       sentence: "Spell Docs + Review tabs"
     })
+    expect(parse("outline-spell P28:  Dragging Cards -- drag").epic).toBe("outline-spell")
+    expect(parse("fix I3:  the label").epic).toBe(null)
+    // phases and items together, an item range spelled out (r17:  the commit rule names every id)
+    expect(parse("spanish P22, J110-J112:  Card Checks -- x")).toMatchObject({
+      phases: [22],
+      items: ["j110", "j111", "j112"]
+    })
+    expect(parse("epic-engine P5, T1, J7:  x")).toMatchObject({ phases: [5], items: ["t1", "j7"] })
     expect(parse("P1 follow-up:  ivory rail").sentence).toBe("ivory rail")
     expect(parse("P4 + P5:  both -- did both").phases).toEqual([4, 5])
     expect(parse("WIP P3:  half").phases).toEqual([3])
@@ -1122,6 +1132,37 @@ describe("PlanDoc commits", () => {
       "more"
     ])
     expect(plan.backfillCommits(log, { base: BASE })).toEqual([])
+  })
+
+  test("a phase by its name, not its number alone:  a renumbered phase and another epic's P<n> are left out (r17)", () => {
+    const plan = freshPlan()
+    for (const name of ["Spike", "Doc Review", "Pile Drawing"]) plan.addPhase(name)
+    const log = [
+      { sha: "d".repeat(40), subject: "other-epic P3:  Pile Drawing -- another epic's" },
+      { sha: "c".repeat(40), subject: "demo P3:  Doc Review -- the old P3, before Pile Drawing went in" },
+      { sha: "b".repeat(40), subject: "demo P3:  Pile Drawing -- today's P3" },
+      { sha: "a".repeat(40), subject: "P1 follow-up:  more" }
+    ]
+    const added = plan.backfillCommits(log, { epic: "demo" })
+    expect(added.map((entry) => [entry.sha[0], entry.phase])).toEqual([
+      ["a", 1],
+      ["b", 3]
+    ])
+  })
+
+  test("a child repo's commit links to its own repo;  the page's links the rest", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    const LANG = "https://github.com/spell-app/spell-lang"
+    const log = [
+      { sha: "b".repeat(40), subject: "P1:  One -- in spell-lang", repo: LANG },
+      { sha: "a".repeat(40), subject: "P1:  One -- in the kit", repo: BASE }
+    ]
+    plan.backfillCommits(log, { base: BASE })
+    expect(Array.from(el(plan, "p1").querySelectorAll("epic-commit"), (commit) => commit.getAttribute("repo"))).toEqual(
+      [null, LANG]
+    )
+    expect(problems(plan)).toEqual([])
   })
 })
 
