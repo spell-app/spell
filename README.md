@@ -629,7 +629,7 @@ When the page server is already running, its line ends "(already running)".
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
 This game's [Solitaire.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell) is written in outlines,
-and its cards come from the card library, which it imports.
+and its cards, deck and piles are files of its own beside it.
 A tableau says what it can take:
 `return its color is not the color of the card and its value is the value of the card + 1`.
 The game deals itself as it opens.
@@ -664,7 +664,7 @@ spell test @spell/examples/Solitaire
 </details>
 
 - Before your change it says `6 passed`, and `spell test` exits 1 on a failure, so a script can tell.
-- The `...` at the top stands for the card library's own tests, of its card, deck and piles, which pass either way.
+- The `...` at the top stands for the tests of its card, deck and piles, which pass either way.
 
 </details>
 
