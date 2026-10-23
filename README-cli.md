@@ -543,20 +543,35 @@ each language pack registers every rule again, with its own words.
 ### Translating a project
 
 `spell lang translate` writes a project in another language, in three passes:
-1. Names:  every name its people chose (types, properties, values, methods, texts, comments), translated by
-   `claude -p` in one batch, so one thing has one word everywhere.
-   Each noun comes with its gender, and each name is checked readable by the other language's grammar first.
+1. Names:  every name its people chose (types, properties, values, methods, texts, comments).
+   - First from the language's shared glossary:  a name another project chose costs no call, and reads the same.
+   - The rest by Claude:  the types alone in one small call, then the other names in a few calls at once,
+     each shown the types and the glossary, so one thing has one word everywhere.
+   - Each noun comes with its gender, and each name is checked readable by the other language's grammar first.
 2. Lines:  each line read in its own language, then written again with the same rule's words in the other.
-3. Fix-ups:  the translation is linted and its tests run;
-   each line that fails, couldn't be written, or may read in the wrong order goes back to `claude -p`,
-   in context, a few rounds at most.
+3. Fix-ups:  the translation is linted, its tests run, and each line compiled beside its English:
+   each line that fails, compiles to a different program, couldn't be written, or may read in the wrong order
+   goes back to Claude, in context, a few rounds at most.
+
+- It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
+  - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
+  - On Solitaire, cold, through `claude -p`:  31-41 s in all, the names 22-31 s, the fix-ups 9-10 s, in 7 or 8 calls.
+  - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
+    system prompt, which the API caches across the calls.
+  - `--effort fast|balanced|best` says how much each pass spends on its answers, `balanced` unless asked;
+    the runner picks a model and how hard it thinks for each pass at each one.
+    - On Solitaire and todos, more thought made no better names, only slower ones, so today `fast` and `balanced`
+      ask the same, and `best` thinks harder only over the fix-ups.
 
 - The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
+- The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-lang:
+  card games' words and common ones, each with its gender and where it came from.
 - Its work is spell-app's (it finds the project the app's way), then `spell-lang`'s `translateProject.ts`.
 
 | Command | What it does |
 | --- | --- |
-| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, or a test fails |
+| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
+| `spell lang translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -564,13 +579,22 @@ each language pack registers every rule again, with its own words.
 | Option | What it does |
 | --- | --- |
 | `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
-| `--no-ai` | never asks `claude -p`:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
+| `--no-ai` | never asks Claude:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
+| `--effort <tier>` | how much every pass spends on its answers:  `fast`, `balanced` (the default) or `best` |
+| `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
 
-- It says how long each pass took, and each `claude -p` call:
-  the names in one, the comments in one per file at the same time, a second for any name it couldn't read,
-  one per round of fix-ups.
+- It says how long each pass took, and each call to Claude:
+  the types in one, the other names in up to 6 at the same time, one more for any name it couldn't read
+  (or that two calls gave the same word), one per round of fix-ups.
+- A fix-up answer that isn't JSON anyway (cut off, say) is asked again in two halves, so the round isn't lost.
+- Through the API, a 429 (too many requests) or an overloaded API is asked again a few times, a few seconds apart;
+  any other failure says what it was (`Claude API (claude-opus-5-5):  401 authentication_error:  ...`).
+- And the shape check:  how many statements compile to the same program as the English, names and texts aside.
+  A line that reads and lints but means something else (`si no está boca arriba` for `if it is face up`)
+  is named, with where the two programs differ.
+- And each name the project chose otherwise than the glossary, so drift between projects shows.
 - A line it can't write keeps its English, marked `// TODO: translate (why)`:
   a name still missing, or a rule it can't write in that language yet.
   The fix-up pass writes it, unless `--no-ai`.
