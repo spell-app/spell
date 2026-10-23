@@ -365,7 +365,13 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
   {
     pattern: /@spell\/test\/(?:cards-from-zero|card-table|klondike|drawable-solitaire|outline-solitaire)(?![-\w])/,
     rule: "example",
-    message: "deleted (epic spanish P11):  lists-from-zero imports the frozen card library, @spell/test/cards"
+    message: "deleted (epic spanish P11):  Solitaire, tested as it is, holds their cards"
+  },
+  {
+    pattern: /@spell\/test\/cards(?![-\w])/,
+    rule: "example",
+    message:
+      "deleted (epic spanish J105):  the import tests' pair is @spell/test/counter, which @spell/test/counter-app imports"
   },
   // the fixture page names a bare `@spell/test/solitaire` beside a stale example:  match its GitHub path form
   {

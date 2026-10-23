@@ -299,6 +299,14 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
   - It runs again when the project's compiled file changes on disk, e.g. compiled by the browser editor.
   - It remembers how it shows the project (its console, its tab, its Type Explorer)
     in a `settings.json5` beside the project's own file.
+- **Run Tests** (the flask in the panel, or the beaker at the top right):  the project's tests, as `spell test` runs them.
+  - Each `to test ...` runs on a copy of its own, so the game in progress is left alone.
+  - A project that starts no app, e.g. one of types and their tests, runs them after every run, by itself.
+  - Program Output says how they went:  `✓` for a test that passed, `✗` and its failed checks for one that didn't,
+    in the project's language.
+  - Each failed check is an error on its own line in the editor, e.g. under
+    `it is the queen of spades should be yes` when it's `no`.
+    An edit to the file clears them;  the next test run shows them again.
 - **`spell.compileOnSave`**, off by default:  compile the project on every save,
   to `<Project>.spell.js` in the build folder (`build/` at the repo's root),
   so anything running that file picks the change up.  Run Project doesn't need it.
