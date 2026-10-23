@@ -21,13 +21,16 @@ import checkboxCSS from "./UICheckbox.css?inline"
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
 export class DOMCheckElement extends F.DOMFormControl<CheckControl> {
-  /** Another name for `selected`. */
+  /**
+   * Another name for `selected`, the same in every language:  a Spanish `<es-casilla>`'s `seleccionado`.
+   * - What `<ui-form>` reads and writes (`FormFields.isChosen()`).
+   */
   get checked(): boolean {
-    return !!(this as unknown as { selected?: boolean }).selected
+    return !!this.valueNamed("selected")
   }
 
   set checked(value: boolean) {
-    ;(this as unknown as { selected?: boolean }).selected = value
+    this.setValueNamed("selected", value)
   }
 
   /** How a form reads it:  `"radio"` for `<ui-radio>`, else `"checkbox"`. */

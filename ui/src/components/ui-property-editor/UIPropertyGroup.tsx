@@ -71,6 +71,12 @@ export class UIPropertyGroup extends UISection {
   }
 
   /** `:state(error)`:  its `error`, a property in it failing validation, or (the section's) a failed load. */
+  /** Always `:state(property-group)`:  how its family finds it, whatever its tag is called (`GROUP_SELECTOR`). */
+  @E.cssState("property-group")
+  get isPropertyGroup(): boolean {
+    return true
+  }
+
   @E.cssState("error")
   get isError(): boolean {
     return !!this.attributes.error || this.failedFields.size > 0 || this.attributes.state === ERROR

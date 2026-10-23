@@ -36,10 +36,19 @@ function nameOf(item: { name?: string; key?: string }): string {
 /** A vocabulary item list, as the vocabularies here build them. */
 export type Names<K extends keyof E.ComponentVocabulary> = E.ComponentVocabulary[K]
 
-/** The tags of the family, for `closest()`. */
+/** The tags of the family, for making one:  `document.createElement(PROPERTY_TAG)`. */
 export const EDITOR_TAG = "ui-property-editor"
 export const GROUP_TAG = "ui-property-group"
 export const PROPERTY_TAG = "ui-property"
+
+/**
+ * The family's elements, for `closest()` and `querySelectorAll()`, whatever each tag is called in a translation
+ * (`<es-editor-propiedades>`):  the state each always carries, as `<ui-field>`'s `:state(field)`.
+ * - Only once it's drawn:  a property finds its editor as it connects by what it is instead (`UIProperty`).
+ */
+export const EDITOR_SELECTOR = ":state(property-editor)"
+export const GROUP_SELECTOR = ":state(property-group)"
+export const PROPERTY_SELECTOR = ":state(property)"
 
 /** Marks what an editor or a property added to its own light DOM, so it can take it away again. */
 export const MADE_ATTRIBUTE = "data-ui-made"
