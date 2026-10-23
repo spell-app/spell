@@ -237,11 +237,11 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The outline Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/Card.spell) has the
+[The Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell) has the
 same `it "is a (rank)"` line, and Spell writes it the same syntax:
 
 ```sh
-spell parse --in @spell/examples/outline-solitaire $'set the card to a new card\nprint the card is a queen'
+spell parse --in @spell/examples/Solitaire $'set the card to a new card\nprint the card is a queen'
 ```
 
 <details>
@@ -257,7 +257,7 @@ core.console.log(card.isARank("queen"))
 
 - A project writes its phrases' syntaxes down, so another project can register the same rules from data:
   that example's are in
-  [outline-solitaire.declarations.json5](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/outline-solitaire/outline-solitaire.declarations.json5).
+  [Solitaire.declarations.json5](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.declarations.json5).
 - The code that builds a phrase's syntax, word by word:
   [QuotedPropertyFormula.ts](src/spell/rules/classes/QuotedPropertyFormula.ts).
 - What phrases are, from the language's side:  [README-spell](README-spell.md).

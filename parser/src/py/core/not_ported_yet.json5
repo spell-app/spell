@@ -18,7 +18,6 @@
         "elementFor",
         "elementApiOf",
         "thingFor",
-        "elementTagOf",
         "appLayout",
         "domRoot",
         "useElement",

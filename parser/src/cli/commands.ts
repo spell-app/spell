@@ -113,7 +113,7 @@ export default function languageCommands(spell: Command): void {
     .description("how spell reads a line:  its match tree, then the javascript it compiles to")
     .argument("<text>", 'a line of spell, e.g. "print 1 + 2" -- several lines parse as a block')
     .option("--rule <name>", "parse as this rule only, e.g. expression -- default statement, then expression")
-    .option("--in <project>", "parse inside this project's scope, e.g. @spell/test/solitaire")
+    .option("--in <project>", "parse inside this project's scope, e.g. @spell/examples/Solitaire")
     .option("--json", "print the result as JSON")
     .option("--tree", "print the spell tree -- what it means -- not the match tree;  with --json:  its data")
     .option("--html", "with --tree:  print it as a <ui-tree-diagram> for a docs page")
@@ -122,14 +122,14 @@ export default function languageCommands(spell: Command): void {
   spell
     .command("repl")
     .description("spell parse, a line at a time -- what a line declares, later lines know.  Piped:  reads stdin")
-    .argument("[project]", "parse inside this project's scope, e.g. @spell/test/solitaire")
+    .argument("[project]", "parse inside this project's scope, e.g. @spell/examples/Solitaire")
     .action((project: string | undefined, _options, command: Command) => language("repl", listOf(project), command))
 
   spell
     .command("explain")
     .description("what a word means to spell:  rules it names or starts -- and, --in a project, what it declares")
     .argument("<word>", "e.g. print, repeat -- or, with --in, a type, property or method")
-    .option("--in <project>", "look in this project too, e.g. @spell/test/solitaire")
+    .option("--in <project>", "look in this project too, e.g. @spell/examples/Solitaire")
     .option("--json", "print what was found as JSON")
     .action((word: string, _options, command: Command) => language("explain", [word], command))
 
@@ -182,12 +182,12 @@ const NO_HOOK =
 /** How to name projects, after each project command's help. */
 const PROJECT_HELP = `
 Projects:
-  Card.spell, ./path/to/Project        a spell file, or the project in a folder
-  @here                                the project in the current folder
-  @spell/library/cards, owen@spell/x   one project, by its address
-  @spell/test/solitaire/Card.spell    a file in one:  its name has a dot
-  @spell/library, owen@spell, @spell   a group, or all of a space's:  pick from their projects, or pass --all
-  (none)                               the project here -- or, outside one, asks, completing as you type`
+  Card.spell, ./path/to/Project          a spell file, or the project in a folder
+  @here                                  the project in the current folder
+  @spell/library/people, owen@spell/x    one project, by its address
+  @spell/examples/Solitaire/Card.spell   a file in one:  its name has a dot
+  @spell/library, owen@spell, @spell     a group, or all of a space's:  pick from their projects, or pass --all
+  (none)                                 the project here -- or, outside one, asks, completing as you type`
 
 /** Help for a command's project argument(s):  a project, or a lone spell file, which counts as one. */
 const PROJECT_ARG = "a spell file, project folder, or a project's address -- default the project here, else asks"

@@ -36,9 +36,16 @@ export class SpellIdentifier<MatchData extends P.AnyMatchData = P.AnyMatchData> 
    * - A METHOD rather than something stashed in `parse()`:  only worked out when someone asks,
    *   and subclasses which know better override it, e.g. `singular_identifier` always says `"singular"`.
    * - Ask from elsewhere as `if (match.is(SpellIdentifier)) match.rule.getPlurality(match)`.
+   * - A type's name in another language's grammar counts as that language does (epic `spanish` J89):
+   *   `cards`, in a Spanish file naming an English `Card`, is plural -- see `SP.typeInItsOwnLanguage()`.
    */
   getPlurality(match: P.MatchFor<this>): P.Plurality {
-    return P.getPlurality(`${match.raw ?? match.value}`)
+    const word = `${match.raw ?? match.value}`
+    const plurality = P.getPlurality(word)
+    if (plurality === "plural") return plurality
+    // a type's name in another language's grammar counts as that language does:  `cards` in Spanish (J89)
+    const inItsOwn = SP.typeInItsOwnLanguage(match.scope, word)
+    return inItsOwn ? P.Inflector.using(inItsOwn.language.inflector, () => P.getPlurality(word)) : plurality
   }
 
   /** Map value by converting dashes and whitespace to underscores. */

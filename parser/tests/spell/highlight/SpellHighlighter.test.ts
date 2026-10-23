@@ -9,7 +9,7 @@ function coloured(text: string, kind: string, parser?: SP.SpellParser): string[]
     .map((span) => text.slice(span.start, span.end))
 }
 
-/** A real file:  spell-app's `spaces/@spell/library/cards/Pile.spell`'s opening. */
+/** A pile file's opening, in the sentence style:  as the old card library's `Pile.spell` was. */
 const PILE = `## Pile of playing cards
 a pile is a list of cards
 

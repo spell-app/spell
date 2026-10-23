@@ -242,6 +242,26 @@ describe("outline style", () => {
     expect(run("back, heart, ace, next, none")).toEqual({ back: "🂠", heart: "♥", ace: "🂡", next: "🂢", none: "" })
   })
 
+  test("`unicode 1F0A0 + n` ADDS to the code point;  `hex 1F0A0` is a number;  a character of text is a whole one", () => {
+    const run = runSpell([
+      "set column to 1",
+      "set ace to unicode 1F0A0 + column",
+      "set queen to unicode 1F0A0 + column + 12",
+      "set start to hex 1F0A0",
+      "set next to unicode (start + 1)",
+      'set second to character 2 of "🂡🂢🂣"',
+      'set last to the last character of "🂡🂢🂣"'
+    ])
+    expect(run("ace, queen, start, next, second, last")).toEqual({
+      ace: "🂡",
+      queen: "🂭",
+      start: 0x1f0a0,
+      next: "🂡",
+      second: "🂢",
+      last: "🂣"
+    })
+  })
+
   test("a call that's all words beats a built-in reading:  `{draw its placeholder}` is the pile's own method", () => {
     const compiled = compile([
       "a card is a thing",
@@ -753,18 +773,58 @@ describe("outline style", () => {
     })
   })
 
-  test('`to "draw its front":` + markup:  a side, as a getter;  front and back give `draw()` by direction (Q14)', () => {
-    const lines = [
-      "a card is a thing where:",
-      "\t- its direction is up or down",
-      '\t- to "draw its front":',
-      '\t\t<ui-image source="images/front.png" />',
-      '\t- to "draw its back": <ui-image source="images/back.png" />'
-    ]
-    const js = compile(lines)
-    expect(js).toMatch(/get front\(\) \{\s+return h\("ui-image"/)
-    expect(js).toContain("draw() {")
-    expect(js).toContain('return this.direction === "down" ? this.back : this.front')
+  describe("drawing:  ONE `to draw it`, and a list's `to draw each item` (epic `spanish` P20)", () => {
+    test('`to "draw it":` + markup:  the markup IS its `draw()`, no `return` needed', () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        '\t- to "draw it":',
+        '\t\t<ui-image source="images/front.png" />'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+return h\("ui-image"/)
+      expect(js).not.toContain("this.direction ===")
+    })
+
+    test("`to draw it:` unquoted is a method's body, which returns it:  the same `draw()`", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- its direction is up or down",
+        "\t- to draw it:",
+        "\t\tif its direction is down",
+        '\t\t\treturn <div class="back"/>',
+        '\t\treturn <div class="front"/>'
+      ])
+      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction == "down"\) return h\("div", \{ class: "back" \}\)/)
+    })
+
+    test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- to draw it:",
+        '\t\treturn <div class="pile"><children/></div>',
+        "\t- to draw each item:",
+        '\t\treturn <div class="spot">{draw the card}</div>'
+      ])
+      expect(js).toContain('return h("div", { class: "pile" }, h("slot"))')
+      expect(js).toMatch(
+        /drawEachItem\(item\) \{\s+return h\("div", \{ class: "spot" \}, \(\) => core\.drawThing\(item\)\)/
+      )
+    })
+
+    test('`to "draw each item":` + markup:  `the item` is the item too', () => {
+      const js = compile([
+        "a card is a drawable thing",
+        "a pile is a drawable list of cards where:",
+        '\t- to "draw each item": <b>{draw the item}</b>'
+      ])
+      expect(js).toMatch(/drawEachItem\(item\) \{\s+return h\("b", \(\) => core\.drawThing\(item\)\)/)
+    })
+
+    test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
+    })
   })
 
   test("`[rank]` fills in, in text and markup:  inside a card, a bare property is its own (P4)", () => {
@@ -772,13 +832,14 @@ describe("outline style", () => {
       "a card is a thing where:",
       "\t- its rank is a number",
       "\t- its suit is text",
-      '\t- to "draw its front":',
+      '\t- to "draw it":',
       '\t\t<ui-image source="images/[rank]-of-[suit].png" />',
       '\t- its "label" is: "the [rank] of [suit]"',
-      '\t- to "draw its back": <span>[rank] of [suit], [[face down]]</span>'
+      '\t- its "caption" is: <span>[rank] of [suit], [[face down]]</span>'
     ]
     const js = compile(lines)
-    expect(js).toContain('{ "prop:source": () => `images/${this.rank}-of-${this.suit}.png` }')
+    // text:  a plain name (an object would be `prop:`)
+    expect(js).toContain("{ source: () => `images/${this.rank}-of-${this.suit}.png` }")
     expect(js).toContain("return `the ${this.rank} of ${this.suit}`")
     expect(js).toContain("`${this.rank} of ${this.suit}, [face down]`")
     expect(runSpell([...lines, 'the card is a new card with rank = 2, suit = "spades"'])("card")).toMatchObject({
@@ -884,6 +945,26 @@ describe("outline style", () => {
       ]
       expect(compile(outline("it "))).toBe(compile(sentences))
       expect(compile(outline(""))).toBe(compile(sentences))
+    })
+
+    test("a guard's long form:  its type's words as written, its first line only (J97)", () => {
+      const outline = [
+        "a card is a thing",
+        'a "stock pile" is a list of cards where:',
+        "\t- it can never take a card",
+        "\t- can give up a card if: the card is its last card",
+        "\t- it can take a card if:",
+        "\t\tif it is empty",
+        "\t\t\treturn yes",
+        "\t\treturn no"
+      ]
+      const { files } = parseSpellProject([{ path: "/test.spell", contents: outline.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      expect(longFormsOf(files[0]!.match!)).toEqual([
+        "a stock pile can never take a card",
+        "a stock pile can give up a card if: the card is its last card",
+        "a stock pile can take a card if:"
+      ])
     })
 
     test('`"x" is ...` is a property, not a phrase:  a getter, or a type', () => {

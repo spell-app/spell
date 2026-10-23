@@ -12,7 +12,8 @@ export class PluralType extends SpellType {
     if (!match || typeof match.raw !== "string") return undefined
     // Anything but a definite singular will do, as `plural_identifier`:  uncountable words (`sheep`) match here too.
     // NOT `words === P.pluralize(words)`:  Spanish's inflector makes a plural more plural, `cartas` => `cartases`
-    if (P.getPlurality(SpellType.numberWordOf(match)) !== "singular") return match
+    const word = SpellType.numberWordOf(match)
+    if (SpellType.inflectingAsRead(match, () => P.getPlurality(word)) !== "singular") return match
     return undefined
   }
   getAST(match: P.MatchFor<this>): P.ASTTypeExpression {

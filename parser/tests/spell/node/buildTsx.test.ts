@@ -12,7 +12,7 @@ describe("buildTsx()", () => {
     const built = await buildTsx(solidSample(), { filename: "Cards.spell.tsx" })
     expect(built).not.toMatch(/^\s*@(prop|drawn|thing)\b|\baccessor rank\b|\bas const\b|<Show\b|<For\b/m)
     expect(built).toMatch(/^import \{ template as _\$template \} from "@solidjs\/web";$/m)
-    expect(built).toContain(`import { Show, For } from "solid-js"`)
+    expect(built).toContain(`import { Show } from "solid-js"`)
     expect(built).toContain(`from "@spell/core"`)
   })
 

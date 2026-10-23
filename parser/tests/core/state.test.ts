@@ -64,6 +64,15 @@ class Table extends Thing {
   }
 }
 
+/** A thing whose `create()` counts how many were made new, in `dealt`. */
+class Dealer extends Thing {
+  create() {
+    dealt++
+  }
+}
+let dealt = 0
+new Dealer() // known by name to what reads state:  made once
+
 /** A table of two stacks, its top the first chip of the first:  `EXPECTED.first`, written. */
 function aTable(): Table {
   const red = new Chip({ color: "red", value: 5 })
@@ -122,6 +131,16 @@ describe("a StateMirror:  reads states into what it read before", () => {
     const moved = aTable()
     core.move(moved.top, moved.stacks[1]!)
     expect(new StateWriter().stateOf(table)).toEqual(new StateWriter().stateOf(moved))
+  })
+
+  test("a thing by its id is a copy of the program's:  its `create()` doesn't run again (epic `spanish` P11)", () => {
+    // as a game's `create()` deals the deck into its stock:  run again, it would take the cards from their piles
+    const before = dealt
+    expect(new StateMirror().read({ $type: "Dealer", $id: "9" })).toBeInstanceOf(Dealer)
+    expect(dealt).toBe(before)
+    // JSON with no ids makes new things, `create()` and all
+    core.fromJSON({ $type: "Dealer" })
+    expect(dealt).toBe(before + 1)
   })
 
   test("unsets what a thing no longer has", () => {

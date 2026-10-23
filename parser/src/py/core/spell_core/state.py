@@ -32,11 +32,21 @@ mirror.read(writer.patch())                 # or only what changed since:  the s
     `stateById.expected.json5`, with the JavaScript core's tests (`tests/core/`), holds one, read by both.
 """
 
+from contextlib import nullcontext
 from typing import Any
 
 from spell_core.kinds import is_same
 from spell_core.lists import List
-from spell_core.things import CHANGE_WATCHERS, ITEMS_KEY, TYPE_KEY, Prop, SpellObject, note_change, things
+from spell_core.things import (
+    CHANGE_WATCHERS,
+    ITEMS_KEY,
+    TYPE_KEY,
+    Prop,
+    SpellObject,
+    note_change,
+    things,
+    without_create,
+)
 
 # The key a thing's id goes under:  `{"$type": "Card", "$id": "3", ...}`, or `{"$id": "3"}` alone, to mention it.
 ID_KEY = "$id"
@@ -141,7 +151,8 @@ class StateMirror:
 
         - A thing we hold:  its properties set to the state's, and any it no longer has unset;
           a list's items set to the state's.
-        - A new one:  made as `core.from_json()` makes one, through its properties, then its `create()`.
+        - A new one:  made as `core.from_json()` makes one, through its properties, then its `create()` --
+          not with an id, a copy of a thing the program made:  its `create()` ran there (`without_create()`).
         - `{"$id": ...}` alone:  the thing with that id.
         - JSON with no ids (`to_json()`'s) reads as `core.from_json()` reads it:  a new thing each time.
         """
@@ -165,7 +176,11 @@ class StateMirror:
         made = known if isinstance(known, cls) else None
         if made is None:
             # the props it declares, through the class, so its `create()` sees them;  the rest after
-            made = cls(**{key: self._read(field) for key, field in fields.items() if _has_setter(cls, key)})
+            settable = {key: self._read(field) for key, field in fields.items() if _has_setter(cls, key)}
+            # a program's thing, by its id, is a copy of one it made:  its `create()` mustn't run again --
+            # an app's `create()` that deals the deck into its stock would take the cards out of the piles they're in
+            with without_create() if isinstance(the_id, str) else nullcontext():
+                made = cls(**settable)
             fields = {key: field for key, field in fields.items() if not _has_setter(cls, key)}
         if isinstance(the_id, str):
             # kept BEFORE its fields are read:  a field may mention it, `{"$id": ...}`

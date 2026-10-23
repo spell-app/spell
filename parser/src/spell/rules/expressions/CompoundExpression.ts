@@ -49,6 +49,8 @@ export class CompoundExpression extends SpellExpression<"lhs|rhsChain"> {
     if (expecting && !rest.length) expecting.expect(chain, this, 1, true)
 
     if (!suffixes.length) {
+      // an operand taking no tokens (`implied_it`) is one only with a suffix after it
+      if (!lhs.length) return undefined
       lhs.matchGroup = this.name
       return lhs
     }

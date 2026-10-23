@@ -189,9 +189,13 @@ export class Parser extends Derivative {
    * - Returns the names found, in order:  `P.IncrementalProject` re-parses everything when an edit changes them.
    */
   stubDeclaredTypes(scope: P.Scope, texts: string[]): string[] {
-    const names = texts.flatMap((text) => this.declaredTypes(text))
-    for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true })
-    return names
+    // our language in play:  a name is made singular by its own language's inflector (`pila de descartes`)
+    return this.inPlay(() => {
+      const names = texts.flatMap((text) => this.declaredTypes(text))
+      const lang = this.inflector?.lang
+      for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true, lang })
+      return names
+    })
   }
 
   /**
@@ -424,16 +428,34 @@ export class Parser extends Derivative {
         }
         P.Subrule.zeroWidthRules.set(ruleName, rule)
       }
-      const previous = this.#ownRules[ruleName]
-      this.mergeRule(this.#ownRules, ruleName, rule)
-      const next = this.#ownRules[ruleName]
-      this.journal?.record({
-        undo: () => this.setOwnRule(ruleName, previous),
-        redo: () => this.setOwnRule(ruleName, next)
-      })
+      this.addOwnRule(ruleName, rule)
     }
 
     return rule
+  }
+
+  /**
+   * Add `rule` to our OWN rules under `ruleName`, merging into a `P.Group` with one there -- journaled.
+   * - What every `addRule()` ends in, once per name.
+   * - Override to do more with each one, e.g. `SpellParser` hands it to its twins in other languages.
+   */
+  protected addOwnRule(ruleName: string, rule: P.Rule): void {
+    this.clearDerived("rules")
+    const previous = this.#ownRules[ruleName]
+    this.mergeRule(this.#ownRules, ruleName, rule)
+    const next = this.#ownRules[ruleName]
+    this.journal?.record({
+      undo: () => this.setOwnRule(ruleName, previous),
+      redo: () => this.setOwnRule(ruleName, next)
+    })
+  }
+
+  /**
+   * A copy of our OWN rules, by name, NOT including our imports' -- e.g. the rules a project declared.
+   * - See `rules` for all of them.
+   */
+  get ownRules(): P.RuleMap {
+    return { ...this.#ownRules }
   }
 
   /** Set (or with no `rule`, remove) one of our own rules directly, e.g. to undo `addRule()`. */

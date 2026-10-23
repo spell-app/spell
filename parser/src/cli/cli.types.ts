@@ -143,7 +143,7 @@ export type FormatOptions = GlobalOptions & {
 /**
  * `spell parse` flags.
  * - `rule`:  parse as this rule only, e.g. `expression`
- * - `in`:  parse inside this project's scope, e.g. `@spell/test/solitaire`
+ * - `in`:  parse inside this project's scope, e.g. `@spell/examples/Solitaire`
  * - `json`:  print the result as JSON
  * - `tree`:  print the spell tree (what it means), not the match tree
  * - `html`:  with `tree`, print it as a `<ui-tree-diagram>` for a docs page
@@ -158,7 +158,7 @@ export type ParseOptions = GlobalOptions & {
 
 /**
  * `spell explain` flags.
- * - `in`:  look in this project, too, e.g. `@spell/test/solitaire`
+ * - `in`:  look in this project, too, e.g. `@spell/examples/Solitaire`
  * - `json`:  print what was found as JSON
  */
 export type ExplainOptions = GlobalOptions & {

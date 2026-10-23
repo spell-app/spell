@@ -36,6 +36,12 @@ export class TypeScope extends BlockScope {
   /** If true, the type was created as a stub. */
   declare stub?: boolean
   /**
+   * The language its declaration is written in, e.g. `en`, when a stub knows it before its declaration parses:
+   * `P.Parser.stubDeclaredTypes()` sets it from the declaring file's parser (epic `spanish` J89).
+   * - Spell asks it through `SP.SpellType.languageOf()`, which reads a declared type's from its `declaredBy`.
+   */
+  declare lang?: string
+  /**
    * What a list type holds, e.g. `Card` for `a deck is a list of cards` -- `undefined` for any other type.
    * - Set when declared (`claim()` for a stub), so journaled with it.
    * - Read through `scope.getItemType()`, which walks the super-type chain:  a sub-type of `Deck` holds cards too.
@@ -398,6 +404,8 @@ export type TypeScopeProps = {
   gender?: string
   /** If true, the type was created as a stub. */
   stub?: boolean
+  /** See `TypeScope.lang`. */
+  lang?: string
   /** See `TypeScope.valueKind`. */
   valueKind?: ValueKind
   /** See `TypeScope.itemType`. */

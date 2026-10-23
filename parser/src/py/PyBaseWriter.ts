@@ -1,3 +1,5 @@
+import { elementTagFor } from "spell-kit/util"
+
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
@@ -211,7 +213,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /**
    * `object.property`, by our name:  `card.is_face_up`.
-   * - A class's constant, `Card.RANKS`;  bare in that class's own body, `RANKS`, as the class isn't made yet there.
+   * - A class's constant, `Card.RANKS`;  bare in that class's own body, `RANKS`, as the class isn't made yet there --
+   *   but not in a `lambda` there, which runs once it is:  `prop(one_of=lambda: Card.SUITS)` (`inlineFunction()`).
    * - Off what may be nothing (`mayBeNothing()`), as spell reads off nothing as nothing:
    *   `getattr(deck.last_item, "name", None)`.
    * - `getattr(object, "name")` for one that isn't a name.
@@ -800,8 +803,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** One statement:  a class member in its class's body, a loop as Python says it (`loop()`), else as written. */
   statement(statement: P.ASTNode): string {
-    // a drawable type's `elementTag`, javascript's for its page:  the program here has no page
-    if (P.jsShapes.elementTagProject(statement) !== undefined) return ""
+    const project = P.jsShapes.elementTagProject(statement)
+    if (project !== undefined) return this.elementTag(project)
     if (statement instanceof P.ASTClassMember) return String(this.writeAsMember(statement))
     const expression = statement instanceof P.ASTExpression ? statement : undefined
     const previous = this.asserts
@@ -817,6 +820,17 @@ export class PyBaseWriter extends P.ProgramWriter {
     } finally {
       this.asserts = previous
     }
+  }
+
+  /**
+   * A drawable class's element tag, in its body:  `element_tag = "solitaire-card"`, from project `project`.
+   * - Javascript's `static elementTag = core.defineElement(this, "Solitaire")`, named the same way (`elementTagFor()`):
+   *   so the page Python prints draws each drawable thing as its element, as javascript's does (`core.draw_thing()`).
+   * - Named here, as text:  Python's class body can't hand the class to the core as it's made.
+   * - The page that draws a Python program defines the element itself, from its javascript (`PY.ElementsWriter`).
+   */
+  elementTag(project: string): string {
+    return `element_tag = ${this.quoted(elementTagFor(project, this.typeNameOf(this.currentClass ?? "")))}`
   }
 
   /** The `assert`s the statement being written needs, before it -- see `assertThere()`. */
@@ -1049,7 +1063,7 @@ export class PyBaseWriter extends P.ProgramWriter {
       .map((attribute) => {
         const value = attribute.propValue
         // by the page's names, `class` first, as javascript draws them:  the core contract compares the HTML
-        const key = attributeName(node.tagName, attribute.name, value instanceof P.ASTJSXLiveValue)
+        const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         return `${this.quoted(key)}: ${value ? this.bare(value) : "True"}`
       })
       .sort((a, b) => Number(b.startsWith('"class"')) - Number(a.startsWith('"class"')))
@@ -1197,10 +1211,17 @@ export class PyBaseWriter extends P.ProgramWriter {
       const value =
         only instanceof P.ASTReturnStatement ? only.value : only instanceof P.ASTExpression ? only : undefined
       if (value) {
-        return this.inBlock(() => {
-          this.noteParams(node)
-          return lambda(this.bare(value))
-        })
+        // run later, once its class is made:  a class's own constant is `Card.SUITS` there, even in its body
+        const { inClassBody } = this
+        this.inClassBody = false
+        try {
+          return this.inBlock(() => {
+            this.noteParams(node)
+            return lambda(this.bare(value))
+          })
+        } finally {
+          this.inClassBody = inClassBody
+        }
       }
     }
     // more than one statement:  a `def` of its own, above the statement that uses it

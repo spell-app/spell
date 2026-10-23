@@ -122,10 +122,12 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     - `owen@spell`:  Owen's own, in spell.spaces beside the main checkout, outside git
   - A project's URLs and folder come from ONE function, [SpellUrls](SpellUrls.ts) (`SP.SpellUrls`).
   - See "Projects" in [PARSING.md](PARSING.md).
-  - Tests read ONLY the test projects:  frozen projects, never the live examples, which get edited.
-    - Their group:  `@spell/test`, e.g. `@spell/test/solitaire`, listed in the app in dev only.
+  - Tests read the test projects:  frozen projects, which never change to follow an example.
+    - Their group:  `@spell/test`, e.g. `@spell/test/fizzbuzz`, listed in the app in dev only.
     - They and the tests that compile them are spell-app's (Owen, 2026-10-22, epic `spanish` P18):
-      every `@spell` group lives there, so a test project may import the card library.
+      every `@spell` group lives there, so a test project may import another, e.g. `lists-from-zero` the frozen `cards`.
+    - Two examples are tested as they are, Solitaire and Solitario (epic `spanish` P21):
+      their snapshots are spell-app's, in its `tests/spell/__examples__/`, re-blessed when an example changes.
       - A lower repo's tests never read a higher one's:  spell-lang's own tests write their projects inline.
     - In spell-app's tests, read them with the helpers from `spell-app/spaces/test`:
       - `loadFixtureProject()`
@@ -136,7 +138,7 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
     (spell-app's [fixtures.test.ts](../../../spell-app/tests/spell/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
-    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), in its language (`.en`, `.es`)
+    - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), one per language its files are in (`.en`, `.es`)
       - Its name ends as a snapshot's does, which keeps it out of the project's files.
     - `<Project>.snapshot.tsx`:  the TypeScript target
     - `<Project>.snapshot.tsc.txt`:  what `tsc` says of it ([typescript.test.ts](../../../spell-app/tests/spell/test/typescript.test.ts))

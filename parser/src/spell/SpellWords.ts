@@ -8,10 +8,13 @@ import { SP } from "spell-lang/spell"
  * `moveToPile` => `move (a card) to (a pile)`.  See `SP.SpellWordsData`.
  * - Why:  compiled code names a member in camelCase, which loses spell's wording, e.g. where a value goes.
  *   The Thing Explorer shows a thing's actions and properties in spell's words again by reading them here.
- * - Lives in `<Project>.en.js`, committed beside its source -- see `SP.SpellProject.wordsFile`.
+ * - Lives in `<Project>.en.js`, committed beside its source -- see `SP.SpellProject.wordsFileFor()`.
  *   - As a Spell UI element keeps its words in its own vocabulary file, e.g. `UIForm.en.ts`.
  *   - Another language is another file of the same shape, e.g. `cartas.es.js`.
  *     It also holds what the core says to the person running the program in that language, `messages`.
+ *   - A project has one per language its files are written in (epic `spanish` P19):
+ *     each holds the members its files in that language declare.
+ *     A runner reads them all, as one (spell-app's `mergedWords()`).
  *   - A target with words of its own writes them as JSON, by its own names:
  *     Python's `<Project>.py.en.json5` -- see `json()`.
  * - Written from the declarations the compiler already gathers (`of()`),
@@ -26,7 +29,10 @@ export class SpellWords {
   ////////////////
 
   /**
-   * The words of a project with `declarations`, in English:  each member of each of its types, by its compiled name.
+   * The words of a project with `declarations`, in language `lang`:  each member of each of its types, by its compiled name.
+   * - `lang`:  the one its program speaks by default (`SP.SpellDeclarations.languagesOf()`).
+   *   - A project in several languages:  only the members its files in `lang` declare, by where each is `defined`.
+   *     One with no `defined` is the default language's.
    * - Methods by their wording, e.g. `move (a card) to (a pile)`.
    *   One read as a property loses its quotes, e.g. `is face up` for `"is face up"`.
    * - Properties by their words as written (`asWritten`), e.g. `is-set-up`, else their name, e.g. `rank`.
@@ -36,10 +42,18 @@ export class SpellWords {
    *   -- only for a language other than English, the core's own (epic `spanish` P12).
    * - `writer`:  whose names the compiled code uses -- javascript's by default, as that's what runs.
    */
-  static of(declarations: SP.SpellDeclarationsData, writer: SpellWordsWriter = P.JSWriter.instance): SP.SpellWordsData {
-    const lang = declarations.language ?? SpellWords.LANG
+  static of(
+    declarations: SP.SpellDeclarationsData,
+    writer: SpellWordsWriter = P.JSWriter.instance,
+    lang = SP.SpellDeclarations.languagesOf(declarations)[0]!
+  ): SP.SpellWordsData {
+    const languages = SP.SpellDeclarations.languagesOf(declarations)
+    // a project in several languages:  each file's members in its own language's words
+    const isIn = (statement: SP.SpellDeclaration) =>
+      languages.length < 2 ||
+      (statement.defined ? (SP.Language.langOfFile(statement.defined) ?? SpellWords.LANG) : languages[0]) === lang
     const types: Record<string, Record<string, string>> = {}
-    for (const statement of declarations.statements) {
+    for (const statement of declarations.statements.filter(isIn)) {
       if (statement.type) types[statement.type] ??= {}
       const member = SpellWords.memberOf(statement, writer)
       if (!member || !statement.of) continue

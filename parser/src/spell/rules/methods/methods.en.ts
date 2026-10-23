@@ -5,7 +5,7 @@
  * - Another language registers the same classes with its own syntax, in `methods.<lang>.ts` (epic `spanish`).
  */
 import { P } from "spell-lang/parser"
-import { Synonyms } from "spell-lang/spell/rules/expressions"
+import { Synonyms, Wording } from "spell-lang/spell/rules/expressions"
 
 import { methods } from "./methods.parser"
 import { BareTypeArg } from "./BareTypeArg"
@@ -25,6 +25,12 @@ import { WithPropsArg } from "./WithPropsArg"
 // the word before a method's receiver, where a type's outline body leaves it out:
 // `deal the cards of the solitaire` -- see `MethodDefinition.takeSubject()`
 methods.addRule(Synonyms.specialize({ ruleName: "receiver_of" }), { syntax: "of" })
+
+// what runs as a thing is made, its `create()` hook:  English's words are its name, `- to create it:`;
+// another language's are its own, `- para crearlo:` -- see `MethodDefinition.hookOf()`
+methods.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["create"] }), {
+  syntax: "(create:create it|create them)"
+})
 
 methods.addRule(MethodKeyword)
 

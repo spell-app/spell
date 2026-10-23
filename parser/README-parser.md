@@ -720,7 +720,7 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
 
   A rule asks which form matched (`Negatable.isNegated()`), never which word.
 - A language's other words (its type words, its plurals, its messages) are its LANGUAGE PACK,
-  in [src/spell/languages/](src/spell/languages/), and a project picks its language with `"language": "es"`.
+  in [src/spell/languages/](src/spell/languages/), and a file picks its language by its name, `Carta.es.spell`.
   - A type's words are Spell's vocabulary, handed to the parser:  each pack brings its own.
 - A third language is a third file per folder, and a pack.
   `spell lang packs check` compares each pack against English, module by module, and says what it still lacks:

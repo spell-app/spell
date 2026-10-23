@@ -1,6 +1,7 @@
 import { kebabCase, proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
+import { Wording } from "spell-lang/spell/rules/expressions"
 // Import directly to avoid circular import
 import { SpellStatement, type SpellStatementProps } from "spell-lang/spell/rules/Statement"
 import { SubjectRule } from "spell-lang/spell/rules/types"
@@ -80,6 +81,9 @@ export class MethodDefinition<
         signature.extraVars.push({ name: initialType.varName, output: "this", type: "alias" })
       }
     }
+    // `draw()` or `create()`, whatever the language's words for them:  see `hookOf()`
+    const hook = signature.instanceType ? MethodDefinition.hookOf(signature.methodBits, scope) : undefined
+    if (hook) signature.methodBits = [hook]
     const { asTest } = groups as { asTest?: P.Match }
     if (asTest) {
       // its name is spell's own, `test_...`;  its call says the language's word, as written:  `probar ...` in Spanish
@@ -87,6 +91,26 @@ export class MethodDefinition<
       signature.syntaxBits.unshift(`${asTest.raw ?? asTest.value}`.toLowerCase())
     }
     return signature
+  }
+
+  /**
+   * The hook a type's method is, by its words with its type taken out:  `draw` or `create`, else `undefined`.
+   * - Then the method is the type's drawing, `draw()`, or what runs as one is made, `create()`,
+   *   whatever the language's verb (epic `spanish` J84, J96).
+   * - Spanish's sentence style:  `para dibujar una carta:` => `Carta.prototype.draw`, as `- para dibujarla:` is;
+   *   `para crear un mazo:` and `- para crearlo:` => `create()`.
+   *   Its words alone would make `dibujar()` or `crear()`, which nothing calls.
+   * - Read by the `draw_method` and `create_method` word rules, the words then the language's word for `it`
+   *   as an object (`dibujar eso`):  English's `draw` and `create` are the hooks' names already.
+   */
+  static hookOf(methodBits: string[], scope: P.Scope): Hook | undefined {
+    const words = methodBits.join(" ")
+    if (!words) return undefined
+    const itWords = SP.Language.of(scope).words.itWords ?? []
+    return HOOKS.find(({ ruleName, hook }) => {
+      if (!scope.parser?.rules[ruleName]) return false
+      return [...itWords].some((it) => Wording.reads(scope, ruleName, `${words} ${it}`, hook))
+    })?.hook
   }
 
   /**
@@ -107,8 +131,10 @@ export class MethodDefinition<
     signature.instanceType = typeWords
     const isSubjectWord = (bit: string) =>
       !/^[{(]/.test(bit) && SubjectRule.reads(scope, "subject_it", scope.parser?.tokenize(bit)?.[0])
-    const at = signature.syntaxBits.findIndex(isSubjectWord)
-    const methodAt = signature.methodBits.findIndex(isSubjectWord)
+    MethodDefinition.splitFusedIt(signature, scope)
+    const at = signature.syntaxBits.findIndex((bit) => bit === FUSED_IT || isSubjectWord(bit))
+    const methodAt = signature.methodBits.findIndex((bit) => bit === FUSED_IT || isSubjectWord(bit))
+    const isFused = signature.syntaxBits[at] === FUSED_IT
     if (at >= 0 && methodAt >= 0) {
       const wordBefore = signature.methodBits[methodAt - 1]
       if (wordBefore && isDangling(wordBefore, scope)) {
@@ -116,13 +142,36 @@ export class MethodDefinition<
       } else {
         signature.methodBits.splice(methodAt, 1)
       }
-      signature.syntaxBits[at] = "{thisArg:expression}"
+      // fused, its receiver may be left out inside the type's own methods, as `subject_implied` leaves out `it`:
+      // `voltear boca arriba` turns this one -- see `DynamicMethodRule.onThis()`
+      signature.syntaxBits[at] = isFused ? "{thisArg:expression}?" : "{thisArg:expression}"
       return
     }
     // one word reads as a verb, `reset the solitaire`;  more, as a phrase, `deal the cards of the solitaire`
     // -- and left out, the call is on this one:  see `DynamicMethodRule.onThis()`
     if (signature.syntaxBits.length === 1) signature.syntaxBits.push("{thisArg:expression}?")
     else signature.syntaxBits.push(`(${scope.getRuleOrDie("receiver_of").syntax} {thisArg:expression})?`)
+  }
+
+  /**
+   * A method's first word with `it` fused onto it (`SP.LanguageWords.fusedIt`), split in two:
+   * the verb, then a marker where `it` was, which `takeSubject()` puts the receiver in place of.
+   * - e.g. Spanish's `- para barajarla:` => `barajar`, then the receiver:  `barajar el mazo`
+   * - e.g. `- para voltearla boca arriba:` => `voltear {thisArg:expression}? boca arriba`, as English's
+   *   `- to turn it face up:`
+   * - Only the FIRST word, the verb:  a later word ending so is a word (`perla`).
+   * - SIDE EFFECT: mutates `signature` in place.
+   */
+  private static splitFusedIt(signature: MethodSignatureData, scope: P.Scope): void {
+    const { fusedIt } = SP.Language.of(scope).words
+    if (!fusedIt) return
+    const [firstMethod] = signature.methodBits
+    const [firstSyntax] = signature.syntaxBits
+    if (!firstMethod || !firstSyntax || /^[{(]/.test(firstSyntax)) return
+    const verb = fusedIt.exec(firstSyntax)?.[1]
+    if (!verb) return
+    signature.methodBits.splice(0, 1, verb.toLowerCase(), FUSED_IT)
+    signature.syntaxBits.splice(0, 1, verb.toLowerCase(), FUSED_IT)
   }
 
   /**
@@ -152,9 +201,52 @@ export class MethodDefinition<
       signatureMatch.data as MethodSignatureData,
       match.scope
     )
-    signature.methodName = signature.methodBits.join("_")
-    signature.syntax = signature.syntaxBits.join(" ")
+    signature.methodName = MethodDefinition.contractedName(signature.methodBits.join("_"), match.scope)
+    signature.syntax = MethodDefinition.withContractions(signature.syntaxBits, match.scope).join(" ")
     return signature
+  }
+
+  /**
+   * A method's name with each little word's pair contracted:  `dar_la_vuelta_a_el_mazo` => `dar_la_vuelta_al_mazo`,
+   * so either way of writing it makes ONE method (`SP.LanguageWords.contractions`, epic `spanish` J96).
+   */
+  static contractedName(name: string, scope: P.Scope): string {
+    const { contractions } = SP.Language.of(scope).words
+    if (!contractions) return name
+    return Object.entries(contractions).reduce(
+      (named, [short, expanded]) =>
+        named.replace(new RegExp(`(^|_)${expanded.replace(/ /g, "_")}(?=_|$)`, "giu"), `$1${short}`),
+      name
+    )
+  }
+
+  /**
+   * A call's syntax bits, where each little word takes its contraction too (`SP.LanguageWords.contractions`):
+   * so a method's words and its calls may say either (epic `spanish` J96).
+   * - `al` => `(al|a el)`, and `a el` => `(a el|al)`:  `dar la vuelta al mazo` is called `dar la vuelta a el mazo`
+   * - `a` before an argument => `(a|al)`:  `mover (una carta) a (una pila)` is called `mover la carta al montón`,
+   *   as the argument then starts with its own `el`, `el montón`, which the call folds into `al`.
+   * - A copy:  `bits` stay as they were, which `getRule()` and `callAhead()` both read through `syntax`.
+   */
+  static withContractions(bits: string[], scope: P.Scope): string[] {
+    const { contractions } = SP.Language.of(scope).words
+    if (!contractions) return bits
+    const isSlot = (bit: string | undefined) => !!bit && /^[{(]/.test(bit)
+    const result: string[] = []
+    for (let index = 0; index < bits.length; index++) {
+      const bit = bits[index]!
+      const next = bits[index + 1]
+      const word = bit.toLowerCase()
+      const contracted = Object.entries(contractions).find(([, expanded]) => expanded === `${word} ${next}`)?.[0]
+      const startsOne = Object.entries(contractions).find(([, expanded]) => expanded.startsWith(`${word} `))?.[0]
+      if (contractions[word]) result.push(`(${bit}|${contractions[word]})`)
+      else if (contracted) {
+        result.push(`(${bit} ${next}|${contracted})`)
+        index++
+      } else if (startsOne && isSlot(next)) result.push(`(${bit}|${startsOne})`)
+      else result.push(bit)
+    }
+    return result
   }
 
   /**
@@ -533,6 +625,18 @@ type MethodDefinitionData = {
   /** Record of the method it declared -- see `addMethod()`. */
   scopeMethod?: P.ScopeMethod
 }
+
+/** The hooks a type's method may be, and the word rule that says each:  see `MethodDefinition.hookOf()`. */
+const HOOKS = [
+  { ruleName: "draw_method", hook: "draw" },
+  { ruleName: "create_method", hook: "create" }
+] as const
+
+/** A hook's name:  `draw` or `create`. */
+type Hook = (typeof HOOKS)[number]["hook"]
+
+/** Where a fused `it` was in a signature's bits, until `takeSubject()` puts the receiver there:  see `splitFusedIt()`. */
+const FUSED_IT = "\u0000it"
 
 /** Is `scope` a file's (or project's) top level, where a definition is `export`ed? */
 function isTopLevel(scope: P.Scope): boolean {

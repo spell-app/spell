@@ -109,7 +109,7 @@ The Spell Parser is a sophisticated parsing and compilation system for the Spell
 - **Projects** (`projects/`): every spell project, by owner -- see `SpellSetup.projectRoots`:
   - `system/examples/` (`@spell/examples`):  Calculator, FizzBuzz, Solitaire (with Card.spell example),
     Solitaire-import, Todos, Todos - Form Based
-  - `system/library/` (`@spell/library`):  cards -- imported as `@spell/library/cards`
+  - `system/library/` (`@spell/library`):  people -- imported as `@spell/library/people`
   - `system/guides/` (`@spell/guides`):  none yet
   - `user/` (`owen@spell`):  user projects, e.g. Errors
   - `test/` (`@spell/test`):  frozen projects tests run against, each with its `<Project>.snapshot.js`

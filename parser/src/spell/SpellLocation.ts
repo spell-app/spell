@@ -148,6 +148,14 @@ export class SpellLocation {
     return !!this.projectId && !!this.folder && !!this.file
   }
 
+  /**
+   * Is this a spell source file:  its name ends `.spell`, in any language -- `Card.spell`, `Carta.es.spell`?
+   * - Not `extension === ".spell"`:  a language's file's is `.es.spell` (epic `spanish` P19).
+   */
+  get isSpellFile(): boolean {
+    return !!this.file?.endsWith(".spell")
+  }
+
   ////////////////
   // ## Syntactic sugar
   ////////////////
@@ -224,7 +232,7 @@ export class SpellLocation {
   }
 
   /**
-   * The file's path in its project, from a file's address:  `@spell/library/cards/a/Card.spell` => `/a/Card.spell`.
+   * The file's path in its project, from a file's address:  `@spell/examples/Solitaire/a/Card.spell` => `/a/Card.spell`.
    * - `undefined` if it isn't a file's address, or its group isn't registered (a compile with no groups:  a test's).
    */
   static filePathOf(address: string): string | undefined {
@@ -236,7 +244,7 @@ export class SpellLocation {
   }
 
   /**
-   * Is `text` an address, `@spell/library/cards` or `owen@spell/errors`,
+   * Is `text` an address, `@spell/library/people` or `owen@spell/errors`,
    * rather than a file's path in a project (`/Card.spell`)?
    * - An address's first part holds an `@`, which no file's name may (`isValidPathSegment()`).
    */

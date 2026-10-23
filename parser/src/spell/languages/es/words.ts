@@ -110,6 +110,15 @@ export const spanishWords: SP.LanguageWords = {
   itWords: new Set(["eso", "ello"]),
 
   /**
+   * A verb with `it` fused onto its end:  `barajarla`, `dibujarlo`, `voltearlas` => `barajar`, `dibujar`, `voltear`.
+   * - Only an infinitive (`-ar`, `-er`, `-ir`) then `lo`, `la`, `los` or `las`:  `para barajarla:` in a type's outline body.
+   */
+  fusedIt: /^(\p{L}+(?:ar|er|ir|ár|ér|ír))(?:lo|la|los|las)$/iu,
+
+  /** `al` is `a el`, `del` is `de el`:  a method's words and its calls may say either. */
+  contractions: { al: "a el", del: "de el" },
+
+  /**
    * Spanish's words for the built-in types' members:  `el largo de la lista`, `el año de la fecha`.
    * - A list's `name` is `nombre`:  `el nombre de la pila` reads and sets `pila.name`.
    */

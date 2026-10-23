@@ -11,8 +11,9 @@
  *   when its `draw()` throws, it shows a small stand-in, and the rest keeps drawing.
  *   ONE boundary, for both targets:
  *   - compiled JavaScript draws a thing with `core.drawThing(card)`, which puts its `draw()` in the boundary
- *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself,
- *     so a parent draws a child with a plain call, `{card.draw()}`
+ *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself:
+ *     it draws a child with `core.drawThing(card)` too, which calls a `@drawn` `draw()` straight
+ *     (a bare `{card.draw()}` would skip a drawable thing's element -- epic `spanish` J100)
  *   - `h()` returns a THUNK, a function that makes the element:  the boundary makes it, once (`madeOnce()`)
  * - Solid comes from the PAGE, never a copy of its own:
  *   `spell-runtime.js` imports `solid-js`, `@solidjs/web` and `@solidjs/h` from the page's one shared Solid,
@@ -95,16 +96,28 @@ export const drawingMethods = defineCoreModule({
   /**
    * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
    * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
+   *   And what a drawable list's element holds as its children -- see `drawThing()`.
+   * - A list with its own `to draw each item` (`drawEachItem()`) draws each item with it, in a boundary of the list's:
+   *   the wrapper each item is drawn in (epic `spanish` P20).
+   *   - A drawable list's default draws the item itself, in the item's own boundary:  no second one around it.
+   * - Any other list's item draws as itself (`drawThing()`).
    * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
    */
   drawItems(list: unknown): Drawing | null {
     // NOT `list.items` here:  read in the caller's drawing, every change to the list would draw it all again
     if (!list || typeof list !== "object" || !("items" in list)) return null
+    const { drawEachItem } = list as Partial<DrawsEachItem>
+    const drawItem =
+      typeof drawEachItem !== "function"
+        ? (item: unknown) => core.drawThing(item)
+        : drawEachItem === DEFAULT_DRAW_EACH_ITEM
+          ? (item: unknown) => drawEachItem.call(list, item)
+          : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
     return createComponent(For as unknown as ForByIdentity, {
       get each() {
         return (list as { items: unknown[] }).items
       },
-      children: (item: unknown) => core.drawThing(item)
+      children: drawItem
     })
   },
 
@@ -142,12 +155,11 @@ Object.assign(core, drawingMethods)
 
 /**
  * `@drawn draw() { ... }`:  the drawing in its own error boundary, the same boundary `core.drawThing()` gives.
- * - So a parent draws a child with a plain call, `{card.draw()}`:
- *   it neither re-runs when the card's reads change, nor dies with the card's errors.
- *   The card's drawing re-runs by itself, inside its boundary.
+ * - So its drawing neither re-runs when the card's reads change, nor dies with the card's errors:
+ *   the card's drawing re-runs by itself, inside its boundary.
  * - What compiled TypeScript (`ts/solid`) and hand-written classes write.
- *   - Compiled JavaScript has no decorators:
- *     it draws a thing with `core.drawThing(card)`, which puts a `draw()` in the same boundary.
+ *   - Both targets draw a thing with `core.drawThing(card)`:  javascript's `draw()`, with no decorators, gets the
+ *     same boundary there.
  *   - ONE boundary, `drawInBoundary()`, for both targets.
  * - SIDE EFFECT:  marks the method it returns (`isDrawn()`), so `drawThing()` calls it straight:
  *   no second boundary around it.
@@ -203,6 +215,15 @@ export type MountedApp = {
 
 /** The element an app is mounted into. */
 export type AppElement = HTMLElement & { spellRoot?: MountedApp }
+
+/** A list with its own way to draw each item:  a drawable list's `drawEachItem()`, spell's `to draw each item`. */
+type DrawsEachItem = {
+  /** `item` drawn as one of the list's -- see `DrawableList.drawEachItem()`. */
+  drawEachItem(item: unknown): Drawing
+}
+
+/** A drawable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
+const DEFAULT_DRAW_EACH_ITEM = DrawableList.prototype.drawEachItem
 
 /** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
 type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing

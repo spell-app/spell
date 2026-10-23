@@ -14,27 +14,52 @@ describe("testing spell module classes, in Spanish", () => {
     return { code, errors: code.split("\n").filter((line) => line.includes("PARSE ERROR")) }
   }
 
-  describe("a drawable's sides, by what their names mean (`side_name`)", () => {
-    test("`frente` and `dorso`:  each a getter, and `draw()` picks one by direction", () => {
-      const { code, errors } = compiled("draw-sides", [
-        "una card es una cosa dibujable:",
-        '\t- para "dibujar su frente": <div>front</div>',
-        '\t- para "dibujar su dorso": <div>back</div>'
-      ])
-      expect(errors).toEqual([])
-      expect(code).toContain("get frente()")
-      expect(code).toContain("get dorso()")
-      expect(code).toContain('return this.direction === "down" ? this.dorso : this.frente')
+  describe("drawing:  ONE `para dibujarlo`, and a list's `para dibujar cada elemento` (`draw_method`, P20)", () => {
+    test('`para "dibujarla":` + markup is `draw()`;  `dibujarlo` and `dibujar eso` say it too', () => {
+      for (const words of ['"dibujarla"', '"dibujarlo"', '"dibujar eso"']) {
+        const { code, errors } = compiled("draw-it", [
+          "una carta es una cosa dibujable:",
+          `\t- para ${words}: <div>carta</div>`
+        ])
+        expect(errors).toEqual([])
+        expect(code).toMatch(/draw\(\) \{\s+return h\("div", "carta"\)/)
+      }
     })
 
-    test("any other side is a getter of its own, and no `draw()`", () => {
-      const { code, errors } = compiled("draw-other-side", [
-        "una card es una cosa dibujable:",
-        '\t- para "dibujar su lomo": <div>spine</div>'
+    test("`para dibujarla:` unquoted is a method's body, which returns it:  `draw()`, never `dibujarla()`", () => {
+      const { code, errors } = compiled("draw-it-method", [
+        "una carta es una cosa dibujable:",
+        "\t- para dibujarla:",
+        "\t\tdevolver <div>carta</div>"
       ])
       expect(errors).toEqual([])
-      expect(code).toContain("get lomo()")
-      expect(code).not.toContain("this.direction")
+      expect(code).toContain("draw() {")
+      expect(code).not.toContain("dibujarla()")
+    })
+
+    test("a drawable list:  `para dibujarla` is its wrapper, `para dibujar cada elemento` the one around each item", () => {
+      const { code, errors } = compiled("draw-each-item", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- para dibujarla:",
+        '\t\tdevolver <div class="pila"><hijos/></div>',
+        "\t- para dibujar cada elemento:",
+        '\t\tdevolver <div class="hueco">{dibujar la carta}</div>',
+        "un mazo es una lista dibujable de cartas:",
+        '\t- para "dibujar cada elemento": <b>{dibujar el elemento}</b>'
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain('return h("div", { class: "pila" }, h("slot"))')
+      expect(code).toContain('return h("div", { class: "hueco" }, () => core.drawThing(item))')
+      expect(code).toContain('return h("b", () => core.drawThing(item))')
+    })
+
+    test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
+      const { errors } = compiled("no-sides", [
+        "una carta es una cosa dibujable:",
+        '\t- para "dibujar su frente": <b/>'
+      ])
+      expect(errors).toHaveLength(1)
     })
   })
 
@@ -111,6 +136,30 @@ describe("testing spell module classes, in Spanish", () => {
           .filter((line) => !line.trim().startsWith("//"))
           .join("\n")
       expect(withoutComments(code)).toBe(withoutComments(compiled("long-forms-es-outline", OUTLINE).code))
+    })
+
+    test("a guard's long form:  its type's words as written, its first line only (J97)", () => {
+      const lines = [
+        "una carta es una cosa",
+        'una "pila de reserva" es una lista de cartas donde:',
+        "\t- nunca puede tomar una carta",
+        "\t- puede soltar una carta si: la carta es su última carta",
+        "\t- puede tomar una carta si:",
+        "\t\tsi está vacía",
+        "\t\t\tdevolver sí",
+        "\t\tdevolver no"
+      ]
+      const block = SP.spanish.parser.getScope("long-forms-es-guards").parse(lines.join("\n"), "block")!
+      const typeLine = block.matched[1] as P.Match
+      const body = (typeLine.data.statement as P.Match).data.body as P.Match
+      const longForms = body.matched
+        .map((line) => (line as P.Match).data.statement as P.Match | undefined)
+        .map((statement) => statement && (statement.rule as SP.SpellStatement).getLongForm(statement))
+      expect(longForms).toEqual([
+        "una pila de reserva nunca puede tomar una carta",
+        "una pila de reserva puede soltar una carta si: la carta es su última carta",
+        "una pila de reserva puede tomar una carta si:"
+      ])
     })
   })
 })

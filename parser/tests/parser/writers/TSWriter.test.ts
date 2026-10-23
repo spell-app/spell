@@ -215,7 +215,7 @@ describe("TSWriter", () => {
     )
   })
 
-  test("JSX is real JSX, by the page's names;  drawing a thing calls its `draw()`", () => {
+  test("JSX is real JSX, by the page's names;  a thing draws as javascript draws it, as its element", () => {
     const element = new P.ASTJSXElement(match, {
       tagName: "th",
       attrs: [
@@ -238,7 +238,19 @@ describe("TSWriter", () => {
       ]
     })
     // `class` first, as javascript's `h()` calls give it
-    expect(writer.write(element)).toBe(`<th class="left" colspan="2">{theStock.draw()}</th>`)
+    expect(writer.write(element)).toBe(`<th class="left" colspan="2">{core.drawThing(theStock)}</th>`)
+  })
+
+  test("a list's items draw as javascript draws them, `core.drawItems()`:  a drawable list's are its element's children", () => {
+    const drawItems = new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawItems",
+      args: [new P.ASTVariableExpression(match, { name: "the_deck" })]
+    })
+    const element = new P.ASTJSXElement(match, {
+      tagName: "div",
+      children: [new P.ASTJSXExpression(match, { expression: drawItems })]
+    })
+    expect(writer.write(element)).toBe(`<div>{core.drawItems(theDeck)}</div>`)
   })
 
   test("an arrow's parameter spell can't type is left to TypeScript", () => {
@@ -414,6 +426,36 @@ describe("TSWriter", () => {
     expect(project.write(core("filter", [piles(), keep]))).toBe("allPiles.filter((pile) => pile.droppable)")
     expect(project.write(core("getItemAt", [piles(), new P.ASTNumericLiteral(match, -1)]))).toBe("allPiles.lastItem")
     expect(project.write(core("isEmpty", [piles()]))).toBe("allPiles.isEmpty")
+  })
+
+  test("an item of a filtered list is the list's own, typed by it:  no type argument on the filter (J97)", () => {
+    const core = (methodName: string, args: P.ASTExpression[], datatype?: string) =>
+      new P.ASTCoreMethodInvocation(match, { methodName, args, datatype })
+    const everyPile = () => core("everyThing", [new P.ASTTypeExpression(match, { name: "Pile" })])
+    const keep = new P.ASTMethodDefinition(match, {
+      inline: true,
+      args: [new P.ASTVariableExpression(match, { name: "pile", datatype: "Pile" })],
+      body: new P.ASTPropertyExpression(match, {
+        object: new P.ASTVariableExpression(match, { name: "pile" }),
+        property: "droppable"
+      })
+    })
+    // `Pile` is one of spell's `List`s, so the filtered piles are one too
+    const pile = new P.ASTTypeExpression(match, { name: "Pile" })
+    const superType = new P.ASTTypeExpression(match, { name: "List" })
+    const project = writer.forProject([[new P.ASTClassDeclaration(match, { type: pile, superType, members: [] })]])
+    const first = new P.ASTAssignmentStatement(match, {
+      thing: new P.ASTVariableExpression(match, { name: "end_pile" }),
+      value: core(
+        "getItemAt",
+        [core("filter", [everyPile(), keep], "Pile"), new P.ASTNumericLiteral(match, 1)],
+        "Pile"
+      ),
+      isNewVariable: true
+    })
+    expect(project.write(first)).toBe(
+      "const endPile = core.filter(core.everyThing(Pile), (pile: Pile) => pile.droppable).firstItem"
+    )
   })
 
   test("comparisons:  === where both sides are alike, a choice bare, nothing === undefined", () => {

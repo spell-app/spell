@@ -31,28 +31,23 @@ drawEs.addRule(DrawItems, {
       tests: [
         {
           input: "dibujar cada carta en el deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "dibujar cartas de el deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "dibujar las cartas del deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "dibujar todas las cartas del deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "dibujar todos los naipes en el deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         }
       ]
     }

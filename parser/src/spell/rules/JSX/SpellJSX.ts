@@ -14,7 +14,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  * - Compiles to `h(tag, props, ...children)` in javascript, JSX in TypeScript:  see `P.JSWriter`, `P.TSWriter`.
  *   - Both write the page's own attribute names, decided when it compiles (`attributeName()`):
  *     `className` => `class`, `colSpan` => `colspan`.
- *   - On a `ui-*` tag, a value that can change is a property, `prop:value`.
+ *   - On a `ui-*` tag, a value that can change and may hold an object is a property, `prop:value`;
+ *     text, a number or yes / no keeps its plain name (`ProgramWriter.mayHoldObject()`).
  * - A dotted tag, `<UI.Form>`, is an error:  `P.ASTJSXElement.tagError()`.
  * - Spell's own words become the web's as the AST is built, so both writers write the web's:
  *   - `<children/>` => `h("slot")`

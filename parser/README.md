@@ -167,7 +167,7 @@ flowchart LR
 </details>
 
 - **Real today:**  English and Spanish in, four targets out.
-  A project written in Spanish says `language: "es"` in its project file;  English is the default.
+  A file written in Spanish says so in its name, `Carta.es.spell`;  a plain `.spell` is English, and one project may mix them.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
   Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
   ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
@@ -243,7 +243,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [outline-solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/outline-solitaire/Solitaire.spell),
+  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -251,7 +251,7 @@ Six ideas carry most of the language, and each reads both ways:
   ([positions count from 1](README-core.md#positions-count-from-1)).
 - **Ids and addresses.**  Every thing has an `id`, built in, and saves as readable JSON;
   `a person is saved in its own file` gives each person a file of their own.
-  Projects and files have addresses too, like `@spell/examples/drawable-solitaire/Card.spell`
+  Projects and files have addresses too, like `@spell/examples/Solitaire/Solitaire.spell`
   ([ids, names and addresses](README-spell.md#ids-names-and-addresses)).
 
 Every rule, and what each target writes for it:  [README-spell](README-spell.md).
@@ -420,7 +420,7 @@ What each does, every option, with examples:
 **Their work is spell-app's, for now.**
 The names live here, and each command hands its work to spell-app's `language` hook
 ([hooks.ts](https://github.com/spell-app/spell-app/blob/main/src/cli/hooks.ts)), so the command line and the editor can't disagree:
-- it finds projects the app's way:  by address (`@spell/examples/drawable-solitaire`), group, `@here`,
+- it finds projects the app's way:  by address (`@spell/examples/Solitaire`), group, `@here`,
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
@@ -507,16 +507,19 @@ The language's own commands are this repo's (above):  the command line finds the
 
 A project can be written in Spanish, and compile to the same targets:
 the second box on the left of the picture above.
-Its project file says `language: "es"`, its files stay `.spell`, and its outline reads the way an English one does:
+Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
 
 ```spell
-una carta es una cosa
-las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
-el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
+una "carta" es una cosa dibujable donde:
+
+	## palos, rangos y colores:  los tipos de valores propios de la carta
+	- "palos" como uno de tréboles, diamantes, corazones o espadas
+	- "rangos" como uno de as, 2 ... 10, jota, dama o rey
+	- "colores" como uno de rojo o negro
 ```
 
-_Three lines of [Carta.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/cartas/Carta.spell),
-from `cartas`, the frozen `cards` project translated line for line._
+_The top of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Carta.es.spell),
+from Solitario, the Solitaire example in Spanish._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
   - Each folder of rules has `<folder>.en.ts`, the rules with their English syntax and tests,
@@ -527,7 +530,9 @@ from `cartas`, the frozen `cards` project translated line for line._
   English is the first pack, Spanish the second.
 - Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
 - A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
-- The parser's warnings and errors speak the project's language, with examples in it:
+- One project may mix languages:  an English `Card.spell` beside a Spanish `Mazo.es.spell`, each read by its own rules,
+  each using what the other declares by the words it was declared with.
+- The parser's warnings and errors speak the file's language, with examples in it:
   `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"`.
 - `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
   `fix` writes stubs to translate.

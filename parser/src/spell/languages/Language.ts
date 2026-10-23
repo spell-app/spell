@@ -14,7 +14,9 @@ import { PARSER_MESSAGES } from "spell-lang/spell/languages/en/parserMessages"
  *   - its root scope:  the built-in types and their members, which every project's scope descends from
  *   - its words for what the core says to the person running a program (`messages`)
  *   - its words for what the parser says to the person writing one (`parserMessages`)
- * - A project names its language (epic `spanish` P4);  `Language.for(lang)` finds its pack.
+ * - A FILE's name says its language (epic `spanish` P19):  `Carta.es.spell` is Spanish, a plain `Card.spell` English.
+ *   - `Language.forFile(name)` finds its pack;  `Language.for(lang)` finds one by its code.
+ *   - So one project may mix languages:  see `rootScopeFor()`.
  * - The rule classes are shared:  a pack holds only words.
  */
 export class Language {
@@ -71,17 +73,63 @@ export class Language {
   get rootScope(): P.RootScope {
     return (this._rootScope ??= P.Inflector.using(this.inflector, () => {
       const scope = new P.RootScope({ name: `spellRoot_${this.lang}`, parser: this.parser })
-      SPELL_BASE_TYPES.forEach((type) => scope.types.add(type))
-      for (const [name, superType] of Object.entries(P.BUILT_IN_TYPES)) {
-        const existing = scope.types.get(name, "LOCAL_ONLY")
-        if (!existing) scope.types.add({ name, superType })
-        else if (superType) existing.superType = P.classCase(superType)
-      }
+      Language.addBuiltInTypes(scope)
       SP.loadBuiltInTypes(scope, this.words)
       return scope
     }))
   }
   private _rootScope: P.RootScope | undefined
+
+  /**
+   * The root scope of a project whose files are written in `languages`, in file order (epic `spanish` P19).
+   * - One language:  its own `rootScope`, so a project in one language parses as it always has.
+   * - Several:  a root of their own, its built-in types' members in EVERY one of their words:
+   *   `the length of the list` and `el largo de la lista` both read `.length`.
+   *   - So a type a Spanish file declares, which an English file extends, has its members in both.
+   *   - Its parser is the first language's;  each file of another language parses with a twin of the project's
+   *     parser in its own language (`SpellParser.twinFor()`).
+   *   - Built once for each set of languages, then shared, as a language's own root is.
+   * - None:  the default's.
+   */
+  static rootScopeFor(languages: readonly Language[]): P.RootScope {
+    const [first = Language.default, ...others] = languages
+    if (!others.length) return first.rootScope
+    const key = languages.map((language) => language.lang).join("+")
+    let root = Language.mixedRoots.get(key)
+    if (!root) {
+      root = P.Inflector.using(first.inflector, () => {
+        const scope = new P.RootScope({ name: `spellRoot_${key}`, parser: first.parser })
+        Language.addBuiltInTypes(scope)
+        // each language's words for each member, the first's first:  one both say the same, e.g. `id`, once
+        for (const language of languages) SP.loadBuiltInTypes(scope, language.words, { keepExisting: true })
+        return scope
+      })
+      Language.mixedRoots.set(key, root)
+    }
+    return root
+  }
+
+  /** Root scopes of projects in several languages, by their codes joined, e.g. `en+es` -- see `rootScopeFor()`. */
+  static readonly mixedRoots = new Map<string, P.RootScope>()
+
+  /** Every root scope there is:  each language's own, then those of projects in several (`rootScopeFor()`). */
+  static get rootScopes(): P.RootScope[] {
+    return [...[...Language.all.values()].map((language) => language.rootScope), ...Language.mixedRoots.values()]
+  }
+
+  /**
+   * Add spell's built-in types to root `scope`, with no members yet:
+   * - spell's runtime classes (`SPELL_BASE_TYPES`:  `Object`, `Thing`, `List`, `App`)
+   * - then every other built-in type's NAME (`P.BUILT_IN_TYPES`:  `text`, `number` ...), each with its super-type
+   */
+  private static addBuiltInTypes(scope: P.RootScope): void {
+    SPELL_BASE_TYPES.forEach((type) => scope.types.add(type))
+    for (const [name, superType] of Object.entries(P.BUILT_IN_TYPES)) {
+      const existing = scope.types.get(name, "LOCAL_ONLY")
+      if (!existing) scope.types.add({ name, superType })
+      else if (superType) existing.superType = P.classCase(superType)
+    }
+  }
 
   ////////////////
   // ## Messages
@@ -166,6 +214,26 @@ export class Language {
     return language
   }
 
+  /**
+   * The pack for the file named `file`, by its name's language (epic `spanish` P19):
+   * `Carta.es.spell` => Spanish;  `Card.spell`, `Card.en.spell` => English.
+   * - `file`:  a name or a path, even with a range after it, as declarations say where a statement is:
+   *   `/Carta.es.spell:71-92`.
+   * - throws a `TypeError` naming the packs there are, for a language with none, e.g. `Carte.fr.spell`
+   */
+  static forFile(file: string | undefined): Language {
+    return Language.for(Language.langOfFile(file))
+  }
+
+  /**
+   * The language code the file named `file` says it's written in, e.g. `es` for `Carta.es.spell` --
+   * `undefined` for one that names none, e.g. `Card.spell`, which reads as English.
+   * - Never throws:  `forFile()` checks there's a pack for it.
+   */
+  static langOfFile(file: string | undefined): string | undefined {
+    return file?.match(FILE_LANGUAGE)?.[1]
+  }
+
   /** The language `scope` is read in:  its parser's, else the one in play (`active`). */
   static of(scope: P.Scope | undefined): Language {
     return (scope?.parser as SP.SpellParser | undefined)?.language ?? Language.active
@@ -206,6 +274,12 @@ export type ParserMessageKey = keyof typeof PARSER_MESSAGES
 
 /** Every one of the parser's messages, in one language:  what a language pack holds (`Language.parserMessages`). */
 export type ParserMessages = Record<ParserMessageKey, string>
+
+/**
+ * The language part of a spell file's name, before its `.spell`:  `es` in `Carta.es.spell`, `pt-BR` in `x.pt-BR.spell`.
+ * - A path may follow with a range, as in declarations' `defined`:  `/Carta.es.spell:71-92`.
+ */
+const FILE_LANGUAGE = /\.([a-z]{2}(?:-[A-Za-z]{2,4})?)\.spell(?::[\d-]*)?$/
 
 /** A named placeholder in a message, `{type}` -- see `Language.parserMessage()`. */
 const PLACEHOLDER = /\{(\w+)\}/g
@@ -255,6 +329,19 @@ export type LanguageWords = {
    * - A variable a person named the same word wins:  this is only a second name for `it`.
    */
   itWords?: Set<string>
+  /**
+   * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
+   * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.
+   * - None:  the language writes `it` as a word of its own, `subject_it`.
+   */
+  fusedIt?: RegExp
+  /**
+   * A little word and the two it stands for, e.g. Spanish's `{ al: "a el", del: "de el" }` (epic `spanish` J96).
+   * - A method's words and its calls may say either:  `dar la vuelta al mazo` is `dar la vuelta a el mazo`,
+   *   and before an argument, `mover (una carta) a (una pila)` takes `mover la carta al montón`.
+   * - None:  the language has none.
+   */
+  contractions?: Record<string, string>
   /**
    * The language's words for the built-in types' members, by their English words:  `{ length: ["largo", "longitud"] }`.
    * - Each reads as its English one does (`SP.BUILT_IN_TYPE_TABLE`'s `readAs`).

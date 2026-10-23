@@ -70,6 +70,14 @@ describe("Spanish's inflector", () => {
     expect(spanishInflector.typeCase("cuentas-bancarias")).toBe("CuentaBancaria")
   })
 
+  test("a name of several words keeps its number after a linking word, in PascalCase too (J96)", () => {
+    expect(spanishInflector.typeCase("pila-de-descartes")).toBe("PilaDeDescartes")
+    expect(spanishInflector.typeCase("pilas-de-descartes")).toBe("PilaDeDescartes")
+    expect(spanishInflector.singularize("PilaDeDescartes")).toBe("PilaDeDescartes")
+    expect(spanishInflector.singularize("MazoDeCartas")).toBe("MazoDeCartas")
+    expect(spanishInflector.singularize("CuentasBancarias")).toBe("CuentaBancaria")
+  })
+
   test("case is kept", () => {
     expect(pluralOf("Carta")).toBe("Cartas")
     expect(singularOf("Corazones")).toBe("Corazón")

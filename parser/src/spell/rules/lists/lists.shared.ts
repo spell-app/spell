@@ -2,6 +2,7 @@
  * The `lists` rule module's shared types and helpers:  what several of its rule files use.
  */
 import { P } from "spell-lang/parser"
+import { SP } from "spell-lang/spell"
 
 ////////////////
 // ## Shared types
@@ -25,7 +26,8 @@ export type GuardOperands = { lhs?: P.ASTExpression; rhs?: P.ASTExpression }
  * - Looked up now, while parsing:  the predicate parses in this scope.
  */
 export function getWhereScope(match: P.Match, arg: P.Match, list: P.Match | undefined): P.MethodScope {
-  const name = P.singularize(arg.value)
+  // `cards` names a `card` too, in a Spanish file naming an English type (epic `spanish` J89)
+  const name = SP.singularIn(match.scope, arg.value)
   const datatype = list && match.scope.getItemType(list.datatype)
   const variable = new P.ScopeVariable({ name, datatype, declaredBy: arg })
   // for `getWhereMethod()`, which can't look it up:  `getAST()` must be pure
@@ -47,7 +49,7 @@ export function getWhereMethod(match: P.Match, arg: P.Match, body: P.Match | und
   const { itemVariable: variable } = match.data as ItemVariableData
   return new P.ASTMethodDefinition(body || match, {
     inline: true,
-    args: [new P.ASTVariableExpression(arg, { name: P.singularize(arg.value), variable })],
+    args: [new P.ASTVariableExpression(arg, { name: variable?.name ?? P.singularize(arg.value), variable })],
     body: P.matchAST(body)
   })
 }

@@ -8,8 +8,8 @@ import { SpellStatement } from "spell-lang/spell/rules/Statement"
  * `draw_items` rule:  draw each / all of a collection of items.
  * - e.g. `draw each card in the deck`, `draw all cards of the deck`
  * - Only the trailing `{expression}` (the container) is compiled:
- *   - javascript:  `draw each card in the deck` => `core.drawItems(deck)`
- *   - TypeScript:  `<For each={deck.items}>{(item) => item.draw()}</For>`, each item in its own error boundary
+ *   - `draw each card in the deck` => `core.drawItems(deck)`, each item in its own error boundary
+ *   - the same in javascript and TypeScript:  a drawable list's items are its element's children (epic `spanish` J100)
  * - The `each {variable}` / `(the|all)? {plural_identifier}` part is purely for readability:
  *   it's matched, but never read in `getAST()`.
  */

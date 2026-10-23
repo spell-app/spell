@@ -132,7 +132,7 @@ export function wordsSuffixFor(lang = "en"): string {
 }
 
 /**
- * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/@spell/library/cards`.
+ * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/@spell/test/cards`.
  * - A runner fetches that project's compiled JS from the server, at its file's URL,
  *   `/spaces/<project>/<Project>.spell.js` (`SpellUrls.fileUrl()`), and points the specifier at it.
  * - See `runCompiled()` in `spell-app/app/runner/runCompiled`.
@@ -155,12 +155,6 @@ export type ProjectManifestJSON5 = {
   targets?: string[]
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
-  /**
-   * The human language its spell is written in, from its project file, e.g. `es` -- English (`en`) when missing.
-   * - One language per project (epic `spanish` Q1):  its parser, words file and messages follow it.
-   * - See `SpellProject.language`, `SP.Language`.
-   */
-  language?: string
   /**
    * Where the server puts what compiling builds, e.g. `Solitaire.spell.py`, inside the checkout's `build/`.
    * - e.g. `spaces/@spell/examples/solitaire`, for a project in spell-app's built-ins (epic `people-and-orgs` J33)
@@ -189,12 +183,12 @@ export type ProjectManifestEntry = {
 /**
  * A single entry in `contents.imports`, as read/written to `project.json` on the server.
  * - A FILE of ours, e.g. `/Card.spell`
- * - or ANOTHER PROJECT, e.g. `@spell/library/cards`:  see `SpellProject.projectImports`
+ * - or ANOTHER PROJECT, e.g. `@spell/library/people`:  see `SpellProject.projectImports`
  */
 export type ProjectManifestImport = {
   /**
    * Local `filePath`, e.g. `/Card.spell`.
-   * - Or another project, by its address:  `@spell/library/cards` (see `SpellProject.projectIdForImport()`).
+   * - Or another project, by its address:  `@spell/library/people` (see `SpellProject.projectIdForImport()`).
    */
   path: string
   /** `true` if file should be included when compiling the project. */
@@ -211,9 +205,9 @@ export type ProjectManifestImport = {
 
 /** Another project a project imports -- see `SpellProject.projectImports`. */
 export type ProjectImport = {
-  /** Its `imports` entry's `path` as written, e.g. `@spell/library/cards` -- named in errors, and `P.ImportScope.origins`. */
+  /** Its `imports` entry's `path` as written, e.g. `@spell/library/people` -- named in errors, and `P.ImportScope.origins`. */
   from: string
-  /** Its project id, e.g. `@spell/library/cards`. */
+  /** Its project id, e.g. `@spell/library/people`. */
   projectId: string
   /** Names to import -- see `DeclarationsImport.import`. */
   import?: string[]
@@ -504,8 +498,15 @@ export type SpellDeclarationsData = {
   /** Semver of the compiler which wrote these -- see `SPELL_VERSION`. */
   spellVersion: string
   /**
-   * The human language the project is written in, e.g. `es`;  missing for English, the default.
-   * - So a runner finds its words file (`Solitario.es.js`) before it has any other word of the project.
+   * The human languages the project's files are written in, e.g. `["es", "en"]` -- missing for English alone.
+   * - Each has a words file, e.g. `Solitario.es.js`:  so a runner finds them before it has any other word of the project.
+   * - The first is the one its program speaks to the person running it:  `SpellDeclarations.speakingFirst()`.
+   * - Read through `SpellDeclarations.languagesOf()`.
+   */
+  languages?: string[]
+  /**
+   * DEPRECATED:  the ONE language of declarations from before epic `spanish` P19, e.g. `es` -- read, never written.
+   * - See `languages`.
    */
   language?: string
   /**
@@ -596,6 +597,11 @@ export type SpellDeclaration = {
   /** `property`'s datatype, e.g. `text`. */
   datatype?: string
   /**
+   * How `property` is read, when not as a property, e.g. `Suit.color({it})` for a value kind's `the color of a suit`.
+   * - See `P.ScopeVariable.readAs`.
+   */
+  readAs?: string
+  /**
    * `property` was declared by its first `set`, as its type never declared it.
    * - See `P.ScopeVariable.autoDeclared`.
    */
@@ -645,7 +651,7 @@ export type SpellDeclaration = {
  * One project another imports, for `SpellDeclarations.importScope()` -- from a `project.json` `imports` entry.
  */
 export type DeclarationsImport = {
-  /** Where it came from, e.g. `@spell/library/cards` -- recorded in `P.ImportScope.origins`, and named in errors. */
+  /** Where it came from, e.g. `@spell/test/cards` -- recorded in `P.ImportScope.origins`, and named in errors. */
   from: string
   /** Its declarations. */
   declarations: SpellDeclarationsData
@@ -656,14 +662,14 @@ export type DeclarationsImport = {
    */
   import?: string[]
   /**
-   * Its project id, e.g. `@spell/library/cards` -- what loaded records' `declaredAt` paths start with.
+   * Its project id, e.g. `@spell/test/cards` -- what loaded records' `declaredAt` paths start with.
    * - Default `from`.
    */
   projectId?: string
   /** Semver range its `version` must satisfy, e.g. `"^1.2"`. */
   version?: string
   /**
-   * ES module specifier its compiled JS is imported by at runtime, e.g. `@spell/project/@spell/library/cards`.
+   * ES module specifier its compiled JS is imported by at runtime, e.g. `@spell/project/@spell/test/cards`.
    * - Recorded with the names loaded in `P.ImportScope.modules`, so the importer's compiled output imports them.
    */
   module?: string

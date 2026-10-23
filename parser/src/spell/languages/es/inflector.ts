@@ -21,11 +21,13 @@ export const spanishInflector = new P.Inflector({
 /**
  * `words`, a name of one or several words, each made singular or plural by `inflect`:
  * in Spanish an adjective agrees with its noun, `cuenta bancaria` => `cuentas bancarias`.
- * - Words are split at a space, a dash or an underscore, which stay as they were.
+ * - Words are split at a space, a dash or an underscore, which stay as they were;
+ *   and where a capital follows a small letter, `PilaDeDescartes`.
  * - From a linking word on (`de`, `del`, `con` ...), the rest is left alone:  `carta de juego` => `cartas de juego`.
  */
 function eachWord(words: string, inflect: (word: string) => string): string {
-  const parts = words.split(/([ _-]+)/)
+  // a type's name is in PascalCase by then, `PilaDeDescartes`:  its words split where each is capitalized
+  const parts = words.split(/([ _-]+|(?<=\p{Ll})(?=\p{Lu}))/u)
   let linked = false
   return parts
     .map((part, index) => {

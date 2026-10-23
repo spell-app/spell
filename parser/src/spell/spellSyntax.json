@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 9,
+          "line": 13,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -354,6 +354,16 @@
               }
             }
           ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ImpliedIt",
+          "ruleNames": ["implied_it"],
+          "internal": false,
+          "file": "src/spell/rules/variables/ImpliedIt.ts",
+          "line": 19,
+          "purpose": "`it` LEFT OUT, before `is`, where the language drops its subject (epic `spanish` J96).",
+          "syntaxes": [],
           "aliases": ["expression"]
         },
         {
@@ -639,6 +649,58 @@
                 },
                 "py": {
                   "code": "thing is not None"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "HexLiteral",
+          "ruleNames": ["hex_literal"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/HexLiteral.ts",
+          "line": 13,
+          "purpose": "`hex 1F0A0` -- a number written in hex (epic `spanish` P11).",
+          "syntaxes": [
+            {
+              "syntax": "hex {digits:hex_digits}",
+              "example": "hex 1F0A0",
+              "outputs": {
+                "js": {
+                  "code": "0x1F0A0"
+                },
+                "ts": {
+                  "code": "0x1F0A0"
+                },
+                "py": {
+                  "code": "0x1F0A0"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "UnicodeOffset",
+          "ruleNames": ["unicode_offset"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/UnicodeOffset.ts",
+          "line": 14,
+          "purpose": "`unicode 1F0A0 + n` -- the character `n` code points past one written in hex (epic `spanish` P11).",
+          "syntaxes": [
+            {
+              "syntax": "unicode {code:unicode_code} (plus|+) {offset:arithmetic_expression}",
+              "example": "unicode 1F0A0 + 1",
+              "outputs": {
+                "js": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
+                },
+                "ts": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
+                },
+                "py": {
+                  "code": "core.unicode(0x1F0A0 + 1)"
                 }
               }
             }
@@ -1286,7 +1348,8 @@
             "take_or_give_up",
             "at_least_or_at_most",
             "url_or_email",
-            "side_name",
+            "draw_method",
+            "create_method",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1324,7 +1387,10 @@
               "syntax": "((url:url)|(email:email))"
             },
             {
-              "syntax": "((front:front)|(back:back))"
+              "syntax": "((draw:draw it)|(draw_each_item:draw each item))"
+            },
+            {
+              "syntax": "(create:create it|create them)"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -1339,11 +1405,21 @@
           "aliases": []
         },
         {
+          "className": "HexDigits",
+          "ruleNames": ["hex_digits"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/HexDigits.ts",
+          "line": 15,
+          "purpose": "A number written in hex, e.g. `1F0A0`, `ff`, `A0` -- the digits of `hex 1F0A0`.",
+          "syntaxes": [],
+          "aliases": []
+        },
+        {
           "className": "UnicodeCode",
           "ruleNames": ["unicode_code"],
           "internal": false,
           "file": "src/spell/rules/expressions/UnicodeCode.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "A code point written in hex, e.g. `1F0A0`, `2665`, `A0` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -3665,9 +3741,12 @@
                   "code": "export class Pile extends DrawableList<Card> {\n  static instanceType = Card\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}\n\nexport class PileElement extends SpellElement<Pile> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-statement-pile\", \"pile\", [])\n}\ncore.useElement(Pile, PileElement)"
                 },
                 "py": {
-                  "code": "class Pile(DrawableList):\n    item_type = Card"
+                  "code": "class Pile(DrawableList):\n    item_type = Card\n    element_tag = \"syntax-statement-pile\""
                 }
               }
+            },
+            {
+              "syntax": "(a|an) {type:quoted_type} is (a|an) drawable list of {instanceType:type} {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -3690,7 +3769,7 @@
                   "code": "export class Card extends Drawable {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n  @E.protoMerged static elementSetup = {\n    styleSheets: { \"syntax-block-card\": Card.css }\n  } satisfies Partial<E.ElementSetup>\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(Drawable):\n    css = \"\\n  .red { color: crimson }\\n\""
+                  "code": "class Card(Drawable):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\\n  .red { color: crimson }\\n\""
                 }
               }
             }
@@ -4671,15 +4750,18 @@
           "aliases": ["statement"]
         },
         {
-          "className": "DrawSide",
-          "ruleNames": ["draw_side"],
+          "className": "DrawIt",
+          "ruleNames": ["draw_it"],
           "internal": false,
-          "file": "src/spell/rules/classes/DrawSide.ts",
-          "line": 29,
-          "purpose": "One SIDE of a thing, as markup, in a type's outline body: `to \"draw its front\":` then markup (epic page `outline-spell`, P3; Q14).",
+          "file": "src/spell/rules/classes/DrawIt.ts",
+          "line": 41,
+          "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
               "syntax": "to {alias:text} :? ({inline_expression}|{nested_expression})?"
+            },
+            {
+              "syntax": "to {phrase:draw_method} :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
@@ -4717,18 +4799,6 @@
             }
           ],
           "aliases": ["statement"]
-        },
-        {
-          "className": "Sequence",
-          "ruleNames": ["draw_its"],
-          "internal": false,
-          "purpose": "",
-          "syntaxes": [
-            {
-              "syntax": "draw its"
-            }
-          ],
-          "aliases": []
         },
         {
           "className": "ThePropertyOfAThing",
@@ -4932,7 +5002,7 @@
           "ruleNames": ["draw_thing"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawThing.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Draw a single thing, e.g. `draw the card`.",
           "syntaxes": [
             {
@@ -4957,7 +5027,7 @@
                   "code": "core.drawItems(deck)"
                 },
                 "ts": {
-                  "code": "<For each={deck.items}>{(item) => item.draw()}</For>"
+                  "code": "core.drawItems(deck)"
                 },
                 "py": {
                   "code": "core.draw_items(deck)"
@@ -5026,7 +5096,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 27,
+          "line": 28,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
@@ -5338,7 +5408,7 @@
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
-              "syntax": "(thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "(thing:{variable}|{expression}) = {value:expression}",
               "example": "unknown-var = yes",
               "outputs": {
                 "js": {
@@ -5353,7 +5423,7 @@
               }
             },
             {
-              "syntax": "let (thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "let (thing:{variable}|{expression}) = {value:expression}",
               "example": "let the name of thing = \"bob\"",
               "outputs": {
                 "js": {
@@ -5368,7 +5438,7 @@
               }
             },
             {
-              "syntax": "set (thing:{expression}|{variable}) to {value:expression}",
+              "syntax": "set (thing:{variable}|{expression}) to {value:expression}",
               "example": "set unknown-var to yes",
               "outputs": {
                 "js": {
@@ -5787,7 +5857,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/methods/MethodDefinition.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "Base for method-DEFINITION rules built on `method_signature`: `to_do_something`, `create_animation` and `quoted_type_expression`.",
           "syntaxes": [],
           "aliases": []
@@ -6019,7 +6089,7 @@
           "ruleNames": ["quoted_method_signature"],
           "internal": false,
           "file": "src/spell/rules/methods/QuotedMethodSignature.ts",
-          "line": 18,
+          "line": 19,
           "purpose": "Method signature surrounded by quotes.",
           "syntaxes": [],
           "aliases": []

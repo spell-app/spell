@@ -13,7 +13,7 @@ import { ReturnStatement } from "./ReturnStatement"
 import { WordsAssignment } from "./WordsAssignment"
 
 assignment.addRule(AssignmentStatement, {
-  syntax: "(thing:{expression}|{variable}) = {value:expression}",
+  syntax: "(thing:{variable}|{expression}) = {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -31,7 +31,7 @@ assignment.addRule(AssignmentStatement, {
 })
 
 assignment.addRule(AssignmentStatement, {
-  syntax: "let (thing:{expression}|{variable}) = {value:expression}",
+  syntax: "let (thing:{variable}|{expression}) = {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -52,7 +52,7 @@ assignment.addRule(AssignmentStatement, {
 })
 
 assignment.addRule(AssignmentStatement, {
-  syntax: "set (thing:{expression}|{variable}) to {value:expression}",
+  syntax: "set (thing:{variable}|{expression}) to {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -64,6 +64,12 @@ assignment.addRule(AssignmentStatement, {
           ts: "export const unknownVar: boolean = true"
         },
         { title: "existing var", input: "set thing to yes", js: "thing = true" },
+        {
+          title: "a number word is a name where it can't be a number (J96)",
+          input: "set three to 3",
+          js: "export const three = 3",
+          ts: "export const three: number = 3"
+        },
         {
           title: "alias var reassign works",
           input: "set it to the name of it",

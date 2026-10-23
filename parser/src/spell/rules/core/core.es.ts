@@ -105,6 +105,16 @@ coreEs.addRule(
           ["nueve", 9],
           ["diez", 10]
         ]
+      },
+      {
+        title: "una variable con su nombre lo lee, no el número (J96)",
+        beforeEach(scope: P.Scope) {
+          scope.variables?.add("tres")
+        },
+        tests: [
+          ["tres", undefined],
+          ["dos", 2]
+        ]
       }
     ]
   }

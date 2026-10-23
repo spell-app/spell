@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from spell_core import core
-from spell_core.run import main
+from spell_core.run import main, run_program
 
 
 def test_runs_the_program_with_its_folder_on_the_import_path(
@@ -16,6 +16,17 @@ def test_runs_the_program_with_its_folder_on_the_import_path(
     program.write_text("from cards import NAME\nprint('playing', NAME)\n")
     main([str(program)])
     assert capsys.readouterr().out == "playing cards\n"
+
+
+def test_each_run_imports_its_projects_afresh(tmp_path: Path) -> None:
+    """Two runs in one process, two visitors' games:  each its own copy of what it imports, and what it adds to it."""
+    (tmp_path / "cards.py").write_text("class Card:\n    pass\n")
+    program = tmp_path / "Game.spell.py"
+    program.write_text("from cards import Card\ngame = object()\nCard.game = game\n")
+    first = run_program(program)
+    second = run_program(program)
+    assert first["Card"] is not second["Card"]
+    assert first["Card"].game is first["game"]
 
 
 def test_a_seed_deals_the_same_every_run(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

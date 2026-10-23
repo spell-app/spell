@@ -41,20 +41,34 @@ class App(Thing):
 
 
 class Drawable(Thing):
-    """A thing drawn as its own element in a browser (`<solitaire-card>`):  what `a card is a drawable thing` extends.
+    """A thing drawn as its own element (`<solitaire-card>`):  what `a card is a drawable thing` extends.
 
-    - Python's page defines no elements:  it draws as any thing does, its own `draw()`.
+    - Its tag:  `element_tag`, which each compiled drawable class names in its body.
+    - `core.draw_thing()` draws it as that element, its own `draw()` inside;  with no tag, as any thing draws.
     """
+
+    # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
+    element_tag: str | None = None
 
 
 class DrawableList(List):
-    """A list drawn as its own element in a browser, its items inside:  `a pile is a drawable list of cards`.
+    """A list drawn as its own element, its items inside:  `a pile is a drawable list of cards`.
 
-    - Python's page defines no elements:  it draws as any thing does, its own `draw()`.
-    - That's just a `<slot>` by default, as in the JavaScript run:
-      its items show inside its element, which only a browser has.
+    - Its tag:  `element_tag`, as a `Drawable`'s.
+    - `core.draw_thing()` draws it as that element:  its `draw()` inside, its items' elements in the `<slot>`.
+      - That's just the `<slot>` by default:  the element shows its items and nothing else.
     """
 
+    # our element's tag, e.g. `solitaire-pile`:  the compiled class names it -- see `core.element_tag_of()`
+    element_tag: str | None = None
+
     def draw(self) -> Element:
-        """Our outside, with a `<slot>` where our items show:  just the slot, by default."""
+        """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show -- just the slot."""
         return h("slot")
+
+    def draw_each_item(self, item: object) -> object:
+        """`item` drawn as one of ours, `to draw each item`:  its own drawing, or its text if it can't draw."""
+        drawing = program_core().draw_thing(item)
+        if drawing is None and item is not None:
+            return str(item)
+        return drawing

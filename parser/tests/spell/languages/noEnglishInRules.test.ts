@@ -70,9 +70,7 @@ const WORD_READS = [
 const ALLOWED: Array<[path: string, text: string]> = [
   // property and rule NAMES, not a person's words
   ["classes/NewThing.ts", '!== "name"'],
-  ["classes/DefinePropertyHas.ts", '=== "instanceType"'],
-  // `front` / `back` / `down`:  a drawable's side names, shared with the runtime's draw() (P3 report:  a decision)
-  ["classes/DrawSide.ts", '"front"']
+  ["classes/DefinePropertyHas.ts", '=== "instanceType"']
 ]
 
 /** Every rule CLASS file below `folder`:  not a language's registrations (`.en.ts` ...). */

@@ -8,6 +8,7 @@ exports[`testing spell module expressions > rule group specs > match snapshot --
   "does_not_include": "operator|expression",
   "exists": "operator",
   "expression": "lhs|rhsChain?",
+  "hex_literal": "digits",
   "includes": "operator|expression",
   "is_a": "operator|expression",
   "is_defined": "operator",
@@ -21,5 +22,6 @@ exports[`testing spell module expressions > rule group specs > match snapshot --
   "there_is_a": "operator|expression",
   "unicode_expression": "code",
   "unicode_literal": "code",
+  "unicode_offset": "code|offset",
 }
 `;

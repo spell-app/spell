@@ -19,8 +19,8 @@ Names people choose keep their accents.
 | --- | --- |
 | a / an | `(un|una)` (plural `unos|unas` where English allows a plural) |
 | the | `(el|la|los|las)`;  optional `the?` is `(el|la|los|las)?` |
-| of | `(de|del)` -- `del` is `de el` |
-| to (a place, a list) | `(a|al)` -- `al` is `a el` |
+| of | `(de|del)` -- `del` is `de el`;  a method's words and its calls may say either |
+| to (a place, a list) | `(a|al)` -- `al` is `a el`;  a method's words and its calls may say either |
 | to (starting a method) | `para` |
 | in / into / at | `en` |
 | on | `(en|sobre)` |
@@ -45,7 +45,7 @@ Names people choose keep their accents.
 | whose | `(cuyo|cuya|cuyos|cuyas)` |
 | which / that | `que` |
 | its | `(su|sus)` |
-| it (the subject) | left out:  Spanish drops it (`subject_implied`);  where a word is needed, `(él|el|ella)` is NOT used |
+| it (the subject) | left out:  Spanish drops it (`subject_implied`;  before `es` / `está` / `puede` in an expression, `implied_it`:  `si es un trébol`);  where a word is needed, `(él|el|ella)` is NOT used |
 | if | `si` |
 | then | `entonces` |
 | else / otherwise | `(si no|sino|de lo contrario)` |
@@ -65,7 +65,7 @@ Names people choose keep their accents.
 
 | English | Spanish |
 | --- | --- |
-| is / is not | `(es|está|esta)` / `(no es|no está|no esta)` |
+| is / is not | `(es|está|esta)` / `(no es|no está|no esta)`;  its plurals `son`, `están` too |
 | are / are not | `(son|están|estan)` / `(no son|no están|no estan)` |
 | is a / is not a | `(es un|es una|son unos|son unas)` / `(no es un|no es una|...)` |
 | has / have / does not have | `tiene` / `tienen` / `no tiene(n)` |
@@ -80,7 +80,7 @@ Names people choose keep their accents.
 | includes / contains | `(incluye|contiene)` |
 | exists | `existe` |
 | there is a / there is no | `hay (un|una)` / `no hay (ningún|ninguna|ningun)` |
-| is empty | `está vacío` (accept `(vacío|vacio|vacía|vacia)`) |
+| is empty | `está vacío` (accept `(vacío|vacio|vacía|vacia)`, and the plurals `están vacíos` / `vacías`) |
 | is greater / less than (or equal to) | `es mayor que` / `es menor que` (`o igual a`) |
 | plus / minus / times / divided by | `más` / `menos` / `por` / `dividido (por|entre)` |
 | return | `devolver` |
@@ -99,7 +99,9 @@ Names people choose keep their accents.
 | on (an event) / trigger / fire | `al` / `(disparar|lanzar)` |
 | create a X | `crear (un|una) X` |
 | a new X with p = v | `(un nuevo|una nueva) X con p = v` |
-| draw its front / back | `dibujar su (frente|dorso)` -- meanings `front` / `back` (a word rule, Owen's pick) |
+| to create it (what runs as it's made) | `para crearlo` (`crearla`, `crear eso`), or `para crear un mazo` -- the `create()` hook (`create_method`) |
+| to shuffle it (`it` fused into the verb) | `- para barajarlo:` (`-la`, `-los`, `-las`):  its calls say `barajar el mazo` |
+| to draw it / to draw each item | `para dibujarlo` (`dibujarla`, `dibujar eso`) / `para dibujar cada elemento` -- meanings `draw` / `draw_each_item` (the `draw_method` word rule);  the item is `el elemento` |
 
 ## Rules for translating a module
 

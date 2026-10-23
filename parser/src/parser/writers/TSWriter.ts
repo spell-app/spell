@@ -28,14 +28,17 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  * - A drawing in Solid's shapes, where it can be:
  *   - a computed local becomes an accessor, `const className = () => ...`
  *   - an `if ... return` chain becomes a `<Show>` / `<Switch>`
- *   - `draw cards in it` becomes a `<For>`
  *   - Any other `to draw` re-runs whole, in its error boundary.
+ * - Drawing a thing, or a list's items, as javascript does:  `{core.drawThing(this.stock)}`, `{core.drawItems(this)}`.
+ *   - So a drawable thing draws as its element, e.g. `<solitaire-card>`, and a drawable list's items as its children.
+ *   - NOT `this.stock.draw()`:  that draws its drawing in place, never its element, so a pile's cards never show
+ *     (epic `spanish` J100).
  * - Decorators:
  *   - `@prop({ oneOf: RANKS }) accessor rank!: Rank`
  *   - `@derived get state()`
  *   - `@thing`
- *   - `@drawn` on `draw()`:  each drawn thing in its own error boundary,
- *     as `core.drawThing()` does for compiled javascript
+ *   - `@drawn` on `draw()`:  its drawing in its own error boundary,
+ *     the one `core.drawThing()` gives compiled javascript;  `core.drawThing()` calls it straight, with no second one
  * - Types where spell knows them:  parameters, properties, lists `as const`.
  *   - A type spell DOESN'T know is written `UNKNOWN`, `any /* spell: type unknown *\/`, never a bare `any`:
  *     so every gap shows, and can be counted (epic `output-targets`, Q16).
@@ -226,11 +229,12 @@ export class TSWriter extends JSWriter {
   // ## `core`'s helpers, as TypeScript says them
   ////////////////
 
-  /** As javascript's (`JSWriter.coreCall()`), plus drawing:  `card.draw()`, `<For>` -- see `drawThing()`, `drawItems()`. */
+  /**
+   * As javascript's (`JSWriter.coreCall()`), plus a `!` on an item a guard found.
+   * - Drawing is javascript's too:  `core.drawThing(this.stock)`, `core.drawItems(this)` -- so a drawable thing
+   *   draws as its element.
+   */
   coreCall(node: P.ASTScopedMethodInvocation): string | undefined {
-    const [first] = node.args.args ?? []
-    if (node.methodName === "drawThing") return this.drawThing(first)
-    if (node.methodName === "drawItems") return first && this.drawItems(first)
     const written = super.coreCall(node)
     // the first or last item of a list a guard found has items:  there, so read as found -- see `isFoundItem()`
     return written !== undefined && this.isFoundItem(node) ? `${written}!` : written
@@ -296,24 +300,6 @@ export class TSWriter extends JSWriter {
         ? String(this.write(only))
         : this.write(new P.ASTStatementBlock(method.body.match, { statements: rest, wrap: true }))
     return `on<${shape}>(${this.bare(type!)}, ${async}({ ${names.join(", ")} }) => ${body})`
-  }
-
-  /** `thing.draw()` -- `?.draw()` when it may be nothing, e.g. the last card of a pile. */
-  drawThing(thing: P.ASTExpression | undefined): string {
-    if (!thing) return "undefined"
-    return `${this.tight(thing)}${this.mayBeNothing(thing) ? "?." : "."}draw()`
-  }
-
-  /**
-   * `<For each={pile.items}>{(card) => card.draw()}</For>`:  each item in its own error boundary, kept by identity.
-   * - Its item is named for the list's item type when it's ours, e.g. `card` in a `Tableau`, else `item`.
-   */
-  drawItems(list: P.ASTExpression): string {
-    const self = unwrapped(list)
-    const isSelf = self instanceof P.ASTSelfLiteral || (self instanceof P.ASTVariableExpression && self.name === "this")
-    const itemType = isSelf && this.project.itemTypeOf(this.currentClass)
-    const item = itemType ? itemType.charAt(0).toLowerCase() + itemType.slice(1) : "item"
-    return `<For each={${this.memberObject(list)}.items}>{(${item}) => ${item}.draw()}</For>`
   }
 
   /**
@@ -435,8 +421,13 @@ export class TSWriter extends JSWriter {
       const type = typeof datatype === "string" && !datatype.startsWith("list") ? this.typeFor(datatype) : undefined
       if (!type) return `${declared} = ${written}`
       // an item read says its type as a type argument, still maybe nothing:  `core.getItemAt<Card>(...)`
-      if (JSWriter.ITEM_READS.has((inner as P.ASTScopedMethodInvocation).methodName)) {
-        return `${declared} = ${written.replace(/^core\.(\w+)\(/, `core.$1<${type}>(`)}`
+      // - only when it's still the item read's own call:  an item of a filtered list is the list's own,
+      //   `core.filter(...).firstItem`, typed by the list already (`core.filter<Card>` would lose it)
+      const { methodName } = inner as P.ASTScopedMethodInvocation
+      if (JSWriter.ITEM_READS.has(methodName)) {
+        const itemRead = `core.${methodName}(`
+        if (!written.startsWith(itemRead)) return `${declared} = ${written}`
+        return `${declared} = core.${methodName}<${type}>(${written.slice(itemRead.length)}`
       }
       return `${declared} = ${written} as ${type}`
     }
@@ -691,7 +682,8 @@ export class TSWriter extends JSWriter {
     const initializer = node.initializer && unwrapped(node.initializer)
     // made when first read, `as a new task-list`:  the class it makes, e.g. `TaskList`
     if (initializer instanceof P.ASTNewInstanceExpression && initializer.type.name !== "List") {
-      return initializer.type.name
+      // by the writer's naming, as the class itself is
+      return this.typeNameOf(initializer.type.name)
     }
     // `as a new list of tasks`:  `List<Task>`
     const itemType = initializer instanceof P.ASTNewInstanceExpression && this.newListItemType(initializer)
@@ -1002,6 +994,7 @@ export class TSWriter extends JSWriter {
     "isStill",
     "isVisible",
     "keepThingAndElementAgreeing",
+    "loadSpellUIFamilies",
     "missingText",
     "nameAfterHandedThing",
     "on",
@@ -1225,15 +1218,15 @@ export class TSWriter extends JSWriter {
     if (child instanceof P.ASTJSXElement) return this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
-    // JSX already, e.g. `<For>` for `draw cards in it`:  no braces
+    // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.bare(expression)
     return text.startsWith("<") ? text : `{${text}}`
   }
 
   /**
    * `name="text"` or `name={value}`, by the page's names, as compiled javascript's `h()` calls name them:
-   * - `class`, `for`, `colspan`;  `prop:value={...}` on a `<ui-*>` tag, for a value that can change:
-   *   see `attributeName()`, which both writers share
+   * - `class`, `for`, `colspan`;  `prop:value={...}` on a `<ui-*>` tag for a value that may hold an object,
+   *   a plain name for text, a number or yes / no:  see `attributeName()`, which both writers share
    * - a handler as an arrow, `onClick={() => autoPlay()}`;  one the drawing shares by its name, `onClick={click}`
    * - no value:  bare on an HTML tag (`hidden`), `{true}` on a `<ui-*>` tag
    * - `undefined` for an attribute that didn't parse:  its error is in the program's parse errors
@@ -1241,7 +1234,7 @@ export class TSWriter extends JSWriter {
   jsxAttribute(tag: string, attribute: P.ASTJSXAttribute): string | undefined {
     const { name, value } = attribute
     if (!value && attribute.error) return undefined
-    const key = attributeName(tag, name, !!value && !isFixedValue(value))
+    const key = attributeName(tag, name, this.mayHoldObject(attribute.propValue))
 
     // bare, as HTML writes it (`hidden`);  a `<ui-*>` tag's bare attribute would ask for an icon called `true`
     if (!value) return tag.includes("-") ? `${key}={true}` : key
