@@ -182,17 +182,17 @@
     flex-direction: column;
     gap: 0.5em;
   }
-  /* the site search gets the band's whole width (the brand's pill, its shortcut hint);
-     the view switch goes under it */
+  /* the site search takes the band's width (the brand's pill, its shortcut hint), the view switch beside it on the same
+     line (Owen, 2026-10-23:  "Search / sort buttons on the same line") */
   .tools {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5em;
     align-items: center;
     justify-content: flex-end;
   }
   .tools > [part~="search"] {
-    flex: 1 1 100%;
+    flex: 1 1 0;
     min-width: 0;
   }
   .tools > [part~="views"] {
@@ -204,9 +204,19 @@
   }
 
   /* ## Bands:  a group's is the brand's sub-head band (a tint, a hairline above, bold caps);  a click folds it. */
+  /*
+   * a group's band sticks at the list's top while its rows scroll under it (Owen, 2026-10-23, epic `debut`:  ""Get
+   * Started", "Components" etc headers sticky"):  each the next one's to push away, as its group ends
+   */
   .heading {
     margin: 0;
     font: inherit;
+  }
+  /* the groups' bands only:  a topic's band (Basic, Layout ...) inside a group scrolls on under its group's */
+  .group > .heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
   .band {
     box-sizing: border-box;
@@ -219,7 +229,9 @@
     padding: 0.25em 1em;
     border: 0;
     border-block-start: 1px solid var(--_ui-docs-nav-border-color);
-    background: var(--_ui-docs-nav-band-background);
+    /* over the page's opaque fill:  a see-through tint (a theme's glass panel) would show the rows scrolling under it */
+    background:
+      linear-gradient(var(--_ui-docs-nav-band-background), var(--_ui-docs-nav-band-background)), var(--ui-background);
     color: var(--_ui-docs-nav-band-color);
     font: var(--ui-font-weight-bold) 0.75em / 1 var(--ui-font-family);
     letter-spacing: 0.01em;

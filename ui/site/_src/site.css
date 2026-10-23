@@ -199,8 +199,12 @@
     align-items: center;
     height: auto;
   }
-  /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
-  .site-topbar-brand {
+  /*
+   * the brand:  the hat and "Spell UI", a plain link set as a heading (a `<ui-header>` there would draw as a menu's
+   * header);  the same in the top bar and the nav panel (Owen, 2026-10-23:  "Do `Spell UI` consistently with Docs
+   * header")
+   */
+  .site-wordmark {
     display: inline-flex;
     align-items: center;
     gap: 0.35em;
@@ -254,10 +258,16 @@
   .site-nav-flyout > ui-docs-nav {
     margin: var(--site-nav-margin);
   }
+  /* the other sets' flyouts still hold the site header, for phones only (Spell UI's holds none:  the top bar has it) */
   @media not (--ui-mobile) {
     .site-flyout-header {
       display: none;
     }
+  }
+  /* its close button small and dimmed until hovered (Owen, 2026-10-23:  ""X" smaller, dimmed until hover") */
+  .site-nav-flyout {
+    --ui-flyout-close-size: 0.875em;
+    --ui-flyout-close-opacity: 0.45;
   }
 
   /*
