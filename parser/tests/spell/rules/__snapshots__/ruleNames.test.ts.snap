@@ -935,6 +935,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "reopen_type · classes · 1",
     "repeat_n_times · lists · 1",
     "return_statement · assignment · 1",
+    "right_away · classes · 1",
     "round_number · math · 1",
     "rounding · math · 1",
     "rule_suggestion · classes · 1",

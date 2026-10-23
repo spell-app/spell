@@ -998,6 +998,7 @@ export class TSWriter extends JSWriter {
     "entry",
     "extraClass",
     "formIsDisabled",
+    "gliding",
     "handedThing",
     "hasInertContent",
     "handlerFor",

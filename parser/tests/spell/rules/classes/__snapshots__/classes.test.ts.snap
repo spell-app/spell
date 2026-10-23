@@ -16,7 +16,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "drag_handler": "item?|moment?|body?",
   "draw_it": "alias?|body?|phrase?",
   "every_thing": "type",
-  "items_reordered": "type|seconds?",
+  "items_reordered": "type|seconds?|now?",
   "its_quoted_property": "type|property",
   "kind_values": "type",
   "list_guard": "type|verb|item|body?|never?",

@@ -83,6 +83,11 @@ classes.addRule(
   { syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))" }
 )
 
+// No wait, for `items_reordered`:  `- its items can be reordered immediately`
+classes.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immediately"] }), {
+  syntax: "((immediately:immediately|right away))"
+})
+
 // The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
 classes.addRule(
   Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
@@ -596,7 +601,7 @@ classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over
 classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
 classes.addRule(ItemsReordered, {
-  syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds))?"
+  syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
 })
 
 for (const subject of ["subject_it", "subject_implied"]) {
