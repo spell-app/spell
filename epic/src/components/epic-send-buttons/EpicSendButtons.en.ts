@@ -21,7 +21,7 @@ export const epicSendButtonsVocabulary = {
   ui: false,
   description:
     "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN " +
-    "MODE on and off.  With it on and something not sent, a ring round the wand drains for 2 minutes, starting " +
+    "MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting " +
     "again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  " +
     "With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by " +
     "default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a " +
@@ -33,7 +33,7 @@ export const epicSendButtonsVocabulary = {
       values: SEND_STATES,
       description:
         "Where what the owner sends stands, by the fill rule:  `idle` (nothing to send:  a grey outline), `unsent` " +
-        "(something not sent:  dashed blue, the countdown runs), `sent` (a blue outline).  Default:  `idle`."
+        "(something not sent:  the plane blue, the countdown runs), `sent` (a blue outline).  Default:  `idle`."
     },
     {
       name: "send-tip",
@@ -72,12 +72,13 @@ export const epicSendButtonsVocabulary = {
     },
     {
       name: "ring",
-      description: "The countdown's ring round the wand, draining as the 2 minutes run;  only while it runs."
+      description:
+        "The countdown's ring round the wand, light grey turning blue as the 2 minutes run;  only while it runs."
     }
   ],
   states: [
     { name: "countdown", description: "Countdown mode is on." },
-    { name: "counting", description: "The countdown is running:  something waits, and the ring drains." },
+    { name: "counting", description: "The countdown is running:  something waits, and the ring turns blue." },
     { name: "waiting", description: "Countdown mode is off and something isn't sent:  the plane is filled blue." }
   ],
   texts: [

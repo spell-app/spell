@@ -43,8 +43,8 @@ export const epicSendVocabulary = {
     {
       name: "send",
       description:
-        "Send and its countdown (`<epic-send-buttons>`), by the fill rule:  a grey outline with nothing to send, " +
-        "dashed blue with changes not sent, a blue outline once sent;  `data-fill` the form's (`rest`, `pending`, " +
+        "Send and its countdown (`<epic-send-buttons>`), grey with nothing to send, blue with changes " +
+        "not sent, a blue outline once sent;  `data-fill` the form's (`rest`, `pending`, " +
         "`sent`)."
     },
     {

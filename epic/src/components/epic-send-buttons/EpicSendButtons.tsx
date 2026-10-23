@@ -17,13 +17,13 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  * - Owen, 2026-10-22:  "Make the magic wand near the plane a toggle -- when it is on, you wait for 2 minutes of
  *   inactivity from me ... and when that is reached you submit the answers.  When it's off, I have to press the plane."
  * - the PLANE asks its owner to send (`epic-send-asked`, `auto` false)
- *   - by the fill rule, from `state`:  a grey outline with nothing to send, dashed blue with something not sent, a
- *     blue outline once sent;  the whole group's outline wears it
+ *   - from `state`:  grey with nothing to send, blue with something not sent;  the group's outline grey, blue
+ *     once sent, never dashed (Owen, 2026-10-22)
  *   - countdown off with something not sent:  FILLED blue, so it plainly waits for a press (`:state(waiting)`)
  * - the WAND turns countdown mode on and off, for every page in this browser (the page's `SendCountdown`)
- *   - on:  blue;  off:  grey
- *   - while it counts (mode on, something not sent):  a ring round it drains over the 2 minutes, starting again at
- *     every key, click or scroll on the page;  its tooltip says how long is left
+ *   - on:  filled light blue, its icon white;  off:  grey
+ *   - while it counts (mode on, something not sent):  a very light grey ring round it turns blue, clockwise, over
+ *     the 2 minutes, starting again at every key, click or scroll on the page;  its tooltip says how long is left
  *   - at the end the owner is asked to send (`auto` true):  an epic page sends as Review Now did (decision Q7)
  * - the countdown is the PAGE's, not this element's:  a Send drawn again (a guide's, at every redraw of its comments)
  *   finds it where it was, its ring too
@@ -73,10 +73,10 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return this.state === "unsent"
   }
 
-  /** How much of the countdown is left, `1` to `0`:  the ring's length. */
-  get fractionLeft(): number {
+  /** How much of the countdown has run, `0` to `1`:  the ring's blue length. */
+  get fractionElapsed(): number {
     void this.version
-    return this.countdown?.fractionLeft ?? 0
+    return 1 - (this.countdown?.fractionLeft ?? 1)
   }
 
   /**
@@ -146,12 +146,12 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             <svg class={RING} part={this.partForName("ring")} viewBox="0 0 36 36" aria-hidden="true">
               <circle class={TRACK} cx="18" cy="18" r="15.5" pathLength="100" />
               <circle
-                class={LEFT}
+                class={ELAPSED}
                 cx="18"
                 cy="18"
                 r="15.5"
                 pathLength="100"
-                style={{ "stroke-dashoffset": `${(1 - this.fractionLeft) * 100}` }}
+                style={{ "stroke-dasharray": `${this.fractionElapsed * 100} 100` }}
               />
             </svg>
           </Show>
@@ -188,7 +188,7 @@ const COUNT = "count"
 const COUNTDOWN = "countdown"
 const RING = "ring"
 const TRACK = "track"
-const LEFT = "left"
+const ELAPSED = "elapsed"
 
 /** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
 function clockOf(ms: number): string {

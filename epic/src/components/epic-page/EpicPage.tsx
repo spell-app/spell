@@ -121,7 +121,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header,
  *     to the left of P11" (epic `airplane` P8 had put them in a bar stuck to the window's bottom)
  *   - the paper plane:  every unsent mark and comment to Claude, by the fill rule (Q20)
- *     - a grey outline with nothing to send, dashed blue with marks not sent, outlined blue once sent
+ *     - grey with nothing to send, blue with marks not sent, outlined blue once sent
  *     - Owen's comments too (Owen, 2026-10-10, he keeps Send as the way they reach Claude):
  *       a new comment, or his reply on a thread, makes it blue;  its tooltip counts both ("2 marks, 1 comment")
  *   - the wand:  countdown mode (Owen, 2026-10-22).  On (the default), what's unsent goes by itself 2 minutes after

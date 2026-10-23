@@ -177,8 +177,8 @@ export const epicPageVocabulary = {
       name: "send",
       description:
         "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` " +
-        "P20):  the paper plane sends every unsent mark and comment to Claude (a grey outline with nothing to send, " +
-        "dashed blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, " +
+        "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
+        "some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, " +
         "what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
     },
     { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },

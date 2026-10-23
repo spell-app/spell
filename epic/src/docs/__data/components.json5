@@ -3218,7 +3218,7 @@
         },
         {
           "name": "send",
-          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (a grey outline with nothing to send, dashed blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
+          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
         },
         {
           "name": "git",
@@ -4489,7 +4489,7 @@
         },
         {
           "name": "send",
-          "description": "Send and its countdown (`<epic-send-buttons>`), by the fill rule:  a grey outline with nothing to send, dashed blue with changes not sent, a blue outline once sent;  `data-fill` the form's (`rest`, `pending`, `sent`)."
+          "description": "Send and its countdown (`<epic-send-buttons>`), grey with nothing to send, blue with changes not sent, a blue outline once sent;  `data-fill` the form's (`rest`, `pending`, `sent`)."
         },
         {
           "name": "who",
@@ -4541,7 +4541,7 @@
         "paper plane",
         "wand"
       ],
-      "description": "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, a ring round the wand drains for 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -4552,7 +4552,7 @@
             "unsent",
             "sent"
           ],
-          "description": "Where what the owner sends stands, by the fill rule:  `idle` (nothing to send:  a grey outline), `unsent` (something not sent:  dashed blue, the countdown runs), `sent` (a blue outline).  Default:  `idle`."
+          "description": "Where what the owner sends stands, by the fill rule:  `idle` (nothing to send:  a grey outline), `unsent` (something not sent:  the plane blue, the countdown runs), `sent` (a blue outline).  Default:  `idle`."
         },
         {
           "name": "send-tip",
@@ -4597,7 +4597,7 @@
         },
         {
           "name": "ring",
-          "description": "The countdown's ring round the wand, draining as the 2 minutes run;  only while it runs."
+          "description": "The countdown's ring round the wand, light grey turning blue as the 2 minutes run;  only while it runs."
         }
       ],
       "states": [
@@ -4607,7 +4607,7 @@
         },
         {
           "name": "counting",
-          "description": "The countdown is running:  something waits, and the ring drains."
+          "description": "The countdown is running:  something waits, and the ring turns blue."
         },
         {
           "name": "waiting",

@@ -95,8 +95,7 @@ const DOCS_TABS = [
   { name: "Sagas", path: "sagas/index.html", areas: ["sagas", "goals"] },
   { name: "Epics", path: "epics/index.html", areas: ["epics"] },
   { name: "Epic/UI", path: "/components/epics/", serverOnly: true, sets: ["epics"], paths: ["/spell-epic/src/docs/"] },
-  { name: "Brand", path: "brand/index.html", areas: ["brand"], sets: ["brand"] },
-  { name: "Templates", path: "templates/index.html", areas: ["templates"] }
+  { name: "Brand", path: "brand/index.html", areas: ["brand"], sets: ["brand"] }
 ]
 
 void UI.load()

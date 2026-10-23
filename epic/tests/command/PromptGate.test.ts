@@ -196,6 +196,21 @@ describe("gate()", () => {
     rmSync(transcript)
   })
 
+  // epic-engine r15:  `/epic resume repo-split` typed in a fresh tab of epic-engine's window resumed in place
+  test("`/epic resume <name>` in another worktree:  its own window, `/epic resume <name>` typed in;  fresh, moved", () => {
+    const transcript = join(prompts, "session.jsonl")
+    writeFileSync(transcript, `${JSON.stringify({ type: "user", message: { content: "/epic resume foo" } })}\n`)
+    const fresh = gate({ prompt: "/epic resume foo", cwd: WORKTREE, transcript_path: transcript }, null)
+    expect(fresh?.hookSpecificOutput?.sessionTitle).toBe("🚧 foo")
+    expect(fresh?.hookSpecificOutput?.additionalContext).toMatch(
+      /epic window launch foo --prompt "\/epic resume foo" --move/
+    )
+    const busy = gate({ prompt: "/epic resume foo", cwd: WORKTREE }, null)
+    expect(busy?.hookSpecificOutput?.sessionTitle).toBeUndefined()
+    expect(busy?.hookSpecificOutput?.additionalContext).toMatch(/epic window launch foo --prompt "\/epic resume foo"`\./)
+    rmSync(transcript)
+  })
+
   test("`/epic <name>` in another worktree:  through, not renamed, a note to ask;  text saved", () => {
     const places: [string, GateWindow | null][] = [
       [WORKTREE, null],
@@ -240,11 +255,15 @@ describe("gate()", () => {
     }
   })
 
-  test("re-entering the same worktree, `/unpark` and `/epic resume` aren't blocked", () => {
+  test("re-entering the same worktree and `/unpark` aren't blocked;  `/epic resume` goes to the epic's window", () => {
     expect(gate({ prompt: "/isolate other", cwd: WORKTREE }, null)?.decision).toBeUndefined()
     expect(gate({ prompt: "/unpark foo", cwd: WORKTREE }, OTHER_WINDOW)?.decision).toBeUndefined()
     const resume = gate({ prompt: "/epic resume foo", cwd: WORKTREE, permission_mode: "plan" }, OTHER_WINDOW)
-    expect(resume?.hookSpecificOutput?.sessionTitle).toBe("🚧 foo")
+    expect(resume?.decision).toBeUndefined()
+    expect(resume?.hookSpecificOutput?.additionalContext).toMatch(/epic window launch foo/)
+    // its own worktree:  only renamed, as before
+    const home = gate({ prompt: "/epic resume other", cwd: WORKTREE, permission_mode: "plan" }, OTHER_WINDOW)
+    expect(home?.hookSpecificOutput?.sessionTitle).toBe("🚧 other")
   })
 
   test("never loses an older saved text", () => {

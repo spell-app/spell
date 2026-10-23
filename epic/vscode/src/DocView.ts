@@ -24,7 +24,8 @@
  *   "Epic Docs" shows the default repo's home page on the epic server, else the window's first folder's;
  *   "Review" a line saying how to fill it.
  * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
- *   then Inspect and Show Console (`openDevTools()`).
+ *   then Inspect (`toggleDevTools()`).
+ *   - the Review tab's:  its epic list right of Home (Owen, 2026-10-22)
  *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
  *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
  * - "Review" has a list button too, "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`):
@@ -187,7 +188,6 @@ export class DocView implements vscode.WebviewViewProvider {
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.docView.inspect", () => DocView.toggleDevTools()),
-      vscode.commands.registerCommand("spellEpic.docView.showConsole", () => DocView.toggleDevTools()),
       ...MENU.map((item) =>
         vscode.commands.registerCommand(`spellEpic.docMenu.${item}`, (context?: MenuContext) =>
           DocView.withId(context?.webview)?.menuItem(item)
@@ -197,15 +197,18 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The Inspect and Show Console buttons, on both views' title bars:
+   * The Inspect button, on both views' title bars:
    * open the developer tools that hold the page, and close them on the next click
    * (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
    * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):
    *   the window's tools, the same ones "Open Webview Developer Tools" opens in desktop VS Code
    *   (`webviewCommands.ts` calls `nativeHostService.openDevTools()`), but it closes them too
-   * - both open the SAME tools, on the tab last used:  neither command takes a tab or mode
-   *   - so each button's tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab
-   *     and the page's frame (`127.0.0.1`) in its context menu
+   * - the tools open on the tab last used:  the command takes no tab or mode
+   *   - so the tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab and the
+   *     page's frame (`127.0.0.1`) in its context menu
+   * - NOT the page's frame by itself:  VS Code has no way to choose the console's frame, and since webviews became
+   *   plain iframes the tools open at `top` (Owen asked, 2026-10-22).  Show Console, a second button opening the same
+   *   tools, went then
    * - only in desktop VS Code:  elsewhere the command isn't there, and a warning says so
    */
   static async toggleDevTools(): Promise<void> {

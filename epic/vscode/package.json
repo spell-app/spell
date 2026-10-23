@@ -104,15 +104,9 @@
       },
       {
         "command": "spellEpic.docView.inspect",
-        "title": "Inspect:  opens (or closes) Developer Tools;  then Cmd+Shift+C there (the arrow, top left) and click in the page",
+        "title": "Inspect:  opens (or closes) Developer Tools;  then Cmd+Shift+C (the arrow, top left) and click in the page, or the Console tab and the page (127.0.0.1) in the menu at its top left",
         "category": "Spell Epic",
         "icon": "$(inspect)"
-      },
-      {
-        "command": "spellEpic.docView.showConsole",
-        "title": "Show Console:  opens (or closes) Developer Tools;  then its Console tab, and the page (127.0.0.1) in the menu at its top left",
-        "category": "Spell Epic",
-        "icon": "$(debug-console)"
       },
       {
         "command": "spellEpic.docMenu.cut",
@@ -235,25 +229,20 @@
         {
           "command": "spellEpic.reviewView.restartServer",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@5"
+          "group": "navigation@6"
         },
         {
           "command": "spellEpic.reviewView.openExternal",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@6"
+          "group": "navigation@7"
         },
         {
           "command": "spellEpic.reviewView.openEpic",
           "when": "view == spellEpic.reviewView",
-          "group": "navigation@0"
+          "group": "navigation@5"
         },
         {
           "command": "spellEpic.docView.inspect",
-          "when": "view == spellEpic.docView || view == spellEpic.reviewView",
-          "group": "navigation@7"
-        },
-        {
-          "command": "spellEpic.docView.showConsole",
           "when": "view == spellEpic.docView || view == spellEpic.reviewView",
           "group": "navigation@8"
         }

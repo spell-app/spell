@@ -175,6 +175,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { RealPath } from "spell-epic/config/RealPath.ts"
 import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { WorktreeGuard } from "spell-epic/command/WorktreeGuard.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
 const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -715,6 +716,8 @@ export class Window {
    *   - for a session started only to type `/epic <name>`:  the prompt hook says when (`PromptGate`'s `launchNote()`)
    *   - its worktree and window file made as above, then `handoff()`:  the `Stop` hook moves it as its turn ends, its
    *     tab here closed, `prompt` typed in there;  `action` `move`
+   *   - and its worktree recorded as `name`'s (`WorktreeGuard.record()`), so the session-start guard doesn't send it
+   *     back to the worktree it was typed in (epic `epic-engine` r15)
    *   - one of the epic's sessions running:  woken as above, and this session stays
    * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):  the session-start
    *   guard records it there, so a reopen comes back (epic `epic-eject` I3), with no `EnterWorktree` (epic `epic-engine`
@@ -741,6 +744,8 @@ export class Window {
       // its window file written (colours in it:  nobody waits for the window here), the move left to the `Stop` hook
       if (plan.open) Window.open(name, pkg, { color, fromCurrent: false, noOpen: true })
       Window.handoff(name, move, { prompt })
+      // its worktree now `name`'s:  else, reopened there, the session-start guard sends it back (epic `epic-engine` r15)
+      WorktreeGuard.record(move, { worktreePath: real(CONFIG.worktreeFolder(name)), worktreeName: name })
       return { ...plan, action: "move", file }
     }
     const { colors } = Window.open(name, pkg, { color, fromCurrent: false })

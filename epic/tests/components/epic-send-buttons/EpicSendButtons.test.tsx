@@ -75,7 +75,7 @@ describe("<epic-send-buttons>", () => {
     beforeEach(() => vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] }))
     afterEach(() => vi.useRealTimers())
 
-    test("unsent:  the ring drains for 2 minutes, then it asks to send (`auto` true);  sent, it's gone", async () => {
+    test("unsent:  the ring turns blue over 2 minutes, then it asks to send (`auto` true);  sent, it's gone", async () => {
       adoptCountdown()
       const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
       await ElementFixture.settle()
@@ -83,8 +83,8 @@ describe("<epic-send-buttons>", () => {
       expect(part(group, "ring")).not.toBeNull()
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       await ElementFixture.settle()
-      const left = part(group, "ring")!.querySelector<SVGCircleElement>(".left")!
-      expect(Number(left.style.strokeDashoffset)).toBeCloseTo(50, 0)
+      const elapsed = part(group, "ring")!.querySelector<SVGCircleElement>(".elapsed")!
+      expect(parseFloat(elapsed.style.strokeDasharray)).toBeCloseTo(50, 0)
       expect(part(group, "countdown")!.title).toMatch(/sends by itself in 1:00 unless you keep typing/)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])
@@ -123,8 +123,8 @@ describe("<epic-send-buttons>", () => {
       const second = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(second)
-      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".left")!
-      expect(Number(left.style.strokeDashoffset)).toBeCloseTo(50, 0)
+      const elapsed = part(second, "ring")!.querySelector<SVGCircleElement>(".elapsed")!
+      expect(parseFloat(elapsed.style.strokeDasharray)).toBeCloseTo(50, 0)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])
     })

@@ -67,6 +67,8 @@ import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
  *      - A FRESH session (`isFresh()`:  a new tab, opened to type it) is the epic's instead:  titled `🚧 <name>`,
  *        and told to MOVE to the epic's window (`epic window launch <name> --move`), its tab here closing
  *        (epic `epic-engine` I72)
+ *    - `/epic resume <name>` there likewise (epic `epic-engine` r15:  "this should open the epic in a new window!"):
+ *      the epic's own window, `/epic resume <name>` typed in;  a fresh session moves
  * 3. Otherwise:  renames the session `🚧 <name>` (`hookSpecificOutput.sessionTitle`), unless it already is.
  *    - "already is":  its `session_title`, and its transcript's last title line too (`rename()`)
  *    - `/epic resume` and `/unpark` rename it whatever it seems to be:  a resumed session's tab may show
@@ -152,6 +154,11 @@ export class PromptGate {
             (text ? ":  it picks the text up." : ".")
         )
       }
+    }
+    // `/epic resume <name>` in ANOTHER epic's window:  its own window, as `/epic <name>` (epic `epic-engine` r15)
+    if (skill === "epic resume" && name) {
+      const other = PromptGate.otherWorktree(input.cwd, window, name)
+      if (other) return launchNote(other, name, "", PromptGate.isFresh(input.transcript_path), `/epic resume ${name}`)
     }
 
     return rename(input, `${TITLE_ICONS.active} ${name}`, skill === "epic resume" || skill === "unpark")
@@ -329,15 +336,18 @@ function rename(input: GateInput, title: string, always = false): GateAnswer | n
  * with a note telling Claude to open a new window for `<name>` instead, at once.
  * - SIDE EFFECT:  `text` saved first (`savePrompt()`), so the new window's `/epic <name>` picks it up
  */
-function launchNote(other: string, name: string, text: string, fresh = false): GateAnswer {
+function launchNote(other: string, name: string, text: string, fresh = false, command = `/epic ${name}`): GateAnswer {
   const saved = text ? `  Its text is saved in ${PromptGate.savePrompt(name, text).replace(homedir(), "~")}.` : ""
+  // another command than `/epic <name>` (`/epic resume <name>`) is typed into the epic's window as it is
+  const prompt = command === `/epic ${name}` ? "" : ` --prompt ${JSON.stringify(command)}`
   const note =
-    `This session works in worktree \`${other}\`:  \`/epic ${name}\` must NOT run here.  Owen means "open a new ` +
+    `This session works in worktree \`${other}\`:  \`${command}\` must NOT run here.  Owen means "open a new ` +
     `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  launch it now, ` +
-    `without asking.` +
+    `without asking` +
+    (prompt ? `:  \`epic window launch ${name}${prompt}\`.` : ".") +
     (fresh
-      ? `  This session is FRESH (started for this prompt):  MOVE it, \`epic window launch ${name} --move\`, and ` +
-        `do nothing else here:  no ${other} work, no questions about ${other} (its worktree behind main ...).`
+      ? `  This session is FRESH (started for this prompt):  MOVE it, \`epic window launch ${name}${prompt} --move\`, ` +
+        `and do nothing else here:  no ${other} work, no questions about ${other} (its worktree behind main ...).`
       : "")
   // a fresh session becomes the epic's:  titled for it now, so the move finds its tab here to close
   const title = fresh ? { sessionTitle: `${TITLE_ICONS.active} ${name}` } : {}

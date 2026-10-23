@@ -518,7 +518,7 @@ describe("<epic-page> Send and its countdown", () => {
 
   // Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header, to the
   // left of P11"
-  test("in the header, left of the step label:  dashed blue unsent, a click sends, then outlined;  nobody listening:  the pill under the review line and the tooltips say so", async () => {
+  test("in the header, left of the step label:  never dashed, a click sends, then outlined;  nobody listening:  the pill under the review line and the tooltips say so", async () => {
     const routes = new FakeRoutes()
     const at = new Date().toISOString()
     routes.inbox.marks = { q1: { action: "approve", at }, q2: { action: "revisit", when: "soon", note: "hm", at } }
@@ -532,9 +532,9 @@ describe("<epic-page> Send and its countdown", () => {
       )
     ).toEqual(["send", "step"])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
-    // the fill rule (Q20):  pressed marks not sent, dashed;  sent, outlined
+    // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
-    expect(outline()).toBe("dashed")
+    expect(outline()).toBe("solid")
     const pill = host.shadowRoot!.querySelector<HTMLElement>('[part~="pill"]')!
     expect(pill.textContent!.replace(/\s+/g, " ")).toContain(
       "No Claude session is reviewing: start one with /epic review demo"
