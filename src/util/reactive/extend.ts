@@ -132,6 +132,14 @@ export function storeProp(target: any, property: string, value: unknown): boolea
   return true
 }
 
+/**
+ * Prop `property` of `target` as stored, UNTRACKED:  `undefined` if it's unset, never its default.
+ * - For a write that keeps the value it replaces, e.g. core's `startWhile()` putting it back after.
+ */
+export function peekProp<T>(target: any, property: string): T | undefined {
+  return extendedFor(target)[PROPS].get(property) as T | undefined
+}
+
 /** Delete prop `property` of `target`:  it leaves `keysOf()`, and a later set appends it.  Returns whether it was set. */
 export function deleteProp(target: any, property: string): boolean {
   const extended = extendedFor(target)
