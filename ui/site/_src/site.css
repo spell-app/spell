@@ -101,7 +101,8 @@
     gap: 12px;
     height: var(--site-topbar-height);
     padding-inline: 16px;
-    background: var(--ui-background);
+    background: var(--ui-bar-background, var(--ui-background));
+    backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
   }
   .site-topbar > spell-site-header {
@@ -241,18 +242,25 @@
    * - Top-level titles stick right below it:  `offset` (px, set by `SiteSections` from the bar's height + the band +
    *   `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by `SiteSections`)
    *   is that line, for the anchors the browser scrolls to itself.
-   * - Stuck titles take the page's background, not the surface's (the theme may tint the page).
+   * - Stuck titles and the bars take the page's background, not the surface's (the theme may tint the page),
+   *   unless the theme gives bars their own (`--ui-bar-background`, and `--ui-bar-filter` behind them:  fruity's glass).
+   * - Stuck titles reach the column's edges (the gutter), their text where it was.
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
     --site-tabs-band: 8px;
-    --ui-section-sticky-background: var(--ui-background);
+    --ui-section-sticky-background: var(--ui-bar-background, var(--ui-background));
+  }
+  .site-main ui-section[sticky]::part(title) {
+    margin-inline: calc(-1 * var(--site-gutter));
+    padding-inline: var(--site-gutter);
+    backdrop-filter: var(--ui-bar-filter, none);
   }
   .site-tabs::part(menu) {
     position: sticky;
     top: var(--site-top);
     z-index: calc(var(--ui-z-sticky) + 1);
-    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-background);
+    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
   }
   .site-main ui-section[id] {
     scroll-margin-top: var(--site-sections-top, var(--site-top));
@@ -303,10 +311,8 @@
     .site-nav {
       display: none;
     }
-    .site-masthead > ui-container::part(container),
-    .site-body::part(container),
-    .site-footer-segment > ui-container::part(container) {
-      margin-inline: 1em;
+    :root {
+      --site-gutter: 1em;
     }
   }
 

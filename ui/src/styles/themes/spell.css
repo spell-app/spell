@@ -31,7 +31,8 @@
  * - Rules beyond tokens (interfaces.dev's checklist, all page-safe):
  *   - focus:  a 3px violet ring, 2px off the box (the tokens `reset.css` / `native.css` draw it with)
  *   - buttons press to `scale: 0.97` (200ms ease-out), only with `prefers-reduced-motion: no-preference`
- *   - `text-wrap: balance` on headings, `pretty` on ledes;  `tabular-nums` in tables and statistics
+ *   - balanced headings, `pretty` ledes (`text-wrap-style`, so a `nowrap` around them holds);
+ *     `tabular-nums` in tables and statistics
  *   - links:  `text-underline-position: from-font`, `text-decoration-skip-ink: auto`;  the underline softens to
  *     40% and comes back on hover, only where the device hovers
  *   - images:  a 1px 8% black / white outline inside the edge, so a white picture doesn't melt into the page
@@ -403,7 +404,7 @@
 
   .ui.header,
   :where(h1, h2, h3, h4, h5, h6) {
-    text-wrap: balance;
+    text-wrap-style: balance;
   }
   :is(h1, h2).ui.header,
   .ui.header:is(.huge, .massive) {
@@ -418,7 +419,7 @@
   :host(:state(in-header)) > .header,
   .in-header.header {
     font-style: italic;
-    text-wrap: pretty;
+    text-wrap-style: pretty;
   }
   /* a `sub` header:  the mono eyebrow */
   .ui.sub.header {

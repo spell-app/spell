@@ -121,7 +121,14 @@ export const gridVocabulary = {
     }
   ],
   events: [],
-  slots: [{ name: "", description: "`<ui-row>`s and `<ui-column>`s." }],
+  slots: [
+    {
+      name: "",
+      description:
+        "`<ui-row>`s and `<ui-column>`s;  or, with `columns`, any elements, each a cell of its own " +
+        '(`<ui-grid columns="3"><div>...</div><div>...</div></ui-grid>`).'
+    }
+  ],
   parts: [{ name: "grid", description: "The grid box (the flex container)." }],
   states: [
     {

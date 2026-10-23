@@ -1,3 +1,4 @@
+| `fruity` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces that blur a soft wallpaper behind the page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
 # Theming Spell UI
 
 ![The same header, three buttons, a search box and a toggle, drawn six ways:  with no theme, with the classic, github and material themes, with Spell's own theme, and with Spell's theme in dark mode](docs/images/themes.png)
@@ -137,7 +138,7 @@ So the scheme can change at any element, and everything below it follows, throug
 One name trips people up:  `theme` on `<ui-root>` is the colour SCHEME, `light` or `dark`.
 A look like `github` is applied with `UI.themes.apply()` (recipe 3).
 
-### The themes:  `classic`, 23 of Fomantic's, and Spell's own
+### The themes:  `classic`, 23 of Fomantic's, and our own three
 
 Each theme is one sheet in [the themes folder](src/styles/themes/), and there's no list of them anywhere else:
 the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
@@ -152,6 +153,10 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
 - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
   pill buttons, an aubergine dark mode.
   It ships no font either:  the serif is whichever Palatino the system has.
+- `spell-brand`:  `spell` plus the brand's own roles (warm and inverse surfaces), converging on the brand pages.
+- `fruity`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
+  and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, over a soft wallpaper.
+  - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
 - Not a theme:  the dark sheet, a colour scheme you put on top of any of them (above).
   `classic` has no dark of its own, since Fomantic had none:  its dark colours are Fomantic's light hues.
 
@@ -272,7 +277,7 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Both sheets sit in `ui.theme`, `classic` first, so the theme wins every tie by coming second.
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
-- `themes.own` lists Spell UI's own themes, `spell` among them:  a picker shows them apart from `names`.
+- `themes.own` lists Spell UI's own themes, `spell`, `spell-brand` and `fruity`:  a picker shows them apart from `names`.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
   So does `apply("dark")`, since dark is a scheme (above):
 
@@ -344,7 +349,7 @@ the theming page on the docs site has the recipe step by step.
 ## 🌱 Coming:  picking and making themes
 
 - a theme picker for any page:  the docs site has one today, but as a docs-only element, `<ui-docs-themes>`
-  (a theme, then light, dark or system, remembered for each viewer)
+  (one palette button:  a theme, and Light, Dark or Auto, remembered for each viewer)
 - a way to make a theme from your own colours and fonts
 - theme files per component, so one page can mix looks family by family
 

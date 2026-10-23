@@ -622,7 +622,7 @@ describe("spell.css", () => {
     await UI.load()
     expect(UI.themes).toMatchObject({
       sheets: expect.arrayContaining(["spell"]),
-      own: ["spell", "spell-brand"],
+      own: ["spell", "spell-brand", "fruity"],
       names: expect.not.arrayContaining(["spell"])
     })
   })
@@ -683,5 +683,43 @@ describe("spell-brand.css", () => {
     await vi.waitFor(() => expect(getComputedStyle(box, "::before").backgroundColor).toBe("rgb(101, 80, 202)"))
     expect(getComputedStyle(box, "::before").borderTopLeftRadius).toBe("50%")
     expect(getComputedStyle(box, "::after").backgroundColor).toMatch(/^(rgb\(255, 255, 255\)|oklch\(1 0 0\))$/) // white
+  })
+})
+
+describe("fruity.css", () => {
+  it("is our own theme:  a sheet, listed in `own`, not among the Fomantic names", async () => {
+    await UI.load()
+    expect(UI.themes.sheets).toContain("fruity")
+    expect(UI.themes.own).toContain("fruity")
+    expect(UI.themes.names).not.toContain("fruity")
+  })
+
+  it("the violet accent (lilac in dark), 8px buttons, the system font", async () => {
+    await T3.use("fruity")
+    const { box, style } = await ThemeHarness.inner(`<ui-button primary>Run</ui-button>`, ".ui.button")
+    expect(style).toMatchObject({ backgroundColor: "rgb(106, 63, 214)", borderTopLeftRadius: "8px" })
+    expect(style.fontFamily).toMatch(/^-apple-system/)
+    const button = box as HTMLElement
+    button.style.transition = "none"
+    document.documentElement.classList.add("ui-dark")
+    onTestFinished(() => document.documentElement.classList.remove("ui-dark"))
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(183, 155, 255)"))
+    expect(T3.color("--ui-background")).toBe("rgb(21, 19, 28)")
+  })
+
+  it("glass:  a card is translucent, 14px round, and blurs what's behind it", async () => {
+    await T3.use("fruity")
+    const { style } = await ThemeHarness.inner(`<ui-card><ui-content>Streak</ui-content></ui-card>`, ".ui.card")
+    expect(style.borderTopLeftRadius).toBe("14px")
+    expect(style.backgroundColor).toBe("rgba(255, 255, 255, 0.62)")
+    expect(style.backdropFilter).toBe("blur(28px) saturate(1.7)")
+  })
+
+  it("the page wears the wallpaper;  a shadow root doesn't", async () => {
+    await T3.use("fruity")
+    expect(getComputedStyle(document.documentElement).backgroundImage).toMatch(/^radial-gradient/)
+    const { style } = await ThemeHarness.inner(`<ui-segment basic>Plain</ui-segment>`, ".ui.segment")
+    expect(style.backgroundImage).toBe("none")
+    expect(style.backdropFilter).toBe("none")
   })
 })

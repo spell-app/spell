@@ -4,7 +4,9 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E, UI, UIT } from "spell-ui/core"
 import {
   DOCS_PLAIN_THEME,
+  DocsSchemes,
   type DocsLook,
+  type DocsScheme,
   type DocsShownScheme,
   type SiteDataFile
 } from "spell-ui/docs-components/docs-components.types"
@@ -26,18 +28,19 @@ import themesCSS from "./UIDocsThemes.css?inline"
  * The component behind `<ui-docs-themes>`:  the docs site's look controls.
  *
  * - Its shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`, holding by `show`:
- *   - `both` (the default):  two round icon buttons, compact enough for a side column or a phone's top bar
+ *   - `both` (the default):  ONE round icon button, compact enough for a side column or a phone's top bar
  *     - `<button part="palette">` opens `<ui-popup part="overlay" open-on="click">`, a small panel with
- *       - the theme list (`role=menu` of `menuitemradio`s:  Spell, Plain, Classic, then Fomantic's;
- *         the chosen one checked)
- *       - a "Match system" switch (`role=switch`:  on while the scheme follows the OS)
- *     - `<button part="scheme">`:  a sun on a light page, a moon on a dark one
- *       (the scheme the page SHOWS:  the OS's, while following it).
- *       - A click flips it and stores it (no longer following the OS).
- *       - The icons cross-fade:  the new one grows from a quarter, un-blurring;  the old one the reverse.
- *     - each with a tooltip,
- *       `<ui-popup part="tip" inverted size="mini">` (the palette's hides while its overlay is open)
- *   - `scheme`:  the sun / moon button alone
+ *       - Light | Dark | Auto, a segmented control (`role=radiogroup` of `radio`s, `part="schemes"`):
+ *         the scheme the viewer CHOSE, Auto while it follows the OS
+ *       - the theme list (`role=menu` of `menuitemradio`s:  Spell, Spell Brand, Fruity, Plain, Classic, then
+ *         Fomantic's;  the chosen one checked)
+ *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
+ *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
+ *       button stood beside it, and the overlay had a "Match system" switch.
+ *   - `scheme`:  the sun / moon button alone, `<button part="scheme">`, with its tooltip:
+ *     a sun on a light page, a moon on a dark one (the scheme the page SHOWS:  the OS's, while following it).
+ *     - A click flips it and stores it (no longer following the OS).
+ *     - The icons cross-fade:  the new one grows from a quarter, un-blurring;  the old one the reverse.
  *   - `theme`:  a theme `<ui-dropdown part="theme" floating scrolling button>`, for a components page's masthead.
  *     - With `for="ui-x"`, it lists only the themes touching that family,
  *       and says `N themes` (Fomantic's per-page dropdown).
@@ -49,9 +52,10 @@ import themesCSS from "./UIDocsThemes.css?inline"
  *   - Every picker on the page follows any picker's change, and the OS's while following it
  *     (`subscribe()`, while connected).
  * - Keyboard, in the overlay:  focus moves to the chosen theme as it opens.
- *   - Arrows / Home / End move through the list (one tab stop, a roving `tabindex`)
- *   - Enter / Space / a click pick (the overlay stays open, to compare)
- *   - Tab reaches the switch;  Escape closes the overlay, and focus goes back to the palette button (`UI.overlays`).
+ *   - In the theme list:  arrows / Home / End move (one tab stop, a roving `tabindex`);
+ *     Enter / Space / a click pick (the overlay stays open, to compare)
+ *   - Shift+Tab reaches the scheme control:  arrows move AND choose, as in any radio group (one tab stop)
+ *   - Escape closes the overlay, and focus goes back to the palette button (`UI.overlays`).
  * - A doc-only element (`src/docs-components/`):
  *   its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>` and `<ui-item>`, which its barrel imports.
  ****************/
@@ -148,13 +152,10 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
     this.emitChange(event)
   }
 
-  /**
-   * Follow the OS's scheme (`system`), or keep the one showing now as a choice of its own (`shown`),
-   * as the viewer did with `event`.
-   * - `shown`:  nothing changes on screen.
-   */
-  chooseScheme(choice: SchemeChoice, event?: Event): void {
-    ThemePreference.setScheme(choice === "system" ? "system" : ThemePreference.shownScheme())
+  /** Choose scheme `scheme` (`system`:  follow the OS), as the viewer did with `event`;  the same one again:  nothing. */
+  chooseScheme(scheme: DocsScheme, event?: Event): void {
+    if (scheme === ThemePreference.look.scheme) return
+    ThemePreference.setScheme(scheme)
     this.emitChange(event)
   }
 
@@ -211,7 +212,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
       <div class={this.rootClass} part={this.partForName("controls")}>
         <Show when={this.shownControls === "theme"}>{this.dropdown()}</Show>
         <Show when={this.shownControls === "both"}>{this.palette()}</Show>
-        <Show when={this.shownControls !== "theme"}>{this.schemeButton()}</Show>
+        <Show when={this.shownControls === "scheme"}>{this.schemeButton()}</Show>
       </div>
     )
   }
@@ -250,7 +251,11 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 
   /** The palette button, its tooltip and the overlay. */
   private palette(): JSX.Element {
-    const label = () => this.translationForKey("palette", { title: this.titleFor(this.look.theme) })
+    const label = () =>
+      this.translationForKey("palette", {
+        title: this.titleFor(this.look.theme),
+        scheme: this.translationForKey(SCHEME_TEXTS[this.look.scheme])
+      })
     return (
       <>
         <button
@@ -274,6 +279,8 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
           ref={(popup: HTMLElement) => this.wireOverlay(popup)}
         >
           <div class={PANEL_CLASS}>
+            {this.schemes()}
+            <div class={DIVIDER_CLASS} role="separator" />
             <div class={HEADING_CLASS} id={IDS.heading}>
               {this.translationForKey("themeName")}
             </div>
@@ -286,21 +293,6 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
             >
               <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
             </div>
-            <div class={DIVIDER_CLASS} role="separator" />
-            <button
-              type="button"
-              class={SYSTEM_CLASS}
-              part={this.partForName("system")}
-              role={MENU_ROLES.switch}
-              aria-checked={this.followsSystem ? "true" : "false"}
-              onClick={(event) => this.chooseScheme(this.followsSystem ? "shown" : "system", event)}
-            >
-              <span class={UIT.LABEL}>
-                <span class={NAME_CLASS}>{this.translationForKey("matchSystem")}</span>
-                <span class={UIT.DESCRIPTION}>{this.translationForKey("matchSystemDescription")}</span>
-              </span>
-              <span class={TRACK_CLASS} aria-hidden="true" />
-            </button>
           </div>
         </ui-popup>
         <ui-popup
@@ -315,6 +307,53 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
         </ui-popup>
       </>
     )
+  }
+
+  /** Light | Dark | Auto:  the overlay's segmented control, a radio group (arrows move and choose). */
+  private schemes(): JSX.Element {
+    return (
+      <div
+        class={SCHEMES_CLASS}
+        part={this.partForName("schemes")}
+        role={SCHEME_ROLES.group}
+        aria-label={this.translationForKey("schemeName")}
+        onKeyDown={(event) => this.onSchemeKey(event)}
+      >
+        <For each={DocsSchemes}>
+          {(scheme) => {
+            const isChosen = () => this.look.scheme === scheme
+            return (
+              <button
+                type="button"
+                class={[SCHEME_OPTION_CLASS, { checked: isChosen() }]}
+                part={this.partForName("scheme-option")}
+                role={SCHEME_ROLES.item}
+                value={scheme}
+                aria-checked={isChosen() ? "true" : "false"}
+                tabindex={isChosen() ? 0 : -1}
+                onClick={(event) => this.chooseScheme(scheme, event)}
+              >
+                <ui-icon name={SCHEME_CHOICE_ICONS[scheme]} fitted="" aria-hidden="true" />
+                <span class={NAME_CLASS}>{this.translationForKey(SCHEME_TEXTS[scheme])}</span>
+              </button>
+            )
+          }}
+        </For>
+      </div>
+    )
+  }
+
+  /** Arrow keys in the scheme control:  move to the next / previous scheme, wrapping, and choose it. */
+  private onSchemeKey(event: KeyboardEvent): void {
+    const step = SCHEME_KEYS[event.key]
+    if (step === undefined) return
+    event.preventDefault()
+    const at = DocsSchemes.indexOf(this.look.scheme)
+    const next = DocsSchemes[(at + step + DocsSchemes.length) % DocsSchemes.length]!
+    this.chooseScheme(next, event)
+    this.domElement.shadowRoot
+      ?.querySelector<HTMLButtonElement>(`[role="${SCHEME_ROLES.item}"][value="${next}"]`)
+      ?.focus()
   }
 
   /** One row of the overlay's list:  a theme, a divider or a header. */
@@ -458,13 +497,6 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UIDocsThemes extends E.AttributeValues<DocsThemesVocabulary> {}
 
-/**
- * What `chooseScheme()` does:
- * - `system`:  follow the OS's scheme
- * - `shown`:  keep the scheme the page shows now, as a choice of its own
- */
-export type SchemeChoice = "system" | "shown"
-
 /** The schemes a page shows, in the button's glyph order:  each glyph is a class word and a `SCHEME_ICONS` key. */
 const ShownSchemes = ["light", "dark"] as const satisfies readonly DocsShownScheme[]
 
@@ -473,6 +505,16 @@ const ShownSchemes = ["light", "dark"] as const satisfies readonly DocsShownSche
  * - the OUTLINE sun:  the solid one reads as a cog at 14px
  */
 const SCHEME_ICONS: Readonly<Record<DocsShownScheme, string>> = { light: "sun outline", dark: "moon" }
+
+/** Icon of each choice in the overlay's scheme control (`fomantic` pack):  Auto a half-filled circle. */
+const SCHEME_CHOICE_ICONS: Readonly<Record<DocsScheme, string>> = {
+  light: "sun outline",
+  dark: "moon",
+  system: "adjust"
+}
+
+/** Text key naming each scheme:  the control's choices, and the palette's name. */
+const SCHEME_TEXTS = { light: "light", dark: "dark", system: "auto" } as const satisfies Record<DocsScheme, string>
 
 /** Icon of the button opening the overlay (`fomantic` pack). */
 const PALETTE_ICON = "palette"
@@ -486,10 +528,11 @@ const SERVER_LOOK: DocsLook = { theme: undefined, scheme: "system" }
 /** Shadow-root ids:  the palette button (its tooltip's `for`) and the overlay's header (its list's name). */
 const IDS = { palette: "palette", heading: "themes-heading" } as const
 
-/**
- * ARIA of the overlay's theme list:  a menu of radio items (arrows move, Enter / Space / click picks), and its switch.
- */
-const MENU_ROLES = { menu: "menu", item: "menuitemradio", switch: "switch" } as const
+/** ARIA of the overlay's theme list:  a menu of radio items (arrows move, Enter / Space / click picks). */
+const MENU_ROLES = { menu: "menu", item: "menuitemradio" } as const
+
+/** ARIA of the overlay's scheme control:  a radio group (arrows move and choose). */
+const SCHEME_ROLES = { group: "radiogroup", item: "radio" } as const
 
 /** A theme row of the overlay's list. */
 const ITEM_SELECTOR = `[role="${MENU_ROLES.item}"]`
@@ -502,13 +545,21 @@ const MENU_KEYS: Readonly<Record<string, number | "first" | "last">> = {
   [UIT.Key.end]: "last"
 }
 
+/** Keys that move (and choose) in the scheme control, by how far. */
+const SCHEME_KEYS: Readonly<Record<string, number>> = {
+  [UIT.Key.arrowRight]: 1,
+  [UIT.Key.arrowDown]: 1,
+  [UIT.Key.arrowLeft]: -1,
+  [UIT.Key.arrowUp]: -1
+}
+
 /** Where the buttons' tooltips show. */
 const TIP_POSITION = "bottom center"
 
 /** `size` of the tooltips. */
 const MINI = "mini"
 
-/** Class word of both round buttons. */
+/** Class word of the round buttons. */
 const BUTTON_CLASS = "button"
 
 /** Class word of the light / dark button. */
@@ -542,13 +593,13 @@ const MENU_CLASS = "menu"
 /** Class word of a divider in the overlay. */
 const DIVIDER_CLASS = "divider"
 
-/** Class word of the "Match system" switch. */
-const SYSTEM_CLASS = "system"
+/** Class word of the overlay's scheme control. */
+const SCHEMES_CLASS = "schemes"
 
-/** Class word of the switch's track (and knob). */
-const TRACK_CLASS = "track"
+/** Class word of one choice in the scheme control. */
+const SCHEME_OPTION_CLASS = "choice"
 
-/** Class word of a row's or the switch's name. */
+/** Class word of a row's or a choice's name. */
 const NAME_CLASS = "name"
 
 /** Class word of a theme row. */

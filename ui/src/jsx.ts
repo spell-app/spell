@@ -27584,7 +27584,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-grid>`:  A grid is used to harmonize negative space in a layout.
        * - also known as:  columns, row, flex grid, layout grid, responsive grid
        * - slots:
-       *   - default:  `<ui-row>`s and `<ui-column>`s.
+       *   - default:  `<ui-row>`s and `<ui-column>`s;  or, with `columns`, any elements, each a cell of its own (`<ui-grid columns="3"><div>...</div><div>...</div></ui-grid>`).
        */
       "ui-grid": UIGridJSXAttributes
       /**
