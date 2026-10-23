@@ -27,11 +27,14 @@
         the comments, `/_epic/assets/spell-comments.js`, which draws them with this pack's elements -->
       <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
       <!--
-        Top bar:  ONLY while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
-        top bar entirely").  The menu button and the brand only below 992px, where the nav panel moves into the flyout.
+        Top bar:  while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
+        top bar entirely") until the page's title scrolls away.  The menu button and the brand only below 992px, where
+        the nav panel moves into the flyout.
         A `<ui-toolbar>`'s bar slots:  `icon` the menu button, `title` the brand, its items the site's links (they scroll
         sideways with `‹` / `›` when the bar is too narrow), `right` search
         and the look controls (at the right edge, whatever shows before them).
+        Once the page's title scrolls under it, the bar shows that title in place of the brand, and the page's own
+        buttons (Owen, 2026-10-23:  "just re-use the existing top bar"):  `SiteSections.titleInBar()`.
       -->
       <ui-toolbar class="site-topbar" aria-label="Site">
         <ui-button
@@ -46,7 +49,10 @@
           command="--show"
         ></ui-button>
         <a slot="title" class="site-topbar-brand" href="../index.html">Spell UI</a>
+        <!-- once the page's title scrolls under the bar, the bar shows it, and the page's own buttons (`SiteSections`) -->
+        <span slot="title" class="site-topbar-page" aria-hidden="true"></span>
         <spell-site-header class="site-topbar-links" docked no-tools root="../../.."></spell-site-header>
+        <span slot="right" class="site-topbar-page-tools"></span>
         <ui-button
           slot="right"
           class="site-search-button"

@@ -74,7 +74,9 @@
     --_ui-breadcrumb-link-hover-color: var(--ui-breadcrumb-link-hover-color, var(--ui-link-hover));
     --_ui-breadcrumb-active-font-weight: var(--ui-breadcrumb-active-font-weight, var(--ui-font-weight-bold));
     --_ui-breadcrumb-active-color: var(--ui-breadcrumb-active-color, initial);
-    --_ui-breadcrumb-divider-spacing: var(--ui-breadcrumb-divider-spacing, 0.25em);
+    /* each side of a divider:  half what the old margin plus the markup's space between sections came to, so it sits
+       midway (Owen, 2026-10-23:  "Spacing on either side of the divider should be the same") */
+    --_ui-breadcrumb-divider-spacing: var(--ui-breadcrumb-divider-spacing, 0.4em);
     --_ui-breadcrumb-divider-opacity: var(--ui-breadcrumb-divider-opacity, 0.7);
     --_ui-breadcrumb-divider-color: var(--ui-breadcrumb-divider-color, var(--ui-text-light));
     --_ui-breadcrumb-divider-size: var(--ui-breadcrumb-divider-size, 0.92857em);
@@ -103,6 +105,13 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+  /* the list a flex row:  the white space between sections in the markup draws nothing, so only the divider's
+     margins space it, the same either side */
+  .ui.breadcrumb > :is(ol, ul) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
   }
   /* Sections don't scale twice. */
   .ui.breadcrumb slot {

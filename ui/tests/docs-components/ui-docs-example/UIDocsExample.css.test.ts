@@ -33,18 +33,23 @@ describe("UIDocsExample.css source", () => {
 describe("UIDocsExample.css layout", () => {
   /** The contract's markup in a shadow root, with the foundation and the sheet adopted. */
   const MARKUP =
-    `<section class="ui example" part="example"><div class="heading"><span part="header">H</span>` +
-    `<button part="toggle">c</button></div><div class="description" part="description">D</div></section>`
+    `<section class="ui example" part="example"><div class="heading"><span part="header">H</span></div>` +
+    `<div class="description" part="description">D</div>` +
+    `<div class="frame"><button part="toggle">c</button><div part="demo">X</div></div></section>`
 
-  it("puts the code button at the end of the header row, dimmed until hovered", () => {
+  it("puts the header and description above the frame, the code button over the frame's corner", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, exampleCSS])
     const shadow = host.shadowRoot!
-    const heading = shadow.querySelector(".heading")!
-    expect(getComputedStyle(heading).display).toBe("flex")
+    expect(getComputedStyle(shadow.querySelector(".heading")!).display).toBe("flex")
+    const frame = shadow.querySelector(".frame")!.getBoundingClientRect()
+    const description = shadow.querySelector("[part~=description]")!.getBoundingClientRect()
+    expect(description.bottom).toBeLessThanOrEqual(frame.top)
     const toggle = shadow.querySelector<HTMLElement>("[part~=toggle]")!
-    expect(getComputedStyle(toggle).opacity).toBe("0.5")
-    const header = shadow.querySelector("[part~=header]")!.getBoundingClientRect()
-    expect(toggle.getBoundingClientRect().left).toBeGreaterThan(header.right)
+    expect(getComputedStyle(toggle).position).toBe("absolute")
+    expect(getComputedStyle(toggle).opacity).toBe("1")
+    const box = toggle.getBoundingClientRect()
+    // the same inset from the frame's top and right edges
+    expect(Math.abs(box.top - frame.top - (frame.right - box.right))).toBeLessThan(1)
   })
 
   it("takes a public token from outside", () => {

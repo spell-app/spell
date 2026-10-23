@@ -70,7 +70,14 @@ export class SiteSections {
     for (const type of ["wheel", "touchstart", "keydown", "pointerdown"])
       window.addEventListener(type, () => (this.hasReaderMoved = true), { capture: true, passive: true })
     window.addEventListener("resize", () => this.measure(), { passive: true })
-    window.addEventListener("scroll", () => this.markTabsStuck(), { passive: true })
+    window.addEventListener(
+      "scroll",
+      () => {
+        this.followTitle()
+        this.markTabsStuck()
+      },
+      { passive: true }
+    )
   }
 
   /**
@@ -123,7 +130,7 @@ export class SiteSections {
   show(main: HTMLElement, { isFirst = false }: { isFirst?: boolean } = {}): void {
     this.main = main
     this.restoreFolds(main, { isInstant: !isFirst })
-    this.stickTitle(main)
+    this.titleInBar(main)
     this.measure()
     TocIndex.whenReady(main, () => {
       if (this.main !== main) return
@@ -143,8 +150,7 @@ export class SiteSections {
     if (!main?.isConnected) return
     const style = getComputedStyle(main)
     const lengthOf = (name: string) => parseFloat(style.getPropertyValue(name)) || 0
-    // the page's title, stuck under the top bar while the masthead's is scrolled away
-    const siteTop = (parseFloat(getComputedStyle(this.probe).top) || 0) + lengthOf(TITLE_HEIGHT)
+    const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
     const bar = SiteSections.barOf(main)
     const band = lengthOf("--site-tabs-band")
     const gap = lengthOf("--site-tabs-gap")
@@ -173,76 +179,55 @@ export class SiteSections {
   }
 
   /**
-   * The page's title sticks (Owen, 2026-10-23, epic `debut`:  "just the Breadcrumb stays + top icons stay, large,
-   * transparent"):  once the masthead's title scrolls under the top bar, a copy of it stays there, as large, with the
-   * page's icon buttons on its right (`site.css`, `.site-page-title`).
-   * - the line goes first in `main`, sticking under the top bar from the page's top;  none without a masthead title
-   * - the copy:  the title's text, a clone of the page's links (bug, original page), and a themes palette for the same
-   *   tag;  `--site-page-title-bar` its measured height, for the tabs below it
-   * - `main` gets `site-title-away` as the title's top reaches the line (a marker just before the title), so the copy
-   *   takes over where the title was;  that also makes room for it in every offset below (`measure()`)
-   * - SIDE EFFECT:  the line and the marker in `main`;  one `IntersectionObserver` and one `ResizeObserver`, replaced
-   *   per page
+   * The page's title moves into the TOP BAR once it scrolls under it (Owen, 2026-10-23, epic `debut`:  "shouldn't need
+   * an extra element for this, just re-use the existing top bar"):  the bar shows the title in place of the brand, and
+   * the page's own buttons (report a bug, the original page) beside its search (`site.css`, "Top bar").
+   * - the bar's two spots for them are in the layout (`.site-topbar-page`, `.site-topbar-page-tools`):  this fills them
+   *   with the page's title text and a copy of its buttons;  none without a masthead title
+   * - `<html>` gets `site-title-away` once the title's top passes under the bar (`followTitle()`, on every scroll);
+   *   on wide screens, which have no bar at rest, the bar comes in then, over the page column, and the offsets follow
+   *   it (`measure()`)
+   * - SIDE EFFECT:  the bar's two spots filled
    */
-  private stickTitle(main: HTMLElement): void {
-    this.titleWatch?.disconnect()
-    this.titleSize?.disconnect()
+  private titleInBar(main: HTMLElement): void {
+    this.pageTitle = undefined
+    document.documentElement.classList.remove(TITLE_AWAY)
     const title = main.querySelector<HTMLElement>(MASTHEAD_TITLE)
-    if (!title) return
-    const words = [...title.childNodes]
+    const spot = document.querySelector<HTMLElement>(BAR_TITLE)
+    const tools = document.querySelector<HTMLElement>(BAR_TOOLS)
+    if (spot) spot.textContent = ""
+    tools?.replaceChildren()
+    if (!title || !spot) return
+    spot.textContent = [...title.childNodes]
       .filter((node) => node.nodeType === Node.TEXT_NODE)
       .map((node) => node.textContent)
       .join("")
       .trim()
-    main.querySelector(`:scope > .${PAGE_TITLE}`)?.remove()
-    const line = document.createElement("div")
-    line.className = PAGE_TITLE
-    const bar = document.createElement("div")
-    bar.className = "bar"
-    const text = document.createElement("span")
-    text.className = "title"
-    text.setAttribute("aria-hidden", "true")
-    text.textContent = words
-    const tools = document.createElement("span")
-    tools.className = "tools"
     const links = main.querySelector(PAGE_LINKS)
-    if (links) tools.append(links.cloneNode(true))
-    const themes = main.querySelector(PAGE_THEMES)
-    if (themes) tools.append(themes.cloneNode(false))
-    bar.append(text, tools)
-    line.append(bar)
-    main.prepend(line)
-    this.titleSize = new ResizeObserver(() => {
-      main.style.setProperty(TITLE_BAR, `${Math.round(bar.offsetHeight)}px`)
-      this.measure()
-    })
-    this.titleSize.observe(bar)
-    // watched:  a marker of no height just before the title, so the copy shows as the title reaches the line
-    let marker = title.previousElementSibling
-    if (!marker?.classList.contains(TITLE_MARKER)) {
-      marker = document.createElement("div")
-      marker.className = TITLE_MARKER
-      marker.setAttribute("aria-hidden", "true")
-      title.before(marker)
-    }
-    const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
-    this.titleWatch = new IntersectionObserver(
-      ([entry]) => {
-        const isAway = !entry.isIntersecting && entry.boundingClientRect.bottom <= siteTop + 1
-        if (main.classList.contains(TITLE_AWAY) === isAway) return
-        main.classList.toggle(TITLE_AWAY, isAway)
-        this.measure()
-      },
-      { rootMargin: `-${Math.round(siteTop)}px 0px 0px 0px` }
-    )
-    this.titleWatch.observe(marker)
+    if (links && tools) tools.append(links.cloneNode(true))
+    this.pageTitle = title
+    this.followTitle()
   }
 
-  /** Watches the masthead's title, for the stuck page title (`stickTitle()`). */
-  private titleWatch?: IntersectionObserver
+  /**
+   * `<html>`'s `site-title-away`:  on once the masthead's title has scrolled under the top bar's line, off once it's back
+   * (`titleInBar()`);  the offsets follow (`measure()`).
+   * - The line is the bar's height whether the bar shows or not:  wide screens show it only while away, over the page
+   *   (fixed, `site.css`), so the title doesn't move as it comes and goes.
+   */
+  private followTitle(): void {
+    const title = this.pageTitle
+    if (!title?.isConnected) return
+    const root = document.documentElement
+    const barTop = parseFloat(getComputedStyle(root).getPropertyValue(BAR_HEIGHT)) || 0
+    const isAway = title.getBoundingClientRect().top < barTop
+    if (root.classList.contains(TITLE_AWAY) === isAway) return
+    root.classList.toggle(TITLE_AWAY, isAway)
+    this.measure()
+  }
 
-  /** Watches the stuck title's height, for the offsets below it (`stickTitle()`). */
-  private titleSize?: ResizeObserver
+  /** The masthead's title the top bar copies (`titleInBar()`), watched on every scroll (`followTitle()`). */
+  private pageTitle?: HTMLElement
 
   ////////////////
   // ## Folds
@@ -549,14 +534,17 @@ const PAGE_BAR = "ui-sticky.site-sticky-bar"
 /** A page bar that is the tabs' panel's lower half:  the section toolbar in a tab's pane (spell-epic's). */
 const JOINED_BAR = "ui-tabs ui-sticky.spell-site-toolbar"
 
-/** `main`'s custom property:  the stuck page title's height while it shows (`site.css`), else none. */
-const TITLE_HEIGHT = "--site-page-title-height"
-
-/** The masthead's title, which the stuck page title copies (`stickTitle()`). */
+/** The masthead's title, which the top bar shows once it scrolls away (`titleInBar()`). */
 const MASTHEAD_TITLE = ".site-masthead .site-title"
 
-/** The stuck page title's line, first in the column (`site.css`). */
-const PAGE_TITLE = "site-page-title"
+/** The top bar's spot for the page's title (`titleInBar()`, the layout's top bar). */
+const BAR_TITLE = ".site-topbar-page"
+
+/** The top bar's spot for the page's own buttons (`titleInBar()`). */
+const BAR_TOOLS = ".site-topbar-page-tools"
+
+/** `:root`'s custom property:  the top bar's height, the line the title is away at (`site.css`). */
+const BAR_HEIGHT = "--site-topbar-height"
 
 /** `main`'s class while the tabs' bar is stuck (`markTabsStuck()`). */
 const TABS_STUCK = "site-tabs-stuck"
@@ -567,19 +555,10 @@ const TABS_LEAVE = "--site-tabs-leave"
 /** `main`'s custom property:  the tabs' track height, px, for the panel the section toolbar draws behind it. */
 const TABS_TRACK = "--site-tabs-track"
 
-/** A marker of no height just before the masthead's title, which `stickTitle()` watches (`site.css`). */
-const TITLE_MARKER = "site-title-marker"
-
-/** The masthead's icon links (report a bug, the original page), copied into the stuck title. */
+/** The masthead's icon links (report a bug, the original page), copied into the top bar (`titleInBar()`). */
 const PAGE_LINKS = ".site-masthead .site-page-links"
 
-/** The masthead's themes palette, copied into the stuck title. */
-const PAGE_THEMES = ".site-masthead .site-themes"
-
-/** `main`'s custom property:  the stuck title's height, px (`site.css`). */
-const TITLE_BAR = "--site-page-title-bar"
-
-/** `main`'s class while the masthead's title is scrolled away:  the stuck page title shows. */
+/** `<html>`'s class while the masthead's title is scrolled away:  the top bar shows it (`titleInBar()`). */
 const TITLE_AWAY = "site-title-away"
 
 /** What can't be a page section:  a demo inside an example, a template. */

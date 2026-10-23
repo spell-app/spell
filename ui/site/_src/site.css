@@ -111,7 +111,11 @@
   .site-topbar::part(toolbar) {
     height: 100%;
     flex: 1 1 auto;
-    gap: 12px;
+    /* tight (Owen, 2026-10-23:  "less space between SpellUI and breadcrumb ... between search and theme") */
+    gap: 4px;
+  }
+  .site-topbar::part(right) {
+    gap: 0;
   }
   /*
    * its icon buttons (menu, search, the palette) plain:  no ring, a tint under the pointer (Owen, 2026-10-23, epic
@@ -166,6 +170,66 @@
   .site-topbar-links::part(nav) {
     flex-wrap: nowrap;
   }
+  /* the links on the bar's middle line, level with its buttons (Owen:  "page links don't line up") */
+  .site-topbar::part(menu) {
+    align-self: center;
+    align-items: center;
+  }
+  .site-topbar-links {
+    align-self: center;
+  }
+  .site-topbar-links::part(bar) {
+    align-items: center;
+    height: auto;
+  }
+  /*
+   * the PAGE'S TITLE in the bar (`SiteSections.titleInBar()`):  once the masthead's title scrolls under the bar
+   * (`:root.site-title-away`), the bar shows it in place of the brand, the page's own buttons (bug, the original page)
+   * before search;  the bar and nothing else, no second element over the page (Owen, 2026-10-23:  "just re-use the
+   * existing top bar")
+   */
+  .site-topbar-page,
+  .site-topbar-page-tools {
+    display: none;
+  }
+  :root.site-title-away .site-topbar-brand {
+    display: none;
+  }
+  :root.site-title-away .site-topbar-page {
+    display: block;
+    margin-inline-end: 0.5em;
+    overflow: hidden;
+    font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--ui-text-dark);
+  }
+  :root.site-title-away .site-topbar-page-tools {
+    display: flex;
+    align-self: center;
+    align-items: center;
+  }
+  /* the copy of the page's links:  centred in the bar, as the masthead's are on the title's line */
+  .site-topbar-page-tools > .site-page-links {
+    display: flex;
+    align-items: center;
+  }
+  /* inside the bar (a menu itself) the links draw as a sub-menu's, which tops their icons:  each a centred box again */
+  .site-topbar-page-tools > .site-page-links > ui-item::part(item) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25em;
+    height: 2.25em;
+    padding: 0;
+  }
+  /* phones:  no room for the site's tabs beside the page's title and buttons, so they make way while it's there */
+  @media (--ui-mobile) {
+    :root.site-title-away .site-topbar-links {
+      display: none;
+    }
+  }
   /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
   .site-topbar-brand {
     font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
@@ -184,6 +248,29 @@
     /* and their slots' boxes, so no gap is left where they were */
     .site-topbar::part(icon),
     .site-topbar::part(title) {
+      display: none;
+    }
+    /* the page's title still shows, once it has scrolled up into the bar */
+    :root.site-title-away .site-topbar::part(title) {
+      display: flex;
+    }
+  }
+  /*
+   * wide screens have no bar at rest (the site's header is in the right column):  it comes in once the page's title
+   * scrolls away, holding that title and the page's buttons only, and the sticky lines below move down for it
+   */
+  @media (--ui-large-monitor) {
+    :root.site-title-away {
+      --site-top: var(--site-topbar-height);
+    }
+    /* over the page column, fixed:  in the page's flow it would push the page down as it came, and back as it went */
+    :root.site-title-away .site-topbar {
+      position: fixed;
+      inset-inline: var(--site-nav-width) var(--site-aside-width);
+      display: flex;
+    }
+    :root.site-title-away .site-topbar-links,
+    :root.site-title-away .site-topbar-themes {
       display: none;
     }
   }
@@ -243,8 +330,9 @@
     max-width: none;
     margin-inline: var(--site-gutter);
   }
+  /* less air round the page's header (Owen, 2026-10-23:  "too much whitespace") */
   .site-masthead::part(segment) {
-    padding-block: 3em;
+    padding-block: 1.25em 0.25em;
   }
   .site-body::part(container) {
     position: relative;
@@ -252,47 +340,98 @@
   }
   /*
    * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large, its
-   * subhead under it;  on the title's right, the page's icon-only buttons in one quiet row:  report a bug, the original
-   * page, and the themes as a palette button (`<ui-docs-themes compact>`);  Send and who's listening under them.
-   * Once the title scrolls under the top bar, it and its buttons stay there, large (`.site-page-title`, below).
+   * subhead under it;  on the title's right, ONE quiet row of the page's icon buttons, level with the title:  report a
+   * bug and the original page (`.site-page-links`), then Send and Review Now (Owen:  "Move send/wand to the right of
+   * the bug icon"), then the page's themes as a palette (`<ui-docs-themes compact>`), then the page's bullhorn.
+   * Once the title scrolls under the top bar, the bar shows it (`SiteSections.titleInBar()`, "Top bar" above).
    */
   .site-masthead > ui-container::part(container) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto var(--_site-send-width, 0px) auto var(--_site-mark-width, 0px);
     column-gap: 0.25em;
     align-items: start;
+  }
+  /*
+   * Send and the page's bullhorn:  the comments put them in the masthead's segment, beside its container, not in it
+   * (`addHeadTool()`, spell-epic's);  the container keeps their two columns empty (`--_site-send-width`,
+   * `--_site-mark-width`), and they're laid over them:  the segment's box one cell, holding the container and both
+   */
+  .site-masthead::part(segment) {
+    display: grid;
+    grid-template-areas: "head";
+  }
+  .site-masthead > ui-container::part(container),
+  .site-main > .site-masthead > [data-head-tool="send"],
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    grid-area: head;
+  }
+  .site-masthead:has(> [data-head-tool="send"]) {
+    --_site-send-width: 3.5em;
+  }
+  .site-masthead:has(> .spell-comment-mark.at-page) {
+    --_site-mark-width: 2.25em;
+  }
+  .site-main > .site-masthead > [data-head-tool="send"],
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    position: static;
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25em;
+    margin: 0.2em var(--site-gutter) 0;
+  }
+  .site-main > .site-masthead > [data-head-tool="send"] {
+    width: var(--_site-send-width);
+    /* past the palette (its box 2.5em) and the bullhorn, and the gaps before them */
+    margin-inline-end: calc(var(--site-gutter) + 2.5em + var(--_site-mark-width, 0px) + 0.5em);
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    width: var(--_site-mark-width);
   }
   /* boxes of their own (both hosts are `display: contents` by default), so the grid places them */
   .site-title {
     --ui-header-margin-top: 0;
+    --ui-header-margin-bottom: 0;
     display: block;
     grid-column: 1;
     grid-row: 1 / span 2;
   }
-  .site-masthead .site-page-links {
-    display: block;
-    grid-column: 2;
+  /* the icon row:  every button the same 2.25em box, centred on the title's first line */
+  .site-masthead .site-page-links,
+  .site-themes {
     grid-row: 1;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    height: 2.25em;
+    margin-block-start: 0.2em;
+  }
+  .site-masthead .site-page-links {
+    grid-column: 2;
   }
   .site-themes {
-    grid-column: 3;
-    grid-row: 1;
-    /* level with the links' round buttons (theirs are taller:  the menu's item height) */
-    align-self: start;
-    padding-block-start: 0.45em;
+    grid-column: 4;
   }
-  /* everything else a page or the comments add to the masthead (Send):  under the buttons, at the right */
-  .site-masthead > ui-container > :not(.site-title, .site-page-links, .site-themes, .site-title-marker) {
-    grid-column: 2 / -1;
-    grid-row: 2;
-    justify-self: end;
+  /* who is listening:  the pill's own tooltip says it;  in the icon row the words would push the title over */
+  .site-masthead .spell-send-who {
+    display: none;
   }
-  /* the marker the stuck title watches (`SiteSections.stickTitle()`):  at the title's top, no room */
-  .site-title-marker {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: start;
-    height: 0;
+  /* the palette the links' size and look:  a plain round icon button */
+  .site-themes::part(palette) {
+    width: 2.25em;
+    height: 2.25em;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ui-text-muted);
+  }
+  .site-themes::part(palette):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    color: var(--ui-text-color);
   }
   /* the page's links:  plain round icon buttons, a tint under the pointer;  no menu box round them */
   .site-page-links {
@@ -374,8 +513,8 @@
    *     toolbar's sticky box the rest (spell-epic's `spell-toolbar.css`, "Under a page's tabs")
    *   - a gap above and below it (`--site-tabs-gap`):  from the top bar when stuck, from the titles under it
    *   - above the stuck section titles (`--ui-z-sticky` + 1)
-   * - The page's TITLE sticks too, once the masthead has scrolled away (`.site-page-title`, made by `SiteSections`):
-   *   a compact bar right under the top bar, the panel below it (`--site-page-title-height`, set while it shows).
+   * - The page's TITLE shows in the top bar once the masthead has scrolled away (`SiteSections.stickTitle()`):
+   *   no bar of its own, so nothing here makes room for it.
    * - Top-level titles stick below all that:  `offset` (px, set by `SiteSections` from the bars' heights, the band,
    *   the gaps and `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by
    *   `SiteSections`) is that line, for the anchors the browser scrolls to itself.
@@ -388,7 +527,7 @@
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
-    --site-tabs-band: 8px;
+    --site-tabs-band: 10px;
     --site-tabs-gap: 10px;
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
     --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
@@ -398,6 +537,18 @@
    * (Owen, 2026-10-23:  "50% opaque white when non-sticky, animated transition to 90% when sticky");  left to the
    * section's own sheet when stuck, the switch was between two different properties' values, and never eased
    */
+  /*
+   * every title's fold chevron in ONE cell, a fixed width, and the same gap after it:  the chevrons' points line up,
+   * and so do the titles' text, top-level and nested (Owen, 2026-10-23:  "Points of the down arrows and left of the
+   * text edge should match up vertically");  a bigger heading's chevron is bigger, centred in the same cell
+   */
+  .site-main ui-section[sticky] {
+    --ui-section-title-gap: 10px;
+  }
+  .site-main ui-section[sticky]::part(fold-icon) {
+    width: 20px;
+    justify-content: center;
+  }
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
@@ -415,6 +566,15 @@
     margin-block-start: 0.5em;
   }
   /*
+   * a FOLDED section keeps no space below its title:  the next title sits right under it, as a list of folded rows
+   * (Owen, 2026-10-23:  "No space between types and content when types is collapsed";  the dividing look's 1.5em
+   * margins, its own below and the next one's above, stood between them)
+   */
+  .site-main ui-section[sticky][collapsed]::part(section),
+  .site-main ui-section[sticky][collapsed] + ui-section[sticky]::part(section) {
+    margin-block: 0;
+  }
+  /*
    * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it and a slightly
    * deeper fill, so the two read as two bars, not one block
    */
@@ -424,13 +584,15 @@
   }
   .site-tabs::part(menu) {
     position: sticky;
-    /* the panel's top edge a gap below the top bar (and the page's title, while it shows) */
-    top: calc(var(--site-top) + var(--site-page-title-height, 0px) + var(--site-tabs-gap) + var(--site-tabs-band));
+    /* the panel's top edge a gap below the top bar */
+    top: calc(var(--site-top) + var(--site-tabs-gap) + var(--site-tabs-band));
     /* above the section toolbar, whose box draws the panel behind it */
     z-index: calc(var(--ui-z-sticky) + 2);
     margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
     /* at a pane's end, up with its section toolbar as it leaves (`--site-tabs-leave`, `SiteSections.markTabsStuck()`) */
     translate: 0 calc(-1 * var(--site-tabs-leave, 0px));
+    /* the top row a little larger than the section toolbar's row under it (Owen:  "use slightly larger font on the top") */
+    font-size: calc(var(--ui-font-size) * 1.0667);
   }
   /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
   .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
@@ -454,65 +616,6 @@
     );
   }
 
-  /*
-   * The page's TITLE, stuck (`SiteSections.stickTitle()`):  once the masthead's title scrolls under the top bar, a copy
-   * of it stays there, LARGE as it was, with the page's icon buttons on its right (Owen, 2026-10-23:  "just the
-   * Breadcrumb stays + top icons stay, large, transparent")
-   * - a line of no height first in `main`, sticking under the top bar from the page's top;  its bar hidden until
-   *   `main.site-title-away`, set as the masthead's title reaches the line (a marker just before it), so the copy takes
-   *   over where the title was:  the subhead and the rest scroll on under it
-   * - no bar of its own:  the page's background, see-through, blurring what slides under it
-   * - its height (`--site-page-title-bar`, measured) is what the tabs below it make room for (`--site-page-title-height`)
-   */
-  .site-page-title {
-    position: sticky;
-    top: var(--site-top);
-    /* above the sticky tabs (+2), as the top bar is */
-    z-index: calc(var(--ui-z-sticky) + 3);
-    height: 0;
-  }
-  .site-page-title > .bar {
-    position: absolute;
-    inset-inline: 0;
-    top: 0;
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 0.25em;
-    padding: 0.35em var(--site-gutter);
-    background: color-mix(in oklab, var(--ui-background) 80%, transparent);
-    backdrop-filter: blur(16px) saturate(1.4);
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity var(--ui-duration-fast, 150ms) var(--ui-ease, ease),
-      visibility var(--ui-duration-fast, 150ms) allow-discrete;
-  }
-  /* the title as the masthead draws it:  the theme's heading face, at its h1 size */
-  .site-page-title .title {
-    overflow: hidden;
-    color: var(--ui-text-dark);
-    font-family: var(--ui-font-family-heading);
-    font-size: calc(var(--ui-font-size) * var(--ui-header-h1, 2));
-    font-weight: var(--ui-font-weight-bold, 700);
-    line-height: var(--ui-line-height-heading, 1.2);
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .site-page-title .tools {
-    display: flex;
-    align-items: center;
-    gap: 0.25em;
-  }
-  .site-title-away {
-    --site-page-title-height: var(--site-page-title-bar, 64px);
-  }
-  .site-title-away .site-page-title > .bar {
-    opacity: 1;
-    visibility: visible;
-  }
   .site-main ui-section[id] {
     scroll-margin-top: var(--site-sections-top, var(--site-top));
   }

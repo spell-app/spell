@@ -29240,7 +29240,8 @@
         },
         {
           "name": "--ui-breadcrumb-divider-spacing",
-          "default": "0.25em",
+          "default": "0.4em",
+          "description": "each side of a divider: half what the old margin plus the markup's space between sections came to, so it sits midway (Owen, 2026-10-23: \"Spacing on either side of the divider should be the same\")",
           "type": "length"
         },
         {
@@ -30570,7 +30571,7 @@
       "tokens": [
         {
           "name": "--ui-docs-example-margin",
-          "default": "2em 0",
+          "default": "1.25em 0",
           "description": "Space above and below the block.",
           "type": "length"
         },
@@ -30588,13 +30589,25 @@
         },
         {
           "name": "--ui-docs-example-toggle-opacity",
-          "default": "0.5",
-          "description": "Opacity of the code button at rest; it brightens on hover, as in Fomantic.",
+          "default": "1",
+          "description": "Opacity of the code button at rest: whole, so it stands out on the frame (Fomantic dimmed it to 0.5)",
           "type": "number"
         },
         {
+          "name": "--ui-docs-example-toggle-background",
+          "default": "light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))",
+          "description": "The code button's fill: whiter than the frame, so it stands out on it",
+          "type": "color"
+        },
+        {
+          "name": "--ui-docs-example-toggle-inset",
+          "default": "0.5em",
+          "description": "Space from the frame's top and right edges to the code button, the same both ways",
+          "type": "length"
+        },
+        {
           "name": "--ui-docs-example-gap",
-          "default": "1em",
+          "default": "0.5em",
           "description": "Space between the header, description and example.",
           "type": "length"
         },

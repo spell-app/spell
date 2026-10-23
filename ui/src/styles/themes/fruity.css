@@ -334,8 +334,14 @@
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;
     --ui-menu-segmented-item-padding: 0.35em 1.5em;
-    /* concentric:  the track's radius (`--ui-menu-radius`, 10px) less its 2px padding */
-    --ui-menu-segmented-item-radius: calc(var(--ui-radius-m) - 2px);
+    /* fully round pills, the track and every option (Owen, 2026-10-23:  "All should be fully rounded pills") */
+    --ui-menu-segmented-radius: var(--ui-radius-pill);
+    --ui-menu-segmented-item-radius: var(--ui-radius-pill);
+    /* a border round a page's SECOND row of tabs (the docs' section toolbar):  none yet, one line to give it one */
+    --ui-bar-subtabs-border: none;
+    /* a toolbar's key tip (the docs' "Type T to jump to this section"):  a pill of dark glass, in both schemes */
+    --ui-bar-tip-background: rgb(24 22 36 / 0.62);
+    --ui-bar-tip-filter: blur(14px) saturate(160%);
     --ui-menu-segmented-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-menu-segmented-active-color: var(--ui-text-color);
     --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
@@ -357,6 +363,7 @@
     --ui-docs-example-frame-border: 1px solid var(--fruity-edge);
     --ui-docs-example-frame-filter: var(--fruity-blur);
     --ui-docs-example-demo-background: light-dark(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.05));
+    --ui-docs-example-toggle-background: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.18));
 
     /* Headers:  San Francisco Display, tight;  ledes muted, never italic */
     --ui-header-font-weight: var(--ui-font-weight-semibold);
@@ -400,6 +407,14 @@
   .ui.modal,
   .ui.toast {
     backdrop-filter: var(--fruity-blur);
+  }
+  /*
+   * an INVERTED surface on a light page (a dark segment, the inverted examples):  dark glass that reads as dark, not
+   * the translucent grey the dark scheme's glass makes over a light wallpaper (Owen:  "inversion surround should be
+   * darker")
+   */
+  .ui.inverted.segment:not(.basic) {
+    background-color: rgb(28 26 36 / 0.9);
   }
   /* the docs' side column, docked or in its flyout (page only:  the panel is the element's own box) */
   ui-docs-nav {

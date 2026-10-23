@@ -688,7 +688,8 @@
             },
             {
               "name": "--ui-breadcrumb-divider-spacing",
-              "default": "0.25em"
+              "default": "0.4em",
+              "description": "each side of a divider: half what the old margin plus the markup's space between sections came to, so it sits midway (Owen, 2026-10-23: \"Spacing on either side of the divider should be the same\")"
             },
             {
               "name": "--ui-breadcrumb-divider-opacity",
