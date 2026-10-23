@@ -13,11 +13,11 @@ READMEs
   [x] P2 · Kit Pages  (3-4h)
 ...
   [x] P8 · Cross-links and Pictures  (2h)
-  [~] P9 · Post-split Cleanup  (2h)
+  [x] P9 · Post-split Cleanup  (2h)
   [x] P10 · Doc Review  (1h)
   [x] P11 · Voice Rewrite  (4h)
 ...
-estimate:  ...h in all, ...h left
+estimate:  ... in all, ... left
 open judgements:
 ...
 open issues:
