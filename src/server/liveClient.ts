@@ -201,11 +201,11 @@ export function liveClient(): void {
     addEventListener("hashchange", reportPlace)
     addEventListener("spell-doc:place", reportPlace)
     addEventListener("message", (event) => {
-      const data = event.data as { spell?: string; go?: number; command?: string; text?: string } | null
+      const data = event.data as { spell?: string; go?: number; command?: string; text?: string; image?: string } | null
       if (event.source !== window.parent) return
       if (data?.spell === "history" && (data.go === -1 || data.go === 1)) history.go(data.go)
       if (data?.spell === "edit" && typeof data.command === "string" && !isRepeat(data.command))
-        edit(data.command, data.text)
+        edit(data.command, data.text, data.image)
     })
     addEventListener("keydown", editKey, true)
     // a same-origin frame of a live page (the brand index's thumbnails) has no VS Code above it
@@ -506,9 +506,10 @@ export function liveClient(): void {
    * - why:  VS Code takes Cmd / Ctrl + C, X, V, A, Z as its own keys before a page in a frame sees them,
    *   so copy, paste and select all did nothing in the side bar (epic `windows-and-review` I2)
    */
-  function edit(command: string, text?: string) {
+  function edit(command: string, text?: string, image?: string) {
     if (command === "paste") {
-      if (text) document.execCommand("insertText", false, text)
+      if (image) void pasteImage(image).catch((error) => console.error("spell-server:  paste", error))
+      else if (text) document.execCommand("insertText", false, text)
       return
     }
     if (command === "copy" || command === "cut") {
@@ -572,6 +573,21 @@ export function liveClient(): void {
     }
     lastKey = { command, at: Date.now() }
     edit(command)
+  }
+
+  /**
+   * An image the extension read off the clipboard (`edit("paste")`, a `data:` URL), pasted as the browser would:  a
+   * `paste` event carrying it as a file, on the focused element.
+   * - why:  in VS Code's side bar the page takes Cmd / Ctrl + V itself (`editKey()`), and may not read the clipboard;
+   *   VS Code's own clipboard is text only, so the extension reads the image (`DocView.ts` `clipboardImage()`) --
+   *   a test run's failure screenshot (epic `epic-engine` I75)
+   */
+  async function pasteImage(url: string) {
+    const blob = await (await fetch(url)).blob()
+    const data = new DataTransfer()
+    data.items.add(new File([blob], `pasted.${blob.type.slice(6) || "png"}`, { type: blob.type || "image/png" }))
+    const target = document.activeElement ?? document.body
+    target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
   }
 
   /**
