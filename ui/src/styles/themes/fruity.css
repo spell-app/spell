@@ -176,6 +176,8 @@
      * the top stuff, so it doesn't have to go to white")
      */
     --ui-bar-wallpaper: var(--fruity-wallpaper);
+    /* a toolbar's ‹ / › keys:  a faint white disc, so they read as buttons (Owen:  "20% white opacity so it's clear what it is") */
+    --ui-toolbar-button-background: rgb(255 255 255 / 0.2);
     --ui-bar-wallpaper-color: var(--ui-background);
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;

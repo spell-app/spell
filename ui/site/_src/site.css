@@ -125,6 +125,23 @@
     --ui-button-basic-border-width: 0px;
     --ui-button-box-shadow: none;
   }
+  /*
+   * each the palette's size, a square round its glyph:  the menu button's glyph as far in from the left edge as the
+   * palette's from the right, and search right beside the palette (Owen, 2026-10-23:  "Hamburger to left, match right
+   * padding of top palette ... search / theme buttons closer together")
+   */
+  .site-topbar > ui-button::part(button) {
+    box-sizing: border-box;
+    width: var(--site-topbar-button);
+    min-width: 0;
+    height: var(--site-topbar-button);
+    padding: 0;
+    justify-content: center;
+  }
+  .site-topbar {
+    /* the palette's box (`<ui-docs-themes size="small">`) */
+    --site-topbar-button: 29.5px;
+  }
   .site-topbar-themes::part(palette) {
     background: transparent;
     box-shadow: none;
@@ -184,11 +201,32 @@
   }
   /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
   .site-topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
     font: var(--ui-font-weight-bold) 1.375em / 1 var(--ui-font-family-heading);
     letter-spacing: -0.01em;
     white-space: nowrap;
     color: var(--ui-text-dark);
     text-decoration: none;
+  }
+  /*
+   * the hat before "Spell UI" (Owen, 2026-10-23:  "Hat to the left of SpellUI"):  the site header's own mark, drawn
+   * here by the site (`site.ts`), the header's own hidden while the brand shows
+   */
+  .site-hat {
+    display: inline-flex;
+    color: var(--ui-primary-text);
+  }
+  .site-hat > svg {
+    display: block;
+    width: auto;
+    height: 0.95em;
+  }
+  @media not (--ui-computer) {
+    .site-topbar-links::part(brand) {
+      display: none;
+    }
   }
   /* the menu and search buttons open the nav flyout, and the brand shows:  only where the nav column is hidden */
   @media (--ui-computer) {
@@ -269,17 +307,34 @@
     padding-block: 0.5em 7em;
   }
   /*
-   * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large, its
-   * subhead under it;  on the title's right, ONE quiet row of the page's icon buttons, level with the title:  report a
-   * bug and the original page (`.site-page-links`), then Send and Review Now (Owen:  "Move send/wand to the right of
-   * the bug icon"), then the page's themes as a palette (`<ui-docs-themes compact>`), then the page's bullhorn.
-   * Once the title scrolls under the top bar, the bar shows it (`SiteSections.titleInBar()`, "Top bar" above).
+   * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large;  on its
+   * right, ONE quiet row of the page's icon buttons, level with it (Owen:  "send|wand|bullhorn in a single group.  then
+   * some space, then bug | theme | new window"):
+   * - Send, Review Now and the page's bullhorn as one pill
+   * - a space
+   * - report a bug, the page's themes as a palette (`<ui-docs-themes compact>`), the original page:  the two links of
+   *   `.site-page-links` and the palette between them, each a cell of the grid (the menu and its items box-less)
+   * - the row ends where the top bar's palette is centred, so the last icon sits right under it ("Align new window icon
+   *   with palette icon on top bar"):  `--_site-head-end`, the gutter on wide screens, which have no bar
+   * Its title line sticks;  the subhead below it scrolls (`SiteSections.splitSubtitle()`).
    */
+  .site-masthead {
+    --_site-head-end: var(--site-gutter);
+  }
+  @media not (--ui-large-monitor) {
+    .site-masthead {
+      /* the top bar's palette is centred its padding (8px) and half its box in;  an icon cell here is 2.25em */
+      --_site-head-end: calc(8px + var(--site-topbar-button, 29.5px) / 2 - 1.125em);
+    }
+  }
   .site-masthead > ui-container::part(container) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto var(--_site-send-width, 0px) auto var(--_site-mark-width, 0px);
+    grid-template-columns:
+      minmax(0, 1fr) var(--_site-send-width, 0px) var(--_site-mark-width, 0px) 0.5em
+      auto auto auto;
     column-gap: 0.25em;
     align-items: start;
+    margin-inline-end: var(--_site-head-end);
   }
   /*
    * Send and the page's bullhorn:  the comments put them in the masthead's segment, beside its container, not in it
@@ -312,13 +367,38 @@
     height: 2.25em;
     margin: 0.2em var(--site-gutter) 0;
   }
+  /* laid over their columns:  the bullhorn past the three icons (3 x 2.25em), their gaps and the space (1em) */
   .site-main > .site-masthead > [data-head-tool="send"] {
     width: var(--_site-send-width);
-    /* past the palette (its box 2.5em) and the bullhorn, and the gaps before them */
-    margin-inline-end: calc(var(--site-gutter) + 2.5em + var(--_site-mark-width, 0px) + 0.5em);
+    margin-inline-end: calc(var(--_site-head-end) + 8.25em + var(--_site-mark-width, 0px));
   }
   .site-main > .site-masthead > .spell-comment-mark.at-page {
     width: var(--_site-mark-width);
+    margin-inline-end: calc(var(--_site-head-end) + 8.25em);
+  }
+  /* ... and drawn as ONE pill:  Send's ring opens on its right, the bullhorn closes it */
+  .site-masthead:has(> .spell-comment-mark.at-page) > [data-head-tool="send"] {
+    justify-content: flex-end;
+  }
+  .site-masthead:has(> .spell-comment-mark.at-page) epic-send-buttons::part(base) {
+    border-inline-end: 0;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page {
+    justify-content: flex-start;
+    box-sizing: border-box;
+    /* Send's ring, closed round the bullhorn:  its height (`--epic-send-buttons-size`, 28px) and colour */
+    height: 28px;
+    margin-block-start: calc(0.2em + (2.25em - 28px) / 2);
+    padding-inline-end: 2px;
+    border: 1px solid var(--epic-send-buttons-rule, var(--ui-border-color));
+    border-inline-start: 0;
+    border-radius: 0 999px 999px 0;
+  }
+  .site-main > .site-masthead > .spell-comment-mark.at-page > ui-button {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-box-shadow: none;
   }
   /* boxes of their own (both hosts are `display: contents` by default), so the grid places them */
   .site-title {
@@ -387,11 +467,24 @@
     height: 2.25em;
     margin-block-start: 0.2em;
   }
-  .site-masthead .site-page-links {
-    grid-column: 2;
+  /* the menu and its items box-less, so each link's own box is a cell:  bug, then (the palette), then the original page */
+  .site-masthead .site-page-links,
+  .site-masthead .site-page-links::part(menu) {
+    display: contents;
+  }
+  .site-masthead .site-page-links > ui-item::part(item) {
+    grid-row: 1;
+    align-self: start;
+    margin-block-start: 0.2em;
+  }
+  .site-masthead .site-page-links > ui-item:first-of-type::part(item) {
+    grid-column: 5;
+  }
+  .site-masthead .site-page-links > ui-item:last-of-type::part(item) {
+    grid-column: 7;
   }
   .site-themes {
-    grid-column: 4;
+    grid-column: 6;
   }
   /* who is listening:  the pill's own tooltip says it;  in the icon row the words would push the title over */
   .site-masthead .spell-send-who {
