@@ -129,10 +129,13 @@ describe("testing spell module classes, in Spanish", () => {
       const { code, errors } = compiled("reorder", [
         "una tarea es una cosa dibujable",
         "una agenda es una lista dibujable de tareas:",
-        "\t- sus elementos se pueden reordenar después de 1 segundo"
+        "\t- sus elementos se pueden reordenar después de 1 segundo",
+        "una cola es una lista dibujable de tareas:",
+        "\t- sus elementos se pueden reordenar de inmediato"
       ])
       expect(errors).toEqual([])
-      expect(code).toMatch(/reorderItemsAfter = 1/)
+      expect(code).toMatch(/reorderItemsAfter = 1\b/)
+      expect(code).toMatch(/reorderItemsAfter = 0/)
     })
 
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {

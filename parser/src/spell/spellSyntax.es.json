@@ -1371,6 +1371,7 @@
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
+            "right_away",
             "draggable_or_droppable",
             "at_least_or_at_most",
             "url_or_email",
@@ -1412,6 +1413,9 @@
             },
             {
               "syntax": "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))"
+            },
+            {
+              "syntax": "((immediately:de inmediato|inmediatamente|enseguida))"
             },
             {
               "syntax": "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
@@ -4974,11 +4978,11 @@
           "ruleNames": ["items_reordered"],
           "internal": false,
           "file": "src/spell/rules/classes/ItemsReordered.ts",
-          "line": 26,
+          "line": 27,
           "purpose": "People may reorder a list's items on the page, by dragging them (epic `outline-spell` P30).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos))?"
+              "syntax": "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos)|{now:right_away})?"
             }
           ],
           "aliases": ["statement"]

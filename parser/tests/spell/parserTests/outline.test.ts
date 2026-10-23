@@ -1007,10 +1007,13 @@ describe("outline style", () => {
         "a checklist is a drawable list of tasks where:",
         "\t- its items can be reordered",
         "a backlog is a drawable list of tasks where:",
-        "\t- its items can be reordered after 1.5 seconds"
+        "\t- its items can be reordered after 1.5 seconds",
+        "a queue is a drawable list of tasks where:",
+        "\t- its items can be reordered immediately"
       ])
       expect(js).toContain("static reorderItemsAfter = 2")
       expect(js).toContain("static reorderItemsAfter = 1.5")
+      expect(js).toContain("static reorderItemsAfter = 0")
     })
 
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {

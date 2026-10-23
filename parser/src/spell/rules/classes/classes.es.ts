@@ -145,6 +145,11 @@ classesEs.addRule(
   { syntax: "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))" }
 )
 
+// Sin esperar, for `items_reordered`:  `- sus elementos se pueden reordenar de inmediato`
+classesEs.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immediately"] }), {
+  syntax: "((immediately:de inmediato|inmediatamente|enseguida))"
+})
+
 // The same, as adjectives:  `es arrastrable`, `no es soltable`
 classesEs.addRule(
   Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
@@ -581,7 +586,8 @@ classesEs.addRule(DragHandler, {
 classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
 // `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
 classesEs.addRule(ItemsReordered, {
-  syntax: "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos))?"
+  syntax:
+    "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos)|{now:right_away})?"
 })
 
 for (const subject of ["subject_it", "subject_implied"]) {
