@@ -79,6 +79,52 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/canBeDroppedOn = true/)
     })
 
+    test("`es arrastrable`, `no es soltable`:  the same flags, as adjectives (outline-spell P28)", () => {
+      const { code, errors } = compiled("draggable", [
+        "una carta es una cosa dibujable:",
+        "\t- es arrastrable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- no es soltable"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/canBeDragged = true/)
+      expect(code).toMatch(/canBeDroppedOn = false/)
+    })
+
+    test("`cuando una carta se suelta sobre ella`:  English's `when a card is dropped on it` (outline-spell P28)", () => {
+      const { code, errors } = compiled("drag-handler", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- cuando una carta se arrastra sobre ella:",
+        "\t\timprimir 1",
+        "\t- cuando una carta se arrastra fuera de ella:",
+        "\t\timprimir 2",
+        "\t- cuando una carta se suelta sobre ella:",
+        "\t\timprimir la carta"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whenCartaDraggedOver\(carta\)/)
+      expect(code).toMatch(/whenCartaDraggedOutOf\(carta\)/)
+      expect(code).toMatch(/whenCartaDroppedOn\(carta\)/)
+    })
+
+    test("`mientras una carta se arrastra sobre ella`, `cuando algo se suelta sobre ella`:  English's `while ...`, `something` (outline-spell P28)", () => {
+      const { code, errors } = compiled("drag-while", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- mientras una carta se arrastra sobre ella:",
+        "\t\timprimir la carta",
+        "\t- mientras algo se arrastra sobre ella:",
+        "\t\timprimir 1",
+        "\t- cuando algo se suelta sobre ella:",
+        "\t\timprimir la cosa"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whileCartaDraggedOver\(carta\)/)
+      expect(code).toMatch(/whileThingDraggedOver\(cosa\)/)
+      expect(code).toMatch(/whenThingDroppedOn\(cosa\) \{\s+core\.console\.log\(cosa\)/)
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",

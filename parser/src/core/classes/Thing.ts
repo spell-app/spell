@@ -2,7 +2,7 @@
  * Base classes for spell.
  */
 import { Observable, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell-kit/util"
-import { registerThing, core } from "spell-lang/core/core"
+import { registerThing, noteSetting, core } from "spell-lang/core/core"
 import type { Drawing } from "spell-lang/core/drawing"
 import { Eventful } from "spell-lang/core/SpellEvent"
 import type { PropCheck } from "spell-lang/core/core.types"
@@ -80,6 +80,7 @@ export class Thing extends Eventful(Observable) {
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
+    noteSetting(this, property)
     return super.setProp(property, value)
   }
 

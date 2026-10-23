@@ -936,6 +936,59 @@ describe("outline style", () => {
       expect(js).toContain("static canBeDroppedOn = true")
     })
 
+    test("`- it is draggable`, `- is droppable`:  the same flags;  `is not` turns one off for a sub-type (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- it is draggable",
+        "a joker is a card where:",
+        "\t- it is not draggable",
+        "a pile is a drawable list of cards where:",
+        "\t- is droppable"
+      ])
+      expect(js).toContain("static canBeDragged = true")
+      expect(js).toContain("static canBeDragged = false")
+      expect(js).toContain("static canBeDroppedOn = true")
+    })
+
+    test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- it can be dropped on",
+        '\t- its "hint" is text',
+        "\t- when a card is dragged over it:",
+        '\t\tset its hint to "drop here"',
+        "\t- when a card is dragged out of it:",
+        '\t\tset its hint to ""',
+        "\t- when a card is dropped on it:",
+        "\t\tadd the card to it"
+      ])
+      expect(js).toMatch(/whenCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whenCardDraggedOutOf\(card\) \{\s+this\.hint = ""/)
+      expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
+    })
+
+    test("`- while a card is dragged over it`, `- when something is dropped on it`:  `the thing` is any thing (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- it can be dropped on",
+        '\t- its "hint" is text',
+        "\t- while a card is dragged over it:",
+        '\t\tset its hint to "drop here"',
+        "\t- while something is dragged over it:",
+        '\t\tset its hint to "not here"',
+        "\t- when something is dropped on it:",
+        "\t\tprint the thing",
+        "\t- when something is dragged out of it:",
+        "\t\tclear its hint"
+      ])
+      expect(js).toMatch(/whileCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whileThingDraggedOver\(thing\) \{\s+this\.hint = "not here"/)
+      expect(js).toMatch(/whenThingDroppedOn\(thing\) \{\s+core\.console\.log\(thing\)/)
+      expect(js).toMatch(/whenThingDraggedOutOf\(thing\) \{\s+this\.hint = ""/)
+    })
+
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
         "a card is a drawable thing where:",

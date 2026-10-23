@@ -46,6 +46,7 @@ import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
+import { DragHandler } from "./DragHandler"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -73,6 +74,17 @@ classes.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["ta
 // What a type's things may be, for `drag_and_drop`:  dragged, or dropped on
 classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
   syntax: "((dragged:dragged)|(dropped_on:dropped on))"
+})
+
+// When a list's drag handler runs, for `drag_handler`:  `when a card is dropped on it`
+classes.addRule(
+  Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
+  { syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))" }
+)
+
+// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
+classes.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:draggable)|(dropped_on:droppable))"
 })
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
@@ -552,9 +564,34 @@ classes.addRule(DragAndDrop, {
   ]
 })
 
+// as adjectives:  `a card is draggable`, `a pile is not droppable`
+classes.addRule(DragAndDrop, {
+  syntax: "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["a card is a drawable thing", "a pile is a drawable list of cards"].join("\n"), "block")
+      },
+      tests: [
+        ["a card is draggable", "Card.canBeDragged = true"],
+        ["a pile is droppable", "Pile.canBeDroppedOn = true"],
+        ["a card is not draggable", "Card.canBeDragged = false"]
+      ]
+    }
+  ]
+})
+
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:  `- it can be dragged`, `- can be dropped on`
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
+classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
+
 for (const subject of ["subject_it", "subject_implied"]) {
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
+  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
 }
 
 classes.addRule(SavedInline, {

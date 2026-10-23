@@ -362,3 +362,62 @@ def test_item_type_is_kept_on_the_prop_by_name() -> None:
 
     assert (Project.tasks.item_type, Project.cards.item_type) == ("Task", "ThingCard")
     assert repr(Project.tasks).startswith("prop(") and "item_type='Task'" in repr(Project.tasks)
+
+
+class Sign(Thing):
+    """A sign:  its hint, and how many times a card came over it."""
+
+    hint = prop(type="text", default="")
+    count = prop(type="number", default=0)
+
+
+class Tray(List):
+    """A tray with a sign:  `- while a card is dragged over it:` sets the sign, as compiled Python does."""
+
+    def __init__(self, **props: object) -> None:
+        super().__init__(**props)
+        self.sign = Sign()
+
+    def while_card_dragged_over(self, label: str) -> None:
+        self.sign.hint = f"drop {label} here"
+        self.sign.hint = "twice"
+        self.sign.count = self.sign.count + 1
+
+    async def while_card_waits_over(self, label: str) -> None:
+        self.sign.hint = label
+        await asyncio.sleep(0)
+        self.sign.count = 5
+
+
+def test_start_while_runs_a_while_handler_and_end_while_puts_back_what_it_set() -> None:
+    tray = Tray()
+    tray.sign.hint = "empty"
+    tray.start_while("while_card_dragged_over", "a")
+    assert (tray.sign.hint, tray.sign.count) == ("twice", 1)
+    tray.end_while("while_card_dragged_over")
+    # as it was:  the count it never had is unset again, so reads its default
+    assert (tray.sign.hint, tray.sign.count) == ("empty", 0)
+    assert "count" not in tray.sign.to_json()
+    # ended:  nothing to put back again
+    tray.sign.hint = "later"
+    tray.end_while("while_card_dragged_over")
+    assert tray.sign.hint == "later"
+
+
+def test_starting_a_while_handler_again_ends_the_last_first() -> None:
+    tray = Tray()
+    tray.start_while("while_card_dragged_over", "a")
+    tray.start_while("while_card_dragged_over", "b")
+    assert tray.sign.count == 1
+    tray.end_while("while_card_dragged_over")
+    assert tray.sign.count == 0
+
+
+def test_a_while_handler_that_waits_is_noted_to_its_end() -> None:
+    tray = Tray()
+    waiting = tray.start_while("while_card_waits_over", "a")
+    assert waiting is not None
+    asyncio.run(waiting)  # type: ignore[arg-type]
+    assert (tray.sign.hint, tray.sign.count) == ("a", 5)
+    tray.end_while("while_card_waits_over")
+    assert (tray.sign.hint, tray.sign.count) == ("", 0)

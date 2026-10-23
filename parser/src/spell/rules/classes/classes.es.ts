@@ -55,6 +55,7 @@ import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
+import { DragHandler } from "./DragHandler"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -135,6 +136,17 @@ classesEs.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["
 // What a type's things may be, for `drag_and_drop`:  `se puede arrastrar`, `se puede soltar encima`
 classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
   syntax: "((dragged:arrastrar)|(dropped_on:soltar encima))"
+})
+
+// When a list's drag handler runs, for `drag_handler`:  `cuando una carta se suelta sobre ella`
+classesEs.addRule(
+  Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
+  { syntax: "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))" }
+)
+
+// The same, as adjectives:  `es arrastrable`, `no es soltable`
+classesEs.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:arrastrable)|(dropped_on:soltable))"
 })
 
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
@@ -534,8 +546,38 @@ classesEs.addRule(DragAndDrop, {
   ]
 })
 
+classesEs.addRule(DragAndDrop, {
+  syntax: `${A} {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          ["una carta es una cosa dibujable", "una pila es una lista dibujable de cartas"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["una carta es arrastrable", "Carta.canBeDragged = true"],
+        ["una pila no es soltable", "Pila.canBeDroppedOn = false"]
+      ]
+    }
+  ]
+})
+
+// in a list type's outline body:  `- cuando una carta se suelta sobre ella:`
+classesEs.addRule(DragHandler, {
+  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
+})
+classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?" })
+classesEs.addRule(DragHandler, {
+  syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+})
+classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
+
 for (const subject of ["subject_it", "subject_implied"]) {
   classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
+  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
 }
 
 classesEs.addRule(SavedInline, {

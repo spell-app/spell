@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { frameSummary, logError, logFrame } from "spell-lang/core"
+import { core, DrawableList, frameSummary, logError, logFrame, startPage, type PageMessage } from "spell-lang/core"
 
 /**
  * A page's frames, as its console shows them (`page.ts`, `logFrame()`):  one folded line each,
@@ -82,6 +82,37 @@ describe("logError()", () => {
       expect(detail).toBe(frame)
     } finally {
       error.mockRestore()
+    }
+  })
+})
+
+/** A page's drag handlers run in its program, by their Python names (`core.remote`, epic `outline-spell` P28). */
+describe("startPage():  a list's drag handlers", () => {
+  test("`core.runHandler()`, `startWhile()`, `endWhile()` and a drop event go to the program, as calls on the list", () => {
+    /** A tray, as a Python program's drawing half declares it. */
+    class Tray extends DrawableList {}
+    const sent: PageMessage[] = []
+    startPage({
+      modules: [{ Tray }],
+      state: { tray: { $type: "Tray", $id: "1", $items: [] } },
+      send: (message) => sent.push(message)
+    })
+    try {
+      const tray = core.things.all().find((thing) => thing instanceof Tray)!
+      core.startWhile(tray, "whileCardDraggedOver", "Card#3")
+      core.endWhile(tray, "whileCardDraggedOver")
+      core.runHandler(tray, "whenCardDroppedOn", "Card#3")
+      core.remote!.trigger("card-drop", { count: 1 })
+      const on = sent[0] && "on" in sent[0] ? sent[0].on : undefined
+      expect(on).toBeDefined()
+      expect(sent).toEqual([
+        { call: "start_while", on, args: ["while_card_dragged_over", "Card#3"] },
+        { call: "end_while", on, args: ["while_card_dragged_over"] },
+        { call: "when_card_dropped_on", on, args: ["Card#3"] },
+        { trigger: "card-drop", details: { count: 1 } }
+      ])
+    } finally {
+      core.remote = undefined
     }
   })
 })

@@ -1357,6 +1357,8 @@
             "print_kind",
             "take_or_give_up",
             "drag_or_drop",
+            "drag_moment",
+            "draggable_or_droppable",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1393,6 +1395,12 @@
             },
             {
               "syntax": "((dragged:dragged)|(dropped_on:dropped on))"
+            },
+            {
+              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))"
+            },
+            {
+              "syntax": "((dragged:draggable)|(dropped_on:droppable))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -2832,8 +2840,8 @@
           "ruleNames": ["list_empty"],
           "internal": false,
           "file": "src/spell/rules/lists/ListEmpty.ts",
-          "line": 10,
-          "purpose": "Empty a list in-place, e.g. `empty my-list` => `core.clear(myList)`.",
+          "line": 13,
+          "purpose": "Empty a list in place, or clear a value back to its empty one.",
           "syntaxes": [
             {
               "syntax": "(empty|clear) {list:expression}",
@@ -3957,7 +3965,7 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 23,
+          "line": 26,
           "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
           "syntaxes": [
             {
@@ -3976,10 +3984,31 @@
               }
             },
             {
+              "syntax": "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+              "example": "a card is draggable",
+              "outputs": {
+                "js": {
+                  "code": "Card.canBeDragged = true"
+                },
+                "ts": {
+                  "code": "Card.canBeDragged = true"
+                },
+                "py": {
+                  "code": "Card.can_be_dragged = True"
+                }
+              }
+            },
+            {
               "syntax": "{type:subject_it} can be {what:drag_or_drop}"
             },
             {
+              "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable}"
+            },
+            {
               "syntax": "{type:subject_implied} can be {what:drag_or_drop}"
+            },
+            {
+              "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable}"
             }
           ],
           "aliases": ["statement"]
@@ -4856,6 +4885,29 @@
           "syntaxes": [
             {
               "syntax": "(a|an) {type} {with_nested_statements}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DragHandler",
+          "ruleNames": ["drag_handler"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DragHandler.ts",
+          "line": 42,
+          "purpose": "What a list does as a thing is dragged over it, out of it, or dropped on it, on the page (epic `outline-spell` P28).",
+          "syntaxes": [
+            {
+              "syntax": "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "when something is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "while (a|an) {item:type} is dragged over it :? {statement_body}?"
+            },
+            {
+              "syntax": "while something is dragged over it :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
