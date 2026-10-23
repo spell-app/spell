@@ -144,10 +144,11 @@ JSX.addRule(SpellJSX, {
             "  number: 1,",
             "  boolean: true,",
             "  expression: () => 1 + 1,",
-            "  onClick: (event) => core.console.log(event.target.value)",
+            "  onClick: (event) => core.console.log(event.target.value),",
+            '  style: "cursor:pointer;user-select:none"',
             "})"
           ],
-          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} />'
+          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} style="cursor:pointer;user-select:none" />'
         ]
       ]
     },
