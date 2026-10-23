@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { CLI } from "spell-kit/cli"
 import { parseSpellProject } from "spell-lang/spell/test"
-import { translateProject, type TranslateSource } from "spell-lang/cli/translateProject"
+import { translateProject, translationOf, type TranslateSource } from "spell-lang/cli/translateProject"
 import type { TranslateOptions } from "spell-lang/cli"
 import type {
   ClaudeRunner,
@@ -31,6 +31,16 @@ const CARD = `a "card" is a thing where:
 to test card labels
 	get a new card whose color is red
 	its label should be "red joker"
+`
+
+/** `CARD` as a person translated it:  `translationOf()`'s reference. */
+const CARD_ES = `una "carta" es una cosa donde:
+	- su "color" es uno de rojo o negro
+	- su "etiqueta" es "comodín " + su color
+
+para probar etiquetas de cartas
+	obtener una carta nueva cuyo color es rojo
+	su etiqueta debería ser "comodín rojo"
 `
 
 /** What the fake `claude` answers the names pass. */
@@ -225,9 +235,106 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     await expect(translate(source(), { to: "es", learn: true }, claude.run)).rejects.toThrow(/translate it first/)
   })
 
+  test("the report says what it started from:  the glossary, the project's dictionary", async () => {
+    writeFileSync(join(folder, "glossary.json5"), JSON.stringify(GLOSSARY))
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    expect(printed()).toContain("  pre-calculated:  the Spanish glossary (5 names)")
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    expect(
+      printed()
+        .filter((line) => line.startsWith("  pre-calculated:"))
+        .at(-1)
+    ).toMatch(/^  pre-calculated:  the Spanish glossary \(5 names\), the project's dictionary \(\d+ names\)$/)
+  })
+
   test("its style sheet comes along, its selectors translated as far as it knows the names", async () => {
     await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
     expect(readFileSync(join(folder, "Cartas", "styles.css"), "utf8")).toBe("ui-text[color] { margin: 0 }\n")
+  })
+})
+
+describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
+  test("no glossary:  claude is asked for every name the glossary has", async () => {
+    writeFileSync(join(folder, "glossary.json5"), JSON.stringify(GLOSSARY))
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas"), cold: true }, claude.run)
+    // warm, the glossary's five names cost no call, nor did the types (see above);  cold, all asked for
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
+    expect(claude.prompts[1]).toContain('"color"')
+    expect(printed()).toContain("  pre-calculated:  none (--cold)")
+    expect(printed().find((line) => line.startsWith("  names:"))).not.toContain("from the glossary")
+  })
+
+  test("no dictionary of the project's:  every name asked for again", async () => {
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    // the dictionary has every name now:  warm, the next run asks for none
+    const warm = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, warm.run)
+    expect(warm.prompts.map(kindOf)).toEqual(["fix-ups"])
+    const cold = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cold"), cold: true }, cold.run)
+    expect(cold.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
+  })
+
+  test("no record:  a fix made before is asked for again;  --update, --seed and --learn are refused", async () => {
+    const out = join(folder, "Cartas")
+    await translate(source(), { to: "es", out }, fakeClaude().run)
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cold"), cold: true }, claude.run)
+    expect(claude.prompts.map(kindOf)).toContain("fix-ups")
+    for (const flag of ["update", "seed", "learn"] as const) {
+      const options = { to: "es", out, cold: true, [flag]: flag === "seed" ? "Cartas" : true }
+      await expect(translate(source(), options, claude.run)).rejects.toThrow(`drop --${flag}`)
+    }
+    await expect(translate(source(), { to: "es", cold: true }, claude.run)).rejects.toThrow(/pass --out/)
+  })
+
+  test("no seed:  a person's translation handed over anyway fills nothing", async () => {
+    const seeded = { ...source(), seed: personsCard() }
+    // warm, the seed has every type:  no types call
+    const warm = fakeClaude()
+    await translate(seeded, { to: "es", out: join(folder, "Cartas") }, warm.run)
+    expect(warm.prompts.map(kindOf)).not.toContain("types")
+    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    const cold = fakeClaude()
+    await translate(seeded, { to: "es", out: join(folder, "Cold"), cold: true }, cold.run)
+    expect(cold.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
+  })
+
+  test("writes only into --out:  never the glossary, never beside the project", async () => {
+    writeFileSync(join(folder, "glossary.json5"), JSON.stringify(GLOSSARY))
+    const glossary = readFileSync(join(folder, "glossary.json5"), "utf8")
+    const out = join(folder, "Cold")
+    await translate(source(), { to: "es", out, cold: true }, fakeClaude().run)
+    expect(readdirSync(join(folder, "Cards")).sort()).toEqual(["Card.spell", "__project.json5", "styles.css"])
+    expect(readdirSync(out)).toEqual(expect.arrayContaining(["Cards.es.names.json5", "Cards.es.translated.json5"]))
+    expect(readFileSync(join(folder, "glossary.json5"), "utf8")).toBe(glossary)
+  })
+
+  test("translationOf():  what it did, in numbers;  and how many drafted names a person's translation agrees with", async () => {
+    // the person's translation calls a label a "rótulo"
+    const reference = personsCard(CARD_ES.replaceAll("etiqueta", "rótulo"))
+    const result = await translationOf(
+      { ...source(), reference },
+      { to: "es", out: join(folder, "Cold"), cold: true },
+      fakeClaude().run,
+      { glossaryFile: join(folder, "glossary.json5"), print: false }
+    )
+    expect(printed()).toEqual([])
+    expect(result).toMatchObject({
+      exitCode: CLI.EXIT.OK,
+      projectName: "Cards",
+      to: "es",
+      lists: { cold: true, glossary: 0, dictionary: 0, fixes: 0, seeded: false },
+      calls: { names: 2, fixUps: 1 },
+      lines: { total: 8, written: 8, fixed: 1 },
+      names: { seeded: 0, fromGlossary: 0 },
+      todo: 0,
+      problems: { lint: 0, test: 0, shape: 0 }
+    })
+    expect(Object.keys(result.timings).sort()).toEqual(["fixUps", "lines", "names", "total"])
+    // the six names claude drafted are all the person's too:  all but the label and the test's phrase the same
+    expect(result.agreement).toEqual({ same: 4, compared: 6 })
   })
 })
 
@@ -247,6 +354,12 @@ function translate(source: TranslateSource, options: TranslateOptions, run: Clau
 /** The translation's file in `out`, parsed in a project of its own. */
 function parsedIn(out: string): SourceFile[] {
   const contents = readFileSync(join(out, "Carta.es.spell"), "utf8")
+  const { files } = parseSpellProject([{ path: "/Carta.es.spell", contents }])
+  return [{ path: "/Carta.es.spell", contents, match: files[0]!.match }]
+}
+
+/** `CARD` as a person translated it (`CARD_ES`, or `contents`), parsed:  a seed, a reference. */
+function personsCard(contents = CARD_ES): SourceFile[] {
   const { files } = parseSpellProject([{ path: "/Carta.es.spell", contents }])
   return [{ path: "/Carta.es.spell", contents, match: files[0]!.match }]
 }

@@ -30,6 +30,7 @@ export type LanguageCommands = {
   repl(project: string[], options: GlobalOptions): Promise<number>
   explain(word: string[], options: ExplainOptions): Promise<number>
   translate(project: string[], options: TranslateOptions): Promise<number>
+  translateTime(projects: string[], options: TranslateTimeOptions): Promise<number>
 }
 
 /** One of the language's commands, by name:  `compile`, `lint` ... */
@@ -52,6 +53,8 @@ export type LanguageCommand = keyof LanguageCommands
  * - `namesEffort`, `fixUpsEffort`:  one pass's, over `effort` -- `--names-effort`, `--fix-ups-effort`
  * - `model`:  HIDDEN, for experiments:  an exact model and effort for every call, in the runner's own terms,
  *   `<model>[:<effort>]` (`claude-sonnet-5-5:medium`), over every tier
+ * - `cold`:  for timing (epic `spanish` P29):  nothing pre-calculated -- no shared glossary, no dictionary of the
+ *   project's, no record of fix-ups, no seed -- and nothing written but into `out`, which it needs
  */
 export type TranslateOptions = GlobalOptions & {
   to: string
@@ -64,6 +67,26 @@ export type TranslateOptions = GlobalOptions & {
   namesEffort?: string
   fixUpsEffort?: string
   model?: string
+  cold?: boolean
+}
+
+/**
+ * `spell lang translate-time` flags (epic `spanish` P29):  timing `spell lang translate`, on scratch copies.
+ * - `to`:  the language, e.g. `es`
+ * - `runs`:  how many runs of each project, mode and tier -- default 1
+ * - `effort`:  the tiers to compare, comma-separated, e.g. `fast,balanced` -- default `balanced`
+ * - `mode`:  what each run starts from, comma-separated (`TimingMode`) -- default `cold,glossary`
+ * - `reference`:  a translation a person made, to compare the drafted names with -- one project only;
+ *   spell-app knows the examples' twins (Solitaire's Solitario) itself
+ * - `json`:  write every run and the table's numbers to this file too
+ */
+export type TranslateTimeOptions = GlobalOptions & {
+  to: string
+  runs?: number
+  effort?: string
+  mode?: string
+  reference?: string
+  json?: string
 }
 
 /**

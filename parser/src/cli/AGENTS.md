@@ -13,7 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
-  lang packs check  lang packs fix  lang translate
+  lang packs check  lang packs fix  lang translate  lang translate-time
   ```
 
   - Owen's names (epic `repo-split` P13):
@@ -54,6 +54,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `--model <model>[:<effort>]`, hidden, for experiments:  an exact model and effort for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
+  - `--cold` (epic `spanish` P29), for timing:  none of the lists earlier runs worked out -- the shared glossary,
+    the project's dictionary, the record of fix-ups, a seed -- and nothing written but into `--out`
+    - every report says which it started from (`pre-calculated:`, `TranslationLists`)
+  - `translationOf()`:  the same translation, returning what it did in numbers (`TranslationResult`), printing
+    nothing with `print: false`;  `translateProject()` is it, returning only the exit code
+- `spell lang translate-time` (epic `spanish` P29) times it the same way, half and half:
+  - spell-app's `translateTimeCommand` finds the projects (default Solitaire and todos-form-based) and the
+    examples' twins a person translated (Solitaire's Solitario), and translates each run's copy, a session of its own
+  - [translateTimes.ts](translateTimes.ts), here, copies each project to a scratch folder (without its own lists),
+    runs it in each mode (`cold`, `glossary`, `update`) and tier, prints a table of min, median and max, writes
+    `--json`, and deletes every scratch folder, a failed run's too
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape
@@ -71,5 +82,7 @@ As WWOD §20, plus:
 - `spell lang packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
 - `spell lang translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
+  its `--cold` too, each list ignored, in the same file;
+  the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
   the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).

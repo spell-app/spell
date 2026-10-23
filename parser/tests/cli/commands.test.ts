@@ -43,7 +43,21 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "--fix-ups-effort",
       "--model",
       "--seed",
-      "--learn"
+      "--learn",
+      "--cold"
+    ])
+  })
+
+  test("timing it:  spell lang translate-time (epic spanish P29)", () => {
+    const time = spell.commands.find((command) => command.name() === "lang")!.commands[2]!
+    expect(time.name()).toBe("translate-time")
+    expect(time.options.map((option) => option.long)).toEqual([
+      "--to",
+      "--runs",
+      "--effort",
+      "--mode",
+      "--reference",
+      "--json"
     ])
   })
 
