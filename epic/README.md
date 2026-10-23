@@ -372,7 +372,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell-kit/blob/ma
 
 | Folder | What's in it |
 | --- | --- |
-| [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder), so the plugin loads in place |
+| [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder);  Claude Code installs a copy of it, which the kit's install steps link back to this folder |
 | [skills/](skills/) | the eighteen skills, a `SKILL.md` each |
 | [hooks/](hooks/) | `hooks.json` and the nine scripts it runs |
 | [monitors/](monitors/) | `monitors.json`:  the one monitor Claude Code runs beside each session, `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page;  a small poller that runs `epic session listen` for a moment as the page's inbox changes |
