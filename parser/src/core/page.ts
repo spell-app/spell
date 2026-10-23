@@ -25,6 +25,7 @@
  * - ONE page at a time:  the messages go to the last one started.
  */
 import { core } from "./core"
+import type { RemoteProgram } from "./elements"
 import { App } from "./classes/App"
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
@@ -59,12 +60,26 @@ let current: { mirror: StateMirror; send: (message: PageMessage) => void } | und
 export function startPage({ modules, state, send }: PageSpec): Page {
   const mirror = new StateMirror({ nameOf: javascriptName })
   current = { mirror, send }
+  core.remote = REMOTE
   for (const module of modules) core.things.addClasses(module)
   const things = mirror.read(state) as Record<string, unknown>
   for (const module of modules) (module.adopt as ((state: unknown) => void) | undefined)?.(things)
   const app = Object.values(things).find((value) => value instanceof App) as App | undefined
   app?.start()
   return { mirror, receive: (next: unknown) => void mirror.read(next) }
+}
+
+/**
+ * How a page runs its lists' drag handlers:  in the program, by their Python names (`core.remote`).
+ * - `core.runHandler(pile, "whenCardDroppedOn", [card])` => `{ "call": "when_card_dropped_on", "on": "Pile#..." }`
+ * - `core.startWhile()` / `endWhile()` => `start_while` / `end_while` on the list, naming its handler:
+ *   `{ "call": "start_while", "on": "Pile#...", "args": ["while_card_dragged_over", "Card#..."] }`
+ */
+const REMOTE: RemoteProgram = {
+  run: (owner, method, args) => sendCall(snakeCase(method), args, owner as Thing),
+  startWhile: (owner, method, args) => sendCall("start_while", [snakeCase(method), ...args], owner as Thing),
+  endWhile: (owner, method) => sendCall("end_while", [snakeCase(method)], owner as Thing),
+  trigger: (name, details) => sendTrigger(name, details)
 }
 
 /**

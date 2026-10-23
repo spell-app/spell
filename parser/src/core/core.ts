@@ -9,7 +9,7 @@
 import _isArrayLike from "lodash/isArrayLike"
 import isEqual from "lodash/isEqual"
 
-import { brokenRule, flushCells, ruleWarning, withoutCreate } from "spell-kit/util"
+import { brokenRule, flushCells, peekProp, ruleWarning, withoutCreate } from "spell-kit/util"
 // Import directly, never through the barrel:
 // `spell-lang/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
@@ -67,6 +67,42 @@ export function programThings(): Core["things"] | undefined {
  */
 export function registerThing(thing: object): void {
   programThings()?.add(thing as Parameters<Core["things"]["add"]>[0])
+}
+
+////////////////
+// ## Changes put back (`core.startWhile()`)
+////////////////
+
+/** The props set while a `while` handler runs, each one's value before:  `undefined` when none is running. */
+let recording: Array<{ target: object; property: string; was: unknown }> | undefined
+
+/**
+ * SIDE EFFECT:  `target`'s prop `property` is about to be set:  note its value now, if a `while` handler is running.
+ * - `Thing` and `List` call it from `setProp()`.
+ * - Only its first value is kept:  put back, that's what it had before the handler.
+ */
+export function noteSetting(target: object, property: string): void {
+  if (!recording || recording.some((change) => change.target === target && change.property === property)) return
+  recording.push({ target, property, was: peekProp(target, property) })
+}
+
+/**
+ * Run `run`, noting every prop it sets:  returns what puts them all back, as they were.
+ * - Only what it sets before it first waits:  a handler's steps after a pause aren't put back.
+ * - What it adds to or takes from a list stays.
+ */
+export function recordingSettings(run: () => unknown): () => void {
+  const outer = recording
+  const changes: NonNullable<typeof recording> = []
+  recording = changes
+  try {
+    run()
+  } finally {
+    recording = outer
+  }
+  return () => {
+    for (const { target, property, was } of changes.reverse()) (target as Record<string, unknown>)[property] = was
+  }
 }
 
 /** Meta-programming, exports, type-checking, path access, equality, math and iteration primitives. */

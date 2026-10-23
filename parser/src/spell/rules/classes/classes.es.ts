@@ -569,6 +569,11 @@ classesEs.addRule(DragAndDrop, {
 classesEs.addRule(DragHandler, {
   syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
 })
+classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?" })
+classesEs.addRule(DragHandler, {
+  syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+})
+classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
 
 for (const subject of ["subject_it", "subject_implied"]) {
   classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })

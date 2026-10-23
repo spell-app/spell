@@ -34,6 +34,7 @@ import string
 import weakref
 from collections.abc import Awaitable, Callable, Iterator, Sequence
 from contextlib import contextmanager
+from contextvars import ContextVar
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 from spell_core.events import Eventful
@@ -66,6 +67,18 @@ class ChangeWatcher(Protocol):
 
 # Each one told of every change, as long as it lives:  see `note_change()`.
 CHANGE_WATCHERS: "weakref.WeakSet[ChangeWatcher]" = weakref.WeakSet()
+
+
+# The properties set while a `while` handler runs, each one's value before:  `None` when none is running.
+# - See `SpellObject.start_while()`;  `set_prop()` notes each.
+_SETTINGS: ContextVar["list[tuple[SpellObject, str, object]] | None"] = ContextVar(
+    "spell_core.while_settings", default=None
+)
+
+# The `while` handlers running, by owner and handler:  what each set, to put back at `end_while()`.
+_WHILES: "weakref.WeakKeyDictionary[SpellObject, dict[str, list[tuple[SpellObject, str, object]]]]" = (
+    weakref.WeakKeyDictionary()
+)
 
 
 def note_change(changed: "SpellObject") -> None:
@@ -379,6 +392,9 @@ class SpellObject:
           one that fails warns on `core.console` (`core.check_prop()`), and is set anyway.
         """
         props = self._props
+        settings = _SETTINGS.get()
+        if settings is not None and not any(owner is self and prop == name for owner, prop, _ in settings):
+            settings.append((self, name, props.get(name)))
         if value is None:
             if props.pop(name, None) is not None:
                 note_change(self)
@@ -442,6 +458,47 @@ class SpellObject:
         - Any case:  `"Card"` and `"card"` are the same.  See `core.is_of_type()`.
         """
         return program_core().is_of_type(self, type_name)
+
+    def start_while(self, handler: str, *args: object) -> Awaitable[None] | None:
+        """Run our `while` handler `handler` with `args`, till `end_while()`:  what it sets is put back then.
+
+        - e.g. `pile.start_while("while_card_dragged_over", card)`, as a page sends it while a card is over the pile:
+          `- while a card is dragged over it:` `set its hint to "drop here"`.
+        - Each property it sets, on any thing, keeps the value it had before:  set back at the end.
+          What it adds to or takes from a list stays.
+        - One that waits (`async def`) is noted to its end, its pauses too:
+          awaited by whoever runs it, e.g. `PageSession`.
+        - Starting one that's running ends it first.
+        - The twin of the JavaScript core's `core.startWhile()`.
+        """
+        self.end_while(handler)
+        settings: list[tuple[SpellObject, str, object]] = []
+        _WHILES.setdefault(self, {})[handler] = settings
+        token = _SETTINGS.set(settings)
+        try:
+            result = getattr(self, handler)(*args)
+        finally:
+            _SETTINGS.reset(token)
+        if not inspect.isawaitable(result):
+            return None
+
+        async def to_its_end() -> None:
+            token = _SETTINGS.set(settings)
+            try:
+                await result
+            finally:
+                _SETTINGS.reset(token)
+
+        return to_its_end()
+
+    def end_while(self, handler: str) -> None:
+        """End our `while` handler `handler`, started by `start_while()`:  put back what it set.
+
+        - Nothing if it isn't running.
+        """
+        settings = _WHILES.get(self, {}).pop(handler, None)
+        for owner, name, was in reversed(settings or []):
+            owner.set_prop(name, was)
 
     def to_json(self) -> dict[str, object]:
         """Our JSON:  our class's name as `"$type"`, then our properties in the order they were first set.

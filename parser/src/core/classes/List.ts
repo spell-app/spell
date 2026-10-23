@@ -4,7 +4,7 @@
 import _ from "lodash"
 
 import { Cell, isTrackingCells, ITEMS_KEY, Observable, runsCreate, typedJSON, type PropInfo } from "spell-kit/util"
-import { registerThing, core } from "spell-lang/core/core"
+import { registerThing, noteSetting, core } from "spell-lang/core/core"
 import type { CollectionIterationCallback } from "spell-lang/core/collection-other"
 import type { Drawing } from "spell-lang/core/drawing"
 import type { PropCheck } from "spell-lang/core/core.types"
@@ -116,6 +116,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
+    noteSetting(this, property)
     return super.setProp(property, value)
   }
 

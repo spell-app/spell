@@ -585,6 +585,9 @@ classes.addRule(DragAndDrop, {
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:  `- it can be dragged`, `- can be dropped on`
 // in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
 classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
 
 for (const subject of ["subject_it", "subject_implied"]) {
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })

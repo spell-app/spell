@@ -645,6 +645,35 @@ lists.addRule(ListEmpty, {
         ["empty my-list", "core.clear(myList)"],
         ["clear the cards of the deck", "core.clear(deck.cards)"]
       ]
+    },
+    {
+      title: "a value that isn't a list goes back to its empty one",
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "a sign is a thing",
+            "a sign has a hint as text",
+            "a sign has a count as a number",
+            "a sign has a lit as yes or no"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        [
+          "to reset a sign\n\tclear its hint\n\tclear its count\n\tclear its lit",
+          ["Sign.prototype.reset = function () {", '  this.hint = ""', "  this.count = 0", "  this.lit = false", "}"],
+          [
+            "export interface Sign { reset(): any /* spell: type unknown */ }",
+            "Sign.prototype.reset = function (this: Sign) {",
+            '  this.hint = ""',
+            "  this.count = 0",
+            "  this.lit = false",
+            "}"
+          ]
+        ]
+      ]
     }
   ]
 })

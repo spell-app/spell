@@ -2840,8 +2840,8 @@
           "ruleNames": ["list_empty"],
           "internal": false,
           "file": "src/spell/rules/lists/ListEmpty.ts",
-          "line": 10,
-          "purpose": "Empty a list in-place, e.g. `empty my-list` => `core.clear(myList)`.",
+          "line": 13,
+          "purpose": "Empty a list in place, or clear a value back to its empty one.",
           "syntaxes": [
             {
               "syntax": "(empty|clear) {list:expression}",
@@ -4894,11 +4894,20 @@
           "ruleNames": ["drag_handler"],
           "internal": false,
           "file": "src/spell/rules/classes/DragHandler.ts",
-          "line": 37,
+          "line": 42,
           "purpose": "What a list does as a thing is dragged over it, out of it, or dropped on it, on the page (epic `outline-spell` P28).",
           "syntaxes": [
             {
               "syntax": "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "when something is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "while (a|an) {item:type} is dragged over it :? {statement_body}?"
+            },
+            {
+              "syntax": "while something is dragged over it :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]

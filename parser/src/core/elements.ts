@@ -15,7 +15,7 @@
 
 import { elementTagFor, schemaOf, type Schema } from "spell-kit/util"
 
-import { core } from "./core"
+import { core, programThings, recordingSettings } from "./core"
 import { defineCoreModule } from "./core.types"
 import { Drawable } from "./classes/Drawable"
 import { DrawableList } from "./classes/DrawableList"
@@ -42,6 +42,48 @@ export const elementsMethods = defineCoreModule({
   beforeMove: undefined as ((things: unknown[]) => void) | undefined,
 
   /**
+   * Where a page sends what its program runs, when the program runs ELSEWHERE, e.g. in Python --
+   * `undefined` when it runs here.
+   * - `startPage()` (`page.ts`) sets it:  a list's drag handlers then run there, by their Python names.
+   */
+  remote: undefined as RemoteProgram | undefined,
+
+  /**
+   * Run `owner`'s method `method` with `args`, e.g. a pile's `whenCardDroppedOn(card)`, for the page.
+   * - In the program, wherever it runs (`remote`).
+   * - Its result, here;  `undefined` there.
+   */
+  runHandler(owner: object, method: string, ...args: unknown[]): unknown {
+    if (core.remote) return core.remote.run(owner, method, args)
+    return (owner as Record<string, (...args: unknown[]) => unknown>)[method]!(...args)
+  },
+
+  /**
+   * Run `owner`'s `while` handler `method` with `args`, e.g. a pile's `whileCardDraggedOver(card)`,
+   * till `endWhile()`:  what it sets is put back then.
+   * - `- while a card is dragged over it:` `set its hint to "drop here"`:  the hint goes back as the card leaves.
+   * - One at a time per owner and method:  starting it again ends the last first.
+   * - Only what it sets before it first waits;  what it adds to or takes from a list stays (`recordingSettings()`).
+   * - In the program, wherever it runs (`remote`):  Python keeps its own.
+   */
+  startWhile(owner: object, method: string, ...args: unknown[]): void {
+    if (core.remote) return core.remote.startWhile(owner, method, args)
+    core.endWhile(owner, method)
+    const undo = recordingSettings(() => core.runHandler(owner, method, ...args))
+    let running = WHILES.get(owner)
+    if (!running) WHILES.set(owner, (running = new Map()))
+    running.set(method, undo)
+  },
+
+  /** End `owner`'s `while` handler `method`, started by `startWhile()`:  put back what it set.  Nothing if it isn't running. */
+  endWhile(owner: object, method: string): void {
+    if (core.remote) return core.remote.endWhile(owner, method)
+    const undo = WHILES.get(owner)?.get(method)
+    WHILES.get(owner)?.delete(method)
+    undo?.()
+  },
+
+  /**
    * Name the element of drawable class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag.
    * - What a drawable class's static field calls as it's declared:
    *   `static elementTag = core.defineElement(this, "Solitaire")`.
@@ -50,11 +92,14 @@ export const elementsMethods = defineCoreModule({
    *   Not now:  the class's later statics, e.g. its `css`, aren't set yet.
    * - `undefined`, doing nothing, for a class that isn't drawable.
    * - SIDE EFFECT:  the class keeps its tag (`elementTagOf()`).
+   * - SIDE EFFECT:  the program's things know the class now (`core.things`), before any of its things is made:
+   *   so a card's element finds its pile's class on a page that only mirrors the program (`elementApiOf()`).
    */
   defineElement(Class: unknown, project: string): string | undefined {
     if (!isDrawableClass(Class)) return undefined
     const tag = elementTagFor(project, Class.name)
     Object.defineProperty(Class, ELEMENT_TAG, { value: tag, configurable: true })
+    programThings()?.addClasses({ [Class.name]: Class })
     queueMicrotask(() => tellDefiner(Class, tag))
     return tag
   },
@@ -286,3 +331,19 @@ const ELEMENT_TAG = Symbol.for("spell-lang:element-tag")
 
 /** Where a drawable class keeps the element class compiled TypeScript handed for it -- see `useElement()`. */
 const ELEMENT_CLASS = Symbol.for("spell-lang:element-class")
+
+/**
+ * A program running elsewhere, as a page reaches it (`core.remote`):  `core.runHandler()`, `startWhile()` and
+ * `endWhile()`, run there.
+ * - `method` is the page's name for it, `whenCardDroppedOn`:  the program's own, `when_card_dropped_on`, is its to say.
+ */
+export type RemoteProgram = {
+  run(owner: object, method: string, args: unknown[]): void
+  startWhile(owner: object, method: string, args: unknown[]): void
+  endWhile(owner: object, method: string): void
+  /** Send event `name` to the program's handlers, e.g. `card-drop`, with `details`:  `{ card, pile }`. */
+  trigger(name: string, details: Record<string, unknown>): void
+}
+
+/** The `while` handlers running, by owner and method:  what puts back what each set (`core.startWhile()`). */
+const WHILES = new WeakMap<object, Map<string, () => void>>()
