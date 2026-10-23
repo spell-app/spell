@@ -9,7 +9,8 @@
  *    couldn't be written, or may read in the wrong order, written again by Claude in context (`FixUps`);
  *    checked again, a few rounds at most
  * - Claude through the API when `ANTHROPIC_API_KEY` is set, else `claude -p` (`claudeRunnerFor()`, epic `spanish` P27);
- *   `--model` picks the model for every call.
+ *   `--effort fast|balanced|best` says how much every pass spends, `--names-effort` and `--fix-ups-effort` one pass's
+ *   (`askingFor()`):  the runner picks the model and effort for each (`CLAUDE_TIERS`).
  * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
@@ -39,8 +40,12 @@ import { ShapeCheck } from "spell-lang/spell/translate/ShapeCheck"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import { Translator } from "spell-lang/spell/translate/Translator"
 import type {
+  AskingPass,
+  ClaudeEffort,
+  ClaudeOptions,
   ClaudeRunner,
   DeclarationStatement,
+  EffortTier,
   GlossaryData,
   ImportedProject,
   LineProblem,
@@ -98,7 +103,9 @@ export async function translateProject(
   if (to === from) throw new CLI.CliError(`${source.projectName} is in ${to.name} already`)
   const ai = options.ai !== false
   const chosen: ChosenRunner = run ? { run, via: "claude" } : claudeRunnerFor(process.env, { ai: ai && !options.learn })
-  const ask = withModel(chosen.run, options.model)
+  // each pass's tier, checked before anything's asked
+  const asking = { names: askingFor(options, "names"), fixUps: askingFor(options, "fixUps") }
+  const askFor = (pass: AskingPass) => withTier(chosen.run, asking[pass])
 
   const paths = translationPaths(source, to)
   const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
@@ -122,7 +129,7 @@ export async function translateProject(
   let plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
   const namesPass = new NamesPass({
     names,
-    run: ask,
+    run: askFor("names"),
     files: source.files,
     declarations: source.declarations ?? [],
     words: source.words,
@@ -161,7 +168,7 @@ export async function translateProject(
 
   // 3. fix-ups:  each line wrong in context, a round at a time, checked between
   mark = performance.now()
-  const fixUps = new FixUps({ run: ask, names, glossary })
+  const fixUps = new FixUps({ run: askFor("fixUps"), names, glossary })
   const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai, shapes: new ShapeCheck() })
   timings.fixUps = performance.now() - mark
 
@@ -604,9 +611,37 @@ const NOT_COPIED =
 // ## Asking claude
 ////////////////
 
-/** `run`, asking `model` (`--model`) when given, whatever model a pass names. */
-function withModel(run: ClaudeRunner, model: string | undefined): ClaudeRunner {
-  return model ? (prompt, options) => run(prompt, { ...options, model }) : run
+/**
+ * How `pass` asks:  its tier, from its own flag (`--names-effort`), else `--effort`, else `balanced`;
+ * and the exact model and effort `--model <model>[:<effort>]` passes through, in the runner's own terms.
+ * - throws `CliError` for a tier there isn't
+ */
+export function askingFor(
+  options: TranslateOptions,
+  pass: AskingPass
+): Required<Pick<ClaudeOptions, "pass" | "tier">> & Pick<ClaudeOptions, "model" | "effort"> {
+  const tier = options[`${pass}Effort`] ?? options.effort ?? "balanced"
+  if (!TIERS.includes(tier as EffortTier)) {
+    throw new CLI.CliError(`No effort '${tier}':  try ${TIERS.join(", ")}`)
+  }
+  const [model, effort] = (options.model ?? "").split(":")
+  return {
+    pass,
+    tier: tier as EffortTier,
+    ...(model ? { model } : {}),
+    ...(effort ? { effort: effort as ClaudeEffort } : {})
+  }
+}
+
+/** The tiers `--effort` takes, quickest first. */
+const TIERS: EffortTier[] = ["fast", "balanced", "best"]
+
+/**
+ * `run`, asked as `asking` says:  the pass and its tier, for the runner to map to its own model and effort;
+ * over the model and effort the pass itself names, which the tier replaces.
+ */
+function withTier(run: ClaudeRunner, asking: ReturnType<typeof askingFor>): ClaudeRunner {
+  return (prompt, options) => run(prompt, { ...options, model: undefined, effort: undefined, ...asking })
 }
 
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */

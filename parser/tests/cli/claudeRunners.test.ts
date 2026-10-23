@@ -1,7 +1,15 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell-kit/cli"
-import { claudeApiRunner, claudeRunnerFor, runClaude, SPEED_UP, type ApiRequest } from "spell-lang/cli/claudeRunners"
+import {
+  CLAUDE_TIERS,
+  claudeApiRunner,
+  claudeRunnerFor,
+  inClaudeTerms,
+  runClaude,
+  SPEED_UP,
+  type ApiRequest
+} from "spell-lang/cli/claudeRunners"
 
 /**
  * The two ways `spell lang translate` asks Claude (epic `spanish` P27):  the Claude API, straight, and `claude -p`.
@@ -16,6 +24,26 @@ const SCHEMA = {
 }
 
 afterEach(() => vi.restoreAllMocks())
+
+describe("inClaudeTerms():  a pass's tier as Claude's model and effort", () => {
+  test("each pass at each tier, from CLAUDE_TIERS;  an exact model or effort wins;  no tier, as it is", () => {
+    expect(inClaudeTerms({ pass: "fixUps", tier: "best" })).toMatchObject(CLAUDE_TIERS.fixUps.best)
+    expect(inClaudeTerms({ pass: "names", tier: "fast" })).toMatchObject(CLAUDE_TIERS.names.fast)
+    expect(inClaudeTerms({ pass: "fixUps", tier: "best", model: "sonnet" })).toMatchObject({
+      model: "sonnet",
+      effort: CLAUDE_TIERS.fixUps.best.effort
+    })
+    expect(inClaudeTerms({ effort: "low" })).toEqual({ effort: "low" })
+    expect(inClaudeTerms()).toEqual({})
+  })
+
+  test("the API asks the tier's model, at its effort", async () => {
+    const { run, requests } = apiRunner([reply("{}")])
+    await run("a", { pass: "fixUps", tier: "best" })
+    expect(requests[0]!.body.model).toBe("claude-opus-5-5")
+    expect(requests[0]!.body.output_config).toEqual({ effort: CLAUDE_TIERS.fixUps.best.effort })
+  })
+})
 
 describe("claudeApiRunner():  one POST to the Messages API a call", () => {
   test("the request:  model, no thinking it can turn off, low effort, the schema, the glossary cached, headers", async () => {

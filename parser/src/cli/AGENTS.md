@@ -48,7 +48,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       structured outputs, thinking off where the model can, the glossary cached, a 429 or 529 retried
     - `runClaude()`:  `claude -p`, as fast as its flags make it, `--json-schema` too;
       it says once, at the start, that a key would be faster
-    - `--model` (`withModel()`, in `translateProject.ts`):  one model for every call
+    - `--effort fast|balanced|best`, and one pass's (`--names-effort`, `--fix-ups-effort`):  in no provider's
+      terms (`askingFor()`, in `translateProject.ts`);  each runner maps a pass's tier to a model and effort,
+      Claude's by `CLAUDE_TIERS` (`inClaudeTerms()`), so another provider's runner brings a table of its own
+    - `--model <model>[:<effort>]`, hidden, for experiments:  an exact model and effort for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.

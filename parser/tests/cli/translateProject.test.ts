@@ -106,6 +106,33 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     expect(printed().find((line) => line.startsWith("  claude:"))).toMatch(/^  claude:  3 calls:  types 1/)
   })
 
+  test("--effort for every pass, --names-effort and --fix-ups-effort for one:  the runner gets the pass and its tier", async () => {
+    const asked: string[] = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      asked.push(`${kindOf(prompt)} ${options?.pass}:${options?.tier} ${options?.model}:${options?.effort}`)
+      return claude.run(prompt, options)
+    }
+    const out = join(folder, "Cartas")
+    await translate(source(), { to: "es", out, effort: "fast", fixUpsEffort: "best" }, run)
+    // the tier replaces the model and effort the names pass names:  the runner picks them
+    expect(asked).toEqual([
+      "types names:fast undefined:undefined",
+      "names names:fast undefined:undefined",
+      "fix-ups fixUps:best undefined:undefined"
+    ])
+    asked.length = 0
+    // cold again:  no dictionary from the run before;  no flags:  balanced
+    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    await translate(source(), { to: "es", out: join(folder, "Cartas2"), model: "sonnet:medium" }, run)
+    expect(asked).toEqual([
+      "types names:balanced sonnet:medium",
+      "names names:balanced sonnet:medium",
+      "fix-ups fixUps:balanced sonnet:medium"
+    ])
+    await expect(translate(source(), { to: "es", out, effort: "low" }, run)).rejects.toThrow(/No effort 'low'/)
+  })
+
   test("a line a check says is wrong goes back too, round after round, until it passes or 3 rounds are up", async () => {
     // a claude that never fixes it:  three rounds asked, then left for a person
     const claude = fakeClaude({ fixes: [] as unknown[] })

@@ -178,10 +178,15 @@ export type ClaudeRunner = (prompt: string, options?: ClaudeOptions) => Promise<
 
 /** How a pass wants Claude asked:  see `ClaudeRunner`. */
 export type ClaudeOptions = {
-  /** How hard it thinks:  less is faster -- default the model's own. */
+  /** Which pass asks:  with `tier`, the runner picks its own model and effort for it (`CLAUDE_TIERS`). */
+  pass?: AskingPass
+  /** How much the pass spends on its answers, in any provider's terms:  the runner maps it to `model` and `effort`. */
+  tier?: EffortTier
+  /** How hard it thinks, in Claude's terms:  less is faster -- default the tier's, else the model's own. */
   effort?: ClaudeEffort
   /**
-   * Which model, e.g. `opus`, `claude-sonnet-5-5` -- default the runner's:  `claude -p`'s own, the API's Opus 5.5.
+   * Which model, e.g. `opus`, `claude-sonnet-5-5` -- default the tier's, else the runner's:  `claude -p`'s own, the
+   *   API's Opus 5.5.
    * - `opus`, `sonnet` and `haiku` are the newest of each, through either runner.
    */
   model?: string
@@ -199,6 +204,18 @@ export type ClaudeOptions = {
 
 /** A JSON schema, as `ClaudeOptions.schema` takes it. */
 export type JsonSchema = { [key: string]: unknown }
+
+/**
+ * How much a pass spends on its answers (epic `spanish` P27), in no provider's terms:
+ * each runner maps it to a model and effort of its own (Claude's:  `CLAUDE_TIERS`).
+ * - `fast`:  the quickest answers still good enough to use
+ * - `balanced`:  the default
+ * - `best`:  the best answers, however long they take
+ */
+export type EffortTier = "fast" | "balanced" | "best"
+
+/** A pass that asks:  the names (`NamesPass`), or the fix-ups (`FixUps`). */
+export type AskingPass = "names" | "fixUps"
 
 /** How hard Claude thinks, as `claude --effort` takes it:  less is faster. */
 export type ClaudeEffort = "low" | "medium" | "high" | "xhigh" | "max"

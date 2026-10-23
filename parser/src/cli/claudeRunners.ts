@@ -5,13 +5,21 @@
  * - `claudeRunnerFor()` picks one, and when it's `claude -p`, says how to make it faster.
  * - Both answer only JSON of the shape a pass asks for (`ClaudeOptions.schema`), and put what every call of a pass
  *   shares (`context`, the glossary) in the system prompt.
+ * - Both take a pass's `tier` (`fast`, `balanced`, `best`), in no provider's terms, and ask the model and effort
+ *   `CLAUDE_TIERS` has for it:  another provider's runner would bring a table of its own.
  * - Node only:  `claude -p` is a program it starts.  No SDK, no new dependency:  the API is one POST.
  */
 import { spawn } from "node:child_process"
 import { tmpdir } from "node:os"
 
 import { CLI } from "spell-kit/cli"
-import type { ClaudeOptions, ClaudeRunner } from "spell-lang/spell/translate/translate.types"
+import type {
+  AskingPass,
+  ClaudeEffort,
+  ClaudeOptions,
+  ClaudeRunner,
+  EffortTier
+} from "spell-lang/spell/translate/translate.types"
 
 /** A Claude runner the command picked, and what the report calls it. */
 export type ChosenRunner = { run: ClaudeRunner; via: string }
@@ -38,6 +46,48 @@ export const SPEED_UP =
   "no claude -p to start, about 2 s a call)"
 
 ////////////////
+// ## Tiers
+////////////////
+
+/**
+ * Claude's model and effort for each pass at each tier (`EffortTier`):  what `--effort fast|balanced|best` asks.
+ * - Measured on Solitaire and todos, cold, through `claude -p` (epic `spanish` P27, 2026-10-23):
+ *   - names:  Opus at low effort was as fast as any, and the closest to Owen's own Solitario (27-35 of 42 names);
+ *     more effort was slower and no closer (medium 21-27, high 22-27), Sonnet glued words (`comodínnegro`)
+ *     and was refused names more, Haiku was slowest (~33 s) and broke a test
+ *   - fix-ups:  every model and effort made the same fixes, first time;
+ *     Opus at low effort answered soonest (7-9 s), at high 12-17 s, Haiku 15-21 s
+ * - `best` fix-ups think harder, for lines harder than Solitaire's:  untested beyond these two projects.
+ * - Through the API, a model that can turns thinking off (`THINKING_OFF`), whatever its tier.
+ */
+export const CLAUDE_TIERS: Record<AskingPass, Record<EffortTier, ClaudeSettings>> = {
+  names: {
+    fast: { model: "opus", effort: "low" },
+    balanced: { model: "opus", effort: "low" },
+    best: { model: "opus", effort: "low" }
+  },
+  fixUps: {
+    fast: { model: "opus", effort: "low" },
+    balanced: { model: "opus", effort: "low" },
+    best: { model: "opus", effort: "high" }
+  }
+}
+
+/** A Claude model, as `claude --model` takes it, and its effort. */
+type ClaudeSettings = { model: string; effort: ClaudeEffort }
+
+/**
+ * `options` in Claude's own terms:  a pass's `tier` as the model and effort `CLAUDE_TIERS` has for it.
+ * - A `model` or `effort` already given wins:  an exact one, passed through (`--model`).
+ * - No `pass` or no `tier`:  as it is.
+ */
+export function inClaudeTerms(options: ClaudeOptions = {}): ClaudeOptions {
+  if (!options.pass || !options.tier) return options
+  const settings = CLAUDE_TIERS[options.pass][options.tier]
+  return { ...options, model: options.model ?? settings.model, effort: options.effort ?? settings.effort }
+}
+
+////////////////
 // ## The Claude API
 ////////////////
 
@@ -62,7 +112,8 @@ export function claudeApiRunner({
   sleep?: (ms: number) => Promise<void>
 }): ClaudeRunner {
   let fallbacks = true
-  return async (prompt, options = {}) => {
+  return async (prompt, asked) => {
+    const options = inClaudeTerms(asked)
     const model = modelFor(options.model)
     for (let attempt = 1; ; attempt++) {
       const request = requestFor(prompt, options, { model, fallbacks })
@@ -263,12 +314,13 @@ type ApiMessage = {
  *   - its own short system prompt, not Claude Code's long one, with the pass's `context` after it
  *   - `--no-session-persistence`:  no session saved
  * - `--json-schema`:  the pass's `schema`, so it prints only JSON of that shape (P27)
- * - `effort`, `model`:  `claude --effort`, `--model`, when given.
+ * - `effort`, `model`:  `claude --effort`, `--model`, when given;  else a pass's `tier`'s (`inClaudeTerms()`).
  * - Several at once run side by side (the names pass's second stage).
  * - throws if it couldn't run, or failed
  * - SIDE EFFECT:  runs `claude`;  it must be on the `PATH`, signed in.
  */
-export function runClaude(prompt: string, { effort, model, schema, context }: ClaudeOptions = {}): Promise<string> {
+export function runClaude(prompt: string, options?: ClaudeOptions): Promise<string> {
+  const { effort, model, schema, context } = inClaudeTerms(options)
   return new Promise((done, fail) => {
     const args = [
       "-p",

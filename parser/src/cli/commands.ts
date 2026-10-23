@@ -173,7 +173,11 @@ export default function languageCommands(spell: Command): void {
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
     .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
-    .option("--model <model>", "the Claude model every call asks, e.g. sonnet or claude-haiku-5-5 -- default opus")
+    .option("--effort <tier>", "how much every pass spends on its answers:  fast, balanced or best -- default balanced")
+    .option("--names-effort <tier>", "the names pass's own:  fast, balanced or best")
+    .option("--fix-ups-effort <tier>", "the fix-ups' own:  fast, balanced or best")
+    // for experiments:  an exact model and effort, in the runner's own terms, over every tier
+    .addOption(lang.createOption("--model <model>", "an exact model[:effort] for every call").hideHelp())
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
