@@ -19,7 +19,7 @@ The hook read it first, knew that plan mode can't make a worktree, and refused i
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
-It gives Claude Code eighteen skills, workflows you start by typing a name,
+It gives Claude Code nineteen skills, workflows you start by typing a name,
 and nine hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
@@ -53,7 +53,7 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node s
 
 </details>
 
-## Eighteen you type, nine that run by themselves
+## Nineteen you type, nine that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.
@@ -96,6 +96,7 @@ The other six here are for the moments in between.
 | you want to mark up a file line by line | `/comment <file> [<file> ...]` | shows each file in the editor tab plan mode opens, one round per file until you approve, then writes it back;  globs too |
 | an epic is about to merge, or you're about to fly | `/docs-check <epic...>` | makes the docs an epic wrote agree with what was chosen and built, then with each other;  fixed in place, uncommitted;  no epic:  it asks which |
 | guides read older than the house's voice | `/voice [<page>...] [--voice <name>]` | background agents rewrite them in the voice (`epic voice`), every fact, id and link kept, and stamp each one done;  no pages:  every guide not done yet |
+| a page looks off, or a UI phase is ending | `/designer <page \| URL> [focus]` | screenshots it headlessly (desktop and phone, light and dark), holds every shot up against [the designer's rules](designer/designer.md), your own asks first, and lists what's wrong with the fix;  at the end of a UI phase it fixes the obvious things itself and asks about the rest with before / after pictures |
 | you notice something that belongs to another epic | `/send [<epic>] <text>` | writes your words and screenshots into that epic as a request, and wakes its session;  no epic:  the tooling's |
 
 - `/send` also goes off unasked, when you ask a session to change how you work rather than what it's building:
