@@ -7,7 +7,7 @@
  *   `tests/test-helpers/vocabularies.test.ts` fail while the file is stale.
  * - Why generated, not `ComponentDefinitions`:  that roll-up imports every vocabulary (~325 kB of source);  a lib
  *   entry importing it would split each vocabulary into a chunk shared with its family.  The catalog is a few kB.
- * - Reads the vocabularies with the kit's `RootCatalog` (`spell-kit/element-tools/RootCatalog`;  the pack build,
+ * - Reads the vocabularies with the kit's `RootCatalog` (`spell/element-tools/RootCatalog`;  the pack build,
  *   `spell-pack build`, shares it for a component pack's catalog), the way `ComponentDefinitions` does:
  *   every `UI<Name>.en.ts` of every folder, every export with a `tag` and `attributes`.
  * - Scans `components/` AND `src/docs-components/` (the doc-only `<ui-docs-*>` elements):  `<ui-root>` loads
@@ -22,8 +22,8 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { FamilyFiles } from "spell-ui/tools/FamilyFiles"
-import { RootCatalog } from "spell-kit/element-tools/RootCatalog"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { RootCatalog } from "spell/element-tools/RootCatalog"
+import { Terminal } from "spell/element-tools/Terminal"
 
 import { formatFiles } from "spell-ui/tools/generatedFiles"
 

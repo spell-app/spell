@@ -1,7 +1,7 @@
 /**
  * Barrel for `src/tools/` -- the node-side package tooling:  measure, vendor, LOC, report tables, smoke runner,
  * icon pack builder.
- * - NOTE: the generic tools they use are the kit's (`spell-kit/element-tools/...`, epic `repo-split` P10):
+ * - NOTE: the generic tools they use are the kit's (`spell/element-tools/...`, epic `repo-split` P10):
  *   `Terminal` (their output), `NodePackage`.  Import those from there.
  * - NOTE: `PerfRun` is left out:  it runs in the BROWSER (the dropdown perf test, the smoke perf page)
  *   and lives in `src/test-helpers/PerfRun.ts`.

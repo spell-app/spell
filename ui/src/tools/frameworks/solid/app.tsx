@@ -13,7 +13,7 @@ import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
  *   - `options` is an array, set as the property;  `appContext` the same, on `<ui-root>`
  *   - the app's own context works (`appContext`), and unmounting releases the runtime's overlay entry
  *     (`unmount`, `overlaysAfterUnmount`)
- *   - a function or object reaches the element as itself, through `spell-kit/element`'s `RichAttributes`:
+ *   - a function or object reaches the element as itself, through `spell/element`'s `RichAttributes`:
  *     no `prop:`, no `ref` listeners (epic `solid-17`)
  * - The page's identity probe (`identity.js`) sets `globalThis.__uiSolidIdentity` (`SolidIdentityHook`), and then:
  *   - `solidIdentity` / `webIdentity` -- the app's `createSignal` / `render` ARE the functions the components' copy

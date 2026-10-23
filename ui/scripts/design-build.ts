@@ -16,7 +16,7 @@ import { parseArgs } from "node:util"
 
 import { DesignExport } from "spell-ui/tools/DesignExport"
 import { environment } from "spell-ui/tools/environment"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 const { values } = parseArgs({
   options: { out: { type: "string" }, brand: { type: "string" }, "brand-book": { type: "string" } }

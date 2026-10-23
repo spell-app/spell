@@ -10,10 +10,10 @@ import type {
   FormValues
 } from "spell-ui/components/components.types"
 import { E } from "spell-ui/core"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Viewport } from "spell-kit/test-helpers/Viewport"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Viewport } from "spell/test-helpers/Viewport"
 
 import "spell-ui/components/ui-form"
 import "spell-ui/components/ui-input"

@@ -41,7 +41,7 @@
     "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run && echo '<< TESTS PASSED\n'"
   },
   "dependencies": {
-    "spell-kit": "workspace:*"
+    "spell": "workspace:*"
   },
   "devDependencies": {
     "@solidjs/web": "__solid__",

@@ -3,7 +3,7 @@ import { userEvent } from "vite-plus/test/browser"
 import { render } from "@solidjs/web"
 
 import { UI } from "spell-ui/runtime"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-button"
 import "spell-ui/components/ui-dropdown"

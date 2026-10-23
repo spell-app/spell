@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { UI } from "spell-ui/runtime"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
 
 import "spell-ui/components/ui-button"

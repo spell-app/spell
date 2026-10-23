@@ -2,8 +2,8 @@
  * Barrel for `spell-ui/util` -- general-purpose utilities with no dependency on the rest of the package.
  * - Re-exports `packages/util`'s GENERIC files (`@proto`, class / string / DOM helpers, `Prettify` ...),
  *   shared with `spell`:  they live there, not here, so every package shares ONE copy.
- * - NOTE: imports them one by one (`spell-kit/util/class` ...), NEVER `spell-kit/util`'s barrel:
- *   that also flattens in `spell-kit/util/spell` (lodash, `chalk`, `pluralize`, fetch, tasks ...),
+ * - NOTE: imports them one by one (`spell/util/class` ...), NEVER `spell/util`'s barrel:
+ *   that also flattens in `spell/util/spell` (lodash, `chalk`, `pluralize`, fetch, tasks ...),
  *   which would land in `ui`'s `core` bundle and published declarations.
  *   - An allowed exception to "import another package's barrel only".
  *   - Add a file here when `util` gains a GENERIC one.
@@ -16,16 +16,16 @@
  *   - Only what sits BELOW `core` imports it by name (`import { proto, suggest } from "spell-ui/util"`):
  *     `spell-ui/vocabulary`, `spell-ui/icons`, the runtime, types files.
  * - Also:
- *   - spell-element's timing helpers (`spell-kit/element/timing`), to run a function later:
+ *   - spell-element's timing helpers (`spell/element/timing`), to run a function later:
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`
  *   - `Warnings` -- `ui`'s console warnings, its own
  */
 
-export * from "spell-kit/util/class"
-export * from "spell-kit/util/decorators"
-export * from "spell-kit/util/dom"
-export * from "spell-kit/util/string"
-export * from "spell-kit/util/util.types"
+export * from "spell/util/class"
+export * from "spell/util/decorators"
+export * from "spell/util/dom"
+export * from "spell/util/string"
+export * from "spell/util/util.types"
 
-export * from "spell-kit/element/timing"
+export * from "spell/element/timing"
 export * from "./Warnings"

@@ -1,6 +1,6 @@
 import { kebabCase } from "spell-ui/util"
 // the types-only leaf, as `V`:  `spell-ui/api` would bring every element (and Solid's JSX) into a node tool's type check
-import type * as V from "spell-kit/element/vocabulary.types"
+import type * as V from "spell/element/vocabulary.types"
 
 /****************
  * ### `PropertySchemas`

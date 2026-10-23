@@ -10,7 +10,7 @@ import type {
   NameMap,
   NamePair,
   TagDictionary
-} from "spell-kit/element/vocabulary.types"
+} from "spell/element/vocabulary.types"
 import { SharedVocabulary } from "./SharedVocabulary"
 import { ValueSets } from "./ValueSets"
 

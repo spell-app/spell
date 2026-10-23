@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vite-plus/test"
 import type { JSX } from "@solidjs/web"
 
-import type { DOMElement, DOMElementClass, UIComponentClass } from "spell-kit/element"
+import type { DOMElement, DOMElementClass, UIComponentClass } from "spell/element"
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
 import { E } from "spell-ui/core"
 import { UIButton } from "spell-ui/components/ui-button"
 import { UIDropdown } from "spell-ui/components/ui-dropdown"
 import { es } from "spell-ui/test-helpers/dictionary.es"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 UIButton.define("ie-boton", es)
 UIDropdown.define("ie-desplegable", es)

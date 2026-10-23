@@ -7,9 +7,9 @@ import { fileURLToPath } from "node:url"
 
 // `.ts` written:  other repos' Vite configs import this one (`spell-ui/vite.config.ts`), and plain node loads it there,
 // which adds no extension (the packages' `"./*.ts"` exports)
-import { elementBaseConfig } from "spell-kit/element-tools/elementConfig.ts"
-import { hotElements } from "spell-kit/element-tools/HotElements.ts"
-import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
+import { elementBaseConfig } from "spell/element-tools/elementConfig.ts"
+import { hotElements } from "spell/element-tools/HotElements.ts"
+import { fmtConfig, packageLint } from "spell/toolchain/lint"
 import { environment } from "spell-ui/tools/environment.ts"
 
 /** Absolute path of `src/`. */
@@ -22,8 +22,8 @@ const COMPONENTS_DIR = fileURLToPath(new URL("./src/components", import.meta.url
  * The folders of the kit's `util` and `element`, which ship inside Spell UI's `dist/` (`declarations()`):
  * found by their npm names, so the declarations build doesn't depend on where the kit sits.
  */
-const UTIL_SRC = path.dirname(createRequire(import.meta.url).resolve("spell-kit/util/index.ts"))
-const ELEMENT_SRC = path.dirname(createRequire(import.meta.url).resolve("spell-kit/element/index.ts"))
+const UTIL_SRC = path.dirname(createRequire(import.meta.url).resolve("spell/util/index.ts"))
+const ELEMENT_SRC = path.dirname(createRequire(import.meta.url).resolve("spell/element/index.ts"))
 
 /**
  * The declarations program's root:  the folder holding this repo, `UTIL_SRC` and `ELEMENT_SRC`
@@ -132,7 +132,7 @@ export const SOLID_EXTERNAL = /^solid-js(\/|$)|^@solidjs\//
 /**
  * Config shared by the library build / dev server (below), `vitest.config.ts` and the docs site:
  * plugins, aliases, dedupe, Lightning CSS.
- * - The kit's element build settings (`elementBaseConfig()`, `spell-kit/element-tools/elementConfig`), which every
+ * - The kit's element build settings (`elementBaseConfig()`, `spell/element-tools/elementConfig`), which every
  *   component pack's script is built on too (epic `repo-split` P10):  the decorator pre-pass BEFORE Solid's plugin,
  *   ONE Solid, Lightning CSS on the platform floor (`CSS_TARGETS`).
  *   - No aliases:  every file is imported by its package name (`spell-ui/components/ui-button/UIButton`), which Vite
@@ -173,7 +173,7 @@ export function baseConfig() {
  * - `css.transformer: "lightningcss"` so component CSS gets nesting / `@custom-media` lowering with the same engine
  *   that minifies it.  NOTE: postcss is never used.
  * - `vite-plugin-dts` emits `.d.ts` for consumers, laid out like `exports` says (`declarations()`).
- * - Also `vp lint` / `vp fmt`:  the toolchain's settings (`spell-kit/toolchain/lint`), as Spell UI's OWN package's
+ * - Also `vp lint` / `vp fmt`:  the toolchain's settings (`spell/toolchain/lint`), as Spell UI's OWN package's
  *   (`packageLint({ name: "ui" })`, the `spell-ui/*` rules in its component folders):  spell-ui is a flat repo, so this
  *   is its root block too, the one the editor and `vp check` read (epic `repo-split` I13;  spell-app's root block
  *   covered it before).
@@ -193,7 +193,7 @@ export default defineConfig(() => {
       // the build's CSS MINIFY reads `cssTarget`, not `css.lightningcss.targets`:  left at Vite's default (older
       // Safari) it lowered `light-dark()` into `--lightningcss-light` variables fixed at `:root`, so `.ui-dark` /
       // `<ui-root theme="dark">` changed nothing in `dist/` (dev and tests were fine).  Same browsers as the kit's
-      // `CSS_TARGETS` (`spell-kit/element-tools/elementConfig`).
+      // `CSS_TARGETS` (`spell/element-tools/elementConfig`).
       cssTarget: ["chrome125", "safari26", "firefox147"],
       rolldownOptions: {
         external: (id: string) => SOLID_EXTERNAL.test(id),
@@ -251,7 +251,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * `vite-plugin-dts` options for the published declarations:
  * `dist/index.d.ts`, `dist/core.d.ts`, `dist/components/ui-<name>/index.d.ts` ... --
  * the paths `package.json` `exports` names.
- * - `src/` imports `spell-kit/util` (`UTIL_SRC`) and `spell-kit/element` (`ELEMENT_SRC`), the kit's.
+ * - `src/` imports `spell/util` (`UTIL_SRC`) and `spell/element` (`ELEMENT_SRC`), the kit's.
  *   - So the program's root is the folder holding all three (`DECLARATIONS_ROOT`;  `compilerOptions.rootDir`, else
  *     TS6059).
  *   - Spell UI's `src/` is included (but its node tools, its `spell` commands and its test helpers), with the kit's
@@ -262,7 +262,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   - `dist/src/element/**` (the kit's `element/`) to `dist/_spell-element/**`
  * - It also rewrites every import of a file that ships in `dist/` to a relative one (a `declare module`
  *   augmentation's too):  Spell UI's own (`spell-ui/core`, `spell-ui/components/ui-parts/UIParts`), and the kit's
- *   `spell-kit/util/...` and `spell-kit/element/...`.
+ *   `spell/util/...` and `spell/element/...`.
  *   - `pathsToAliases: false`:
  *     the plugin's own rewrite measures from the layout BEFORE the move, and gets `../spell-ui/src/...`.
  * - `?inline` CSS imports (`styles/index.ts`) become `declare const x: string`:  only `vite/client` types them.
@@ -273,7 +273,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   (`util`'s GENERIC ones only).
  *   NOT `util/spell/` or `util`'s barrel (which flattens it in):
  *   `exclude` lists them, and `src/util/index.ts` imports file by file.
- * - MUST end with no `spell-ui/...`, `spell-kit/util` or `spell-kit/element` in `dist/**.d.ts`, and no path
+ * - MUST end with no `spell-ui/...`, `spell/util` or `spell/element` in `dist/**.d.ts`, and no path
  *   outside `dist/`;  `yarn smoke` checks (`DeclarationCheck`).
  */
 export function declarations(): PluginOptions {
@@ -309,10 +309,10 @@ export function declarations(): PluginOptions {
  */
 function declarationPaths(): Record<string, string[]> {
   return {
-    "spell-kit/util": [`${UTIL_SRC}/index.ts`],
-    "spell-kit/util/*": [`${UTIL_SRC}/*`],
-    "spell-kit/element": [`${ELEMENT_SRC}/index.ts`],
-    "spell-kit/element/*": [`${ELEMENT_SRC}/*`]
+    "spell/util": [`${UTIL_SRC}/index.ts`],
+    "spell/util/*": [`${UTIL_SRC}/*`],
+    "spell/element": [`${ELEMENT_SRC}/index.ts`],
+    "spell/element/*": [`${ELEMENT_SRC}/*`]
   }
 }
 
@@ -344,7 +344,7 @@ function rewriteDeclaration(filePath: string, content: string) {
 
   const code = content
     .replace(
-      /(from |import\(|declare module )(["'])(spell-ui(?:\/[^"']*)?|spell-kit\/(?:util|element)(?:\/[^"']*)?|\.\.?\/[^"']*)\2/g,
+      /(from |import\(|declare module )(["'])(spell-ui(?:\/[^"']*)?|spell\/(?:util|element)(?:\/[^"']*)?|\.\.?\/[^"']*)\2/g,
       (_, start, quote, specifier: string) => {
         const named = SHIPPED.find(({ name }) => specifier === name || specifier.startsWith(`${name}/`))
         const source = specifier.startsWith(".")
@@ -376,8 +376,8 @@ const OUTSIDE = [
 /** The package names whose files ship in `dist/`, each with its source folder:  Spell UI's own, and the kit's two. */
 const SHIPPED = [
   { name: "spell-ui", src: path.resolve("src") },
-  { name: "spell-kit/util", src: UTIL_SRC },
-  { name: "spell-kit/element", src: ELEMENT_SRC }
+  { name: "spell/util", src: UTIL_SRC },
+  { name: "spell/element", src: ELEMENT_SRC }
 ]
 
 /** The deepest folder holding every one of `folders`. */
@@ -400,14 +400,14 @@ function slashed(file: string): string {
 
 /**
  * Hot module replacement for the components in `yarn dev`
- * (the kit's `HotElements`, `spell-kit/element-tools/HotElements`;
+ * (the kit's `HotElements`, `spell/element-tools/HotElements`;
  * `apply: "serve"`, so builds are untouched, and NOT in `vitest.config.ts`).
- * - `HotDefinitions` (`spell-kit/element`'s) is injected by FILE PATH, resolved from its package's `exports`.
+ * - `HotDefinitions` (`spell/element`'s) is injected by FILE PATH, resolved from its package's `exports`.
  */
 function hotElementsPlugin(): Plugin {
   // HACK: `HotElements.ts` types its plugin with `vite`'s `Plugin`, this config with `vite-plus`'s:
   // the same version, but a second declaration TypeScript won't unify
-  return hotElements(createRequire(import.meta.url).resolve("spell-kit/element/HotDefinitions.ts")) as unknown as Plugin
+  return hotElements(createRequire(import.meta.url).resolve("spell/element/HotDefinitions.ts")) as unknown as Plugin
 }
 
 /**

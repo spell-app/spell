@@ -5,7 +5,7 @@ import { ClassBuilder } from "spell-ui/elements"
 import { colorsCSS, foundationCSS } from "spell-ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { searchVocabulary } from "spell-ui/components/ui-search/UISearch.en"

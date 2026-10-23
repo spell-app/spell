@@ -74,9 +74,9 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 
 - The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
   its bundle (`"pageServer"`, in [package.json](package.json):
-  [the kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
+  [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
   - So it needs only the kit and `spell-ui`:  `yarn clone spell-ui`
-    ([setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)).
+    ([setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)).
   - `start all` and `spell server start` both find the kit from any folder of it.
 - `start all` brings up the editor too, where spell-app is cloned.
   For the page server alone, `spell server start`.
@@ -199,7 +199,7 @@ with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README
   its `<epic-thread>` and `<epic-comment-pane>` draw the threads and the pane.
 - Both are `spell-epic`'s engine routes, `/_epic/...`, which the page server serves too.
 - The site's bundle shares its Solid and Spell UI with the pack, by their npm names
-  (`solid-js`, `@solidjs/web`, `spell-ui/core`, `spell-kit/element` ...):  [SitePacks.ts](site/_src/SitePacks.ts).
+  (`solid-js`, `@solidjs/web`, `spell-ui/core`, `spell/element` ...):  [SitePacks.ts](site/_src/SitePacks.ts).
 - A comment waits in `<page>.inbox.json5` beside its page, git-ignored,
   until Send hands it to the standing `feedback` epic.
 - **The cost:**  a pack may use any export of what it shares, so those modules stay whole in the bundle.
@@ -222,7 +222,7 @@ with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README
 | `site/_assets/` | GENERATED, NOT committed:  the bundle (`site.js`, `site.css`, a lazy chunk per family);  `.bundle.json`, its sources' hash, so the page server doesn't build it again;  `icon-packs`, a link to `../../src/icons/icon-packs` (2,167 SVGs, 8.7 MB:  committed once, never copied).  NEVER edit |
 
 - Git-ignored because its hashed chunk names churned every diff;
-  how the page server builds bundles on demand:  [the kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md).
+  how the page server builds bundles on demand:  [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md).
 - EVERY component set's pages load this one bundle:
   Spell UI's, Epic UI's at `/components/epics/`, App UI's at `/components/app/`.
   Each takes the folder above its `_assets/` as the site's root, for its layout and its data.
@@ -455,7 +455,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [tools.types.ts](src/tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, the site's two halves (`SITE_PAGES`, `SITE_BUILD`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
 | [BundleMeasure.ts](src/tools/BundleMeasure.ts) | an in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library as used and in full;  standalone per-family builds;  structural checks |
 | [PeerVendor.ts](src/tools/PeerVendor.ts) | one ES module per peer specifier, plus `importmap.json`, in `vendor/`:  deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
-| [DeclarationCheck.ts](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every published `exports` `types` path exists, and every import in `dist/`'s declarations is a bare package name or a path inside `dist/`:  no `#` alias, no `spell-ui/...`, no `spell-kit/util` or `spell-kit/element` (theirs ship in `dist/_util/` and `dist/_spell-element/`) |
+| [DeclarationCheck.ts](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every published `exports` `types` path exists, and every import in `dist/`'s declarations is a bare package name or a path inside `dist/`:  no `#` alias, no `spell-ui/...`, no `spell/util` or `spell/element` (theirs ship in `dist/_util/` and `dist/_spell-element/`) |
 | [HostApp.ts](src/tools/HostApp.ts) | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
 | [SmokeRunner.ts](src/tools/SmokeRunner.ts), [StaticServer.ts](src/tools/StaticServer.ts) | serve `dist/`, `vendor/` and `src/` from ONE static server (a thin wrapper over the kit's web server), inject the import map, drive each page in headless Chromium |
 | [LocCount.ts](src/tools/LocCount.ts) | lines and code lines per file, by group |
@@ -485,7 +485,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [visual/](src/tools/visual/) | `yarn test:visual`:  `cli.ts` (flags) → `VisualRunner` (dev server, one Playwright run per OS, pruning) and `DockerBrowserServer` (Docker checks, the browser server container);  `playwright.config.ts`, `visual.spec.ts` (tests generated by `VisualExamples`), `fixture.html` / `fixture.ts` (one example, settled), `ParityReport` (`--parity` / `--static`);  for `--static`, `StaticFamilies`, `StaticPages` and `StaticFixture`;  `VisualSettings` (viewport, time, tolerances, paths);  `visual.types.ts` |
 | [demo/](src/tools/demo/) | the `yarn dev` pages:  every example side by side (`index.html`), `perf`, `translate`, `hmr`;  `fallback.html` is also a smoke page;  `FamilySheets` puts every family sheet on the page |
 
-The generic tools are the kit's, `spell-kit/element-tools/<Name>`, in [its src/element-tools/](https://github.com/spell-app/spell-kit/tree/main/src/element-tools):
+The generic tools are the kit's, `spell/element-tools/<Name>`, in [its src/element-tools/](https://github.com/spell-app/spell/tree/main/src/element-tools):
 - `Terminal`, where every tool and script prints;  `NodePackage`, finding an installed dependency
 - `ComponentPack` and `packModules`, a component pack's build (`spell-pack build | check`)
 - `RootCatalog` and `VocabularyFiles`, which `yarn gen:root` and `yarn site:data` read the vocabularies with
@@ -505,7 +505,7 @@ The generic tools are the kit's, `spell-kit/element-tools/<Name>`, in [its src/e
 - Output goes through `Terminal` (stdout and stderr), never `console.*`.
 - Environment variables are read through `environment`.
 - Imports:  these are node scripts, run by `tsx`.
-  - By package name, as all of Spell UI's code is (`spell-ui/tools/SiteCheck`, `spell-kit/server`;
+  - By package name, as all of Spell UI's code is (`spell-ui/tools/SiteCheck`, `spell/server`;
     [AGENTS.md](AGENTS.md), "Imports");  a same-folder peer stays relative (`./tools.types.ts`).
   - Their TypeScript settings are the node ones, [tsconfig.node.json](tsconfig.node.json),
     with `src/cli/`, `scripts/` and the configs.
@@ -545,12 +545,12 @@ Ours start `SPELL_UI_`;  `CI` and `INIT_CWD` are other tools' names, read as the
 ## Spell UI's `spell` commands
 
 Spell UI adds four commands to `spell`:  `spell icon`, `spell ssr`, `spell pack` and `spell design`.
-What each one does, with every option and real output, is on [the kit's README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-ui);
+What each one does, with every option and real output, is on [the kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui);
 this is their code.
 
 - The kit's `spell` finds them through Spell UI's `package.json`:  `"spell": { "commands": "./src/cli/commands.ts" }`.
 - Each action imports its command's file only when it runs, so `spell help` stays fast.
-- Adding one:  the kit's recipe, "How a command is built" in [README-cli.md](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#how-a-command-is-built);
+- Adding one:  the kit's recipe, "How a command is built" in [README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#how-a-command-is-built);
   the rules for writing one here, [src/cli/AGENTS.md](src/cli/AGENTS.md).
 
 <details>
@@ -558,8 +558,8 @@ this is their code.
 
 If you find yourself writing a second copy of any of these, stop and reuse.
 
-- the `spell` program, its errors and exit codes, running another tool:  the kit's `spell-kit/cli`
-- building and checking a pack:  the kit's `ComponentPack` (`spell-kit/element-tools/ComponentPack`)
+- the `spell` program, its errors and exit codes, running another tool:  the kit's `spell/cli`
+- building and checking a pack:  the kit's `ComponentPack` (`spell/element-tools/ComponentPack`)
 - the static render:  [StaticRenderer](src/tools/StaticRenderer.ts) and [StaticDocument](src/tools/StaticDocument.ts)
 - the icon packs:  Spell UI's icons (`BuiltInPacks`, `IconName`)
 
@@ -603,6 +603,6 @@ so they need a checkout with the content folder and the page server running (abo
 
 - [README.md](README.md):  Spell UI's front page, for what the elements are before the pages about them
 - [README-components.md](README-components.md):  every family with a picture, the catalogue `yarn readme:components` writes
-- [The kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md):  the page server the site runs on, its addresses and its live reload
+- [The kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md):  the page server the site runs on, its addresses and its live reload
 - [README-frameworks.md](README-frameworks.md):  the framework pages `yarn smoke` runs
 - [AGENTS.md](AGENTS.md):  the rules for working here, "The docs site" and "Commands" among them

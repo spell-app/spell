@@ -1,7 +1,7 @@
 /**
  * `yarn site:bundle`:  build the Spell UI site's bundle, `site/_assets/` (git-ignored), from `site/_src/site.ts`
  * with `vite.site.config.ts`, then report its sizes.
- * - Run by `spell bundle ui-site` (`spell-kit/server`'s `Bundle`), which the page server runs when it starts and
+ * - Run by `spell bundle ui-site` (`spell/server`'s `Bundle`), which the page server runs when it starts and
  *   the sources changed;  it then records their hash in `site/_assets/.bundle.json`.
  * - Clears `site/_assets/` first (everything but `icon-packs`, the record too), so a removed chunk doesn't linger.
  * - Icon packs:  `site/_assets/icon-packs` is a SYMLINK to `../../src/icons/icon-packs` (~8.7 MB, ~2,200 SVGs), made
@@ -19,7 +19,7 @@ import { gzipSync } from "node:zlib"
 import { build } from "vite"
 
 import { SITE_ASSETS } from "spell-ui/vite.site.config.ts"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /** The packs link's name inside `_assets/`:  the one entry a rebuild keeps. */
 const PACKS_NAME = "icon-packs"

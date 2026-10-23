@@ -3,7 +3,7 @@
  * shapes, the site's two folders, the static pages' and the design export's shapes, and the error classes
  * (`IconPackError` ...).
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
- *   `spell-kit/element-tools/tools.types` (epic `repo-split` P10).
+ *   `spell/element-tools/tools.types` (epic `repo-split` P10).
  * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and Spell UI's `spell` commands, `src/cli/`,
  *   through `spell-ui/tools/tools.types`) imports it without loading another.
  * - Every `results/*-results.json` has one of these shapes;  `ReportTables` reads them.

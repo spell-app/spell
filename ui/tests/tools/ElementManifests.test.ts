@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, test } from "vite-plus/test"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 import { ElementManifests } from "spell-ui/tools/ElementManifests"
 

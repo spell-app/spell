@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url"
 import { IconName } from "spell-ui/icons/IconName"
 import { environment } from "spell-ui/tools/environment"
 import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 import type { IconPackReport } from "spell-ui/tools/tools.types"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 

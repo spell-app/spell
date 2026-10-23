@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui"
 

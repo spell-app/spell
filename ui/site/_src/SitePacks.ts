@@ -39,13 +39,13 @@ import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
 /**
  * What a pack imports, by its `packModules` key => the page's copy of that module.
  * - The keys are the pack build's externals, by the names its source imports them by:  `spell-ui/core`.
- * - `spell-kit/element`:  Spell UI's core module, which carries all of it (`spell-ui/core` re-exports it):  one per page.
+ * - `spell/element`:  Spell UI's core module, which carries all of it (`spell-ui/core` re-exports it):  one per page.
  */
 const packModules: Record<string, unknown> = {
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
-  "spell-kit/element": uiCore,
+  "spell/element": uiCore,
   "spell-ui/core": uiCore,
   "spell-ui/forms": uiForms
 }

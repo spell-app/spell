@@ -2,9 +2,9 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import type { DOMFormControl } from "spell-ui/elements"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-slider"
 import "spell-ui/components/ui-segment"

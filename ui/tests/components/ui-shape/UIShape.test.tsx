@@ -3,11 +3,11 @@ import { userEvent } from "vite-plus/test/browser"
 
 import { UI } from "spell-ui/runtime"
 import type { ShapeChangeDetail } from "spell-ui/components/components.types"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { Fixture } from "spell/test-helpers/Fixture"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 import type { DOMShapeElement } from "spell-ui/components/ui-shape"
 
 import "spell-ui/components/ui-shape"

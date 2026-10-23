@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { UI } from "spell-ui/runtime"
 import { ValueSets } from "spell-ui/vocabulary"
 import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { UIPanel } from "spell-ui/components/ui-panel"
 import { panelVocabulary } from "spell-ui/components/ui-panel/UIPanel.en"
 

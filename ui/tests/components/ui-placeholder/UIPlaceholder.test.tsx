@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { PLACEHOLDER_HOST_STATE } from "spell-ui/components/components.types"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui/components/ui-placeholder"
 

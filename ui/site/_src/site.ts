@@ -43,7 +43,7 @@ import { E, UI } from "spell-ui/core"
 import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ThemePreference } from "spell-ui/docs-components/ThemePreference"
-import { defineSite } from "spell-kit/server/site"
+import { defineSite } from "spell/server/site"
 import { SiteRouter } from "./SiteRouter"
 import { SiteShell } from "./SiteShell"
 

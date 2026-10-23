@@ -3,7 +3,7 @@ import { describe, expect, it, test } from "vite-plus/test"
 import { E } from "spell-ui/core"
 import { ComponentDefinitions } from "spell-ui/components/ComponentDefinitions"
 import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
-import { SkeletonText } from "spell-kit/element/SkeletonText"
+import { SkeletonText } from "spell/element/SkeletonText"
 
 /**
  * `<ui-root>`'s generated catalog (`UIRoot.catalog.ts`) agrees with the vocabularies:  run `yarn gen:root` after

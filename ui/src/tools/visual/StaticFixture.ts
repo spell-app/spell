@@ -8,7 +8,7 @@
  * - Which families:  `StaticFamilies`.  Every listed class is defined once, for every page.
  */
 
-import type { UIComponentClass } from "spell-kit/element"
+import type { UIComponentClass } from "spell/element"
 import { ServerRuntime, StaticRender, StaticStylesheet } from "spell-ui/static"
 
 import { StaticFamilies } from "./StaticFamilies.ts"

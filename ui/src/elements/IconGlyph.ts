@@ -3,7 +3,7 @@ import { isServer, ssr } from "@solidjs/web"
 
 import { E, UI } from "spell-ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
-import { derived, state } from "spell-kit/element"
+import { derived, state } from "spell/element"
 
 /****************
  * ### `IconGlyph`

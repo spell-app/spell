@@ -4,12 +4,12 @@ import { Keys } from "spell-ui/test-helpers/Keys"
 
 import { UI } from "spell-ui/runtime"
 import type { ToastActionDetail, ToastCloseDetail, ToastShowDetail } from "spell-ui/components/components.types"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import { Viewport } from "spell-kit/test-helpers/Viewport"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { Fixture } from "spell/test-helpers/Fixture"
+import { Viewport } from "spell/test-helpers/Viewport"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui/components/ui-toast"
 

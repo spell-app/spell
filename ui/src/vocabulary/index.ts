@@ -13,7 +13,7 @@
  *   `export * as V` of this barrel would cost every page a chunk (see `vocabulary.api.ts`).
  */
 
-export * from "spell-kit/element/vocabulary.types"
+export * from "spell/element/vocabulary.types"
 
 export * from "./ValueSets"
 export * from "./Converters"

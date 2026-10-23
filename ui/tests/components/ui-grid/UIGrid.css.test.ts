@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
-import { Viewport } from "spell-kit/test-helpers/Viewport"
+import { Viewport } from "spell/test-helpers/Viewport"
 
 import { gridVocabulary } from "spell-ui/components/ui-grid/UIGrid.en"
 import { columnVocabulary } from "spell-ui/components/ui-grid/UIColumn.en"

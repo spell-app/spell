@@ -3,7 +3,7 @@ import { onTestFinished } from "vite-plus/test"
 import { ClassBuilder } from "spell-ui/elements"
 import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 /**
  * Helpers for component CSS tests (`UI<Name>.css.test.ts`):  adopt sheets for one test, walk a sheet's rules,

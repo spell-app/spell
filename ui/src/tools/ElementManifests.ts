@@ -8,7 +8,7 @@ import type {
   SiteNamed,
   SiteTag
 } from "spell-ui/docs-components/docs-components.types"
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 import type { CssCustomData, CssCustomDataEntry, CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
 
 import { FamilyFiles } from "./FamilyFiles.ts"

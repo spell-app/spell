@@ -2,7 +2,7 @@
  * Types for Spell UI's `spell` commands (`src/cli/commands.ts`):  `spell icon`, `spell ssr`, `spell pack`, `spell design`.
  * - Types only, plus constants:  `commands.ts` loads it, and `spell help` loads every repo's list.
  */
-import type { CLI } from "spell-kit/cli"
+import type { CLI } from "spell/cli"
 import type {
   StaticCoverage,
   StaticDocumentOptions,

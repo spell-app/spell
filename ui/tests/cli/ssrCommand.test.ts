@@ -14,11 +14,11 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 import { coverageLine, readCoverage, staticPages } from "spell-ui/cli/ssrCommand"
 
 /** The real `spell` command, the kit's:  `spell ssr` renders in a child process, through Vite. */
-const SPELL = resolve(dirname(fileURLToPath(import.meta.resolve("spell-kit/package.json"))), "bin/spell.mjs")
+const SPELL = resolve(dirname(fileURLToPath(import.meta.resolve("spell/package.json"))), "bin/spell.mjs")
 /** `ui-segment`, `ui-card` with parts, `ui-button` with an icon, `ui-modal`;  two element scripts and a plain one. */
 const FIXTURE = resolve(import.meta.dirname, "ssrCommand.fixture.html")
 /** Temp folder for pages and what's written:  its REAL path, as on macOS `tmpdir()` is a symlink. */

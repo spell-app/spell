@@ -70,7 +70,7 @@ What each column holds, and where it stops:
 - **Family:**  a link to its docs page, every example live with its markup a click away.
   - The page is plain HTML in [`docs/`](docs/), so on GitHub the link shows its source.
     Served by the page server, from a checkout of the kit, it shows the page
-    ([setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero), then [README-site.md](README-site.md)).
+    ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then [README-site.md](README-site.md)).
   - *(In progress)* marks the two not done yet:  Property Editor and Section.
 - **Tags:**  every tag of the family;  one with a docs page of its own is linked (`<ui-textarea>`, `<ui-radio>`).
 - **What it is:**  the main tag's one-line description, from its vocabulary.
@@ -373,7 +373,7 @@ Seven steps, run from `spell-ui/`;  four of them have a test that fails until th
 <summary>How an element is written, in more depth</summary>
 
 - The two objects behind every tag (the DOM element and the component), the decorators and the lifecycle:
-  the kit's element framework, [README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md).
+  the kit's element framework, [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md).
 - What's under every element (the shared runtime, vocabularies, icons, styles):  [README-runtime.md](README-runtime.md).
 - The rules for writing one (house style, imports, the lint guard):
   [AGENTS.md](AGENTS.md), "A family's files" and "Solid authoring".

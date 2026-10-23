@@ -38,7 +38,7 @@ import { parseArgs } from "node:util"
 
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { environment } from "spell-ui/tools/environment"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_PAGES } from "spell-ui/tools/tools.types"
 
 import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFiles"

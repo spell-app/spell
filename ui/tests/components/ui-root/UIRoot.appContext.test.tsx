@@ -1,13 +1,13 @@
 import { onTestFinished, beforeAll, describe, expect, test } from "vite-plus/test"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { UIComponent, type DOMElement, type UIComponentClass } from "spell-kit/element"
+import { UIComponent, type DOMElement, type UIComponentClass } from "spell/element"
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
 import { UI } from "spell-ui/runtime"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
- * `UIComponent.appContext`:  what an app hands the elements inside a `<ui-root>`, read by `spell-kit/element`'s
+ * `UIComponent.appContext`:  what an app hands the elements inside a `<ui-root>`, read by `spell/element`'s
  * `UIComponent` from the nearest root around it.
  * - A Solid context never reaches inside an element (epic `spell-element`, Q9):  the root's `appContext` does.
  * - Tried on tiny test elements inside Spell UI's real `<ui-root>`, loaded by each test:

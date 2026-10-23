@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 import { TreeData } from "spell-ui/components/ui-tree-diagram/TreeData"
 

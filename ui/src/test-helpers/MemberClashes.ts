@@ -1,8 +1,8 @@
-import type { DOMElement, UIComponentClass } from "spell-kit/element"
+import type { DOMElement, UIComponentClass } from "spell/element"
 import type { ComponentVocabulary } from "spell-ui/vocabulary"
 import { E } from "spell-ui/core"
 import { F } from "spell-ui/forms"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /****************
  * ### `MemberClashes`

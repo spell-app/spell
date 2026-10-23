@@ -12,8 +12,8 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 import { chromium, type Page } from "playwright"
 
-import { DevServer } from "spell-kit/element-tools/DevServer"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { DevServer } from "spell/element-tools/DevServer"
+import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
  * ### `DemoScreenshots`

@@ -8,7 +8,7 @@
  */
 import type { Server } from "node:http"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /** What a route answers:  text (with its type), or a file on disk. */
 export type Served = { text: string; type: string } | { file: string }

@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 import { SiteData, type SiteDataFile, type SiteTag } from "spell-ui/docs-components"
 
 import type { UIDocsApi } from "spell-ui/docs-components/ui-docs-api/UIDocsApi"

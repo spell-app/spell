@@ -4,7 +4,7 @@ import { dirname, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { styleText } from "node:util"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 import type { SsrOptions, StaticMessage, StaticSheetJob } from "./cli.types"
 

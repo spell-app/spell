@@ -28,7 +28,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Output through `CLI.out()` / `CLI.err()`;  colour through node's `styleText()`, no chalk.
   - [cli.types.ts](cli.types.ts):  the options and reports, types only.
   - [renderStatic.ts](runner/renderStatic.ts):  `spell ssr`'s CHILD process, which renders on Vite.
-    It never imports `spell-kit/cli`:  it needs only Spell UI.
+    It never imports `spell/cli`:  it needs only Spell UI.
 - Where they work:
   - `spell pack` and `spell design`:  the nearest kit from the current folder up,
     so in an epic's worktree they work on the worktree's repos (`CLI.findCheckout(CLI.KIT_MARKER)`).
@@ -40,7 +40,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - From [templates/](templates/README.md);  the kit needs no wiring (its `spell-*` workspaces), only the
     commands page gets the new repo's scripts.
   - It never touches the kit's `repos.json5`:  the new repo has no remote yet, and says what to do next.
-- NEVER imports spell-app, spell-lang or spell-epic:  they're above Spell UI, or beside it.
+- NEVER imports spell-app, spell-parser or spell-epic:  they're above Spell UI, or beside it.
 
 ## Tests
 

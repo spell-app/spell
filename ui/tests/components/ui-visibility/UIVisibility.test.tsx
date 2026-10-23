@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it } from "vite-plus/test"
 
 import { UI, type VisibilityCalculations } from "spell-ui/runtime"
 import { nextFrame } from "spell-ui/util"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Fixture } from "spell/test-helpers/Fixture"
+import type { DOMElement } from "spell/element"
 
 import "spell-ui/components/ui-visibility"
 import "spell-ui/components/ui-segment"

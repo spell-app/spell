@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { DataFile } from "spell-kit/server/DataFile"
+import { DataFile } from "spell/server/DataFile"
 import { readPack } from "spell-ui/cli/packBuild"
 import { addElement, createPack, nextSteps } from "spell-ui/cli/packCreate"
 
@@ -103,7 +103,7 @@ describe("createPack()", () => {
         "./*": { default: "./src/*" }
       },
       scripts: { "pack:build": "spell-pack build", "pack:check": "spell-pack check" },
-      dependencies: { "spell-kit": "workspace:*" },
+      dependencies: { spell: "workspace:*" },
       // its elements are written on Spell UI
       devDependencies: { "spell-ui": "workspace:*" }
     })

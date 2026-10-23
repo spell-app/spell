@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { UI } from "spell-ui/runtime"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import type { DOMCodeElement } from "spell-ui/components/ui-code/UICode"
 

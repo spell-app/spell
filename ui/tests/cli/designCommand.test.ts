@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 import { DESIGN_TOOLS, designBuildArgs, designCommand } from "spell-ui/cli/designCommand"
 
 describe("DESIGN_TOOLS", () => {

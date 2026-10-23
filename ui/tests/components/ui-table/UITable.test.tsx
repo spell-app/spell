@@ -3,10 +3,10 @@ import { page, userEvent } from "vite-plus/test/browser"
 
 import { UI } from "spell-ui/runtime"
 import type { TableColumn, TableRow, TableSortDetail } from "spell-ui/components/components.types"
-import type { DOMElement } from "spell-kit/element"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Viewport } from "spell-kit/test-helpers/Viewport"
+import type { DOMElement } from "spell/element"
+import { expectAccessible } from "spell/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Viewport } from "spell/test-helpers/Viewport"
 
 import "spell-ui/components/ui-table"
 

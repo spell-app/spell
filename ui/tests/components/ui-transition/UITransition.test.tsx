@@ -4,10 +4,10 @@ import { Keys } from "spell-ui/test-helpers/Keys"
 
 import { UI } from "spell-ui/runtime"
 import type { TransitionDetail } from "spell-ui/components/components.types"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import type { DOMElement } from "spell-kit/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import type { DOMElement } from "spell/element"
 import type { DOMTransitionElement } from "spell-ui/components/ui-transition"
 
 import "spell-ui/components/ui-transition"

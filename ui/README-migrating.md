@@ -427,7 +427,7 @@ And Spell UI isn't on npm yet, so all of it runs from a checkout of the kit.
 
 1. Set up the kit and bring Spell UI in, as
    [the front page's thirty seconds](README.md#thirty-seconds-two-ways) do:
-   the kit's [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero), then `yarn clone spell-ui`.
+   the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then `yarn clone spell-ui`.
 2. See every example in both forms:
 
    ```sh

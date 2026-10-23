@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 import { DesignColor } from "spell-ui/tools/DesignColor"
 import { DesignExport } from "spell-ui/tools/DesignExport"
 import { ElementManifests } from "spell-ui/tools/ElementManifests"

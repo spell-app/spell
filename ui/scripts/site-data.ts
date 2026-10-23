@@ -25,7 +25,7 @@ import { parseArgs } from "node:util"
 
 import { ElementManifests } from "spell-ui/tools/ElementManifests"
 import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
-import { Terminal } from "spell-kit/element-tools/Terminal"
+import { Terminal } from "spell/element-tools/Terminal"
 
 import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFiles"
 
