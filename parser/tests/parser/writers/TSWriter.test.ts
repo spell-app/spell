@@ -215,7 +215,7 @@ describe("TSWriter", () => {
     )
   })
 
-  test("JSX is real JSX, by the page's names;  drawing a thing calls its `draw()`", () => {
+  test("JSX is real JSX, by the page's names;  a thing draws as javascript draws it, as its element", () => {
     const element = new P.ASTJSXElement(match, {
       tagName: "th",
       attrs: [
@@ -238,7 +238,19 @@ describe("TSWriter", () => {
       ]
     })
     // `class` first, as javascript's `h()` calls give it
-    expect(writer.write(element)).toBe(`<th class="left" colspan="2">{theStock.draw()}</th>`)
+    expect(writer.write(element)).toBe(`<th class="left" colspan="2">{core.drawThing(theStock)}</th>`)
+  })
+
+  test("a list's items draw as javascript draws them, `core.drawItems()`:  a drawable list's are its element's children", () => {
+    const drawItems = new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawItems",
+      args: [new P.ASTVariableExpression(match, { name: "the_deck" })]
+    })
+    const element = new P.ASTJSXElement(match, {
+      tagName: "div",
+      children: [new P.ASTJSXExpression(match, { expression: drawItems })]
+    })
+    expect(writer.write(element)).toBe(`<div>{core.drawItems(theDeck)}</div>`)
   })
 
   test("an arrow's parameter spell can't type is left to TypeScript", () => {

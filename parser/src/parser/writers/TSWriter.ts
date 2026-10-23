@@ -28,14 +28,17 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  * - A drawing in Solid's shapes, where it can be:
  *   - a computed local becomes an accessor, `const className = () => ...`
  *   - an `if ... return` chain becomes a `<Show>` / `<Switch>`
- *   - `draw cards in it` becomes a `<For>`
  *   - Any other `to draw` re-runs whole, in its error boundary.
+ * - Drawing a thing, or a list's items, as javascript does:  `{core.drawThing(this.stock)}`, `{core.drawItems(this)}`.
+ *   - So a drawable thing draws as its element, e.g. `<solitaire-card>`, and a drawable list's items as its children.
+ *   - NOT `this.stock.draw()`:  that draws its drawing in place, never its element, so a pile's cards never show
+ *     (epic `spanish` J100).
  * - Decorators:
  *   - `@prop({ oneOf: RANKS }) accessor rank!: Rank`
  *   - `@derived get state()`
  *   - `@thing`
- *   - `@drawn` on `draw()`:  each drawn thing in its own error boundary,
- *     as `core.drawThing()` does for compiled javascript
+ *   - `@drawn` on `draw()`:  its drawing in its own error boundary,
+ *     the one `core.drawThing()` gives compiled javascript;  `core.drawThing()` calls it straight, with no second one
  * - Types where spell knows them:  parameters, properties, lists `as const`.
  *   - A type spell DOESN'T know is written `UNKNOWN`, `any /* spell: type unknown *\/`, never a bare `any`:
  *     so every gap shows, and can be counted (epic `output-targets`, Q16).
@@ -225,11 +228,12 @@ export class TSWriter extends JSWriter {
   // ## `core`'s helpers, as TypeScript says them
   ////////////////
 
-  /** As javascript's (`JSWriter.coreCall()`), plus drawing:  `card.draw()`, `<For>` -- see `drawThing()`, `drawItems()`. */
+  /**
+   * As javascript's (`JSWriter.coreCall()`), plus a `!` on an item a guard found.
+   * - Drawing is javascript's too:  `core.drawThing(this.stock)`, `core.drawItems(this)` -- so a drawable thing
+   *   draws as its element.
+   */
   coreCall(node: P.ASTScopedMethodInvocation): string | undefined {
-    const [first] = node.args.args ?? []
-    if (node.methodName === "drawThing") return this.drawThing(first)
-    if (node.methodName === "drawItems") return first && this.drawItems(first)
     const written = super.coreCall(node)
     // the first or last item of a list a guard found has items:  there, so read as found -- see `isFoundItem()`
     return written !== undefined && this.isFoundItem(node) ? `${written}!` : written
@@ -295,24 +299,6 @@ export class TSWriter extends JSWriter {
         ? String(this.write(only))
         : this.write(new P.ASTStatementBlock(method.body.match, { statements: rest, wrap: true }))
     return `on<${shape}>(${this.bare(type!)}, ${async}({ ${names.join(", ")} }) => ${body})`
-  }
-
-  /** `thing.draw()` -- `?.draw()` when it may be nothing, e.g. the last card of a pile. */
-  drawThing(thing: P.ASTExpression | undefined): string {
-    if (!thing) return "undefined"
-    return `${this.tight(thing)}${this.mayBeNothing(thing) ? "?." : "."}draw()`
-  }
-
-  /**
-   * `<For each={pile.items}>{(card) => card.draw()}</For>`:  each item in its own error boundary, kept by identity.
-   * - Its item is named for the list's item type when it's ours, e.g. `card` in a `Tableau`, else `item`.
-   */
-  drawItems(list: P.ASTExpression): string {
-    const self = unwrapped(list)
-    const isSelf = self instanceof P.ASTSelfLiteral || (self instanceof P.ASTVariableExpression && self.name === "this")
-    const itemType = isSelf && this.project.itemTypeOf(this.currentClass)
-    const item = itemType ? itemType.charAt(0).toLowerCase() + itemType.slice(1) : "item"
-    return `<For each={${this.memberObject(list)}.items}>{(${item}) => ${item}.draw()}</For>`
   }
 
   /**
@@ -1223,7 +1209,7 @@ export class TSWriter extends JSWriter {
     if (child instanceof P.ASTJSXElement) return this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""
-    // JSX already, e.g. `<For>` for `draw cards in it`:  no braces
+    // JSX already, e.g. an element written as a child's value:  no braces
     const text = this.bare(expression)
     return text.startsWith("<") ? text : `{${text}}`
   }
