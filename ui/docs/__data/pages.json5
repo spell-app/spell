@@ -507,6 +507,11 @@
       "summary": "A toast allows users to receive a short, non-blocking notification.",
       "status": "done"
     },
+    "ui-toolbar": {
+      "title": "Toolbar",
+      "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.",
+      "status": "done"
+    },
     "ui-transition": {
       "title": "Transition",
       "summary": "A transition is an animation used to show or hide content, or to draw attention to it.",

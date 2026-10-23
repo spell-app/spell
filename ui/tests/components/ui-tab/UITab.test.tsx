@@ -444,6 +444,24 @@ describe("<ui-tab>", () => {
 ////////////////
 
 describe("<ui-tabs> look", () => {
+  it("segmented:  the chosen tab's thumb slides to the next tab chosen, as `<ui-menu>`'s does", async () => {
+    const { menu, buttons } = await wide('appearance="segmented"', UNEVEN)
+    /** A tab's left edge, from the menu's padding edge. */
+    const leftOf = (button: HTMLElement) =>
+      button.getBoundingClientRect().left - menu.getBoundingClientRect().left - menu.clientLeft
+    await expect.poll(() => menu.classList.contains("thumbed")).toBe(true)
+    expect(parseFloat(getComputedStyle(menu, "::before").left)).toBeCloseTo(leftOf(buttons[0]!), 0)
+    await expect.poll(() => menu.classList.contains("moving")).toBe(true)
+    await userEvent.click(buttons[1]!)
+    await expect
+      .poll(() => parseFloat(menu.style.getPropertyValue("--_menu-thumb-x")))
+      .toBeCloseTo(leftOf(buttons[1]!), 0)
+    expect(parseFloat(menu.style.getPropertyValue("--_menu-thumb-width"))).toBeCloseTo(
+      buttons[1]!.getBoundingClientRect().width,
+      0
+    )
+  })
+
   it("joins a tabular menu and its panes, and lays vertical tabs out beside the pane", async () => {
     const { menu, panes } = await tabs("tabular attached")
     expect(getComputedStyle(boxOf(panes[0]!)).marginTop).toBe("0px")

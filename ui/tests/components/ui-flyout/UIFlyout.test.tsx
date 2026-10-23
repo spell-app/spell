@@ -70,7 +70,9 @@ beforeEach(async () => {
   await UI.load()
   UI.overlays.useCloseWatcher = false
   // speeds the slide up (the dialog's alias reads the page's `::part` value)
-  Fixture.render(`<style>ui-flyout::part(flyout) { --ui-flyout-duration: 1ms }</style>`)
+  Fixture.render(
+    `<style>ui-flyout::part(flyout) { --ui-flyout-duration: 1ms;  --ui-flyout-close-duration: 1ms }</style>`
+  )
 })
 
 afterEach(() => {
@@ -357,21 +359,44 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 ////////////////
 
 describe("<ui-flyout> modeless", () => {
-  it("shows with show():  no dimmer, no scroll lock, the page still clickable;  a click on it leaves it open", async () => {
+  it("shows with show():  no dimmer, no scroll lock;  a click on the page lands, and closes it", async () => {
     const { host, dialog, trigger } = await flyout(`<ui-flyout modeless header="Hi" content="Body"></ui-flyout>`)
     const clicks = record<MouseEvent>(trigger, "click")
+    const closes = record(host, "ui-close")
     await open(host)
     expect(dialog.open).toBe(true)
     expect(dialog.matches(":modal")).toBe(false)
     expect(document.documentElement.classList.contains("ui-scroll-locked")).toBe(false)
     expect(dialog.className).toContain("modeless")
-    // the page isn't inert:  focus reaches it, and a click on it lands, leaving the flyout open
+    // the page isn't inert:  focus reaches it;  a click on it lands where it went, and light-dismisses the flyout
     trigger.focus()
     expect(document.activeElement).toBe(trigger)
-    await userEvent.click(document.body, { position: { x: innerWidth - 5, y: 5 } })
-    trigger.click()
+    // a narrow flyout, the trigger at the far edge:  the frame is narrower than a flyout
+    host.style.setProperty("--ui-flyout-width", "100px")
+    trigger.style.cssText = "position: fixed;  right: 0;  top: 0"
+    await userEvent.click(trigger)
     await settle()
     expect(clicks).toHaveLength(1)
+    expect(dialog.open).toBe(false)
+    expect(closes.map((detail) => detail.reason)).toEqual(["outside"])
+  })
+
+  it("a click inside it leaves it open", async () => {
+    const { host, dialog } = await flyout(`<ui-flyout modeless header="Hi" content="Body"></ui-flyout>`)
+    await open(host)
+    await userEvent.click(dialog)
+    await settle()
+    expect(dialog.open).toBe(true)
+  })
+
+  it('closedby="closerequest":  a click on the page leaves it open', async () => {
+    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless closedby="closerequest">x</ui-flyout>`)
+    await open(host)
+    // a narrow flyout, the trigger at the far edge:  the frame is narrower than a flyout
+    host.style.setProperty("--ui-flyout-width", "100px")
+    trigger.style.cssText = "position: fixed;  right: 0;  top: 0"
+    await userEvent.click(trigger)
+    await settle()
     expect(dialog.open).toBe(true)
   })
 
@@ -393,8 +418,8 @@ describe("<ui-flyout> modeless", () => {
 describe("<ui-flyout> sliding out", () => {
   it("stays drawn while `hidden` slides it out:  the DOM element keeps its box until the dialog has left", async () => {
     const { host, dialog } = await flyout(`<ui-flyout header="Hi">x</ui-flyout>`)
-    host.style.setProperty("--ui-flyout-duration", "400ms")
-    onTestFinished(() => void host.style.removeProperty("--ui-flyout-duration"))
+    host.style.setProperty("--ui-flyout-close-duration", "400ms")
+    onTestFinished(() => void host.style.removeProperty("--ui-flyout-close-duration"))
     await open(host)
     host.hidden = true
     await settle()

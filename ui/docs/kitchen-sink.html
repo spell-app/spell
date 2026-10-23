@@ -1084,6 +1084,40 @@
                 </ui-table>
               </ui-docs-example>
             </ui-section>
+
+            <ui-section id="collections-toolbar" label="Toolbar" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.
+                  <a href="ui-toolbar.html">Toolbar page</a>
+                </p>
+                <ui-toolbar secondary aria-label="Sections demo" style="max-width: 360px">
+                  <ui-item href="#types" selected>Types</ui-item>
+                  <ui-item href="#groups">Groups</ui-item>
+                  <ui-item href="#content">Content</ui-item>
+                  <ui-item href="#states">States</ui-item>
+                  <ui-item href="#variations">Variations</ui-item>
+                  <ui-item href="#group-variations">Group Variations</ui-item>
+                </ui-toolbar>
+              </ui-docs-example>
+              <ui-docs-example description="Segmented">
+                <ui-toolbar appearance="segmented" aria-label="Segmented demo" style="max-width: 320px">
+                  <ui-item selected>Examples</ui-item>
+                  <ui-item>Usage</ui-item>
+                  <ui-item>API</ui-item>
+                  <ui-item>Theming</ui-item>
+                  <ui-item>Accessibility</ui-item>
+                  <ui-item>History</ui-item>
+                </ui-toolbar>
+              </ui-docs-example>
+              <ui-docs-example description="Everything fits">
+                <ui-toolbar secondary aria-label="Short demo">
+                  <ui-item href="#one" selected>One</ui-item>
+                  <ui-item href="#two">Two</ui-item>
+                  <ui-item href="#three">Three</ui-item>
+                </ui-toolbar>
+              </ui-docs-example>
+            </ui-section>
           </ui-section>
 
           <ui-section id="views" label="Views" sticky collapsible dividing>

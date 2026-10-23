@@ -161,6 +161,19 @@
     --ui-bar-background: var(--fruity-bar);
     --ui-bar-filter: var(--fruity-blur);
     --ui-bar-color: var(--ui-text-color);
+    /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
+    --ui-bar-tracked: 1;
+    --ui-bar-track: light-dark(#e9e9ee, #3a3846);
+    --ui-bar-track-radius: 9px;
+    --ui-bar-track-width: fit-content;
+    --ui-bar-track-padding: 2px;
+    --ui-bar-item-padding: 0 1.1em;
+    --ui-bar-item-radius: 7px;
+    --ui-bar-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
+    --ui-bar-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
+    --ui-bar-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    /* round the tab bar:  a lighter band than the bars themselves */
+    --ui-bar-band: light-dark(rgb(255 255 255 / 0.72), rgb(30 28 38 / 0.72));
     --ui-panel-shadow: var(--ui-shadow-raised);
     --ui-menu-background: var(--fruity-glass);
     --ui-popup-background: var(--fruity-glass-strong);
@@ -301,7 +314,7 @@
     --ui-progress-text-color: var(--ui-primary-on);
 
     /* Menus:  the selected item the accent's wash, its text the accent */
-    --ui-menu-hover-background: var(--fruity-track);
+    --ui-menu-hover-background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
     --ui-menu-active-background: var(--fruity-accent-wash);
     --ui-menu-active-color: var(--fruity-accent-text);
 
@@ -313,11 +326,14 @@
     --ui-menu-segmented-border: none;
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;
-    --ui-menu-segmented-item-padding: 0.3em 1em;
-    --ui-menu-segmented-item-radius: 6px;
+    --ui-menu-segmented-item-padding: 0.35em 1.5em;
+    /* concentric:  the track's radius (`--ui-menu-radius`, 10px) less its 2px padding */
+    --ui-menu-segmented-item-radius: calc(var(--ui-radius-m) - 2px);
     --ui-menu-segmented-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-menu-segmented-active-color: var(--ui-text-color);
     --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    /* the chosen segment under the pointer stays the white key;  an unchosen one a shade darker than the track */
+    --ui-menu-segmented-active-hover-background: var(--ui-menu-segmented-active-background);
     --ui-menu-active-focus-color: var(--ui-focus-color);
 
     /* The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash */
@@ -389,6 +405,11 @@
   :where(h1, h2, h3, h4, h5, h6) {
     text-wrap-style: balance;
   }
+  /* a segmented menu's focus ring:  the violet focus colour, not its chosen segment's text colour (black) */
+  .ui.segmented.menu {
+    --_ui-menu-active-focus-color: var(--ui-focus-color);
+  }
+
   :is(h1, h2).ui.header,
   .ui.header:is(.huge, .massive) {
     font-weight: var(--ui-font-weight-bold);
@@ -397,15 +418,84 @@
   :where(.ui-typography) :where(h1, h2) {
     letter-spacing: -0.02em;
   }
-  /* the tight tracking is the heading's, not its lede's */
+  /* the tight tracking is the heading's, not its lede's;  a lede wraps `pretty` (no lone last word) */
   :host(:state(in-header)) > .header,
   .in-header.header {
     letter-spacing: normal;
+    text-wrap-style: pretty;
   }
+
+  /* Anchors land below a sticky header (page only:  `:root` matches nothing in a shadow root) */
+  :root :where(h1, h2, h3, h4, h5, h6, section, ui-section) {
+    scroll-margin-top: calc(var(--spell-site-header-height, 0px) + 1em);
+  }
+
+  /*******************************
+       Numbers, links, images, text
+  *******************************/
 
   :is(.ui.table, :where(ui-table) > table),
   .ui.statistic,
   .ui.statistics {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* underlines never cross descenders;  softer at rest, full on hover, only where the device hovers */
+  :where(a) {
+    text-underline-position: from-font;
+    text-decoration-skip-ink: auto;
+  }
+  @media (hover: hover) {
+    :where(.ui-typography) :where(a) {
+      text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+    }
+    :where(.ui-typography) :where(a:hover) {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* a white picture doesn't melt into the page:  a 1px 8% outline inside its edge */
+  :where(img) {
+    outline: 1px solid light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08));
+    outline-offset: -1px;
+  }
+
+  /* long words, links and ids break rather than run off the page */
+  :where(.ui-typography) {
+    overflow-wrap: break-word;
+  }
+
+  /*******************************
+               Motion
+  *******************************/
+
+  /* Buttons press in (0.97, 200ms ease-out);  the property list restates the button's own (`UIButton.css`) */
+  @media (prefers-reduced-motion: no-preference) {
+    .ui.button:not(.loading) {
+      transition-property: opacity, background-color, color, box-shadow, scale;
+      transition-duration:
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)),
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)), 200ms;
+      transition-timing-function: var(--ui-ease), var(--ui-ease), var(--ui-ease), var(--ui-ease), ease-out;
+    }
+    .ui.button:not(.disabled, :disabled, .loading):active {
+      scale: 0.97;
+    }
+  }
+
+  /*
+   * Switching scheme:  `ThemePreference.applyScheme()` puts `ui-scheme-switching` on `<html>` for one frame;  the flag
+   * inherits into every shadow root, where the style query finds it, so no colour animates across the switch.
+   * - `!important`:  a transition set by ANY component layer must lose for that frame.
+   */
+  :root.ui-scheme-switching {
+    --spell-scheme-switching: on;
+  }
+  @container style(--spell-scheme-switching: on) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
+    }
   }
 }

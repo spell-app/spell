@@ -7219,7 +7219,7 @@
             },
             {
               "name": "modeless",
-              "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it.",
+              "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page lands, and closes it as it does;  so do Escape and its own buttons.",
               "type": {
                 "text": "boolean"
               },
@@ -7429,7 +7429,12 @@
             },
             {
               "name": "--ui-flyout-duration",
-              "default": "var(--ui-duration-slower)"
+              "default": "220ms",
+              "description": "opening: quick, easing out; closing: quicker, easing in (macOS's pace)"
+            },
+            {
+              "name": "--ui-flyout-close-duration",
+              "default": "160ms"
             },
             {
               "name": "--ui-flyout-close-size",
@@ -14439,6 +14444,10 @@
             {
               "name": "--ui-menu-segmented-active-shadow",
               "default": "none"
+            },
+            {
+              "name": "--ui-menu-thumb-duration",
+              "default": "200ms"
             },
             {
               "name": "--ui-menu-font-family",
@@ -28849,6 +28858,410 @@
           "declaration": {
             "name": "UIToast",
             "module": "src/components/ui-toast/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ui-toolbar/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIToolbar",
+          "tagName": "ui-toolbar",
+          "customElement": true,
+          "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.",
+          "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.",
+          "attributes": [
+            {
+              "name": "size",
+              "description": "Size, `mini` ... `massive`;  `medium` is the default.",
+              "type": {
+                "text": "\"mini\" | \"tiny\" | \"small\" | \"medium\" | \"large\" | \"big\" | \"huge\" | \"massive\""
+              },
+              "fieldName": "size"
+            },
+            {
+              "name": "color",
+              "description": "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill.",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\""
+              },
+              "fieldName": "color"
+            },
+            {
+              "name": "appearance",
+              "description": "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` (no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  `appearance=\"pointing\" secondary` ~== `secondary pointing`.",
+              "type": {
+                "text": "\"tabular\" | \"pointing\" | \"secondary\" | \"text\" | \"segmented\""
+              },
+              "fieldName": "appearance"
+            },
+            {
+              "name": "position",
+              "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).",
+              "type": {
+                "text": "\"left\" | \"right\" | \"center\""
+              },
+              "fieldName": "position"
+            },
+            {
+              "name": "secondary",
+              "description": "De-emphasized:  no box, rounded items.  Alias of `appearance=\"secondary\"`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "secondary"
+            },
+            {
+              "name": "pointing",
+              "description": "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of `appearance=\"pointing\"`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "pointing"
+            },
+            {
+              "name": "tabular",
+              "description": "Looks like tabs (Fomantic 2.9's `tabbed`).  Alias of `appearance=\"tabular\"`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "tabular"
+            },
+            {
+              "name": "text",
+              "description": "Plain text items, no box.  Alias of `appearance=\"text\"`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "text"
+            },
+            {
+              "name": "vertical",
+              "description": "Items stacked top to bottom.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "vertical"
+            },
+            {
+              "name": "pagination",
+              "description": "Page links:  compact, centred items.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "pagination"
+            },
+            {
+              "name": "icon",
+              "description": "Icon-only items.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "icon"
+            },
+            {
+              "name": "labeled",
+              "description": "Labeled icon items:  a large icon above each item's text.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "labeled"
+            },
+            {
+              "name": "link",
+              "description": "Every item is interactive:  a `<button>` with the link hover.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "fluid",
+              "description": "Takes the full width of its container.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "fluid"
+            },
+            {
+              "name": "stackable",
+              "description": "Stacks its items on mobile.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "stackable"
+            },
+            {
+              "name": "centered",
+              "description": "Centred in its container, items centred.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "centered"
+            },
+            {
+              "name": "borderless",
+              "description": "No dividers between items.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "borderless"
+            },
+            {
+              "name": "compact",
+              "description": "Only as wide as its items.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "compact"
+            },
+            {
+              "name": "wrapping",
+              "description": "Items wrap onto more lines when they don't fit.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "wrapping"
+            },
+            {
+              "name": "wrapped",
+              "description": "With `wrapping`:  square corners where the lines meet.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "wrapped"
+            },
+            {
+              "name": "inverted",
+              "description": "The dark scheme;  with `color`, filled with the colour.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "inverted"
+            },
+            {
+              "name": "floated",
+              "description": "Floats beside the content;  `right` floats right.",
+              "type": {
+                "text": "boolean | \"left\" | \"right\""
+              },
+              "fieldName": "floated"
+            },
+            {
+              "name": "fitted",
+              "description": "No item padding;  `horizontally` / `vertically` keep the other axis' padding.",
+              "type": {
+                "text": "boolean | \"horizontally\" | \"vertically\""
+              },
+              "fieldName": "fitted"
+            },
+            {
+              "name": "attached",
+              "description": "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle.",
+              "type": {
+                "text": "boolean | \"top\" | \"bottom\""
+              },
+              "fieldName": "attached"
+            },
+            {
+              "name": "fixed",
+              "description": "Fixed to an edge of the viewport.",
+              "type": {
+                "text": "boolean | \"top\" | \"bottom\" | \"left\" | \"right\""
+              },
+              "fieldName": "fixed"
+            },
+            {
+              "name": "alignment",
+              "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `alignment=\"center\"` => `center aligned`.",
+              "type": {
+                "text": "\"fluid\" | \"left\" | \"center\" | \"right\""
+              },
+              "fieldName": "alignment"
+            },
+            {
+              "name": "equal",
+              "description": "Every item the same width, from the items themselves (no count):  with `alignment=\"fluid\"` each takes an equal share of the bar;  otherwise each is as wide as the widest, packed.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "equal"
+            },
+            {
+              "name": "items",
+              "description": "Older, count-based alias of `equal`:  divides the width evenly between N items (`items=\"3\"` => `three item`);  `items=\"equal\"` => `equal width` (Fomantic's, ~== `equal alignment=\"fluid\"`).",
+              "type": {
+                "text": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" | \"10\" | \"11\" | \"12\" | \"13\" | \"14\" | \"15\" | \"16\" | string"
+              },
+              "fieldName": "items"
+            },
+            {
+              "name": "interactive",
+              "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "interactive"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-select",
+              "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ value: string, item: Element, originalEvent?: Event }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "menu",
+              "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+            },
+            {
+              "name": "toolbar",
+              "description": "The box around the menu and its scroll buttons."
+            },
+            {
+              "name": "scroll-start",
+              "description": "The `‹` button, shown while there's more to scroll back to."
+            },
+            {
+              "name": "scroll-end",
+              "description": "The `›` button, shown while there's more to scroll on to."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "interactive",
+              "description": "A menubar (`interactive`)."
+            },
+            {
+              "name": "vertical",
+              "description": "Items stacked (`vertical`)."
+            },
+            {
+              "name": "overflowing",
+              "description": "Its items don't all fit:  they scroll sideways."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-toolbar-gap",
+              "default": "0.25em"
+            },
+            {
+              "name": "--ui-toolbar-button-size",
+              "default": "1.75em"
+            },
+            {
+              "name": "--ui-toolbar-button-background",
+              "default": "transparent"
+            },
+            {
+              "name": "--ui-toolbar-button-hover-background",
+              "default": "oklch(from var(--ui-ink) l c h / 0.08)"
+            },
+            {
+              "name": "--ui-toolbar-button-color",
+              "default": "var(--ui-text-muted)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIToolbar",
+          "declaration": {
+            "name": "UIToolbar",
+            "module": "src/components/ui-toolbar/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-toolbar",
+          "declaration": {
+            "name": "UIToolbar",
+            "module": "src/components/ui-toolbar/index.ts"
           }
         }
       ]

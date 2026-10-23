@@ -95,7 +95,8 @@
   .site-topbar {
     position: sticky;
     top: 0;
-    z-index: 20;
+    /* above the sticky tabs and titles, so their bands slide under it */
+    z-index: calc(var(--ui-z-sticky) + 2);
     box-sizing: border-box;
     display: none;
     align-items: center;
@@ -105,6 +106,24 @@
     background: var(--ui-bar-background, var(--ui-background));
     backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
+  }
+  /*
+   * at the top of the page the bar is see-through over the masthead;  it fills in over the first 32px of scrolling,
+   * once the page slides under it (a scroll-driven animation;  without one, it stays filled)
+   */
+  @supports (animation-timeline: scroll()) {
+    .site-topbar {
+      animation: site-topbar-fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 32px;
+    }
+  }
+  @keyframes site-topbar-fill {
+    from {
+      background-color: transparent;
+      border-block-end-color: transparent;
+      backdrop-filter: none;
+    }
   }
   .site-topbar > spell-site-header {
     flex: 1 1 auto;
@@ -268,17 +287,32 @@
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
+    padding-block: 0.4em;
     backdrop-filter: var(--ui-bar-filter, none);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
     background: none;
     backdrop-filter: none;
   }
+  /*
+   * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it and a slightly
+   * deeper fill, so the two read as two bars, not one block
+   */
+  .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
+    background: color-mix(in oklab, var(--ui-section-sticky-background) 94%, var(--ui-text-color));
+    box-shadow: inset 0 1px 0 var(--ui-border-color);
+  }
   .site-tabs::part(menu) {
+    --_site-band: var(--ui-bar-band, var(--ui-bar-background, var(--ui-background)));
     position: sticky;
-    top: var(--site-top);
+    /* its band's width below the top bar, so the band never laps over it */
+    top: calc(var(--site-top) + var(--site-tabs-band));
     z-index: calc(var(--ui-z-sticky) + 1);
-    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
+    /* the band:  round the bar, and out to the column's edges (a strip, not a frame) */
+    box-shadow:
+      0 0 0 var(--site-tabs-band) var(--_site-band),
+      calc(var(--site-tabs-band) - var(--site-gutter)) 0 0 var(--site-tabs-band) var(--_site-band),
+      calc(var(--site-gutter) - var(--site-tabs-band)) 0 0 var(--site-tabs-band) var(--_site-band);
     backdrop-filter: var(--ui-bar-filter, none);
   }
   .site-main ui-section[id] {

@@ -6,6 +6,8 @@ import { tabsVocabulary } from "./UITabs.en"
 import { tabVocabulary } from "./UITab.en"
 import { UITab } from "./UITab"
 import { MENU, type TabOwner, type TabPaneState } from "./UITab.types"
+// The menu family's, beside its sheet (below):  the tab list draws a segmented menu's thumb
+import { SegmentedThumb } from "spell-ui/components/ui-menu/SegmentedThumb"
 
 import menuCSS from "spell-ui/components/ui-menu/UIMenu.css?inline"
 import tabCSS from "./UITab.css?inline"
@@ -293,6 +295,38 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   }
 
   ////////////////
+  // ## The sliding thumb
+  ////////////////
+
+  /** The tab list's sliding thumb, while drawn. */
+  private thumb: SegmentedThumb | undefined
+
+  /** A `segmented` tab list, rendered and connected:  it draws a sliding thumb, as `<ui-menu>` does. */
+  get hasThumb(): boolean {
+    return this.appearance === SEGMENTED && this.isReady && this.isConnected
+  }
+
+  /** SIDE EFFECT:  the thumb, drawn on the tab list while `hasThumb`;  its cleanup takes it down. */
+  @E.onChange("hasThumb")
+  protected onThumbChanged(hasThumb: boolean) {
+    const bar = this.bar
+    if (!hasThumb || !bar) return
+    const thumb = new SegmentedThumb({ track: bar, chosenBox: () => this.buttons()[this.selectedIndex] })
+    this.thumb = thumb
+    const stop = thumb.start()
+    return () => {
+      stop()
+      this.thumb = undefined
+    }
+  }
+
+  /** Another tab chosen, or the tabs changed:  the thumb slides to the chosen one. */
+  @E.onChange("selectedIndex", "tabs", { defer: true })
+  protected onChosenTabChanged() {
+    this.thumb?.update()
+  }
+
+  ////////////////
   // ## The roving tabindex
   ////////////////
 
@@ -504,6 +538,9 @@ const TAB_SELECTOR = ":scope > [role=tab]"
 
 /** Window events `history` follows. */
 const HISTORY_EVENTS = ["hashchange", "popstate"] as const
+
+/** The `appearance` of a tab list drawn as a segmented control:  it has a sliding thumb. */
+const SEGMENTED: UIT.MenuAppearance = "segmented"
 
 /** A value no pane has. */
 const NO_VALUE = "\u0000"

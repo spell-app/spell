@@ -97,7 +97,7 @@ export class SiteSections {
 
   /**
    * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bar:
-   * `--site-top`, plus the tabs' bar and its band when the page has tabs.
+   * `--site-top`, plus the tabs' bar and its band above and below when the page has tabs.
    */
   private measure(): void {
     const main = this.main
@@ -105,7 +105,8 @@ export class SiteSections {
     const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
     const bar = SiteSections.barOf(main)
     const band = parseFloat(getComputedStyle(main).getPropertyValue("--site-tabs-band")) || 0
-    let top = siteTop + (bar ? bar.getBoundingClientRect().height + band : 0)
+    // the bar sticks a band below the site top, its band below it too
+    let top = siteTop + (bar ? band + bar.getBoundingClientRect().height + band : 0)
     // a page's own sticky bar (the kitchen sink's theme picker):  stuck below that, the titles below it
     const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
     if (pageBar) {
