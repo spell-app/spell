@@ -169,7 +169,9 @@ describe("worktree hook", () => {
     expect(failed.stderr).toMatch(/`exit 3` failed in .*broken:  exit 3\..*EnterWorktree with name "broken"/)
     expect(existsSync(join(BESIDE, "broken", ".git"))).toBe(true)
 
-    config({ installOnCreate: true, installCommand: "sleep 5", installTimeout: 1 })
+    // `exec`:  the timeout stops the shell, so sleep must BE the shell;  Linux's `sh` (dash) runs it as a child,
+    // which lives on, holding the hook's stderr, and this test waits the whole 5s for it (CI, epic `repo-split` I65)
+    config({ installOnCreate: true, installCommand: "exec sleep 5", installTimeout: 1 })
     const slow = hook("create", { name: "slow", cwd: MAIN })
     expect(slow.status).toBe(1)
     expect(slow.stderr).toMatch(/stopped after 1s \(installTimeout/)
