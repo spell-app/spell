@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-labelledby="title desc">
+<!-- The kit's box shows five folders on purpose: element-tools and test-helpers are left out (Owen, 2026-10-23). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="800" height="440" role="img" aria-labelledby="title desc">
   <title id="title">Five repos, one checkout</title>
-  <desc id="desc">The five Spell repos stacked by what they use.  spell-app at the top uses spell-lang and spell-ui, and runs spell-epic.  spell-epic uses spell-ui.  spell-lang and spell-ui use the kit, spell-kit, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
+  <desc id="desc">The five Spell repos stacked by what they use.  At the top, spell-app uses spell-lang and spell-ui, and spell-epic, beside it, uses spell-ui.  spell-lang, the language in English and Spanish, and spell-ui use the kit, spell-kit, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
@@ -13,57 +14,51 @@
     .name { font-size: 15px; font-weight: 700; text-anchor: middle; }
     .what { font-size: 12.5px; fill: #4A4D5C; text-anchor: middle; }
     .chip { font-size: 12.5px; font-weight: 600; text-anchor: middle; fill: #3B2F86; }
-    .label { font-size: 12px; font-style: italic; fill: #6550CA; }
     .repo { fill: #EFECFB; stroke: #6550CA; stroke-width: 2; }
     .kit { fill: #E4DFFA; stroke: #6550CA; stroke-width: 2.5; }
     .chipbox { fill: #FFFFFF; stroke: #B9B0E8; stroke-width: 1.2; }
     .edge { fill: none; stroke: #6550CA; stroke-width: 1.8; }
-    .runs { fill: none; stroke: #8E96B5; stroke-width: 1.8; stroke-dasharray: 6 5; }
   </style>
 
-  <rect x="1" y="1" width="798" height="498" rx="16" fill="#FAF9FE" stroke="#E4E0F5" stroke-width="2"/>
+  <rect x="1" y="1" width="798" height="438" rx="16" fill="#FAF9FE" stroke="#E4E0F5" stroke-width="2"/>
   <text class="title" x="40" y="44">Five repos, one checkout</text>
   <text class="sub" x="40" y="66">Every arrow points down:  a repo uses only what's below it.</text>
 
   <!-- edges first, so the boxes sit on top of them -->
-  <path class="edge" d="M330,150 C330,226 210,214 210,286" marker-end="url(#arrow)"/>
-  <path class="edge" d="M580,150 L580,286" marker-end="url(#arrow)"/>
-  <path class="runs" d="M470,150 L470,186" marker-end="url(#arrow)"/>
-  <text class="label" x="482" y="174">runs</text>
-  <path class="edge" d="M480,250 C480,272 536,266 540,286" marker-end="url(#arrow)"/>
-  <path class="edge" d="M210,350 L210,386" marker-end="url(#arrow)"/>
-  <path class="edge" d="M580,350 L580,386" marker-end="url(#arrow)"/>
+  <path class="edge" d="M230,150 L214,216" marker-end="url(#arrow)"/>
+  <path class="edge" d="M380,150 C380,190 540,180 552,216" marker-end="url(#arrow)"/>
+  <path class="edge" d="M620,150 L606,216" marker-end="url(#arrow)"/>
+  <path class="edge" d="M210,280 L210,316" marker-end="url(#arrow)"/>
+  <path class="edge" d="M580,280 L580,316" marker-end="url(#arrow)"/>
 
-  <!-- spell-app -->
-  <rect class="repo" x="300" y="90" width="320" height="60" rx="12"/>
-  <text class="name" x="460" y="116">spell-app</text>
-  <text class="what" x="460" y="136">the editor</text>
-
-  <!-- spell-epic -->
-  <rect class="repo" x="400" y="190" width="160" height="60" rx="12"/>
-  <text class="name" x="480" y="216">spell-epic</text>
-  <text class="what" x="480" y="236">epics and sagas</text>
+  <!-- spell-app, spell-epic -->
+  <rect class="repo" x="110" y="90" width="320" height="60" rx="12"/>
+  <text class="name" x="270" y="116">spell-app</text>
+  <text class="what" x="270" y="136">the editor</text>
+  <rect class="repo" x="520" y="90" width="200" height="60" rx="12"/>
+  <text class="name" x="620" y="116">spell-epic</text>
+  <text class="what" x="620" y="136">epics and sagas</text>
 
   <!-- spell-lang, spell-ui -->
-  <rect class="repo" x="110" y="290" width="200" height="60" rx="12"/>
-  <text class="name" x="210" y="316">spell-lang</text>
-  <text class="what" x="210" y="336">the language</text>
-  <rect class="repo" x="480" y="290" width="200" height="60" rx="12"/>
-  <text class="name" x="580" y="316">spell-ui</text>
-  <text class="what" x="580" y="336">the ui-* elements</text>
+  <rect class="repo" x="90" y="220" width="240" height="60" rx="12"/>
+  <text class="name" x="210" y="246">spell-lang</text>
+  <text class="what" x="210" y="266">the language:  English and Spanish</text>
+  <rect class="repo" x="460" y="220" width="240" height="60" rx="12"/>
+  <text class="name" x="580" y="246">spell-ui</text>
+  <text class="what" x="580" y="266">the ui-* elements, and es-*</text>
 
   <!-- spell-kit -->
-  <rect class="kit" x="40" y="390" width="720" height="84" rx="14"/>
-  <text class="name" x="400" y="414">spell-kit</text>
-  <text class="what" x="400" y="431" style="font-size:11.5px">the kit:  under every repo, and the one install</text>
-  <rect class="chipbox" x="120" y="440" width="96" height="24" rx="12"/>
-  <text class="chip" x="168" y="456">util</text>
-  <rect class="chipbox" x="236" y="440" width="96" height="24" rx="12"/>
-  <text class="chip" x="284" y="456">toolchain</text>
-  <rect class="chipbox" x="352" y="440" width="96" height="24" rx="12"/>
-  <text class="chip" x="400" y="456">server</text>
-  <rect class="chipbox" x="468" y="440" width="96" height="24" rx="12"/>
-  <text class="chip" x="516" y="456">element</text>
-  <rect class="chipbox" x="584" y="440" width="96" height="24" rx="12"/>
-  <text class="chip" x="632" y="456">cli</text>
+  <rect class="kit" x="40" y="320" width="720" height="92" rx="14"/>
+  <text class="name" x="400" y="344">spell-kit</text>
+  <text class="what" x="400" y="361" style="font-size:11.5px">the kit:  under every repo, and the one install</text>
+  <rect class="chipbox" x="120" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="168" y="390">util</text>
+  <rect class="chipbox" x="236" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="284" y="390">toolchain</text>
+  <rect class="chipbox" x="352" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="400" y="390">server</text>
+  <rect class="chipbox" x="468" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="516" y="390">element</text>
+  <rect class="chipbox" x="584" y="374" width="96" height="24" rx="12"/>
+  <text class="chip" x="632" y="390">cli</text>
 </svg>

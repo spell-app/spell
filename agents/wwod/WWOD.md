@@ -566,7 +566,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
     read with `appTexts.text(key, params)`;  each other language is a LAZY `AppTexts.<lang>.ts` beside it,
     with every key (its type says so)
   - the language server (`spell-app/lsp`):  its labels are keys in `LspTexts.en.ts`,
-    read in the PROJECT's language (`LSP.LspTexts.of(scope)`)
+    read in the language of the FILE they're about (`LSP.LspTexts.of(scope)`)
   - A sentence that names something takes it as a param (`{type}`, `{theType}`), never glued from pieces:
     each language words it its own way.
   - NOT:  a `MSG.ts` of every string in a package that speaks only English -- one more file to keep in step, for no

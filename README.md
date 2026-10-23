@@ -246,8 +246,9 @@ and runs them right beside the text.
   Each rule is a class with a syntax string, written in [Rulex](https://github.com/spell-app/spell-lang/blob/main/README-rulex.md);
   no grammar file, no generated code.
   [GitHub's Markdown](https://github.com/spell-app/spell-lang/blob/main/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
-- Spell reads Spanish too:  a file says so in its name, `Carta.es.spell`, and its sentences compile to the same targets
-  ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README.md#a-third-human-language)).
+- Spell reads Spanish too:  a file says so in its name, `Carta.es.spell`, and its sentences compile to the same targets.
+  Solitario, the Solitaire example written again in Spanish, deals and passes the same tests
+  ([Spell in Spanish](https://github.com/spell-app/spell-lang/blob/main/README-spanish.md)).
   🌱 Norwegian and Portuguese are next.
 
 ### A component is a real element on the page
@@ -292,7 +293,7 @@ _"Why doesn't it do that already???"_
     If it wrote Spell, they read it, find the sentence that's wrong, and change it.
   - English-like languages were tried before:  COBOL and AppleScript were easy to read, hard to write.
     Now an AI does the writing, so code a person can read is worth more than it was, not less.
-- One language, many targets:  English in;  JavaScript, TypeScript and Python out today.
+- Many languages, many targets:  English and Spanish in;  JavaScript, TypeScript and Python out today.
   The language:  [spell-lang's README](https://github.com/spell-app/spell-lang/blob/main/README.md).
 - 🌱 An environment where you build by moving things around, not only by typing:  coming.
   The editor today:  [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md).
@@ -307,10 +308,10 @@ Where that stands, plainly:
 
 The kit is checked out first, and the other four are cloned inside it.
 
-![Five Spell repos stacked by what they use:  spell-app on top uses spell-lang and spell-ui and runs spell-epic;  spell-epic uses spell-ui;  spell-lang and spell-ui use the kit, whose folders are util, toolchain, server, element and cli](docs/images/repos.svg)
+![Five Spell repos stacked by what they use:  on top, spell-app uses spell-lang and spell-ui, and spell-epic, beside it, uses spell-ui;  spell-lang, the language in English and Spanish, and spell-ui use the kit, whose folders are util, toolchain, server, element and cli](docs/images/repos.svg)
 
-_The kit is under every repo.  The dashed arrow:  `yarn clone spell-app` brings spell-epic too, whose route modules
-the kit's page server runs beside the app's;  spell-app never imports a line of them._
+_The kit is under every repo.  spell-epic sits beside spell-app, not under it:
+spell-app names it nowhere, and the kit's page server runs each repo's part of its settings, spell-epic's too._
 
 Why five, and not one:  each repo is one thing, with its own tests and its own CI, and the arrows stay honest.
 `yarn clone` brings a repo only what it needs, so an import that climbs fails right there.
@@ -815,13 +816,14 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [README-development.md](README-development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with three differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>working across repos with one branch name;  CI by branch name</li><li>where to change what;  the papercuts;  every script</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk</li><li>two extensions you build, the rest from the Marketplace</li><li>what it does for a `.spell` file;  the settings the repos ship</li><li>Spell Epic, the pages beside your code;  windows and worktrees</li><li>working on the extensions</li></ul> |
 | [README-agents.md](README-agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
-| [spell-lang/README.md](https://github.com/spell-app/spell-lang/blob/main/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>🌱 Spanish, more targets, any program read back as Spell</li></ul> |
+| [spell-lang/README.md](https://github.com/spell-app/spell-lang/blob/main/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>Spell in Spanish;  🌱 a third language, more targets, any program read back as Spell</li></ul> |
 | [spell-lang/README-parser.md](https://github.com/spell-app/spell-lang/blob/main/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
 | [spell-lang/README-rulex.md](https://github.com/spell-app/spell-lang/blob/main/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |
 | [spell-lang/README-markdown.md](https://github.com/spell-app/spell-lang/blob/main/README-markdown.md) | <ul><li>Markdown on Spell's parser:  a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, but slower and bigger than marked;  who draws with it</li><li>the spec as its scoreboard</li></ul> |
 | [spell-lang/README-spell.md](https://github.com/spell-app/spell-lang/blob/main/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
 | [spell-lang/README-core.md](https://github.com/spell-app/spell-lang/blob/main/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's</li><li>its pieces:  one object, built as it loads</li><li>three things a reader trips on, the Python runtime beside it</li><li>who may import it:  one copy per running app</li></ul> |
 | [spell-lang/README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md) | <ul><li>one program, four targets, and what each costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it;  a library for code that isn't Spell</li><li>Python in Python's own words;  choosing a target</li><li>🌱 WebAssembly, and a program on node mirrored in the page</li></ul> |
+| [spell-lang/README-spanish.md](https://github.com/spell-app/spell-lang/blob/main/README-spanish.md) | <ul><li>Spell in Spanish:  Solitario beside Solitaire, line for line</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  keeping them in step</li><li>the edges</li></ul> |
 | [spell-ui/README.md](https://github.com/spell-app/spell-ui/blob/main/README.md) | <ul><li>Spell UI, by contrast with other component libraries</li><li>thirty seconds, two ways;  `<ui-root>`, the top of every page</li><li>component packs;  the 62 families;  other ways to load</li><li>what it costs and assumes;  working on it</li><li>every page of Spell UI</li></ul> |
 | [spell-ui/README-components.md](https://github.com/spell-app/spell-ui/blob/main/README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike</li><li>the catalogue of every family</li><li>how a family is laid out, and adding one</li><li>written from the data</li></ul> |
 | [spell-ui/README-frameworks.md](https://github.com/spell-app/spell-ui/blob/main/README-frameworks.md) | <ul><li>the contract:  four rules every element keeps</li><li>plain JavaScript, React 19, Vue 3 and Solid 2;  Svelte, Angular and Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today, with an import map</li><li>what the smoke pages prove</li></ul> |
