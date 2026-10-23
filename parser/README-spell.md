@@ -524,7 +524,7 @@ SP.spellParser.compile("print 1 + 2", "statement") // => "core.console.log(1 + 2
 
 ## The frozen test projects
 
-Six projects in spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/)
+Seven projects in spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/)
 pin what Spell does, line for line:
 each has a snapshot of every target's output beside it, and a test fails on any change.
 They're NEVER edited to follow the live examples, which people change.
@@ -686,7 +686,7 @@ A rule's class takes any language's syntax, which is why `addRule()` takes only 
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
 Spanish has all of English's:  `spell lang packs check` says `Spanish (es):  complete, 19 modules`.
-A file in Spanish says so in its name, `Carta.es.spell`, as the frozen `cartas`'s do;  a plain `.spell` is English,
+A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
 ## What lives here, and what doesn't

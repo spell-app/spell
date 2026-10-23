@@ -46,8 +46,8 @@ And the three agree.
 Every frozen test project is compiled to JavaScript, TypeScript and Python, then run headless from the same seed,
 and each must print the same thing, line for line, its drawing included:
 that's [the core contract test](https://github.com/spell-app/spell-app/blob/main/tests/cli/contract.test.ts).
-The edge:  Python runs ten of the twelve:  the to-do app is still beyond its writer (below),
-and the Spanish one, `cartas`, has no Python yet.
+The edge:  Python runs seven of the nine:  the to-do app is still beyond its writer (below),
+and Solitario, the Spanish example, compiles to Python but isn't run under it yet.
 
 ## Four targets, and what each one costs
 
@@ -350,13 +350,14 @@ A program that draws runs as a web app, without `--no-browser`:
 
 The checks:
 - pyright on every test project's Python, as Python 3.12, in the `basic` mode VS Code's Python extension uses:
-  it finds nothing in any of the ten.
+  it finds nothing in any of the seven.
 - ruff and pytest on `spell_core`:  they run in spell-lang's `yarn lint` and `yarn test`.
 
 The cost, beyond Python and uv:
 - **Its type hints are thinner than TypeScript's:**  where TypeScript says `rank: Rank`, Python says `rank: Any`.
 - 36 of the JavaScript core's names aren't in `spell_core` yet, most of them a browser's own (below).
-- Two test projects of the twelve have no Python yet:  the to-do app (below), and the Spanish `cartas`.
+- Two test projects of the nine have no Python snapshot yet:  the to-do app (below), and Solitario,
+  which compiles to Python but has no snapshot pinning it.
 - A kind of node the Python writer can't write yet stops the compile, naming the kind.
 
 <details>
@@ -452,6 +453,6 @@ These guides need a checkout with the content folder beside it, and the page ser
 
 - [README-parser](README-parser.md#5-output):  how a writer walks the tree;  the same `if`, two writers
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
-- [README-spell](README-spell.md#the-frozen-test-projects):  the twelve test projects whose snapshots pin every target
+- [README-spell](README-spell.md#the-frozen-test-projects):  the test projects, and the two examples, whose snapshots pin every target
 - [the `py` folder's AGENTS.md](src/py/AGENTS.md):  the rules for working on Python's writers and `spell_core`
 - [The command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  `spell compile`, `spell run` and the rest of the language's commands

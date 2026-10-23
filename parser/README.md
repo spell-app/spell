@@ -169,8 +169,9 @@ flowchart LR
 - **Real today:**  English and Spanish in, four targets out.
   A file written in Spanish says so in its name, `Carta.es.spell`;  a plain `.spell` is English, and one project may mix them.
   Every project gets JavaScript, `js/solid`;  a project asks for the rest by name:  `ts/solid`, `ts/lib`, `py`.
-  Twelve frozen test projects pin what the writers write, in snapshots that `tsc` and pyright check too
-  ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
+  Seven frozen test projects and two examples, Solitaire and Solitario, pin what the writers write,
+  in snapshots that `tsc` and pyright check too ([the frozen test projects](README-spell.md#the-frozen-test-projects)).
+  Spanish, file by file:  [README-spanish](README-spanish.md).
 - **Not yet:**  a third human language, and WebAssembly (below, "Coming").
 - What each target gives you, and what it costs:
   [README-targets](README-targets.md#four-targets-and-what-each-one-costs).
@@ -474,6 +475,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [parser/rulex/](src/parser/rulex/) | `spell-lang/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
 | [markdown/](src/markdown/) | `spell-lang/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
 | [spell/](src/spell/) | `spell-lang/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [spell/languages/](src/spell/languages/) | `spell-lang/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  the edges</li></ul> |
 | [core/](src/core/) | `spell-lang/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell-lang/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
 | [cli/](src/cli/) | `spell-lang/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang) |
@@ -511,34 +513,24 @@ Each file's name says its language, `Carta.es.spell`, and its outline reads the 
 
 ```spell
 una "carta" es una cosa dibujable donde:
-
-	## palos, rangos y colores:  los tipos de valores propios de la carta
-	- "palos" como uno de tréboles, diamantes, corazones o espadas
-	- "rangos" como uno de as, 2 ... 10, jota, dama o rey
-	- "colores" como uno de rojo o negro
+	# rango de la carta
+	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
+	- su "valor" es la posición de su rango      				// as = 1 ... rey = 13
+	- "es un (rango)"											// "la carta es un rey"
+	- "es una figura" si su rango es jota, dama o rey			// "la carta es una figura"
 ```
 
 _The top of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Carta.es.spell),
-from Solitario, the Solitaire example in Spanish._
+from Solitario, the Solitaire example in Spanish, line for line._
 
-- It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
-  - Each folder of rules has `<folder>.en.ts`, the rules with their English syntax and tests,
-    and `<folder>.es.ts`, the same rules in the same order, in Spanish.
-  - A rule reads what a WORD RULE matched (an article, `is` or `is not`), never the word itself.
-- A LANGUAGE PACK is everything else a language brings, in [languages/](src/spell/languages/):
-  its word tables, its singulars and plurals, its articles and their agreement, and its messages.
-  English is the first pack, Spanish the second.
-- Names keep their Spanish, accents and all:  `una carta "es una figura"` compiles to `get esUnaFigura()`.
-- A wrong article is a warning, never an error:  `el carta` asks `¿Querías decir "la carta"?`.
-- One project may mix languages:  an English `Card.spell` beside a Spanish `Mazo.es.spell`, each read by its own rules,
-  each using what the other declares by the words it was declared with.
-- The parser's warnings and errors speak the file's language, with examples in it:
-  `Di qué contiene "nombres-de-cartas", p. ej. "poner nombres-de-cartas a una nueva lista de texto"`.
-- `spell lang packs check` says what a pack lacks against English, module by module, and runs in the tests too;
-  `fix` writes stubs to translate.
-- **Not yet:**  a translated example beyond `cartas`, and docs that teach Spanish Spell.
-- The whole story, and what Spell UI and the editor do in Spanish:  the docs site's Spell in Spanish guide,
-  `/guides/spanish.html`.
+- It isn't a translation layer, or a second parser:  the same rule classes are registered twice,
+  each folder's `<folder>.en.ts` and `<folder>.es.ts`, with the words in a LANGUAGE PACK beside them.
+- Names keep their Spanish, accents and all:  `"es una figura"` compiles to `get esUnaFigura()`.
+- One project may mix languages, each file read by its own rules.
+- The parser, a test's lines, Spell UI's tags and the editor all speak it;  a wrong article is a warning.
+- **Not yet:**  docs that teach Spanish Spell, and a third language (below).
+- Solitario's tests, the commands to try, pictures of the editor, and every edge:
+  [README-spanish](README-spanish.md).
 
 ## 🌱 Coming
 
@@ -632,5 +624,5 @@ MIT, as spell-lang's [package.json](package.json) says.
 - [README-parser](README-parser.md):  the parser on its own, if the rules-as-classes part is why you came
 - [README-spell](README-spell.md):  everything a line of Spell can say, and how to add a rule
 - [README-targets](README-targets.md):  what each target writes, and what each one costs
-- [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  every option of the thirteen commands, with examples
+- [README-spanish](README-spanish.md):  Spell in Spanish, with Solitario to run and the editor speaking it
 - [the kit's README](https://github.com/spell-app/spell-kit/blob/main/README.md):  setup from zero, the five repos, and every page of every repo
