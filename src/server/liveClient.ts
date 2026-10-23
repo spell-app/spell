@@ -201,11 +201,11 @@ export function liveClient(): void {
     addEventListener("hashchange", reportPlace)
     addEventListener("spell-doc:place", reportPlace)
     addEventListener("message", (event) => {
-      const data = event.data as { spell?: string; go?: number; command?: string; text?: string } | null
+      const data = event.data as { spell?: string; go?: number; command?: string; text?: string; image?: string } | null
       if (event.source !== window.parent) return
       if (data?.spell === "history" && (data.go === -1 || data.go === 1)) history.go(data.go)
       if (data?.spell === "edit" && typeof data.command === "string" && !isRepeat(data.command))
-        edit(data.command, data.text)
+        edit(data.command, data.text, data.image)
     })
     addEventListener("keydown", editKey, true)
     // a same-origin frame of a live page (the brand index's thumbnails) has no VS Code above it
@@ -506,9 +506,10 @@ export function liveClient(): void {
    * - why:  VS Code takes Cmd / Ctrl + C, X, V, A, Z as its own keys before a page in a frame sees them,
    *   so copy, paste and select all did nothing in the side bar (epic `windows-and-review` I2)
    */
-  function edit(command: string, text?: string) {
+  function edit(command: string, text?: string, image?: string) {
     if (command === "paste") {
-      if (text) document.execCommand("insertText", false, text)
+      if (image) void pasteImage(image).catch((error) => console.error("spell-server:  paste", error))
+      else if (text) document.execCommand("insertText", false, text)
       return
     }
     if (command === "copy" || command === "cut") {
@@ -565,7 +566,9 @@ export function liveClient(): void {
     if ((command === "copy" || command === "cut") && !selectedText()) return
     event.preventDefault()
     if (command === "paste") {
-      void pasteKey().catch((error) => console.error("spell-server:  paste", error))
+      // it comes back as the extension's `edit` message:  that one is the page's own, never a repeat
+      pastePending = true
+      window.parent.postMessage({ spell: "edit", command: "paste" }, "*")
       return
     }
     lastKey = { command, at: Date.now() }
@@ -573,37 +576,18 @@ export function liveClient(): void {
   }
 
   /**
-   * Cmd / Ctrl + V in the framed page (`editKey()`):  an IMAGE on the clipboard is pasted as the browser would, a
-   * `paste` event carrying the file on the focused element;  else the text, through the extension.
-   * - why:  `editKey()` takes the key from VS Code, which pastes only text into a view (`DocView.ts` `edit()`), so
-   *   an image never reached the page (a test run's failure screenshot:  epic `epic-engine` I75, Owen 2026-10-22)
-   * - the frame may read the clipboard (`allow="clipboard-read"`);  refused or empty:  the text route, as before
+   * An image the extension read off the clipboard (`edit("paste")`, a `data:` URL), pasted as the browser would:  a
+   * `paste` event carrying it as a file, on the focused element.
+   * - why:  in VS Code's side bar the page takes Cmd / Ctrl + V itself (`editKey()`), and may not read the clipboard;
+   *   VS Code's own clipboard is text only, so the extension reads the image (`DocView.ts` `clipboardImage()`) --
+   *   a test run's failure screenshot (epic `epic-engine` I75)
    */
-  async function pasteKey() {
-    const image = await clipboardImage()
-    if (image) {
-      const data = new DataTransfer()
-      data.items.add(image)
-      const target = document.activeElement ?? document.body
-      target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
-      return
-    }
-    // it comes back as the extension's `edit` message:  that one is the page's own, never a repeat
-    pastePending = true
-    window.parent.postMessage({ spell: "edit", command: "paste" }, "*")
-  }
-
-  /** The clipboard's first image, as a file;  `undefined` with none, or when the page may not read it. */
-  async function clipboardImage(): Promise<File | undefined> {
-    try {
-      for (const item of await navigator.clipboard.read()) {
-        const type = item.types.find((each) => each.startsWith("image/"))
-        if (type) return new File([await item.getType(type)], `pasted.${type.slice(6)}`, { type })
-      }
-    } catch {
-      // no permission, or nothing readable:  the text route
-    }
-    return undefined
+  async function pasteImage(url: string) {
+    const blob = await (await fetch(url)).blob()
+    const data = new DataTransfer()
+    data.items.add(new File([blob], `pasted.${blob.type.slice(6) || "png"}`, { type: blob.type || "image/png" }))
+    const target = document.activeElement ?? document.body
+    target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
   }
 
   /**
