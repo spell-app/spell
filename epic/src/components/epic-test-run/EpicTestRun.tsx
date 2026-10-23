@@ -79,6 +79,12 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /** Screenshots pasted on this visit, test id -> its data URL:  shown at once, while saving and after. */
   @E.state accessor pasted: Readonly<Record<string, string>> = {}
 
+  /**
+   * Screenshots saved for tests with no answer yet, test id -> its path (`POST shot`'s):  the answer chosen next
+   * carries it.  This visit's only:  a reload before answering drops it (the file stays beside the page).
+   */
+  heldShots: Readonly<Record<string, string>> = {}
+
   /** The test whose screenshot is on its way to the page server;  `""` for none. */
   @E.state accessor savingShot = ""
 
@@ -329,7 +335,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
         <Show when={this.fields()?.ifNot.length}>{this.field("ifNot", this.fields()!.ifNot)}</Show>
         {this.answers(id)}
         {this.commentBox(id)}
-        <Show when={answer()?.result === "failed"}>{this.failure(id)}</Show>
+        {this.screenshot(id)}
         {this.moves()}
       </article>
     )
@@ -462,8 +468,12 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /** A failure's screenshot:  its area -- its thumbnail, or where to paste or drop one. */
-  private failure(id: string): JSX.Element {
+  /**
+   * A test's screenshot:  its area -- its thumbnail, or where to paste, drop or choose one.
+   * - on every card, as the comment box is (Owen, 2026-10-22:  "you lost the picture input"):  it goes with whichever
+   *   answer is chosen, before or after it
+   */
+  private screenshot(id: string): JSX.Element {
     const shot = () => this.pasted[id] ?? this.answerOf(id)?.shot
     return (
       <div class="failure" part={this.partForName("failure")}>
@@ -634,8 +644,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
    * An answer pressed (or its key):  marked at once, then saved.
    * - Passed, Skip, Not now:  on to the next test, a moment later (the press shows first)
    * - Failed:  the screenshot's area opens, the comment box focused;  pressed again, it keeps both
-   * - the comment goes with it, whichever it is (typed, saved in an earlier answer, or the draft);  a screenshot only
-   *   with Failed
+   * - the comment and the screenshot go with it, whichever it is (typed or taken now, or with an earlier answer)
    */
   @E.untracked
   private answer(result: TestResult) {
@@ -645,17 +654,18 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.noteTimer?.cancel()
     this.noteTimer = undefined
     const note = this.commentOf(id).trim()
+    const prior = client.testAnswerOf(id)
+    const shot = prior?.shot ?? this.heldShots[id]
     if (result !== "failed") {
-      this.track(client.answerTest(id, { result, ...(note && { note }) }))
+      this.track(client.answerTest(id, { result, ...(note && { note }), ...(shot && { shot }) }))
       this.moveTimer?.cancel()
       this.moveTimer = E.after(ANSWER_PAUSE_MS / 1000, () => {
         if (this.at === id) this.move(1)
       })
       return
     }
-    const prior = client.testAnswerOf(id)
-    if (prior?.result !== "failed" || (prior.note ?? "") !== note)
-      this.track(client.answerTest(id, { result, ...(note && { note }), ...(prior?.shot && { shot: prior.shot }) }))
+    if (prior?.result !== "failed" || (prior.note ?? "") !== note || prior.shot !== shot)
+      this.track(client.answerTest(id, { result, ...(note && { note }), ...(shot && { shot }) }))
     E.afterSolidUpdate(() => E.beforeNextPaint(() => this.focusNote()))
   }
 
@@ -874,9 +884,9 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /** A paste anywhere on the page, while a failure shows:  an image in it is the test's screenshot. */
+  /** A paste anywhere on the page, while a test's card shows:  an image in it is the test's screenshot. */
   private readonly onPaste = (event: ClipboardEvent) => {
-    if (this.answerOf(this.at)?.result !== "failed") return
+    if (!this.tests().includes(this.at)) return
     const file = Array.from(event.clipboardData?.items ?? [])
       .find((item) => item.kind === "file" && item.type.startsWith("image/"))
       ?.getAsFile()
@@ -903,7 +913,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
 
   /**
    * Take `file` as the current test's screenshot:  shown at once, saved through the page server (`POST shot`), then
-   * put in its failure.
+   * put in its answer;  no answer yet, held for the one to come (`heldShots`).
    * - not an image, or over 8 MB:  a notice says so
    */
   @E.untracked
@@ -918,13 +928,17 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     this.savingShot = id
     const shot = await client.saveShot(id, png)
     this.savingShot = ""
+    if (!shot) return
     const answer = client.testAnswerOf(id)
-    if (!shot || answer?.result !== "failed") return
+    if (!answer) {
+      this.heldShots = { ...this.heldShots, [id]: shot }
+      return
+    }
     const note = this.commentOf(id).trim()
-    await client.answerTest(id, { result: "failed", ...(note && { note }), shot })
+    await client.answerTest(id, { result: answer.result, ...(note && { note }), shot })
   }
 
-  /** Test `id`'s screenshot removed:  off its failure, its note kept. */
+  /** Test `id`'s screenshot removed:  off its answer (or the one to come), its note kept. */
   @E.untracked
   private removeShot(id: string) {
     const client = this.review.client
@@ -932,8 +946,11 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     const pasted = { ...this.pasted }
     delete pasted[id]
     this.pasted = pasted
-    if (!client || answer?.result !== "failed") return
-    void client.answerTest(id, { result: "failed", ...(answer.note && { note: answer.note }) })
+    const held = { ...this.heldShots }
+    delete held[id]
+    this.heldShots = held
+    if (!client || !answer) return
+    void client.answerTest(id, { result: answer.result, ...(answer.note && { note: answer.note }) })
   }
 
   /** A screenshot's button, clicked:  its image zoomed. */

@@ -138,18 +138,77 @@ export class EpicTests {
     if (!step && !should && !example && !ifNot) return ""
     if (!step || !should) throw new TypeError("a test says both what to do (--step) and what should happen (--should)")
     const image = example?.image ? `<img src="${PlanMarkup.text(example.image)}" alt="What it should look like">` : ""
-    const exampleHTML = [image, example?.text ?? ""].filter(Boolean).join(" ")
+    const exampleHTML = [image, example?.text ? EpicTests.proseHTML(example.text) : ""].filter(Boolean).join(" ")
     const fields: [TestField, string | undefined][] = [
-      ["Step", step],
-      ["Should", should],
+      ["Step", EpicTests.proseHTML(step)],
+      ["Should", EpicTests.proseHTML(should)],
       ["Example", exampleHTML],
-      ["If not", ifNot]
+      ["If not", ifNot && EpicTests.proseHTML(ifNot)]
     ]
     return fields
       .filter(([, html]) => html)
       .map(([label, html]) => `<epic-field label="${label}">${html}</epic-field>`)
       .join("")
   }
+
+  /**
+   * A test field's value as HTML:  HTML stays as it is;  plain text (no tag in it) is made readable.
+   * - why:  the fields take HTML, and a test written as plain text with its steps inline, `1. Open ... 2. Pick ...`,
+   *   showed as one run-on paragraph (Owen, 2026-10-22:  "text is not markdown formatted")
+   * - steps numbered from 1, inline or a line each:  a numbered list;  lines starting `- `:  a bullet list
+   * - else paragraphs, at blank lines;  `` `code` `` in backticks becomes code;  everything else escaped
+   */
+  static proseHTML(value: string): string {
+    if (HTML_TAG.test(value)) return value
+    const text = value.trim()
+    const steps = EpicTests.stepsOf(text)
+    if (steps) return `<ol>${steps.map((step) => `<li>${inlineHTML(step)}</li>`).join("")}</ol>`
+    const lines = text.split("\n").map((line) => line.trim())
+    if (lines.length > 1 && lines.every((line) => !line || BULLET.test(line))) {
+      const items = lines.filter(Boolean).map((line) => `<li>${inlineHTML(line.replace(BULLET, ""))}</li>`)
+      return `<ul>${items.join("")}</ul>`
+    }
+    return text
+      .split(/\n\s*\n/)
+      .map((paragraph) => `<p>${inlineHTML(paragraph)}</p>`)
+      .join("")
+  }
+
+  /**
+   * `text`'s numbered steps, when it is one:  `1. ...`, then `2. ...`, inline or a line each, numbered from 1 with
+   * none skipped;  `undefined` for anything else (fewer than two, or a number out of order).
+   * - a number counts only after a space or a line's start, followed by a dot and a space:  `steps 1-5`, `v1.2` and
+   *   a path's dot are text
+   */
+  static stepsOf(text: string): string[] | undefined {
+    const starts: number[] = []
+    for (const match of text.matchAll(STEP_NUMBER)) {
+      if (Number(match[2]) !== starts.length + 1) continue
+      starts.push(match.index + match[1]!.length)
+    }
+    if (starts.length < 2 || starts[0] !== 0) return undefined
+    return starts.map((start, index) =>
+      text
+        .slice(start, starts[index + 1])
+        .replace(/^\d+\.\s+/, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+  }
+}
+
+/** Any HTML tag:  a field holding one is HTML, kept as given (`EpicTests.proseHTML()`). */
+const HTML_TAG = /<[a-z][\w-]*[\s>/]/i
+
+/** A step's number:  after the start or a space, a number, a dot, then a space (`EpicTests.stepsOf()`). */
+const STEP_NUMBER = /(^|\s)(\d{1,2})\.\s/g
+
+/** A bullet line's start:  `- ` or `* `. */
+const BULLET = /^[-*]\s+/
+
+/** Plain text as HTML:  escaped, `` `code` `` as code, its lines run together. */
+function inlineHTML(text: string): string {
+  return PlanMarkup.text(text.replace(/\s+/g, " ").trim()).replace(/`([^`]+)`/g, "<code>$1</code>")
 }
 
 ////////////////

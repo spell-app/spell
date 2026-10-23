@@ -62,7 +62,9 @@ export const epicTestRunVocabulary = {
     },
     {
       name: "failure",
-      description: "Under the comment once Failed:  the screenshot's paste and drop area."
+      description:
+        "Under the comment on every card:  the screenshot's area (paste, drop or choose one), going with whichever " +
+        "answer is picked;  its part name from when only Failed had it."
     },
     { name: "moves", description: "Back and Next, at the card's foot." },
     {

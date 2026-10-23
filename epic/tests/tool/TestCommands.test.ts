@@ -132,6 +132,23 @@ test("details <epic> <V id> --step --should:  the test rewritten in the fields, 
   expect(warned.at(-1)).toMatch(/^epic:  missing --file <html file>/)
 })
 
+// Owen, 2026-10-22:  "text is not markdown formatted" -- a Step written as plain text, its steps inline
+describe("a test's fields given as plain text (EpicTests.proseHTML)", () => {
+  test("steps numbered from 1, inline or a line each:  a numbered list;  backticks:  code", () => {
+    expect(EpicTests.proseHTML("1. Open `Card.spell`. 2. Pick Spell. 3. Do steps 1-2 again in ~/www/spell.")).toBe(
+      "<ol><li>Open <code>Card.spell</code>.</li><li>Pick Spell.</li><li>Do steps 1-2 again in ~/www/spell.</li></ol>"
+    )
+    expect(EpicTests.proseHTML("1. One\n2. Two")).toBe("<ol><li>One</li><li>Two</li></ol>")
+  })
+
+  test("bullets, paragraphs and escaping;  HTML kept as given;  numbers out of order are text", () => {
+    expect(EpicTests.proseHTML("- a\n- b")).toBe("<ul><li>a</li><li>b</li></ul>")
+    expect(EpicTests.proseHTML("x < y\n\nthen z")).toBe("<p>x &lt; y</p><p>then z</p>")
+    expect(EpicTests.proseHTML("<p>kept</p>")).toBe("<p>kept</p>")
+    expect(EpicTests.proseHTML("Step 2. comes before 1. here")).toBe("<p>Step 2. comes before 1. here</p>")
+  })
+})
+
 describe("test <epic>", () => {
   beforeEach(() => epicWith("x", "Epic X", null, ["first", "!closed", "second", "third"]))
 
