@@ -18,9 +18,10 @@ import type { Styles } from "./Styles"
  *   - `classic`:  the base every Fomantic theme sits on;  `apply("classic")` applies it alone
  *   - `dark`:  a colour SCHEME, not a look;  switch it with `color-scheme` / `ui-dark` / `<ui-root theme>`, on top
  *     of any theme.  `apply("dark")` throws.
- *   - `spell` and `spell-brand`:  OUR OWN themes (`own`), the Spell brand (`spell-brand`:  a copy converging on
- *     Claude Design's pages, epic `design-system`);  applied exactly like a Fomantic theme (on `classic`), but a
- *     picker lists them apart
+ *   - `spell`, `spell-brand` and `fruity`:  OUR OWN themes (`own`):
+ *     - `spell`:  the Spell brand;  `spell-brand`:  a copy converging on Claude Design's pages (epic `design-system`)
+ *     - `fruity`:  macOS's look today, translucent glass surfaces (epic `debut`)
+ *     - applied exactly like a Fomantic theme (on `classic`), but a picker lists them apart
  * - Registry names in `UI.styles` (`slots`):  `classic` (the base) and `theme` (the current Fomantic theme).  ONE
  *   `theme` slot, so switching themes replaces its text in place.
  ****************/
@@ -29,7 +30,7 @@ export class Themes {
   readonly base = BASE
 
   /** our own themes (not Fomantic ports):  applied like one, listed apart from `names` */
-  readonly own: readonly string[] = ["spell", "spell-brand"]
+  readonly own: readonly string[] = ["spell", "spell-brand", "fruity"]
 
   /** `UI.styles` names:  base slot and theme slot */
   readonly slots = { base: BASE, theme: "theme" } as const

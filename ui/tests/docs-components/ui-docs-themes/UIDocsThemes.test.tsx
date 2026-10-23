@@ -13,7 +13,12 @@ import {
   type DocsShownScheme
 } from "spell-ui/docs-components/docs-components.types"
 
-import { SPELL, SPELL_BRAND, type DocsThemesChange } from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
+import {
+  FRUITY,
+  SPELL,
+  SPELL_BRAND,
+  type DocsThemesChange
+} from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
 
 import "spell-ui/docs-components/ui-docs-themes"
 import "spell-ui/components/ui-button"
@@ -202,18 +207,19 @@ describe("<ui-docs-themes> markup", () => {
 })
 
 describe("<ui-docs-themes> overlay", () => {
-  it("lists Spell (checked), Spell Brand, Plain, Classic, then every Fomantic theme titled from the site data", async () => {
+  it("lists Spell (checked), Spell Brand, Fruity, Plain, Classic, then every Fomantic theme titled from the site data", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
     const list = rows(host)
-    expect(list.slice(0, 4)).toEqual([
+    expect(list.slice(0, 5)).toEqual([
       [SPELL, "Spell"],
       [SPELL_BRAND, "Spell Brand"],
+      [FRUITY, "Fruity"],
       [DOCS_PLAIN_THEME, "Plain"],
       ["classic", "Classic"]
     ])
     expect(
       list
-        .slice(4)
+        .slice(5)
         .map(([value]) => value)
         .sort()
     ).toEqual([...UI.themes.names].sort())
@@ -361,7 +367,7 @@ describe("<ui-docs-themes> dropdown (show=theme)", () => {
     const buttons = data.themes.filter((theme) => theme.families.includes("ui-button")).map((theme) => theme.name)
     const host = await render(`<ui-docs-themes for="ui-button" show="theme"></ui-docs-themes>`)
     const listed = dropdownRows(host)
-      .slice(4)
+      .slice(5)
       .map(([value]) => value)
     expect(listed.sort()).toEqual(buttons.filter((name) => UI.themes.names.includes(name)).sort())
     expect(listed).toContain("github")

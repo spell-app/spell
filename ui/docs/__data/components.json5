@@ -28007,6 +28007,11 @@
           "description": "Under `Spell Brand` in the list:  the theme the brand pages converge on."
         },
         {
+          "key": "fruityDescription",
+          "text": "macOS today, in glass",
+          "description": "Under `Fruity` in the list."
+        },
+        {
           "key": "classicDescription",
           "text": "Fomantic's look",
           "description": "Under `Classic` in the list."
@@ -39301,6 +39306,33 @@
         "ui-parts",
         "ui-progress",
         "ui-table"
+      ],
+      "global": true
+    },
+    {
+      "name": "fruity",
+      "title": "Fruity",
+      "families": [
+        "ui-button",
+        "ui-card",
+        "ui-checkbox",
+        "ui-code",
+        "ui-dimmer",
+        "ui-dropdown",
+        "ui-input",
+        "ui-label",
+        "ui-menu",
+        "ui-message",
+        "ui-modal",
+        "ui-panel",
+        "ui-parts",
+        "ui-popup",
+        "ui-progress",
+        "ui-section",
+        "ui-segment",
+        "ui-statistic",
+        "ui-table",
+        "ui-toast"
       ],
       "global": true
     },
