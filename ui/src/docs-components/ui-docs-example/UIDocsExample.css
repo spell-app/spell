@@ -197,39 +197,48 @@
     backdrop-filter: none;
   }
   /*
-   * OPEN, the code is a panel BEHIND the example, rolling down from under it (Owen, 2026-10-23, epic `debut`:  "show it
-   * like it is a panel behind the example which rolls open from the top.  The example shadow should be over the code
-   * content.  Code button should look depressed when the panel is open"):
-   * - the demo over it, casting its shadow down onto it
-   * - the code panel tucked up under the demo's rounded bottom, a shade deeper, rolling open (its height from 0;  at
-   *   once where the browser can't ease to `auto`)
+   * OPEN, as Owen's picture (2026-10-23, epic `debut`:  "show it like it is a panel behind the example which rolls open
+   * from the top.  The example shadow should be over the code content.  Code button should look depressed when the panel
+   * is open";  then, on a first try that boxed the demo inside the frame, "This is not what I wanted"):
+   * - ONE card:  the demo its top band, out to the frame's edges, as it sits closed;  the code under it, edge to edge
+   * - the demo over the code, casting its shadow down onto it
+   * - the code a shade deeper, rolling open from under the demo (its height from 0;  at once where the browser can't
+   *   ease to `auto`);  its long lines scroll sideways, never cut off
    * - the code button pressed in
    */
+  :host(:state(open)) .ui.example:not(.bare) > .frame {
+    padding: 0;
+    overflow: hidden;
+  }
   :host(:state(open)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
     position: relative;
     z-index: 1;
     margin: 0;
-    padding: 1em;
+    padding: var(--_ui-docs-example-frame-padding);
     border: none;
-    border-radius: var(--_ui-docs-example-demo-radius);
+    border-radius: 0;
     background: var(--_ui-docs-example-demo-background);
-    box-shadow: 0 6px 14px -8px oklch(0 0 0 / 0.3);
-  }
-  .ui.example {
-    --_ui-docs-example-demo-radius: calc(var(--_ui-docs-example-frame-radius) * 0.66);
+    box-shadow:
+      0 1px 0 var(--ui-border-color),
+      0 6px 12px -8px oklch(0 0 0 / 0.25);
   }
   .ui.example:not(.bare) [part~="code"]::part(segment) {
     box-sizing: border-box;
     height: auto;
-    margin: calc(-1 * var(--_ui-docs-example-demo-radius)) 0 0;
-    padding: calc(var(--_ui-docs-example-demo-radius) + 0.5em) 0 0;
-    overflow: hidden;
+    margin: 0;
+    padding: 0.5em var(--_ui-docs-example-code-inline) 0.75em;
+    overflow-x: auto;
+    overflow-y: hidden;
     border: none;
-    border-radius: 0 0 var(--_ui-docs-example-demo-radius) var(--_ui-docs-example-demo-radius);
-    background: color-mix(in oklab, var(--ui-text-color) 4%, transparent);
+    border-radius: 0;
+    background: color-mix(in oklab, var(--ui-text-color) 3%, transparent);
     box-shadow: none;
     interpolate-size: allow-keywords;
     transition: height 0.26s var(--ui-ease-out, ease-out);
+  }
+  .ui.example {
+    /* the code's side padding:  the frame's, so its text starts under the demo's */
+    --_ui-docs-example-code-inline: 1em;
   }
   @starting-style {
     .ui.example:not(.bare) [part~="code"]::part(segment) {
@@ -237,9 +246,9 @@
     }
   }
   :host(:state(open)) .frame > [part~="toggle"]::part(button) {
-    background: color-mix(in oklab, var(--ui-text-color) 10%, var(--_ui-docs-example-toggle-background));
+    background: color-mix(in oklab, var(--ui-text-color) 6%, var(--_ui-docs-example-toggle-background));
     box-shadow:
-      inset 0 1px 3px oklch(0 0 0 / 0.22),
+      inset 0 1px 2px oklch(0 0 0 / 0.18),
       0 0 0 1px var(--ui-border-color);
   }
   .ui.example:not(.bare) [part~="source"] {
