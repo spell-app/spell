@@ -178,6 +178,7 @@
     --ui-dimmer-background: light-dark(rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.45));
     --ui-dimmer-blur: blur(8px) saturate(1.2);
     --ui-modal-dimmer-filter: blur(8px) saturate(1.2);
+    --ui-flyout-dimmer-background: var(--ui-dimmer-background);
 
     /*******************************
                 Palette
@@ -316,7 +317,7 @@
     --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
 
     /* The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash */
-    --ui-docs-nav-background: var(--fruity-glass-strong);
+    --ui-docs-nav-background: light-dark(rgb(255 255 255 / 0.78), rgb(30 28 38 / 0.8));
     --ui-docs-nav-header-background: transparent;
     --ui-docs-nav-band-background: transparent;
     --ui-docs-nav-band-color: var(--ui-text-muted);
@@ -366,6 +367,14 @@
   .ui.modal,
   .ui.toast {
     backdrop-filter: var(--fruity-blur);
+  }
+  /* the docs' side column, docked or in its flyout (page only:  the panel is the element's own box) */
+  ui-docs-nav {
+    backdrop-filter: var(--fruity-blur);
+  }
+  /* a flyout blurs the page it covers, as a modal does */
+  dialog.ui.flyout::backdrop {
+    backdrop-filter: var(--ui-dimmer-blur);
   }
 
   /*******************************
