@@ -47,6 +47,7 @@ import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
+import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -593,6 +594,10 @@ classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_
 classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
 classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
 classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
+classes.addRule(ItemsReordered, {
+  syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds))?"
+})
 
 for (const subject of ["subject_it", "subject_implied"]) {
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })

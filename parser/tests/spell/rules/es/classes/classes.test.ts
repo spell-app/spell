@@ -125,6 +125,16 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/whenThingDroppedOn\(cosa\) \{\s+core\.console\.log\(cosa\)/)
     })
 
+    test("`- sus elementos se pueden reordenar (después de 1 segundo)`:  English's `its items can be reordered` (outline-spell P30)", () => {
+      const { code, errors } = compiled("reorder", [
+        "una tarea es una cosa dibujable",
+        "una agenda es una lista dibujable de tareas:",
+        "\t- sus elementos se pueden reordenar después de 1 segundo"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/reorderItemsAfter = 1/)
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",

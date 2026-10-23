@@ -1001,6 +1001,18 @@ describe("outline style", () => {
       expect(js).toContain("core.console.log(core.itemCountOf(this.selection))")
     })
 
+    test("`- its items can be reordered (after 1.5 seconds)`:  the seconds the page waits, on the class (outline-spell P30)", () => {
+      const js = compile([
+        "a task is a drawable thing",
+        "a checklist is a drawable list of tasks where:",
+        "\t- its items can be reordered",
+        "a backlog is a drawable list of tasks where:",
+        "\t- its items can be reordered after 1.5 seconds"
+      ])
+      expect(js).toContain("static reorderItemsAfter = 2")
+      expect(js).toContain("static reorderItemsAfter = 1.5")
+    })
+
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
         "a card is a drawable thing where:",

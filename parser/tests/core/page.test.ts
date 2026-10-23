@@ -102,6 +102,8 @@ describe("startPage():  a list's drag handlers", () => {
       core.startWhile(tray, "whileCardDraggedOver", "Card#3")
       core.endWhile(tray, "whileCardDraggedOver")
       core.runHandler(tray, "whenCardDroppedOn", "Card#3")
+      // a reorder:  Python's list moves them (outline-spell P30)
+      core.moveBefore(tray, ["Card#3"], undefined)
       core.remote!.trigger("card-drop", { count: 1 })
       // the page changes one of the program's things, e.g. a form a person typed in:  set there too
       tray.name = "T9"
@@ -113,6 +115,7 @@ describe("startPage():  a list's drag handlers", () => {
         { call: "start_while", on, args: ["while_card_dragged_over", "Card#3"] },
         { call: "end_while", on, args: ["while_card_dragged_over"] },
         { call: "when_card_dropped_on", on, args: ["Card#3"] },
+        { call: "move_before", on, args: [["Card#3"], undefined] },
         { trigger: "card-drop", details: { count: 1 } },
         { call: "set_prop", on, args: ["name", "T9"] }
       ])

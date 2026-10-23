@@ -70,6 +70,9 @@ class DrawableList(List):
     can_be_dropped_on: bool = False
     # may a page let people drag our lists themselves?  `a pile can be dragged`
     can_be_dragged: bool = False
+    # how many seconds a page waits before dragged items move into place, if people may reorder our items:
+    # `- its items can be reordered` says 2 -- `reorderItemsAfter`;  `None`:  they may not
+    reorder_items_after: float | None = None
 
     @property
     def selection(self) -> list[object]:

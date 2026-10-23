@@ -1325,6 +1325,24 @@
     },
     {
       "kind": "method",
+      "name": "moveBefore",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "items"
+        },
+        {
+          "name": "before"
+        }
+      ],
+      "description": "Move `items` into `list` before `before`, at its end with none:  a page reordering a list as people drag (epic `outline-spell` P30) -- see `List.moveBefore()`."
+    },
+    {
+      "kind": "method",
       "name": "startWhile",
       "of": "core",
       "module": "elements",

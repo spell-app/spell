@@ -56,6 +56,7 @@ import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
+import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -578,6 +579,10 @@ classesEs.addRule(DragHandler, {
   syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
 })
 classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
+// `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
+classesEs.addRule(ItemsReordered, {
+  syntax: "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos))?"
+})
 
 for (const subject of ["subject_it", "subject_implied"]) {
   classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })

@@ -308,3 +308,36 @@ def test_asking_without_moving_a_plain_list_allows_anything() -> None:
     assert core.can_give_up(foundation, a) is False
     assert core.can_take(Pile(), a) is True
     assert core.can_give_up([a], a) is True
+
+
+#######################################################
+# ## Reordering:  `move_before()` (epic outline-spell P30)
+#######################################################
+
+
+def test_move_before_reorders_a_lists_own_items_in_the_order_given() -> None:
+    a, b, c, d = cards(4)
+    pile = Pile()
+    core.append(pile, a, b, c, d)
+    assert pile.move_before([d, b], a) is True
+    assert list(pile.items) == [d, b, a, c]
+    # none:  to the end;  `before` one of them:  the next that isn't
+    pile.move_before([d], None)
+    assert list(pile.items) == [b, a, c, d]
+    pile.move_before([c, b], b)
+    assert list(pile.items) == [c, b, a, d]
+
+
+def test_move_before_takes_another_lists_item_only_as_a_move_would() -> None:
+    a, b, c = cards(3)
+    stock = StockPile()
+    pile = Pile()
+    core.append(stock, a, b)
+    core.append(pile, c)
+    # `a` isn't the stock's last card:  it stays;  `b` comes over, its owner changing
+    assert pile.move_before([a, b], c) is True
+    assert list(pile.items) == [b, c]
+    assert list(stock.items) == [a]
+    assert b.pile is pile
+    assert Foundation().move_before([c]) is True
+    assert pile.move_before([c]) is False

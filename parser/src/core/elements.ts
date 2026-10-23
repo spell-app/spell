@@ -59,6 +59,16 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
+   * Move `items` into `list` before `before`, at its end with none:  a page reordering a list as people drag
+   * (epic `outline-spell` P30) -- see `List.moveBefore()`.
+   * - In the program, wherever it runs (`remote`):  Python's list moves them, `move_before()`.
+   */
+  moveBefore(list: object, items: unknown[], before?: unknown): void {
+    if (core.remote) return core.remote.run(list, "moveBefore", [items, before])
+    ;(list as { moveBefore(items: unknown[], before?: unknown): boolean }).moveBefore(items, before)
+  },
+
+  /**
    * Run `owner`'s `while` handler `method` with `args`, e.g. a pile's `whileCardDraggedOver(card)`,
    * till `endWhile()`:  what it sets is put back then.
    * - `- while a card is dragged over it:` `set its hint to "drop here"`:  the hint goes back as the card leaves.

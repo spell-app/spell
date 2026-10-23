@@ -34,6 +34,14 @@ export class DrawableList<T = unknown> extends List<T> {
   static canBeDragged = false
 
   /**
+   * How many seconds the pointer rests before dragged items move into place, if people may reorder our items:
+   * `- its items can be reordered` says 2, `... after 1.5 seconds` 1.5 (epic `outline-spell` P30).
+   * - `undefined`:  they may not.
+   * - A page may say otherwise for one list:  its element's `move-delay`.
+   */
+  static reorderItemsAfter: number | undefined = undefined
+
+  /**
    * Our items people have selected on the page, in our order:  spell's `the selection of the tasks`
    * (epic `outline-spell` P29).
    * - Only items whose type says `can be selected`:  the page selects them as people click (`select()`).

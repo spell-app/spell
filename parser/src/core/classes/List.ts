@@ -646,6 +646,33 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
     return true
   }
 
+  /**
+   * Move `items` here, before `before` -- at our end with none:  a page reordering us as people drag (epic `outline-spell`
+   * P30, `core.moveBefore()`).
+   * - Ours already:  they just change places, in the order given.
+   * - Another list's:  only those it lets go and we take, as `moveHere()`;  the rest stay where they are.
+   * - `before` one of `items`:  the next of ours after it that isn't.
+   * - Returns whether any moved.
+   */
+  moveBefore(items: T[], before?: T): boolean {
+    const current = this.items
+    const moving = items.filter((item) => current.includes(item) || this.wouldTake(item))
+    if (!moving.length) return false
+    let place = before === undefined ? -1 : current.indexOf(before)
+    while (place >= 0 && moving.includes(current[place]!)) place = place + 1 < current.length ? place + 1 : -1
+    const anchor = place < 0 ? undefined : current[place]
+    const rest = current.filter((item) => !moving.includes(item))
+    const at = anchor === undefined ? rest.length : rest.indexOf(anchor)
+    this.writeItems([...rest.slice(0, at), ...moving, ...rest.slice(at)])
+    return true
+  }
+
+  /** Would `item`, another list's, come here as `moveHere()` moves it:  its list lets it go, and we take it? */
+  private wouldTake(item: T): boolean {
+    const owner = this.family?.ownerOf(item, "UNTRACKED")
+    return (!owner || owner.canGiveUp(item)) && this.canTake(item)
+  }
+
   /** Convert to string by joining with comma. */
   toString(): string {
     return this.items.join(", ")

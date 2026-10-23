@@ -70,6 +70,7 @@ describe("priority and precedence", () => {
         "is_gt_lt:  Precedence.comparison",
         "is_in:  Precedence.comparison",
         "is_same_type_as:  Precedence.comparison",
+        "items_reordered:  Priority.declaration",
         "its_known_property:  Priority.preferred",
         "kind_values:  Priority.userDeclared",
         "list_count:  Priority.mostSpecific",

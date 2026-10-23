@@ -4970,6 +4970,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "ItemsReordered",
+          "ruleNames": ["items_reordered"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ItemsReordered.ts",
+          "line": 26,
+          "purpose": "People may reorder a list's items on the page, by dragging them (epic `outline-spell` P30).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} elementos se pueden reordenar (después de {seconds:number} (segundo|segundos))?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "ValueKind",
           "ruleNames": ["value_kind"],
           "internal": false,

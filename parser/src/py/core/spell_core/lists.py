@@ -546,6 +546,38 @@ class List(SpellObject, MutableSequence[Any]):
         self.append(item)
         return True
 
+    def move_before(self, items: Iterable[Any], before: Any = None) -> bool:
+        """Move `items` here, before `before` -- at our end with `None`:  a page reordering us as people drag.
+
+        - Ours already:  they just change places, in the order given.
+        - Another list's:  only those it lets go and we take, as `move_here()`;  the rest stay where they are.
+        - `before` one of `items`:  the next of ours after it that isn't.
+        - Returns whether any moved.
+        - The twin of the JavaScript core's `List.moveBefore()` (epic outline-spell P30).
+        """
+        current = list(self.items)
+        moving = [item for item in items if any(item is it for it in current) or self._would_take(item)]
+        if not moving:
+            return False
+
+        def is_moving(item: object) -> bool:
+            return any(item is it for it in moving)
+
+        place = next((index for index, it in enumerate(current) if it is before), -1) if before is not None else -1
+        while place >= 0 and is_moving(current[place]):
+            place = place + 1 if place + 1 < len(current) else -1
+        anchor = current[place] if place >= 0 else None
+        rest = [it for it in current if not is_moving(it)]
+        at = len(rest) if anchor is None else next(index for index, it in enumerate(rest) if it is anchor)
+        self._write_items([*rest[:at], *moving, *rest[at:]])
+        return True
+
+    def _would_take(self, item: object) -> bool:
+        """Would `item`, another list's, come here as `move_here()` moves it:  its list lets it go, and we take it?"""
+        family = self._family
+        owner = family.owner_of(item) if family else None
+        return (owner is None or owner.can_give_up(item)) and self.can_take(item)
+
     def to_json(self) -> dict[str, object]:
         """Our JSON:  our class's name as `"$type"`, our own properties, then our items under `"$items"`.
 
