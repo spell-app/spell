@@ -1292,6 +1292,12 @@
       "description": "How the page defines the element for a drawable class -- `undefined` until the page running programs sets it."
     },
     {
+      "property": "beforeMove",
+      "of": "core",
+      "module": "elements",
+      "description": "What the page does just before things MOVE from one list to another, e.g. a card onto the discards -- `undefined` until the page running programs sets it."
+    },
+    {
       "kind": "method",
       "name": "defineElement",
       "of": "core",

@@ -167,6 +167,25 @@ describe("exclusive lists", () => {
     expect(Tableau.ownerOf(card)).toBe(tableau)
   })
 
+  test("the page hears of a move first, while the card is still in its old pile:  never of an add from nowhere", () => {
+    const [card, other] = cards(2)
+    const pile = new Pile({})
+    const tableau = new Tableau({})
+    const heard: [Card[], List | undefined][] = []
+    core.beforeMove = (things) => heard.push([things as Card[], (things[0] as Card).pile])
+    try {
+      core.append(pile, card, other)
+      expect(heard).toEqual([])
+      core.append(tableau, card)
+      expect(heard).toEqual([[[card], pile]])
+      // a deck is outside the family:  nothing moves
+      core.append(new Deck({}), other)
+      expect(heard).toHaveLength(1)
+    } finally {
+      core.beforeMove = undefined
+    }
+  })
+
   test("a card can be in the deck AND one pile -- a deck is outside the family", () => {
     const [card] = cards(1)
     const deck = new Deck({})

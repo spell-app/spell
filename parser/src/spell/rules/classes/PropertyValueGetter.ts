@@ -23,7 +23,10 @@ const LITERAL_TYPES: Record<string, SP.ParserMessageKey> = {
  * - Compiles to a getter in its class running the parsed body, e.g.
  *   `the value of a card is its name` => `get value() { return this.name }`.
  */
-export class PropertyValueGetter extends SpellStatement<"property|type|body?", { valueKind?: boolean }> {
+export class PropertyValueGetter extends SpellStatement<
+  "property|type|body?",
+  { valueKind?: boolean; inheritedType?: string }
+> {
   @proto static alias = "statement"
   @proto static declares: P.DeclaresSpec = { kind: "property", name: "property", of: "type" }
 
@@ -33,6 +36,8 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
    * - With its subject left out, in a type's outline body (`- score is its rank * 2`), it's a declaration:
    *   it outranks setting a variable, `score is ...` (epic page `outline-spell`, P9).
    * - In an outline body, a body that's just a value warns -- see `warnIfAlwaysTheSame()`.
+   * - A super-type's property it gives a value, e.g. a tableau's `- its layout is vertical` for a pile's `layout`:
+   *   the getter has that property's type, so TypeScript takes it as the same property (epic `outline-spell` P27).
    */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
@@ -41,8 +46,30 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
     // ... once its body parsed:  `- color is red if ... otherwise it is black` is `property_value_either`'s
     const bodyParsed = !!this.getBody(match) || match.length === tokens.length
     if (!match.groups.type.length && bodyParsed) match.priority = Priority.declaration
+    match.data.inheritedType = PropertyValueGetter.inheritedTypeOf(match)
     this.warnIfAlwaysTheSame(match)
     return SpellStatement.refuseBuiltInType(match, match.groups.type, match.groups.property)
+  }
+
+  /**
+   * The datatype of the super-type's property we give a value -- `undefined` if none declares it.
+   * - Its own, e.g. `number`;  else, for one of a list (`- its "layout" is one of stacked or vertical`),
+   *   the kind of its values, e.g. `PileLayout` -- see `DefinePropertyHas.declareKind()`.
+   */
+  private static inheritedTypeOf(match: P.MatchFor<PropertyValueGetter>): string | undefined {
+    const { superType } = getKnownType(match.groups.type)
+    const words = `${match.groups.property.value}`
+    const owner = superType
+      ? match.scope
+          .getType(superType)
+          ?.chain()
+          .find((type) => type.variables.get(words, "LOCAL_ONLY"))
+      : undefined
+    const member = owner?.variables.get(words, "LOCAL_ONLY")
+    if (!owner || !member) return undefined
+    if (typeof member.datatype === "string") return member.datatype
+    const kind = SP.Language.of(match.scope).propertyKindType(owner.name, `${member.name}`)
+    return match.scope.getType(kind)?.valueKind?.property ? kind : undefined
   }
 
   /**
@@ -141,7 +168,8 @@ export class PropertyValueGetter extends SpellStatement<"property|type|body?", {
       type: P.matchAST<P.ASTTypeExpression>(type),
       property: P.matchAST<P.ASTPropertyLiteral>(property),
       get: new P.ASTMethodDefinition(match, {
-        body: P.matchAST<MethodBody>(this.getBody(match))
+        body: P.matchAST<MethodBody>(this.getBody(match)),
+        datatype: match.data.inheritedType
       })
     })
   }
