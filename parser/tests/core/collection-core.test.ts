@@ -192,6 +192,11 @@ describe("core.getItemAt()", () => {
     expect(core.getItemAt("🂡🂢x", -3)).toEqual("🂡")
     expect(core.getItemAt("🂡", 1)).toEqual(undefined)
   })
+  test("a number:  its digits, so `the first letter of its rank` is 7 for a 7", () => {
+    expect(core.getItemAt(7, 0)).toEqual("7")
+    expect(core.getItemAt(10, 1)).toEqual("0")
+    expect(core.getItemAt(7, 1)).toEqual(undefined)
+  })
 })
 
 describe("core.setItemAt()", () => {

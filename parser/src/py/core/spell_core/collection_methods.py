@@ -97,6 +97,9 @@ class CollectionMethods:
         """
         if not self._is_defined(collection, "get_item_at"):
             return None
+        # a number reads as its digits:  `the first letter of its rank` is "7" for a 7
+        if is_plain_number(collection):
+            collection = str(collection)
         if isinstance(collection, List):
             return collection.get_item(position)
         if isinstance(collection, Mapping):

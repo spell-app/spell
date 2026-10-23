@@ -44,6 +44,13 @@ def test_get_item_at_an_index_from_0(core: Core, index: float | None, expected: 
         assert core.get_item_at(collection, index) == expected
 
 
+def test_get_item_at_a_number_reads_its_digits(core: Core) -> None:
+    # `the first letter of its rank` is "7" for a 7
+    assert core.get_item_at(7, 0) == "7"
+    assert core.get_item_at(10, 1) == "0"
+    assert core.get_item_at(7, 1) is None
+
+
 def test_get_item_at_a_dict_or_a_thing_by_key(core: Core) -> None:
     assert core.get_item_at({"a": 1}, "a") == 1
     assert core.get_item_at({"a": 1}, "b") is None

@@ -158,8 +158,9 @@ export const collectionCoreMethods = defineCoreModule({
    */
   getItemAt<T = unknown>(collection?: CollectionOf<T>, position?: string | number): T | undefined {
     if (!assert.isDefined(collection, "core.getItemAt(collection)")) return undefined
-    if (typeof collection === "string") {
-      const characters = Array.from(collection)
+    // a number reads as its digits:  `the first letter of its rank` is "7" for a 7
+    if (typeof collection === "string" || typeof collection === "number") {
+      const characters = Array.from(`${collection}`)
       const index = zeroIndexOf(position as number, characters.length)
       return index === undefined ? undefined : (characters[index] as T | undefined)
     }
