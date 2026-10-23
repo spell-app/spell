@@ -19,7 +19,7 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
  *   `src/components/__pack/` is current), and `tools/**`, the docs tools' own tests
  * - `browser` -- `components/**`:  the `<epic-*>` elements, in a REAL browser (Vitest browser mode + Playwright,
  *   chromium), as Spell UI's are.  `baseConfig()`:  Spell UI's plugins (decorators BEFORE Solid), Solid dedupe,
- *   Lightning CSS;  the test helpers come from the kit (`spell-kit/test-helpers/...`)
+ *   Lightning CSS;  the test helpers come from the kit (`spell/test-helpers/...`)
  * - NOT here:  the window script's and the extension's tests (`tests/window.test.mjs`, `tests/vscode/`), plain
  *   `node --test` (`yarn test:scripts`)
  * - `prefix` / `root`:  for a config that lists these beside others (`epics:node` / `epics:browser`), `root` set to
@@ -56,7 +56,7 @@ export function epicsProjects({
         name: `${prefix}browser`,
         dir: TESTS,
         include: ["components/**/*.test.{ts,tsx}"],
-        // Spell UI's core first, as a page has it:  its settings for `spell-kit/element` (spell-ui's
+        // Spell UI's core first, as a page has it:  its settings for `spell/element` (spell-ui's
         // `test/setup.ts`)
         setupFiles: [UI_SETUP],
         testTimeout: 10_000,

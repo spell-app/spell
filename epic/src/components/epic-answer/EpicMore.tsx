@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { Fold } from "spell-epic/components/epic-item/Fold"
 

@@ -87,13 +87,13 @@ describe("sharedDocLog", () => {
         )
       return checkout
     }
-    const kit = repo("kit", "https://github.com/spell-app/spell-kit.git", [
+    const kit = repo("kit", "https://github.com/spell-app/spell.git", [
       ["P1:  Fussbudget -- every epic's Doc Review runs it", "2026-10-20T10:00:00"],
       ["other P2:  Doc Review -- another epic's, naming its own", "2026-10-20T11:00:00"],
       ["demo P1:  Spike -- the kit's part", "2026-10-20T12:00:00"]
     ])
-    const lang = repo("kit/spell-lang", "git@github.com:spell-app/spell-lang.git", [
-      ["demo P2:  Doc Review -- spell-lang's part", "2026-10-20T13:00:00"]
+    const lang = repo("kit/spell-parser", "git@github.com:spell-app/spell-parser.git", [
+      ["demo P2:  Doc Review -- spell-parser's part", "2026-10-20T13:00:00"]
     ])
     const plan = PlanDoc.parse(readFileSync(new PlanDocFiles().template, "utf8"))
     plan.addPhase("Spike")
@@ -103,13 +103,13 @@ describe("sharedDocLog", () => {
     expect(sharedDocLog(file, [kit, lang])).toEqual([
       {
         sha: expect.any(String),
-        subject: "demo P2:  Doc Review -- spell-lang's part",
-        repo: "https://github.com/spell-app/spell-lang"
+        subject: "demo P2:  Doc Review -- spell-parser's part",
+        repo: "https://github.com/spell-app/spell-parser"
       },
       {
         sha: expect.any(String),
         subject: "demo P1:  Spike -- the kit's part",
-        repo: "https://github.com/spell-app/spell-kit"
+        repo: "https://github.com/spell-app/spell"
       }
     ])
   })

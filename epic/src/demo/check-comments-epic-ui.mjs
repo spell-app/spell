@@ -79,7 +79,7 @@ const { DemoServer } = await import("./DemoServer.ts")
 const { GuideInbox } = await import("spell-epic/tool/GuideInbox.ts")
 const { RepoList } = await import("spell-epic/server/RepoList.ts")
 const { packageDir } = await import("spell-epic/tools/packageDir.ts")
-const { componentSets, pageServerSettings } = await import("spell-kit/server/page/settings")
+const { componentSets, pageServerSettings } = await import("spell/server/page/settings")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)

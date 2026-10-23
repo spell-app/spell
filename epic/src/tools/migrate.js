@@ -295,7 +295,7 @@ export function report(results, root, { dryRun = false, all = false } = {}) {
 /**
  * Run `fn` holding every `<file>.lock` of `files`, as `SRV.FileLock` takes them (`open(wx)`).
  * - waits up to 30s for each, and takes over one older than a minute (a crashed holder's)
- * - plain node:  this script loads none of `spell-kit/server`, whose files import each other without extensions
+ * - plain node:  this script loads none of `spell/server`, whose files import each other without extensions
  */
 export function withLocks(files, fn) {
   const held = []

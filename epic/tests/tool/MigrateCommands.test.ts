@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { MigrateCommands } from "spell-epic/tool/MigrateCommands"
 import { PlanDoc } from "spell-epic/tool/PlanDoc"

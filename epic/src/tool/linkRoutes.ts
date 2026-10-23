@@ -1,6 +1,6 @@
 /**
  * Links to sagas, epics, phases and items, on the page server (epic `epic-workflow` P15, J32):  a ROUTE MODULE
- * (`spell-kit/server/page`'s `RouteModule`), listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
+ * (`spell/server/page`'s `RouteModule`), listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  *
  * TYPED ADDRESSES:  `/saga/<saga>[/<epic>]` redirects to the page, and the browser keeps the `#id`:
  * - `/saga/drawable-spell` -> `/sagas/drawable-spell/drawable-spell.saga.html`
@@ -16,8 +16,8 @@
  * - 400 for attributes that aren't an address (a bad name, an item AND a phase)
  * - a read:  no token
  */
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 import { EpicAddress, TARGET_API } from "spell-epic/links"
 

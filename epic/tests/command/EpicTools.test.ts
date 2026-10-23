@@ -10,7 +10,7 @@ import { EpicTools } from "spell-epic/command/EpicTools"
  * - CODE:  the running `epic`'s, its tools fake scripts that report what they got
  * - DATA:  the caller's, where the command runs from, with the same files
  * - ONE copy of the code (epic `epic-eject` P5):  every epic tool must be CODE's script, working on DATA.
- * - DATA installs a fake kit, `spell-kit`, whose `src/server/page/cli.ts` is the page server (`SERVER`), and whose
+ * - DATA installs a fake kit, `spell`, whose `src/server/page/cli.ts` is the page server (`SERVER`), and whose
  *   `bin/spell.mjs` is the `spell` command (`serve`'s:  `spell server start all`)
  */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-tools-")))
@@ -18,8 +18,8 @@ const CODE = join(TEMP, "code")
 const DATA = join(TEMP, "data")
 /** A folder inside the caller's checkout, to run from. */
 const INSIDE = join(DATA, "packages", "app")
-/** The kit DATA's install resolves, and its `src/server/` folder:  `spell-kit/server`. */
-const KIT = join(DATA, "node_modules", "spell-kit")
+/** The kit DATA's install resolves, and its `src/server/` folder:  `spell/server`. */
+const KIT = join(DATA, "node_modules", "spell")
 const SERVER = join(KIT, "src", "server")
 /** Where each run's report goes. */
 const REPORT = join(TEMP, "report.json")
@@ -50,7 +50,7 @@ mkdirSync(join(SERVER, "page"), { recursive: true })
 writeFileSync(
   join(KIT, "package.json"),
   JSON.stringify({
-    name: "spell-kit",
+    name: "spell",
     exports: { "./server": "./src/server/index.ts", "./package.json": "./package.json" }
   })
 )
@@ -94,7 +94,7 @@ describe("EpicTools.run()", () => {
     }
   })
 
-  test("server:  the spell-kit/server the CALLER's install resolves, with the kit's node config", async () => {
+  test("server:  the spell/server the CALLER's install resolves, with the kit's node config", async () => {
     const server = await run("server", ["status"])
     expect(server).toMatchObject({ status: 3, owner: "server", args: ["status"], checkout: DATA })
     expect(server.tsconfig).toBe(join(KIT, "tsconfig.node.json"))
@@ -109,7 +109,7 @@ describe("EpicTools.run()", () => {
 })
 
 describe("EpicTools.hasPageServer()", () => {
-  test("a checkout with page server settings that installs spell-kit/server", () => {
+  test("a checkout with page server settings that installs spell/server", () => {
     expect(EpicTools.hasPageServer(INSIDE)).toBe(true)
   })
 

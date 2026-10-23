@@ -2,7 +2,7 @@ import { realpathSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { componentSets, pageServerSettings } from "spell-kit/server/page/settings"
+import { componentSets, pageServerSettings } from "spell/server/page/settings"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { EPIC_UI } from "spell-epic/server/server.types"

@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { fakeMainCheckout } from "spell-kit/server/test/checkouts"
+import { fakeMainCheckout } from "spell/server/test/checkouts"
 
 /** The hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/left-worktree.mjs")

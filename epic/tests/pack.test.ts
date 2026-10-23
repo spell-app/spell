@@ -9,7 +9,7 @@ import { packageDir } from "spell-epic/tools/packageDir"
  * The kit's pack tooling, `spell-pack` (`yarn pack:check`;  Spell UI's `spell-ui-pack` until epic `repo-split` P10),
  * from the kit's `bin/`, where Node's resolver finds the kit.
  */
-const SPELL_PACK = join(packageDir("spell-kit")!, "bin/spell-pack.mjs")
+const SPELL_PACK = join(packageDir("spell")!, "bin/spell-pack.mjs")
 
 /** spell-epic's root:  the package, whose `package.json` names the pack (`"spellPack"`, its `src/`). */
 const PACKAGE = fileURLToPath(new URL("../", import.meta.url))

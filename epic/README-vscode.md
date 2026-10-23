@@ -61,13 +61,13 @@ else, today.
 - It starts with every window (`onStartupFinished`), since every window needs its bridge;
   and on a `vscode://` link to it (`onUri`).
 - Both extensions side by side, and how windows and worktrees are laid out:
-  [the kit's README-vscode.md](https://github.com/spell-app/spell-kit/blob/main/README-vscode.md).
+  [the kit's README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md).
 
 </details>
 
 ## Install it:  three commands and a reload
 
-Run the kit's install first ([setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero)):
+Run the kit's install first ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)):
 the bundler, and the kit's own code that goes into the bundle, come from there.
 The extension adds a small install of its own, because it's a yarn project apart, with its own lockfile:
 
@@ -118,14 +118,14 @@ and its fallback server loses the engine's scripts and styles.
   then reload the windows.
 - From spell-epic's root instead:  `yarn vscode:package`, then `code --install-extension vscode/spell-epic.vsix`.
 - In an epic's worktree, `vscode/`'s own install is done for you:
-  the kit's epic settings list it in `extraInstalls` ([.epic/config.json5](https://github.com/spell-app/spell-kit/blob/main/.epic/config.json5)).
+  the kit's epic settings list it in `extraInstalls` ([.epic/config.json5](https://github.com/spell-app/spell/blob/main/.epic/config.json5)).
 
 <details>
 <summary>What's in the .vsix, and what's built into it</summary>
 
 - Three files, by its [.vscodeignore](vscode/.vscodeignore):
   `package.json`, the bundle `out/extension.js`, and `media/spell.svg`, the Spell hat.
-- The bundle is about 760 KB, because it carries the kit's page server (`spell-kit/server`):
+- The bundle is about 760 KB, because it carries the kit's page server (`spell/server`):
   the fallback server below runs it.
   It carries spell-epic's repo list and settings readers too.
 - esbuild makes it, as CommonJS for node 20, with `vscode` and `vite-plus/fmt` left out ([build.mjs](vscode/build.mjs)).
@@ -239,7 +239,7 @@ it has live reload and the engine's own files, but none of the `/api/` routes yo
 
 - The epic server, by its pid file:  `~/.spell-epic/server.json` (`SPELL_EPIC_HOME` moves the folder).
 - A page server, by the `.spell-server.json` at its root:  in a Spell kit, the kit's root, since the page server
-  is the kit's ([the kit's README-server.md](https://github.com/spell-app/spell-kit/blob/main/README-server.md)).
+  is the kit's ([the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md)).
 - The fallback, one per checkout, live-reloads the docs folders (`epics`, `guides`, `pages`, `templates`, `sagas`),
   else the whole checkout.
   The engine's files it serves (`/_epic/assets/`, `/_epic/pack/`, `/templates/`) come from the checkout the extension
@@ -456,7 +456,7 @@ yarn test:vscode
 - [README-cli.md](README-cli.md#windows-and-the-page-server):  every `epic window`, `epic hub` and `epic pages` verb
 - [README-adopting.md](README-adopting.md):  the extension as one step of setting up a repo that isn't Spell, and the
   epic server in full
-- [The kit's README-vscode.md](https://github.com/spell-app/spell-kit/blob/main/README-vscode.md):  Spell's language extension beside this one, and how window files
+- [The kit's README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md):  Spell's language extension beside this one, and how window files
   and worktrees are laid out
 
 <details>

@@ -3,7 +3,7 @@
  * - `ENGINE_ROOT` is the spell-epic checkout this file sits in:  an INSTALLED copy (in VS Code's extensions folder)
  *   still knows whose `epic` command restarts the epic server.  Move the checkout and you must rebuild.
  * - `esbuild` is spell-epic's own, found up the folder tree.
- * - Every repo's files by their package names (`spell-kit/server`, `spell-epic/server/RepoList`;  epic `repo-split`
+ * - Every repo's files by their package names (`spell/server`, `spell-epic/server/RepoList`;  epic `repo-split`
  *   P14), found as their source files by the kit's `sourceNames()`:  esbuild alone finds neither a name without its extension
  *   nor a folder's `index.ts`.
  * - Then the bundle is LOADED once, `vscode` stubbed (`loadOnce()`):  a crash as it loads fails the build, here,
@@ -14,7 +14,7 @@ import Module, { createRequire } from "node:module"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { sourceNames } from "spell-kit/toolchain/sourceNames"
+import { sourceNames } from "spell/toolchain/sourceNames"
 
 const here = dirname(fileURLToPath(import.meta.url))
 

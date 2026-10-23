@@ -302,7 +302,7 @@
     "commander": "^14",
     "json5": "^2.1.1",
     "linkedom": "^0.18.13",
-    "spell-kit": "workspace:*",
+    "spell": "workspace:*",
     "spell-ui": "workspace:*",
     "tsx": "4.20.3"
   },

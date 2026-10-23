@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls': its file, not `epic-review`'s barrel

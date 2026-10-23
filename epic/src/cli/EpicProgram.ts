@@ -55,7 +55,7 @@ import { GROUP_VERBS, type GroupName } from "./epicGroups"
  * - Lean:  it loads no spell, and the `epic` tool only when a page verb runs,
  *   so `epic` starts in a fraction of a second.
  *   - its entry is `epicMain.ts`, beside this
- *   - NEVER imports the kit's `spell` program (`spell-kit/cli`)
+ *   - NEVER imports the kit's `spell` program (`spell/cli`)
  * - NOTE: `spell commands` reads the `epic.command(...)` calls in this file's TEXT:
  *   keep the receiver named `epic`
  ****************/

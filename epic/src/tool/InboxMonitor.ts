@@ -1,6 +1,6 @@
 import { join } from "node:path"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { SessionFolders } from "spell-epic/config/SessionFolders"

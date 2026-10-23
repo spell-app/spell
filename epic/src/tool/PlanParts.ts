@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /****************
  * ### `PlanParts`
@@ -17,7 +17,7 @@ import { SRV } from "spell-kit/server"
  * - `.html` only:  the `.htm` of a doc split before Q12 is read no more (epic `epic-components` P15:  every doc was
  *   converted, and its parts written `.html`, at P12)
  * - STATIC:  every helper works on paths, URLs or the element it's given, never a document of its own
- * - Node only (`node:fs`, oxfmt through `spell-kit/server`):  NOT in the `spell-epic` barrel, imported by path.
+ * - Node only (`node:fs`, oxfmt through `spell/server`):  NOT in the `spell-epic` barrel, imported by path.
  ****************/
 export class PlanParts {
   ////////////////
@@ -67,7 +67,7 @@ export class PlanParts {
 
   /**
    * `html` formatted as `vp fmt` would format the file at `file` (its extension picks the parser), in this
-   * process:  `spell-kit/server`'s `formatHTML()`.  Throws on a parse error.
+   * process:  `spell/server`'s `formatHTML()`.  Throws on a parse error.
    */
   static formatHTML(file: string, html: string): Promise<string> {
     return SRV.formatHTML(file, html)

@@ -10,7 +10,7 @@ import { EpicRepo } from "spell-epic/config/EpicRepo"
 import { RealPath } from "spell-epic/config/RealPath"
 import { DataFile, type DataFileMove } from "spell-epic/data/DataFile"
 import { RepoList } from "spell-epic/server/RepoList"
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { planDocIn } from "spell-epic/tools/pages.js"
 import { PlanDocError, type CommitLogEntry, type PlanDocOptions, type PlanDocParts } from "./planDoc.types"
@@ -50,7 +50,7 @@ import { ServedFolders } from "./ServedFolders"
  *   - reading assembles it into one document;  `writeDoc()` splits it again
  *   - so every command works on either shape
  *   - a part file is written only when its body changed
- * - Node only (`node:fs`, git, `spell-kit/server`'s lock, linker and formatter):
+ * - Node only (`node:fs`, git, `spell/server`'s lock, linker and formatter):
  *   NOT in the `spell-epic` barrel, imported by path.
  * - Knows nothing of the command line (`PlanDocCommands`).
  *   It rebuilds the docs index by running its tool, `tools/index.js`, as the command line does (`reindex()`).
@@ -532,9 +532,9 @@ export class PlanDocFiles {
 
   /**
    * The repos a doc's commits can be in, the doc's checkout first:  it, then each of its child repos that's there
-   * (`EpicConfig.repos`:  a multi-repo top's, `spell-lang` ...;  none for a single repo).
+   * (`EpicConfig.repos`:  a multi-repo top's, `spell-parser` ...;  none for a single repo).
    * - every repo's work counts toward an epic (epic `epic-engine` r17):  outline-spell's phases are mostly
-   *   spell-lang's, spell-ui's and spell-app's commits
+   *   spell-parser's, spell-ui's and spell-app's commits
    */
   repoFolders(file: string): string[] {
     const checkout = this.checkoutOf(file)

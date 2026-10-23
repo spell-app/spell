@@ -44,7 +44,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Written exactly like a Spell UI family:
     [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Overview" and "Solid authoring".
   - Every file named for its COMPONENT:
-    - `<Name>.tsx`:  the component, on [`spell-kit/element`](../../src/element/AGENTS.md)'s `E.UIComponent`
+    - `<Name>.tsx`:  the component, on [`spell/element`](../../src/element/AGENTS.md)'s `E.UIComponent`
     - `<Name>.en.ts`:  its tag's vocabulary (topics + aka, skeleton text)
     - `<Name>.css`
     - `<Name>.types.ts`:  only what several of its files share
@@ -243,7 +243,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `EpicProgram`:  the commander tree, every verb on it under its heading, `epic --help`
     - `epicGroups.ts`:  each group's verbs, for their help (`epic ask create --help`)
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
-      - NEVER imports the kit's `spell` program (`spell-kit/cli`), and loads no spell
+      - NEVER imports the kit's `spell` program (`spell/cli`), and loads no spell
     - Owen's names (repo-split P13):  `create`, `lint`, `inbox watch | ignore | wait ... <epic>` (the inbox's verb
       first), `window should-stay`, `window reload`, `summarize`, `status` (taking stock, `stock` before);  an item's
       status card is `update`'s (`epic update seo#J3 underway`, J140);  `add-request`, `overnight` and `plan-doc` gone
@@ -267,7 +267,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `~/.spell-epic`), from the `SessionStart` hook ([server-prune.mjs](../hooks/server-prune.mjs))
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
         live checkout's
-      - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell-kit/server/page/prune`)
+      - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell/server/page/prune`)
     - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
       checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
       - a `copy` patch puts `main`'s file where it isn't tracked yet, git-excluded;  a `run` patch runs once per checkout
@@ -387,10 +387,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `SpellUI.registerPack({ name, prefix, catalog, define })`, where `define()` imports every family barrel
   - `epics.pack.js` -- the CLASSIC script (an IIFE) a page loads, minified
     - Solid, the kit's element and Spell UI's shared modules are NOT in it:
-      `solid-js`, `@solidjs/web`, `spell-kit/element`, `spell-ui/core`, `spell-ui/forms`.
+      `solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`.
     - It takes them from the docs bundle's `globalThis.SpellUI.packModules`,
       so a page has ONE Solid and one `UIComponent`.
-      - `spell-kit/element` there is Spell UI's core, which carries it.
+      - `spell/element` there is Spell UI's core, which carries it.
 - `tools/` -- every docs page's tooling:  the scripts, their route modules, and `_assets/` (see "Layout", "Scripts").
   - Plain `node` scripts (`.js`) beside `tsx` ones (`.ts`).
     `tsconfig.json` takes both (`allowJs`).
@@ -405,13 +405,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   2. in the same change, commit the pack, `components/__pack/`, and the docs data the build writes too, `docs/__data/`
   - `yarn pack:check` exits 1 while either is stale, and the pack's test (`pack.test.ts`) runs it:
     so `yarn test` and `yarn review` fail until you build.
-- Elements are written on `spell-kit/element`:  `import { E } from "spell-kit/element"` (`E.UIComponent`, `@E.state` ...).
+- Elements are written on `spell/element`:  `import { E } from "spell/element"` (`E.UIComponent`, `@E.state` ...).
   - A file that also uses Spell UI's own pieces (`E.IconGlyph`, `E.LoadableBody`, `E.Converters` ...)
     takes `E` from `spell-ui/core` instead:  the same names, and Spell UI's on top (epic `people-and-orgs` P17).
 - They import Spell UI's code ONLY from `spell-ui/core` / `spell-ui/forms`, as a Spell UI family does.
   - Solid only from `solid-js` / `@solidjs/web`.
-  - The build fails on any other Spell UI, `spell-kit/element` or Solid import, which the page couldn't share:
-    a deeper `spell-ui/...` or `spell-kit/element/...`, say.
+  - The build fails on any other Spell UI, `spell/element` or Solid import, which the page couldn't share:
+    a deeper `spell-ui/...` or `spell/element/...`, say.
   - Another shared module:
     add it to Spell UI's `packModules` AND to `PACK_MODULES`, in the kit's
     [packModules.ts](../../src/element-tools/packModules.ts).
@@ -599,7 +599,7 @@ The shared folders:
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
     - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
-      `componentSets()` in `spell-kit/server/page`), in Spell UI's page shape.
+      `componentSets()` in `spell/server/page`), in Spell UI's page shape.
       Their cards link the sets' addresses:
 
       ```text
@@ -796,7 +796,7 @@ In `tools/`:
     - The page loads `commands.js` INSTEAD of the bundle.
   - `spell-syntax.js`, `spell-syntax.css`:  [the spell syntax guide](../../spell.epics/guides/spell-syntax/spell-syntax.html).
     - It draws one table per module of the base spell language, a row per rule class.
-      - from spell's generated [spellSyntax.json](../../spell-lang/src/spell/spellSyntax.json) (`yarn spell:gen:syntax`, in spell-lang)
+      - from spell's generated [spellSyntax.json](../../spell-parser/src/spell/spellSyntax.json) (`yarn spell:gen:syntax`, in spell-parser)
     - Each row:
       - the class's name, opening its source
       - its syntaxes and aliases
@@ -812,8 +812,8 @@ In `tools/`:
     - Then it loads `spell-ui.js` itself, as `commands.js` does.
   - `core-reference.js`:  [the core reference page](../../spell.epics/guides/targets/core-reference.html), epic `python-target` P29.
     - It draws one table per core file, from two lists:
-      - core's [core.declarations.json5](../../spell-lang/src/core/core.declarations.json5)
-      - py's [not_ported_yet.json5](../../spell-lang/src/py/core/not_ported_yet.json5)
+      - core's [core.declarations.json5](../../spell-parser/src/core/core.declarations.json5)
+      - py's [not_ported_yet.json5](../../spell-parser/src/py/core/not_ported_yet.json5)
     - Both are read from the checkout serving the page, so each branch shows its own core.
     - Built from elements, never markup in strings (epic `epic-engine` P3, J19):  light-DOM `<ui-section>`s and
       `<ui-table>`s, as a page writes them;  each file's source link a `<ui-button href>`.
@@ -839,7 +839,7 @@ In `tools/`:
   - The template tools (`docs new`, `epic create`, `goals new`) set it.
   - Everything that sticks or lands starts below it:
     `siteHeaderHeight()` in `spell-doc-runtime.js`, and its header's "Landing".
-  - The element itself is `spell-kit/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
+  - The element itself is `spell/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
   - Its tabs:  the content repo's `page-server.json5` `"siteTabs"` on a served page (epic `repo-split` P16);  from disk, the docs bundle's own
     (`DOCS_TABS` in `spell-ui.entry.js`:  the docs' areas and Epic/UI), epic `repo-split` I4.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
@@ -1918,7 +1918,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - The page loads it right after `spell-ui.js`.
   - It's built as a component pack is, so the elements extend the page's own Spell UI:
     - Vite, on Spell UI's `baseConfig()`
-    - Solid, `spell-kit/element` and `spell-ui/core`, from the page's `SpellUI.packModules`, by those names
+    - Solid, `spell/element` and `spell-ui/core`, from the page's `SpellUI.packModules`, by those names
       (epic `repo-split` P14:  an entry still importing by the old alias fails;  import `spell-ui/...`)
   - It may import Spell UI's doc-only families (`spell-ui/docs-components/<family>`), from the checkout's source.
     - Why:  `spell-ui.js` is built from `ui`'s `dist/`, which has none.
@@ -1938,7 +1938,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - every local link resolves
     - one target per destination
     - no nested links
-  - The rules themselves live in `spell-kit/server` (`SRV.Linker`):  how a path resolves, which target a link gets.
+  - The rules themselves live in `spell/server` (`SRV.Linker`):  how a path resolves, which target a link gets.
   - A page in the CONTENT folder links as it's served:  laid under the checkout that serves it (epic `epic-engine` I22).
     - spell-app's pages, and spell-epic's own epics too:  spell-app serves that content, so a code name in an
       epic-engine reply links `../../../spell-epic/src/...` (spell-app's `spell-epic` link), never
@@ -1951,7 +1951,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       `engine-links`, gone since epic `repo-split` P14
     - `doc-links.js` is its command line.
     - The `epic` tool links through the same code.
-  - Run it under `tsx`, never plain `node`:  it imports `spell-kit/server`.
+  - Run it under `tsx`, never plain `node`:  it imports `spell/server`.
     - The tools run it through `docLinksRun()`, in [pages.js](tools/pages.js).
 - A link to a SAGA, an EPIC, a PHASE or an ITEM is written by what it points at, never by a path
   (epic `epic-workflow` P15):
@@ -1962,7 +1962,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - The runtime rewrites it to the page and its `#id` (`wireAddresses()`), in that epic's tab.
     - `doc-links.js` gives it no target and leaves it alone.
   - `doc-links.js --check` fails on a saga, page or id that isn't there, and on an epic under a saga it doesn't name
-    (the epics tool's `EpicTargets`:  `Linker`, in `spell-kit/server`, imports no package and skips them).
+    (the epics tool's `EpicTargets`:  `Linker`, in `spell/server`, imports no package and skips them).
 
 ## Finishing a page
 
@@ -2173,8 +2173,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - Text and regexes, not a DOM:  it edits only what it links.
   - Its page arguments are from where it runs:  a guide, from epics' folder, is `../../guides/x.html`.
   - `--root <checkout>`:  links resolve in another checkout (a copy of the pages beside a copy of the code).
-  - The linking itself is `spell-kit/server`'s `Linker`.
-  - `PlanParts.formatHTML()` is `spell-kit/server`'s `formatHTML()` too.
+  - The linking itself is `spell/server`'s `Linker`.
+  - `PlanParts.formatHTML()` is `spell/server`'s `formatHTML()` too.
 - A spell-ui problem:  fix it in spell-ui when it's a real `ui` bug (the same change may touch both).
   - Else work around it here.
   - Either way, add it to [spell-ui-findings.md](../../spell.epics/guides/spell-docs/spell-ui-findings.md).

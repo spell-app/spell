@@ -146,7 +146,7 @@ export class Definitions {
    * as its component's attribute getter (`this.reviewAs`).
    * - NOT `spec.property`, the DOM element's JS property:  `id` and `title` take `epicId` / `epicTitle` there,
    *   so they don't shadow the platform's own (`DOMElement` refuses that), but data says `id` and `title`.
-   * - NOTE: a private copy of `spell-kit/util`'s `camelCase()`:  that barrel drags spell's utilities into the pack,
+   * - NOTE: a private copy of `spell/util`'s `camelCase()`:  that barrel drags spell's utilities into the pack,
    *   and `spell-ui/util` isn't node-safe through `spell-ui/core`.
    */
   static keyOf(spec: EpicAttributeSpec): string {

@@ -5,7 +5,7 @@ import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 // - By the server's package entry (its `exports`, epic `repo-split` P6):
 //   plain `node` loads this file (the hooks, the window script), and finds the server package in `node_modules`
 //   (the kit's install)
-import { checkoutOf } from "spell-kit/server/checkout"
+import { checkoutOf } from "spell/server/checkout"
 
 import { RealPath } from "./RealPath.ts"
 
@@ -235,8 +235,8 @@ export class EpicConfig {
   /**
    * The child repos this repo holds, lowest first, when it's a MULTI-REPO TOP (epic `epic-engine` P10, repo-split's
    * Q9 A):  `repos` in its config;  `[]` for any other repo (a single repo, or a child).
-   * - `repos`:  a list of names (`["spell-lang", ...]`), or a file from the main checkout listing them
-   *   (`"repos.json5"`:  `{ "repos": [{ "name": "spell-lang", ... }, ...] }`, the top repo `spell`'s own list)
+   * - `repos`:  a list of names (`["spell-parser", ...]`), or a file from the main checkout listing them
+   *   (`"repos.json5"`:  `{ "repos": [{ "name": "spell-parser", ... }, ...] }`, the top repo `spell`'s own list)
    * - a file that won't read:  `[]`, said on stderr
    */
   get repos(): string[] {
@@ -968,7 +968,7 @@ function pathsOf(given: Record<string, unknown>, key: string, fallback: string[]
 }
 
 /**
- * `given.repos`:  a file listing the child repos (`"repos.json5"`), or their names (`["spell-lang", ...]`);
+ * `given.repos`:  a file listing the child repos (`"repos.json5"`), or their names (`["spell-parser", ...]`);
  * `fallback` (`""`, none) when it's left out.
  * - throws `TypeError` naming the file for anything else
  */

@@ -1378,7 +1378,7 @@
         {
           "name": "repo",
           "kind": "string",
-          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-lang`)."
+          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-parser`)."
         }
       ],
       "slots": [

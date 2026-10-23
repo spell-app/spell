@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process"
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeSync } from "node:fs"
 import { delimiter, dirname, join } from "node:path"
 
-import type { SRV } from "spell-kit/server"
+import type { SRV } from "spell/server"
 
 import { EpicConfig, type EpicApp } from "spell-epic/config/EpicConfig"
 

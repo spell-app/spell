@@ -1,5 +1,5 @@
 /**
- * Airplane mode on the page server (epic `airplane`):  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`),
+ * Airplane mode on the page server (epic `airplane`):  a ROUTE MODULE (`spell/server/page`'s `RouteModule`),
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  * - Every page it serves is told, as it's served, when airplane mode is on:
  *   `window.SPELL_SERVER.airplane` (`AirplaneMode.isOn`, read on every page).
@@ -8,7 +8,7 @@
  * - Here, not in the server, since epic `epic-eject` P4:
  *   the switch is epics' (`AirplaneMode`), and the server imports no other package.
  */
-import type { RouteModule } from "spell-kit/server/page"
+import type { RouteModule } from "spell/server/page"
 
 import { AirplaneMode } from "./AirplaneMode"
 

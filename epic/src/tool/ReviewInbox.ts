@@ -1,4 +1,4 @@
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { DataFile } from "spell-epic/data/DataFile"
 
@@ -78,7 +78,7 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       (`claimWake()`), from the epic page or any page that wakes the same epic
  *     - `state` `waking` while the wake is under way, claimed under the lock:  two Sends at once wake once
  *     - gone once a session listens (`setListening()`), or `WAKE_COOLDOWN_MS` after `at` (`liveWoken()`)
- * - Node only (`node:fs`, `spell-kit/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
+ * - Node only (`node:fs`, `spell/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Imports no other file of the tool but `CommentList` (its comments).
  * - From the docs tools' `inbox.js` (epic `epic-components`, P7), which now forwards here.
  ****************/

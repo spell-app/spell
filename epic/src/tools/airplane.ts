@@ -34,8 +34,8 @@ import { fileURLToPath } from "node:url"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
-import { SRV } from "spell-kit/server"
-import { PageServer, pageServerRoot } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import { PageServer, pageServerRoot } from "spell/server/page"
 
 import { AirplaneInbox } from "./AirplaneInbox.ts"
 import { AirplaneMode } from "./AirplaneMode.ts"

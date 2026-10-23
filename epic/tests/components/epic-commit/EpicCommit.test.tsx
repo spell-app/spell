@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell-epic/components/epic-commit"
 
@@ -35,12 +35,12 @@ describe("<epic-commit>", () => {
   test("a child repo's commit links through its OWN `repo`", async () => {
     const root = await ElementFixture.render(
       shown(
-        `<epic-commit sha="0123456789abcdef" repo="https://github.com/spell-app/spell-lang">Lang</epic-commit>`,
-        ` repo="https://github.com/spell-app/spell-kit"`
+        `<epic-commit sha="0123456789abcdef" repo="https://github.com/spell-app/spell-parser">Lang</epic-commit>`,
+        ` repo="https://github.com/spell-app/spell"`
       )
     )
     const link = root.querySelector("epic-commit")!.shadowRoot!.querySelector<HTMLAnchorElement>('[part~="sha"]')!
-    expect(link.getAttribute("href")).toBe("https://github.com/spell-app/spell-lang/commit/0123456789abcdef")
+    expect(link.getAttribute("href")).toBe("https://github.com/spell-app/spell-parser/commit/0123456789abcdef")
   })
 
   test("without a `repo`:  the sha as code, no link;  hidden until something shows the commits", async () => {

@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { PlanDates } from "spell-epic/dates"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)

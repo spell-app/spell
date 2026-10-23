@@ -1,5 +1,5 @@
 /**
- * Choice pages' drafts and answers, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`),
+ * Choice pages' drafts and answers, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`),
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  * - A SYNTAX-CHOICES PAGE:  a table of names Claude recommends, one row per use site, each pre-filled in a box Owen
  *   types over (`epic choices`, `choices.js`)
@@ -33,8 +33,8 @@
 import { readFileSync } from "node:fs"
 
 import { DataFile } from "spell-epic/data/DataFile"
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 import { answerFile, draftFile, isDetailsPage, saveData, servedPage } from "./detailsRoutes"
 

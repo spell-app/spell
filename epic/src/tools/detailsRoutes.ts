@@ -1,5 +1,5 @@
 /**
- * Details pages' answers, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`), listed in the repo
+ * Details pages' answers, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`), listed in the repo
  * root's `package.json` `"pageServer": { "routes": [...] }`.
  * - A DETAILS PAGE:  a page Claude writes to explain a question (`/details`, `epic ask`).
  *   - shown in VS Code's side bar
@@ -37,8 +37,8 @@
  */
 import { DataFile } from "spell-epic/data/DataFile"
 import { AskListeners } from "./AskListeners"
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 /** Where the routes live. */
 const API = "/api/docs/details"

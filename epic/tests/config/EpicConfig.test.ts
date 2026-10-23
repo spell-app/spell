@@ -6,7 +6,7 @@ import JSON5 from "json5"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
 /** spell-epic's own config, as committed (comments and all). */
 const REPO_CONFIG = resolve(dirname(fileURLToPath(import.meta.url)), "../..", EpicConfig.FILE)

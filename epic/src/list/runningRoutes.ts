@@ -1,5 +1,5 @@
 /**
- * The RUNNING epics on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`).
+ * The RUNNING epics on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`).
  * - listed in the repo root's `package.json`, `"pageServer": { "routes": [...] }`
  * - the logic:  `RunningEpics`
  * - `GET /api/epics/running` -- every running epic, as JSON (`RunningEpic[]`), never cached
@@ -24,7 +24,7 @@
  */
 import { resolve } from "node:path"
 
-import type { RouteContext, RouteModule } from "spell-kit/server/page"
+import type { RouteContext, RouteModule } from "spell/server/page"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RealPath } from "spell-epic/config/RealPath"

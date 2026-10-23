@@ -1153,9 +1153,9 @@ describe("PlanDoc commits", () => {
   test("a child repo's commit links to its own repo;  the page's links the rest", () => {
     const plan = freshPlan()
     plan.addPhase("One")
-    const LANG = "https://github.com/spell-app/spell-lang"
+    const LANG = "https://github.com/spell-app/spell-parser"
     const log = [
-      { sha: "b".repeat(40), subject: "P1:  One -- in spell-lang", repo: LANG },
+      { sha: "b".repeat(40), subject: "P1:  One -- in spell-parser", repo: LANG },
       { sha: "a".repeat(40), subject: "P1:  One -- in the kit", repo: BASE }
     ]
     plan.backfillCommits(log, { base: BASE })

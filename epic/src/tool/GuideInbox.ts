@@ -1,4 +1,4 @@
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { DataFile } from "spell-epic/data/DataFile"
 
@@ -27,7 +27,7 @@ const INBOX_VERSION = 1
  *     `/airplane land`
  * - EVERY write through `update()` / `updateAsync()`:  under the file's lock (`SRV.FileLock`), atomic
  * - Works with no Claude and no network:  the page server writes it (`src/tools/commentsRoutes.ts`)
- * - Node only (`node:fs`, `spell-kit/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
+ * - Node only (`node:fs`, `spell/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Here, not in the docs tools (`src/tools`) where it began:  the epic tool's `inbox wait` reads it, and nothing
  *   imports `docs`.
  ****************/

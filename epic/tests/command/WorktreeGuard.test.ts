@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { WorktreeGuard } from "spell-epic/command/WorktreeGuard"
-import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
 /** The hook, as the plugin runs it. */
 const HOOK = resolve(dirname(fileURLToPath(import.meta.url)), "../../hooks/worktree-guard.mjs")

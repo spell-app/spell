@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
 import type { ThreadComment } from "spell-epic/comments"
 import type { DOMThreadElement } from "spell-epic/components/epic-thread"

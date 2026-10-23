@@ -11,7 +11,7 @@
  * - Built as a component pack's script is (`spell-pack build`, the kit's `ComponentPack`):
  *   - Vite, on Spell UI's `baseConfig()`:  decorators BEFORE Solid, Solid's JSX, Lightning CSS
  *   - one minified IIFE, banner first, saying how it was built
- *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell-kit/element`, `spell-ui/core`, `spell-ui/forms`)
+ *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`)
  *     left external, read from `globalThis.SpellUI.packModules`:  the page's one Solid, spell-element and Spell UI core
  * - Unlike a pack:
  *   - no `<ui-root>` catalog, no `registerPack()`:  the entry defines its tags itself, as the script runs
@@ -29,7 +29,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { PACK_MODULES } from "spell-kit/element-tools/packModules"
+import { PACK_MODULES } from "spell/element-tools/packModules"
 
 import { packageDir } from "./packageDir.ts"
 import { parseArgs } from "./pages.js"
@@ -44,7 +44,7 @@ const UI_DIR = packageDir("spell-ui") ?? join(DOCS, "spell-ui (not installed)")
 const UI_SOURCE = /^spell-ui\/(docs-components|components\/components\.types)(\/|$)/
 
 /** Imports the page must share, never bundled:  Spell UI, Solid, our other repos' packages (as `packBuild.ts`). */
-const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell-kit\/element(\/|$)/
+const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
 
 const { positional } = parseArgs(process.argv.slice(2))
 const entry = positional[0] ? resolve(positional[0]) : ""
@@ -97,7 +97,7 @@ async function bundle(entry: string, out: string) {
           if (SHARED_IMPORT.test(id) && !UI_SOURCE.test(id)) {
             throw new Error(
               `bundle-experiment:  '${id}' can't be shared with the page;  import from solid-js, @solidjs/web, ` +
-                `spell-kit/element, spell-ui/core, spell-ui/forms, or a doc-only family ('spell-ui/docs-components/<family>')`
+                `spell/element, spell-ui/core, spell-ui/forms, or a doc-only family ('spell-ui/docs-components/<family>')`
             )
           }
           return false

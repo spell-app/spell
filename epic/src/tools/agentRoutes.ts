@@ -1,5 +1,5 @@
 /**
- * An epic's running agents, on the page server (epic `skillz`, P3):  a ROUTE MODULE (`spell-kit/server/page`'s
+ * An epic's running agents, on the page server (epic `skillz`, P3):  a ROUTE MODULE (`spell/server/page`'s
  * `RouteModule`), listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  * - The epic page shows them in its "Agents running" box (`<epic-page>`, `spell-epic`), each with a note box:
  *   Owen's note REDIRECTS that agent.  It waits in the list (`AgentList.ts`) until a Claude session waiting on it
@@ -12,8 +12,8 @@
  * - writes:  under the list's lock, all at once (`AgentList.redirect()`, through `SRV.FileOperations.save()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`), as the review routes' do
  */
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 import { planDoc } from "spell-epic/tool/reviewRoutes"
 
