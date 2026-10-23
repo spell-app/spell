@@ -60,7 +60,7 @@
  * - NOTE:  the FIRST show in a window opens the side bar with focus on the view:
  *   VS Code has no way to open a view without focusing it.  Later shows keep focus where it is.
  */
-import { spawn } from "child_process"
+import { execFile, spawn } from "child_process"
 import { randomBytes } from "crypto"
 import { existsSync } from "fs"
 import { join } from "path"
@@ -271,15 +271,22 @@ export class DocView implements vscode.WebviewViewProvider {
    * - the view's script catches that call (`html()`) and sends it here
    * - copy / cut:  the page sends back its selection (`{ spell: "clipboard", text }`), which goes on the clipboard here
    *   (the page can't:  copying needs a key press IN it);  cut then deletes it there
-   * - paste:  the clipboard's text, sent in, typed where the caret is
+   * - paste:  the clipboard's IMAGE when it holds one (`clipboardImage()`), which the page pastes as a browser would (a
+   *   test run's failure screenshot:  epic `epic-engine` I75);  else its text, typed where the caret is
    * - select all, undo, redo:  the page does them (`document.execCommand()`)
    * - Not keybindings (P2 tried them):
    *   `focusedView` is never set while focus is in a webview view's page, so they never fired
    */
   async edit({ command }: EditCommand): Promise<void> {
     if (!this.view) return
-    const text = command === "paste" ? await vscode.env.clipboard.readText() : undefined
-    void this.view.webview.postMessage({ spell: "edit", command, ...(text !== undefined && { text }) })
+    const image = command === "paste" ? await clipboardImage() : undefined
+    const text = command === "paste" && !image ? await vscode.env.clipboard.readText() : undefined
+    void this.view.webview.postMessage({
+      spell: "edit",
+      command,
+      ...(text !== undefined && { text }),
+      ...(image && { image })
+    })
   }
 
   /**
@@ -701,3 +708,29 @@ type Clipboard = { spell: "clipboard"; text?: string }
  * the frame's `data-vscode-context` (`rightClick()` in `html()`), and the view's id, `webview`.
  */
 type MenuContext = { webview?: string; spellField?: boolean; spellSelection?: boolean }
+
+/** The most a pasted image may be, as the page's own limit for a screenshot:  8 MB. */
+const IMAGE_MAX_BYTES = 8 * 1024 * 1024
+
+/**
+ * The clipboard's image, as a PNG `data:` URL;  `undefined` with none, or off macOS.
+ * - why:  VS Code's clipboard API is text only, and the page in the view may not read the clipboard itself
+ *   (`navigator.clipboard.read()` is refused there:  epic `epic-engine` I75)
+ * - macOS hands it over through AppleScript:  `the clipboard as «class PNGf»`, printed as `«data PNGf<hex>»`
+ * - NEVER throws:  no image, a failure, or one over `IMAGE_MAX_BYTES`, all `undefined`
+ */
+function clipboardImage(): Promise<string | undefined> {
+  if (process.platform !== "darwin") return Promise.resolve(undefined)
+  const script = ["try", "return the clipboard as «class PNGf»", "on error", 'return ""', "end try"]
+  return new Promise((resolve) => {
+    execFile(
+      "osascript",
+      script.flatMap((line) => ["-e", line]),
+      { maxBuffer: IMAGE_MAX_BYTES * 2 + 1024, encoding: "utf8" },
+      (error, stdout) => {
+        const hex = /«data PNGf([0-9A-F]+)»/i.exec(error ? "" : stdout)?.[1]
+        resolve(hex ? `data:image/png;base64,${Buffer.from(hex, "hex").toString("base64")}` : undefined)
+      }
+    )
+  })
+}
