@@ -388,21 +388,34 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
     )
   }
 
-  /** The theme `<ui-dropdown>` (`show="theme"`). */
+  /**
+   * The theme `<ui-dropdown>` (`show="theme"`).
+   * - `compact`:  an icon-only palette button, its text (`3 themes`) its tooltip and name (Owen, 2026-10-23, epic
+   *   `debut`:  "'1 theme' button should be palette icon")
+   */
   private dropdown(): JSX.Element {
+    const label = () => this.themeMenu.labelFor(this.look.theme)
     return (
       <ui-dropdown
         part={this.partForName("theme")}
+        class={{ [COMPACT]: !!this.compact }}
         floating=""
         scrolling=""
         button=""
+        compact={this.compact ? "" : undefined}
         inverted={this.inverted ? "" : undefined}
         size={this.size}
         text={this.translationForKey("themeName")}
+        title={this.compact ? label() : undefined}
+        aria-label={this.compact ? label() : undefined}
         value={this.chosenTheme}
         ref={(dropdown: HTMLElement) => dropdown.addEventListener("ui-change", (event) => this.onDropdownChange(event))}
       >
-        <span slot="trigger">{this.themeMenu.labelFor(this.look.theme)}</span>
+        <span slot="trigger">
+          <Show when={this.compact} fallback={label()}>
+            <ui-icon name={PALETTE_ICON} aria-hidden="true"></ui-icon>
+          </Show>
+        </span>
         <For each={this.themeMenu.entries}>
           {(entry) =>
             "type" in entry ? (
@@ -567,6 +580,9 @@ const SCHEME_CLASS = "scheme"
 
 /** Class word of the palette button. */
 const PALETTE_CLASS = "palette"
+
+/** Class word of a `compact` theme dropdown:  an icon-only palette button. */
+const COMPACT = "compact"
 
 /** Class word of a button's icon box. */
 const GLYPH_CLASS = "glyph"

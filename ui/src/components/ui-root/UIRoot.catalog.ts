@@ -327,7 +327,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-docs-themes": {
     folder: "ui-docs-themes",
     skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["for", "show", "size", "inverted"]
+    attributes: ["for", "show", "size", "inverted", "compact"]
   },
   "ui-docs-toc": {
     folder: "ui-docs-toc",

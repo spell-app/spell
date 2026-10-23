@@ -162,11 +162,13 @@
     --ui-bar-filter: var(--fruity-blur);
     --ui-bar-color: var(--ui-text-color);
     /*
-     * a section title:  in place, near-solid white (85%);  stuck, a lighter glass (60%) that blurs what slides under it
-     * (Owen, 2026-10-23:  "more opaque when not sticky, less when sticky, transition the opacity")
+     * a section title:  in place, white glass at 50%;  stuck, 90%, the change eased (Owen, 2026-10-23:  "all of those
+     * headers, 50% opaque white when non-sticky, animated transition to 90% when sticky");  the panel round a page's
+     * tabs, 50% ("make tab surround 50% opaque")
      */
-    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.85), rgb(30 28 38 / 0.85));
-    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.6), rgb(30 28 38 / 0.6));
+    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
+    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.9), rgb(30 28 38 / 0.9));
+    --ui-bar-panel-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
     --ui-bar-rest-filter: var(--fruity-blur);
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;
@@ -349,6 +351,12 @@
     --ui-docs-nav-border-color: var(--fruity-hairline);
     --ui-docs-nav-current-background: var(--fruity-accent-wash);
     --ui-docs-nav-current-color: var(--fruity-accent-text);
+
+    /* Docs examples (`<ui-docs-example>`):  a glass frame;  the open demo a very light white, not pure white */
+    --ui-docs-example-frame-background: light-dark(rgb(255 255 255 / 0.35), rgb(30 28 38 / 0.35));
+    --ui-docs-example-frame-border: 1px solid var(--fruity-edge);
+    --ui-docs-example-frame-filter: var(--fruity-blur);
+    --ui-docs-example-demo-background: light-dark(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.05));
 
     /* Headers:  San Francisco Display, tight;  ledes muted, never italic */
     --ui-header-font-weight: var(--ui-font-weight-semibold);

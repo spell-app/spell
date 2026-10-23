@@ -28251,6 +28251,11 @@
           "description": "For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown."
         },
         {
+          "name": "compact",
+          "kind": "keyOnly",
+          "description": "With `show=\"theme\"`:  the dropdown is an icon-only palette button, its text (`3 themes`) its tooltip and name, for a masthead's row of icon buttons."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -30592,6 +30597,44 @@
           "default": "1em",
           "description": "Space between the header, description and example.",
           "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 45%, transparent)",
+          "description": "The frame round an example: a faint see-through card, so it never runs into the prose round it.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-docs-example-frame-border",
+          "default": "var(--ui-border-width, 1px) solid var(--ui-border-color)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-frame-radius",
+          "default": "var(--ui-radius-l, 0.75em)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-padding",
+          "default": "0.75em 1em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-docs-example-frame-shadow",
+          "default": "var(--ui-shadow-subtle, none)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-frame-filter",
+          "default": "none",
+          "description": "What the frame does to what's behind it: a theme's glass (`backdrop-filter`)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-docs-example-demo-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 60%, transparent)",
+          "description": "The live demo while the code shows: a very light tint, so its edge reads (pure white read as a missing border)",
+          "type": "color"
         }
       ]
     },
@@ -39822,6 +39865,7 @@
         "ui-checkbox",
         "ui-code",
         "ui-dimmer",
+        "ui-docs-example",
         "ui-docs-nav",
         "ui-dropdown",
         "ui-flyout",

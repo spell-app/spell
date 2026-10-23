@@ -95,8 +95,8 @@
   .site-topbar {
     position: sticky;
     top: 0;
-    /* above the sticky tabs and titles, so their bands slide under it */
-    z-index: calc(var(--ui-z-sticky) + 2);
+    /* above the sticky tabs (+2) and titles, so they slide under it as the page scrolls past them */
+    z-index: calc(var(--ui-z-sticky) + 3);
     box-sizing: border-box;
     display: none;
     align-items: center;
@@ -112,6 +112,21 @@
     height: 100%;
     flex: 1 1 auto;
     gap: 12px;
+  }
+  /*
+   * its icon buttons (menu, search, the palette) plain:  no ring, a tint under the pointer (Owen, 2026-10-23, epic
+   * `debut`:  "lose ring around hamburger, search, pallette icons")
+   */
+  .site-topbar > ui-button {
+    --ui-button-basic-border-width: 0px;
+    --ui-button-box-shadow: none;
+  }
+  .site-topbar-themes::part(palette) {
+    background: transparent;
+    box-shadow: none;
+  }
+  .site-topbar-themes::part(palette):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
   }
   /*
    * at the top of the page the bar is see-through over the masthead;  it fills in over the first 32px of scrolling,
@@ -131,20 +146,25 @@
       backdrop-filter: none;
     }
   }
-  .site-topbar > spell-site-header {
-    flex: 1 1 auto;
-    min-width: 0;
+  /*
+   * the site's links:  the bar's own items, ONE row at every width, scrolling sideways with `‹` / `›` at either side while
+   * there's more that way (Owen, 2026-10-23:  "center buttons to scroll with < > arrows on either side");  the header's
+   * row at its own width, so the bar's items box is what scrolls
+   */
+  .site-topbar-links {
+    flex: none;
   }
-  /* one row:  the links scroll sideways when they don't fit, so the bar keeps its height (the tabs stick below it) */
-  .site-topbar > spell-site-header::part(bar) {
-    flex-wrap: nowrap;
+  /* the items box is only a scroller:  no menu box (a theme's menu fill and shadow) round the links */
+  .site-topbar::part(menu) {
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
-  .site-topbar > spell-site-header::part(nav) {
-    flex: 0 1 auto;
-    min-width: 0;
+  .site-topbar-links::part(bar),
+  .site-topbar-links::part(nav) {
     flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
   }
   /* the brand:  the bar's title, a plain link set as a heading (a `<ui-header>` there would draw as a menu's header) */
   .site-topbar-brand {
@@ -230,12 +250,78 @@
     position: relative;
     padding-block: 2em 7em;
   }
+  /*
+   * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large, its
+   * subhead under it;  on the title's right, the page's icon-only buttons in one quiet row:  report a bug, the original
+   * page, and the themes as a palette button (`<ui-docs-themes compact>`);  Send and who's listening under them.
+   * Once the title scrolls under the top bar, it and its buttons stay there, large (`.site-page-title`, below).
+   */
+  .site-masthead > ui-container::part(container) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: 0.25em;
+    align-items: start;
+  }
+  /* boxes of their own (both hosts are `display: contents` by default), so the grid places them */
   .site-title {
     --ui-header-margin-top: 0;
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .site-masthead .site-page-links {
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
   }
   .site-themes {
-    display: inline-block;
-    margin-block-start: 1em;
+    grid-column: 3;
+    grid-row: 1;
+    /* level with the links' round buttons (theirs are taller:  the menu's item height) */
+    align-self: start;
+    padding-block-start: 0.45em;
+  }
+  /* everything else a page or the comments add to the masthead (Send):  under the buttons, at the right */
+  .site-masthead > ui-container > :not(.site-title, .site-page-links, .site-themes, .site-title-marker) {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    justify-self: end;
+  }
+  /* the marker the stuck title watches (`SiteSections.stickTitle()`):  at the title's top, no room */
+  .site-title-marker {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    height: 0;
+  }
+  /* the page's links:  plain round icon buttons, a tint under the pointer;  no menu box round them */
+  .site-page-links {
+    --ui-menu-background: transparent;
+    --ui-menu-border: none;
+    --ui-menu-shadow: none;
+    --ui-menu-divider-display: none;
+    float: none;
+  }
+  .site-page-links::part(menu) {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    gap: 0.25em;
+  }
+  .site-page-links > ui-item::part(item) {
+    width: 2.25em;
+    height: 2.25em;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ui-text-muted);
+  }
+  .site-page-links > ui-item::part(item):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    color: var(--ui-text-color);
   }
   /*
    * the panes sit flush in the column, as Fomantic's sections do (a `basic` pane keeps a segment's padding);  and
@@ -294,8 +380,10 @@
    *   the gaps and `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by
    *   `SiteSections`) is that line, for the anchors the browser scrolls to itself.
    * - Bars take the page's background, not the surface's (the theme may tint the page), unless the theme gives bars
-   *   their own:  `--ui-bar-background` while stuck, `--ui-bar-rest-background` in place (fruity:  white glass, 95%
-   *   and 30%), `--ui-bar-filter` / `--ui-bar-rest-filter` behind them.
+   *   their own:  a stuck title `--ui-bar-title-background`, in place `--ui-bar-rest-background` (fruity:  white glass,
+   *   90% and 50%), the panel `--ui-bar-panel-background` (50%);  `--ui-bar-filter` / `--ui-bar-rest-filter` behind them.
+   *   While the panel is stuck, a strip in the stuck titles' colour fills round it (spell-toolbar.css), so nothing
+   *   scrolling under shows in its gaps.
    * - Section titles reach the column's edges (the gutter), their text where it was.
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
@@ -305,23 +393,33 @@
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
     --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
+  /*
+   * a title's fill:  set HERE in both states, as a colour (`background-color`), so the switch as it sticks eases
+   * (Owen, 2026-10-23:  "50% opaque white when non-sticky, animated transition to 90% when sticky");  left to the
+   * section's own sheet when stuck, the switch was between two different properties' values, and never eased
+   */
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
     padding-block: 0.4em;
+    background-color: var(--ui-section-sticky-background);
     backdrop-filter: var(--ui-bar-filter, none);
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    background: var(--ui-bar-rest-background, none);
+    background-color: var(--ui-bar-rest-background, transparent);
     backdrop-filter: var(--ui-bar-rest-filter, none);
+  }
+  /* a section's first nested title, in place, a little below its own (Owen:  "No space between types/breadcrumb") */
+  .site-main ui-section > ui-section[sticky]:first-of-type::part(title) {
+    margin-block-start: 0.5em;
   }
   /*
    * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it and a slightly
    * deeper fill, so the two read as two bars, not one block
    */
   .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
-    background: color-mix(in oklab, var(--ui-section-sticky-background) 94%, var(--ui-text-color));
+    background-color: color-mix(in oklab, var(--ui-section-sticky-background) 94%, var(--ui-text-color));
     box-shadow: inset 0 1px 0 var(--ui-border-color);
   }
   .site-tabs::part(menu) {
@@ -331,53 +429,87 @@
     /* above the section toolbar, whose box draws the panel behind it */
     z-index: calc(var(--ui-z-sticky) + 2);
     margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+    /* at a pane's end, up with its section toolbar as it leaves (`--site-tabs-leave`, `SiteSections.markTabsStuck()`) */
+    translate: 0 calc(-1 * var(--site-tabs-leave, 0px));
   }
   /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
-  .site-tabs:not(:has(ui-sticky.spell-site-toolbar))::part(menu) {
+  .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
     margin-block-end: calc(var(--site-tabs-gap) + var(--site-tabs-band));
-    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
+    box-shadow: 0 0 0 var(--site-tabs-band)
+      var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)));
+  }
+  /*
+   * ... and while they're stuck (`main.site-tabs-stuck`, `SiteSections.markTabsStuck()`), a strip in the stuck titles'
+   * colour behind that panel, out to the column's edges and over the gaps above and below it, so nothing scrolling
+   * under shows round them (the section toolbar draws its own:  spell-toolbar.css):  a shadow as wide as everything,
+   * cut to the strip's box
+   */
+  .site-tabs-stuck .site-tabs:not(:has(> ui-tab:state(selected) ui-sticky.spell-site-toolbar))::part(menu) {
+    box-shadow:
+      0 0 0 var(--site-tabs-band) var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))),
+      0 0 0 100vmax var(--ui-section-sticky-background, var(--ui-background));
+    clip-path: inset(
+      calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap))) calc(-1 * var(--site-gutter))
+        calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap)))
+    );
   }
 
   /*
-   * The page's TITLE, stuck (`SiteSections.stickTitle()`):  a line of no height first in the column, holding a bar
-   * that shows once the masthead has scrolled away (`main.site-title-away`):  watched through a marker of no height just
-   * before the column, `.site-title-marker`, so it shows as it pins;  the title in the heading face,
-   * out to the column's edges as the section titles are.
+   * The page's TITLE, stuck (`SiteSections.stickTitle()`):  once the masthead's title scrolls under the top bar, a copy
+   * of it stays there, LARGE as it was, with the page's icon buttons on its right (Owen, 2026-10-23:  "just the
+   * Breadcrumb stays + top icons stay, large, transparent")
+   * - a line of no height first in `main`, sticking under the top bar from the page's top;  its bar hidden until
+   *   `main.site-title-away`, set as the masthead's title reaches the line (a marker just before it), so the copy takes
+   *   over where the title was:  the subhead and the rest scroll on under it
+   * - no bar of its own:  the page's background, see-through, blurring what slides under it
+   * - its height (`--site-page-title-bar`, measured) is what the tabs below it make room for (`--site-page-title-height`)
    */
   .site-page-title {
     position: sticky;
     top: var(--site-top);
-    z-index: calc(var(--ui-z-sticky) + 2);
+    /* above the sticky tabs (+2), as the top bar is */
+    z-index: calc(var(--ui-z-sticky) + 3);
     height: 0;
   }
-  .site-page-title > span {
+  .site-page-title > .bar {
     position: absolute;
-    inset-inline: calc(-1 * var(--site-gutter));
+    inset-inline: 0;
     top: 0;
     box-sizing: border-box;
-    height: var(--site-page-title-bar, 40px);
-    padding: 0 var(--site-gutter);
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    overflow: hidden;
-    /* the page's own background (Owen:  "should be page bg, not white") */
-    background: var(--ui-background);
-    border-block-end: 1px solid var(--ui-border-color);
-    color: var(--ui-text-dark);
-    font: var(--ui-font-weight-bold, 700) 1.125em / 1 var(--ui-font-family-heading);
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    column-gap: 0.25em;
+    padding: 0.35em var(--site-gutter);
+    background: color-mix(in oklab, var(--ui-background) 80%, transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
     opacity: 0;
     visibility: hidden;
     transition:
       opacity var(--ui-duration-fast, 150ms) var(--ui-ease, ease),
       visibility var(--ui-duration-fast, 150ms) allow-discrete;
   }
-  .site-title-away {
-    --site-page-title-height: var(--site-page-title-bar, 40px);
+  /* the title as the masthead draws it:  the theme's heading face, at its h1 size */
+  .site-page-title .title {
+    overflow: hidden;
+    color: var(--ui-text-dark);
+    font-family: var(--ui-font-family-heading);
+    font-size: calc(var(--ui-font-size) * var(--ui-header-h1, 2));
+    font-weight: var(--ui-font-weight-bold, 700);
+    line-height: var(--ui-line-height-heading, 1.2);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
-  .site-title-away .site-page-title > span {
+  .site-page-title .tools {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+  }
+  .site-title-away {
+    --site-page-title-height: var(--site-page-title-bar, 64px);
+  }
+  .site-title-away .site-page-title > .bar {
     opacity: 1;
     visibility: visible;
   }
@@ -435,18 +567,8 @@
     }
   }
 
-  /* ## Phone:  no page links in the masthead;  the top bar keeps its look controls (the flyout needs no copy) */
+  /* ## Phone:  the top bar keeps its look controls (the flyout needs no copy) */
   @media (--ui-mobile) {
-    .site-page-links {
-      display: none;
-    }
-    /* no room for the site row in the top bar:  the brand takes the space */
-    .site-topbar > spell-site-header {
-      display: none;
-    }
-    .site-topbar-brand {
-      flex: 1 1 auto;
-    }
   }
   .site-flyout-themes {
     display: none;

@@ -39,6 +39,25 @@
     --_ui-docs-example-toggle-opacity: var(--ui-docs-example-toggle-opacity, 0.5);
     /* Space between the header, description and example. */
     --_ui-docs-example-gap: var(--ui-docs-example-gap, 1em);
+    /* The frame round an example:  a faint see-through card, so it never runs into the prose round it. */
+    --_ui-docs-example-frame-background: var(
+      --ui-docs-example-frame-background,
+      color-mix(in oklab, var(--ui-surface) 45%, transparent)
+    );
+    --_ui-docs-example-frame-border: var(
+      --ui-docs-example-frame-border,
+      var(--ui-border-width, 1px) solid var(--ui-border-color)
+    );
+    --_ui-docs-example-frame-radius: var(--ui-docs-example-frame-radius, var(--ui-radius-l, 0.75em));
+    --_ui-docs-example-frame-padding: var(--ui-docs-example-frame-padding, 0.75em 1em);
+    --_ui-docs-example-frame-shadow: var(--ui-docs-example-frame-shadow, var(--ui-shadow-subtle, none));
+    /* What the frame does to what's behind it:  a theme's glass (`backdrop-filter`) */
+    --_ui-docs-example-frame-filter: var(--ui-docs-example-frame-filter, none);
+    /* The live demo while the code shows:  a very light tint, so its edge reads (pure white read as a missing border) */
+    --_ui-docs-example-demo-background: var(
+      --ui-docs-example-demo-background,
+      color-mix(in oklab, var(--ui-surface) 60%, transparent)
+    );
   }
 
   .ui.example {
@@ -124,6 +143,82 @@
   /* Floated example content stays inside the frame (Fomantic's `.example` clears its floats too). */
   [part~="demo"]::part(segment) {
     display: flow-root;
+  }
+
+  /*
+   * THE FRAME (Owen, 2026-10-23, epic `debut`:  "Example panes bleed into the text, need some framing.  Something
+   * closer to glass framing when expanded"):  every example but a `bare` one sits in a faint card, open or not
+   * - a hairline, rounded, a little padding, the theme's glass behind it (fruity's blur)
+   * - open:  the demo a very light tint, no box of its own;  the code under it plain, with no frame of its own
+   *   ("Don't need secondary frame around the HTML inside panel ... just visual noise")
+   * - the segments' look set on their boxes (`::part(segment)`), NOT through `--ui-segment-*` tokens, which would
+   *   inherit into every segment the example shows
+   */
+  .ui.example:not(.bare) {
+    padding: var(--_ui-docs-example-frame-padding);
+    border: var(--_ui-docs-example-frame-border);
+    border-radius: var(--_ui-docs-example-frame-radius);
+    background: var(--_ui-docs-example-frame-background);
+    box-shadow: var(--_ui-docs-example-frame-shadow);
+    backdrop-filter: var(--_ui-docs-example-frame-filter);
+  }
+  :host(:state(open)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
+    padding: 1em;
+    border: none;
+    border-radius: calc(var(--_ui-docs-example-frame-radius) * 0.66);
+    background: var(--_ui-docs-example-demo-background);
+    box-shadow: none;
+  }
+  .ui.example:not(.bare) [part~="code"]::part(segment) {
+    margin: 0;
+    padding: 0.5em 0 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .ui.example:not(.bare) [part~="source"] {
+    --ui-code-border: none;
+    --ui-code-background: transparent;
+    /* room on the right for the copy icon, which sits over the first line */
+    --ui-code-padding: 0.5em 2.5em 0.5em 0;
+  }
+
+  /*
+   * The code's copy button:  an icon, no border (Owen:  "Change "Copy" to copy icon, no border").  `<ui-code>`'s
+   * button keeps its words ("Copy", "Copied") as its accessible name;  they're hidden, and its icon is painted
+   * through a mask in the text's colour (two sheets;  a check once it has copied)
+   */
+  [part~="source"]::part(copy) {
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 0;
+    color: var(--ui-text-muted);
+  }
+  [part~="source"]::part(copy)::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: currentColor;
+    mask: var(--_ui-docs-example-copy-icon) center / 15px no-repeat;
+  }
+  [part~="source"]:state(copied)::part(copy)::before {
+    mask-image: var(--_ui-docs-example-copied-icon);
+  }
+  [part~="source"]::part(copy):hover,
+  [part~="source"]::part(copy):focus-visible {
+    background: color-mix(in oklab, var(--ui-text-color) 8%, transparent);
+    color: var(--ui-text-color);
+  }
+  .ui.example {
+    --_ui-docs-example-copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='12' height='12' rx='2.5'/%3E%3Cpath d='M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8'/%3E%3C/svg%3E");
+    --_ui-docs-example-copied-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
   }
   /* Phones:  an example wider than the column scrolls inside its frame, never the page. */
   @media (--ui-mobile) {

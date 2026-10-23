@@ -29,7 +29,8 @@
       <!--
         Top bar:  ONLY while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
         top bar entirely").  The menu button and the brand only below 992px, where the nav panel moves into the flyout.
-        A `<ui-toolbar>`'s bar slots:  `icon` the menu button, `title` the brand, `center` the site's links, `right` search
+        A `<ui-toolbar>`'s bar slots:  `icon` the menu button, `title` the brand, its items the site's links (they scroll
+        sideways with `‹` / `›` when the bar is too narrow), `right` search
         and the look controls (at the right edge, whatever shows before them).
       -->
       <ui-toolbar class="site-topbar" aria-label="Site">
@@ -45,7 +46,7 @@
           command="--show"
         ></ui-button>
         <a slot="title" class="site-topbar-brand" href="../index.html">Spell UI</a>
-        <spell-site-header slot="center" docked root="../../.."></spell-site-header>
+        <spell-site-header class="site-topbar-links" docked no-tools root="../../.."></spell-site-header>
         <ui-button
           slot="right"
           class="site-search-button"
@@ -75,7 +76,7 @@
             <svg class="site-brand-lockup" aria-hidden="true"><use href="#spell-lockup" width="100%" height="100%" /></svg>
             <span class="site-brand-name">UI</span>
           </a>
-          <spell-site-header slot="header" docked root="../../.." class="site-flyout-header"></spell-site-header>
+          <spell-site-header slot="header" docked no-tools root="../../.." class="site-flyout-header"></spell-site-header>
           <ui-docs-themes slot="header" inverted size="small" class="site-flyout-themes"></ui-docs-themes>
         </ui-docs-nav>
       </ui-flyout>
@@ -102,7 +103,7 @@
         -->
         <aside class="site-aside">
           <header class="site-aside-head">
-            <spell-site-header docked root="../../.."></spell-site-header>
+            <spell-site-header docked no-tools root="../../.."></spell-site-header>
             <ui-docs-themes size="small" class="site-aside-themes"></ui-docs-themes>
           </header>
           <ui-docs-toc class="site-toc"></ui-docs-toc>
