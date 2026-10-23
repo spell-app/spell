@@ -1,0 +1,10 @@
+{
+  // What `tsx` runs the `spell` command under (`bin/spell.mjs`):  the kit's node settings, over EVERY repo's files.
+  // - `tsx` applies a tsconfig's settings only to the files that tsconfig includes.
+  //   `tsconfig.node.json` includes only the kit's own folders, so a child repo's file got none of its settings:
+  //   spell-app's terminal screens (Ink's) compiled to `React.createElement`, and crashed in a terminal with
+  //   "React is not defined" (epic `repo-split` I69).
+  // - NOT a TypeScript program of its own:  no `yarn ts` reads it (`"spellTypes"`), only `tsx`.
+  "extends": "./tsconfig.node.json",
+  "include": ["**/*"]
+}

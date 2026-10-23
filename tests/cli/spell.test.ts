@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process"
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
+import { pathToFileURL } from "node:url"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 /**
@@ -9,6 +10,12 @@ import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
  * - Every installed repo's commands load, so `spell help` here lists theirs too;  their own tests are theirs.
  */
 const SPELL = resolve(import.meta.dirname, "../../bin/spell.mjs")
+
+/** The kit's root. */
+const KIT = resolve(import.meta.dirname, "../..")
+
+/** The settings the bin hands `tsx`. */
+const TSX_SETTINGS = join(KIT, "tsconfig.tsx.json")
 
 // each run starts node and `tsx`;  slower under the load of every test file at once
 vi.setConfig({ testTimeout: 30_000 })
@@ -53,6 +60,37 @@ describe("spell pony", () => {
     const { status, stdout } = spell(["pony", "hello", "there"])
     expect(status).toBe(0)
     expect(stdout).toContain(" < hello there >")
+  })
+})
+
+describe("the settings `tsx` runs `spell` under:  tsconfig.tsx.json, as the bin registers it", () => {
+  test("a child repo's JSX compiles for the automatic runtime, no `React` in scope (epic repo-split I69)", () => {
+    // a stand-in child repo, inside the kit, with a fake `react/jsx-runtime`:  the kit installs no React
+    const repo = mkdtempSync(join(import.meta.dirname, "tsx-settings-"))
+    try {
+      mkdirSync(join(repo, "node_modules", "react"), { recursive: true })
+      writeFileSync(join(repo, "node_modules", "react", "package.json"), `{ "name": "react", "type": "module" }`)
+      writeFileSync(
+        join(repo, "node_modules", "react", "jsx-runtime.js"),
+        `export const jsx = (type, props) => ({ type, props })\n`
+      )
+      writeFileSync(join(repo, "Screen.tsx"), `export const screen = () => <b>hi</b>\n`)
+      const probe = [
+        `import { register } from "tsx/esm/api"`,
+        `register({ tsconfig: ${JSON.stringify(TSX_SETTINGS)} })`,
+        `const { screen } = await import(${JSON.stringify(pathToFileURL(join(repo, "Screen.tsx")).href)})`,
+        `console.log(JSON.stringify(screen()))`
+      ].join("\n")
+      const { status, stdout, stderr } = spawnSync(process.execPath, ["--input-type=module", "-e", probe], {
+        cwd: KIT,
+        encoding: "utf8"
+      })
+      expect(stderr).not.toContain("React is not defined")
+      expect(status).toBe(0)
+      expect(JSON.parse(stdout)).toEqual({ type: "b", props: { children: "hi" } })
+    } finally {
+      rmSync(repo, { recursive: true, force: true })
+    }
   })
 })
 

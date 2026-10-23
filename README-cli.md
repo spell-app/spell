@@ -913,10 +913,14 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [commands/commandsCommand.ts](src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
 | [commands/wwodCommand.ts](src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](src/cli/commands/wwod.ts) |
 | [commands/ponyCommand.ts](src/cli/commands/ponyCommand.ts) | `spell pony` |
-| [tsconfig.node.json](tsconfig.node.json) | the settings `tsx` runs every repo's commands under, and the kit's node type check |
+| [tsconfig.node.json](tsconfig.node.json) | the kit's node settings, and its node type check |
+| [tsconfig.tsx.json](tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |
 
 - `tsx` takes one settings file for every file it runs, so this one holds what every repo's commands need:
   JSX for `spell-app`'s Ink screens, and standard decorators lowered for `spell-lang`.
+- It applies those settings only to the files the settings file includes.
+  So `spell` runs under `tsconfig.tsx.json`, which includes every repo:
+  under `tsconfig.node.json` alone, `spell-app`'s screens crashed in a terminal with `React is not defined`.
 - The tests:  the kit's in [tests/cli/](tests/cli/), each repo's commands' in that repo's `tests/cli/`.
   - The kit's run the real `spell` as separate processes, so a broken command list in any repo fails them.
   - `spell-app`'s include end-to-end runs of every language command, through the kit's bin.
