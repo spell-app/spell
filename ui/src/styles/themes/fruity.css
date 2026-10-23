@@ -41,7 +41,7 @@
     --fruity-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
     --fruity-blur: blur(28px) saturate(1.7);
     /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
-    --fruity-bar: light-dark(rgb(255 255 255 / 0.38), rgb(30 28 38 / 0.42));
+    --fruity-bar: light-dark(rgb(255 255 255 / 0.6), rgb(30 28 38 / 0.62));
 
     /* The wallpaper behind the page:  each wash a `light-dark()` colour, so the gradient follows the scheme */
     --fruity-wallpaper:
@@ -160,6 +160,7 @@
     /* a bar over scrolling content, for pages that draw one (the docs site's top bar, its sticky titles) */
     --ui-bar-background: var(--fruity-bar);
     --ui-bar-filter: var(--fruity-blur);
+    --ui-bar-color: var(--ui-text-color);
     --ui-panel-shadow: var(--ui-shadow-raised);
     --ui-menu-background: var(--fruity-glass);
     --ui-popup-background: var(--fruity-glass-strong);
@@ -201,7 +202,8 @@
     --ui-blue-on-light: #0066d6;
     --ui-blue-on-dark: #0a84ff;
     --ui-violet-on-light: var(--fruity-accent-light);
-    --ui-violet-on-dark: var(--fruity-accent-dark);
+    /* dark:  a saturated violet with white on it, as macOS keeps its accent;  the lilac is for text and focus */
+    --ui-violet-on-dark: #7c55e6;
     --ui-purple-on-light: #8944ab;
     --ui-purple-on-dark: #bf5af2;
     --ui-pink-on-light: #d30f45;
@@ -209,7 +211,7 @@
     --ui-brown-on-light: #7f6545;
     --ui-brown-on-dark: #ac8e68;
     --ui-grey-on-light: #6e6e73;
-    --ui-grey-on-dark: #98989d;
+    --ui-grey-on-dark: #636366;
     --ui-black-on-light: #1d1d1f;
     --ui-black-on-dark: #3a3a3c;
     --ui-info-on-light: #0066d6;
@@ -224,17 +226,14 @@
     --ui-green-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-teal-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-blue-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
-    --ui-violet-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-violet-on: oklch(1 0 0);
     --ui-purple-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-pink-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-brown-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
-    --ui-grey-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+    --ui-grey-on: oklch(1 0 0);
     --ui-black-on: oklch(1 0 0);
     --ui-info-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-warning-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
-
-    /* Hue tints:  brown is the warm ivory accent;  see-through in light;  near solid in dark, where a bar tinted with it (the docs' toolbar) has no blur behind it */
-    --ui-brown-background: light-dark(rgb(247 239 226 / 0.6), rgb(52 40 30 / 0.82));
 
     /* Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal) */
     --ui-yellow-text: light-dark(
@@ -278,6 +277,8 @@
     *******************************/
 
     /* Buttons:  a white key with a hairline shadow;  the primary the accent */
+    --ui-button-padding-block: 0.4em;
+    --ui-button-padding-inline: 0.9em;
     --ui-button-font-weight: 500;
     --ui-button-background: light-dark(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.12));
     --ui-button-background-hover: light-dark(rgb(255 255 255 / 0.98), rgb(255 255 255 / 0.18));
@@ -303,11 +304,31 @@
     --ui-menu-active-background: var(--fruity-accent-wash);
     --ui-menu-active-color: var(--fruity-accent-text);
 
+    /* Segmented menus (tab bars):  a grey track, the chosen segment a raised white key, no dividers */
+    --ui-menu-segmented-background: var(--fruity-track);
+    --ui-menu-segmented-border: none;
+    --ui-menu-segmented-padding: 2px;
+    --ui-menu-segmented-divider: transparent;
+    --ui-menu-segmented-item-padding: 0.3em 1em;
+    --ui-menu-segmented-item-radius: 6px;
+    --ui-menu-segmented-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
+    --ui-menu-segmented-active-color: var(--ui-text-color);
+    --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+
+    /* The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash */
+    --ui-docs-nav-background: var(--fruity-glass-strong);
+    --ui-docs-nav-header-background: transparent;
+    --ui-docs-nav-band-background: transparent;
+    --ui-docs-nav-band-color: var(--ui-text-muted);
+    --ui-docs-nav-border-color: var(--fruity-hairline);
+    --ui-docs-nav-current-background: var(--fruity-accent-wash);
+    --ui-docs-nav-current-color: var(--fruity-accent-text);
+
     /* Headers:  San Francisco Display, tight;  ledes muted, never italic */
     --ui-header-font-weight: var(--ui-font-weight-semibold);
     --ui-header-h1: 2.25;
-    --ui-header-h2: 1.75;
-    --ui-header-h3: 1.3125;
+    --ui-header-h2: 1.375;
+    --ui-header-h3: 1.125;
     --ui-header-h4: 1.0625;
     --ui-header-sub-color: var(--ui-text-muted);
 
@@ -362,6 +383,11 @@
   }
   :where(.ui-typography) :where(h1, h2) {
     letter-spacing: -0.02em;
+  }
+  /* the tight tracking is the heading's, not its lede's */
+  :host(:state(in-header)) > .header,
+  .in-header.header {
+    letter-spacing: normal;
   }
 
   :is(.ui.table, :where(ui-table) > table),

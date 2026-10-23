@@ -84,7 +84,8 @@
 
   /*
    * ## Top bar:  only while the right column is hidden (below 1200px;  see there).  A slim bar of the page's own
-   * colours:  the menu button and the brand (below 992px), the docked site header, the look controls.
+   * colours:  the menu button and the brand (below 992px), the docked site header, search (below 992px), the look
+   * controls.
    * GAP:  a bar like this has no widget of its own (a `ui-menu` brings Fomantic's menu look);  its look is these
    * few rules, on the theme's tokens.
    */
@@ -100,7 +101,7 @@
     align-items: center;
     gap: 12px;
     height: var(--site-topbar-height);
-    padding-inline: 16px;
+    padding-inline: 8px;
     background: var(--ui-bar-background, var(--ui-background));
     backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
@@ -108,6 +109,17 @@
   .site-topbar > spell-site-header {
     flex: 1 1 auto;
     min-width: 0;
+  }
+  /* one row:  the links scroll sideways when they don't fit, so the bar keeps its height (the tabs stick below it) */
+  .site-topbar > spell-site-header::part(bar) {
+    flex-wrap: nowrap;
+  }
+  .site-topbar > spell-site-header::part(nav) {
+    flex: 0 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   /* the look controls at the right edge, whatever is shown before them */
   .site-topbar-themes {
@@ -170,11 +182,12 @@
     height: 34px;
     aspect-ratio: 377.57 / 117.94;
   }
+  /* "UI" set on the wordmark's baseline, about its x-height tall (Owen, 2026-10-23:  12px was "way too small") */
   .site-brand-name {
-    padding-block-end: 4px;
+    padding-block-end: 5px;
     color: var(--ui-primary-text);
-    font: 500 12px / 1 var(--ui-font-family-mono);
-    letter-spacing: 0.14em;
+    font: 600 19px / 1 var(--ui-font-family-mono);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
@@ -237,14 +250,15 @@
   /*
    * ## Sections and tabs:  the pages' nested `<ui-section sticky collapsible dividing>`s (`yarn site:sections`) and
    * the tabs' bar above them (`_src/SiteSections.ts` measures and lands).
-   * - The tabs' bar sticks at the top of the page column, on a band of page background (`--site-tabs-band`) that
-   *   hides what scrolls under it, above the stuck section titles (`--ui-z-sticky` + 1).
+   * - The tabs' bar sticks at the top of the page column, above the stuck section titles (`--ui-z-sticky` + 1);
+   *   a band round it (`--site-tabs-band`, in the bar's colour) hides the titles sliding away under it.
    * - Top-level titles stick right below it:  `offset` (px, set by `SiteSections` from the bar's height + the band +
    *   `--site-top`);  nested ones stack below their parents'.  `--site-sections-top` (on `main`, by `SiteSections`)
    *   is that line, for the anchors the browser scrolls to itself.
    * - Stuck titles and the bars take the page's background, not the surface's (the theme may tint the page),
    *   unless the theme gives bars their own (`--ui-bar-background`, and `--ui-bar-filter` behind them:  fruity's glass).
    * - Stuck titles reach the column's edges (the gutter), their text where it was.
+   * - A title is a bar only while stuck:  in place it sits on the page, so no band of its own between paragraphs.
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
@@ -256,11 +270,16 @@
     padding-inline: var(--site-gutter);
     backdrop-filter: var(--ui-bar-filter, none);
   }
+  .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
+    background: none;
+    backdrop-filter: none;
+  }
   .site-tabs::part(menu) {
     position: sticky;
     top: var(--site-top);
     z-index: calc(var(--ui-z-sticky) + 1);
     box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
+    backdrop-filter: var(--ui-bar-filter, none);
   }
   .site-main ui-section[id] {
     scroll-margin-top: var(--site-sections-top, var(--site-top));

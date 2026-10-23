@@ -694,7 +694,7 @@ describe("fruity.css", () => {
     expect(UI.themes.names).not.toContain("fruity")
   })
 
-  it("the violet accent (lilac in dark), 8px buttons, the system font", async () => {
+  it("the violet accent (a deeper violet in dark, white on it), 8px buttons, the system font", async () => {
     await T3.use("fruity")
     const { box, style } = await ThemeHarness.inner(`<ui-button primary>Run</ui-button>`, ".ui.button")
     expect(style).toMatchObject({ backgroundColor: "rgb(106, 63, 214)", borderTopLeftRadius: "8px" })
@@ -703,7 +703,7 @@ describe("fruity.css", () => {
     button.style.transition = "none"
     document.documentElement.classList.add("ui-dark")
     onTestFinished(() => document.documentElement.classList.remove("ui-dark"))
-    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(183, 155, 255)"))
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(124, 85, 230)"))
     expect(T3.color("--ui-background")).toBe("rgb(21, 19, 28)")
   })
 
