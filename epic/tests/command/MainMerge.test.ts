@@ -96,6 +96,17 @@ describe("MainMerge.run()", () => {
     expect(git(repo, "status", "--porcelain")).toBe("")
   })
 
+  test("a file only this machine's `.git/info/exclude` ignores stays tracked", () => {
+    const repo = makeRepo("local-exclude")
+    change(repo, "wip", { "src/wip.txt": "the branch's own work\n" })
+    change(repo, "main", { ".ignore": "!/spell-*/\n" })
+    writeFileSync(join(repo, ".git/info/exclude"), "/.ignore\n")
+
+    const report = new MainMerge({ root: repo, ...OPTIONS }).run()
+    expect(report.untracked).toEqual([])
+    expect(git(repo, "ls-files", ".ignore")).toBe(".ignore")
+  })
+
   test("up to date, fast-forward, and refusals", () => {
     const repo = makeRepo("simple")
     expect(new MainMerge({ root: repo, ...OPTIONS }).run().result).toBe("up-to-date")

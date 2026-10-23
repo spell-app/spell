@@ -133,10 +133,12 @@ export class MainMerge {
     // a file `main` changed or in conflict, that the merged `.gitignore` ignores and ONE side's tree lacks,
     // leaves the index, kept on disk.
     // (A file both sides track, though ignored, stays.)
+    // ONLY `.gitignore`s, never this machine's `.git/info/exclude`:  a file listed there was untracked by every merge
+    // (the kit's `.ignore`, epic `epic-engine` P17, dropped from `main` twice)
     const base = gitOut(root, ["merge-base", "HEAD", "MERGE_HEAD"])
     const conflicted = gitLines(root, ["diff", "--name-only", "--diff-filter=U"])
     const theirs = gitLines(root, ["diff", "--name-only", base, "MERGE_HEAD"])
-    const ignored = new Set(gitLines(root, ["ls-files", "--cached", "--ignored", "--exclude-standard"]))
+    const ignored = new Set(gitLines(root, ["ls-files", "--cached", "--ignored", "--exclude-per-directory=.gitignore"]))
     const dropped = [...new Set([...conflicted, ...theirs])].filter((file) => ignored.has(file))
     const [inOurs, inTheirs] = [inTree(root, "HEAD", dropped), inTree(root, "MERGE_HEAD", dropped)]
     report.untracked = dropped.filter((file) => !(inOurs.has(file) && inTheirs.has(file))).sort()
@@ -369,7 +371,7 @@ function emptyReport(branch: string): MergeMainReport {
 
 /** Tracked files changed, deleted or new (not ignored) in the working tree, against the index. */
 function changedFiles(root: string): string[] {
-  const out = mustGit(root, ["ls-files", "-z", "--modified", "--others", "--exclude-standard"])
+  const out = mustGit(root, ["ls-files", "-z", "--modified", "--others", "--exclude-per-directory=.gitignore"])
   return [...new Set(out.split("\0").filter(Boolean))]
 }
 
