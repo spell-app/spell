@@ -1,12 +1,14 @@
 import { P } from "spell-lang/parser"
 import type { SP } from "spell-lang/spell"
-import type { MissingName, NamesData, NamesKind, TranslatedType } from "./translate.types"
+import type { DeclarationStatement, MissingName, NamesData, NamesKind, TranslatedType } from "./translate.types"
 
 /**
  * A project's NAMES DICTIONARY for one other language:  what each name its people chose says there
  * (epic `spanish` P24).
  * - Saved beside the project as `<Project>.<lang>.names.json5`, e.g. `Solitaire.es.names.json5`.
- * - Its sections (`NamesData`):  types (with their gender), names, phrases, texts and comments.
+ * - Its sections (`NamesData`):  types (with their gender), names, phrases, texts, comments,
+ *   and the genders of the nouns in `names` (epic `spanish` P25).
+ * - Beneath its own, the names of the projects it imports (`addImported()`):  looked up, never written to the file.
  * - A lookup that finds nothing notes what it asked for in `missing`, and gives back `undefined`:
  *   the `Translator` keeps the English and marks the line, until a person, or `claude -p`, fills it in.
  * - Pure data:  reading and writing the file is the command's (spell-app's `translateCommand`).
@@ -23,6 +25,8 @@ export class TranslationNames {
   readonly to: SP.Language
   /** Every name asked for and not found since the last `takeMissing()`, in the order asked. */
   missing: MissingName[] = []
+  /** The names of the projects it imports, looked up after our own:  see `addImported()`. */
+  readonly imported: Required<NamesData> = emptyNames()
 
   constructor(data: NamesData, { from, to }: { from: SP.Language; to: SP.Language }) {
     this.from = from
@@ -32,7 +36,55 @@ export class TranslationNames {
       names: { ...data.names },
       phrases: { ...data.phrases },
       texts: { ...data.texts },
-      comments: { ...data.comments }
+      comments: { ...data.comments },
+      genders: { ...data.genders }
+    }
+  }
+
+  /**
+   * The names `statements` (a project's declarations) declare, in its own words, by section:
+   * - `types`:  each type's words, `stock pile` (its name is `StockPile`)
+   * - `names`:  each property (`rank`), and each value of one (`ace`, `clubs`) and constant (`red`)
+   * - `phrases`:  each method's and function's words, quotes off, `is a (rank)`, `turn it face up`, `card setup`
+   * - Each once, in the order declared.
+   */
+  static declaredIn(statements: DeclarationStatement[]): { types: string[]; names: string[]; phrases: string[] } {
+    const types = new Set<string>()
+    const names = new Set<string>()
+    const phrases = new Set<string>()
+    const addValues = (values: unknown[] | undefined) =>
+      values?.forEach((value) => typeof value === "string" && /\p{L}/u.test(value) && names.add(value))
+    for (const statement of statements) {
+      if (statement.type) types.add(wordsOfTypeName(statement.type))
+      if (statement.property) names.add(unquote(statement.property))
+      if (statement.name && (statement.kind === "method" || statement.kind === "function")) {
+        phrases.add(unquote(statement.name))
+      }
+      addValues(statement.enumeration)
+      Object.values(statement.values ?? {}).forEach(addValues)
+      addValues(statement.constants)
+    }
+    return { types: [...types], names: [...names], phrases: [...phrases] }
+  }
+
+  /**
+   * Add the names of a project we import, beneath our own:  looked up after ours, never written to our file.
+   * - `data`:  its own dictionary, when we import its translation;
+   *   else its names as it declares them (`declaredIn()`), each itself:
+   *   the only words the other language's parser reads for a project in ours, `increment el contador`.
+   */
+  addImported(data: NamesData): void {
+    for (const kind of NAMES_KINDS) Object.assign(this.imported[kind], data[kind])
+  }
+
+  /** `statements`' names (`declaredIn()`), each as itself:  what `addImported()` takes for an untranslated import. */
+  static asDeclared(statements: DeclarationStatement[]): NamesData {
+    const { types, names, phrases } = TranslationNames.declaredIn(statements)
+    const same = (words: string[]) => Object.fromEntries(words.map((each) => [each, each]))
+    return {
+      types: Object.fromEntries(types.map((each) => [each, { name: each }])),
+      names: same(names),
+      phrases: same(phrases)
     }
   }
 
@@ -99,14 +151,19 @@ export class TranslationNames {
 
   /**
    * The gender of a noun in the OTHER language, `words` as written there (`cartas`, `pila de reserva`):
-   * its type's, if it names one, else the pack's guess by its ending -- `undefined` for a language with none.
+   * its type's, if it names one;  else the dictionary's `genders` (`imagen` => `feminine`, epic `spanish` J146);
+   * else the pack's guess by its ending -- `undefined` for a language with none.
    */
   genderOf(words: string): string | undefined {
     const articles = this.to.articles
     if (!articles?.genderOf) return undefined
     const singular = this.to.inflector.singularize(words)
-    const type = Object.values(this.data.types).find(({ name }) => name === singular || name === words)
+    const type = [...Object.values(this.data.types), ...Object.values(this.imported.types)].find(
+      ({ name }) => name === singular || name === words
+    )
     if (type?.gender) return type.gender
+    const known = this.data.genders[singular] ?? this.data.genders[words] ?? this.data.genders[words.split(" ")[0]!]
+    if (known) return known
     // its guess, by the other language's own rules for singular and plural:  `as` is one ace
     const article = P.Inflector.using(this.to.inflector, () => articles.article("definite", singular, undefined))
     return articles.genderOf(article)
@@ -171,7 +228,8 @@ export class TranslationNames {
       names: sorted(this.data.names),
       phrases: sorted(this.data.phrases),
       texts: sorted(this.data.texts),
-      comments: sorted(this.data.comments)
+      comments: sorted(this.data.comments),
+      genders: sorted(this.data.genders)
     }
   }
 
@@ -179,17 +237,22 @@ export class TranslationNames {
   // ## Helpers
   ////////////////
 
-  /** `words` in section `kind`, if there and filled in;  exactly, else lowercased. */
+  /** `words` in section `kind`, if there and filled in;  exactly, else lowercased;  ours, else an import's. */
   private entry(kind: Exclude<NamesKind, "types">, words: string): string | undefined {
-    const section = this.data[kind]
-    const found = section[words] ?? section[words.toLowerCase()]
-    return isMissing(found) ? undefined : found
+    for (const section of [this.data[kind], this.imported[kind]]) {
+      const found = section[words] ?? section[words.toLowerCase()]
+      if (!isMissing(found)) return found
+    }
+    return undefined
   }
 
-  /** Type `words` in `types`, if there and filled in. */
+  /** Type `words` in `types`, if there and filled in;  ours, else an import's. */
   private typeEntry(words: string): TranslatedType | undefined {
-    const found = this.data.types[words] ?? this.data.types[words.toLowerCase()]
-    return isMissing(found?.name) ? undefined : found
+    for (const types of [this.data.types, this.imported.types]) {
+      const found = types[words] ?? types[words.toLowerCase()]
+      if (!isMissing(found?.name)) return found
+    }
+    return undefined
   }
 
   /** Built-in type `words`, e.g. `text`, in the other language's own word for it, `texto`. */
@@ -234,7 +297,22 @@ export class TranslationNames {
 }
 
 /** The dictionary's sections, in the file's order. */
-export const NAMES_KINDS: NamesKind[] = ["types", "names", "phrases", "texts", "comments"]
+export const NAMES_KINDS: NamesKind[] = ["types", "names", "phrases", "texts", "comments", "genders"]
+
+/** A dictionary with every section, and nothing in it. */
+function emptyNames(): Required<NamesData> {
+  return { types: {}, names: {}, phrases: {}, texts: {}, comments: {}, genders: {} }
+}
+
+/** A type's name as its words, `StockPile` => `stock pile`. */
+function wordsOfTypeName(name: string): string {
+  return name.replace(/(?<=[\p{Ll}\p{N}])(?=\p{Lu})/gu, " ").toLowerCase()
+}
+
+/** `words` without the quotes around them, `"is a (rank)"` => `is a (rank)`. */
+function unquote(words: string): string {
+  return words.replace(/^"|"$/g, "")
+}
 
 /** Is `value` missing:  absent, empty or `TODO`? */
 function isMissing(value: unknown): boolean {

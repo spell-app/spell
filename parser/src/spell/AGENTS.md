@@ -63,12 +63,21 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - Other repos import these files by name, e.g. `spell-lang/spell/node/buildTsx`.
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell-lang/spell`'s barrel may import it (WWOD §8 › "Barrels").
-- `translate/` (epic `spanish` P24):  writing a project in another language, rule by rule
+- `translate/` (epic `spanish` P24-P25):  writing a project in another language, names first, then rule by rule
   (`spell lang translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
+  - `NamesPass`:  every name the project declares and its lines lack, translated by `claude -p` in one batch,
+    each checked readable, the unreadable asked for again once
   - `Translator`:  each line written again with its rule's twin in the other language's pack
-    (the same class, registered in the same place), its slots filled with its children, translated the same way
-  - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`
+    (the same class, registered in the same place), its slots filled with its children, translated the same way;
+    it flags the lines whose word order may be wrong (`risky`)
+  - `FixUps`:  each line that fails lint or a test, or the writer couldn't write or flagged, written again by
+    `claude -p` in context, one call a round
+  - `ElementNames`:  the tags, attributes and values a project draws with, `<ui-*>` through Spell UI's names
+    (handed in by spell-app:  spell-lang never imports Spell UI), in its JSX and its style sheets
+  - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`, with its nouns' genders;
+    beneath it, the names of the projects it imports
   - `NamesSeeder`:  fills one from a translation a person made (`--seed`)
+  - `claude` is always injected (`ClaudeRunner`):  every class here is pure, and tested with a fake.
   - Imported by path, never through the barrel:  `spell-lang/spell/translate/Translator`.
 - `highlight/`:  `SpellHighlighter`.
   - It colours a snippet without a project, for `<ui-code language="spell">`.

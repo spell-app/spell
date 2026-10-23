@@ -163,14 +163,15 @@ export default function languageCommands(spell: Command): void {
   lang
     .command("translate")
     .description(
-      "write a project in another language, rule by rule, its names from <Project>.<lang>.names.json5 -- " +
+      "write a project in another language:  its names first (<Project>.<lang>.names.json5, one claude -p batch), " +
+        "then line by line, rule by rule, then claude fixes each line that fails lint or a test -- " +
         "exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
     .requiredOption("--to <lang>", "the language to write it in, e.g. es")
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
-    .option("--no-ai", "leave each name the dictionary lacks as TODO, instead of asking claude -p")
+    .option("--no-ai", "never ask claude -p:  each name the dictionary lacks stays TODO, and no line is fixed up")
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"

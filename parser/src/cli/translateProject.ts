@@ -1,29 +1,49 @@
 /**
- * `spell lang translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24):
- * read its names dictionary, translate each file (`SP`'s `Translator`), ask `claude -p` for the names it lacks,
- * and write the project in the other language.
- * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here:
- *   so this file needs no project groups, only parsed files.
+ * `spell lang translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24-P25), in three passes:
+ * 1. NAMES:  every name the project's people chose, translated by `claude -p` in ONE go (`NamesPass`),
+ *    into its names dictionary:  its types, properties, values and methods (its declarations), its texts and comments
+ * 2. LINES:  each file written again, line by line, by its rules' twins in the other language (`Translator`)
+ * 3. FIX-UPS:  each line that fails lint or a test, couldn't be written, or may read in the wrong order,
+ *    written again by `claude -p` in context (`FixUps`);  checked again, a few rounds at most
+ * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
+ *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
+ *   that lints and tests the translation.  So this file needs no project groups, only parsed files.
  * - Beside the project, two files of its own:
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
- *     so `--update` re-translates only the lines changed since
+ *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
  * - Loaded only when it runs (`commands.ts` imports the hook's work dynamically):  it loads all of spell.
  */
-import { spawnSync } from "node:child_process"
+import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { basename, dirname, join, resolve } from "node:path"
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { basename, dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { keepingCommentsIn, readJSON5File } from "spell-kit/util/node/json5"
 import { CLI } from "spell-kit/cli"
 import { SP } from "spell-lang/spell"
 import type { TranslateOptions } from "spell-lang/cli"
+import { ElementNames } from "spell-lang/spell/translate/ElementNames"
+import { FixUps, type FixUpFile, type FixUpLine } from "spell-lang/spell/translate/FixUps"
+import { NamesPass } from "spell-lang/spell/translate/NamesPass"
 import { NamesSeeder } from "spell-lang/spell/translate/NamesSeeder"
-import { NAMES_KINDS, TranslationNames } from "spell-lang/spell/translate/TranslationNames"
+import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import { Translator } from "spell-lang/spell/translate/Translator"
-import type { MissingName, NamesData, SourceFile, TranslatedFile } from "spell-lang/spell/translate/translate.types"
+import type {
+  ClaudeEffort,
+  ClaudeRunner,
+  DeclarationStatement,
+  ImportedProject,
+  LineProblem,
+  MissingName,
+  NamesData,
+  SourceFile,
+  TranslatedFile,
+  TranslationChecker,
+  UIVocabulary
+} from "spell-lang/spell/translate/translate.types"
 
 /** A parsed project to translate:  what spell-app's command hands `translateProject()`. */
 export type TranslateSource = {
@@ -35,14 +55,29 @@ export type TranslateSource = {
   files: SourceFile[]
   /** A translation of it a person made, parsed, in the same order:  `--seed`. */
   seed?: SourceFile[]
+  /** What it declares (its `<Project>.declarations.json5`, as compiled now):  the names pass asks for each. */
+  declarations?: DeclarationStatement[]
+  /** Its words (its `<Project>.<lang>.js`):  its types' members, by type, for the names pass's prompt. */
+  words?: SP.SpellWordsData
+  /** The projects it imports:  what each declares, and its own dictionary when it has a translation. */
+  imports?: ImportedProject[]
+  /** Spell UI's names in the other language, for its `<ui-*>` tags. */
+  ui?: UIVocabulary
+  /** Lints and tests the translation in `folder`, as it is on disk:  the fix-up pass checks with it. */
+  checker?: (folder: string) => TranslationChecker
 }
 
 /**
  * Translate `source` into language `options.to`, and write it:  see the file's docstring.
- * - Returns the exit code:  `EXIT.ERRORS` if any line still needs a person (`// TODO: translate`).
+ * - `run`:  how to run `claude -p` -- the real one by default;  a test's fake.
+ * - Returns the exit code:  `EXIT.ERRORS` if any line still needs a person, fails lint, or a test fails.
  * - Throws `CliError` for a language it doesn't know, or the language the project is already in.
  */
-export async function translateProject(source: TranslateSource, options: TranslateOptions): Promise<number> {
+export async function translateProject(
+  source: TranslateSource,
+  options: TranslateOptions,
+  run: ClaudeRunner = runClaude
+): Promise<number> {
   const started = performance.now()
   const from = SP.Language.forFile(source.files[0]?.path ?? "")
   if (!SP.Language.all.has(options.to)) {
@@ -50,46 +85,83 @@ export async function translateProject(source: TranslateSource, options: Transla
   }
   const to = SP.Language.for(options.to)
   if (to === from) throw new CLI.CliError(`${source.projectName} is in ${to.name} already`)
+  const ai = options.ai !== false
 
   const paths = translationPaths(source, to)
   const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
   const seeded = source.seed ? new NamesSeeder(names).seed(source.files, source.seed) : 0
-  const record = options.update && existsSync(paths.record) ? readJSON5File<TranslationRecord>(paths.record) : undefined
-
-  let translated = translateAll(source, from, to, names)
-  const outName = projectNameIn(names, source.projectName)
-  const outFolder = resolve(options.out ?? join(dirname(source.folder), outName))
-  const plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
-
-  // the names the lines to write lack:  asked for once, then saved
-  const missing = missingIn(translated.files, plans)
-  let drafted = 0
-  if (missing.length && options.ai !== false) {
-    drafted = draftNames(missing, names, source, to)
-    translated = translateAll(source, from, to, names)
+  for (const imported of source.imports ?? []) {
+    names.addImported(imported.names ?? TranslationNames.asDeclared(imported.declarations.statements))
   }
-  names.markTodo(missingIn(translated.files, plans).filter(({ kind }) => kind !== "comments"))
+  const record = options.update && existsSync(paths.record) ? readJSON5File<TranslationRecord>(paths.record) : undefined
+  const glossary = glossaryFor(to.lang)
+  const timings: Timings = {}
 
-  // write the project, its dictionary and its record
-  mkdirSync(outFolder, { recursive: true })
-  const outputs = source.files.map((file, at) => {
-    const output = outputPathFor(file.path, names, to)
-    const lines = plans[at]!.lines.map((old, index) => old ?? translated.files[at]!.lines[index]!)
-    writeFileSync(join(outFolder, output), lines.join("\n"))
-    return { output, lines }
-  })
-  writeManifest(
-    source,
-    outFolder,
+  // 1. names:  what the lines lack, and everything the project declares, asked for at once
+  let mark = performance.now()
+  // with its elements' names too, so a `part` or an attribute's value the dictionary lacks is asked for
+  let translated = translateAll(source, from, to, names, source.imports, new ElementNames({ names, ui: source.ui }))
+  let outFolder = outFolderFor(source, names, options, record)
+  let plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
+  const namesPass = new NamesPass({
     names,
-    outName,
-    outputs.map(({ output }) => output)
-  )
-  copyOtherFiles(source.folder, outFolder)
-  writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toJSON(), null, 2)}\n`))
-  writeFileSync(paths.record, `${JSON.stringify(recordOf(source, outputs, to), null, 2)}\n`)
+    run,
+    files: source.files,
+    declarations: source.declarations ?? [],
+    words: source.words,
+    glossary
+  })
+  const wanted = namesPass.wanted(missingIn(translated.files, plans))
+  const drafted = ai ? await namesPass.draft(wanted) : 0
+  timings.names = performance.now() - mark
 
-  return report({ source, to, outFolder, translated, plans, seeded, drafted, names, started, paths })
+  // 2. lines:  each written again with the dictionary
+  mark = performance.now()
+  const outName = projectNameIn(names, source.projectName)
+  outFolder = outFolderFor(source, names, options, record)
+  if (!record) plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
+  const elements = new ElementNames({
+    names,
+    ui: source.ui,
+    projectName: { ours: source.projectName, theirs: outName }
+  })
+  translated = translateAll(source, from, to, names, source.imports, elements)
+  names.markTodo(missingIn(translated.files, plans).filter(({ kind }) => kind !== "comments"))
+  const fixes = record?.fixes ?? []
+  const outputs = source.files.map((file, at) =>
+    outputFor(file, translated.files[at]!, plans[at]!, outputPathFor(file.path, names, to), fixes)
+  )
+  mkdirSync(outFolder, { recursive: true })
+  for (const output of outputs) writeFileSync(join(outFolder, output.path), output.lines.join("\n"))
+  writeManifest(source, outFolder, names, outName, outputs)
+  copyOtherFiles(source.folder, outFolder, elements)
+  timings.lines = performance.now() - mark
+
+  // 3. fix-ups:  each line wrong in context, a round at a time, checked between
+  mark = performance.now()
+  const fixUps = new FixUps({ run, names, glossary })
+  const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai })
+  timings.fixUps = performance.now() - mark
+
+  writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toJSON(), null, 2)}\n`))
+  writeFileSync(paths.record, `${JSON.stringify(recordOf(source, outputs, to, outFolder, fixes), null, 2)}\n`)
+  timings.total = performance.now() - started
+
+  return report({
+    source,
+    to,
+    outFolder,
+    translated,
+    outputs,
+    plans,
+    seeded,
+    drafted,
+    paths,
+    timings,
+    checked,
+    calls: { names: namesPass.durations, fixUps: fixUps.durations },
+    notes: [...namesPass.notes, ...fixUps.notes]
+  })
 }
 
 ////////////////
@@ -97,8 +169,15 @@ export async function translateProject(source: TranslateSource, options: Transla
 ////////////////
 
 /** Every file of `source`, translated with `names`;  and the rules none could write. */
-function translateAll(source: TranslateSource, from: SP.Language, to: SP.Language, names: TranslationNames) {
-  const translator = new Translator({ from, to, names })
+function translateAll(
+  source: TranslateSource,
+  from: SP.Language,
+  to: SP.Language,
+  names: TranslationNames,
+  imports?: ImportedProject[],
+  elements?: ElementNames
+) {
+  const translator = new Translator({ from, to, names, imports, elements })
   const files = source.files.map((file) => translator.translateFile(file))
   return { files, untranslatable: translator.untranslatable }
 }
@@ -136,13 +215,63 @@ const TODO_COMMENT = "// TODO: translate"
 /** Which source lines to keep (`lines`), and how many will be written. */
 type LinePlan = { lines: Array<string | undefined>; changed: number }
 
-/** The names the lines to write lack, each once:  comments and JSX texts too. */
+/**
+ * One source file's translation, as written:  its kept lines, and its new ones -- each new one that a fix-up fixed
+ * before, from the record, as it was fixed (`--update` never asks for the same fix twice).
+ */
+function outputFor(
+  file: SourceFile,
+  translated: TranslatedFile,
+  plan: LinePlan,
+  path: string,
+  fixes: RecordedFix[]
+): TranslationOutput {
+  const english = file.contents.split("\n")
+  const written = new Set<number>()
+  const reused = new Set<number>()
+  const lines = plan.lines.map((kept, index) => {
+    if (kept !== undefined) return kept
+    written.add(index)
+    const mechanical = translated.lines[index]!
+    const fixed = fixes.find(
+      (fix) => fix.path === file.path && fix.source === hashOf(english[index]!) && fix.mechanical === mechanical
+    )
+    if (!fixed) return mechanical
+    reused.add(index)
+    return fixed.fixed
+  })
+  return { file, translated, path, lines, english, written, reused }
+}
+
+/** One file of the translation:  where it goes, its lines, and which of them were written this run. */
+type TranslationOutput = {
+  /** Its source. */
+  file: SourceFile
+  /** What the writer made of it. */
+  translated: TranslatedFile
+  /** Its path in the translation, `/Carta.es.spell`. */
+  path: string
+  /** Its lines, as on disk. */
+  lines: string[]
+  /** Its source's lines. */
+  english: string[]
+  /** The lines written this run, by index:  the rest were kept (`--update`). */
+  written: Set<number>
+  /** The lines written this run from a fix the record has. */
+  reused: Set<number>
+}
+
+/**
+ * The names the lines to write lack, each once:  comments and JSX texts too.
+ * - A statement over several lines (JSX) counts when any of its lines is to be written.
+ */
 function missingIn(files: TranslatedFile[], plans: LinePlan[]): MissingName[] {
   const seen = new Set<string>()
   const missing: MissingName[] = []
   files.forEach((file, at) => {
     for (const [index, names] of file.missing) {
-      if (plans[at]!.lines[index] !== undefined) continue
+      const lines = plans[at]!.lines.slice(index, index + (file.spans.get(index) ?? 1))
+      if (!lines.includes(undefined)) continue
       for (const name of names) {
         const key = `${name.kind}:${name.words}`
         if (seen.has(key)) continue
@@ -177,6 +306,86 @@ function hashOf(line: string): string {
 }
 
 ////////////////
+// ## Fixing up
+////////////////
+
+/**
+ * Check the translation, and have `claude` fix each line that's wrong, a round at a time:  how it went at the end.
+ * - Round 1 also takes each line the writer couldn't write, and each it flagged `risky` (word order);
+ *   the later rounds, what's still wrong.
+ * - Only lines written THIS run:  a kept line (`--update`) is a person's, or was fixed before.
+ * - With no checker, one round, of the lines the writer flagged;  with `--no-ai`, a check and no fixes.
+ * - SIDE EFFECT:  rewrites each file it fixes, and adds each fix to `fixes`, for the record.
+ */
+async function fixUp({
+  source,
+  outputs,
+  outFolder,
+  fixUps,
+  fixes,
+  ai
+}: {
+  source: TranslateSource
+  outputs: TranslationOutput[]
+  outFolder: string
+  fixUps: FixUps
+  fixes: RecordedFix[]
+  ai: boolean
+}): Promise<CheckResult> {
+  const check = source.checker?.(outFolder)
+  const byPath = new Map(outputs.map((output) => [output.path, output]))
+  const files = new Map<string, FixUpFile>(outputs.map((output) => [output.path, output]))
+  let result: CheckResult = { problems: [], checks: 0 }
+  for (let round = 0; ; round++) {
+    if (check) result = { ...(await check()), checks: round + 1 }
+    const wanted = new Map<string, FixUpLine>()
+    const want = (path: string, line: number, why: string) => {
+      const output = byPath.get(path)
+      if (!output?.written.has(line)) return
+      const key = `${path}:${line}`
+      const item = wanted.get(key) ?? { path, line, why: [] }
+      if (!item.why.includes(why)) item.why.push(why)
+      wanted.set(key, item)
+    }
+    for (const problem of result.problems) want(problem.path, problem.line, `${problem.source}:  ${problem.message}`)
+    for (const output of outputs) {
+      output.lines.forEach((line, index) => {
+        if (line.includes(TODO_COMMENT)) want(output.path, index, "not translated yet")
+      })
+      if (round > 0) continue
+      for (const [index, why] of output.translated.risky) {
+        if (!output.reused.has(index)) want(output.path, index, `may read in the wrong order:  ${why}`)
+      }
+    }
+    if (!ai || !wanted.size || round >= MAX_ROUNDS) return result
+    const fixed = await fixUps.round([...wanted.values()], files)
+    if (!fixed.length) return result
+    for (const { path, line, text } of fixed) {
+      const output = byPath.get(path)!
+      const mechanical = output.translated.lines[line]!
+      output.lines[line] = text
+      const sourceHash = hashOf(output.english[line]!)
+      const at = fixes.findIndex(
+        (fix) => fix.path === output.file.path && fix.source === sourceHash && fix.mechanical === mechanical
+      )
+      const fix = { path: output.file.path, source: sourceHash, mechanical, fixed: text }
+      if (at >= 0) fixes[at] = fix
+      else fixes.push(fix)
+    }
+    for (const path of new Set(fixed.map((each) => each.path))) {
+      writeFileSync(join(outFolder, path), byPath.get(path)!.lines.join("\n"))
+    }
+    if (!check) return result
+  }
+}
+
+/** How many rounds of fix-ups, at most:  each one a `claude` call, and a check after. */
+const MAX_ROUNDS = 3
+
+/** How the last check went, and how many checks there were. */
+type CheckResult = Awaited<ReturnType<TranslationChecker>> & { checks: number }
+
+////////////////
 // ## Files
 ////////////////
 
@@ -187,26 +396,61 @@ function translationPaths(source: TranslateSource, to: SP.Language) {
 }
 
 /**
- * What `--update` reads:  each source file's output file, and a hash of each of its source lines when last written.
+ * Where the translation goes:  `--out`, else where the record says it went, else beside the project,
+ * named as the dictionary names it (`Solitario`).
+ */
+function outFolderFor(
+  source: TranslateSource,
+  names: TranslationNames,
+  options: TranslateOptions,
+  record: TranslationRecord | undefined
+): string {
+  if (options.out) return resolve(options.out)
+  if (record?.outFolder) return resolve(source.folder, record.outFolder)
+  return join(dirname(source.folder), projectNameIn(names, source.projectName))
+}
+
+/**
+ * What `--update` reads:  where the translation went, each source file's output file, a hash of each of its source
+ * lines when last written, and each fix-up made.
  * - Its output has one line for each source line, so line `i` of one is line `i` of the other.
  */
 type TranslationRecord = {
   /** The languages, from and to. */
   from: string
   to: string
+  /** The translation's folder, from the project's. */
+  outFolder?: string
   /** Each source file, by its path in the project, e.g. `/Card.spell`. */
   files: Record<string, { output: string; lines: string[] }>
+  /** Each line a fix-up wrote:  used again for a line written the same way from the same source (`outputFor()`). */
+  fixes?: RecordedFix[]
 }
 
+/** A fix-up, recorded:  the source file and line (its hash), what the writer wrote, and what `claude` fixed it to. */
+type RecordedFix = { path: string; source: string; mechanical: string; fixed: string }
+
 /** The record of what was just written. */
-function recordOf(source: TranslateSource, outputs: Array<{ output: string }>, to: SP.Language): TranslationRecord {
+function recordOf(
+  source: TranslateSource,
+  outputs: TranslationOutput[],
+  to: SP.Language,
+  outFolder: string,
+  fixes: RecordedFix[]
+): TranslationRecord {
   const files = Object.fromEntries(
-    source.files.map((file, at) => [
-      file.path,
-      { output: outputs[at]!.output, lines: file.contents.split("\n").map(hashOf) }
+    outputs.map((output) => [
+      output.file.path,
+      { output: output.path, lines: output.file.contents.split("\n").map(hashOf) }
     ])
   )
-  return { from: SP.Language.forFile(source.files[0]?.path ?? "").lang, to: to.lang, files }
+  return {
+    from: SP.Language.forFile(source.files[0]?.path ?? "").lang,
+    to: to.lang,
+    outFolder: relative(source.folder, outFolder),
+    files,
+    fixes
+  }
 }
 
 /**
@@ -245,18 +489,24 @@ function nameIn(names: TranslationNames, name: string): string | undefined {
     .replace(/ /g, "")
 }
 
-/** Write the project file:  its files renamed, its title the project's new name, its description translated if known. */
+/**
+ * Write the project file:  its files renamed, its title the project's new name, its description translated if known,
+ * and each import that has a translation of its own pointing at it.
+ */
 function writeManifest(
   source: TranslateSource,
   outFolder: string,
   names: TranslationNames,
   outName: string,
-  outputs: string[]
+  outputs: TranslationOutput[]
 ): void {
   const manifestPath = join(source.folder, SP.PROJECT_FILE)
   if (!existsSync(manifestPath)) return
   const manifest = readJSON5File<ProjectManifest>(manifestPath)
-  const renamed = new Map(source.files.map((file, at) => [file.path, outputs[at]!]))
+  const renamed = new Map<string, string>(outputs.map((output) => [output.file.path, output.path]))
+  for (const imported of source.imports ?? []) {
+    if (imported.translatedPath) renamed.set(imported.path, imported.translatedPath)
+  }
   manifest.title = outName
   if (manifest.description) manifest.description = names.data.texts[manifest.description] ?? manifest.description
   manifest.imports = manifest.imports?.map((file) => ({ ...file, path: renamed.get(file.path) ?? file.path }))
@@ -266,168 +516,48 @@ function writeManifest(
 /** What a project file holds that a translation changes:  its title, its description, its files' names. */
 type ProjectManifest = { title?: string; description?: string; imports?: Array<{ path: string }> }
 
-/** Copy the project's other files as they are, e.g. `styles.css`:  never its spell, its builds or our own files. */
-function copyOtherFiles(folder: string, outFolder: string): void {
+/**
+ * Copy the project's other files, e.g. `styles.css`:  never its spell, its builds, its snapshots or our own files.
+ * - A style sheet's selectors in the other language (`ElementNames.translateStyles()`):
+ *   `ui-item[type="header"]` => `es-elemento[tipo="encabezado"]`.
+ */
+function copyOtherFiles(folder: string, outFolder: string, elements: ElementNames): void {
   for (const name of readdirSync(folder)) {
     const path = join(folder, name)
     if (!statSync(path).isFile() || NOT_COPIED.test(name)) continue
-    copyFileSync(path, join(outFolder, name))
+    const text = readFileSync(path, "utf8")
+    writeFileSync(join(outFolder, name), name.endsWith(".css") ? elements.translateStyles(text) : text)
   }
 }
 
-/** The files a translation never copies:  spell, the project file, what compiling writes, our own. */
+/** The files a translation never copies:  spell, the project file, what compiling writes, snapshots, our own. */
 const NOT_COPIED =
-  /\.spell$|^__project\.json5$|^project\.json$|\.declarations\.json5$|\.[a-z]{2}\.js$|\.names\.json5$|\.translated\.json5$/
+  /\.spell$|^__project\.json5$|^project\.json$|\.declarations\.json5$|\.[a-z]{2}\.js$|\.snapshot\.|\.names\.json5$|\.translated\.json5$/
 
 ////////////////
 // ## Asking claude
 ////////////////
 
 /**
- * Draft the names `missing` with `claude -p`, into `names`:  how many it added.
- * - A name spell can't read (`unreadableName()`) is asked for again, once, saying why;  still unreadable, it stays TODO.
- */
-function draftNames(missing: MissingName[], names: TranslationNames, source: TranslateSource, to: SP.Language): number {
-  let drafts = askClaude(missing, names, source, to)
-  const rejected = rejectUnreadable(drafts, to)
-  if (rejected.length) {
-    const again = askClaude(
-      rejected.map(({ name }) => name),
-      names,
-      source,
-      to,
-      rejected.map(({ why }) => why)
-    )
-    rejectUnreadable(again, to)
-    drafts = mergedDrafts(drafts, again)
-  }
-  return names.merge(drafts)
-}
-
-/** Take each name out of `drafts` that spell can't read as one name, saying why. */
-function rejectUnreadable(drafts: NamesData, to: SP.Language): Array<{ name: MissingName; why: string }> {
-  const rejected: Array<{ name: MissingName; why: string }> = []
-  for (const kind of ["names", "phrases"] as const) {
-    const section = drafts[kind] ?? {}
-    for (const [words, value] of Object.entries(section)) {
-      const why = unreadableName(value, kind, to)
-      if (!why) continue
-      delete section[words]
-      rejected.push({ name: { kind, words }, why: `\`${words}\` => \`${value}\`:  ${why}` })
-    }
-  }
-  return rejected
-}
-
-/**
- * Why spell can't read `value` as a name of section `kind` in `to`, if it can't:
- * - a name holding one of the language's small words (`de`, `en`, `y`):  `carta de prueba` reads as `carta` of `prueba`
- * - a phrase with `it` (`eso`) not straight after its verb:  `dar vuelta eso`
- */
-function unreadableName(value: string, kind: "names" | "phrases", to: SP.Language): string | undefined {
-  const words = value.split(/\s+/)
-  if (kind === "names") {
-    const small = words.find(
-      (word) => to.words.memberStopWords.has(word.toLowerCase()) || to.words.blacklist[word.toLowerCase()]
-    )
-    return small && words.length > 1 ? `holds \`${small}\`, one of spell's own words` : undefined
-  }
-  const it = words.findIndex((word, at) => at > 0 && to.words.itWords?.has(word))
-  return it > 1
-    ? `\`${words[it]}\` must come straight after the verb, e.g. \`voltear ${words[it]} boca arriba\``
-    : undefined
-}
-
-/** `first` with `second`'s names added. */
-function mergedDrafts(first: NamesData, second: NamesData): NamesData {
-  return Object.fromEntries(NAMES_KINDS.map((kind) => [kind, { ...first[kind], ...second[kind] }]))
-}
-
-/**
- * Ask `claude -p` for the names `missing`, once, all together:  what it answers, as dictionary sections.
- * - `rejected`:  drafts it gave before that spell can't read, and why, for it to do better.
- * - It sees the project's source, the names already chosen (to stay consistent) and the language's glossary.
- * - A `claude` that fails, or answers what won't read as JSON, gives nothing:  the names stay `TODO`, said on stderr.
+ * Run `claude -p` on `prompt`:  what it printed.
+ * - With no tools, from a folder of its own:  it only answers, and reads no project's `CLAUDE.md` first.
+ * - `effort`:  `claude --effort`, when given.
+ * - Several at once run side by side (the names pass's comments).
+ * - throws if it couldn't run, or failed
  * - SIDE EFFECT:  runs `claude`;  it must be on the `PATH`, signed in.
  */
-function askClaude(
-  missing: MissingName[],
-  names: TranslationNames,
-  source: TranslateSource,
-  to: SP.Language,
-  rejected: string[] = []
-): NamesData {
-  const prompt = namesPrompt(missing, names, source, to, rejected)
-  const result = spawnSync("claude", ["-p"], { input: prompt, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
-  if (result.error || result.status !== 0) {
-    CLI.err(`claude couldn't draft the names:  ${result.error?.message ?? result.stderr}`)
-    return {}
-  }
-  const json = result.stdout.match(/```(?:json5?)?\n([\s\S]*?)```/)?.[1] ?? result.stdout
-  try {
-    const answer = JSON.parse(json.slice(json.indexOf("{"), json.lastIndexOf("}") + 1)) as NamesData
-    return Object.fromEntries(NAMES_KINDS.map((kind) => [kind, answer[kind] ?? {}]))
-  } catch {
-    CLI.err("claude's names aren't JSON:  left them TODO")
-    return {}
-  }
-}
-
-/** What `claude` is asked:  see `askClaude()`. */
-function namesPrompt(
-  missing: MissingName[],
-  names: TranslationNames,
-  source: TranslateSource,
-  to: SP.Language,
-  rejected: string[]
-): string {
-  const wanted = Object.fromEntries(
-    NAMES_KINDS.map((kind) => [
-      kind,
-      Object.fromEntries(missing.filter((name) => name.kind === kind).map(({ words }) => [words, ""]))
-    ])
-  )
-  const { comments: _comments, ...chosen } = names.toJSON()
-  const program = source.files.map((file) => `### ${file.path}\n\`\`\`spell\n${file.contents}\n\`\`\``).join("\n\n")
-  const glossary = glossaryFor(to.lang)
-  return [
-    `Translate the names the people who wrote a spell program chose, from English into ${to.name} (\`${to.lang}\`).`,
-    "Spell reads programs written in plain words;  its own words are already translated.",
-    "Fill in every empty value below, and answer with ONE JSON object with the same keys, in a ```json fence:",
-    '- `types`:  each type\'s name, singular, as `{ "name": "...", "gender": "masculine" | "feminine" }`',
-    "- `names`:  each property, variable, value or event, as written (a plural stays plural)",
-    `  - NEVER with one of spell's own small words inside, which end a name:  ${smallWords(to)}`,
-    "    e.g. `test card` => `candidata`, not `carta de prueba`;  one word is best",
-    "- `phrases`:  a method's or quoted phrase's words, as declared:",
-    `  - keep each \`(slot)\`, its words translated as \`names\` translates them;  write \`it\` as \`${[...(to.words.itWords ?? ["it"])][0]}\`,`,
-    "    straight after the verb:  `turn it face up` => `voltear eso boca arriba`, `turn it over` => `voltear eso`",
-    "  - keep each `a <type>` as the type's name with its article, e.g. `a card` => `una carta`",
-    "- `texts`:  quoted text people see:  keep its spaces, punctuation and symbols",
-    "- `comments`:  the program's comments:  keep their code (in backticks) as the translated program says it",
-    "Use the names already chosen, so the whole program reads as one language.",
-    "",
-    ...(rejected.length
-      ? ["## Your drafts spell can't read:  try again", ...rejected.map((why) => `- ${why}`), ""]
-      : []),
-    "## To fill in",
-    "```json",
-    JSON.stringify(wanted, null, 2),
-    "```",
-    "",
-    "## Names already chosen",
-    "```json",
-    JSON.stringify(chosen, null, 2),
-    "```",
-    "",
-    "## The program",
-    program,
-    ...(glossary ? ["", `## The ${to.name} glossary:  spell's own words`, glossary] : [])
-  ].join("\n")
-}
-
-/** The language's small words a name may not hold, for the prompt:  its `memberStopWords`. */
-function smallWords(to: SP.Language): string {
-  return [...to.words.memberStopWords].map((word) => `\`${word}\``).join(", ")
+function runClaude(prompt: string, { effort }: { effort?: ClaudeEffort } = {}): Promise<string> {
+  return new Promise((done, fail) => {
+    const args = ["-p", "--tools", "", ...(effort ? ["--effort", effort] : [])]
+    const child = spawn("claude", args, { cwd: tmpdir(), stdio: ["pipe", "pipe", "pipe"] })
+    let stdout = ""
+    let stderr = ""
+    child.stdout.on("data", (data) => (stdout += data))
+    child.stderr.on("data", (data) => (stderr += data))
+    child.on("error", fail)
+    child.on("close", (code) => (code === 0 ? done(stdout) : fail(new Error(stderr || `claude exited ${code}`))))
+    child.stdin.end(prompt)
+  })
 }
 
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */
@@ -443,25 +573,31 @@ const LANGUAGES_FOLDER = fileURLToPath(new URL("../spell/languages/", import.met
 // ## Reporting
 ////////////////
 
+/** How long each pass took, in milliseconds. */
+type Timings = { names?: number; lines?: number; fixUps?: number; total?: number }
+
 /** Print what was done, and what's left for a person;  the exit code. */
 function report(done: {
   source: TranslateSource
   to: SP.Language
   outFolder: string
   translated: ReturnType<typeof translateAll>
+  outputs: TranslationOutput[]
   plans: LinePlan[]
   seeded: number
   drafted: number
-  names: TranslationNames
-  started: number
   paths: { names: string; record: string }
+  timings: Timings
+  checked: CheckResult
+  calls: { names: number[]; fixUps: number[] }
+  notes: string[]
 }): number {
-  const { source, to, outFolder, translated, plans, seeded, drafted, started, paths } = done
-  const seconds = ((performance.now() - started) / 1000).toFixed(2)
+  const { source, to, outFolder, translated, outputs, plans, seeded, drafted, paths, timings, checked, calls } = done
+  const seconds = (ms = 0) => `${(ms / 1000).toFixed(ms < 1000 ? 2 : 1)}s`
   const lines = source.files.reduce((sum, file) => sum + file.contents.split("\n").length, 0)
   const written = plans.reduce((sum, plan) => sum + plan.changed, 0)
   CLI.out(
-    `${source.projectName} in ${to.name}:  ${CLI.relativePath(outFolder)}  (${source.files.length} files, translated in ${seconds}s)`
+    `${source.projectName} in ${to.name}:  ${CLI.relativePath(outFolder)}  (${source.files.length} files, ${seconds(timings.total)})`
   )
   CLI.out(
     `  ${written} of ${lines} lines translated${written < lines ? ", the rest unchanged since the last run" : ""}`
@@ -471,18 +607,48 @@ function report(done: {
       (seeded ? `, ${seeded} seeded` : "") +
       (drafted ? `, ${drafted} drafted by claude:  review them` : "")
   )
-  const todo = translated.files.flatMap((file, at) =>
-    [...file.todo]
-      .filter(([index]) => plans[at]!.lines[index] === undefined)
-      .map(([index, why]) => ({ file, index, why }))
+  const fixed = outputs.reduce(
+    (sum, output) =>
+      sum + output.lines.filter((line, at) => line !== output.translated.lines[at] && output.written.has(at)).length,
+    0
+  )
+  const each = (durations: number[]) => (durations.length ? ` (${durations.map((ms) => seconds(ms)).join(", ")})` : "")
+  const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
+  CLI.out(
+    `  passes:  names ${seconds(timings.names)}, lines ${seconds(timings.lines)}, fix-ups ${seconds(timings.fixUps)}` +
+      ` (${plural(fixed, "line")} fixed in ${plural(calls.fixUps.length, "round")}, ${plural(checked.checks, "check")})`
+  )
+  CLI.out(
+    `  claude -p:  ${calls.names.length + calls.fixUps.length} calls:  names ${calls.names.length}${each(calls.names)}, ` +
+      `fix-ups ${calls.fixUps.length}${each(calls.fixUps)}`
+  )
+  const { tests } = checked
+  if (tests && tests.passed + tests.failed) CLI.out(`  tests:  ${tests.passed} passed, ${tests.failed} failed`)
+  for (const note of done.notes) CLI.err(`  ${note}`)
+  const todo = outputs.flatMap((output) =>
+    output.lines.flatMap((line, index) => {
+      if (!line.includes(TODO_COMMENT) || !output.written.has(index)) return []
+      // a statement over several lines (JSX) says so on its last:  its why is its first line's
+      const from = [...output.translated.todo.keys()].filter((at) => at <= index).at(-1)
+      return [{ output, index, why: (from !== undefined && output.translated.todo.get(from)) || [] }]
+    })
   )
   if (todo.length) {
     CLI.out(`  ${todo.length} lines still need a person, marked // TODO: translate:`)
-    for (const { file, index, why } of todo) CLI.out(`    ${file.path.slice(1)}:${index + 1}  ${why.join(", ")}`)
+    for (const { output, index, why } of todo) CLI.out(`    ${output.path.slice(1)}:${index + 1}  ${why.join(", ")}`)
+  }
+  if (checked.problems.length) {
+    CLI.out(`  ${checked.problems.length} problems left:`)
+    for (const problem of checked.problems) CLI.out(`    ${problemLine(problem)}`)
   }
   if (translated.untranslatable.size) {
     const rules = [...translated.untranslatable].map(([rule, count]) => `${rule} (${count})`)
     CLI.out(`  rules it can't write yet:  ${rules.join(", ")}`)
   }
-  return todo.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+  return todo.length || checked.problems.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+}
+
+/** `problem` on one line:  `Carta.es.spell:142  test:  ...`. */
+function problemLine({ path, line, source, message }: LineProblem): string {
+  return `${path.slice(1)}:${line + 1}  ${source}:  ${message.split("\n")[0]}`
 }

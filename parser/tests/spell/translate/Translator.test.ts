@@ -112,7 +112,7 @@ para probar la preparación de la carta
 	para cada carta en la pila
 		poner cuenta a cuenta + 1
 	cuenta debería ser 1
-	la pila es vacío debería ser no
+	la pila es vacía debería ser no
 	pausar 10 mseg
 	imprimir "as de corazones"
 `
@@ -142,6 +142,22 @@ describe("Translator:  English to Spanish, rule by rule", () => {
     expect(file.missing.get(at)).toEqual([{ kind: "names", words: "pile" }])
     expect(names.markTodo(file.missing.get(at)!)).toBe(1)
     expect(names.data.names.pile).toBe(TranslationNames.TODO)
+  })
+
+  test("a text joined to a value with `+` is written, and flagged for the fix-up pass:  its word order", () => {
+    const { file } = translatedWith({ ...NAMES, texts: { ...NAMES.texts, " of ": " de " } }, CARD)
+    const at = CARD.split("\n").findIndex((line) => line.includes('" of "'))
+    expect(file.lines[at]).toBe('\t- su "nombre" es su rango + " de " + su palo')
+    expect(file.risky.get(at)).toBe('text joined to a value:  `its rank + " of " + its suit`')
+    expect([...file.risky.keys()]).toEqual([at])
+  })
+
+  test("a possessive agrees in number with a name of either gender:  `sus espadas`, `sus corazones`", () => {
+    const source = 'a "card" is a thing where:\n\t- its "spades" is a number\n\t- its "hearts" is a number\n'
+    expect(translated(source).lines.slice(1, 3)).toEqual([
+      '\t- sus "espadas" es un número',
+      '\t- sus "corazones" es un número'
+    ])
   })
 
   test("a comment the dictionary lacks stays as it was, and is no TODO", () => {
