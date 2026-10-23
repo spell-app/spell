@@ -142,7 +142,8 @@ export class ReviewStart {
       state: "sent",
       command,
       sessions: titles,
-      message: `Typed ${command} into ${session.title}:  press Enter there.${busy}`
+      // VS Code refuses a prompt for a session whose tab is open ("Session is already open"):  the page copied it
+      message: `Typed ${command} into ${session.title}:  press Enter there.${busy}  It's copied too, to paste if VS Code says the session is already open.`
     }
   }
 

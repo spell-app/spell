@@ -615,8 +615,12 @@ describe("<epic-page> Send and its countdown", () => {
     await adoptClient(routes)
     const host = await render(page("", ["todo"]))
     await vi.waitFor(() => expect(host.shadowRoot!.querySelector('[part~="pill"]')).not.toBeNull())
+    // an earlier test's toast, still on the page
+    document.getElementById("epic-copied")?.remove()
     host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="pill"]')!.click()
     await vi.waitFor(() => expect(writeText).toHaveBeenCalledWith("/epic review demo"))
+    // epic-engine I78:  starting the review, its notice is the one toast;  no "Copied" toast stacked beside it
+    expect(document.getElementById("epic-copied")).toBeNull()
     writeText.mockRestore()
   })
 

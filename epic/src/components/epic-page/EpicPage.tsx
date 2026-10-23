@@ -1203,12 +1203,15 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * The review line or the pill, clicked:  copy the command, then flash and say so.
    * - nobody listening, not in airplane mode:  start the review too (epic `airplane` P12):  the page server types
    *   `/epic review <name>` into the session titled for the epic, or says why it didn't (`ReviewClient.startReview()`)
+   *   - its notice is the ONE toast, and says it's copied too:  a "Copied" toast beside it stacked two over the test
+   *     run's bar (epic `epic-engine` I78)
    */
   @E.untracked
   private async copyCommand() {
     const client = this.review.client
-    if (client && !client.listening && !isAirplane()) void client.startReview()
-    if (!(await this.copyAndSay(this.command()))) return
+    const isStarting = Boolean(client && !client.listening && !isAirplane())
+    if (isStarting) void client!.startReview()
+    if (!(await (isStarting ? Clipboard.copy(this.command()) : this.copyAndSay(this.command())))) return
     // off first, so a second click flashes again
     this.isCopied = false
     this.flashTimer?.cancel()
