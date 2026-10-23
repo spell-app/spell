@@ -302,7 +302,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           part={this.partForName("progress")}
           size="tiny"
           color="green"
-          value={at()}
+          value={String(at())}
           total={total() || 1}
           aria-label={this.translationForKey("answered", { count: answered(), total: total() })}
           title={this.translationForKey("answered", { count: answered(), total: total() })}
