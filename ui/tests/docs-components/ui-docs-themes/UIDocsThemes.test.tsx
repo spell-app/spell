@@ -10,6 +10,7 @@ import {
   DOCS_LEGACY_SCHEME_KEYS,
   DOCS_LOOK_KEYS,
   DOCS_PLAIN_THEME,
+  type DocsScheme,
   type DocsShownScheme
 } from "spell-ui/docs-components/docs-components.types"
 
@@ -63,6 +64,21 @@ function part<T extends HTMLElement = HTMLElement>(host: Element, name: string) 
 function shownOf(host: Element) {
   const classes = part(host, "scheme").classList
   return classes.contains("dark") ? "dark" : classes.contains("light") ? "light" : undefined
+}
+
+/** `host`'s overlay choice for scheme `scheme` (Light | Dark | Auto). */
+function choice(host: Element, scheme: DocsScheme) {
+  return host.shadowRoot!.querySelector<HTMLButtonElement>(`[role=radio][value="${scheme}"]`)!
+}
+
+/** `host`'s scheme choices:  `[value, name, aria-checked, tabindex]`. */
+function choices(host: Element): [string, string, string, number][] {
+  return [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>("[role=radio]")].map((each) => [
+    each.value,
+    each.querySelector(".name")!.textContent!,
+    each.getAttribute("aria-checked")!,
+    each.tabIndex
+  ])
 }
 
 /** `host`'s overlay theme rows:  `[value, name]`. */
@@ -136,14 +152,38 @@ afterEach(async () => {
 ////////////////
 
 describe("<ui-docs-themes> markup", () => {
-  it("renders the palette button, its overlay, and the sun / moon button showing the page's scheme", async () => {
+  it("renders ONE palette button, its overlay holding Light | Dark | Auto (Auto chosen) and the theme list", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
     expect(part(host, "controls").className).toBe("ui themes")
     expect(part(host, "palette").localName).toBe("button")
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme:  Spell")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Auto")
     const overlay = part(host, "overlay")
     expect(overlay.localName).toBe("ui-popup")
     expect(overlay.getAttribute("open-on")).toBe("click")
+    expect(part(host, "scheme")).toBeNull()
+    expect(part(host, "schemes").getAttribute("role")).toBe("radiogroup")
+    expect(part(host, "schemes").getAttribute("aria-label")).toBe("Light or dark")
+    expect(choices(host)).toEqual([
+      ["light", "Light", "false", -1],
+      ["dark", "Dark", "false", -1],
+      ["system", "Auto", "true", 0]
+    ])
+    expect([...part(host, "schemes").querySelectorAll("ui-icon")].map((icon) => icon.getAttribute("name"))).toEqual([
+      "sun outline",
+      "moon",
+      "adjust"
+    ])
+    expect([...host.shadowRoot!.querySelectorAll("[part~=tip]")].map((tip) => tip.textContent)).toEqual([
+      "Theme and light / dark:  Spell, Auto"
+    ])
+    expect(host.matches(":state(following)")).toBe(true)
+    expect(host.matches(":state(dark)")).toBe(false)
+    expect(part(host, "theme")).toBeNull()
+    await expectAccessible(host)
+  })
+
+  it('show="scheme":  the sun / moon button alone, showing the page\'s scheme', async () => {
+    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
     const scheme = part(host, "scheme")
     expect(scheme.className).toBe("scheme button light")
     expect(scheme.getAttribute("aria-label")).toBe("Switch to dark")
@@ -152,26 +192,21 @@ describe("<ui-docs-themes> markup", () => {
       "moon"
     ])
     expect([...host.shadowRoot!.querySelectorAll("[part~=tip]")].map((tip) => tip.textContent)).toEqual([
-      "Theme:  Spell",
       "Switch to dark"
     ])
-    expect(part(host, "system").getAttribute("aria-checked")).toBe("true")
-    expect(host.matches(":state(following)")).toBe(true)
-    expect(host.matches(":state(dark)")).toBe(false)
-    expect(part(host, "theme")).toBeNull()
     await expectAccessible(host)
   })
 
   it("follows the OS's scheme while nothing is chosen:  a moon on a dark OS", async () => {
     os = "dark"
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
     expect(shownOf(host)).toBe("dark")
     expect(part(host, "scheme").getAttribute("aria-label")).toBe("Switch to light")
     expect(host.matches(":state(dark)")).toBe(true)
   })
 
   it("switches its icon when the OS switches scheme, while following it", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
     os = "dark"
     ThemePreference.osChanged()
     await ElementFixture.settle()
@@ -180,8 +215,9 @@ describe("<ui-docs-themes> markup", () => {
   })
 
   it.each([
-    ["theme", ["theme"], ["palette", "overlay", "scheme"]],
-    ["scheme", ["scheme"], ["palette", "overlay", "theme"]]
+    ["both", ["palette", "overlay", "schemes"], ["scheme", "theme"]],
+    ["theme", ["theme"], ["palette", "overlay", "schemes", "scheme"]],
+    ["scheme", ["scheme"], ["palette", "overlay", "schemes", "theme"]]
   ])("show=%s", async (show, present, absent) => {
     const host = await render(`<ui-docs-themes show="${show}"></ui-docs-themes>`)
     for (const name of present) expect(part(host, name), name).not.toBeNull()
@@ -277,7 +313,7 @@ describe("<ui-docs-themes> overlay", () => {
     await ElementFixture.settle()
     expect(row(host, "github").getAttribute("aria-checked")).toBe("true")
     expect(row(host, SPELL).getAttribute("aria-checked")).toBe("false")
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme:  GitHub")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  GitHub, Auto")
     expect(host.matches(":state(themed)")).toBe(true)
     // picking it again changes nothing
     row(host, "github").click()
@@ -292,7 +328,7 @@ describe("<ui-docs-themes> overlay", () => {
     row(host, DOCS_PLAIN_THEME).click()
     await vi.waitFor(() => expect(UI.styles.has(UI.themes.slots.base)).toBe(false))
     expect(UI.themes.current).toBeUndefined()
-    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme:  Plain")
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Plain, Auto")
   })
 })
 
@@ -301,8 +337,8 @@ describe("<ui-docs-themes> overlay", () => {
 ////////////////
 
 describe("<ui-docs-themes> scheme", () => {
-  it("a click flips the shown scheme and stores it:  ui-dark / ui-light + color-scheme on <html>", async () => {
-    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+  it('show="scheme":  a click flips the shown scheme and stores it:  ui-dark / ui-light + color-scheme on <html>', async () => {
+    const host = await render(`<ui-docs-themes show="scheme"></ui-docs-themes>`)
     const changes: DocsThemesChange[] = []
     host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
     part(host, "scheme").click()
@@ -311,7 +347,6 @@ describe("<ui-docs-themes> scheme", () => {
     expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("dark")
     expect(shownOf(host)).toBe("dark")
     expect(part(host, "scheme").getAttribute("aria-label")).toBe("Switch to light")
-    expect(part(host, "system").getAttribute("aria-checked")).toBe("false")
     expect(host.matches(":state(dark)")).toBe(true)
     expect(host.matches(":state(following)")).toBe(false)
     part(host, "scheme").click()
@@ -324,22 +359,67 @@ describe("<ui-docs-themes> scheme", () => {
     ])
   })
 
-  it("Match system:  on drops the stored scheme (the OS's shows);  off keeps the shown one as a choice", async () => {
+  it("Dark and Light store the scheme;  Auto drops it, and the OS's shows;  one ui-change each", async () => {
     os = "dark"
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    part(host, "scheme").click()
+    const changes: DocsThemesChange[] = []
+    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<DocsThemesChange>).detail))
+    choice(host, "light").click()
     await ElementFixture.settle()
     expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("light")
-    part(host, "system").click()
-    await ElementFixture.settle()
-    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBeNull()
-    expect(htmlScheme()).toEqual({ light: false, dark: false, colorScheme: "" })
-    expect(part(host, "system").getAttribute("aria-checked")).toBe("true")
-    expect(shownOf(host)).toBe("dark")
-    part(host, "system").click()
+    expect(htmlScheme()).toEqual({ light: true, dark: false, colorScheme: "light" })
+    expect(choices(host).map(([value, , checked]) => [value, checked])).toEqual([
+      ["light", "true"],
+      ["dark", "false"],
+      ["system", "false"]
+    ])
+    expect(part(host, "palette").getAttribute("aria-label")).toBe("Theme and light / dark:  Spell, Light")
+    choice(host, "dark").click()
     await ElementFixture.settle()
     expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBe("dark")
     expect(htmlScheme().dark).toBe(true)
+    expect(host.matches(":state(dark)")).toBe(true)
+    choice(host, "system").click()
+    await ElementFixture.settle()
+    expect(localStorage.getItem(DOCS_LOOK_KEYS.scheme)).toBeNull()
+    expect(htmlScheme()).toEqual({ light: false, dark: false, colorScheme: "" })
+    expect(host.matches(":state(following)")).toBe(true)
+    expect(host.matches(":state(dark)")).toBe(true) // the OS's
+    // the chosen one again:  nothing
+    choice(host, "system").click()
+    expect(changes.map(({ scheme, shown }) => [scheme, shown])).toEqual([
+      ["light", "light"],
+      ["dark", "dark"],
+      ["system", "dark"]
+    ])
+  })
+
+  it("Light | Dark | Auto is a radio group:  one tab stop, the chosen one;  arrows move AND choose, wrapping", async () => {
+    const host = await render(`<ui-docs-themes></ui-docs-themes>`)
+    const focused = () => host.shadowRoot!.activeElement
+    part(host, "palette").click()
+    await vi.waitFor(() => expect(part(host, "overlay").matches(":popover-open")).toBe(true))
+    // Shift+Tab from the theme list reaches the scheme control's one tab stop:  the chosen scheme
+    await vi.waitFor(() => expect(focused()).toBe(row(host, SPELL)))
+    await userEvent.keyboard("{Shift>}{Tab}{/Shift}")
+    expect(focused()).toBe(choice(host, "system"))
+    await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.settle()
+    expect(focused()).toBe(choice(host, "light"))
+    expect(ThemePreference.look.scheme).toBe("light")
+    expect(choices(host).map(([value, , , tabIndex]) => [value, tabIndex])).toEqual([
+      ["light", 0],
+      ["dark", -1],
+      ["system", -1]
+    ])
+    await userEvent.keyboard("{ArrowDown}")
+    await ElementFixture.settle()
+    expect(focused()).toBe(choice(host, "dark"))
+    expect(htmlScheme().dark).toBe(true)
+    await userEvent.keyboard("{ArrowLeft}{ArrowUp}")
+    await ElementFixture.settle()
+    expect(focused()).toBe(choice(host, "system"))
+    expect(ThemePreference.look.scheme).toBe("system")
   })
 
   it("every picker on the page follows a change made in another", async () => {
@@ -348,7 +428,7 @@ describe("<ui-docs-themes> scheme", () => {
     )
     await SiteData.load()
     const [first, second] = wrapper.querySelectorAll("ui-docs-themes")
-    part(first!, "scheme").click()
+    choice(first!, "dark").click()
     row(first!, "github").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("github"))
     await ElementFixture.settle()
@@ -399,7 +479,7 @@ describe("<ui-docs-themes> dropdown (show=theme)", () => {
 describe("<ui-docs-themes> persistence", () => {
   it("stores the look, and restore() re-applies it on the next page", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    part(host, "scheme").click()
+    choice(host, "dark").click()
     row(host, "material").click()
     await vi.waitFor(() => expect(UI.themes.current).toBe("material"))
     expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBe("material")
@@ -414,14 +494,14 @@ describe("<ui-docs-themes> persistence", () => {
     expect(UI.themes.current).toBe("material")
     const next = await render(`<ui-docs-themes></ui-docs-themes>`)
     expect(row(next, "material").getAttribute("aria-checked")).toBe("true")
-    expect(shownOf(next)).toBe("dark")
+    expect(choice(next, "dark").getAttribute("aria-checked")).toBe("true")
   })
 
   it("system and Spell (the default) are stored as absent keys;  Plain as its own value", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-    part(host, "scheme").click()
+    choice(host, "dark").click()
     await ElementFixture.settle()
-    part(host, "system").click()
+    choice(host, "system").click()
     row(host, "github").click()
     row(host, SPELL).click()
     await vi.waitFor(() => expect(UI.themes.current).toBe(SPELL))
@@ -441,7 +521,7 @@ describe("<ui-docs-themes> persistence", () => {
     })
     try {
       const host = await render(`<ui-docs-themes></ui-docs-themes>`)
-      part(host, "scheme").click()
+      choice(host, "dark").click()
       await ElementFixture.settle()
       expect(htmlScheme().dark).toBe(true)
       expect(ThemePreference.look.scheme).toBe("dark")

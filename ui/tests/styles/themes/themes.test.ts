@@ -711,7 +711,7 @@ describe("fruity.css", () => {
     await T3.use("fruity")
     const { style } = await ThemeHarness.inner(`<ui-card><ui-content>Streak</ui-content></ui-card>`, ".ui.card")
     expect(style.borderTopLeftRadius).toBe("14px")
-    expect(style.backgroundColor).toMatch(/^rgba\(255, 255, 255, 0\.7/)
+    expect(style.backgroundColor).toBe("rgba(255, 255, 255, 0.62)")
     expect(style.backdropFilter).toBe("blur(28px) saturate(1.7)")
   })
 

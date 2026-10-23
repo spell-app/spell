@@ -349,7 +349,7 @@ the theming page on the docs site has the recipe step by step.
 ## 🌱 Coming:  picking and making themes
 
 - a theme picker for any page:  the docs site has one today, but as a docs-only element, `<ui-docs-themes>`
-  (a theme, then light, dark or system, remembered for each viewer)
+  (one palette button:  a theme, and Light, Dark or Auto, remembered for each viewer)
 - a way to make a theme from your own colours and fonts
 - theme files per component, so one page can mix looks family by family
 

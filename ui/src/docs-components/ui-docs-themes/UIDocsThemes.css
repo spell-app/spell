@@ -1,17 +1,17 @@
 /*
  * The style sheet of `<ui-docs-themes>`:  the docs site's look controls.
- * Compact by default:  two round icon buttons, the palette's overlay a small brand-styled panel
- * (the Spell design system's icon buttons, menus and switch).
+ * Compact by default:  one round icon button, its overlay a small brand-styled panel
+ * (the Spell design system's icon buttons, segmented controls and menus).
  * - It styles the component's shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`,
  *   holding by `show`:
  *   - `both`:  `<button class="palette button" part="palette">`, then `<ui-popup class="overlay" part="overlay">`,
- *     its tooltip `<ui-popup part="tip">`;  then the scheme button
+ *     its tooltip `<ui-popup part="tip">`
  *     - the overlay's slotted `.panel`:
- *       - `.heading`
+ *       - `.schemes` (`role=radiogroup`) of three `<button class="choice [checked]" role="radio">`
+ *         (an icon, `.name`):  Light | Dark | Auto, a segmented control
+ *       - a `.divider`, then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
  *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
- *       - a `.divider`
- *       - `<button class="system" role="switch">` (`.label` > `.name` + `.description`, `.track`)
  *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
  *     Then its tooltip
@@ -43,10 +43,8 @@
     --_ui-docs-themes-overlay-radius: var(--ui-docs-themes-overlay-radius, 14px);
     /* How long the sun / moon swap takes. */
     --_ui-docs-themes-swap-duration: var(--ui-docs-themes-swap-duration, 280ms);
-    /* Knob of the "Match system" switch. */
-    --_ui-docs-themes-knob-color: var(--ui-docs-themes-knob-color, oklch(1 0 0));
-    /* The knob's drop shadow. */
-    --_ui-docs-themes-knob-shadow: var(--ui-docs-themes-knob-shadow, 0 1px 2px oklch(0 0 0 / 0.25));
+    /* The chosen scheme's raised key in the segmented control:  its drop shadow. */
+    --_ui-docs-themes-choice-shadow: var(--ui-docs-themes-choice-shadow, 0 1px 2px oklch(0 0 0 / 0.16));
     /* Ink of the `inverted` buttons (for dark backgrounds):  their fill, ring and icon are it, translucent. */
     --_ui-docs-themes-inverted-ink: var(--ui-docs-themes-inverted-ink, oklch(1 0 0));
 
@@ -172,9 +170,48 @@
     background: var(--ui-border-color);
   }
 
+  /* Light | Dark | Auto:  three keys on a sunken track, the chosen one raised. */
+  .schemes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    margin: 0.25em 0.25em 0.125em;
+    padding: 2px;
+    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em);
+    background: var(--ui-surface-strong);
+  }
+  .choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375em;
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 0;
+    padding: 0.4em 0.375em;
+    border: 0;
+    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em - 2px);
+    background: transparent;
+    color: var(--ui-text-muted);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .choice:hover {
+    color: var(--ui-text-color);
+  }
+  .choice:focus-visible {
+    outline: 2px solid var(--ui-focus-color);
+    outline-offset: -2px;
+  }
+  .choice > .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* One theme:  check, name, and the one-line description under it. */
-  .option,
-  .system {
+  .option {
     box-sizing: border-box;
     width: 100%;
     margin: 0;
@@ -193,13 +230,11 @@
     column-gap: 0.5em;
     align-items: center;
   }
-  .option:hover,
-  .system:hover {
+  .option:hover {
     background: var(--ui-surface-muted);
   }
   /* A thin ring inside the row:  the theme's focus width (3px in Spell) is too heavy on a small list. */
-  .option:focus-visible,
-  .system:focus-visible {
+  .option:focus-visible {
     outline: 2px solid var(--ui-focus-color);
     outline-offset: -2px;
   }
@@ -221,46 +256,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .option > .description,
-  .system .description {
+  .option > .description {
     grid-column: 2;
     color: var(--ui-text-muted);
     font-size: 0.857em;
-  }
-
-  /* "Match system":  label left, the brand's switch right. */
-  .system {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75em;
-  }
-  .system > .label {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
-  .system .name {
-    font-weight: 500;
-  }
-  .track {
-    position: relative;
-    flex: none;
-    width: 2.25em;
-    height: 1.25em;
-    border-radius: 999px;
-    background: var(--ui-border-color-strong);
-  }
-  .track::after {
-    content: "";
-    position: absolute;
-    top: 0.125em;
-    left: 0.125em;
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    background: var(--_ui-docs-themes-knob-color);
-    box-shadow: var(--_ui-docs-themes-knob-shadow);
   }
 
   /* Tooltips:  the palette's hides while its overlay is open. */
@@ -296,15 +295,16 @@
   .option.checked > .name {
     color: var(--ui-primary-text);
   }
-  .system[aria-checked="true"] .track {
-    background: var(--ui-primary);
-  }
-  .system[aria-checked="true"] .track::after {
-    translate: 1em 0;
+  .choice.checked {
+    background: var(--ui-surface);
+    box-shadow:
+      var(--_ui-docs-themes-choice-shadow),
+      inset 0 0 0 1px var(--ui-border-color);
+    color: var(--ui-text-color);
   }
 
   /*
-   * Motion:  the sun / moon swap, the switch's knob, the buttons' press.
+   * Motion:  the sun / moon swap, the scheme keys, the buttons' press.
    * - The swap is interfaces.dev's:  scale 0.25 -> 1, opacity, blur 4px -> 0, the old one reversed.
    * - Named properties only;  none at all under reduced motion.
    * - The swap's `!important`:  the Spell theme turns EVERY transition off for the frame a scheme switch lands in
@@ -327,15 +327,14 @@
         color var(--ui-duration-fast, 100ms) ease-out,
         scale var(--ui-duration-fast, 100ms) ease-out;
     }
-    .option,
-    .system {
+    .option {
       transition: background-color var(--ui-duration-fast, 100ms) ease-out;
     }
-    .track {
-      transition: background-color var(--ui-duration-normal, 200ms) ease-out;
-    }
-    .track::after {
-      transition: translate var(--ui-duration-normal, 200ms) cubic-bezier(0.34, 1.56, 0.64, 1);
+    .choice {
+      transition:
+        background-color var(--ui-duration-normal, 200ms) ease-out,
+        box-shadow var(--ui-duration-normal, 200ms) ease-out,
+        color var(--ui-duration-fast, 100ms) ease-out;
     }
   }
 }

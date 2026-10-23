@@ -33,13 +33,15 @@
     --fruity-accent-text: light-dark(#5a35c4, #d3c2ff);
 
     /* Glass:  the surfaces, their edge and the blur behind them */
-    --fruity-glass: light-dark(rgb(255 255 255 / 0.58), rgb(38 36 48 / 0.55));
-    --fruity-glass-strong: light-dark(rgb(255 255 255 / 0.74), rgb(30 28 38 / 0.68));
+    --fruity-glass: light-dark(rgb(255 255 255 / 0.45), rgb(38 36 48 / 0.45));
+    --fruity-glass-strong: light-dark(rgb(255 255 255 / 0.62), rgb(30 28 38 / 0.58));
     --fruity-glass-faint: light-dark(rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.05));
     --fruity-edge: light-dark(rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.12));
     --fruity-hairline: light-dark(rgb(60 60 67 / 0.12), rgb(255 255 255 / 0.08));
     --fruity-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
     --fruity-blur: blur(28px) saturate(1.7);
+    /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
+    --fruity-bar: light-dark(rgb(255 255 255 / 0.38), rgb(30 28 38 / 0.42));
 
     /* The wallpaper behind the page:  each wash a `light-dark()` colour, so the gradient follows the scheme */
     --fruity-wallpaper:
@@ -155,6 +157,9 @@
     --ui-section-shadow: var(--ui-shadow-raised);
     --ui-section-title-background: var(--fruity-glass);
     --ui-section-sticky-background: var(--fruity-glass-strong);
+    /* a bar over scrolling content, for pages that draw one (the docs site's top bar, its sticky titles) */
+    --ui-bar-background: var(--fruity-bar);
+    --ui-bar-filter: var(--fruity-blur);
     --ui-panel-shadow: var(--ui-shadow-raised);
     --ui-menu-background: var(--fruity-glass);
     --ui-popup-background: var(--fruity-glass-strong);
@@ -227,6 +232,9 @@
     --ui-black-on: oklch(1 0 0);
     --ui-info-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-warning-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
+
+    /* Hue tints:  brown is the warm ivory accent;  see-through in light;  near solid in dark, where a bar tinted with it (the docs' toolbar) has no blur behind it */
+    --ui-brown-background: light-dark(rgb(247 239 226 / 0.6), rgb(52 40 30 / 0.82));
 
     /* Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal) */
     --ui-yellow-text: light-dark(
@@ -345,7 +353,7 @@
 
   .ui.header,
   :where(h1, h2, h3, h4, h5, h6) {
-    text-wrap: balance;
+    text-wrap-style: balance;
   }
   :is(h1, h2).ui.header,
   .ui.header:is(.huge, .massive) {

@@ -27780,7 +27780,7 @@
             "scheme"
           ],
           "default": "both",
-          "description": "Which controls to show:  `both` (the light / dark button and the palette button with its overlay), `scheme` (the light / dark button alone) or `theme` (a theme dropdown, e.g. with `for`)."
+          "description": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown, e.g. with `for`)."
         },
         {
           "name": "size",
@@ -27880,7 +27880,7 @@
         },
         {
           "name": "scheme",
-          "description": "The light / dark `<button>`:  a sun or a moon, the scheme the page shows."
+          "description": "The light / dark `<button>` (`show=\"scheme\"`):  a sun or a moon, the scheme the page shows."
         },
         {
           "name": "palette",
@@ -27899,8 +27899,12 @@
           "description": "One theme in the list (`role=menuitemradio`)."
         },
         {
-          "name": "system",
-          "description": "The overlay's \"Match system\" switch (`role=switch`)."
+          "name": "schemes",
+          "description": "The overlay's Light | Dark | Auto control (`role=radiogroup`)."
+        },
+        {
+          "name": "scheme-option",
+          "description": "One choice in it (`role=radio`):  an icon and its name."
         },
         {
           "name": "tip",
@@ -27922,7 +27926,7 @@
         },
         {
           "name": "following",
-          "description": "The scheme follows the OS (nothing chosen, or \"Match system\" on)."
+          "description": "The scheme follows the OS (nothing chosen, or Auto)."
         },
         {
           "name": "open",
@@ -28033,8 +28037,8 @@
         },
         {
           "key": "palette",
-          "text": "Theme:  {title}",
-          "description": "The palette button's name and tooltip:  the chosen theme."
+          "text": "Theme and light / dark:  {title}, {scheme}",
+          "description": "The palette button's name and tooltip:  the chosen theme and scheme (`light`, `dark` or `auto`'s text)."
         },
         {
           "key": "overlayName",
@@ -28042,14 +28046,24 @@
           "description": "Accessible name of the overlay."
         },
         {
-          "key": "matchSystem",
-          "text": "Match system",
-          "description": "The overlay's switch:  follow the OS's scheme."
+          "key": "schemeName",
+          "text": "Light or dark",
+          "description": "Accessible name of the overlay's scheme control."
         },
         {
-          "key": "matchSystemDescription",
-          "text": "Follow your device",
-          "description": "Under `Match system`."
+          "key": "light",
+          "text": "Light",
+          "description": "The scheme control's light choice."
+        },
+        {
+          "key": "dark",
+          "text": "Dark",
+          "description": "The scheme control's dark choice."
+        },
+        {
+          "key": "auto",
+          "text": "Auto",
+          "description": "The scheme control's choice that follows the device's scheme."
         }
       ],
       "mainTag": "ui-docs-themes",
@@ -30491,15 +30505,9 @@
           "type": "time"
         },
         {
-          "name": "--ui-docs-themes-knob-color",
-          "default": "oklch(1 0 0)",
-          "description": "Knob of the \"Match system\" switch.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-themes-knob-shadow",
-          "default": "0 1px 2px oklch(0 0 0 / 0.25)",
-          "description": "The knob's drop shadow.",
+          "name": "--ui-docs-themes-choice-shadow",
+          "default": "0 1px 2px oklch(0 0 0 / 0.16)",
+          "description": "The chosen scheme's raised key in the segmented control: its drop shadow.",
           "type": "other"
         },
         {
