@@ -326,14 +326,11 @@ epic summary spanish
 Spanish
   [x] P1 · Unicode Words  (2-3h)
 ...
-  [ ] P11 · Solitario  (3-4h)
+  [x] P11 · Solitario  (3-4h)
 ...
   [x] P17 · Parser Warnings in Spanish  (3-4h)
 ...
 estimate:  ... in all, ... left
-next:  P11 · Solitario
-open judgements:
-  - J1  JSX tag names stay ASCII
 ...
 open caveats:
   - C1  Agreement is a warning, never an error
@@ -343,7 +340,7 @@ open caveats:
 
 </details>
 
-_On Spell's own pages:  the plan for writing Spell in Spanish, with P11 still to do._
+_On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario done, its caveats still open._
 
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 
