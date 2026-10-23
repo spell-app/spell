@@ -377,7 +377,10 @@ The kit is always there, so no `needs` names it.
   - Each has its own theme.
 - Each window shows the WHOLE branch:
   - folder 1 is the KIT's root, `~/www/spell` (since epic `repo-split` P9), then the shared content repo
-    - a worktree's window:  the kit's root, the worktree (`⎇ <name>`), the content repo
+    - a worktree's window:  the worktree (`⎇ <name>`), then the content repo, and NOT the kit's root
+      (`windows.worktreeOnly` in [the kit's epic settings](.epic/config.json5);  Owen, 2026-10-22)
+      - with the kit's root there too, Quick Open listed every file twice
+      - its Claude panel still lists every session:  the worktree's saved-session folder links to the kit's
   - no package folder since 2026-10-06
   - Why the kit first:  the Claude panel lists only the sessions saved under a window's FIRST folder,
     so every window lists every session, of every repo.
@@ -386,7 +389,9 @@ The kit is always there, so no `needs` names it.
 - Each file shows ONCE in Explorer and Quick Open:
   - The window's `files.exclude` shows the shared links only under `spell.epics`
     ([filesExclude()](spell-epic/src/window.mjs) writes it).
-  - A worktree's window hides the main root's files (beside its git-ignored `.spell-main` marker).
+  - A worktree's window holds no main checkout (above), so each file is the worktree's alone.
+    - Before 2026-10-22 it hid the main root's files beside a `.spell-main` marker:  that hid them in the Explorer
+      only, never in Quick Open.
   - `search.exclude` in [spell-app's VS Code settings](spell-app/.vscode/settings.json)
     keeps generated files, icons and screenshots out of Quick Open and Find.
 
@@ -441,9 +446,7 @@ The kit is always there, so no `needs` names it.
   - Its look:  that of the window it's opened from, or the one asked for.
   - `/epic <name> -purple`:  Tomorrow Night Blue's look in one of 12 hues (`epic window color`).
   - `/epic color <look>` recolours the window you're in, live.
-  - Its folders:  the MAIN root first (so its Claude panel lists every session),
-    then the worktree's root (`⎇ <name>`), then the shared content repo.
-  - The main root's files are hidden (above).
+  - Its folders:  the worktree's root (`⎇ <name>`), then the shared content repo (above, "Windows").
 - Why:  Owen reviews in VS Code;  edits a window doesn't show are invisible there.
 - `epic window` works in a fresh worktree, before its `yarn install`.
   - The `spell` link runs the MAIN checkout's CLI, which has its packages.
