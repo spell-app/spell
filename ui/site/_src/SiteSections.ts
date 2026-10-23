@@ -88,8 +88,11 @@ export class SiteSections {
     requestAnimationFrame(() => {
       this.isMarkingStuck = false
       const main = this.main
-      const bar = main?.isConnected ? SiteSections.barOf(main) : undefined
-      if (!main || !bar) return
+      if (!main?.isConnected) return
+      // the page header's title line is stuck once the page has scrolled at all:  it sits at its line from the start
+      main.classList.toggle(HEAD_STUCK, scrollY > 0)
+      const bar = SiteSections.barOf(main)
+      if (!bar) return
       // how far the joined toolbar has moved up from where it sticks:  0 until its pane ends
       const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
       const part = pageBar?.matches(JOINED_BAR)
@@ -133,7 +136,7 @@ export class SiteSections {
       if (bar) this.resized.observe(bar)
       // and the page header's title line, which grows as its tools (Send, the bullhorn) arrive
       const head = SiteSections.headOf(main)
-      if (head) this.resized.observe(head)
+      if (head) this.resized.observe(head, { box: "border-box" })
     })
   }
 
@@ -526,6 +529,9 @@ const SUBTITLE_CLASS = "site-subtitle"
 
 /** `main`'s custom property:  the masthead's stuck height, px, the sticky lines below it start under (`measure()`). */
 const HEAD_HEIGHT = "--site-head-height"
+
+/** `main`'s class while the page has scrolled, its header's title line stuck and tighter (`markTabsStuck()`, `site.css`). */
+const HEAD_STUCK = "site-head-stuck"
 
 /** `main`'s class while the tabs' bar is stuck (`markTabsStuck()`). */
 const TABS_STUCK = "site-tabs-stuck"

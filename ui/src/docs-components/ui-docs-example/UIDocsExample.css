@@ -44,8 +44,11 @@
       --ui-docs-example-toggle-background,
       light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))
     );
-    /* Space from the frame's top and right edges to the code button, the same both ways */
-    --_ui-docs-example-toggle-inset: var(--ui-docs-example-toggle-inset, 0.5em);
+    /*
+     * Space from the frame's top and right edges to the code button, the same both ways:  about what centres it beside
+     * one line of text (Owen, 2026-10-23:  ""code" button should look centered vertically here";  0.5em before)
+     */
+    --_ui-docs-example-toggle-inset: var(--ui-docs-example-toggle-inset, 0.8em);
     /* Space between the header, description and example. */
     --_ui-docs-example-gap: var(--ui-docs-example-gap, 0.5em);
     /* The frame round an example:  a faint see-through card, so it never runs into the prose round it. */
@@ -106,7 +109,8 @@
   }
   .frame > [part~="toggle"] {
     position: absolute;
-    inset-block-start: var(--_ui-docs-example-toggle-inset);
+    /* in a frame too short for that inset, centred top to bottom instead (the button is about 1.35em tall) */
+    inset-block-start: min(calc(50% - 0.675em), var(--_ui-docs-example-toggle-inset));
     inset-inline-end: var(--_ui-docs-example-toggle-inset);
     z-index: 1;
     margin: 0;

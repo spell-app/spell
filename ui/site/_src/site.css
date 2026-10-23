@@ -466,6 +466,25 @@
       backdrop-filter: none;
     }
   }
+  /*
+   * stuck, the title line is tighter:  half its space above, a quarter of its space below (Owen, 2026-10-23:  "When
+   * Breadcrumb top header is sticky, reduce padding to 1/2 of what's on the top, 1/4 of what's on bottom"), eased in
+   * once the page has scrolled at all (`main.site-head-stuck`, `SiteSections.markTabsStuck()`);  the lines below follow
+   * its height (`SiteSections.measure()`)
+   */
+  .site-main > .site-masthead::part(segment) {
+    transition:
+      padding-block var(--ui-duration-normal, 200ms) var(--ui-ease, ease),
+      margin-block-end var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
+  }
+  /*
+   * ... the space it gives up kept as a margin below it, so nothing under it moves:  a shorter box there moved the page
+   * up, the browser scrolled back to keep its place, and near the top that undid the scroll that tightened it
+   */
+  .site-main.site-head-stuck > .site-masthead::part(segment) {
+    padding-block: 0.625em calc((0.25em + 8px) / 4);
+    margin-block-end: calc(0.625em + (0.25em + 8px) * 0.75);
+  }
   /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
   .site-subtitle {
     margin: 0 var(--site-gutter);
@@ -684,11 +703,11 @@
     margin-block: 0;
   }
   /*
-   * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it and a slightly
-   * deeper fill, so the two read as two bars, not one block
+   * a NESTED title (an example under its section) stacks under its parent's:  a hairline above it, so the two read as
+   * two bars;  the same white as its parent's (Owen, 2026-10-23:  ""Breadcrumb" subheader should read as white rather
+   * than grey";  a slightly deeper fill before)
    */
   .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
-    background-color: color-mix(in oklab, var(--ui-section-sticky-background) 94%, var(--ui-text-color));
     box-shadow: inset 0 1px 0 var(--ui-border-color);
   }
   .site-tabs::part(menu) {
