@@ -217,7 +217,9 @@
     margin: 0;
     padding: var(--_ui-docs-example-frame-padding);
     border: none;
-    border-radius: 0;
+    /* its bottom corners round, the frame's:  a card over the code (Owen, 2026-10-23:  "The example should keep its
+       rounding on the bottom when opened, like the picture I pasted last") */
+    border-radius: 0 0 var(--_ui-docs-example-frame-radius) var(--_ui-docs-example-frame-radius);
     background: var(--_ui-docs-example-demo-background);
     box-shadow:
       0 1px 0 var(--ui-border-color),
