@@ -132,6 +132,10 @@
   ) {
   opacity: 1;
 }
+/* the Spell UI site's page header draws its bullhorn as the end of Send's pill (its `site.css`):  always shown there */
+.site-main > .site-masthead > .spell-comment-mark.at-page {
+  opacity: 1;
+}
 /*
  * a box of THREADS (`<epic-threads>`):  a column of them, a little apart, 8px below its block and 12px above the next
  * (its own sheet);  until the epics pack has drawn it, the same, so nothing jumps as it upgrades
@@ -236,9 +240,8 @@ ui-button[title]::part(icon) {
  * - Its segment and container are `display: contents` hosts, so these place themselves by the column the site's
  *   `site.css` gives its masthead and body:  `--site-gutter` in from `main`'s edges (3em), 1em below Fomantic's
  *   computer width (992px), as there
- * - the page's bullhorn:  over the masthead's top right corner (its box:  the site's `.site-page`, as wide and as high
- *   as `main`), at the column's right edge, above the page's own links (`.site-page-links`)
- * - Send:  under the title, at the column's right edge
+ * - the page's bullhorn and Send:  placed by the site's `site.css`, in the masthead's row of icon buttons
+ *   (Owen, 2026-10-23, epic `debut`:  "Move send/wand to the right of the bug icon");  only Send's look is here
  * - the page's threads (the `<epic-threads>` box after the masthead):  in the column, as the lede under them
  */
 .site-main {
@@ -249,19 +252,8 @@ ui-button[title]::part(icon) {
     --_spell-site-column: 1em;
   }
 }
-.site-main > .site-masthead > .spell-comment-mark.at-page {
-  position: absolute;
-  top: 12px;
-  inset-inline-end: var(--_spell-site-column);
-}
 .site-main > .site-masthead > .spell-send {
   --_tint: var(--ui-blue, #2185d0);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  margin: 12px var(--_spell-site-column) 0;
-  font: 600 13px/1.4 var(--spell-sans);
 }
 .site-main > .site-masthead + epic-threads {
   margin: 0 var(--_spell-site-column);

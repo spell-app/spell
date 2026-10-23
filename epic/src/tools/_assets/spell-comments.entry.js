@@ -141,12 +141,14 @@ function drawToolbar(sections, { signal }) {
   }))
   const toolbar = toolbarMenu(
     titledItems(groups, () => []),
-    { titled: true }
+    // under a page's tabs:  pills as the tabs are
+    { titled: true, segmented: !!sections[0].closest("ui-tabs") }
   )
   for (const old of document.querySelectorAll(`.${PAGE_BAR_CLASS}.spell-site-toolbar`)) old.remove()
   const bar = el("ui-sticky", { class: `${PAGE_BAR_CLASS} spell-site-toolbar`, "data-spell-added": true }, toolbar)
   const article = sections[0].parentElement
   article.prepend(bar)
+  toolbar.addEventListener("click", glideTo, { signal })
   keepFitted(toolbar, { signal })
   // the site re-measures its sticky lines on a resize:  now the bar is in, and once it has drawn
   const remeasure = () => !signal.aborted && dispatchEvent(new Event("resize"))
@@ -195,17 +197,40 @@ function sectionLabel(section) {
   return slotted?.textContent.replace(/\s+/g, " ").trim() ?? section.id
 }
 
-/** The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first. */
+/**
+ * The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first.
+ * - at the page's end, the last one showing on screen:  a short last section can't scroll up to the line, so a click
+ *   on it would leave the one above marked (Owen, 2026-10-23:  "Not showing Themes as selected when I click it")
+ */
 function currentSection(main, sections) {
   const line = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
+  const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 2
   let current
   for (const section of sections) {
     const box = section.getBoundingClientRect()
     if (!box.height && !box.width) continue
-    if (box.top > line) break
+    if (box.top > (atEnd ? innerHeight - 1 : line)) break
     current = section
   }
   return current
+}
+
+/**
+ * A click on a section's button GLIDES there (Owen, 2026-10-23:  "Clicking secondary tab jumps the entire page rather
+ * than tabs gliding up"):  the browser's own jump to `#id` is stopped, the address set without a scroll, and the
+ * site's landing told by the `hashchange` it listens for (`SiteSections`:  a smooth scroll, the stuck bars put)
+ * - a click with a modifier (a new tab, a new window) is left to the browser
+ */
+function glideTo(event) {
+  if (event.defaultPrevented || event.button !== 0) return
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  const item = event.composedPath().find((node) => node.localName === "ui-item" && node.hasAttribute("data-rail"))
+  const hash = item?.getAttribute("href")
+  if (!hash?.startsWith("#")) return
+  event.preventDefault()
+  const oldURL = location.href
+  history.pushState(history.state, "", hash)
+  dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: location.href }))
 }
 
 /**
