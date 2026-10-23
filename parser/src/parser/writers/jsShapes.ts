@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * What the javascript writers (`P.JSWriter`, `P.TSWriter`) read off a spell tree:  pure helpers, nothing written.

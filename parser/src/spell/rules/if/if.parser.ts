@@ -4,7 +4,7 @@
  * - A file of its own, so a rule file can import it without importing its siblings.
  */
 // Import directly to avoid circular import
-import { SpellParser } from "spell-lang/spell/SpellParser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
 
 /**
  * Rule module for `if`/`else if`/`else` statement rules, plus the `backwards_if` ternary suffix.

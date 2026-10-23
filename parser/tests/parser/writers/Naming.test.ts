@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 describe("Naming.wordsOf()", () => {
   test("splits at `_`, `$` and a capital, in any script", () => {

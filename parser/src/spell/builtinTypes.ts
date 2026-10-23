@@ -16,9 +16,9 @@
  *   - A built-in type with no entry here, e.g. `number`, has no members yet.
  */
 
-import { snakeCase } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { snakeCase } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * The docs of `id`, which every thing and list has (epic `people-and-orgs`, Q9):

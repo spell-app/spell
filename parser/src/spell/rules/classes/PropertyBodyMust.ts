@@ -1,10 +1,10 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 // Through the folder:  read only when called, once the folder has loaded
-import { DefinePropertyHas } from "spell-lang/spell/rules/classes"
+import { DefinePropertyHas } from "spell-parser/spell/rules/classes"
 
 /**
  * `property_body_must` rule:  what a property's value must be, said indented under the property's own line.

@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `comment` rule:  line comment token -- wraps a `CommentToken` into a `LineComment` AST node, e.g. `// foo`.

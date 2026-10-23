@@ -1,5 +1,5 @@
-import { assert, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { assert, proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `keyword` rule:  single alphanumeric word used as a keyword, e.g. in a method definition.

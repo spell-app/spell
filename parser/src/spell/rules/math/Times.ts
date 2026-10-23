@@ -1,6 +1,6 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { InfixOperatorSuffix, Precedence } from "spell-parser/spell/rules/expressions"
 
 /**
  * `times` rule:  `*` / `times`, e.g. `price * taxRate` -- `Precedence.product`, tightest, alongside `/`.

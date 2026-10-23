@@ -1,7 +1,7 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * Base for rules which pick ONE item out of a list, e.g. `the first card of the deck`:  what we are is an item of it.

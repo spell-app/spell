@@ -1,9 +1,9 @@
 //  # Parser Rules
 //
 
-import { proto } from "spell-kit/util"
-import { Derivative } from "spell-kit/util/spell/Derivative"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { Derivative } from "spell/util/spell/Derivative"
+import { P } from "spell-parser/parser"
 
 /**
  * # Rule base class
@@ -198,7 +198,7 @@ export abstract class Rule<
   }
 
   /**
-   * Called by `@proto` as each `@proto static` is defined on us or a subclass -- see `spell-kit/util/decorators`.
+   * Called by `@proto` as each `@proto static` is defined on us or a subclass -- see `spell/util/decorators`.
    * - SIDE EFFECT: `@proto static importableAs = "<id>"` registers the class being defined under `<id>`.
    * - Throws if a DIFFERENT class already has that id.  The same class again, e.g. hot reload, replaces it.
    */
@@ -312,7 +312,7 @@ export abstract class Rule<
     const { rulexParser } = P.Parser
     if (!rulexParser) {
       throw new TypeError(
-        'Rulex parser is not installed.  Use `import "spell-lang/parser/rulex"` to import it and try again.'
+        'Rulex parser is not installed.  Use `import "spell-parser/parser/rulex"` to import it and try again.'
       )
     }
     const compiled = rulexParser.compile(syntax)

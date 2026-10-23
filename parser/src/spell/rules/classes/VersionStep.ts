@@ -1,9 +1,9 @@
-import { camelCase, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { camelCase, proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
  * `version_step` rule:  how a saved thing is brought up to a newer version of its type (epic `people-and-orgs` P6):

@@ -1,7 +1,7 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { SpellType, getKnownType } from "spell-lang/spell/rules/types"
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { SpellType, getKnownType } from "spell-parser/spell/rules/types"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 import { NewThing } from "./NewThing"
 import { ThingName } from "./ThingName"
 

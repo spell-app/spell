@@ -1,7 +1,7 @@
 # Markdown on Spell's parser
 
 ```ts
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 MD.toHTML("# Hello\n\n- one **bold**\n- [x] done")
 ```
@@ -18,7 +18,7 @@ The parser knows no language until rules are registered on it;  this engine regi
 and never imports Spell.
 It passes all 670 of 670 examples of GitHub's markdown spec.
 
-`spell-lang/markdown` is the second language on [the parser](README-parser.md), after Spell itself.
+`spell-parser/markdown` is the second language on [the parser](README-parser.md), after Spell itself.
 It's no demo:  the editor's docstrings, the `<spell-markdown>` element and the language server all draw with it.
 It isn't the fastest or the smallest, either:  about 1.6 times marked's time, and seven times its bytes
 ([the numbers](#exact-and-slower-and-bigger-than-marked)).
@@ -272,7 +272,7 @@ The time is fine for a page;  the bytes are the real cost.
 ## Who draws with it, and who doesn't
 
 Two elements draw markdown, and they're the same element with different engines.
-Spell UI's `<ui-markdown>` uses marked:  Spell UI stands on the kit alone, beside spell-lang, so it can't import this
+Spell UI's `<ui-markdown>` uses marked:  Spell UI stands on the kit alone, beside spell-parser, so it can't import this
 engine, and wouldn't want its bytes.
 spell-app's `<spell-markdown>` extends it and swaps this engine in, because the app loads the parser anyway.
 
@@ -280,11 +280,11 @@ spell-app's `<spell-markdown>` extends it and swaps this engine in, because the 
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart TB
   spmd["spell-markdown<br/>spell-app's element"] -- extends --> uimd["ui-markdown<br/>Spell UI's element"]
-  spmd -- "draws with" --> md["spell-lang/markdown"]
+  spmd -- "draws with" --> md["spell-parser/markdown"]
   docs["the editor's docstrings"] --> md
   lsp["the language server"] -- "inline parser only" --> md
   uimd --> marked["marked"]
-  md --> parser["spell-lang/parser"]
+  md --> parser["spell-parser/parser"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
 ```
@@ -302,10 +302,10 @@ The cost lands on the page:  its first `<spell-markdown>` loads the engine when 
 ## Working on it:  the spec is the scoreboard
 
 Progress here is a number you can read:  670 of 670, section by section, and a test that fails when it moves.
-From spell-lang's root, in a checkout set up as [the kit's README](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero) says:
+From spell-parser's root, in a checkout set up as [the kit's README](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says:
 
 ```sh
-cd ~/www/spell/spell-lang
+cd ~/www/spell/spell-parser
 yarn vp test run --project markdown        # markdown's tests:  7 files, 34 tests
 yarn tsx scripts/markdown/spec-report.mts  # the spec, section by section;  name a section to see its failures
 ```
@@ -342,7 +342,7 @@ The spec report, trimmed:
   [gfm-spec.json](src/markdown/spec/gfm-spec.json):
 
   ```sh
-  cd ~/www/spell/spell-lang
+  cd ~/www/spell/spell-parser
   yarn markdown:spec:update <path to spec.txt>
   ```
 
@@ -385,4 +385,4 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-rulex](README-rulex.md):  every construct the line rules use, counts and `{spaces}` included
 - [README-spell](README-spell.md):  the other language on the same parser, Spell itself
 - [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  `<spell-markdown>` and the editor that draws with this
-- [spell-lang's front page](README.md):  the language, its pipeline, and every page of the repo
+- [spell-parser's front page](README.md):  the language, its pipeline, and every page of the repo

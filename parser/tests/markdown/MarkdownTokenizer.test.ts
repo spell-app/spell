@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
-import { MD } from "spell-lang/markdown"
+import { P } from "spell-parser/parser"
+import { MD } from "spell-parser/markdown"
 
 /** `text`'s tokens as `Type(value)`, whitespace after shown as `·`. */
 function tokens(text: string) {

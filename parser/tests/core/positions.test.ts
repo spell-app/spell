@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, positionOf, List, position, spellPosition, withSpellPositions } from "spell-lang/core"
-import { zeroIndexOf } from "spell-lang/core/positions"
+import { core, positionOf, List, position, spellPosition, withSpellPositions } from "spell-parser/core"
+import { zeroIndexOf } from "spell-parser/core/positions"
 
 /**
  * Positions (epic `python-target` P23):  the core counts from 0, as javascript does;

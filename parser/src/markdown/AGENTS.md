@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/markdown/` of the `spell-lang` package (`spell-lang/markdown`).
+when working with code in this folder, `src/markdown/` of the `spell-parser` package (`spell-parser/markdown`).
 
 **READ the repo root's `AGENTS.md` and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 - the root's:  the repo's layout
@@ -11,11 +11,11 @@ when working with code in this folder, `src/markdown/` of the `spell-lang` packa
 
 ## Overview
 
-- GitHub-flavoured markdown on the generic parser (`spell-lang/parser`, `P`), drawing `ui-*` markup.
+- GitHub-flavoured markdown on the generic parser (`spell-parser/parser`, `P`), drawing `ui-*` markup.
   - It's the second language on the parser, after spell:  the proof that the parser knows no language.
   - The plan:  [its epic page](../../../spell.epics/epics/markdown/markdown.plan.html).
-- It depends only on `spell-lang/parser` and `spell-kit/util`.
-  - NEVER import `spell-lang/spell`, or anything above it.
+- It depends only on `spell-parser/parser` and `spell/util`.
+  - NEVER import `spell-parser/spell`, or anything above it.
   - `ui` NEVER imports this folder, nor ships it prebuilt:  Spell UI's `<ui-markdown>` draws with marked.
     The app's `<spell-markdown>` draws with it, from source
     ([MDEngine](../../../spell-app/src/app/components/spell-markdown/MDEngine.ts)).
@@ -39,10 +39,10 @@ when working with code in this folder, `src/markdown/` of the `spell-lang` packa
 As WWOD §12, plus:
 
 - The repo's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
-  (`spell-kit/toolchain/decorators`).
+  (`spell/toolchain/decorators`).
 
 ## Types / Exports
 
 As WWOD §8, plus our self-namespace:
 
-- `MD` ~== `spell-lang/markdown`
+- `MD` ~== `spell-parser/markdown`

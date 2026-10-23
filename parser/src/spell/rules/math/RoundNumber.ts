@@ -1,7 +1,7 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority } from "spell-lang/spell/rules/rules.types"
-import { SpellExpression, Wording } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority } from "spell-parser/spell/rules/rules.types"
+import { SpellExpression, Wording } from "spell-parser/spell/rules/expressions"
 
 /**
  * `round_number` rule:  `round {expression}`, optionally `off`/`up`/`down`, e.g. `round price up`.

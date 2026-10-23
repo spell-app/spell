@@ -6,7 +6,7 @@ import {
   summarize,
   summarizeIncremental,
   type SpellSourceFile
-} from "spell-lang/spell/test"
+} from "spell-parser/spell/test"
 
 /**
  * `P.IncrementalProject` MUST give exactly what a full parse gives:

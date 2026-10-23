@@ -1,7 +1,7 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority } from "spell-lang/spell/rules/rules.types"
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority } from "spell-parser/spell/rules/rules.types"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `max` rule:  `the biggest`/`largest` [thing] `of`/`in` {expression}, e.g. `largest of the prices`.

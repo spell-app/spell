@@ -1,6 +1,6 @@
-import { P } from "spell-lang/parser"
-import { Synonyms } from "spell-lang/spell/rules/expressions"
-import { SpellIdentifier } from "spell-lang/spell/rules/variables"
+import { P } from "spell-parser/parser"
+import { Synonyms } from "spell-parser/spell/rules/expressions"
+import { SpellIdentifier } from "spell-parser/spell/rules/variables"
 
 /** Most words an event's name may have, linking words included. */
 const MAX_WORDS = 4

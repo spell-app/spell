@@ -1,5 +1,5 @@
-import { snakeCase } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { snakeCase } from "spell/util"
+import { P } from "spell-parser/parser"
 
 import { BlockScope } from "./BlockScope"
 /**

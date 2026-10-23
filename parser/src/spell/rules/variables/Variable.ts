@@ -1,5 +1,5 @@
-import { NONE } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { NONE } from "spell/util"
+import { P } from "spell-parser/parser"
 import { SpellIdentifier } from "./SpellIdentifier"
 import { type IdentifierMatchData } from "./variables.shared"
 

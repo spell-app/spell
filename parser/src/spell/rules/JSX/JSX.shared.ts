@@ -1,6 +1,6 @@
-import { P } from "spell-lang/parser"
-import type { FillInParts } from "spell-lang/spell/rules/core"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import type { FillInParts } from "spell-parser/spell/rules/core"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 /**
  * Spell's own tag words in JSX, in ENGLISH, by the web's tag each becomes:  for the editor's completions.

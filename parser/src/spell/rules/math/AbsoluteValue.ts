@@ -1,6 +1,6 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `absolute_value` rule:  `the absolute value of {expression}`.

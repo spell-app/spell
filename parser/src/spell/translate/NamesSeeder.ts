@@ -1,16 +1,16 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { TextLiteral } from "spell-lang/spell/rules/core"
-import { Synonyms, Wording } from "spell-lang/spell/rules/expressions"
-import { SubjectRule } from "spell-lang/spell/rules/types"
-import { SpellJSX } from "spell-lang/spell/rules/JSX"
-import { MethodSignature, QuotedMethodSignature, QuotedSignatureWords } from "spell-lang/spell/rules/methods"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { TextLiteral } from "spell-parser/spell/rules/core"
+import { Synonyms, Wording } from "spell-parser/spell/rules/expressions"
+import { SubjectRule } from "spell-parser/spell/rules/types"
+import { SpellJSX } from "spell-parser/spell/rules/JSX"
+import { MethodSignature, QuotedMethodSignature, QuotedSignatureWords } from "spell-parser/spell/rules/methods"
 import type { TranslationNames } from "./TranslationNames"
 import type { SourceFile } from "./translate.types"
 
 /**
  * Fills a names dictionary from a translation a PERSON made (epic `spanish` P24):
- * `spell lang translate Solitaire --to es --seed Solitario`, so the hand-made Solitario's names are reused.
+ * `spell parser translate Solitaire --to es --seed Solitario`, so the hand-made Solitario's names are reused.
  * - Reads the two projects side by side, file by file (each with the one it lines up with best), line by line:
  *   the lines lined up by what each is (a comment, a blank, a statement of which rule), so a line one has and the
  *   other doesn't (a comment split in two) only skips itself.

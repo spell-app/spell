@@ -1,4 +1,4 @@
-import type { P } from "spell-lang/parser"
+import type { P } from "spell-parser/parser"
 
 /**
  * `ScopeMethod` -- a method or function, as a scope RECORD:  what it's called, what it takes, what it gives back.

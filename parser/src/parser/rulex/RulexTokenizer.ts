@@ -1,5 +1,5 @@
 // Import directly to avoid circular import
-import { Tokenizer } from "spell-lang/parser/tokenizer/Tokenizer"
+import { Tokenizer } from "spell-parser/parser/tokenizer/Tokenizer"
 
 /**
  * The tokenizer rulex reads a `syntax` string with:  words, numbers, symbols, whitespace -- nothing else.

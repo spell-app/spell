@@ -3,7 +3,7 @@ import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { basename, join, resolve } from "path"
 
-import { CODE_FOLDERS, nodeBinary } from "spell-lang/spell/node/typecheck"
+import { CODE_FOLDERS, nodeBinary } from "spell-parser/spell/node/typecheck"
 
 /**
  * Type-check compiled spell's Python (the `py` target) with pyright:  the errors it finds, by file.

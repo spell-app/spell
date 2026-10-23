@@ -4,7 +4,7 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `types.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 import { types } from "./types.parser"
 import { KindName } from "./KindName"

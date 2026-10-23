@@ -66,7 +66,7 @@ The other three are for where your code has to live:  a typed codebase, a librar
 ## One tree, a writer per language
 
 Each target is a writer that walks [the Spell tree](README-parser.md#4-the-spell-tree), on a runtime of its own.
-(The other half, human languages going in, is on [spell-lang's front page](README.md#languages-in-targets-out).)
+(The other half, human languages going in, is on [spell-parser's front page](README.md#languages-in-targets-out).)
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -80,7 +80,7 @@ flowchart LR
   js -- .spell.js --> core["@spell/core<br/>the core, on Solid"]
   ts -- .spell.tsx --> core
   el -- .elements.spell.js --> core
-  lib -- .lib.ts --> model["spell-lang/core/model<br/>the core, without Solid"]
+  lib -- .lib.ts --> model["spell-parser/core/model<br/>the core, without Solid"]
   py -- .spell.py --> spc["spell_core<br/>the core's Python twin"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
@@ -107,9 +107,9 @@ It also holds what changes from one language to the next:
 
 | Target | Writer | Writes | Its runtime |
 | --- | --- | --- | --- |
-| `js/solid` | [`JSWriter`](src/parser/writers/JSWriter.ts) | `<Project>.spell.js` | `@spell/core`, spell-lang's core |
+| `js/solid` | [`JSWriter`](src/parser/writers/JSWriter.ts) | `<Project>.spell.js` | `@spell/core`, spell-parser's core |
 | `ts/solid` | [`TSWriter`](src/parser/writers/TSWriter.ts), on `JSWriter` | `<Project>.spell.tsx` | `@spell/core`;  `@spell/elements` for a drawable thing's element |
-| `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell-lang/core/model`:  the core with no drawing, so no Solid |
+| `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell-parser/core/model`:  the core with no drawing, so no Solid |
 | `py` | [`PyWriter`](src/py/PyWriter.ts), on [`PyBaseWriter`](src/py/PyBaseWriter.ts) | `<Project>.spell.py`;  beside the source, its words, `<Project>.py.en.json5`, and for a program that draws, its web app, `<Project>.app.py` | `spell_core` |
 | `py`, a program that draws | [`ElementsWriter`](src/py/ElementsWriter.ts), on `JSWriter` | its page, in JavaScript:  `<Project>.elements.spell.js` | `@spell/core` |
 
@@ -121,7 +121,7 @@ It also holds what changes from one language to the next:
 ## The card, line by line
 
 The two lines at the top of this page come from a card of ten.
-[The kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md) opens with all ten, and folds their whole output, in all three, under them.
+[The kit's front page](https://github.com/spell-app/spell/blob/main/README.md) opens with all ten, and folds their whole output, in all three, under them.
 Most of it comes out the same shape in all three.
 The differences sit in four places:  imports, types, the element, and each language's own words.
 
@@ -200,7 +200,7 @@ The cost:
 - `spell run <project> --target ts` does that build and runs it under node:  its prints and tests in the terminal.
   **A program that draws can't open in a browser that way yet:**  `--target js`, or none, does.
 - A drawable thing's element imports `@spell/elements`, which is spell-app's `SpellElement` and Spell UI's `E`.
-  So the type check needs spell-app installed beside spell-lang;  without it, the check skips itself.
+  So the type check needs spell-app installed beside spell-parser;  without it, the check skips itself.
 
 ## A library:  Spell's classes, for code that isn't Spell
 
@@ -220,7 +220,7 @@ Its project file asks for `"targets": ["ts/lib"]`, and the compile writes
 [people.lib.ts](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/people/people.lib.ts) beside it:
 
 ```ts
-import { Thing, List, prop } from "spell-lang/core/model"
+import { Thing, List, prop } from "spell-parser/core/model"
 ...
 export class Person extends Thing {
   static savedInFile = true
@@ -240,7 +240,7 @@ TypeScript, by package name:  `import * as People from "spell-app/spaces/@spell/
 - It's `TSWriter`'s TypeScript, with the program's top-level steps left out:
   headings, tests, `print`, the things it makes.
   So importing it runs nothing but the class declarations.
-- Its core comes from `spell-lang/core/model`, and only what it uses:
+- Its core comes from `spell-parser/core/model`, and only what it uses:
   no Solid, and a thing it makes joins no program's list.
 - One file, its own types, with no `.d.ts` beside it.
   Vite, `tsx` and `tsc` import it as they import any TypeScript;
@@ -260,7 +260,7 @@ spell compile @spell/examples/fizzbuzz --target ts/lib --stdout
 
 ```text
 ✓ @spell/examples/fizzbuzz
-import { core } from "spell-lang/core/model"
+import { core } from "spell-parser/core/model"
 
 /** File FizzBuzz.spell */
 export function playFizzbuzz() {
@@ -283,7 +283,7 @@ Ask it to, and it says so (below, "Choosing a target").
 ## Python:  Python's own words, on Python's own core
 
 Everything Spell has for Python is in [src/py/](src/py/), in two halves:
-- its TypeScript files WRITE Python:  `spell-lang/py`, the writers above
+- its TypeScript files WRITE Python:  `spell-parser/py`, the writers above
 - [src/py/core/](src/py/core/) is `spell_core`, what compiled Python imports:
   `from spell_core import core, Thing, List, App, prop, h`
 
@@ -351,7 +351,7 @@ A program that draws runs as a web app, without `--no-browser`:
 The checks:
 - pyright on every test project's Python, as Python 3.12, in the `basic` mode VS Code's Python extension uses:
   it finds nothing in any of the seven.
-- ruff and pytest on `spell_core`:  they run in spell-lang's `yarn lint` and `yarn test`.
+- ruff and pytest on `spell_core`:  they run in spell-parser's `yarn lint` and `yarn test`.
 
 The cost, beyond Python and uv:
 - **Its type hints are thinner than TypeScript's:**  where TypeScript says `rank: Rank`, Python says `rank: Any`.
@@ -411,7 +411,7 @@ What it says when you ask for what isn't there:
 | a program that draws, as `ts/lib` | `'Solitaire' draws a UI, which target 'ts/lib' can't.` |
 | `spell run --target ts/lib` | `` "ts/lib" doesn't run:  it's compiled for other code to import (`spell compile`) `` |
 
-Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang).
+Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
 
 ## 🌱 Coming
 
@@ -455,4 +455,4 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
 - [README-spell](README-spell.md#the-frozen-test-projects):  the test projects, and the two examples, whose snapshots pin every target
 - [the `py` folder's AGENTS.md](src/py/AGENTS.md):  the rules for working on Python's writers and `spell_core`
-- [The command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang):  `spell compile`, `spell run` and the rest of the language's commands
+- [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  `spell compile`, `spell run` and the rest of the language's commands

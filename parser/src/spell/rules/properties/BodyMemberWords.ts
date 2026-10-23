@@ -1,5 +1,5 @@
-import { P } from "spell-lang/parser"
-import { SubjectRule } from "spell-lang/spell/rules/types"
+import { P } from "spell-parser/parser"
+import { SubjectRule } from "spell-parser/spell/rules/types"
 import { MemberWords } from "./MemberWords"
 
 /**

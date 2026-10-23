@@ -1,5 +1,5 @@
-import { assert, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { assert, proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `whitespace` rule:  any whitespace token -- space, tab, newline, etc., wrapped as-is into a `StringLiteral`.

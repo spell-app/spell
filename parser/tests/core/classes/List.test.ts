@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { observe } from "spell-kit/util"
-import { core, Thing, List } from "spell-lang/core"
+import { observe } from "spell/util"
+import { core, Thing, List } from "spell-parser/core"
 
 /**
  * Exclusive lists:  an item is in at most ONE list of a family at a time -- and guards on a move.

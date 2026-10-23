@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { core, itemOf, positionOf, List } from "spell-lang/core"
+import { core, itemOf, positionOf, List } from "spell-parser/core"
 
 /** Each old name, and the new one it now is -- epic `output-targets` P16. */
 const RENAMED = {

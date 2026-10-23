@@ -1,6 +1,6 @@
-import { elementTagFor } from "spell-kit/util"
+import { elementTagFor } from "spell/util"
 
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
 

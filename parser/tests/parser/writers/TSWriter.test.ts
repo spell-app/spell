@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * `TSWriter`:  TypeScript on Solid, as a person writes it.
  * - Whole projects, checked by `tsc`:  spell-app's `tests/spell/test/typescript.test.ts`.
- * - Run on both targets:  the core contract, `contract.test.ts` in `spell-lang/cli`.
+ * - Run on both targets:  the core contract, `contract.test.ts` in `spell-parser/cli`.
  */
 
 /** A match for hand-made AST:  no tokens, so no datatype comes from it. */

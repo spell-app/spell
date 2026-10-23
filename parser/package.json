@@ -1,59 +1,59 @@
 {
-  "name": "spell-lang",
+  "name": "spell-parser",
   "version": "0.8.0",
   "private": true,
   "description": "The spell language:  the rule-based parser, markdown, the core runtime, Python's writers and spell itself",
   "license": "MIT",
-  "repository": "https://github.com/spell-app/spell-lang",
+  "repository": "https://github.com/spell-app/spell-parser",
   "type": "module",
   "exports": {
     "./parser": {
-      "spell-lang-source": "./src/parser/index.ts",
+      "spell-parser-source": "./src/parser/index.ts",
       "types": "./dist-types/src/parser/index.d.ts",
       "default": "./src/parser/index.ts"
     },
     "./parser/rulex": {
-      "spell-lang-source": "./src/parser/rulex/index.ts",
+      "spell-parser-source": "./src/parser/rulex/index.ts",
       "types": "./dist-types/src/parser/rulex/index.d.ts",
       "default": "./src/parser/rulex/index.ts"
     },
     "./parser/test": {
-      "spell-lang-source": "./src/parser/test/index.ts",
+      "spell-parser-source": "./src/parser/test/index.ts",
       "types": "./dist-types/src/parser/test/index.d.ts",
       "default": "./src/parser/test/index.ts"
     },
     "./markdown": {
-      "spell-lang-source": "./src/markdown/index.ts",
+      "spell-parser-source": "./src/markdown/index.ts",
       "types": "./dist-types/src/markdown/index.d.ts",
       "default": "./src/markdown/index.ts"
     },
     "./core": {
-      "spell-lang-source": "./src/core/index.ts",
+      "spell-parser-source": "./src/core/index.ts",
       "types": "./dist-types/src/core/index.d.ts",
       "default": "./src/core/index.ts"
     },
     "./py": {
-      "spell-lang-source": "./src/py/index.ts",
+      "spell-parser-source": "./src/py/index.ts",
       "types": "./dist-types/src/py/index.d.ts",
       "default": "./src/py/index.ts"
     },
     "./spell": {
-      "spell-lang-source": "./src/spell/index.ts",
+      "spell-parser-source": "./src/spell/index.ts",
       "types": "./dist-types/src/spell/index.d.ts",
       "default": "./src/spell/index.ts"
     },
     "./spell/test": {
-      "spell-lang-source": "./src/spell/test/index.ts",
+      "spell-parser-source": "./src/spell/test/index.ts",
       "types": "./dist-types/src/spell/test/index.d.ts",
       "default": "./src/spell/test/index.ts"
     },
     "./cli": {
-      "spell-lang-source": "./src/cli/index.ts",
+      "spell-parser-source": "./src/cli/index.ts",
       "types": "./dist-types/src/cli/index.d.ts",
       "default": "./src/cli/index.ts"
     },
     "./*": {
-      "spell-lang-source": [
+      "spell-parser-source": [
         "./src/*.ts",
         "./src/*.tsx",
         "./src/*/index.ts",
@@ -67,7 +67,7 @@
       "default": "./src/*"
     },
     "./*.ts": {
-      "spell-lang-source": "./src/*.ts",
+      "spell-parser-source": "./src/*.ts",
       "types": "./dist-types/src/*.d.ts",
       "default": "./src/*.ts"
     },
@@ -103,7 +103,7 @@
     "pluralize": "^8.0.0",
     "semver": "^7.8.5",
     "solid-js": "2.0.0-rc.17",
-    "spell-kit": "workspace:*"
+    "spell": "workspace:*"
   },
   "devDependencies": {
     "@solidjs/compiler": "2.0.0-rc.17",

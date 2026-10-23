@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * `number_range` rule:  whole numbers from one to another, e.g. `2 ... 10` in `ace, 2 ... 10, jack, queen or king`

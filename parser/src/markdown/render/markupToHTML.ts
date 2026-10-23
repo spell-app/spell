@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 /**
  * `MD.Markup` => an HTML string.

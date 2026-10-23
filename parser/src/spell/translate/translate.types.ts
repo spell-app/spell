@@ -2,7 +2,7 @@
  * Types for translating a spell project into another language (epic `spanish` P24):  see `Translator`.
  * - Type-only:  imports no values.
  */
-import type { P } from "spell-lang/parser"
+import type { P } from "spell-parser/parser"
 
 /**
  * What a project's names dictionary holds, `<Project>.<lang>.names.json5`:

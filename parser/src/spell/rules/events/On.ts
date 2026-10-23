@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { WithPropsArg } from "spell-lang/spell/rules/methods"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { WithPropsArg } from "spell-parser/spell/rules/methods"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
  * `on` rule:  watches a global event, with an inline statement or nested block as the handler body.

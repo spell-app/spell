@@ -1,4 +1,4 @@
-import type { P } from "spell-lang/parser"
+import type { P } from "spell-parser/parser"
 
 /** Constructor signature shared by all `Token` subclasses -- takes a `record` and builds a `Token`. */
 export type TokenConstructor = new (args: any) => P.Token

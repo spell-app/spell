@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
-import { englishInflector } from "spell-lang/spell/languages/en/inflector"
+import { P } from "spell-parser/parser"
+import { englishInflector } from "spell-parser/spell/languages/en/inflector"
 
 describe("English's inflector", () => {
   test("makes words singular and plural", () => {

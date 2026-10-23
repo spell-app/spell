@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 /** Where an extended autolink may start:  line start, after whitespace or `*` `_` `~` `(`. */
 const BOUNDARY = /[\s*_~(]/

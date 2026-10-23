@@ -1,6 +1,6 @@
 import flattenDeep from "lodash/flattenDeep"
 
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { Rule } from "./Rule"
 

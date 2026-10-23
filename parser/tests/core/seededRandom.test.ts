@@ -2,8 +2,8 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect, afterEach } from "vite-plus/test"
 
-import { core, List } from "spell-lang/core"
-import { ParkMiller } from "spell-lang/core/ParkMiller"
+import { core, List } from "spell-parser/core"
+import { ParkMiller } from "spell-parser/core/ParkMiller"
 
 /**
  * What the seeded random must give, from each seed:  made by lodash itself, on Park and Miller numbers.

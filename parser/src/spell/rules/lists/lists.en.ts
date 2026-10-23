@@ -4,8 +4,8 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `lists.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-lang/parser"
-import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
 
 import { lists } from "./lists.parser"
 import { BracketedList } from "./BracketedList"

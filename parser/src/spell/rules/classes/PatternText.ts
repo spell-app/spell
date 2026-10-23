@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `pattern_text` rule:  a PATTERN in quotes, a regular expression, read exactly as typed.

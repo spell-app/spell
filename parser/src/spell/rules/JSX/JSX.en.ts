@@ -4,8 +4,8 @@
  * - Registered in TIE-BREAK order, the order `index.ts` once listed them:  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `JSX.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-lang/parser"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 import { JSX } from "./JSX.parser"
 import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"

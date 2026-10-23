@@ -1,11 +1,11 @@
 /**
  * Base classes for spell.
  */
-import { Observable, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell-kit/util"
-import { registerThing, core } from "spell-lang/core/core"
-import type { Drawing } from "spell-lang/core/drawing"
-import { Eventful } from "spell-lang/core/SpellEvent"
-import type { PropCheck } from "spell-lang/core/core.types"
+import { Observable, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
+import { registerThing, core } from "spell-parser/core/core"
+import type { Drawing } from "spell-parser/core/drawing"
+import { Eventful } from "spell-parser/core/SpellEvent"
+import type { PropCheck } from "spell-parser/core/core.types"
 
 import { ID_PROP } from "./ids"
 
@@ -64,7 +64,7 @@ export class Thing extends Eventful(Observable) {
    * - NOTE: runs from THIS constructor, before any subclass field initializer:
    *   a plain field set here is clobbered by its initializer.
    *   - Compiled classes have no fields, so they're safe.
-   *   - A hand-written subclass with fields MUST be `@thing` (`spell-kit/util`),
+   *   - A hand-written subclass with fields MUST be `@thing` (`spell/util`),
    *     which runs `create()` after them instead.
    */
   create(): void {}

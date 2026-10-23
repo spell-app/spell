@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { core, Thing, List, App } from "spell-lang/core"
+import { core, Thing, List, App } from "spell-parser/core"
 
 /**
  * `core.carryOver()` (epic `drawable-thing` P16):  a recompiled program takes over the last run's things.

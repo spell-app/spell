@@ -1,11 +1,11 @@
 /**
  * Constants, types and pure helpers shared by more than one of spell's rule modules.
- * - Runtime-light:  `import type` only, apart from `spell-kit/util` -- so any rule module may import it,
+ * - Runtime-light:  `import type` only, apart from `spell/util` -- so any rule module may import it,
  *   whatever order the `SP` barrel loads them in.
  * - What only ONE module uses stays in that module, below the rule it serves.
  */
 
-import type { P } from "spell-lang/parser"
+import type { P } from "spell-parser/parser"
 
 ////////////////
 // ## Priority

@@ -1,8 +1,8 @@
-import { Derivative } from "spell-kit/util"
-import type { P } from "spell-lang/parser"
+import { Derivative } from "spell/util"
+import type { P } from "spell-parser/parser"
 // Import directly to avoid circular import:  a VALUE import of `P` here
-// would make `spell-lang/parser/scope/Scope` an entry which breaks the barrel -- see `barrel.test.ts`
-import { itemTypeOf } from "spell-lang/parser/parser.types"
+// would make `spell-parser/parser/scope/Scope` an entry which breaks the barrel -- see `barrel.test.ts`
+import { itemTypeOf } from "spell-parser/parser/parser.types"
 
 /**
  * We create a `Scope` when starting a parse run, so parser can keep state as it descends up and down.

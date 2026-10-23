@@ -1,5 +1,5 @@
 {
-  // spell-lang's TypeScript settings for its node-only code (see `tsconfig.json` for the rest):
+  // spell-parser's TypeScript settings for its node-only code (see `tsconfig.json` for the rest):
   // - the cli's commands (`src/cli/`)
   // - spell's node tools (`src/spell/node/`) and test helpers (`src/spell/test/`), the parser's (`src/parser/test/`)
   // - core's declarations writer
@@ -9,7 +9,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client", "spell-kit/toolchain/types"]
+    "types": ["node", "vite/client", "spell/toolchain/types"]
   },
   "include": [
     "src/cli",

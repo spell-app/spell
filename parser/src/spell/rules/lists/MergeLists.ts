@@ -1,7 +1,7 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `merge_lists` rule:  merge a set of lists together, e.g. `merge the piles` => `core.mergeLists(piles)`.

@@ -34,7 +34,7 @@ import {
   core,
   Thing,
   trigger
-} from "spell-lang/core"
+} from "spell-parser/core"
 import { coreMethods } from "./core"
 import { collectionCoreMethods } from "./collection-core"
 import { collectionOtherMethods } from "./collection-other"

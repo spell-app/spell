@@ -7,8 +7,8 @@
  *   - Its names are Spanish (`carta`, `cartas`), so Spanish's inflector can tell singular from plural;
  *     the compiled names follow them.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
 
 import { Identifier } from "./Identifier"
 import { KnownVariable } from "./KnownVariable"

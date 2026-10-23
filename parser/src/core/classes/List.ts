@@ -3,12 +3,12 @@
  */
 import _ from "lodash"
 
-import { Cell, isTrackingCells, ITEMS_KEY, Observable, runsCreate, typedJSON, type PropInfo } from "spell-kit/util"
-import { registerThing, core } from "spell-lang/core/core"
-import type { CollectionIterationCallback } from "spell-lang/core/collection-other"
-import type { Drawing } from "spell-lang/core/drawing"
-import type { PropCheck } from "spell-lang/core/core.types"
-import { zeroIndexOf } from "spell-lang/core/positions"
+import { Cell, isTrackingCells, ITEMS_KEY, Observable, runsCreate, typedJSON, type PropInfo } from "spell/util"
+import { registerThing, core } from "spell-parser/core/core"
+import type { CollectionIterationCallback } from "spell-parser/core/collection-other"
+import type { Drawing } from "spell-parser/core/drawing"
+import type { PropCheck } from "spell-parser/core/core.types"
+import { zeroIndexOf } from "spell-parser/core/positions"
 
 import { ID_PROP } from "./ids"
 

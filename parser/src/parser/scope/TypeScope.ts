@@ -1,5 +1,5 @@
-import { snakeCase, type PropRule } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { snakeCase, type PropRule } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { BlockScope } from "./BlockScope"
 

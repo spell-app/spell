@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * Files of one project, parsed in order into one `scope`, so an edit to one file re-parses as little as possible

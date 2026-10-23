@@ -1,7 +1,7 @@
-import { P } from "spell-lang/parser"
-import { MD } from "spell-lang/markdown"
+import { P } from "spell-parser/parser"
+import { MD } from "spell-parser/markdown"
 
-import "spell-lang/parser/rulex"
+import "spell-parser/parser/rulex"
 
 /**
  * A `P.Parser` for markdown:  `MD.MarkdownTokenizer`, rules written in rulex.

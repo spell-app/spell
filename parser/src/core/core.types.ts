@@ -16,7 +16,7 @@ import type { carryMethods } from "./carry"
 import type { classesMethods } from "./classes"
 import type { deprecatedMethods } from "./deprecated"
 import type { messageMethods } from "./messages"
-import type { PropRule } from "spell-kit/util"
+import type { PropRule } from "spell/util"
 
 // ## Importing core
 

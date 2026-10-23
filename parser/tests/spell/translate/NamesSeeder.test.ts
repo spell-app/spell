@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-lang/spell"
-import { parseSpellProject } from "spell-lang/spell/test"
-import { NamesSeeder } from "spell-lang/spell/translate/NamesSeeder"
-import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
+import { SP } from "spell-parser/spell"
+import { parseSpellProject } from "spell-parser/spell/test"
+import { NamesSeeder } from "spell-parser/spell/translate/NamesSeeder"
+import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
 
 /**
  * Seeding a names dictionary from a translation a person made (epic `spanish` P24):  `--seed`.

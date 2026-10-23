@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { describeWarnings, parseSpellProject } from "spell-lang/spell/test"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { describeWarnings, parseSpellProject } from "spell-parser/spell/test"
 
 /**
  * Spell's words for one thing, by its name or its place (epic `drawable-thing` P19):

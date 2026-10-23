@@ -1,5 +1,5 @@
-import { assert, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { assert, proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `indent` rule:  indent whitespace specifically, e.g. leading spaces/tabs at start of a line.

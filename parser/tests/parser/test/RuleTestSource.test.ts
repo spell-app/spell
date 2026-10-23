@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { RuleTestSource } from "spell-lang/parser/test/RuleTestSource"
+import { RuleTestSource } from "spell-parser/parser/test/RuleTestSource"
 
 /** A rule module's source, its tests in both shapes. */
 const SOURCE = [

@@ -1,10 +1,10 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { MemberReadExpression } from "spell-lang/spell/rules/properties"
-import { NewThing } from "spell-lang/spell/rules/classes"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { MemberReadExpression } from "spell-parser/spell/rules/properties"
+import { NewThing } from "spell-parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
  * `assignment` rule:  assignment, via any of 4 equivalent surface forms:

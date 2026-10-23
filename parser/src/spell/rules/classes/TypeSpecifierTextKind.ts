@@ -1,7 +1,7 @@
-import { proto, type PropRule } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority } from "spell-lang/spell/rules/rules.types"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { proto, type PropRule } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority } from "spell-parser/spell/rules/rules.types"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 /**
  * `type_specifier_text_kind` rule:  makes a property text that must be a web address or an email address.

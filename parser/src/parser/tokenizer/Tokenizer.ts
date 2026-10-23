@@ -1,5 +1,5 @@
-import { Logger } from "spell-kit/util/spell/Logger"
-import { P } from "spell-lang/parser"
+import { Logger } from "spell/util/spell/Logger"
+import { P } from "spell-parser/parser"
 
 /**
  * Tokenizer class for parsing text into a stream of tokens.

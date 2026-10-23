@@ -1,13 +1,13 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { thing } from "spell-kit/util"
-import { Thing, List } from "spell-lang/core"
+import { thing } from "spell/util"
+import { Thing, List } from "spell-parser/core"
 
 /**
  * Construction order:  `create()` runs exactly once per instance, and never before a field it sets is initialized.
  * - `Thing` / `List` call `create()` from their own constructor, before any subclass field initializer.
  * - `@thing` moves that call after the decorated class's fields;  `runsCreate()` keeps it to one call.
- * - See `Thing.create()` and `@thing` in `spell-kit/util/spell/spellDecorators`.
+ * - See `Thing.create()` and `@thing` in `spell/util/spell/spellDecorators`.
  */
 
 ////////////////

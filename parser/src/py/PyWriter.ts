@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 import { PyBaseWriter } from "./PyBaseWriter"
 import * as pyText from "./pyText"
 

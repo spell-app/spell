@@ -9,9 +9,9 @@
  *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`,
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
- *   importing this barrel (or anything that transitively imports `spell-lang/core`) is what triggers the assembly.
+ *   importing this barrel (or anything that transitively imports `spell-parser/core`) is what triggers the assembly.
  * - `Core` (the assembled TYPE) is exported separately as a `type`-only export, so it costs nothing at runtime.
- * - NOTE: `SC` ~== `spell-lang/core`, this sub-system's self-namespace.
+ * - NOTE: `SC` ~== `spell-parser/core`, this sub-system's self-namespace.
  * - NOTE: `classes/` (`Thing`, `List`, ...) is flattened in via `export * from "./classes"`,
  *   rather than getting its own namespace.
  */
@@ -49,9 +49,9 @@ export { positionOf } from "./collection-core"
 export { position, spellPosition, endPosition, withSpellPositions } from "./positions"
 export { itemOf } from "./deprecated"
 // The decorators compiled TypeScript (`ts/solid`) writes, e.g. `@prop({ oneOf: RANKS }) accessor rank!: Rank`:
-// `spell-kit/util`'s shared reactive ones, spell's `@thing`, and `@drawn` (`drawing.ts`).
+// `spell/util`'s shared reactive ones, spell's `@thing`, and `@drawn` (`drawing.ts`).
 // Compiled JavaScript has none.
-export { prop, state, derived, thing } from "spell-kit/util"
+export { prop, state, derived, thing } from "spell/util"
 export { drawn } from "./drawing"
 // The tag a drawable type's `<css>` block compiles to:  its style sheet, as text (epic `drawable-thing` P10).
 export { elementTagFor, css, type ElementDefiner, type ElementApi } from "./elements"

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, Thing, List, App } from "spell-lang/core"
+import { core, Thing, List, App } from "spell-parser/core"
 
 /**
  * `core.fromJSON()` (epic `output-targets`, P15, Q49):  a spell object's JSON read back as what it was.

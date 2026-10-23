@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach, vi } from "vite-plus/test"
 
-import { List, Thing } from "spell-lang/core"
-import { isPlainValue, SpellConsole } from "spell-lang/core/console"
+import { List, Thing } from "spell-parser/core"
+import { isPlainValue, SpellConsole } from "spell-parser/core/console"
 
 afterEach(() => {
   vi.restoreAllMocks()

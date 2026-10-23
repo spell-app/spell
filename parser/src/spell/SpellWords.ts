@@ -1,7 +1,7 @@
 import JSON5 from "json5"
 
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * A project's words:  spell's wording of each member of its types, by the name its compiled code uses --

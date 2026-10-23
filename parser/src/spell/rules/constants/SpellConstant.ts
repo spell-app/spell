@@ -1,6 +1,6 @@
-import { NONE, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { NONE, proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * Base pattern rule for matching a single-word constant identifier (alpha-numeric, dashes/underscores).

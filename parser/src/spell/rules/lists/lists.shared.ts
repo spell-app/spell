@@ -1,8 +1,8 @@
 /**
  * The `lists` rule module's shared types and helpers:  what several of its rule files use.
  */
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 ////////////////
 // ## Shared types

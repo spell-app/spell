@@ -664,7 +664,7 @@ A kind that says so is saved in a file of its own.
   - A key in the language pack's `parserMessages` ([English's](languages/en/parserMessages.ts),
     [Spanish's](languages/es/parserMessages.ts)), read with `SP.Language.of(scope).parserMessage(key, params)`.
   - Its examples are the language's spell:  `poner X a una nueva lista de texto`.
-  - A key a pack lacks reads English;  `spell lang packs check` reports it.
+  - A key a pack lacks reads English;  `spell parser packs check` reports it.
   - Rule code never writes a sentence of its own:  `noEnglishInRules.test.ts` checks.
 - Refused statements:  a `parse()` which understood a statement, but mustn't take it.
   - It returns `SpellStatement.refuse(match, message)`.
@@ -1283,7 +1283,7 @@ A kind that says so is saved in a file of its own.
     - in spell-app's `spaces/@spell/<group>/<Project>/`
   - the test projects, committed and frozen, beside them:
     - `@spell/test/...`
-    - in spell-app's `spaces/@spell/test/<Project>/` (spell-lang's `tests/spaces/` until epic `spanish` P18)
+    - in spell-app's `spaces/@spell/test/<Project>/` (spell-parser's `tests/spaces/` until epic `spanish` P18)
   - Owen's own, in spell.spaces, outside git:
     - `owen@spell/...`
     - in `<main checkout>/../spell.spaces/@spell/owen@/<project>/`
@@ -1582,7 +1582,7 @@ A kind that says so is saved in a file of its own.
   - declaration edit near the START of the first file:  ~110ms (~= a full parse)
 - spell-app's [IncrementalProject.test.ts](../../../spell-app/tests/spell/parserTests/IncrementalProject.test.ts) edits lines of every Solitaire
   file, on ONE project.
-  - Over projects written inline:  spell-lang's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).
+  - Over projects written inline:  spell-parser's own [IncrementalProject.test.ts](../../tests/spell/parserTests/IncrementalProject.test.ts).
   - every line, with `INCREMENTAL_FULL=1`
   - After each edit, and after undoing it, it checks output, errors and token positions against a full parse.
 - spell-app's [ParseJournal.test.ts](../../../spell-app/tests/spell/parserTests/ParseJournal.test.ts) checks a whole project's rewind / replay.
@@ -1600,7 +1600,7 @@ A kind that says so is saved in a file of its own.
     - `ts/lib`, by `P.LibraryWriter` (epic `people-and-orgs` P3):
       a LIBRARY, the project's classes alone, for other code to import
       - one TypeScript file, `<Project>.lib.ts`, its own types, checked by `tsc`
-      - no drawing, none of its top-level steps, the core with no Solid (`spell-lang/core/model`)
+      - no drawing, none of its top-level steps, the core with no Solid (`spell-parser/core/model`)
   - Each writes a file of its own, e.g. `Solitaire.spell.py`:  see each target's `suffix`.
   - A project lists the others it wants in its project file, e.g. `"targets": ["ts/solid", "py"]`.
   - What every program's writer shares is `P.ProgramWriter`, which the javascript and Python writers extend.

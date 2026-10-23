@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `type_specifier_yes_or_no` rule:  `as yes or no` / `as either true or false` --

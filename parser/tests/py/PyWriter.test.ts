@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
-import { PY } from "spell-lang/py"
+import { P } from "spell-parser/parser"
+import { PY } from "spell-parser/py"
 
 /**
  * `PyWriter` (epic `python-target`):  which AST classes it writes so far, and Python's punctuation.

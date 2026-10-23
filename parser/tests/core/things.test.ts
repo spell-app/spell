@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach } from "vite-plus/test"
 
-import { observe } from "spell-kit/util"
-import { core, Thing, List, App } from "spell-lang/core"
+import { observe } from "spell/util"
+import { core, Thing, List, App } from "spell-parser/core"
 
 /**
  * A thing, as a program declares one:  `a card is a thing`, with properties compiled as spell compiles them.

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import type { List } from "spell-lang/core"
-import { runSpell } from "spell-lang/spell/test"
+import type { List } from "spell-parser/core"
+import { runSpell } from "spell-parser/spell/test"
 
 /**
  * Membership and guards END TO END:  spell compiled, then RUN on `core`'s source.

@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { Writer } from "./Writer"
 

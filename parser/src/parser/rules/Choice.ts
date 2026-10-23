@@ -1,5 +1,5 @@
-import { itemsWithHighest } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { itemsWithHighest } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { Rule } from "./Rule"
 

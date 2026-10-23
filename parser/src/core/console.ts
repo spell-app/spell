@@ -1,4 +1,4 @@
-import { Observable, prop } from "spell-kit/util"
+import { Observable, prop } from "spell/util"
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
 

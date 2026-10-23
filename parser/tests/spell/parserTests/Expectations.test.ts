@@ -1,11 +1,11 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { proto } from "spell-kit/util"
-import { P, Parser, Tokenizer, WhitespacePolicy } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { proto } from "spell/util"
+import { P, Parser, Tokenizer, WhitespacePolicy } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 // These tests define rules with rulex `syntax`, so they must opt into the rulex parser.
-import "spell-lang/parser/rulex"
+import "spell-parser/parser/rulex"
 
 /** Each expectation as `rulex syntax`, `+` in front if it only `continues` something complete. */
 function describeAll(expectations: P.Expectation[]): string[] {

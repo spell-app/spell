@@ -55,7 +55,7 @@ Spell compiles the line to the same call every time, and that call is tested onc
 expected draws.
 
 [The parser](README-parser.md) reads the English, [a writer](README-targets.md) turns it into code,
-and this is what the code calls:  `spell-lang/core`, one of [spell-lang's](README.md) six folders.
+and this is what the code calls:  `spell-parser/core`, one of [spell-parser's](README.md) six folders.
 It's ONE object, `core`, of 143 helpers (`core.getRange(1, 100)`, `core.randomItemOf(deck)`,
 `core.move(card, tableau)` ...), and the five classes a program's types extend.
 Every `core.` in compiled JavaScript is a call into it;  compiled Python's go to its twin, `spell_core`.
@@ -90,8 +90,8 @@ spell lint try/deal
 
 - Without `--seed`, each run draws differently.
 - A seed is a whole number from 1 to 2147483646 (`spell help run`).
-- No checkout yet:  [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero), then `spell` on your PATH
-  ([README-cli](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up)).
+- No checkout yet:  [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then `spell` on your PATH
+  ([README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up)).
 
 </details>
 
@@ -158,7 +158,7 @@ reading it means knowing the core's names, and the Core Reference lists all 143,
 ## A type is a class, and the class is the core's
 
 The other half of the import is classes.
-Here's the start of the card from [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md), in the outline style:
+Here's the start of the card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:
 
 ```spell
 a "card" is a drawable thing:
@@ -228,7 +228,7 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | seeded random | `core.seedRandom(n)`:  everything random after it repeats, run after run | [ParkMiller.ts](src/core/ParkMiller.ts) |
 | the console, tests | `print`, `expect`, `to test ...`, and assertions | [console.ts](src/core/console.ts), [assert.ts](src/core/assert.ts), [tests.ts](src/core/tests.ts) |
 | messages | what the core says to the person running a program, in the program's language:  English built in, another language's from the project's words file | [messages.ts](src/core/messages.ts) |
-| the model alone | the core without drawing, for libraries:  `spell-lang/core/model` | [model.ts](src/core/model.ts) |
+| the model alone | the core without drawing, for libraries:  `spell-parser/core/model` | [model.ts](src/core/model.ts) |
 | the method list | every name on the core, for another language's core to match;  and the script that writes it | [coreDeclarations.ts](src/core/coreDeclarations.ts), [writeCoreDeclarations.ts](src/core/writeCoreDeclarations.ts) |
 
 Its tests are in [tests/core/](tests/core/), at the same paths as the code.
@@ -265,7 +265,7 @@ If you write Solid 2, you'd bet on `red` twice.
 Solid 2 stages a write:  a read right after it sees the OLD value, until the next flush.
 Spell can't work that way, because it's imperative:  `set x to 1` then `print x` must print 1.
 
-So a thing's properties aren't Solid's signals but cells, from [the kit's util](https://github.com/spell-app/spell-kit/blob/main/README-util.md):
+So a thing's properties aren't Solid's signals but cells, from [the kit's util](https://github.com/spell-app/spell/blob/main/README-util.md):
 small reactive values, read and written synchronously.
 - Drawing still follows:  Solid redraws only what read a changed cell, on its own schedule, so ten writes redraw once.
 - A write of the value already there (`===`) tells nobody.
@@ -408,7 +408,7 @@ flowchart LR
     a1["a &lt;spell-app&gt;"] --> r1["spell-runtime.js<br/>its own core"]
     a2["another &lt;spell-app&gt;"] --> r2["spell-runtime.js<br/>its own core"]
   end
-  ed["the editor, the parser, the language"] -. "types only" .-> types["spell-lang/core/core.types"]
+  ed["the editor, the parser, the language"] -. "types only" .-> types["spell-parser/core/core.types"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
@@ -427,19 +427,19 @@ with its own console, event listeners, running state and mount point.
 So a program never runs on whatever else the page loaded, nor on another app's core.
 
 Everything else, the editor, the parser and the language among them, imports only the core's TYPES
-(`import type` from `spell-lang/core/core.types`), which erase to nothing.
+(`import type` from `spell-parser/core/core.types`), which erase to nothing.
 Two tests in `spell-app` hold that line, [element.build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/runner/element.build.test.ts)
 and [build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/build.test.ts):
 import the core's code anywhere else, and it lands in a shared chunk, or loads twice.
 
 Three more rules, each with its reason:
-- `spell-lang/core/model` is the one other entry:  the core without drawing, so no Solid and no running program's
+- `spell-parser/core/model` is the one other entry:  the core without drawing, so no Solid and no running program's
   things.
   A compiled TypeScript library (the `ts/lib` target) imports it, and so may the server and the app:
   a library's things are plain data, and belong to no program.
 - The core never touches `document`, because an app runs in a shadow root:
   `core.appRoot` is where it mounts, and `core.domRoot()` where it looks elements up.
-- Of Spell's own code it imports only the kit's util, `spell-kit/util`:  never the parser, the language or Spell UI.
+- Of Spell's own code it imports only the kit's util, `spell/util`:  never the parser, the language or Spell UI.
 
 Where `@spell/core` points, by where the program runs:
 
@@ -451,7 +451,7 @@ Where `@spell/core` points, by where the program runs:
 
 ## Working on it
 
-At the root of `spell-lang`:
+At the root of `spell-parser`:
 
 ```sh
 yarn vp test run --project core          # the TypeScript core's tests:  28 files in tests/core/
@@ -468,7 +468,7 @@ yarn core:gen:declarations               # rewrite the method list, after adding
 
 | File | What it is | Rewritten by |
 | --- | --- | --- |
-| [core.declarations.json5](src/core/core.declarations.json5) | the core's method list:  13 names it provides, 155 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at the root of `spell-lang` |
+| [core.declarations.json5](src/core/core.declarations.json5) | the core's method list:  13 names it provides, 155 statements, each with its module and a description from its docstring | `yarn core:gen:declarations`, at the root of `spell-parser` |
 | [core.scopes.js](src/core/core.scopes.js) | the built-in types' docs, for pages with no parser | `yarn lsp:scopes --builtins`, in `spell-app` |
 
 - A test fails until you regenerate the method list after adding, renaming or removing anything on `core`;
@@ -496,5 +496,5 @@ These guides need a checkout with the content folder beside it, and the page ser
   Python half
 - [README-spell](README-spell.md):  the sentences behind each call, from types and lists to saving by id
 - [core's AGENTS.md](src/core/AGENTS.md):  the rules for changing the core, in full
-- [the kit's README-util](https://github.com/spell-app/spell-kit/blob/main/README-util.md):  the cells under every thing's properties
+- [the kit's README-util](https://github.com/spell-app/spell/blob/main/README-util.md):  the cells under every thing's properties
 - [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  the runner that gives each app its own copy

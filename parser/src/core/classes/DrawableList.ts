@@ -1,7 +1,7 @@
 import h from "@solidjs/h"
 
-import type { Drawing } from "spell-lang/core/drawing"
-import { core } from "spell-lang/core/core"
+import type { Drawing } from "spell-parser/core/drawing"
+import { core } from "spell-parser/core/core"
 // Import directly to avoid circular import
 import { List } from "./List"
 

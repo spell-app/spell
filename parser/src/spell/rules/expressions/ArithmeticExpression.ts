@@ -1,4 +1,4 @@
-import { proto } from "spell-kit/util"
+import { proto } from "spell/util"
 import { CompoundExpression } from "./CompoundExpression"
 import { Precedence } from "./expressions.shared"
 

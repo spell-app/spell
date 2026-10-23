@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { type P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { parseSpellProject } from "spell-lang/spell/test"
+import { type P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { parseSpellProject } from "spell-parser/spell/test"
 
 /**
  * LEDGER of names of several words holding one of spell's grammar words (epic `spanish` P14):

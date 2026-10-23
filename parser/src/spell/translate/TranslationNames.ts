@@ -1,5 +1,5 @@
-import { P } from "spell-lang/parser"
-import type { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import type { SP } from "spell-parser/spell"
 import type { MissingName, NamesData, NamesKind, TranslatedType } from "./translate.types"
 
 /**

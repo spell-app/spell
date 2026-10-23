@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority, declaredPrefix } from "spell-lang/spell/rules/rules.types"
-import { getKnownType } from "spell-lang/spell/rules/types"
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority, declaredPrefix } from "spell-parser/spell/rules/rules.types"
+import { getKnownType } from "spell-parser/spell/rules/types"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `class_member` rule:  `{type} {member words}` -- a class variable of a known type, e.g.:

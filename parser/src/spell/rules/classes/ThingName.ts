@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `thing_name` rule:  the name of one thing, written bare after its type (epic `drawable-thing` P19).

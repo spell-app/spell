@@ -1,5 +1,5 @@
 import { describe, test, expect, expectTypeOf, beforeEach, vi } from "vite-plus/test"
-import { core, assert, positionOf, List, Thing } from "spell-lang/core"
+import { core, assert, positionOf, List, Thing } from "spell-parser/core"
 
 // Wrap `assert.failed` for each test
 beforeEach(() => {

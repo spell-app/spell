@@ -11,9 +11,9 @@
  *   - The page knows them once Spanish is on:  `<ui-root lang="es">` defines every component as `es-*` too.
  *   - So spell needs none of Spell UI's Spanish words, which it can't import.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 import { SPELL_ATTRIBUTE_WORDS, SPELL_JSX_MEANINGS, SPELL_TAG_WORDS } from "./JSX.shared"
 import { MarkdownBlock } from "./MarkdownBlock"

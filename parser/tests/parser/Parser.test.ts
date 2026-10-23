@@ -4,10 +4,10 @@
 //
 
 import { describe, test, expect } from "vite-plus/test"
-import { proto } from "spell-kit/util"
-import { P, Parser, ParserError, Rule, type RuleConstructor } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P, Parser, ParserError, Rule, type RuleConstructor } from "spell-parser/parser"
 // These tests define rules with rulex `syntax`, so they must opt into the rulex parser.
-import "spell-lang/parser/rulex"
+import "spell-parser/parser/rulex"
 
 describe("addRule() and rules", () => {
   test("parser.rules works when no rules are defined", () => {

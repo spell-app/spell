@@ -5,8 +5,8 @@
  * - Registered in the same order as `async.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
+import { SpellParser } from "spell-parser/spell/SpellParser"
+import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
 
 import { Await } from "./Await"
 import { CheckProcess } from "./CheckProcess"

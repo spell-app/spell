@@ -1,5 +1,5 @@
-import { drawableAttributeFor, elementTagFor } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { drawableAttributeFor, elementTagFor } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { JSWriter } from "./JSWriter"
 import * as jsText from "./jsText"
@@ -52,7 +52,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   `class CardElement extends SpellElement<Card>`,
  *   handed to the page with `core.useElement(Card, CardElement)`.
  * - Spell's own built-ins stay `core` calls, so both targets print the same:
- *   `getItemAt(rank, 1)` counts from 1 (the core contract, `contract.test.ts` in `spell-lang/cli`).
+ *   `getItemAt(rank, 1)` counts from 1 (the core contract, `contract.test.ts` in `spell-parser/cli`).
  * - Sees the whole project first (`forProject()`, a `P.WriterProject`).
  *   `TSWriter.instance` alone knows nothing of it, e.g. writing one node in a test.
  * - Checked by `tsc` against `@spell/core`'s types:  see spell-app's `typescript.test.ts`, on the frozen test projects.
@@ -875,7 +875,7 @@ export class TSWriter extends JSWriter {
   /**
    * An attribute for each property drawable class `node` declares itself, as its element's vocabulary says it:
    * `{ name: "rank", kind: "string", description: "Its rank." }`.
-   * - Named as the page names them:  see `drawableAttributeFor()` in `spell-kit/util`.
+   * - Named as the page names them:  see `drawableAttributeFor()` in `spell/util`.
    * - Not a super-type's, nor the list holding it (`a card belongs to one pile`):  the page adds those.
    * - None for a name the page or Spell UI already means something by, e.g. `id`.
    */

@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { Negatable } from "spell-lang/spell/rules/expressions"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { Negatable } from "spell-parser/spell/rules/expressions"
 
 /**
  * `start_process` rule:  start a conceptual animation or process, e.g. `start animation dealing`.

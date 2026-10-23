@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 /**
  * Take the link reference definitions (`[label]: url "title"`) off the front of every paragraph in `doc`, into a

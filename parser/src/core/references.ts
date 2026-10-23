@@ -19,13 +19,13 @@
  *   `<solitaire-card id="queen-of-spades">` -- see `elementIdFor()`.
  * - WHERE they look:  the running program's things, or what the caller hands `searchThings()` instead
  *   (epic `people-and-orgs` P9, Q44).
- *   - So a library's code finds things by name too, under `spell-lang/core/model`, which has no running program:
+ *   - So a library's code finds things by name too, under `spell-parser/core/model`, which has no running program:
  *     the people store searches its people and orgs, `Person#owen`.
- * - Part of `core`:  imported by `spell-lang/core`'s barrel, and by `spell-lang/core/model`, for its side effect.
+ * - Part of `core`:  imported by `spell-parser/core`'s barrel, and by `spell-parser/core/model`, for its side effect.
  *   - The model has no drawing, so no `elementIdFor()`:  it says so if it's called there.
  */
 
-import { untrackCells } from "spell-kit/util"
+import { untrackCells } from "spell/util"
 
 import { programThings, core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -38,7 +38,7 @@ export const referencesMethods = defineCoreModule({
    * Look things up in `things` from now on, not in the running program's.
    * - Returns what was searched before, to put back.
    * - `undefined`:  the running program's things again.
-   * - What a library's code needs under `spell-lang/core/model`, which has no running program, e.g. the people store's:
+   * - What a library's code needs under `spell-parser/core/model`, which has no running program, e.g. the people store's:
    *
    *   ```ts
    *   const before = core.searchThings({ all: () => people, classNamed: (name) => classes[name] })
@@ -171,7 +171,7 @@ export const referencesMethods = defineCoreModule({
   elementIdFor(thing: unknown): string | undefined {
     if (!thing || typeof thing !== "object") return undefined
     if (!programThings())
-      throw new Error("elementIdFor() needs drawing:  import spell-lang/core, not spell-lang/core/model")
+      throw new Error("elementIdFor() needs drawing:  import spell-parser/core, not spell-parser/core/model")
     const name = idNameOf(thing)
     if (!name) return undefined
     const kept = ELEMENT_IDS.get(thing)
@@ -200,7 +200,7 @@ export type ThingsToSearch = {
 /** What `searchThings()` was last given:  `undefined` for the running program's things. */
 let searched: ThingsToSearch | undefined
 
-/** Nothing to search:  under `spell-lang/core/model`, before `searchThings()`. */
+/** Nothing to search:  under `spell-parser/core/model`, before `searchThings()`. */
 const NOTHING: ThingsToSearch = { all: () => [], classNamed: () => undefined }
 
 /** What the lookups search now:  `searchThings()`'s, else the running program's things, else nothing. */

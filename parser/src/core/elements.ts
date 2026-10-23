@@ -10,10 +10,10 @@
  * - Compiled TypeScript also writes each type's element class, and hands it over (P10):
  *   `core.useElement(Card, CardElement)`.
  *   The page builds the tag on that class.
- * - Part of `core`:  imported by `spell-lang/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
  */
 
-import { elementTagFor, schemaOf, type Schema } from "spell-kit/util"
+import { elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -282,7 +282,7 @@ function isDrawableClass(value: unknown): value is Function {
 export type ElementDefiner = (tag: string, Class: Function) => void
 
 /** Where a drawable class keeps its tag. */
-const ELEMENT_TAG = Symbol.for("spell-lang:element-tag")
+const ELEMENT_TAG = Symbol.for("spell-parser:element-tag")
 
 /** Where a drawable class keeps the element class compiled TypeScript handed for it -- see `useElement()`. */
-const ELEMENT_CLASS = Symbol.for("spell-lang:element-class")
+const ELEMENT_CLASS = Symbol.for("spell-parser:element-class")

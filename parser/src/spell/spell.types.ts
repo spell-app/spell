@@ -3,11 +3,11 @@
  * - `import type` only, per `AGENTS.md`.
  * - NOTE: `rules/Statement.ts` imports `BODY_KEYWORDS` from here directly,
  *   so this MUST stay free of runtime imports.
- * - The `spell-lang/parser/rulex` registration is in `SpellParser.ts`, which every rule module imports anyway.
+ * - The `spell-parser/parser/rulex` registration is in `SpellParser.ts`, which every rule module imports anyway.
  */
 
-import type { PropRule } from "spell-kit/util"
-import type { P } from "spell-lang/parser"
+import type { PropRule } from "spell/util"
+import type { P } from "spell-parser/parser"
 import type { SpellLocation } from "./SpellLocation"
 import type { SpellFile } from "./SpellFile"
 import type { SpellJSFile } from "./SpellJSFile"
@@ -479,7 +479,7 @@ export type ReadAsTemplate = {
 /**
  * Semver of the spell LANGUAGE and its compiler -- stamped on every project's declarations as `spellVersion`.
  * - Set by hand, NOT from `package.json`:
- *   the app's version (`PACKAGE_VERSION` in `spell-kit/util`) changes for reasons
+ *   the app's version (`PACKAGE_VERSION` in `spell/util`) changes for reasons
  *   that don't touch what compiled projects can read.
  * - Bump the MAJOR when declarations' shape, or generated-name mangling (e.g. `frobnicate_$thing`), changes:
  *   declarations from another major are refused.

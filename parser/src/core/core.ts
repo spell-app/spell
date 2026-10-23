@@ -9,9 +9,9 @@
 import _isArrayLike from "lodash/isArrayLike"
 import isEqual from "lodash/isEqual"
 
-import { brokenRule, flushCells, ruleWarning, withoutCreate } from "spell-kit/util"
+import { brokenRule, flushCells, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
-// `spell-lang/core/model` loads this file, and must not load drawing (Solid)
+// `spell-parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
 import { defineCoreModule, type PropCheck, type Core } from "./core.types"
 import { ParkMiller } from "./ParkMiller"
@@ -53,7 +53,7 @@ export const core = new (class core {})() as Core
 
 /**
  * The running program's things, `core.things` (`things.ts`), for the Thing Explorer.
- * - `undefined` under `spell-lang/core/model`, which leaves them out:
+ * - `undefined` under `spell-parser/core/model`, which leaves them out:
  *   a thing made there, e.g. a `Person` the server loads, belongs to no running program.
  * - So code the model loads asks here, never `core.things` itself.
  */
@@ -76,7 +76,7 @@ export const coreMethods = defineCoreModule({
 
   /**
    * Settle everything that follows spell state NOW:  pending derived checks, then the host's Solid.
-   * - See `flushCells()` in `spell-kit/util`.
+   * - See `flushCells()` in `spell/util`.
    * - Spell state itself never needs it:  a read right after a write sees the write.
    *   It's for what DRAWS it:  a test asserting on the DOM, imperative code measuring it.
    * - NEVER Solid's `flush()` directly:  a reader of only a derived value hears of a change on a microtask.

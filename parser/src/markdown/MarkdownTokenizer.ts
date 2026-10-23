@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * Markdown's tokenizer:  words, one symbol per other character, newlines and indents -- nothing else.

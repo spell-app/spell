@@ -1,6 +1,6 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { TypeDeclaration } from "./TypeDeclaration"
 
 /**

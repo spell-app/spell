@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 describe("toHTML() options", () => {
   it("GFM autolinks:  on by default, off on request", () => {

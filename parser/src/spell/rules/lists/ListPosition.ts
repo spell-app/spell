@@ -1,9 +1,9 @@
-import { proto, upperFirst } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { proto, upperFirst } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `list_position` rule:  return position of an item in a list,

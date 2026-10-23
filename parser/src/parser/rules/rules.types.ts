@@ -1,4 +1,4 @@
-import type { P } from "spell-lang/parser"
+import type { P } from "spell-parser/parser"
 
 // ## Rules
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { SP } from "spell-lang/spell"
+import { SP } from "spell-parser/spell"
 
 /** Pieces of `text` coloured `kind`, by `parser` (English's by default). */
 function coloured(text: string, kind: string, parser?: SP.SpellParser): string[] {

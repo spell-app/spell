@@ -2,8 +2,8 @@
  * Shared by the `properties` rule files:  the words a member's name stops at,
  * and how the `its_*` rules read `it`.
  */
-import { NONE } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { NONE } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /** What `its_*` rules stash on their matches. */
 export type ItsMatchData = {

@@ -1,10 +1,10 @@
-import { JSON5File, TaskList, Task, getDier } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { PY } from "spell-lang/py"
-// Import directly, NOT through the `spell-lang/core` barrel:  a project MUST NOT load `core` itself --
+import { JSON5File, TaskList, Task, getDier } from "spell/util"
+import { P } from "spell-parser/parser"
+import { PY } from "spell-parser/py"
+// Import directly, NOT through the `spell-parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
-import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell-lang/core/core.types"
-import { SP } from "spell-lang/spell"
+import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell-parser/core/core.types"
+import { SP } from "spell-parser/spell"
 
 /**
  * One spell project, e.g. `owen@spell/myProject`:  its files, and reading, compiling and saving them.

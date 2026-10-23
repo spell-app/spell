@@ -1,5 +1,5 @@
 {
-  // spell-lang's tests:  node's settings (`tsconfig.node.json`), over this folder
+  // spell-parser's tests:  node's settings (`tsconfig.node.json`), over this folder
   // - NOT `spaces/`:  the frozen test projects, spell's compiled output, checked by spell's own tests
   // - NOT `py/core/`:  `spell_core`'s pytest tests
   "extends": "../tsconfig.node.json",

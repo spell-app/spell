@@ -1,6 +1,6 @@
 import { describe, test, expect, afterEach } from "vite-plus/test"
 
-import { core, Thing, Drawable, DrawableList, css, elementTagFor } from "spell-lang/core"
+import { core, Thing, Drawable, DrawableList, css, elementTagFor } from "spell-parser/core"
 
 /** A drawable class's element:  its tag, named here, defined by the page's `elementDefiner`. */
 describe("drawable things' elements", () => {

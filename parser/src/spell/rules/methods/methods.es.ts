@@ -9,9 +9,9 @@
  *     `moverAPile`, where English's is `moveToPile`.
  *   - A parse error quotes the line as written, in Spanish.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Synonyms, Wording } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
+import { Synonyms, Wording } from "spell-parser/spell/rules/expressions"
 
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"

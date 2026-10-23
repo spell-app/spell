@@ -2,18 +2,19 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { core } from "spell-lang/core"
-import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "spell-lang/core/coreDeclarations"
+import { core } from "spell-parser/core"
+import { coreDeclarations, docsIn, paramNamesOf, unlistedCoreNames } from "spell-parser/core/coreDeclarations"
 
 /** Where `yarn core:gen:declarations` writes the core's method list. */
 const DECLARATIONS_FILE = resolve(import.meta.dirname, "../../src/core/core.declarations.json5")
 
 describe("the core's method list, core.declarations.json5", () => {
-  test("is up to date with the core:  if not, run `yarn core:gen:declarations` in spell-lang", () => {
+  test("is up to date with the core:  if not, run `yarn core:gen:declarations` in spell-parser", () => {
     const written = JSON.parse(readFileSync(DECLARATIONS_FILE, "utf8")) as unknown
-    expect(written, "core.declarations.json5 is out of date:  run `yarn core:gen:declarations` in spell-lang").toEqual(
-      coreDeclarations()
-    )
+    expect(
+      written,
+      "core.declarations.json5 is out of date:  run `yarn core:gen:declarations` in spell-parser"
+    ).toEqual(coreDeclarations())
   })
 
   test("lists every name on core, except old names and the core's own `_` helpers", () => {

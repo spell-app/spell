@@ -36,7 +36,7 @@ _Solitario open in the editor, in a Spanish browser:  the program, the game, and
 ## Try it
 
 You need the kit's checkout with its child repos, and `spell` on your `PATH`:
-the kit's [setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero) does both.
+the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) does both.
 
 **Run Solitario's tests.**
 They're Solitaire's six, in Spanish:
@@ -324,11 +324,11 @@ src/spell/rules/<module>/
 ### Keeping the two in step
 
 A new English rule must never leave Spanish behind without anyone noticing.
-`spell lang packs check` compares each pack with English, module by module:
+`spell parser packs check` compares each pack with English, module by module:
 a rule missing, out of order, or with no syntax or tests, and the word tables.
 
 ```sh
-spell lang packs check es
+spell parser packs check es
 ```
 
 <details>
@@ -340,11 +340,11 @@ Spanish (es):  complete, 19 modules
 
 </details>
 
-- It exits 1 on anything missing, and runs in spell-lang's tests too.
-- `spell lang packs fix es` writes a stub for each missing registration, the English copied and marked to translate;
+- It exits 1 on anything missing, and runs in spell-parser's tests too.
+- `spell parser packs fix es` writes a stub for each missing registration, the English copied and marked to translate;
   `--ai` asks Claude to draft each one, marked for review.
 - A difference on purpose is marked in the pack's file, `// packs: ok -- why`, so the check passes.
-- Every option:  [the command line's page](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang).
+- Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
 
 ## The edges
 
@@ -393,4 +393,4 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
 - [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
 - [Spell UI's runtime page](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
-- [spell-lang's README](README.md):  the language, its pipeline, and every page of the repo
+- [spell-parser's README](README.md):  the language, its pipeline, and every page of the repo

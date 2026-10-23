@@ -1,4 +1,4 @@
-import { upperFirst } from "spell-kit/util"
+import { upperFirst } from "spell/util"
 
 /**
  * How a human language makes a word singular or plural:  `cards` => `card`, `corazones` => `corazón`.
@@ -90,7 +90,7 @@ export class Inflector {
     const active = Inflector.current ?? Inflector.fallback
     if (!active) {
       throw new TypeError(
-        "Inflector.active:  no language is loaded;  import a language pack (spell's English is `spell-lang/spell`) first"
+        "Inflector.active:  no language is loaded;  import a language pack (spell's English is `spell-parser/spell`) first"
       )
     }
     return active

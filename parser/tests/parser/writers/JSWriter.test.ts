@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * `JSWriter` finds its methods by class NAME (`P.Writer`):  pin that every AST class finds one, so a renamed class or

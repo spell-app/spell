@@ -3,7 +3,7 @@
  * how tightly each operator binds (`Precedence`), what a suffix compiles from (`OperatorOperands`),
  * and what the suffix being parsed follows (`SuffixLeft`).
  */
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * How tightly each operator suffix binds, higher first:  `*` before `+` before `is` before `and`.

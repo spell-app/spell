@@ -1508,7 +1508,7 @@
           "name": "path"
         }
       ],
-      "description": "Given an `object` and a string `path`, walk it to get the leaf value -- see `getPath()` in `spell-kit/util`."
+      "description": "Given an `object` and a string `path`, walk it to get the leaf value -- see `getPath()` in `spell/util`."
     },
     {
       "kind": "method",
@@ -1526,7 +1526,7 @@
           "name": "value"
         }
       ],
-      "description": "Given an `object`, walk `path` and set leaf step to `value` -- see `setPath()` in `spell-kit/util`."
+      "description": "Given an `object`, walk `path` and set leaf step to `value` -- see `setPath()` in `spell/util`."
     },
     {
       "kind": "method",
@@ -1538,7 +1538,7 @@
           "name": "path"
         }
       ],
-      "description": "Split `path` into an array of steps, e.g. `[\"a\", \"b\", 0, \"c\"]` -- see `splitPath()` in `spell-kit/util`."
+      "description": "Split `path` into an array of steps, e.g. `[\"a\", \"b\", 0, \"c\"]` -- see `splitPath()` in `spell/util`."
     },
     {
       "kind": "method",

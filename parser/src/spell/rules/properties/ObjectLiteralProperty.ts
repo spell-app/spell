@@ -1,6 +1,6 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 /**
  * `object_literal_property` rule:  single object-literal property declaration:

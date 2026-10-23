@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/core/` of the `spell-lang` package (`spell-lang/core`).
+when working with code in this folder, `src/core/` of the `spell-parser` package (`spell-parser/core`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- The runtime compiled spell runs on, `spell-lang/core` (`SC`):
+- The runtime compiled spell runs on, `spell-parser/core` (`SC`):
   - the core classes, collections, `Thing` registry
   - console, assertions
   - `core.scopes.js`
@@ -42,8 +42,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Negative positions count from the end either way:  `-1` is the last item.
 - The console sends a DUMP (a thing, a spell list ...) through `core.console.printDump()`:
   the page's console by default, stderr under `spell run`.
-- Depends only on `spell-kit/util`.
-  NEVER import `spell-lang/spell` / `spell-lang/parser`, or anything above.
+- Depends only on `spell/util`.
+  NEVER import `spell-parser/spell` / `spell-parser/parser`, or anything above.
 - Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
   - That's [drawing.ts](drawing.ts):
     - drawing a thing or a list's items:  `drawThing()`, `drawItems()`
@@ -79,28 +79,28 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `referenceFor()`
   - They search the running program's things, or what the caller hands `searchThings()` instead
     (epic `people-and-orgs` P9, Q44).
-    - So a library's code finds `Person#owen` under `spell-lang/core/model` too,
+    - So a library's code finds `Person#owen` under `spell-parser/core/model` too,
       in the people store's people and orgs.
 
 ## Who may value-import it
 
 - ONLY the app's runner entry, [spellRuntime.ts](../../../spell-app/src/app/runner/spellRuntime.ts),
-  may value-import `spell-lang/core`, in every bundle.
+  may value-import `spell-parser/core`, in every bundle.
   - Anything else -- the app, the parser, the language --
     puts it in a shared chunk, or loads a second copy.
   - Programs run on the runtime bundle built from it, `spell-runtime.js`, NEVER the page's own `core`.
     Each runner loads its own copy, so apps on a page don't share one.
   - Everyone else reads only:
-    - its types:  `import type` from `spell-lang/core/core.types`
+    - its types:  `import type` from `spell-parser/core/core.types`
     - or the runtime's own API, e.g. `runtimeConsole()`
   - Pinned by two of app's tests:
     - [element.build.test.ts](../../../spell-app/tests/app/runner/element.build.test.ts)
     - [build.test.ts](../../../spell-app/tests/app/build.test.ts)
-- The ONE other entry:  `spell-lang/core/model` ([model.ts](model.ts), epic `people-and-orgs` P3).
+- The ONE other entry:  `spell-parser/core/model` ([model.ts](model.ts), epic `people-and-orgs` P3).
   - The core with no drawing, so no Solid, and no running program's list of things.
     - References by name are in it all the same, searching what `searchThings()` was given (P9).
   - What a compiled LIBRARY imports, e.g. `people.lib.ts` (the `ts/lib` target).
-    - By its name, `spell-lang/core/model`, through spell-lang's `exports`.
+    - By its name, `spell-parser/core/model`, through spell-parser's `exports`.
   - So the server and the app may value-import it, through a library:
     its things are plain data, belonging to no program, so a copy of its own is fine.
   - Code it loads NEVER imports the barrel, and asks `programThings()` for the running program's things,
@@ -169,7 +169,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `{ "$type": "Card", "rank": "ace" }`
   - a list's adds its items, under `"$items"`, its `ITEMS_KEY`:
     - `{ "$type": "Pile", "name": "stock", "$items": [...] }`
-  - written by `spell-kit/util`'s `typedJSON()`
+  - written by `spell/util`'s `typedJSON()`
   - Neither key is ever a prop:  what the Thing Explorer lists (`keys()`) doesn't have them.
 - `core.fromJSON()` ([json.ts](json.ts)) reads it back, each object as its class.
   - It finds a class by name, `core.things.classNamed()`.
@@ -230,7 +230,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       one file a class, e.g. `Person.schema.json`, in a schemas folder.
     - The code:  cli's `writeSchemas()`.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
-  - In `spell-lang/core/model` too:  the people store checks with it.
+  - In `spell-parser/core/model` too:  the people store checks with it.
 - A PAGE drawing a program that runs elsewhere, e.g. in Python ([page.ts](page.ts), P19):
   - `startPage()`:
     - mirrors the program's state
@@ -259,10 +259,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 As WWOD §12, plus:
 
 - The repo's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
-  (`spell-kit/toolchain/decorators`).
+  (`spell/toolchain/decorators`).
 
 ## Types / Exports
 
 As WWOD §8, plus our self-namespace:
 
-- `SC` ~== `spell-lang/core`
+- `SC` ~== `spell-parser/core`

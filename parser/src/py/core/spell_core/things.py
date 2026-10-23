@@ -21,7 +21,7 @@ card.to_json()  # {"$type": "Card", "rank": "queen"}
 - Unlike the JavaScript core's things, nothing is reactive:
   Python's page (`core.page`) is drawn only when it's written, so it shows each thing as it is then.
 - The classes are known by name as soon as they're defined, so `core.from_json()` can make them again.
-- The twin of the JavaScript core's `Thing` (`classes/Thing.ts`) and `Observable` (`spell-kit/util`).
+- The twin of the JavaScript core's `Thing` (`classes/Thing.ts`) and `Observable` (`spell/util`).
 - Imports `core` only inside functions:  `core.py` imports this module, to build `core`.
 """
 

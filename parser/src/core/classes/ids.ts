@@ -2,11 +2,11 @@
  * Every spell thing's `id`, built in:  what a thing is saved and referred to by (epic `people-and-orgs`, Q9).
  * - `Thing` and `List` each declare it, the same way:  `static { this.declareProp("id", ID_PROP) }`.
  * - A program never declares it:  it's there on every thing, and on every list.
- * - Imports only `spell-kit/util` and lodash:  `Thing.ts` and `List.ts` both import it.
+ * - Imports only `spell/util` and lodash:  `Thing.ts` and `List.ts` both import it.
  */
 import _ from "lodash"
 
-import type { PropInfo } from "spell-kit/util"
+import type { PropInfo } from "spell/util"
 
 /** Characters a made-up id's random part is written in:  base 36, lower case. */
 const ID_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"

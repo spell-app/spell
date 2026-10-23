@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { fillInsAST, parseFillIns } from "spell-lang/spell/rules/core"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { fillInsAST, parseFillIns } from "spell-parser/spell/rules/core"
 // Import directly to avoid circular import
-import { commitStatement } from "spell-lang/spell/rules/Statement"
+import { commitStatement } from "spell-parser/spell/rules/Statement"
 import { SPELL_ATTRIBUTE_WORDS, webWordFor } from "./JSX.shared"
 import { SpellJSXContent } from "./SpellJSXContent"
 

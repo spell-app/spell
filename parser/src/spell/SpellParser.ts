@@ -1,10 +1,10 @@
-import { P } from "spell-lang/parser"
-// Import directly, NOT through the `spell-lang/core` barrel:  the parser MUST NOT load `core` itself.
+import { P } from "spell-parser/parser"
+// Import directly, NOT through the `spell-parser/core` barrel:  the parser MUST NOT load `core` itself.
 // Each runner runs its own copy:  see `spellRuntime.ts`.
-import { SP } from "spell-lang/spell"
+import { SP } from "spell-parser/spell"
 
 // Registers `RulexParser` on `P.Parser.rulexParser` -- MUST load before any rule with a `syntax:` string.
-import "spell-lang/parser/rulex"
+import "spell-parser/parser/rulex"
 
 /**
  * `P.Parser` subclass for the spell language.

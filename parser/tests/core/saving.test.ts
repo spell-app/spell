@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { Loader, parseRef, refText, Saver, core, Thing, List } from "spell-lang/core"
+import { Loader, parseRef, refText, Saver, core, Thing, List } from "spell-parser/core"
 
 /**
  * Things saved by id (`saving.ts`):  written by a `Saver`, read back by a `Loader`.

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { spellParser } from "spell-lang/spell"
+import { spellParser } from "spell-parser/spell"
 
 /**
  * `scope.rules` exists so a scope can hand on the rules it created while parsing:

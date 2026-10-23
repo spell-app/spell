@@ -1,5 +1,5 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * Parse + compile a spell project headlessly, the same way `SpellProject` does in the app:
@@ -17,7 +17,7 @@ import { SP } from "spell-lang/spell"
  *   - A path naming none, `/test.spell`, reads as `parentScope`'s language:  English, unless you pass another's root.
  * - Projects written in the test, inline.
  *   The frozen test projects (`@spell/test`) are spell-app's, read with its `spell-app/spaces/test`:
- *   spell-lang's tests never read a higher repo's files.
+ *   spell-parser's tests never read a higher repo's files.
  */
 export function parseSpellProject(
   files: SpellSourceFile[],

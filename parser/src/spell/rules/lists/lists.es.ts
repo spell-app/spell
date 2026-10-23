@@ -9,10 +9,10 @@
  *   There the tests say `cartas`, `palabras`, so a `where`'s item is `carta`, `palabra`.
  * - Keywords with a written accent are accepted without it too:  `(posición|posicion)`, `(después|despues)`.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
+import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 
 import { BracketedList } from "./BracketedList"
 import { CanGiveUp } from "./CanGiveUp"

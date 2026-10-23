@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { type FillInParts, parseFillIn } from "spell-lang/spell/rules/core"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { type FillInParts, parseFillIn } from "spell-parser/spell/rules/core"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
 
 /**

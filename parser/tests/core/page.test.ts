@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { frameSummary, logError, logFrame } from "spell-lang/core"
+import { frameSummary, logError, logFrame } from "spell-parser/core"
 
 /**
  * A page's frames, as its console shows them (`page.ts`, `logFrame()`):  one folded line each,

@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { KindName } from "spell-lang/spell/rules/types"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { KindName } from "spell-parser/spell/rules/types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { type MethodBody, type ItemVariableData } from "./lists.shared"
 
 /**

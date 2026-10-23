@@ -1,5 +1,5 @@
 /**
- * `spell lang translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24):
+ * `spell parser translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24):
  * read its names dictionary, translate each file (`SP`'s `Translator`), ask `claude -p` for the names it lacks,
  * and write the project in the other language.
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here:
@@ -16,14 +16,14 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSyn
 import { basename, dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { keepingCommentsIn, readJSON5File } from "spell-kit/util/node/json5"
-import { CLI } from "spell-kit/cli"
-import { SP } from "spell-lang/spell"
-import type { TranslateOptions } from "spell-lang/cli"
-import { NamesSeeder } from "spell-lang/spell/translate/NamesSeeder"
-import { NAMES_KINDS, TranslationNames } from "spell-lang/spell/translate/TranslationNames"
-import { Translator } from "spell-lang/spell/translate/Translator"
-import type { MissingName, NamesData, SourceFile, TranslatedFile } from "spell-lang/spell/translate/translate.types"
+import { keepingCommentsIn, readJSON5File } from "spell/util/node/json5"
+import { CLI } from "spell/cli"
+import { SP } from "spell-parser/spell"
+import type { TranslateOptions } from "spell-parser/cli"
+import { NamesSeeder } from "spell-parser/spell/translate/NamesSeeder"
+import { NAMES_KINDS, TranslationNames } from "spell-parser/spell/translate/TranslationNames"
+import { Translator } from "spell-parser/spell/translate/Translator"
+import type { MissingName, NamesData, SourceFile, TranslatedFile } from "spell-parser/spell/translate/translate.types"
 
 /** A parsed project to translate:  what spell-app's command hands `translateProject()`. */
 export type TranslateSource = {

@@ -1,5 +1,5 @@
-import { lowerFirst, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { lowerFirst, proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 import { Negatable } from "./Negatable"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"

@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 /**
  * `MD.toHTML(markdown)` -- markdown to PLAIN HTML, as the GFM spec spells it.

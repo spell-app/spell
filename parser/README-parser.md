@@ -1,8 +1,8 @@
 # The parser:  rules as classes, for any language
 
 ```ts
-import { P } from "spell-lang/parser"
-import "spell-lang/parser/rulex" // opt in:  rules written with `syntax` need it
+import { P } from "spell-parser/parser"
+import "spell-parser/parser/rulex" // opt in:  rules written with `syntax` need it
 
 const parser = new P.Parser({ module: "pets" })
 class pet extends P.Sequence {}
@@ -22,7 +22,7 @@ That's a language, with its autocomplete.
 There's no grammar file in it, no generator to run, and no generated parser to check in:
 the two classes ARE the rules, registered while the program runs.
 
-`spell-lang/parser` is a parser that knows no language.
+`spell-parser/parser` is a parser that knows no language.
 You hand it rules, each a class with a syntax string, and it hands back a tree of matches,
 each knowing its rule, the tokens it took and its named parts.
 [Spell](README-spell.md) is written on it, and so is [GitHub markdown](README-markdown.md),
@@ -85,9 +85,9 @@ flowchart LR
 _Each stage below opens with that line's close-up.
 A language may skip the tree:  the dates language, further down, compiles straight from its matches._
 
-- The parser imports only the kit's shared helpers, `spell-kit/util`:  no UI framework, no JSX, no DOM.
+- The parser imports only the kit's shared helpers, `spell/util`:  no UI framework, no JSX, no DOM.
   So the same parser runs in the editor's page, under node, and in the language server.
-- To run the commands on this page, you need the kit's checkout:  [setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero).
+- To run the commands on this page, you need the kit's checkout:  [setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero).
 - The deep map of how Spell's lines go through it, about 1,600 lines for the curious:
   [PARSING.md](src/spell/PARSING.md).
 
@@ -723,10 +723,10 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   in [src/spell/languages/](src/spell/languages/), and a file picks its language by its name, `Carta.es.spell`.
   - A type's words are Spell's vocabulary, handed to the parser:  each pack brings its own.
 - A third language is a third file per folder, and a pack.
-  `spell lang packs check` compares each pack against English, module by module, and says what it still lacks:
+  `spell parser packs check` compares each pack against English, module by module, and says what it still lacks:
 
   ```sh
-  spell lang packs check
+  spell parser packs check
   ```
 
   <details>
@@ -777,7 +777,7 @@ math.addRule(Plus, {
   run the tests with `BLESS_RULE_TESTS=1` (Spell's script for it is `yarn spell:test:rules:bless`), then read the diff.
 - `parser.speedTest()` runs every rule test once to warm up, then 20 more times, and reports the average.
   `spell speedtest --against HEAD` does it in fresh processes, against a commit
-  ([the language commands](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#spell-lang)).
+  ([the language commands](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser)).
 
 ### Adding a rule
 

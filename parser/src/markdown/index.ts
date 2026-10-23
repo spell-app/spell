@@ -1,6 +1,6 @@
 /**
- * Barrel for `spell-lang/markdown` -- GitHub-flavoured markdown on the generic parser.
- * - `import { MD } from "spell-lang/markdown"`, then `MD.toHTML()`, `MD.BlockScanner`, `MD.MarkdownTokenizer` ...
+ * Barrel for `spell-parser/markdown` -- GitHub-flavoured markdown on the generic parser.
+ * - `import { MD } from "spell-parser/markdown"`, then `MD.toHTML()`, `MD.BlockScanner`, `MD.MarkdownTokenizer` ...
  * - Pipeline:  `blocks/` (text => `MD.Block` tree), `render/` (blocks => `MD.Markup` => HTML).
  */
 export * as MD from "."

@@ -9,7 +9,7 @@
 - This module says:
   - whether a value keeps them, for a setter's WARNING (never a refusal)
   - what to say when it doesn't
-- The JavaScript side is `spell-kit/util`'s `PropRules.ts`:  the same rules, the same words.
+- The JavaScript side is `spell/util`'s `PropRules.ts`:  the same rules, the same words.
 """
 
 import re

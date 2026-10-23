@@ -1,5 +1,5 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * `Block`s are generally the root entity that we parse in spell -- a top-level construct, e.g. used to

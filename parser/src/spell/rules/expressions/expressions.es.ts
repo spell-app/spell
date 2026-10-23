@@ -6,8 +6,8 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - A keyword with a written accent is accepted without it too:  `(está|esta)`, `(más|mas)`.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
 
 import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"

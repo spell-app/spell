@@ -1,11 +1,11 @@
-import { SpellSetup } from "spell-lang/spell/SpellSetup"
-import type { SP } from "spell-lang/spell"
+import { SpellSetup } from "spell-parser/spell/SpellSetup"
+import type { SP } from "spell-parser/spell"
 
 /**
  * A TEST DOUBLE of spell-app's project groups (spaces' `models/projectGroups.ts`):  the groups a spell address can
  * name, registered as this file loads.
  * - Why:  spell's own tests of its addresses and URLs (`SpellLocation`, `SpellUrls`) need groups registered, and the
- *   real ones are spaces', in spell-app, which spell-lang's tests never read (epic `repo-split` C11).
+ *   real ones are spaces', in spell-app, which spell-parser's tests never read (epic `repo-split` C11).
  * - Only what those tests read:  each group's address, space and domain;  the rest is filler.
  * - The real list's own test, and the tests that load projects from disk, are spell-app's (its `tests/spaces/`,
  *   `tests/spell/`).

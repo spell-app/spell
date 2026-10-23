@@ -1,7 +1,7 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-lang/spell/rules/expressions"
+import { SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `every_thing` rule:  every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).

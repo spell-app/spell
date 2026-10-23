@@ -3,7 +3,7 @@
  * - English is built in (`CORE_MESSAGES`);  another language's words come from the project's words file,
  *   e.g. `cartas.es.js`'s `messages`, which the runner hands `core.useMessages()` before the program runs.
  * - A key the words don't have, or no words at all:  English.
- * - Part of `core`:  imported by `spell-lang/core`'s barrel (and `spell-lang/core/model`) for its side effect.
+ * - Part of `core`:  imported by `spell-parser/core`'s barrel (and `spell-parser/core/model`) for its side effect.
  * - Python's twin is `spell_core.messages`.
  */
 import { core } from "./core"

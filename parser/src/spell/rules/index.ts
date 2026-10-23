@@ -9,9 +9,9 @@
  * - NOTE: import order matters in a few places -- see the comment above the `ParseError` import.
  * - Structural rules (`blank_line` / `block` / `line` / `parse_error`) are added directly, below.
  */
-import { P } from "spell-lang/parser"
-import { SpellParser } from "spell-lang/spell/SpellParser"
-import { englishInflector } from "spell-lang/spell/languages/en/inflector"
+import { P } from "spell-parser/parser"
+import { SpellParser } from "spell-parser/spell/SpellParser"
+import { englishInflector } from "spell-parser/spell/languages/en/inflector"
 
 // Structural rule classes, registered directly below.
 import { Block, type DocComment } from "./Block"

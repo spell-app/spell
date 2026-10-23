@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 /**
  * An `MD.InlineNode` tree => `MD.Markup`, in plain HTML tags (`em`, `strong`, `del`, `a`, `img`, `code`, `br`).

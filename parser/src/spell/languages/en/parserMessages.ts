@@ -2,7 +2,7 @@
  * What the parser says to the person WRITING a program, in English (epic `spanish` P17):
  * its warnings, its parse errors, why a rule refused a line, and the long forms editors show as "Reads as".
  * - Every other language's table has the same keys (`languages/<lang>/parserMessages.ts`);
- *   a key it lacks reads English, and `spell lang packs check` reports it.
+ *   a key it lacks reads English, and `spell parser packs check` reports it.
  * - Read one in the scope's language:  `SP.Language.of(scope).parserMessage("dont-understand", { text })`.
  * - Each `{name}` is a param the code fills:  a sentence that names something takes it as a param,
  *   never glued from pieces, so each language words it its own way.

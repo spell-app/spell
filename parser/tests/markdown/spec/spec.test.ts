@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
-import { comparableHTML, specOptions } from "spell-lang/markdown/spec/spec.types"
-import spec from "spell-lang/markdown/spec/gfm-spec.json"
+import { comparableHTML, specOptions } from "spell-parser/markdown/spec/spec.types"
+import spec from "spell-parser/markdown/spec/gfm-spec.json"
 
 /**
  * The GFM spec, example by example:  how many pass, per section.

@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `identifier_list` rule:  list of identifiers and/or numbers, e.g. `clubs or hearts`, `jack, queen, king`.

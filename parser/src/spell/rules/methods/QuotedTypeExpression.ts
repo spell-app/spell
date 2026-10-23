@@ -1,13 +1,13 @@
 import { isNode } from "browser-or-node"
 
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { Negatable, Wording } from "spell-lang/spell/rules/expressions"
-import { SubjectImplied, SubjectRule } from "spell-lang/spell/rules/types"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { Negatable, Wording } from "spell-parser/spell/rules/expressions"
+import { SubjectImplied, SubjectRule } from "spell-parser/spell/rules/types"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { MethodDefinition } from "./MethodDefinition"
 import type { MethodSignatureData } from "./methods.shared"
 

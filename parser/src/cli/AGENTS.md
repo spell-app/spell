@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/cli/` of the `spell-lang` package (`spell-lang/cli`).
+when working with code in this folder, `src/cli/` of the `spell-parser` package (`spell-parser/cli`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -20,7 +20,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `lint` was `spell check`
     - `speedtest` was `spell speed`
     - `spell explore` is gone
-  - [spell-lang's README](../../README.md#the-language-commands), "Moving each command's work down into spell-lang",
+  - [spell-parser's README](../../README.md#the-language-commands), "Moving each command's work down into spell-parser",
     has what each needs to move down here.
 - How the kit finds them:  `package.json`'s `"spell": { "commands": "./src/cli/commands.ts" }`.
   - [commands.ts](commands.ts) adds each command to the `spell` program it's handed (commander):
@@ -32,21 +32,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Why:  every one finds projects the app's way:
     addresses like `@spell/examples/solitaire`, groups, the editor's language service.
   - Without spell-app, each says "clone spell-app" and exits 2 (`CLI.needHook()`).
-- `spell lang packs check|fix` (epic `spanish` P7) are the exception:
-  their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only spell-lang's own rule files.
+- `spell parser packs check|fix` (epic `spanish` P7) are the exception:
+  their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only spell-parser's own rule files.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell lang translate` (epic `spanish` P24) is half and half:
+- `spell parser translate` (epic `spanish` P24) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does
   - then [translateProject.ts](translateProject.ts), here, does the rest:  the dictionary, `claude -p`, the files
   - the translating itself is spell's [translate/](../spell/translate/), `Translator`, on parsed files:  no node
-- [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
+- [index.ts](index.ts) (`spell-parser/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape
     - each command's flags:  `CompileOptions`, `LintOptions` ...
   - spell-app implements the hook against them:  every arrow points down.
-- NEVER imports spell-app:  it's above spell-lang.
+- NEVER imports spell-app:  it's above spell-parser.
 
 ## Tests
 
@@ -55,6 +55,6 @@ As WWOD §20, plus:
 - In the repo's [tests/cli/](../../tests/cli/):  the command list's names and help.
 - The commands themselves run end to end in [spell-app's tests](../../../spell-app/tests/cli/cli.test.ts):
   their work is spell-app's.
-- `spell lang packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
-- `spell lang translate`'s:  the `Translator`'s own tests, [tests/spell/translate/](../../tests/spell/translate/);
+- `spell parser packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
+- `spell parser translate`'s:  the `Translator`'s own tests, [tests/spell/translate/](../../tests/spell/translate/);
   the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).

@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { type OperatorOperands } from "./expressions.shared"
 

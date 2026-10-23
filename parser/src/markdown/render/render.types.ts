@@ -1,4 +1,4 @@
-import type { Block } from "spell-lang/markdown"
+import type { Block } from "spell-parser/markdown"
 
 // ## Markup
 

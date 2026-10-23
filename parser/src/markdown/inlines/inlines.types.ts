@@ -1,7 +1,7 @@
 import { decodeHTMLStrict } from "entities"
 
 // Import directly to avoid circular import:  read at module evaluation, for `HTML_TAG`
-import { CLOSETAG, OPENTAG } from "spell-lang/markdown/blocks/blocks.types"
+import { CLOSETAG, OPENTAG } from "spell-parser/markdown/blocks/blocks.types"
 
 // ## References
 

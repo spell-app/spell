@@ -1,14 +1,14 @@
 /**
  * Master import file for the classes `core` exposes to compiled spell code.
- * - Re-exported from `spell-lang/core`'s own barrel (`export * from "./classes"`) so `Thing`/`List`/`App`/`Drawable`/
+ * - Re-exported from `spell-parser/core`'s own barrel (`export * from "./classes"`) so `Thing`/`List`/`App`/`Drawable`/
  *   `DrawableList` are available alongside the rest of `core`.
  *
- * NOTE: imports reach into `spell-lang/core/core` and `spell-lang/core/Core` directly rather than
- * the `spell-lang/core` barrel -- this file helps BUILD that barrel, so going through it would
+ * NOTE: imports reach into `spell-parser/core/core` and `spell-parser/core/Core` directly rather than
+ * the `spell-parser/core` barrel -- this file helps BUILD that barrel, so going through it would
  * re-enter it circularly.
  */
-import { core } from "spell-lang/core/core"
-import { defineCoreModule, SPELL_BASE_TYPES } from "spell-lang/core/core.types"
+import { core } from "spell-parser/core/core"
+import { defineCoreModule, SPELL_BASE_TYPES } from "spell-parser/core/core.types"
 
 import { Thing } from "./Thing"
 import { App } from "./App"

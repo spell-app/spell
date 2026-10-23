@@ -5,7 +5,7 @@
  * - spell-app implements `LanguageCommands` (its `"language"` hook) and imports these flags' types from here:
  *   every arrow points down.
  */
-import type { GlobalOptions } from "spell-kit/cli"
+import type { GlobalOptions } from "spell/cli"
 
 ////////////////
 // ## The hook
@@ -15,7 +15,7 @@ import type { GlobalOptions } from "spell-kit/cli"
  * The language commands' work, by command:  what the `"language"` hook loads (`CLI.needHook()`).
  * - Each takes the command's arguments and flags, and resolves to its exit code.
  * - spell-app's `src/cli/hooks.ts` provides it today:  every one of them loads projects the app's way (addresses like
- *   `@spell/examples/solitaire`, the editor's language service), until spell-lang can (epic `repo-split` P13).
+ *   `@spell/examples/solitaire`, the editor's language service), until spell-parser can (epic `repo-split` P13).
  */
 export type LanguageCommands = {
   compile(projects: string[], options: CompileOptions): Promise<number>
@@ -40,7 +40,7 @@ export type LanguageCommand = keyof LanguageCommands
 ////////////////
 
 /**
- * `spell lang translate` flags (epic `spanish` P24).
+ * `spell parser translate` flags (epic `spanish` P24).
  * - `to`:  the language to write the project in, by its code, e.g. `es`
  * - `out`:  the folder to write it to -- default beside it, named as the dictionary names the project
  * - `update`:  re-translate only the lines changed since the last run;  the rest stay as they are, hand edits too
@@ -184,7 +184,7 @@ export type ExplainOptions = GlobalOptions & {
 }
 
 /**
- * `spell lang packs check|fix` flags (epic `spanish` P7).
+ * `spell parser packs check|fix` flags (epic `spanish` P7).
  * - `json`:  `check` prints its report as JSON
  * - `ai`:  `fix` asks `claude -p` to translate each stub, rather than leaving it in English
  */

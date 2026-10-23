@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * Log of every change parsing makes to shared state -- scope lists and parser rules -- so we can take changes

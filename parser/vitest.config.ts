@@ -1,13 +1,13 @@
 import { defineConfig } from "vite-plus"
 
-import { standardDecorators } from "spell-kit/toolchain/decorators"
-import { packageVersion } from "spell-kit/toolchain/packageVersion"
+import { standardDecorators } from "spell/toolchain/decorators"
+import { packageVersion } from "spell/toolchain/packageVersion"
 
 /** Solid's packages:  core draws with them. */
 const SOLID = [/^solid-js/, /^@solidjs\//]
 
 /**
- * spell-lang's Vitest config:  one project per folder of `src/`, each over its tests in `tests/<folder>/`, at the same
+ * spell-parser's Vitest config:  one project per folder of `src/`, each over its tests in `tests/<folder>/`, at the same
  * paths as the code.
  * - `yarn vp test run --project core` runs one.
  * - `standardDecorators()` lowers standard decorators:  vite 8's own transform (oxc) doesn't.

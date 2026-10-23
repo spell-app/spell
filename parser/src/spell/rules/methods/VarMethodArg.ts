@@ -1,7 +1,7 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { SpellIdentifier } from "spell-lang/spell/rules/variables"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { SpellIdentifier } from "spell-parser/spell/rules/variables"
 import type { MethodArgData } from "./methods.shared"
 
 /**

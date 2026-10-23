@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { pluralOf, singularOf, spanishInflector } from "spell-lang/spell/languages/es/inflector"
+import { pluralOf, singularOf, spanishInflector } from "spell-parser/spell/languages/es/inflector"
 
 /** Singular => plural pairs every Spanish program of cards and lists says. */
 const PAIRS: Array<[singular: string, plural: string]> = [

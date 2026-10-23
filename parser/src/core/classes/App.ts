@@ -1,7 +1,7 @@
 /**
  * Base classes for spell.
  */
-import { core } from "spell-lang/core/core"
+import { core } from "spell-parser/core/core"
 import { Thing } from "./Thing"
 
 /**

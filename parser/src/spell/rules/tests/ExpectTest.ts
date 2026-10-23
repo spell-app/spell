@@ -1,8 +1,8 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SpellConstant } from "spell-lang/spell/rules/constants"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SpellConstant } from "spell-parser/spell/rules/constants"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
  * `expect_test` rule:  an assertion --

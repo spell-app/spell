@@ -1,5 +1,5 @@
-import { P } from "spell-lang/parser"
-import { Negatable, SpellExpression } from "spell-lang/spell/rules/expressions"
+import { P } from "spell-parser/parser"
+import { Negatable, SpellExpression } from "spell-parser/spell/rules/expressions"
 
 /**
  * `check_process` rule:  check whether a conceptual animation or process is currently running.

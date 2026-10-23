@@ -1,9 +1,9 @@
 /**
- * `spell lang packs check|fix`:  is a language pack complete, against English?
+ * `spell parser packs check|fix`:  is a language pack complete, against English?
  * - `fix` writes stubs for what it lacks (epic `spanish` P7).
- * - The checking and the stub writing are `spell-lang/spell/languages/packs` (node-free, on text);
+ * - The checking and the stub writing are `spell-parser/spell/languages/packs` (node-free, on text);
  *   this file reads and writes the rule files, asks `claude` for drafts, and prints.
- * - Their work is HERE, not behind spell-app's `"language"` hook:  it needs no project, only spell-lang's own files.
+ * - Their work is HERE, not behind spell-app's `"language"` hook:  it needs no project, only spell-parser's own files.
  * - Loaded only when one of them runs (`commands.ts` imports it dynamically):  it loads all of spell.
  */
 import { spawnSync } from "node:child_process"
@@ -11,9 +11,9 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { CLI } from "spell-kit/cli"
-import { SP } from "spell-lang/spell"
-import type { PacksOptions } from "spell-lang/cli"
+import { CLI } from "spell/cli"
+import { SP } from "spell-parser/spell"
+import type { PacksOptions } from "spell-parser/cli"
 import {
   AI_MARKER,
   checkPack,
@@ -24,10 +24,10 @@ import {
   type PackReport,
   type PackSources,
   type PackStub
-} from "spell-lang/spell/languages/packs"
+} from "spell-parser/spell/languages/packs"
 
 /**
- * `spell lang packs check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.
+ * `spell parser packs check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.
  * - `lang`:  one language, e.g. `es`;  none:  every pack but English
  */
 export async function checkPacks(lang: string | undefined, options: PacksOptions = {}): Promise<number> {
@@ -42,7 +42,7 @@ export async function checkPacks(lang: string | undefined, options: PacksOptions
 }
 
 /**
- * `spell lang packs fix [lang] [--ai]`:  write a stub into `<module>.<lang>.ts` for each registration it lacks, then
+ * `spell parser packs fix [lang] [--ai]`:  write a stub into `<module>.<lang>.ts` for each registration it lacks, then
  * print the list to review.
  * - Each stub is English's, marked `// TODO: translate` -- see `fixPackModule()`.
  * - `--ai`:  ask `claude -p` for each one in the language, marked `// AI draft:  review` instead;
@@ -71,7 +71,7 @@ export async function fixPacks(lang: string | undefined, options: PacksOptions =
   }
   CLI.out("\nTo review:")
   for (const line of review) CLI.out(`  ${line}`)
-  CLI.out("\nThen:  spell lang packs check, and the module's rule tests (yarn spell:test:rules).")
+  CLI.out("\nThen:  spell parser packs check, and the module's rule tests (yarn spell:test:rules).")
   return CLI.EXIT.OK
 }
 
@@ -163,7 +163,7 @@ function printReport(report: PackReport, language: SP.Language): void {
   CLI.out(
     report.isComplete
       ? `${language.name} (${report.lang}):  complete, ${modules} modules`
-      : `${language.name} (${report.lang}):  INCOMPLETE -- spell lang packs fix ${report.lang} writes stubs for what's missing`
+      : `${language.name} (${report.lang}):  INCOMPLETE -- spell parser packs fix ${report.lang} writes stubs for what's missing`
   )
 }
 

@@ -1,9 +1,9 @@
-# spell_core:  the Python twin of `spell-lang/core`, what Python compiled from spell imports.
+# spell_core:  the Python twin of `spell-parser/core`, what Python compiled from spell imports.
 # - Run from the repo root:
 #   - its tests:  `uv run --directory src/py/core pytest`
 #   - the terminal study's (not in the run above):  `uv run --directory src/py/core --group study pytest experiments/terminal`
 #   - tidy it:  `uv run --directory src/py/core ruff check --fix` and `... ruff format`
-# - spell-lang's `yarn test` runs the tests too (its package.json), so `yarn review` does.
+# - spell-parser's `yarn test` runs the tests too (its package.json), so `yarn review` does.
 
 [project]
 name = "spell-core"

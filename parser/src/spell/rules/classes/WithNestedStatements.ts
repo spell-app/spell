@@ -1,4 +1,4 @@
-import { P } from "spell-lang/parser"
+import { P } from "spell-parser/parser"
 
 /**
  * `with_nested_statements` rule:  `where:`, `with:` or a bare `:` ending a line --

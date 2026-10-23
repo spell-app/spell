@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-lang/spell"
-import { packSources } from "spell-lang/cli/packsCommand"
+import { SP } from "spell-parser/spell"
+import { packSources } from "spell-parser/cli/packsCommand"
 import {
   checkPack,
   checkPackModule,
@@ -10,10 +10,10 @@ import {
   TODO_MARKER,
   type PackModuleSource,
   type PackReport
-} from "spell-lang/spell/languages/packs"
+} from "spell-parser/spell/languages/packs"
 
 /**
- * The language packs' check and fix (epic `spanish` P7):  `spell lang packs check|fix`.
+ * The language packs' check and fix (epic `spanish` P7):  `spell parser packs check|fix`.
  * - The real packs, read from disk:  Spanish is complete.
  * - The rest on strings:  a small made-up module, English and Spanish.
  */
@@ -22,7 +22,7 @@ import {
 // ## A made-up module
 ////////////////
 
-const ENGLISH = `import { Negatable } from "spell-lang/spell/rules/expressions"
+const ENGLISH = `import { Negatable } from "spell-parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
 import { Await } from "./Await"
@@ -45,8 +45,8 @@ _async.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {
 })
 `
 
-const SPANISH = `import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Negatable } from "spell-lang/spell/rules/expressions"
+const SPANISH = `import { SpellParser } from "spell-parser/spell/SpellParser"
+import { Negatable } from "spell-parser/spell/rules/expressions"
 
 import { Await } from "./Await"
 
@@ -145,7 +145,7 @@ asyncEs.addRule(Pause, {
   test("a translator's answer replaces the stub, marked for review", () => {
     const fix = fixPackModule(SOURCE, "es", () => 'asyncEs.addRule(Pause, { syntax: "pausar {number:expression}" })')
     expect(fix.text).toContain(
-      '// AI draft:  review -- translated by `spell lang packs fix --ai`\nasyncEs.addRule(Pause, { syntax: "pausar'
+      '// AI draft:  review -- translated by `spell parser packs fix --ai`\nasyncEs.addRule(Pause, { syntax: "pausar'
     )
     expect(fix.stubs[0]!.isTranslated).toBe(true)
   })

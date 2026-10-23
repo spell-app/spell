@@ -10,8 +10,8 @@
  * - A message's example takes its article from the same table (`article()`):  `una carta tiene ...`.
  * - NOT the contractions `al` and `del`, nor a feminine noun taking `el` before a stressed `a` (`el agua`).
  */
-import { P } from "spell-lang/parser"
-import type { SP } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import type { SP } from "spell-parser/spell"
 
 /** Spanish's article agreement:  see the file's docstring. */
 export const spanishAgreement: SP.ArticleAgreement = {

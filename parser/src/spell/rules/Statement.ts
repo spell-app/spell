@@ -1,9 +1,9 @@
-import { NONE, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { NONE, proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 // Import directly to avoid circular import -- rules are constructed while the `SP` barrel is still loading.
-import { BODY_KEYWORDS, type StatementBodySpec } from "spell-lang/spell/spell.types"
-import { SubjectIt, SubjectRule } from "spell-lang/spell/rules/types"
+import { BODY_KEYWORDS, type StatementBodySpec } from "spell-parser/spell/spell.types"
+import { SubjectIt, SubjectRule } from "spell-parser/spell/rules/types"
 import { Block } from "./Block"
 
 /**

@@ -2,24 +2,24 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-lang/spell"
+import { SP } from "spell-parser/spell"
 import {
   SPELL_SYNTAX_FILE,
   purposeOf,
   spellSyntax,
   spellSyntaxFileFor,
   withoutComments
-} from "spell-lang/spell/node/spellSyntax"
+} from "spell-parser/spell/node/spellSyntax"
 
 /** Where `yarn spell:gen:syntax` writes the spell syntax tables. */
 const SYNTAX_FOLDER = resolve(import.meta.dirname, "../../../src/spell")
 
-describe("each language's spell syntax table is up to date:  if not, run `yarn spell:gen:syntax` in spell-lang", () => {
+describe("each language's spell syntax table is up to date:  if not, run `yarn spell:gen:syntax` in spell-parser", () => {
   for (const language of SP.Language.all.values()) {
     const file = spellSyntaxFileFor(language)
     test(`${language.name}'s, ${file}`, () => {
       const written = JSON.parse(readFileSync(resolve(SYNTAX_FOLDER, file), "utf8")) as unknown
-      expect(written, `${file} is out of date:  run \`yarn spell:gen:syntax\` in spell-lang`).toEqual(
+      expect(written, `${file} is out of date:  run \`yarn spell:gen:syntax\` in spell-parser`).toEqual(
         spellSyntax(language)
       )
     })

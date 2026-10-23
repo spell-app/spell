@@ -1,4 +1,4 @@
-import type { MarkdownOptions, SpecExample } from "spell-lang/markdown"
+import type { MarkdownOptions, SpecExample } from "spell-parser/markdown"
 
 // ## Options
 

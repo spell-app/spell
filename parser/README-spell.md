@@ -13,7 +13,7 @@ a "card" is a drawable thing:
 	- it "is the (rank) of (suit)"
 ```
 
-_The card from [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md), in the outline style:  a name, then bullets of what's true of it.
+_The card from [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md), in the outline style:  a name, then bullets of what's true of it.
 It lints clean, and every output on this page is the compiler's own, from a real run._
 
 Ten lines, and the language is bigger than it was.
@@ -58,8 +58,8 @@ and `spell lint` fails on it by file, line and column.
 <summary>Run the card yourself</summary>
 
 You need `spell` on your PATH:
-[setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero),
-then [the command line](https://github.com/spell-app/spell-kit/blob/main/README-cli.md#setting-it-up).
+[setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero),
+then [the command line](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up).
 In any folder outside the checkout, save the card as `try/solitaire/Card.spell`, then:
 
 ```sh
@@ -88,7 +88,7 @@ export class Card extends Drawable {
 - The element's tag is the project's name, then the type's:  `<solitaire-card>`.
 - Look for `2 ... 10`:  it became the nine numbers between, and the choice of words a list on the class, `Card.Suits`.
 - The whole of all three, JavaScript, TypeScript and Python, is folded under the card on
-  [the kit's front page](https://github.com/spell-app/spell-kit/blob/main/README.md);  the three side by side, a line of Spell at a time, are in
+  [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md);  the three side by side, a line of Spell at a time, are in
   [README-targets](README-targets.md#the-card-line-by-line).
 
 </details>
@@ -520,7 +520,7 @@ All four, and what each writes:  [README-targets](README-targets.md).
 From code:
 
 ```ts
-import { SP } from "spell-lang/spell"
+import { SP } from "spell-parser/spell"
 
 SP.spellParser.compile("print 1 + 2", "statement") // => "core.console.log(1 + 2)"
 ```
@@ -579,7 +579,7 @@ The snapshots, for a project `<Project>`:
 - Add a test project by copying a project in:  every folder there with a project file is one.
 - In tests, read them with `loadFixtureProject()`, `fixturePath()` and `fixtureProjectId()`,
   from spell-app's `spell-app/spaces/test`:  by name, a frozen project's or a tested example's (`Solitaire`).
-- Spell's own tests here write their projects inline, with `parseSpellProject()` from `spell-lang/spell/test`.
+- Spell's own tests here write their projects inline, with `parseSpellProject()` from `spell-parser/spell/test`.
 - They're the group `@spell/test`, which the app lists in dev only.
 
 ## Adding a rule
@@ -610,8 +610,8 @@ tests/spell/rules/<module>/
 3. Register it in the module's `<module>.en.ts`:  `<module>.addRule(...)`, once per syntax, each with its tests.
    Its place there is its registration order, which breaks ties.
 4. Register it in `<module>.es.ts` too, with its Spanish syntax, in the same place.
-   `spell lang packs check` lists what the Spanish lacks against the English;
-   `spell lang packs fix` writes a stub for each, the English copied and marked to translate.
+   `spell parser packs check` lists what the Spanish lacks against the English;
+   `spell parser packs fix` writes a stub for each, the English copied and marked to translate.
 5. `yarn spell:test:rules`, then `yarn spell:test:rules:bless` once the output is right, and read the diff.
 6. `yarn spell:gen:syntax`:  the syntax table's test fails until you do.
 7. A built-in type's member (`the length of the name`) is data, not a rule (below, "The built-in types"):
@@ -619,7 +619,7 @@ tests/spell/rules/<module>/
    spell-app, which rewrites their docs for pages with no parser, [core.scopes.js](src/core/core.scopes.js).
 8. A new operator, or a change to how parsing works:  [PARSING.md](src/spell/PARSING.md), in the same change.
 
-The `yarn` scripts run in spell-lang's folder.
+The `yarn` scripts run in spell-parser's folder.
 A test pins every rule's name, module and registration order, so a renamed class that renames a rule fails it
 ([ruleNames.test.ts](tests/spell/rules/ruleNames.test.ts)).
 
@@ -627,11 +627,11 @@ A test pins every rule's name, module and registration order, so a renamed class
 <summary>A whole rule, to copy from:  <code>pause</code></summary>
 
 ```ts
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { Wording } from "spell-lang/spell/rules/expressions"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { Wording } from "spell-parser/spell/rules/expressions"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.
@@ -691,7 +691,7 @@ what goes on the class and what on the match, and why `getAST()` must never touc
 A rule's class takes any language's syntax, which is why `addRule()` takes only `{ syntax, tests }`:
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
-Spanish has all of English's:  `spell lang packs check` says `Spanish (es):  complete, 19 modules`.
+Spanish has all of English's:  `spell parser packs check` says `Spanish (es):  complete, 19 modules`.
 A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
@@ -709,7 +709,7 @@ Two seams show when you work in this folder:
 And what IS here, though you might look elsewhere:
 - **The highlighter:**  `SP.SpellHighlighter.spans(text)` colours a snippet with no project,
   for `<ui-code language="spell">`.
-- **Node-only helpers**, never in the entry (`spell-lang/spell/node/...`):
+- **Node-only helpers**, never in the entry (`spell-parser/spell/node/...`):
   the TypeScript check and its build, pyright, the syntax table.
 
 ## 🌱 Coming:  mixins, and Spell UI written in Spell

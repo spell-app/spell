@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, Thing, List, Drawable, DrawableList } from "spell-lang/core"
+import { core, Thing, List, Drawable, DrawableList } from "spell-parser/core"
 
 /** The base classes `a card is a drawable thing` and `a pile is a drawable list of cards` compile to. */
 describe("Drawable, DrawableList", () => {

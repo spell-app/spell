@@ -1,6 +1,6 @@
 /**
  * Convert the GFM spec (cmark-gfm's `test/spec.txt`) into markdown's `spec/gfm-spec.json`:  the examples the spec test runs.
- * - Run from spell-lang's root:  `node scripts/markdown/gfm-spec.mjs <path to spec.txt>`
+ * - Run from spell-parser's root:  `node scripts/markdown/gfm-spec.mjs <path to spec.txt>`
  * - Get spec.txt from https://raw.githubusercontent.com/github/cmark-gfm/master/test/spec.txt (GFM 0.29, CC-BY-SA 4.0).
  * - Each example:  `{ example, section, extension?, markdown, html }`.  `→` in the spec stands for a tab.
  * - `extension`:  the GFM extension an example tests (`table`, `strikethrough`, `autolink`, `tagfilter`), or

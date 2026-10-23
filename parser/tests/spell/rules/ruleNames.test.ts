@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-lang/parser"
-import { spellParser } from "spell-lang/spell"
+import { P } from "spell-parser/parser"
+import { spellParser } from "spell-parser/spell"
 
 /**
  * The rule names spell's parsers know, pinned:  a rule's class may be renamed or moved to a file of its own

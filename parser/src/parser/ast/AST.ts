@@ -5,8 +5,8 @@
  * - NEVER write output here.
  */
 
-import { Assertable, OPTIONAL } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { Assertable, OPTIONAL } from "spell/util"
+import { P } from "spell-parser/parser"
 
 ////////////////
 // ## Helpers

@@ -1,6 +1,6 @@
-import { NONE, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { Priority, declaredPrefix } from "spell-lang/spell/rules/rules.types"
+import { NONE, proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { Priority, declaredPrefix } from "spell-parser/spell/rules/rules.types"
 import { MemberReadExpression } from "./MemberReadExpression"
 import { itsObject, type ItsMatchData } from "./properties.shared"
 

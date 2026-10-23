@@ -1,4 +1,4 @@
-import { proto } from "spell-kit/util"
+import { proto } from "spell/util"
 import { TypeSpecifierYesOrNo } from "./TypeSpecifierYesOrNo"
 
 /** `outline_specifier_yes_or_no` rule:  `yes or no` -- see `outline_specifier_enum`. */

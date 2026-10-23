@@ -1,17 +1,17 @@
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { BODY_KEYWORDS } from "spell-lang/spell/spell.types"
-import { NumberLiteral, TextLiteral } from "spell-lang/spell/rules/core"
-import { CompoundExpression, Wording } from "spell-lang/spell/rules/expressions"
-import { SubjectIt, SubjectRule } from "spell-lang/spell/rules/types"
-import { MethodSignature, QuotedMethodSignature, QuotedSignatureWords } from "spell-lang/spell/rules/methods"
-import { SpellJSX, SpellJSXExpression, SpellJSXText } from "spell-lang/spell/rules/JSX"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { BODY_KEYWORDS } from "spell-parser/spell/spell.types"
+import { NumberLiteral, TextLiteral } from "spell-parser/spell/rules/core"
+import { CompoundExpression, Wording } from "spell-parser/spell/rules/expressions"
+import { SubjectIt, SubjectRule } from "spell-parser/spell/rules/types"
+import { MethodSignature, QuotedMethodSignature, QuotedSignatureWords } from "spell-parser/spell/rules/methods"
+import { SpellJSX, SpellJSXExpression, SpellJSXText } from "spell-parser/spell/rules/JSX"
 import type { TranslationNames } from "./TranslationNames"
 import type { MissingName, SourceFile, TranslatedFile } from "./translate.types"
 
 /**
  * Writes a spell project in another human language, rule by rule (epic `spanish` P24):
- * `spell lang translate <project> --to es`.
+ * `spell parser translate <project> --to es`.
  * - Each line's statement is written back with the SAME rule's syntax in the other language
  *   -- its registration in `<module>.<lang>.ts` -- its slots filled with its children, translated the same way.
  * - The names a project's people chose come from its names dictionary (`TranslationNames`).

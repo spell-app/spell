@@ -1,5 +1,5 @@
-import { assert, proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { assert, proto } from "spell/util"
+import { P } from "spell-parser/parser"
 
 /**
  * `number_as_string` rule:  `number` spelled out as a string, `zero` to `ten`

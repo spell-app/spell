@@ -42,7 +42,7 @@
  *   It's with the core's tests, in `tests/core/`.
  * - Not the same as a page's state (`state.ts`):  that numbers things per page, and holds them in one message.
  */
-import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell-kit/util"
+import { getProp, ITEMS_KEY, keysOf, schemaOf, setProp, TYPE_KEY } from "spell/util"
 
 import { programThings, core } from "./core"
 import { fieldsOf, hasSetter, isPlainObject, isSpellObject } from "./state"
@@ -105,7 +105,7 @@ export type LoaderOptions = {
   entryFor: (ref: string) => Record<string, unknown> | undefined
   /**
    * The class an entry's `"$type"` names:  the running program's (`core.things.classNamed()`) by default.
-   * - Needed under `spell-lang/core/model`, which has no running program.
+   * - Needed under `spell-parser/core/model`, which has no running program.
    */
   classNamed?: (name: string) => SpellClass | undefined
 }
@@ -265,14 +265,14 @@ export class Loader {
   /**
    * A loader reading entries through `entryFor`.
    * - throws with no `classNamed`, and no running program to find classes in:
-   *   under `spell-lang/core/model` -- see `programThings()`
+   *   under `spell-parser/core/model` -- see `programThings()`
    */
   constructor({ entryFor, classNamed }: LoaderOptions) {
     this.entryFor = entryFor
     const things = programThings()
     if (!classNamed && !things) {
       throw new TypeError(
-        "new Loader():  no running program to find classes in (`spell-lang/core/model`);  pass `classNamed`"
+        "new Loader():  no running program to find classes in (`spell-parser/core/model`);  pass `classNamed`"
       )
     }
     this.classNamed = classNamed ?? ((name) => things!.classNamed(name) as SpellClass | undefined)

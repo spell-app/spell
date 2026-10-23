@@ -1,6 +1,6 @@
-import { TextFile, batch } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
+import { TextFile, batch } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
 
 /**
  * CSS file as part of `SpellProject`.

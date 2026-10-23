@@ -1,4 +1,4 @@
-import { MD } from "spell-lang/markdown"
+import { MD } from "spell-parser/markdown"
 
 import { InlineNode } from "./InlineNode"
 // read at module evaluation, for the patterns below

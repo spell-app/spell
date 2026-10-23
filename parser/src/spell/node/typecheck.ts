@@ -5,10 +5,10 @@ import { dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 /**
- * spell-lang's code folders:  what compiled spell is checked against.
+ * spell-parser's code folders:  what compiled spell is checked against.
  * - Found from this file's folder, `src/spell/node/`.
  * - `srcDir`:  spell's folder, `src/spell/`
- * - `repoDir`:  spell-lang's root, holding its `src/` (`src/core/`, `src/py/` ...) and its `tests/`
+ * - `repoDir`:  spell-parser's root, holding its `src/` (`src/core/`, `src/py/` ...) and its `tests/`
  * - `coreDir`:  `core`'s folder, `src/core/`
  * - Spell's own folders only.
  *   Where PROJECTS are is spaces' (`spell-app/spaces/server/node/environment`), which spell never imports.
@@ -20,9 +20,9 @@ export const CODE_FOLDERS = (() => {
 })()
 
 /**
- * The editor app's source folder (`src/app/` in spell-app), when it's installed beside spell-lang;  else `undefined`.
+ * The editor app's source folder (`src/app/` in spell-app), when it's installed beside spell-parser;  else `undefined`.
  * - The `ts/solid` target's check reads its types (`typecheck()`):  compiled spell's elements ARE the app's.
- * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none,
+ * - A higher repo's:  spell-parser alone (`yarn clone spell-parser`) has none,
  *   and the checks that need it skip themselves (epic `repo-split` C11).
  */
 export const APP_DIR: string | undefined = installedPackage("spell-app", "src/app")
@@ -61,7 +61,7 @@ function installedPackage(name: string, sub = ""): string | undefined {
  * - `projects`:  each project they import, `@spell/project/<id>`, as the path of its compiled output.
  * - Used by `spell compile` (on a `ts/solid` target) and spell-app's `typescript.test.ts` (the frozen test projects').
  * - NODE-ONLY:  runs the workspace's `tsc` (TypeScript 7) in a child process.
- * - Needs the editor app installed beside spell-lang (`APP_DIR`, spell-app's):  throws without it.
+ * - Needs the editor app installed beside spell-parser (`APP_DIR`, spell-app's):  throws without it.
  */
 export function typecheck(
   files: Record<string, string>,
@@ -99,7 +99,7 @@ export function describeTypecheckError({ line, column, code, message }: Typechec
 }
 
 /**
- * The first `node_modules/.bin/<name>` at or above spell-lang's `src/`, e.g. `tsc`.
+ * The first `node_modules/.bin/<name>` at or above spell-parser's `src/`, e.g. `tsc`.
  * - Why a search:  yarn hoists to the install's root, the top repo `spell` (`~/www/spell`).
  * - Throws if none, i.e. no `yarn install`.
  */
@@ -122,8 +122,8 @@ function nodeModulesDir(): string {
  * `<ui-*>` tags' JSX types:  Spell UI's, exact (`spell-ui/jsx`, generated from its vocabularies), as the app uses them.
  * - So compiled spell's `<ui-button size="enormous">` is an error, as it is in the app's own code.
  * - Written into the checked folder as a file of its own (`UI_JSX_FILE`), naming them by package:
- *   spell-lang never imports Spell UI, a repo above it.
- *   - The folder finds Spell UI as it finds the app:  installed beside spell-lang, through its `node_modules` link.
+ *   spell-parser never imports Spell UI, a repo above it.
+ *   - The folder finds Spell UI as it finds the app:  installed beside spell-parser, through its `node_modules` link.
  * - Types only:  nothing of Spell UI's runs here.
  * - Translated tags (a Spanish program's `<es-boton>`) stay loose, as the app types them:
  *   the generated types name the English tags only.
@@ -151,19 +151,19 @@ const SPELL_ELEMENTS_SOURCE = "runner/spellElements.ts"
 
 /**
  * A `tsconfig.json` checking `names`, with `@spell/core` pointing at `core`'s source.
- * - spell-lang's settings (its root `tsconfig.json`),
+ * - spell-parser's settings (its root `tsconfig.json`),
  *   plus Solid's JSX and `<ui-*>`'s JSX types (`UI_JSX_FILE`):  see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
- * - ONE core:  the app's own imports of `spell-lang/core` go to the same source,
- *   by spell-lang's own condition (`spell-lang-source`, in the settings it extends).
- * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations,
+ * - ONE core:  the app's own imports of `spell-parser/core` go to the same source,
+ *   by spell-parser's own condition (`spell-parser-source`, in the settings it extends).
+ * - The other repos' packages (`spell/util`, `spell-ui` ...) by their declarations,
  *   through the folder's `node_modules` link (epic `repo-split` I12).
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
   const { coreDir } = CODE_FOLDERS
   const app = APP_DIR
   if (!app)
-    throw new Error("typecheck():  no spell-app installed beside spell-lang:  it checks against the app's types")
+    throw new Error("typecheck():  no spell-app installed beside spell-parser:  it checks against the app's types")
   const imported = Object.fromEntries(Object.entries(projects).map(([id, path]) => [`@spell/project/${id}`, [path]]))
   return {
     extends: resolve(CODE_FOLDERS.repoDir, "tsconfig.json"),
@@ -179,11 +179,11 @@ function tsconfig(names: string[], projects: Record<string, string>) {
       // the repo's global types (`Prettify` ...), through the folder's `node_modules` link
       // - `vite/client`:  not named, as `core` uses none of it (the toolchain's types bring it all the same)
       // NO `typeRoots`:  found by package name, through the folder's `node_modules` link and the kit's `exports`
-      types: ["node", "spell-kit/toolchain/types"],
+      types: ["node", "spell/toolchain/types"],
       noUnusedLocals: false
     },
     files: [...names, UI_JSX_FILE],
-    // none:  `files` only (else spell-lang's own `include` would be inherited)
+    // none:  `files` only (else spell-parser's own `include` would be inherited)
     include: []
   }
 }

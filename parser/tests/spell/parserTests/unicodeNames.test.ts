@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-lang/spell/test"
+import { parseSpellProject } from "spell-parser/spell/test"
 
 /**
  * Names in any script (epic `spanish` P1):  a type `Árbol`, a property `corazón` and a method `es un trébol`

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-lang/spell/test"
+import { parseSpellProject } from "spell-parser/spell/test"
 
 /**
  * PROPERTY RULES (epic `property-editor` P9):  what a property's value must be, beyond its type, said on its type.

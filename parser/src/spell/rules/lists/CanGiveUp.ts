@@ -1,7 +1,7 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
 // Import directly to avoid circular import
-import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressions"
+import { InfixOperatorSuffix, Precedence } from "spell-parser/spell/rules/expressions"
 import { type GuardOperands } from "./lists.shared"
 
 /**

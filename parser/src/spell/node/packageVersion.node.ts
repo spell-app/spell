@@ -4,8 +4,8 @@ import { fileURLToPath } from "url"
 
 /**
  * Our `package.json` version -- the app's, NOT the spell language's (`SP.SPELL_VERSION`).
- * - The nearest `package.json` up from this file:  spell-lang's one (epic `repo-split` P11:  `src/spell/` is a folder of
- *   the `spell-lang` package, with no `package.json` of its own).
+ * - The nearest `package.json` up from this file:  spell-parser's one (epic `repo-split` P11:  `src/spell/` is a folder of
+ *   the `spell-parser` package, with no `package.json` of its own).
  * - NODE ONLY:  reads the file.  NEVER import from browser code -- it gets `__PACKAGE_VERSION__` from vite.
  */
 export function readPackageVersion(): string {

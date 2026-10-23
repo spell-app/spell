@@ -1,5 +1,5 @@
-import { proto } from "spell-kit/util"
-import type { P } from "spell-lang/parser"
+import { proto } from "spell/util"
+import type { P } from "spell-parser/parser"
 // Import directly to avoid circular import
 import { CreateListType } from "./CreateListType"
 

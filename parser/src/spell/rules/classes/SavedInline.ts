@@ -1,9 +1,9 @@
-import { proto } from "spell-kit/util"
-import { P } from "spell-lang/parser"
-import { SP } from "spell-lang/spell"
-import { Priority } from "spell-lang/spell/rules/rules.types"
+import { proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { Priority } from "spell-parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-lang/spell/rules/Statement"
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
 
 /**
  * `saved_inline` rule:  `a dated-event is saved inline` --
