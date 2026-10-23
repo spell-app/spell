@@ -137,6 +137,11 @@ classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dra
   syntax: "((dragged:arrastrar)|(dropped_on:soltar encima))"
 })
 
+// The same, as adjectives:  `es arrastrable`, `no es soltable`
+classesEs.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:arrastrable)|(dropped_on:soltable))"
+})
+
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
 classesEs.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
   syntax: "((at_least:al menos|como mínimo|como minimo)|(at_most:como mucho|a lo sumo|como máximo|como maximo))"
@@ -534,8 +539,28 @@ classesEs.addRule(DragAndDrop, {
   ]
 })
 
+classesEs.addRule(DragAndDrop, {
+  syntax: `${A} {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          ["una carta es una cosa dibujable", "una pila es una lista dibujable de cartas"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["una carta es arrastrable", "Carta.canBeDragged = true"],
+        ["una pila no es soltable", "Pila.canBeDroppedOn = false"]
+      ]
+    }
+  ]
+})
+
 for (const subject of ["subject_it", "subject_implied"]) {
   classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
+  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
 }
 
 classesEs.addRule(SavedInline, {

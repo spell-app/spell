@@ -75,6 +75,11 @@ classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragg
   syntax: "((dragged:dragged)|(dropped_on:dropped on))"
 })
 
+// The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
+classes.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:draggable)|(dropped_on:droppable))"
+})
+
 // Which bound, for `must_rule`:  `be at least 3 letters long`
 classes.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
   syntax: "((at_least:at least)|(at_most:at most))"
@@ -552,9 +557,28 @@ classes.addRule(DragAndDrop, {
   ]
 })
 
+// as adjectives:  `a card is draggable`, `a pile is not droppable`
+classes.addRule(DragAndDrop, {
+  syntax: "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["a card is a drawable thing", "a pile is a drawable list of cards"].join("\n"), "block")
+      },
+      tests: [
+        ["a card is draggable", "Card.canBeDragged = true"],
+        ["a pile is droppable", "Pile.canBeDroppedOn = true"],
+        ["a card is not draggable", "Card.canBeDragged = false"]
+      ]
+    }
+  ]
+})
+
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:  `- it can be dragged`, `- can be dropped on`
 for (const subject of ["subject_it", "subject_implied"]) {
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
+  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
 }
 
 classes.addRule(SavedInline, {

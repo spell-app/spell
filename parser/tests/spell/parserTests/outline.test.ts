@@ -936,6 +936,20 @@ describe("outline style", () => {
       expect(js).toContain("static canBeDroppedOn = true")
     })
 
+    test("`- it is draggable`, `- is droppable`:  the same flags;  `is not` turns one off for a sub-type (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- it is draggable",
+        "a joker is a card where:",
+        "\t- it is not draggable",
+        "a pile is a drawable list of cards where:",
+        "\t- is droppable"
+      ])
+      expect(js).toContain("static canBeDragged = true")
+      expect(js).toContain("static canBeDragged = false")
+      expect(js).toContain("static canBeDroppedOn = true")
+    })
+
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
         "a card is a drawable thing where:",

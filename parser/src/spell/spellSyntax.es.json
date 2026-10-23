@@ -1370,6 +1370,7 @@
             "print_kind",
             "take_or_give_up",
             "drag_or_drop",
+            "draggable_or_droppable",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1406,6 +1407,9 @@
             },
             {
               "syntax": "((dragged:arrastrar)|(dropped_on:soltar encima))"
+            },
+            {
+              "syntax": "((dragged:arrastrable)|(dropped_on:soltable))"
             },
             {
               "syntax": "((at_least:al menos|como mínimo|como minimo)|(at_most:como mucho|a lo sumo|como máximo|como maximo))"
@@ -3995,7 +3999,7 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 23,
+          "line": 25,
           "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
           "syntaxes": [
             {
@@ -4014,10 +4018,31 @@
               }
             },
             {
+              "syntax": "(un|una) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable}",
+              "example": "una carta es arrastrable",
+              "outputs": {
+                "js": {
+                  "code": "Carta.canBeDragged = true"
+                },
+                "ts": {
+                  "code": "Carta.canBeDragged = true"
+                },
+                "py": {
+                  "code": "Carta.can_be_dragged = True"
+                }
+              }
+            },
+            {
               "syntax": "{type:subject_it} se puede {what:drag_or_drop}"
             },
             {
+              "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable}"
+            },
+            {
               "syntax": "{type:subject_implied} se puede {what:drag_or_drop}"
+            },
+            {
+              "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable}"
             }
           ],
           "aliases": ["statement"]

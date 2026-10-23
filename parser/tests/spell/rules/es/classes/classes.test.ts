@@ -79,6 +79,18 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/canBeDroppedOn = true/)
     })
 
+    test("`es arrastrable`, `no es soltable`:  the same flags, as adjectives (outline-spell P28)", () => {
+      const { code, errors } = compiled("draggable", [
+        "una carta es una cosa dibujable:",
+        "\t- es arrastrable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- no es soltable"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/canBeDragged = true/)
+      expect(code).toMatch(/canBeDroppedOn = false/)
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",
