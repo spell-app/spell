@@ -1,3 +1,5 @@
+import { elementTagFor } from "spell-kit/util"
+
 import { P } from "spell-lang/parser"
 // Import directly to avoid circular import
 import * as pyText from "./pyText"
@@ -801,8 +803,8 @@ export class PyBaseWriter extends P.ProgramWriter {
 
   /** One statement:  a class member in its class's body, a loop as Python says it (`loop()`), else as written. */
   statement(statement: P.ASTNode): string {
-    // a drawable type's `elementTag`, javascript's for its page:  the program here has no page
-    if (P.jsShapes.elementTagProject(statement) !== undefined) return ""
+    const project = P.jsShapes.elementTagProject(statement)
+    if (project !== undefined) return this.elementTag(project)
     if (statement instanceof P.ASTClassMember) return String(this.writeAsMember(statement))
     const expression = statement instanceof P.ASTExpression ? statement : undefined
     const previous = this.asserts
@@ -818,6 +820,17 @@ export class PyBaseWriter extends P.ProgramWriter {
     } finally {
       this.asserts = previous
     }
+  }
+
+  /**
+   * A drawable class's element tag, in its body:  `element_tag = "solitaire-card"`, from project `project`.
+   * - Javascript's `static elementTag = core.defineElement(this, "Solitaire")`, named the same way (`elementTagFor()`):
+   *   so the page Python prints draws each drawable thing as its element, as javascript's does (`core.draw_thing()`).
+   * - Named here, as text:  Python's class body can't hand the class to the core as it's made.
+   * - The page that draws a Python program defines the element itself, from its javascript (`PY.ElementsWriter`).
+   */
+  elementTag(project: string): string {
+    return `element_tag = ${this.quoted(elementTagFor(project, this.typeNameOf(this.currentClass ?? "")))}`
   }
 
   /** The `assert`s the statement being written needs, before it -- see `assertThere()`. */

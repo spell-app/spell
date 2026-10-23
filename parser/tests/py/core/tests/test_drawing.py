@@ -158,13 +158,47 @@ def test_a_draw_that_fails_shows_a_stand_in(core: Core, capsys: pytest.CaptureFi
     assert capsys.readouterr().err == "Broken:  draw() failed ValueError('no rank')\n"
 
 
-def test_drawable_things_draw_as_any_thing_and_a_drawable_list_as_its_slot(core: Core) -> None:
+def test_drawable_things_with_no_tag_draw_as_any_thing_and_a_drawable_list_as_its_slot(core: Core) -> None:
     class Token(Drawable):
         def draw(self) -> Element:
             return h("i", {"class": "token"})
 
     assert str(core.draw_thing(Token())) == '<i class="token"></i>'
     assert str(core.draw_thing(DrawableList([Token()]))) == "<slot></slot>"
+
+
+class Chip(Drawable):
+    element_tag = "game-chip"
+    value = prop(type="number")
+
+    def draw(self) -> Element:
+        return h("i", {"class": "chip"}, self.value)
+
+
+class Stack(DrawableList):
+    element_tag = "game-stack"
+
+    def draw(self) -> Element:
+        return h("div", {"class": "stack"}, h("slot", {"name": "label"}), h("b", "top"), h("slot"))
+
+
+def test_a_drawable_thing_with_a_tag_draws_as_its_element_its_drawing_inside(core: Core) -> None:
+    assert core.element_tag_of(Chip()) == "game-chip"
+    assert core.element_tag_of(Card()) is None
+    assert str(core.draw_thing(Chip(value=5))) == '<game-chip><i class="chip">5</i></game-chip>'
+
+
+def test_a_drawable_lists_items_show_in_its_drawings_slot_as_the_page_shows_them(core: Core) -> None:
+    class Plain(DrawableList):
+        element_tag = "game-plain"
+
+    assert str(core.draw_thing(Plain([Chip(value=1), 2]))) == (
+        '<game-plain><game-chip><i class="chip">1</i></game-chip>2</game-plain>'
+    )
+    assert str(core.draw_thing(Stack([Chip(value=1)]))) == (
+        '<game-stack><div class="stack"><b>top</b><game-chip><i class="chip">1</i></game-chip></div></game-stack>'
+    )
+    assert str(core.draw_thing(Plain())) == "<game-plain></game-plain>"
 
 
 def test_a_drawable_lists_items_draw_as_themselves_or_their_text_or_in_its_own_wrapper(core: Core) -> None:

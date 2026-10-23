@@ -116,7 +116,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Not counted:  a plain `List`, a thing made inside a test, a helper's scratch result (made `core.quietly()`).
     - A name falls back to a thing the program keeps at its top level, as javascript's does.
 - A drawable program (P28) draws its own elements (`<solitaire-card>`) on the page:
-  the page's javascript defines them, so the Python leaves out the `elementTag` line.
+  the page's javascript defines them.
+  - Each drawable class still names its tag, `element_tag = "solitaire-card"`, as javascript's names it
+    (epic `spanish` I5).
+  - So the page Python prints (`--page`) draws each drawable thing as its element, as javascript's does:
+    its own drawing inside, a drawable list's items' elements in its `<slot>` (`core.draw_thing()`).
 - `play_page()` (`spell_core.playing`, P30):  a test plays a program the way its page does, by the page's messages.
   - `game.trigger("card-click", card=game.ref(card))`, `game.call("deal_the_cards")`:  each answered by its patch.
   - `game.thing(id)`, `game.named("stock")`:  what the page holds now, by id.

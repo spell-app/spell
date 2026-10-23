@@ -3779,7 +3779,7 @@
                   "code": "export class Pile extends DrawableList<Carta> {\n  static instanceType = Carta\n  static elementTag = core.defineElement(this, \"syntax_statement\")\n}\n\nexport class PileElement extends SpellElement<Pile> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-statement-pile\", \"pile\", [])\n}\ncore.useElement(Pile, PileElement)"
                 },
                 "py": {
-                  "code": "class Pile(DrawableList):\n    item_type = Carta"
+                  "code": "class Pile(DrawableList):\n    item_type = Carta\n    element_tag = \"syntax-statement-pile\""
                 }
               }
             },
@@ -3807,7 +3807,7 @@
                   "code": "export class Card extends Drawable {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  static css = css`\n    .red { color: crimson }\n  `\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n  @E.protoMerged static elementSetup = {\n    styleSheets: { \"syntax-block-card\": Card.css }\n  } satisfies Partial<E.ElementSetup>\n}\ncore.useElement(Card, CardElement)"
                 },
                 "py": {
-                  "code": "class Card(Drawable):\n    css = \"\\n  .red { color: crimson }\\n\""
+                  "code": "class Card(Drawable):\n    element_tag = \"syntax-block-card\"\n\n    css = \"\\n  .red { color: crimson }\\n\""
                 }
               }
             }

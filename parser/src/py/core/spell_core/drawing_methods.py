@@ -17,14 +17,17 @@ game.start()                      # the game is drawn on `core.page`, when the p
   - An app mounted on it is drawn each time the page is WRITTEN, not when it starts:
     so it shows its things as they are then, as a live page would.
   - `python -m spell_core.run --page` writes it when the program ends:  what the core contract compares.
-- A drawable thing is never its own element here (`<solitaire-card>`):  that's the browser's, which defines it.
-  Every thing draws as its own drawing, as in the JavaScript run, which defines no elements either.
+- A drawable thing is its own element here too, `<solitaire-card>`, as the page shows it (epic `spanish` I5):
+  - its own drawing inside, where a browser has its shadow root
+  - a drawable list's items' elements in its drawing's `<slot>`
+  - So the page prints what the JavaScript run's fake page prints, cards in their piles.
+  - Its tag is its class's `element_tag`, which the compiled class names (`element_tag_of()`).
 """
 
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from spell_core.drawing import Element, Page, h
+from spell_core.drawing import Element, Page, drawn_children, h
 
 if TYPE_CHECKING:
     from spell_core.console import SpellConsole
@@ -66,12 +69,32 @@ class DrawingMethods:
     ################
 
     def draw_thing(self, drawable: object = None) -> object:
-        """`drawable` drawn:  what its own `draw()` returns -- `None` if it can't draw (no `draw()`).
+        """`drawable` drawn -- `None` if it can't draw (no `draw()`).
 
         - Compiled from `draw the card`, as `h("td", core.draw_thing(stock))`.
         - Takes anything, as it checks:  the last card of an empty pile is `None`, which draws nothing.
+        - A DRAWABLE thing (its class has an `element_tag`) is its element, e.g. `<solitaire-card>`,
+          its own drawing inside (`draw_own()`), as the page shows it:  see `element_of()`.
+          - A drawable LIST's items are drawn in its drawing's `<slot>` (`draw_items()`).
+        - Anything else:  its own drawing, here.
         """
-        return self.draw_own(drawable)
+        if not callable(getattr(drawable, "draw", None)):
+            return None
+        tag = self.element_tag_of(drawable)
+        if tag is None:
+            return self.draw_own(drawable)
+        from spell_core.apps import DrawableList
+
+        items = self.draw_items(drawable) if isinstance(drawable, DrawableList) else None
+        return element_of(tag, self.draw_own(drawable), items or [])
+
+    def element_tag_of(self, drawable: object = None) -> str | None:
+        """Tag of `drawable`'s element, e.g. `solitaire-card` -- `None` if its class has none.
+
+        - The compiled class names it:  `element_tag = "solitaire-card"`, in its body.
+        """
+        tag = getattr(type(drawable), "element_tag", None)
+        return tag if isinstance(tag, str) and tag else None
 
     def draw_own(self, drawable: object = None) -> object:
         """`drawable`'s own drawing, in its own error boundary -- `None` if it can't draw.
@@ -147,3 +170,44 @@ class DrawingMethods:
           as the JavaScript run's page adds no styles either.
         """
         self.page.styles[name or "anonymous-css"] = safe_css.replace("¬", "\n")
+
+
+################
+# ## Drawing an element
+################
+
+
+def element_of(tag: str, drawing: object, children: list[object]) -> Element:
+    """Element `<tag>` drawn as the page shows it:  `drawing`, its shadow root, in its place, `children` in its slots.
+
+    - What the JavaScript run's fake page prints (`withShadowsInPlace()`, `runProject.ts`):
+      - each `<slot>` replaced by the children it takes:
+        the unnamed one those with no `slot` attribute, and text;  `<slot name="header">` those with `slot="header"`
+      - a child goes in the FIRST slot that takes it, as a browser puts it;  a slot with none shows nothing
+    - A drawable thing inside `drawing` is already drawn so (`core.draw_thing()`):
+      its slots are gone, so only `drawing`'s own are filled here.
+    """
+    unplaced = drawn_children([children])
+    shown = drawn_children([drawing])
+
+    def filled(nodes: list[object]) -> list[object]:
+        result: list[object] = []
+        for node in nodes:
+            if not isinstance(node, Element):
+                result.append(node)
+            elif node.tag == "slot":
+                name = node.attributes.get("name")
+                taken = [child for child in unplaced if slot_of(child) == name]
+                unplaced[:] = [child for child in unplaced if slot_of(child) != name]
+                result.extend(taken)
+            else:
+                node.children[:] = filled(node.children)
+                result.append(node)
+        return result
+
+    return Element(tag, children=filled(shown))
+
+
+def slot_of(child: object) -> str | None:
+    """The slot `child` goes in:  its `slot` attribute, `None` for the unnamed one -- text always goes there."""
+    return child.attributes.get("slot") if isinstance(child, Element) else None
