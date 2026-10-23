@@ -265,7 +265,8 @@
   }
   .site-body::part(container) {
     position: relative;
-    padding-block: 2em 7em;
+    /* close under the page header (Owen:  the gap above the tabs read as empty) */
+    padding-block: 0.5em 7em;
   }
   /*
    * ## The page header (Owen, 2026-10-23, epic `debut`:  "needs to be completely rethought"):  the title, large, its
@@ -326,6 +327,14 @@
     display: block;
     grid-column: 1;
     grid-row: 1;
+    /* never broken inside a word ("Breadcrum / b"):  between words only */
+    overflow-wrap: normal;
+  }
+  /* phones:  a smaller title, so a one-word name fits beside the icons */
+  @media (--ui-mobile) {
+    .site-title {
+      font-size: 0.75em;
+    }
   }
   /*
    * the TITLE LINE sticks under the top bar for the whole page, and everything scrolls under it (Owen, 2026-10-23:
@@ -501,6 +510,14 @@
     --site-tabs-gap: 10px;
     /* the tabs' panel, in from the column's edges (its band reaching out past this) */
     --site-tabs-inset: 40px;
+  }
+  /* phones:  the tabs need the width */
+  @media (--ui-mobile) {
+    .site-main {
+      --site-tabs-inset: 0px;
+    }
+  }
+  .site-main {
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
     --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
