@@ -1407,13 +1407,13 @@
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
             },
             {
-              "syntax": "((dragged:arrastrar)|(dropped_on:soltar encima))"
+              "syntax": "((dragged:arrastrar)|(dropped_on:soltar encima)|(selected:seleccionar))"
             },
             {
               "syntax": "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))"
             },
             {
-              "syntax": "((dragged:arrastrable)|(dropped_on:soltable))"
+              "syntax": "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
             },
             {
               "syntax": "((at_least:al menos|como mínimo|como minimo)|(at_most:como mucho|a lo sumo|como máximo|como maximo))"
@@ -4003,7 +4003,7 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
           "syntaxes": [
             {

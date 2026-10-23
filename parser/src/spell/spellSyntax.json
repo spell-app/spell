@@ -1394,13 +1394,13 @@
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
             },
             {
-              "syntax": "((dragged:dragged)|(dropped_on:dropped on))"
+              "syntax": "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
             },
             {
               "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))"
             },
             {
-              "syntax": "((dragged:draggable)|(dropped_on:droppable))"
+              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -3965,7 +3965,7 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 26,
+          "line": 29,
           "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
           "syntaxes": [
             {

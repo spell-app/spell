@@ -15,4 +15,10 @@ export class Drawable extends Thing {
    * - Even then, only when the list holding one will give it up:  its `can give up` rule.
    */
   static canBeDragged = false
+
+  /**
+   * May a page let people select our things?  `a task can be selected` says yes (epic `outline-spell` P29).
+   * - A click selects one in its list;  shift and command (ctrl) select more:  see `DrawableList.selection`.
+   */
+  static canBeSelected = false
 }

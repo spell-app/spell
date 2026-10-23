@@ -341,6 +341,8 @@ export type RemoteProgram = {
   run(owner: object, method: string, args: unknown[]): void
   startWhile(owner: object, method: string, args: unknown[]): void
   endWhile(owner: object, method: string): void
+  /** Set `owner`'s property there too:  the page changed it, e.g. a form a person typed in. */
+  set(owner: object, property: string, value: unknown): void
   /** Send event `name` to the program's handlers, e.g. `card-drop`, with `details`:  `{ card, pile }`. */
   trigger(name: string, details: Record<string, unknown>): void
 }

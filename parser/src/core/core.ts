@@ -77,13 +77,18 @@ export function registerThing(thing: object): void {
 let recording: Array<{ target: object; property: string; was: unknown }> | undefined
 
 /**
- * SIDE EFFECT:  `target`'s prop `property` is about to be set:  note its value now, if a `while` handler is running.
- * - `Thing` and `List` call it from `setProp()`.
- * - Only its first value is kept:  put back, that's what it had before the handler.
+ * SIDE EFFECT:  `target`'s prop `property` is about to be set to `value`:  `Thing` and `List` call it from `setProp()`.
+ * - Nothing if it has that value already.
+ * - A `while` handler running:  its value now is noted, to put back -- only its first, what it had before the handler.
+ * - A program running elsewhere (`core.remote`, e.g. Python):  it's set there too,
+ *   e.g. a task's title typed into a page's form.
  */
-export function noteSetting(target: object, property: string): void {
-  if (!recording || recording.some((change) => change.target === target && change.property === property)) return
-  recording.push({ target, property, was: peekProp(target, property) })
+export function noteSetting(target: object, property: string, value: unknown): void {
+  const was = peekProp(target, property)
+  if (was === value) return
+  const isNoted = recording?.some((change) => change.target === target && change.property === property)
+  if (recording && !isNoted) recording.push({ target, property, was })
+  ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
 }
 
 /**

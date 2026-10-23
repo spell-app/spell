@@ -116,7 +116,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
-    noteSetting(this, property)
+    noteSetting(this, property, value)
     return super.setProp(property, value)
   }
 

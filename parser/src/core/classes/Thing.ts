@@ -80,7 +80,7 @@ export class Thing extends Eventful(Observable) {
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
-    noteSetting(this, property)
+    noteSetting(this, property, value)
     return super.setProp(property, value)
   }
 

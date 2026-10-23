@@ -989,6 +989,18 @@ describe("outline style", () => {
       expect(js).toMatch(/whenThingDraggedOutOf\(thing\) \{\s+this\.hint = ""/)
     })
 
+    test("`- it can be selected`;  `the selection of the tasks`, what people selected (outline-spell P29)", () => {
+      const js = compile([
+        "a task is a drawable thing where:",
+        "\t- it can be selected",
+        "a to-do is a drawable list of tasks",
+        "to show the selection of a to-do",
+        "\tprint the length of the selection of the to-do"
+      ])
+      expect(js).toContain("static canBeSelected = true")
+      expect(js).toContain("core.console.log(core.itemCountOf(this.selection))")
+    })
+
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
         "a card is a drawable thing where:",

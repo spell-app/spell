@@ -268,6 +268,11 @@
       super: "type:List"
     },
     {
+      path: "type:DrawableList/property:selection",
+      detail: "list",
+      description: "Its items people have selected on the page, in its order -- `the selection of the tasks`.\n- Only items whose type says so:  `a task can be selected`.\n- A click selects one;  shift selects up to it, command (ctrl) adds or takes one away.\n- e.g. a property editor of every selected task:  `<ui-property-editor value={the selection of the tasks}>`.\n- The page's alone:  it's never saved."
+    },
+    {
       path: "type:Text",
       description: "Words, letters -- anything in quotes, e.g. `\"hello\"`.\n- Counts from 1, as a list does:  `the first character of the name` is its first letter.\n- `+` joins two:  `\"total: \" + x`.\n\n```spell\nset the name to \"Ada\"\nprint the length of the name\nprint the last character of the name\n```"
     },

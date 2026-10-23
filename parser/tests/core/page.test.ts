@@ -103,14 +103,27 @@ describe("startPage():  a list's drag handlers", () => {
       core.endWhile(tray, "whileCardDraggedOver")
       core.runHandler(tray, "whenCardDroppedOn", "Card#3")
       core.remote!.trigger("card-drop", { count: 1 })
+      // the page changes one of the program's things, e.g. a form a person typed in:  set there too
+      tray.name = "T9"
+      // the same again:  nothing to send
+      tray.name = "T9"
       const on = sent[0] && "on" in sent[0] ? sent[0].on : undefined
       expect(on).toBeDefined()
       expect(sent).toEqual([
         { call: "start_while", on, args: ["while_card_dragged_over", "Card#3"] },
         { call: "end_while", on, args: ["while_card_dragged_over"] },
         { call: "when_card_dropped_on", on, args: ["Card#3"] },
-        { trigger: "card-drop", details: { count: 1 } }
+        { trigger: "card-drop", details: { count: 1 } },
+        { call: "set_prop", on, args: ["name", "T9"] }
       ])
+      // what the program sends the page is its own:  never sent back
+      sent.length = 0
+      startPage({
+        modules: [{ Tray }],
+        state: { tray: { $type: "Tray", $id: "1", name: "T1", $items: [] } },
+        send: (message) => sent.push(message)
+      })
+      expect(sent).toEqual([])
     } finally {
       core.remote = undefined
     }

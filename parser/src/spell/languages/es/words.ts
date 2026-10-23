@@ -134,7 +134,8 @@ export const spanishWords: SP.LanguageWords = {
     size: ["tamaño", "tamano"],
     characters: ["caracteres"],
     year: ["año", "ano"],
-    day: ["día", "dia"]
+    day: ["día", "dia"],
+    selection: ["selección", "seleccion"]
   },
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */

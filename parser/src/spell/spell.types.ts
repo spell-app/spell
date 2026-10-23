@@ -233,7 +233,7 @@ export type ProjectImportRef = {
 export type ProjectList = ProjectListEntry[]
 
 /**
- * One project of a group's list:  `{ path: "@spell/examples/todos-form-based", title: "Todos - Form Based" }`.
+ * One project of a group's list:  `{ path: "@spell/examples/TaskList", title: "Task List" }`.
  * - `title` only when its project file has one (decision Q45):  else `SpellProject.title` makes it from the name.
  */
 export type ProjectListEntry = { path: string; title?: string }

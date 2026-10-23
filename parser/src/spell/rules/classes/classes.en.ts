@@ -71,9 +71,9 @@ classes.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["ta
   syntax: "((take:add|take)|(give_up:release|remove|give up|let go of))"
 })
 
-// What a type's things may be, for `drag_and_drop`:  dragged, or dropped on
-classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:dragged)|(dropped_on:dropped on))"
+// What a type's things may be, for `drag_and_drop`:  dragged, dropped on, or selected
+classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on", "selected"] }), {
+  syntax: "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
 })
 
 // When a list's drag handler runs, for `drag_handler`:  `when a card is dropped on it`
@@ -83,9 +83,12 @@ classes.addRule(
 )
 
 // The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
-classes.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:draggable)|(dropped_on:droppable))"
-})
+classes.addRule(
+  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  {
+    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+  }
+)
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
 classes.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -558,7 +561,8 @@ classes.addRule(DragAndDrop, {
       },
       tests: [
         ["a card can be dragged", "Card.canBeDragged = true"],
-        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"]
+        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"],
+        ["a card can be selected", "Card.canBeSelected = true"]
       ]
     }
   ]
@@ -576,7 +580,8 @@ classes.addRule(DragAndDrop, {
       tests: [
         ["a card is draggable", "Card.canBeDragged = true"],
         ["a pile is droppable", "Pile.canBeDroppedOn = true"],
-        ["a card is not draggable", "Card.canBeDragged = false"]
+        ["a card is not draggable", "Card.canBeDragged = false"],
+        ["a card is selectable", "Card.canBeSelected = true"]
       ]
     }
   ]

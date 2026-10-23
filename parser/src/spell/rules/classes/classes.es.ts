@@ -134,8 +134,8 @@ classesEs.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["
 })
 
 // What a type's things may be, for `drag_and_drop`:  `se puede arrastrar`, `se puede soltar encima`
-classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:arrastrar)|(dropped_on:soltar encima))"
+classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on", "selected"] }), {
+  syntax: "((dragged:arrastrar)|(dropped_on:soltar encima)|(selected:seleccionar))"
 })
 
 // When a list's drag handler runs, for `drag_handler`:  `cuando una carta se suelta sobre ella`
@@ -145,9 +145,12 @@ classesEs.addRule(
 )
 
 // The same, as adjectives:  `es arrastrable`, `no es soltable`
-classesEs.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:arrastrable)|(dropped_on:soltable))"
-})
+classesEs.addRule(
+  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  {
+    syntax: "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
+  }
+)
 
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
 classesEs.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -540,7 +543,8 @@ classesEs.addRule(DragAndDrop, {
       },
       tests: [
         ["una carta se puede arrastrar", "Carta.canBeDragged = true"],
-        ["una pila se puede soltar encima", "Pila.canBeDroppedOn = true"]
+        ["una pila se puede soltar encima", "Pila.canBeDroppedOn = true"],
+        ["una carta se puede seleccionar", "Carta.canBeSelected = true"]
       ]
     }
   ]

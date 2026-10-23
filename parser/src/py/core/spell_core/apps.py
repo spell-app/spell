@@ -51,6 +51,8 @@ class Drawable(Thing):
     element_tag: str | None = None
     # may a page let people drag our things?  `a card can be dragged` says yes -- the JavaScript core's `canBeDragged`
     can_be_dragged: bool = False
+    # may a page let people select our things?  `a task can be selected` says yes -- `canBeSelected`
+    can_be_selected: bool = False
 
 
 class DrawableList(List):
@@ -68,6 +70,14 @@ class DrawableList(List):
     can_be_dropped_on: bool = False
     # may a page let people drag our lists themselves?  `a pile can be dragged`
     can_be_dragged: bool = False
+
+    @property
+    def selection(self) -> list[object]:
+        """Our items people selected on the page:  `the selection of the tasks` -- see the JavaScript core's.
+
+        - The page's alone:  a program running in Python never hears of it, so here it's always empty.
+        """
+        return []
 
     def draw(self) -> object:
         """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show.

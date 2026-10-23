@@ -215,6 +215,7 @@ describe("drag handlers", () => {
       run: (...args) => sent.push(["run", ...args.slice(1)]),
       startWhile: (...args) => sent.push(["startWhile", ...args.slice(1)]),
       endWhile: (...args) => sent.push(["endWhile", ...args.slice(1)]),
+      set: () => {},
       trigger: (...args) => sent.push(["trigger", ...args])
     }
     try {

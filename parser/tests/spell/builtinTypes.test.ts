@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
 import { P } from "spell-lang/parser"
-import { core, List, Thing } from "spell-lang/core"
+import { core, DrawableList, List, Thing } from "spell-lang/core"
 import { SP } from "spell-lang/spell"
 
 /**
@@ -40,6 +40,7 @@ describe("built-in type table", () => {
       [
         "list length => 3",
         "list size => 3",
+        "drawable list selection => []",
         "text length => 3",
         "text characters => ["A","d","a"]",
         "date year => 2026",
@@ -150,6 +151,7 @@ describe("typeName()", () => {
 const SAMPLES: Record<string, unknown> = {
   text: "Ada",
   list: Object.assign(new List({}), { items: ["a", "b", "c"] }),
+  "drawable list": new DrawableList({}),
   date: new Date(2026, 9, 4),
   thing: {},
   app: {}
