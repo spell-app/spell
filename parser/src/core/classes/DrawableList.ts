@@ -25,6 +25,15 @@ import { List } from "./List"
  */
 export class DrawableList<T = unknown> extends List<T> {
   /**
+   * May a page let people drop a thing on our lists?  `a pile can be dropped on` says yes (epic `outline-spell` P28).
+   * - Even then, only what the list will take:  its `can take` rule.
+   */
+  static canBeDroppedOn = false
+
+  /** May a page let people drag our lists themselves?  `a pile can be dragged` -- see `Drawable.canBeDragged`. */
+  static canBeDragged = false
+
+  /**
    * Its outside, with a `<slot>` where its items show -- by default the slot, and its placeholder while it's empty.
    * - Override it, e.g. `to draw it:  return <div class="pile"><children/></div>`:
    *   spell's `<children/>` is the web's `<slot>`, compiled to `h("slot")`.

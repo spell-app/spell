@@ -45,6 +45,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
+import { DragAndDrop } from "./DragAndDrop"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -67,6 +68,11 @@ import { WithNestedStatements } from "./WithNestedStatements"
 // Which way a list's item moves, for `list_guard`:  `a pile can let go of a card if: ...` means `give_up`
 classes.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["take", "give_up"] }), {
   syntax: "((take:add|take)|(give_up:release|remove|give up|let go of))"
+})
+
+// What a type's things may be, for `drag_and_drop`:  dragged, or dropped on
+classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:dragged)|(dropped_on:dropped on))"
 })
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
@@ -528,6 +534,28 @@ classes.addRule(CanBelongToMany, {
     }
   ]
 })
+
+// `a card can be dragged`, `a pile can be dropped on`:  dragging is opt-in (epic `outline-spell` P28)
+classes.addRule(DragAndDrop, {
+  syntax: "(a|an) {type:known_type} can be {what:drag_or_drop}",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["a card is a drawable thing", "a pile is a drawable list of cards"].join("\n"), "block")
+      },
+      tests: [
+        ["a card can be dragged", "Card.canBeDragged = true"],
+        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"]
+      ]
+    }
+  ]
+})
+
+// in a type's outline body -- tests in `parserTests/outline.test.ts`:  `- it can be dragged`, `- can be dropped on`
+for (const subject of ["subject_it", "subject_implied"]) {
+  classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
+}
 
 classes.addRule(SavedInline, {
   syntax: "(a|an) {type:known_type} is saved inline",

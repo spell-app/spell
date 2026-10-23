@@ -66,6 +66,19 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).not.toContain("dibujarSuMarcador")
     })
 
+    test("`- se puede arrastrar`, `- se puede soltar encima`:  English's `can be dragged`, `can be dropped on` (outline-spell P28)", () => {
+      const { code, errors } = compiled("drag-and-drop", [
+        "una carta es una cosa dibujable:",
+        "\t- se puede arrastrar",
+        "una pila es una lista dibujable de cartas:",
+        "\t- se puede soltar encima"
+      ])
+      expect(errors).toEqual([])
+      // a flag on the class:  in it, or after it, as the writer places it
+      expect(code).toMatch(/canBeDragged = true/)
+      expect(code).toMatch(/canBeDroppedOn = true/)
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",
