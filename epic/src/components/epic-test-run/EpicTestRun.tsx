@@ -260,6 +260,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           >
             {this.summary()}
           </Show>
+          {this.moves()}
         </Show>
         <ui-modal class="zoom" basic="" visible={this.zoomed ? "" : undefined}>
           <Show when={this.zoomed}>{(src) => <img class="zoomed" src={src()} alt="" />}</Show>
@@ -274,7 +275,8 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     const answered = () => total() - this.counts().open
     const at = () => (this.isSummary ? total() : this.tests().indexOf(this.at) + 1)
     return (
-      <>
+      // the band at the top:  full width, sticky under the page's header (the run's modal shape)
+      <div class="top">
         <div class="head" part={this.partForName("head")}>
           <span class="title">{this.translationForKey("testing")}</span>
           <span class="where" aria-live="polite">
@@ -300,11 +302,11 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           aria-label={this.translationForKey("answered", { count: answered(), total: total() })}
           title={this.translationForKey("answered", { count: answered(), total: total() })}
         />
-      </>
+      </div>
     )
   }
 
-  /** Test `id`'s card:  its title, fields, the answers, the failure once failed, Back and Next. */
+  /** Test `id`'s card:  its title, fields, the answers, the comment, the screenshot. */
   private card(id: string): JSX.Element {
     const item = () => this.item()
     const answer = () => this.answerOf(id)
@@ -336,7 +338,6 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
         {this.answers(id)}
         {this.commentBox(id)}
         {this.screenshot(id)}
-        {this.moves()}
       </article>
     )
   }
@@ -545,7 +546,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /** Back and Next. */
+  /** Back and Next:  a band of their own, pinned to the window's bottom, under the card or the summary. */
   private moves(): JSX.Element {
     return (
       <nav class="moves" part={this.partForName("moves")}>
@@ -566,7 +567,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /** The summary:  the counts, what Send does, Send results, the next epic, Back and Done testing. */
+  /** The summary:  the counts, what Send does, Send results, the next epic, Done testing. */
   private summary(): JSX.Element {
     const counts = () => this.counts()
     return (
@@ -631,7 +632,6 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
             )}
           </Show>
         </div>
-        {this.moves()}
       </article>
     )
   }

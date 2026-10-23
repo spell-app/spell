@@ -5056,7 +5056,7 @@
         },
         {
           "name": "head",
-          "description": "Its head:  \"Testing\", \"4 of 9\", and Done testing."
+          "description": "Its head:  \"Testing\", \"4 of 9\", and Done testing;  with the bar under it, a full-width band, sticky under the page's header."
         },
         {
           "name": "progress",
@@ -5080,7 +5080,7 @@
         },
         {
           "name": "moves",
-          "description": "Back and Next, at the card's foot."
+          "description": "Back and Next:  a full-width band of their own, pinned to the window's bottom."
         },
         {
           "name": "summary",

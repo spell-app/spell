@@ -170,6 +170,10 @@ body {
   min-width: 0;
   padding: 0 0 var(--spell-doc-pad-end);
 }
+/* an epic page's test run is the window's, a modal's shape:  no ground below it (epic `epic-engine`, Owen 2026-10-22) */
+.spell-doc-main:has(epic-page:state(testing)) {
+  --spell-doc-pad-end: 0px;
+}
 /*
  * PROSE and INSETS:  the reading column.  Not the comment pane:  it's fixed on the screen, and the column's margin
  * pushed it 176px right of where it was put at 1200px, half off the window (epic `epic-engine` I26)
