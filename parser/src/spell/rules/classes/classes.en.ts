@@ -22,6 +22,7 @@ import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
+import { KindValues } from "./KindValues"
 import { ListGuard, CAN_MOVE, CAN_NEVER_MOVE } from "./ListGuard"
 import { MarkdownDescription } from "./MarkdownDescription"
 import { MustRule } from "./MustRule"
@@ -40,6 +41,7 @@ import { PropertyMust } from "./PropertyMust"
 import { PropertyValueEither } from "./PropertyValueEither"
 import { PropertyValueGetter } from "./PropertyValueGetter"
 import { QuotedPropertyFormula } from "./QuotedPropertyFormula"
+import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
@@ -892,15 +894,20 @@ classes.addRule(ClassMember, {
             "a card is a thing",
             "a card has a suit as one of clubs, diamonds",
             "a bank-account is a thing",
-            "a bank-account has an account-type as one of savings, checking"
+            "a bank-account has an account-type as one of savings, checking",
+            "a deck is a list of cards with:",
+            '\t- "ranks" as one of ace, king'
           ].join("\n"),
           "block"
         )
       },
       tests: [
+        // a property's own list is its kind's plural too, `card suit`:  `kind_values` reads it the same
         ["card suits", "Card.Suits"],
         ["Card Suits", "Card.Suits"],
         ["bank-account account-types", "BankAccount.AccountTypes"],
+        // a value kind's list, on the type whose body names it
+        ["deck ranks", "Deck.Ranks"],
         { title: "not a class variable", input: "card ranks", js: undefined }
       ]
     }
@@ -1638,6 +1645,57 @@ classes.addRule(QuotedPropertyFormula, {
         ["print card is a club", 'core.console.log(card.isASuit("clubs"))'],
         ["print card is the 2 of hearts", 'core.console.log(card.isTheRankOfSuits(2, "hearts"))']
       ]
+    },
+    // a blank takes its values singular or plural, numbers too:  `(suit)` reads `clubs`, `(rank)` reads `2`
+    // -- and a sub-type's phrase is its type's static method, which checks the type:  safe on any card
+    {
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "a card is a thing",
+            "a card has a rank as one of ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king",
+            "a card has a suit as one of clubs, diamonds, hearts, spades",
+            'a card "is the (rank) of (suit)" for its ranks and its suits',
+            "a joker is a card",
+            "a joker has a color as one of red, black",
+            "card = a new card"
+          ].join("\n"),
+          "block"
+        )
+      },
+      compileAs: "block",
+      tests: [
+        [
+          'a joker "is the (color) joker" for its colors',
+          [
+            "Joker.isTheColorJoker = function (card, color) {",
+            "  return card instanceof Joker && card.color === color",
+            "}"
+          ],
+          [
+            "Joker.isTheColorJoker = function (card: Card, color: any /* spell: type unknown */) {",
+            "  return card instanceof Joker && card.color === color",
+            "}"
+          ]
+        ],
+        [
+          'a joker "is the (color) joker" for its colors\nprint card is the red joker',
+          [
+            "Joker.isTheColorJoker = function (card, color) {",
+            "  return card instanceof Joker && card.color === color",
+            "}",
+            'core.console.log(Joker.isTheColorJoker(card, "red"))'
+          ],
+          [
+            "Joker.isTheColorJoker = function (card: Card, color: any /* spell: type unknown */) {",
+            "  return card instanceof Joker && card.color === color",
+            "}",
+            'core.console.log(Joker.isTheColorJoker(card, "red"))'
+          ]
+        ],
+        ["print card is the 2 of clubs", 'core.console.log(card.isTheRankOfSuit(2, "clubs"))'],
+        ["print card is the queen of spade", 'core.console.log(card.isTheRankOfSuit("queen", "spades"))']
+      ]
     }
   ]
 })
@@ -1733,6 +1791,14 @@ classes.addRule(EveryThing, {
         ["every pile", "core.everyThing(Pile)"],
         ["every tableau", "core.everyThing(Tableau)"]
       ]
+    },
+    {
+      // every value of a kind:  its list (epic `spanish` P22)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a suit as one of clubs, diamonds"].join("\n"), "block")
+      },
+      tests: [["every card suit", "Card.Suits"]]
     }
   ]
 })
@@ -1753,6 +1819,47 @@ classes.addRule(TheThings, {
         // a variable keeps its meaning
         ["the cards", "cards"],
         ["the gizmos", undefined]
+      ]
+    }
+  ]
+})
+
+classes.addRule(KindValues, {
+  syntax: "{type:plural_type}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "a card is a thing",
+            "a card has a suit as one of clubs, diamonds",
+            "a card has a short rank as one of ace, 2 ... 10"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["card suits", "Card.Suits"],
+        ["card short ranks", "Card.ShortRanks"],
+        // a type that isn't a kind
+        ["cards", undefined]
+      ]
+    }
+  ]
+})
+
+classes.addRule(RandomKindValue, {
+  syntax: "a random {type:known_type}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a suit as one of clubs, diamonds"].join("\n"), "block")
+      },
+      tests: [
+        ["a random card suit", "core.randomItemOf(Card.Suits)"],
+        ["a random card", undefined]
       ]
     }
   ]

@@ -26,12 +26,13 @@ card.to_json()  # {"$type": "Card", "rank": "queen"}
 """
 
 import builtins
+import inspect
 import re
 import reprlib
 import secrets
 import string
 import weakref
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Sequence
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
@@ -330,6 +331,8 @@ class SpellObject:
         - Its starting values that are things (`prop(early=True)`), e.g. a solitaire's piles,
           are made before `create()`, unless `props` gave them.
         - No `create()` inside `without_create()`:  a copy, not a new thing.
+        - A `create()` that waits (`async def`) runs to its end here too, its pauses not waiting:
+          `core.run_at_once()`.
         """
         program_core().note_made(self)
         self._props: dict[str, object] = {}
@@ -338,7 +341,9 @@ class SpellObject:
         for name in _early_props(builtins.type(self)):
             getattr(self, name)
         if not _copying:
-            self.create()
+            started = self.create()
+            if inspect.iscoroutine(started):
+                program_core().run_at_once(started)
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """SIDE EFFECT:  every class of thing is known by name, for `core.from_json()`."""
@@ -357,10 +362,12 @@ class SpellObject:
         if isinstance(declared, Prop):
             declared.rules = [*declared.rules, *rules]
 
-    def create(self) -> None:
+    def create(self) -> Awaitable[None] | None:
         """Spell's set-up for a new one:  runs once, after the keyword properties are set.  Does nothing here.
 
         - A class compiled from spell overrides it:  `to set up a deck` compiles to `def create(self)`.
+        - Or `async def create(self)`, when it waits, e.g. a deck's cards each turned face down, which pauses:
+          it still runs to its end as the thing is made (`__init__()`).
         """
 
     def set_prop(self, name: str, value: object, check: "Prop | None" = None) -> None:

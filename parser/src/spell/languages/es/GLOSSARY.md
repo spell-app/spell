@@ -57,6 +57,8 @@ Names people choose keep their accents.
 | nothing / undefined | `(nada|indefinido)` |
 | new | `(nuevo|nueva|nuevos|nuevas)` |
 | list / thing / type / app | `lista` / `cosa` / `tipo` / `(aplicación|aplicacion)` |
+| a property's kind of values, `card suit` | Spanish's order, `palo de carta` (`{property} de {type}`, the pack's `propertyKindName`);  plural `palos de carta` |
+| a class's list of values, `card suits` | `palos de carta` |
 | named / called | `(llamado|llamada)` |
 | number words zero-ten | `cero`, `(uno|una|un)`, `dos`, `tres`, `cuatro`, `cinco`, `seis`, `siete`, `ocho`, `nueve`, `diez` |
 | ordinals | `(primer|primero|primera)`, `(segundo|segunda)`, `(tercer|tercero|tercera)`, `(cuarto|cuarta)`, `(quinto|quinta)`, `(sexto|sexta)`, `(séptimo|septimo|séptima|septima)`, `(octavo|octava)`, `(noveno|novena)`, `(décimo|decimo|décima|decima)`, `(penúltimo|penultimo|penúltima|penultima)`, `(último|ultimo|última|ultima)`, `final`;  top `arriba`, bottom `abajo` |
@@ -93,6 +95,7 @@ Names people choose keep their accents.
 | shuffle / randomize / reverse / empty / clear | `(barajar|mezclar)` / `(barajar|mezclar)` / `invertir` / `vaciar` / `vaciar` |
 | repeat N times | `repetir N veces` |
 | for each X in L | `para cada X en L` |
+| a random X (a kind's value) | `(un|una) X (al azar|aleatorio|aleatoria)`:  `un palo de carta al azar` |
 | wait for / pause for N seconds | `esperar (a)?` / `pausar N segundos` |
 | start / stop / end / finish / cancel | `iniciar` / `detener` / `terminar` / `terminar` / `cancelar` |
 | test / expect that / should be | `probar` (`para probar ...`) / `esperar que` / `(debería|deberia) ser` |

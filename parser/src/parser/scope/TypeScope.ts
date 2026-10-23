@@ -50,7 +50,9 @@ export class TypeScope extends BlockScope {
   /**
    * A VALUE kind's values, and where its list is kept -- `undefined` for any other type.
    * - e.g. `Suit`, from `"suits" as one of clubs, ...` in a deck's outline body:
-   *   `{ values: ["'clubs'", ...], listOn: "Deck", listName: "Suits" }`
+   *   `{ values: ["clubs", ...], listOn: "Deck", listName: "Suits" }`
+   * - Or a property's own list's kind, e.g. `CardSuit` from a card's `its "suit" is one of clubs, ...`:
+   *   see `ValueKind.property`.
    * - Its values stay plain text or numbers when the code runs;  its properties are static methods of its class,
    *   read as `Suit.color(value)` (epic page `outline-spell`, Q10).  See spell's `value_kind`.
    * - Set when declared (`claim()` for a stub), so journaled with it.
@@ -372,12 +374,20 @@ export type ClaimListOptions = {
 
 /** A value kind's values, and where its list is kept -- see `TypeScope.valueKind`. */
 export type ValueKind = {
-  /** Its values as compiled, e.g. `["'clubs'", "'diamonds'"]` or `[2, 3]`. */
+  /** Its values, spell's, e.g. `["clubs", "diamonds"]` or `[2, 3]`. */
   values: Array<string | number>
   /** Type whose class variable holds the list, e.g. `Deck`. */
   listOn: string
   /** That class variable, e.g. `Suits`. */
   listName: string
+  /**
+   * The property whose own list of values it is, e.g. `suit` for `card suit`, from a card's
+   * `its "suit" is one of clubs, ...` (epic `spanish` P22) -- `undefined` for `"suits" as one of ...` (`value_kind`).
+   * - Such a kind has no class of its own:  nothing compiles for it, and a project neither exports it
+   *   nor writes it in its declarations.  An importer makes it again from the property's.
+   * - A type declared with the same name takes its place:  see spell's `TypeDeclaration.declareType()`.
+   */
+  property?: string
 }
 
 /** What `TypeScope.declareProperty()` takes besides a name -- each optional. */

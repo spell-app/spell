@@ -118,6 +118,9 @@ export const englishWords: SP.LanguageWords = {
   /** The word between a list and what it holds:  `list of cards`. */
   listOfWord: "of",
 
+  /** The kind of a property's values:  `card suit`, from a card's `its "suit" is one of ...`. */
+  propertyKindName: "{type} {property}",
+
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
   declarations: {
     /**
@@ -134,6 +137,13 @@ export const englishWords: SP.LanguageWords = {
       /^[ \t]*(?:-[ \t]+)?(?:an?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+is\b|an?[ \t]+["']?((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is[ \t]+an?|aka)\b|create[ \t]+a[ \t]+type[ \t]+(?:named|called)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:an?|its?|the)\b)((?:(?!is\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!is\b)[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an[ \t]+app\b)/gimu,
     /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` in `- "suits" as one of ...`. */
     valueKindDeclaration: /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gimu,
+    /**
+     * A body's line declaring a property with a list of values, its words captured (group 1, or 2 after `has`):
+     * `- its "suit" is one of ...`, `- "suit" is either ...`, `- it has a suit as one of ...`.
+     * - Not a value kind's `- "suits" as one of ...`:  `as` only after `has`.
+     */
+    propertyListDeclaration:
+      /^[ \t]+-[ \t]+(?:(?:its[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is|are)|(?:it[ \t]+)?has[ \t]+(?:an?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+as)[ \t]+(?:one[ \t]+of|either)\b/iu,
     /** A line starting a method:  `to play a card`, `animation deal`. */
     methodLine: /^(?:to|(?:create[ \t]+)?animation)[ \t]/iu,
     /** A line re-opening a type, its name captured:  `a solitaire:`, `a card where:`. */

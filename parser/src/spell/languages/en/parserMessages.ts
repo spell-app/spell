@@ -76,6 +76,12 @@ export const PARSER_MESSAGES = {
   /** A built-in property declared again with another type, `a pile has a name as number`. */
   "cant-retype-built-in-member":
     "Can't add {property} to {type} as {datatype}:  every {on} has one, built in, as {builtInType}",
+  /**
+   * A property or phrase on the kind of a property's values, `the "value" of a card rank is ...` (epic `spanish` P22):
+   * it has no class to hold one.
+   */
+  "no-members-on-property-kind":
+    "{AKind} is one of the values {aType} lists:  it can't have properties or phrases of its own",
   /** A line adding to a type nobody declares:  `{example}` is `example-type`. */
   "no-such-type": 'There\'s no type "{type}":  declare it, e.g. "{example}"',
   /** A type's declaration, as an example writes it. */

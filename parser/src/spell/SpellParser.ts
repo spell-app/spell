@@ -274,6 +274,7 @@ export class SpellParser extends P.Parser {
    * - A name of several words too, e.g. `a stock pile is a pile`, `a bank account aka account is a thing`.
    *   Only before `is a` / `is an` or `aka`:  `a cards color is black` names no type.
    * - A one-of-a-kind app too, with no article:  `solitaire is an app` (`create_one_of_a_kind`).
+   * - The kind of a property's values too, e.g. `card suit` (epic `spanish` P22):  see `declaredPropertyKinds()`.
    */
   declaredTypes(text: string): string[] {
     const types = [...text.matchAll(this.declarations.typeDeclaration)].map(
@@ -286,7 +287,33 @@ export class SpellParser extends P.Parser {
         created!
     )
     const kinds = [...text.matchAll(this.declarations.valueKindDeclaration)].map(([, plural]) => P.singularize(plural!))
-    return [...types, ...kinds]
+    return [...types, ...kinds, ...this.declaredPropertyKinds(text)]
+  }
+
+  /**
+   * The kinds of property values the type bodies in `text` declare, by a scan of their lines (epic `spanish` P22):
+   * `- its "suit" is one of ...` under `a card is a thing where:` declares `card-suit`, `card suit`.
+   * - So a type above the card can say `its "suit" is a card suit`:  a name of several words needs its type known.
+   * - Named in our language's word order:  `palo-de-carta` in Spanish (`SP.Language.propertyKindName()`).
+   * - Only a list with `one of` / `either`, as `propertyListDeclaration` finds it:
+   *   a bare `up or down` is known once its line parses.
+   * - Blank lines don't end a body;  any other line at the left edge does.
+   */
+  private declaredPropertyKinds(text: string): string[] {
+    const language = this.language ?? SP.Language.default
+    const found: string[] = []
+    let subject = ""
+    for (const line of text.split("\n")) {
+      if (!line.trim()) continue
+      if (!/^\s/.test(line)) {
+        subject = this.subjectOf(line) ?? ""
+        continue
+      }
+      const listed = subject ? this.declarations.propertyListDeclaration.exec(line) : undefined
+      const property = listed?.[1] ?? listed?.[2]
+      if (property) found.push(language.propertyKindName(subject, property).split(" ").join("-"))
+    }
+    return found
   }
 
   /**

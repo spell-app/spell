@@ -150,6 +150,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [List.test.ts](../../tests/core/classes/List.test.ts)
   - end to end, spell's [membership.test.ts](../../tests/spell/parserTests/membership.test.ts)
 
+## Tests at run time
+
+- A `to test ...` compiles to a function the program exports, running `core.test()`:
+  `export function testCardSetup() { return core.test("test card setup", function testCardSetup() { ... }) }`.
+  - Each `... should be ...` in it is a `core.expect()`, called with the spell it was written as:
+    `core.expect(it.rank, "its rank", "queen", "queen")`.
+- How each test went is in `core.testResults()`, kept per run (`core.RUNTIME`), in [tests.ts](tests.ts):
+  - its checks, each with the spell it was written as (`TestCheck`):
+    so the language server finds a failed one's line with no line numbers in the compiled code
+  - a test that throws fails, and says so on the console (`test-threw`), as Python's core does
+- `core.runTests(program, filter)` runs each exported test the program didn't run itself as it loaded:
+  `spell test` and the VS Code runner's Run Tests both call it.
+
 ## JSON
 
 - Every spell object's JSON says its class first, `"$type"`, then its props.

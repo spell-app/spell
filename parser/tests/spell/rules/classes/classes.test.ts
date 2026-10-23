@@ -69,7 +69,10 @@ describe("testing spell module classes", () => {
       const scope = spellParser.getScope("enumeration-declaration")
       scope.parse("a card is a thing\na card has a suit as one of clubs, diamonds", "block")
       expect(scope.rules.get()).toEqual([])
-      expect(scope.parse("card suits", "expression")?.rule.name).toBe("class_member")
+      // its list is its kind's too, `card suit`, whose plural names it (epic `spanish` P22)
+      expect(scope.parse("card suits", "expression")?.rule.name).toBe("kind_values")
+      scope.parse('a deck is a list of cards with:\n\t- "ranks" as one of ace, king', "block")
+      expect(scope.parse("deck ranks", "expression")?.rule.name).toBe("class_member")
     })
   })
 

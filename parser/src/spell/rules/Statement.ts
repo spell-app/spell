@@ -142,6 +142,8 @@ export class SpellStatement<
     property: P.Match | undefined,
     datatype?: P.Datatype
   ): P.Match {
+    const ofPropertyKind = SpellStatement.refusePropertyKind(match, type)
+    if (ofPropertyKind !== match) return ofPropertyKind
     const language = SP.Language.of(match.scope)
     const words = property ? `"${property.raw}"` : language.parserMessage("a-property")
     const typeName = language.wordFor(SP.typeName(`${type.value}`))
@@ -178,10 +180,23 @@ export class SpellStatement<
    */
   static refuseUnknownType(match: P.Match, type: P.Match): P.Match {
     const { scopeType } = type.data as { scopeType?: unknown }
-    if (scopeType !== NONE) return match
+    if (scopeType !== NONE) return SpellStatement.refusePropertyKind(match, type)
     const example = SpellStatement.exampleTypeDeclaration(match.scope, `${type.raw}`)
     const message = SP.Language.of(match.scope).parserMessage("no-such-type", { type: `${type.raw}`, example })
     return SpellStatement.refuse(match, message)
+  }
+
+  /**
+   * `match`, or a parse error if `type` is the kind of a property's values, e.g. `card rank` (epic `spanish` P22):
+   * it has no class to hold a property or phrase of its own -- see `P.ValueKind.property`.
+   * - e.g. `the "value" of a card rank is ...`, `a card rank "is a face card" if ...`, `a card rank:`
+   * - Call it WHILE PARSING:  it reads the type's record, found then.
+   */
+  static refusePropertyKind(match: P.Match, type: P.Match): P.Match {
+    const { scopeType } = type.data as { scopeType?: unknown }
+    const kind = scopeType instanceof P.TypeScope ? scopeType : match.scope.types?.get(`${type.value}`)
+    const message = SP.SpellWarnings.noMembersOnPropertyKind(match.scope, kind)
+    return message ? SpellStatement.refuse(match, message) : match
   }
 
   /**

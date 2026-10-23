@@ -172,6 +172,71 @@ describe("SpellDeclarations of a value kind", () => {
   })
 })
 
+/**
+ * The kind of a property's values (epic `spanish` P22):  a card's `its "suit" is one of ...` makes `card suit`.
+ * - It has no class, so a project neither exports it nor writes it:  an importer makes it again from the property's.
+ */
+describe("SpellDeclarations of a property's list of values", () => {
+  const library = [
+    {
+      path: "/Card.spell",
+      contents: ['a "card" is a thing where:', '\t- its "suit" is one of clubs, diamonds, hearts or spades'].join("\n")
+    },
+    {
+      path: "/Foundation.spell",
+      contents: ['a "foundation" is a thing where:', '\t- its "suit" is a card suit'].join("\n")
+    }
+  ]
+  const declarations = compiledSpellProject(library).declarations
+  const from = "@spell/library/cards"
+
+  test("says nothing of its kind:  no class to export", () => {
+    expect(declarations.provides).toEqual(["Card", "Foundation"])
+    expect(declarations.statements.filter((it) => it.type).map((it) => it.type)).toEqual(["Card", "Foundation"])
+    expect(declarations.statements.find((it) => it.of === "Foundation" && it.property === "suit")?.datatype).toBe(
+      "CardSuit"
+    )
+  })
+
+  test("loads it again, from the property:  an importer's `a card suit` is one of the card's suits", () => {
+    const imports = SP.SpellDeclarations.importScope(SP.SpellParser.rootScope, [{ from, declarations }])
+    expect(imports.types.get("CardSuit", "LOCAL_ONLY")?.valueKind).toEqual({
+      values: ["clubs", "diamonds", "hearts", "spades"],
+      listOn: "Card",
+      listName: "Suits",
+      property: "suit"
+    })
+    const contents = ['a "pile" is a thing where:', '\t- its "suit" is a card suit', "print card suits"]
+    const { files } = parseSpellProject([{ path: "/A.spell", contents: contents.join("\n") }], {
+      parentScope: imports
+    })
+    expect(files[0]!.errors).toEqual([])
+    expect(files[0]!.compiled).toContain('this.declareProp("suit", { oneOf: () => Card.Suits })')
+    expect(files[0]!.compiled).toContain("core.console.log(Card.Suits)")
+  })
+
+  test("picking a type with a property of a kind brings the type listing it", () => {
+    const imports = SP.SpellDeclarations.importScope(SP.SpellParser.rootScope, [
+      { from, declarations, import: ["Foundation"] }
+    ])
+    expect(imports.types.get("Card", "LOCAL_ONLY")).toBeDefined()
+    expect(imports.types.get("CardSuit", "LOCAL_ONLY")).toBeDefined()
+  })
+
+  test("named in the language its declaration is written in:  `palo de carta`", () => {
+    const { declarations: cartas } = compiledSpellProject([
+      {
+        path: "/Carta.es.spell",
+        contents: ['una "carta" es una cosa donde:', '\t- su "palo" es uno de tréboles, diamantes'].join("\n")
+      }
+    ])
+    const imports = SP.SpellDeclarations.importScope(SP.spanish.rootScope, [
+      { from: "@spell/library/cartas", declarations: cartas }
+    ])
+    expect(imports.types.get("PaloDeCarta", "LOCAL_ONLY")?.valueKind?.listName).toBe("Palos")
+  })
+})
+
 /** A type's short name, `a bank account aka account` (epic `drawable-thing`, P1), in another project. */
 describe("SpellDeclarations, a type's short name", () => {
   test("goes into its declarations, and finds the type in a project that imports it", () => {

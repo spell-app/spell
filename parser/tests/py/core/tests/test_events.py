@@ -97,6 +97,22 @@ def test_a_pause_waits_unless_pauses_are_off(core: Core) -> None:
     assert time.perf_counter() - start < 0.05
 
 
+def test_run_at_once_runs_to_the_end_its_pauses_not_waiting_and_refuses_any_other_wait(core: Core) -> None:
+    async def turn_face_down() -> str:
+        await core.pause_for(10, "seconds")
+        return "down"
+
+    start = time.perf_counter()
+    assert core.run_at_once(turn_face_down()) == "down"
+    assert time.perf_counter() - start < 0.05
+
+    async def wait_for_the_loop() -> None:
+        await asyncio.sleep(0)
+
+    with pytest.raises(RuntimeError, match="other than a pause"):
+        core.run_at_once(wait_for_the_loop())
+
+
 def test_an_async_handler_runs_to_its_end_outside_a_loop(core: Core) -> None:
     heard = []
 

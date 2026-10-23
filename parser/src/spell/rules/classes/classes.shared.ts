@@ -30,6 +30,7 @@ export type MethodBody = P.ASTStatementBlock | P.ASTStatement | P.ASTExpression
  * `ruleData` entry for placeholder `(instanceVar)` over enumerated `values`, e.g. `(suit)` over `["'clubs'", ...]`.
  * - `enumeration` is `values` unquoted, inflected to match the placeholder, e.g. `club` for `(suit)`
  *   but `clubs` for `(suits)`.
+ * - What the blank MATCHES is wider, either inflection:  see `placeholderForms()`.
  */
 export function placeholderData(
   instanceVar: string,
@@ -44,6 +45,34 @@ export function placeholderData(
   return kind
     ? { isSingular, instanceVar, enumeration, values, kind }
     : { isSingular, instanceVar, enumeration, values }
+}
+
+/**
+ * Every word a blank takes for `values`:  each value's singular AND plural, and each number as is.
+ * - So `(suit)` takes `club` and `clubs`, and `(rank)` takes `2`:
+ *   `is the (rank) of (suit)` reads `the 2 of clubs` as well as `the queen of spade`.
+ * - Each value as listed first, then its other forms;  no word twice.
+ */
+export function placeholderForms(values: Array<string | number>): Array<string | number> {
+  const forms = values.flatMap((value): Array<string | number> => {
+    if (typeof value === "number") return [value]
+    const word = value.replace(/^'(.*)'$/, "$1")
+    return [word, P.singularize(word), P.pluralize(word)]
+  })
+  return [...new Set(forms)]
+}
+
+/**
+ * Where `word` is in `values`, by its singular or plural:  `clubs` and `club` are both `'clubs'`.
+ * - A number is only itself.
+ * - `-1` if it's none of them.
+ */
+export function placeholderValueIndex(values: Array<string | number>, word: string | number): number {
+  if (typeof word === "number") return values.indexOf(word)
+  const singular = P.singularize(word)
+  return values.findIndex(
+    (value) => typeof value === "string" && P.singularize(value.replace(/^'(.*)'$/, "$1")) === singular
+  )
 }
 
 /**
@@ -72,6 +101,14 @@ export type QuotedPropertyFormulaBits = {
   vars: string[]
   /** Generated method/property name, e.g. `"is_the_$rank_of_$suits"`. */
   property: string
+  /**
+   * A phrase on a SUB-type of another type of the project, e.g. a joker's `it "is the (color) joker"`:
+   * its super-type's instance name, e.g. `card`, the static method's first argument.
+   * - Then it's a STATIC method of its type, which checks the type first, so it's safe on any card:
+   *   `Joker.isTheColorJoker(card, color)` => `card instanceof Joker && card.color === color`.
+   * - `undefined` for any other phrase:  an instance method, `card.isTheRankOfSuits(rank, suit)`.
+   */
+  staticArg?: string
 }
 
 /**

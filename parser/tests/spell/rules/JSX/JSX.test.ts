@@ -27,6 +27,15 @@ describe("testing spell module JSX", () => {
     ])
   })
 
+  test("an error inside JSX on the lines below its `return` is reported with the block's parse errors", () => {
+    // Owen's card draws so:  `return` alone, its markup the line's indented body
+    const scope = spellParser.getScope("jsx-return-body")
+    const text = "set foo to 1\nreturn\n\t<div>\n\t\t{foo bar}\n\t</div>"
+    const block = scope.parse(text, "block")!
+    const errors = (block.data as { errors?: P.Match[] }).errors ?? []
+    expect(errors.map((error) => text.slice(error.start, error.end))).toEqual(["foo bar"])
+  })
+
   describe("`{...}` contents sit at their file positions", () => {
     test("a parse error inside `{...}` starts where its text is", () => {
       const scope = spellParser.getScope("jsx-error-offset")

@@ -7,6 +7,7 @@
 import { P } from "spell-lang/parser"
 
 import { types } from "./types.parser"
+import { KindName } from "./KindName"
 import { KnownType } from "./KnownType"
 import { PluralType } from "./PluralType"
 import { QuotedType } from "./QuotedType"
@@ -142,6 +143,21 @@ types.addRule(TypeWords, {
         { title: "a blacklisted word, not up to is", input: "card in play", js: "Card" },
         { title: "a blacklisted word last", input: "card in is", js: "Card" },
         { title: "a blacklisted word", input: "is", js: undefined }
+      ]
+    }
+  ]
+})
+
+types.addRule(KindName, {
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a rank as one of ace, 2, 3"].join("\n"), "block")
+      },
+      tests: [
+        { title: "a kind's name", input: "card rank", js: "CardRank" },
+        { title: "plural", input: "card ranks", js: undefined },
+        { title: "a type that isn't a kind", input: "card", js: undefined }
       ]
     }
   ]

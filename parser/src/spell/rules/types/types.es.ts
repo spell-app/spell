@@ -10,6 +10,7 @@
 import { P } from "spell-lang/parser"
 import { SpellParser } from "spell-lang/spell/SpellParser"
 
+import { KindName } from "./KindName"
 import { KnownType } from "./KnownType"
 import { PluralType } from "./PluralType"
 import { QuotedType } from "./QuotedType"
@@ -157,6 +158,21 @@ typesEs.addRule(TypeWords, {
         },
         { title: "una palabra prohibida, no hasta es", input: "carta de juego", js: "Carta" },
         { title: "una palabra prohibida", input: "es", js: undefined }
+      ]
+    }
+  ]
+})
+
+typesEs.addRule(KindName, {
+  tests: [
+    {
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una carta tiene un rango como uno de as, 2, 3"].join("\n"), "block")
+      },
+      tests: [
+        { title: "el nombre de un tipo de valores", input: "rango de carta", js: "RangoDeCarta" },
+        { title: "plural", input: "rangos de carta", js: undefined },
+        { title: "un tipo que no es de valores", input: "carta", js: undefined }
       ]
     }
   ]

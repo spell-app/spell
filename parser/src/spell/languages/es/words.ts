@@ -103,6 +103,12 @@ export const spanishWords: SP.LanguageWords = {
   listOfWord: "de",
 
   /**
+   * The kind of a property's values, by Spanish's word order:  `palo de carta`, from a carta's `su "palo" es uno de ...`.
+   * - Its plural is its first word's, `palos de carta`, as for any name with `de` in it.
+   */
+  propertyKindName: "{property} de {type}",
+
+  /**
    * Words which name `it` as an object:  `imprimir eso`, `obtener su nombre`, then `imprimir eso`.
    * - Spanish attaches the pronoun to its verb (`imprimirlo`), which spell's words can't split, so `eso` ("that").
    * - `ello` too, the plain pronoun.
@@ -147,6 +153,13 @@ export const spanishWords: SP.LanguageWords = {
     /** A line declaring a value kind, its PLURAL name captured:  `- "palos" como uno de ...`. */
     valueKindDeclaration:
       /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+como[ \t]+(?:uno[ \t]+de|o[ \t]+bien)\b/gimu,
+    /**
+     * A body's line declaring a property with a list of values, its words captured (group 1, or 2 after `tiene`):
+     * `- su "palo" es uno de ...`, `- "palo" es o bien ...`, `- tiene un palo como uno de ...`.
+     * - Not a value kind's `- "palos" como uno de ...`:  `como` only after `tiene`.
+     */
+    propertyListDeclaration:
+      /^[ \t]+-[ \t]+(?:(?:sus?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:es|son)|tiene[ \t]+(?:un[oa]?[ \t]+)?["']?((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)["']?[ \t]+como)[ \t]+(?:un[oa][ \t]+de|o[ \t]+bien)\b/iu,
     /**
      * A line starting a method:  `para mover una carta`, `animación repartir`.
      * - Not a loop, which starts `para cada` too:  `para cada carta en el mazo:`.

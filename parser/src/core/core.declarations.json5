@@ -1583,7 +1583,29 @@
           "name": "collapse"
         }
       ],
-      "description": "Dynamic test: prints to console for now..."
+      "description": "Run `testMethod` as test `message`, then print its result and its lines -- what `to test ...` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "testResults",
+      "of": "core",
+      "module": "tests",
+      "description": "How each test went this run, in the order they ended:  the ones the program ran, and `runTests()`'s."
+    },
+    {
+      "kind": "method",
+      "name": "runTests",
+      "of": "core",
+      "module": "tests",
+      "params": [
+        {
+          "name": "program"
+        },
+        {
+          "name": "filter"
+        }
+      ],
+      "description": "Run each `to test ...` function `program` exports which hasn't run yet, and answer how every test went: `core.testResults()`."
     },
     {
       "kind": "method",

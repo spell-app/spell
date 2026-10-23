@@ -316,9 +316,26 @@ listsEs.addRule(ListPosition, {
   ]
 })
 
-// ... and a kind's value, in its kind's own list:  `la posición de su rank`
+// ... and a kind's value, in its kind's own list:  `la posición de su rank` -- `del` is `de el`
 listsEs.addRule(ListPosition, {
-  syntax: "la? (posición|posicion) de {thing:expression}"
+  syntax: "la? (posición|posicion) (de|del) {thing:expression}",
+  tests: [
+    // ... or a property's own list:  `su "rango" es uno de ...`
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "una card es una cosa",
+            "una card tiene un rango como uno de as, 2, 3, 4, 5, 6, 7, 8, 9, 10, jota, reina, rey",
+            "card = una nueva card"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [["la posición del rango de card", "spellPosition(positionOf(Card.Rangos, card.rango))"]]
+    }
+  ]
 })
 
 listsEs.addRule(StartsWith, {
@@ -963,6 +980,31 @@ listsEs.addRule(ListIteration, {
             "  if (index > 2) core.append(messages, message)",
             "}))"
           ]
+        ]
+      ]
+    }
+  ]
+})
+
+// the item named for a value kind of several words (epic `spanish` P22)
+listsEs.addRule(ListIteration, {
+  syntax: "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una carta es una cosa", "una carta tiene un rango como uno de as, 2, 3"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "para cada rango de carta en rangos de carta: imprimir rango de carta",
+          "core.map(Carta.Rangos, (rangoDeCarta) => core.console.log(rangoDeCarta))",
+          "core.map(Carta.Rangos, (rangoDeCarta: (typeof Carta.Rangos)[number]) => core.console.log(rangoDeCarta))"
+        ],
+        [
+          ["para cada rango de carta en rangos de carta:", "\timprimir eso"],
+          "core.map(Carta.Rangos, (rangoDeCarta) => core.console.log(rangoDeCarta))",
+          "core.map(Carta.Rangos, (rangoDeCarta: (typeof Carta.Rangos)[number]) => core.console.log(rangoDeCarta))"
         ]
       ]
     }

@@ -52,6 +52,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "cant-add-built-in-member": "No se puede añadir {property} al tipo {type}:  cada cosa ya tiene uno, incorporado",
   "cant-retype-built-in-member":
     "No se puede añadir {property} al tipo {type} como {datatype}:  cada {on} ya tiene uno, incorporado, como {builtInType}",
+  "no-members-on-property-kind":
+    "{AKind} es uno de los valores que lista {aType}:  no puede tener propiedades ni frases propias",
   "no-such-type": 'No hay ningún tipo "{type}":  decláralo, p. ej. "{example}"',
   "example-type": "{aType} es una cosa",
   "example-list-type": "{aList} es una lista de {items}",

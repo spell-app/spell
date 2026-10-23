@@ -6,18 +6,19 @@ import { SpellExpression } from "spell-lang/spell/rules/expressions"
 
 /**
  * `class_member` rule:  `{type} {member words}` -- a class variable of a known type, e.g.:
- * - `card suits` / `Card Suits` ~== `Card.Suits`
- * - `bank-account account-types` ~== `BankAccount.Account_types`
+ * - `deck suits` / `Deck Suits` ~== `Deck.Suits`, a value kind's list
+ * - Spanish's `palos de carta` ~== `Carta.Palos`
+ * - A property's own list, English's `card suits`, is its kind's plural, ONE name:  `kind_values` reads it
+ *   (epic `spanish` P22).
  * - ONE rule for every type:  the member resolves through `type`'s `classVariables`,
  *   e.g. `Suits` as `cards have a suit as one of ...` declares it -- see `define_property_has`.
  *   Was a rule per enumeration.
- * - The LONGEST run of words the type declares, e.g. `suits` in `card suits includes x`.
+ * - The LONGEST run of words the type declares, e.g. `suits` in `deck suits includes x`.
  * - `Priority.userDeclared`, as the per-enumeration rule had:
  *   a type's own member beats a longer built-in reading.
  */
 export class ClassMember extends SpellExpression<"type|member", ClassMemberData> {
   @proto static priority = Priority.userDeclared
-  @proto static datatype = "list"
 
   /** Resolve the longest run of our words `type` declares as a class variable -- see class docs. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
@@ -31,6 +32,14 @@ export class ClassMember extends SpellExpression<"type|member", ClassMemberData>
     if (count < member.length) return this.parse(scope, tokens.slice(0, 1 + count))
     match.data.classVariable = typeScope.getClassVariable(`${member.raw}`)
     return match
+  }
+
+  /**
+   * What the class variable holds, e.g. `list of card-suits` for a card's `Suits` (epic `spanish` P22) --
+   * else a plain `list`.
+   */
+  getDatatype(match: P.MatchFor<this>): P.Datatype | undefined {
+    return match.data.classVariable?.datatype ?? "list"
   }
 
   getAST(match: P.MatchFor<this>): P.ASTPropertyExpression {

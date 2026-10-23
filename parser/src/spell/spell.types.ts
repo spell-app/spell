@@ -132,7 +132,7 @@ export function wordsSuffixFor(lang = "en"): string {
 }
 
 /**
- * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/@spell/test/cards`.
+ * Start of the ES module specifier for another project's compiled JS, e.g. `@spell/project/owen@spell/cards`.
  * - A runner fetches that project's compiled JS from the server, at its file's URL,
  *   `/spaces/<project>/<Project>.spell.js` (`SpellUrls.fileUrl()`), and points the specifier at it.
  * - See `runCompiled()` in `spell-app/app/runner/runCompiled`.
@@ -651,7 +651,7 @@ export type SpellDeclaration = {
  * One project another imports, for `SpellDeclarations.importScope()` -- from a `project.json` `imports` entry.
  */
 export type DeclarationsImport = {
-  /** Where it came from, e.g. `@spell/test/cards` -- recorded in `P.ImportScope.origins`, and named in errors. */
+  /** Where it came from, e.g. `owen@spell/cards` -- recorded in `P.ImportScope.origins`, and named in errors. */
   from: string
   /** Its declarations. */
   declarations: SpellDeclarationsData
@@ -662,14 +662,14 @@ export type DeclarationsImport = {
    */
   import?: string[]
   /**
-   * Its project id, e.g. `@spell/test/cards` -- what loaded records' `declaredAt` paths start with.
+   * Its project id, e.g. `owen@spell/cards` -- what loaded records' `declaredAt` paths start with.
    * - Default `from`.
    */
   projectId?: string
   /** Semver range its `version` must satisfy, e.g. `"^1.2"`. */
   version?: string
   /**
-   * ES module specifier its compiled JS is imported by at runtime, e.g. `@spell/project/@spell/test/cards`.
+   * ES module specifier its compiled JS is imported by at runtime, e.g. `@spell/project/owen@spell/cards`.
    * - Recorded with the names loaded in `P.ImportScope.modules`, so the importer's compiled output imports them.
    */
   module?: string

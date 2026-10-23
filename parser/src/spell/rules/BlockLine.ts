@@ -143,7 +143,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         if (nestedBlockMatch) {
           // add any errors in the nestedBlock to `errors`
           bodyErrorsAt = errors.length
-          if (nestedBlockMatch.is(Block) && nestedBlockMatch.data.errors) errors.push(...nestedBlockMatch.data.errors)
+          if (nestedBlockMatch.is(Block)) errors.push(...(nestedBlockMatch.data.errors ?? []))
+          // a body that's ONE expression, e.g. `return` with its markup on the lines below:  errors in its JSX
+          else errors.push(...SpellJSX.parseErrorsIn(nestedBlockMatch))
           // add the nestedBlock to `tokensMatched` to account for it in the output
           tokensMatched.push(nextItem!)
         }

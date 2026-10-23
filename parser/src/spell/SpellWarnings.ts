@@ -7,9 +7,10 @@
  * - Parse errors are the other kind of problem:  a line spell can't read (`SP.Block.getParseErrors()`).
  *   A line with a warning compiles as it is.
  * - Plain matches and their `data`, no scope of its own:
- *   imports only `spell-lang/parser`, and `spell-lang/spell` (read at call time),
+ *   imports only `spell-kit/util`, `spell-lang/parser`, and `spell-lang/spell` (read at call time),
  *   and `Synonyms`, the article word rules' class.
  */
+import { upperFirst } from "spell-kit/util"
 import { P } from "spell-lang/parser"
 import { SP } from "spell-lang/spell"
 import { Synonyms } from "spell-lang/spell/rules/expressions"
@@ -182,11 +183,31 @@ export class SpellWarnings {
   /**
    * `type`, as an example writes it, with its article:  `Pile` => `a pile`, Spanish's `Carta` => `una carta`.
    * - Its name lowercase, any `_` a `-`.
+   * - The kind of a property's values by its words (epic `spanish` P22):  `a card rank`, `un rango de carta`.
    * - `kind`:  `indefinite` (default) or `definite`.
    */
   static exampleNoun(scope: P.Scope, type: P.TypeScope, kind: SP.ArticleKind = "indefinite"): string {
-    const words = type.name.toLowerCase().replace(/_/g, "-")
-    return SP.Language.of(scope).withArticle(kind, words, type)
+    const language = SP.Language.of(scope)
+    const { valueKind } = type
+    const words = valueKind?.property
+      ? language.propertyKindName(valueKind.listOn, valueKind.property)
+      : type.name.toLowerCase().replace(/_/g, "-")
+    return language.withArticle(kind, words, type)
+  }
+
+  /**
+   * What to say of a property or phrase on `type`, the kind of a property's values (epic `spanish` P22):
+   * `A card rank is one of the values a card lists:  it can't have properties or phrases of its own`.
+   * - It has no class to hold one (`P.ValueKind.property`).
+   * - `undefined` for any other type, or when the type listing it isn't in `scope`.
+   */
+  static noMembersOnPropertyKind(scope: P.Scope, type: P.TypeScope | undefined): string | undefined {
+    const listedBy = type?.valueKind?.property ? scope.types?.get(type.valueKind.listOn) : undefined
+    if (!type || !listedBy) return undefined
+    return SP.Language.of(scope).parserMessage("no-members-on-property-kind", {
+      AKind: upperFirst(SpellWarnings.exampleNoun(scope, type)),
+      aType: SpellWarnings.exampleNoun(scope, listedBy)
+    })
   }
 }
 

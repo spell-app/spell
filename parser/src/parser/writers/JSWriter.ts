@@ -12,6 +12,7 @@ import {
   attributeName,
   isCoreCall,
   isTight,
+  topLevelOf,
   unwrapped
 } from "./jsShapes"
 import { Naming } from "./Naming"
@@ -474,7 +475,7 @@ export class JSWriter extends ProgramWriter {
     if (!this.bindsTightly(inner)) return `(${this.write(inner)})`
     const text = String(this.write(inner))
     // a `core` helper said with an operator:  `x !== undefined`, `x instanceof Tableau`, `!x`
-    return isCoreCall(inner) && LOOSE_CORE_CALL.test(text) ? `(${text})` : text
+    return isCoreCall(inner) && LOOSE_CORE_CALL.test(topLevelOf(text)) ? `(${text})` : text
   }
 
   /** Does `node` bind at least as tightly as `.`?  An element too:  javascript draws it with a call, `h(...)`. */

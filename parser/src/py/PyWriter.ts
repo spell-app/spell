@@ -26,6 +26,9 @@ const { isCoreCall, unwrapped } = P.jsShapes
  *   - by NAME:  every method of a name waits if one does, so `await` is never put before a plain value
  *   - Why:  javascript calls them without waiting (`this.turnFaceDown()`),
  *     where Python's call, not awaited, would do nothing at all.
+ * - A `create()` that waits is `async def` too, e.g. a deck's, which turns each card face down:
+ *   `spell_core` runs it to its end as the thing is made, its pauses not waiting (`core.run_at_once()`),
+ *   as javascript's constructor runs it.
  * - A function given as a value that waits is a lifted `async def`, never a `lambda`.
  * - At the top of the module, where Python can't `await`:  `asyncio.run(...)`
  *   - a call alone:  `asyncio.run(main())`

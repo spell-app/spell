@@ -1,5 +1,6 @@
 import { proto } from "spell-kit/util"
 import { P } from "spell-lang/parser"
+import { KindName } from "spell-lang/spell/rules/types"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
 import { type MethodBody, type ItemVariableData } from "./lists.shared"
@@ -10,6 +11,8 @@ import { type MethodBody, type ItemVariableData } from "./lists.shared"
  * - Optional `{position}` (`for item, index in ...`) adds a numeric index arg alongside `{item}`.
  * - Both a `statement` and an `expression`:  usable inline or as a block.
  * - Body runs as nested block or inline statement;  `{item}`'s value is also aliased from `it`.
+ * - The item may be named for a value kind of several words (`kind_name`, epic `spanish` P22):
+ *   `for each card rank in card ranks`, then `card rank` in the body -- see `itemName()`.
  * - Builds `core.map(list, (item, position?) => { ... })`,
  *   or `await core.forEachSequential(...)` if its body contains an `await`.
  * - How javascript writes it (`JSWriter`):
@@ -29,7 +32,8 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
   getNestedScopeForMatch(match: P.MatchFor<this>): P.MethodScope {
     const { item, position, list } = match.groups
     const datatype = match.scope.getItemType(list.datatype)
-    const variable = new P.ScopeVariable({ name: item.value, datatype, declaredBy: item })
+    const name = ListIteration.itemName(item)
+    const variable = new P.ScopeVariable({ name, datatype, declaredBy: item })
     // for `getAST()`, which can't look it up
     ;(match.data as ItemVariableData).itemVariable = variable
     const args: P.ScopeVariable[] = [variable]
@@ -37,7 +41,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
     return new P.MethodScope({
       parentScope: match.scope,
       args,
-      mapItTo: item.value,
+      mapItTo: name,
       itDatatype: datatype,
       declaredBy: match
     })
@@ -50,7 +54,7 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
   getAST(match: P.MatchFor<this>): P.ASTExpression {
     const { list, item, position } = match.groups
     const { itemVariable: variable } = match.data as ItemVariableData
-    const args = [new P.ASTVariableExpression(item, { name: item.value, variable })]
+    const args = [new P.ASTVariableExpression(item, { name: ListIteration.itemName(item), variable })]
     if (position) args.push(new P.ASTVariableExpression(position, { datatype: "number" }))
     const method = new P.ASTMethodDefinition(match, {
       inline: true,
@@ -72,5 +76,10 @@ export class ListIteration extends SpellStatement<"item|position?|list|body?"> {
       methodName: "map", // TODO...
       args: [P.matchAST(list), method]
     })
+  }
+
+  /** The item's variable:  its word, `card`, or a kind's words joined, `card_rank` for `card rank` (`kind_name`). */
+  static itemName(item: P.Match): string {
+    return item.is(KindName) ? KindName.variableName(item) : `${item.value}`
   }
 }

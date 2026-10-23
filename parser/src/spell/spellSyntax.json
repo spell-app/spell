@@ -2162,7 +2162,7 @@
           "ruleNames": ["list_position"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPosition.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Return position of an item in a list, e.g. `position of thing in my-list` => `spellPosition(positionOf(myList, thing))`, imported from `@spell/core`.",
           "syntaxes": [
             {
@@ -2181,7 +2181,19 @@
               }
             },
             {
-              "syntax": "the? position of {thing:expression}"
+              "syntax": "the? position of {thing:expression}",
+              "example": "the position of the rank of card",
+              "outputs": {
+                "js": {
+                  "code": "spellPosition(positionOf(Card.Ranks, card.rank))"
+                },
+                "ts": {
+                  "code": "spellPosition(positionOf(Card.Ranks, card.rank))"
+                },
+                "py": {
+                  "code": "spell_position(core.position_of(Card.RANKS, card.rank))"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -2480,7 +2492,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 21,
+          "line": 24,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -2495,6 +2507,21 @@
                 },
                 "py": {
                   "code": "for card in deck:\n    pass"
+                }
+              }
+            },
+            {
+              "syntax": "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+              "example": "for each card rank in card ranks: print card rank",
+              "outputs": {
+                "js": {
+                  "code": "core.map(Card.Ranks, (cardRank) => core.console.log(cardRank))"
+                },
+                "ts": {
+                  "code": "core.map(Card.Ranks, (cardRank: (typeof Card.Ranks)[number]) => core.console.log(cardRank))"
+                },
+                "py": {
+                  "code": "for card_rank in Card.RANKS:\n    core.console.log(card_rank)"
                 }
               }
             }
@@ -3418,7 +3445,7 @@
           "ruleNames": ["class_member"],
           "internal": false,
           "file": "src/spell/rules/classes/ClassMember.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "`{type} {member words}` -- a class variable of a known type, e.g.",
           "syntaxes": [
             {
@@ -3511,7 +3538,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -3552,6 +3579,58 @@
                 },
                 "py": {
                   "code": "core.every_thing(Pile)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "KindValues",
+          "ruleNames": ["kind_values"],
+          "internal": false,
+          "file": "src/spell/rules/classes/KindValues.ts",
+          "line": 15,
+          "purpose": "Every value of a kind, by the kind's plural name -- its list (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "syntax": "{type:plural_type}",
+              "example": "card suits",
+              "outputs": {
+                "js": {
+                  "code": "Card.Suits"
+                },
+                "ts": {
+                  "code": "Card.Suits"
+                },
+                "py": {
+                  "code": "Card.SUITS"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "RandomKindValue",
+          "ruleNames": ["random_kind_value"],
+          "internal": false,
+          "file": "src/spell/rules/classes/RandomKindValue.ts",
+          "line": 12,
+          "purpose": "One value of a kind, picked at random (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "syntax": "a random {type:known_type}",
+              "example": "a random card suit",
+              "outputs": {
+                "js": {
+                  "code": "core.randomItemOf(Card.Suits)"
+                },
+                "ts": {
+                  "code": "core.randomItemOf(Card.Suits)"
+                },
+                "py": {
+                  "code": "core.random_item_of(Card.SUITS)"
                 }
               }
             }
@@ -5350,6 +5429,31 @@
                 },
                 "py": {
                   "code": "Card"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "KindName",
+          "ruleNames": ["kind_name"],
+          "internal": false,
+          "file": "src/spell/rules/types/KindName.ts",
+          "line": 11,
+          "purpose": "A value kind's name of several words, singular, naming one of its values (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "example": "card rank",
+              "outputs": {
+                "js": {
+                  "code": "CardRank"
+                },
+                "ts": {
+                  "code": "CardRank"
+                },
+                "py": {
+                  "code": "CardRank"
                 }
               }
             }

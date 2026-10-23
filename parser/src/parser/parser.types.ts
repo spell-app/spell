@@ -146,6 +146,16 @@ export function listOf(itemType: Datatype): Datatype {
 }
 
 /**
+ * Datatype of a list holding the type named `typeName`, its words kept apart:
+ * `CardSuit` => `list of card-suits`, so `itemTypeOf()` gives `CardSuit` back.
+ * - `listOf()` would run them together, `list of cardsuits`, a type nobody declared.
+ * - A one-word name is the same either way:  `Card` => `list of cards`.
+ */
+export function listOfType(typeName: string): Datatype {
+  return listOf(`${typeName}`.split(/(?<=\p{Ll})(?=\p{Lu})/u).join("-"))
+}
+
+/**
  * What a `list of X` datatype holds, e.g. `list of cards` => `Card` -- `undefined` for any other datatype.
  * - Only from the WORDS:  a user's list type, e.g. `Deck`, says what it holds on its `TypeScope`, `itemType`.
  * - Use `scope.getItemType()` for either.

@@ -5,11 +5,12 @@
   - It's asyncio's:  the one Python target, since P22.
   - `core.pauses = False` skips them, e.g. in a test run (`python -m spell_core.run --no-pauses`).
 - Processes are names with a flag, "!" (running alone) or a count:  `start exclusive process deal the cards`.
+- A thing's `create()` that waits runs at once, its pauses not waiting:  `run_at_once()`.
 """
 
 import asyncio
 import inspect
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any, ClassVar
 
 from spell_core.events import Eventful, Handler, SpellEvent
@@ -41,6 +42,9 @@ class RuntimeMethods:
     # Do pauses wait?  `False` in a test run, where only what's printed matters
     pauses: bool = True
 
+    # How many `run_at_once()` are running now:  no pause waits while one is
+    _running_at_once: int = 0
+
     # the running program:  `Core` makes one, `reset_runtime()` a new one
     RUNTIME: SpellRuntime
 
@@ -53,17 +57,41 @@ class RuntimeMethods:
         """Wait `number` `units` without stopping the program's other work:  `pause for 50 msec`.
 
         - Compiled, `await core.pause_for(50, "msec")`:  only a function that waits pauses, `async def`.
-        - An unknown unit is seconds;  no wait at all when `pauses` is off.
+        - An unknown unit is seconds;  no wait at all when `pauses` is off, or inside `run_at_once()`.
         - Each of `before_pause` is called first, and awaited if it's a coroutine:
           a web page is sent what changed so far, so a game animates (epic python-target P20).
         """
-        if not self.pauses:
+        if not self.pauses or self._running_at_once:
             return
         for listener in list(self.before_pause):
             result = listener()
             if inspect.isawaitable(result):
                 await result
         await asyncio.sleep(self._milliseconds(number, units) / 1000)
+
+    def run_at_once[Result](self, coroutine: Coroutine[Any, Any, Result]) -> Result:
+        """Run `coroutine` to its end now, its pauses not waiting:  a thing's `create()` that waits.
+
+        - As javascript's constructor runs `create()`:  at once, nothing waiting for the pauses in it.
+          e.g. a deck's `to create it:` turning each card face down, a pause each:
+          every card is face down as soon as the deck is made, as in javascript.
+        - Python's `__init__()` can't wait, and a pause there would hold up making the thing:
+          the deck's 52 turns, 50 msec each.
+        - Why not a task that goes on beside the program, as an event's handler does (`events._run()`):
+          the thing would be made half set up, its cards still turning while the game deals them.
+        - throws `RuntimeError` if it waits for something other than a pause, which only a running loop could give it
+        """
+        self._running_at_once += 1
+        try:
+            coroutine.send(None)
+        except StopIteration as finished:
+            return finished.value
+        finally:
+            self._running_at_once -= 1
+        coroutine.close()
+        raise RuntimeError(
+            "core.run_at_once():  it waited for something other than a pause;  wait for that once the thing is made"
+        )
 
     def _milliseconds(self, number: float, units: str) -> float:
         """`number` `units` in milliseconds, rounded;  0 for not a number, or less than 0."""

@@ -2175,7 +2175,7 @@
           "ruleNames": ["list_position"],
           "internal": false,
           "file": "src/spell/rules/lists/ListPosition.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "Return position of an item in a list, e.g. `position of thing in my-list` => `spellPosition(positionOf(myList, thing))`, imported from `@spell/core`.",
           "syntaxes": [
             {
@@ -2194,7 +2194,19 @@
               }
             },
             {
-              "syntax": "la? (posición|posicion) de {thing:expression}"
+              "syntax": "la? (posición|posicion) (de|del) {thing:expression}",
+              "example": "la posición del rango de card",
+              "outputs": {
+                "js": {
+                  "code": "spellPosition(positionOf(Card.Rangos, card.rango))"
+                },
+                "ts": {
+                  "code": "spellPosition(positionOf(Card.Rangos, card.rango))"
+                },
+                "py": {
+                  "code": "spell_position(core.position_of(Card.RANGOS, card.rango))"
+                }
+              }
             }
           ],
           "aliases": ["expression"]
@@ -2508,7 +2520,7 @@
           "ruleNames": ["list_iteration"],
           "internal": false,
           "file": "src/spell/rules/lists/ListIteration.ts",
-          "line": 21,
+          "line": 24,
           "purpose": "Generic `for each` list iteration: e.g. `for each card in deck:`, `for item, index in my-list:`.",
           "syntaxes": [
             {
@@ -2523,6 +2535,21 @@
                 },
                 "py": {
                   "code": "for card in deck:\n    pass"
+                }
+              }
+            },
+            {
+              "syntax": "(para|por) cada? {item:kind_name} (en|de|del) {list:expression} :? {statement_body}?",
+              "example": "para cada rango de carta en rangos de carta: imprimir rango de carta",
+              "outputs": {
+                "js": {
+                  "code": "core.map(Carta.Rangos, (rangoDeCarta) => core.console.log(rangoDeCarta))"
+                },
+                "ts": {
+                  "code": "core.map(Carta.Rangos, (rangoDeCarta: (typeof Carta.Rangos)[number]) => core.console.log(rangoDeCarta))"
+                },
+                "py": {
+                  "code": "for rango_de_carta in Carta.RANGOS:\n    core.console.log(rango_de_carta)"
                 }
               }
             }
@@ -3456,7 +3483,7 @@
           "ruleNames": ["class_member"],
           "internal": false,
           "file": "src/spell/rules/classes/ClassMember.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "`{type} {member words}` -- a class variable of a known type, e.g.",
           "syntaxes": [
             {
@@ -3549,7 +3576,7 @@
           "ruleNames": ["every_thing"],
           "internal": false,
           "file": "src/spell/rules/classes/EveryThing.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Every thing of a type the program has made, in the order made (epic page `outline-spell`, P16).",
           "syntaxes": [
             {
@@ -3590,6 +3617,58 @@
                 },
                 "py": {
                   "code": "core.every_thing(Pila)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "KindValues",
+          "ruleNames": ["kind_values"],
+          "internal": false,
+          "file": "src/spell/rules/classes/KindValues.ts",
+          "line": 15,
+          "purpose": "Every value of a kind, by the kind's plural name -- its list (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "syntax": "{type:plural_type}",
+              "example": "palos de carta",
+              "outputs": {
+                "js": {
+                  "code": "Carta.Palos"
+                },
+                "ts": {
+                  "code": "Carta.Palos"
+                },
+                "py": {
+                  "code": "Carta.PALOS"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "RandomKindValue",
+          "ruleNames": ["random_kind_value"],
+          "internal": false,
+          "file": "src/spell/rules/classes/RandomKindValue.ts",
+          "line": 12,
+          "purpose": "One value of a kind, picked at random (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {type:known_type} (al azar|aleatorio|aleatoria)",
+              "example": "un palo de carta al azar",
+              "outputs": {
+                "js": {
+                  "code": "core.randomItemOf(Carta.Palos)"
+                },
+                "ts": {
+                  "code": "core.randomItemOf(Carta.Palos)"
+                },
+                "py": {
+                  "code": "core.random_item_of(Carta.PALOS)"
                 }
               }
             }
@@ -5389,6 +5468,31 @@
                 },
                 "py": {
                   "code": "Carta"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "KindName",
+          "ruleNames": ["kind_name"],
+          "internal": false,
+          "file": "src/spell/rules/types/KindName.ts",
+          "line": 11,
+          "purpose": "A value kind's name of several words, singular, naming one of its values (epic `spanish` P22).",
+          "syntaxes": [
+            {
+              "example": "rango de carta",
+              "outputs": {
+                "js": {
+                  "code": "RangoDeCarta"
+                },
+                "ts": {
+                  "code": "RangoDeCarta"
+                },
+                "py": {
+                  "code": "RangoDeCarta"
                 }
               }
             }

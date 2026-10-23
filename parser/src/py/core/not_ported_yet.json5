@@ -46,6 +46,13 @@
       ]
     },
     {
+      "why": "Running a project's tests from a runner (epic spanish, Card Checks and Test Results):  spell test and the VS Code runner's Run Tests, on the JavaScript core;  Python's tests run under pytest",
+      "names": [
+        "testResults",
+        "runTests"
+      ]
+    },
+    {
       "why": "Not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it",
       "names": [
         "doNothing",

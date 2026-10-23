@@ -114,6 +114,38 @@ export class DefinePropertyHas extends SpellStatement<
     }
   }
 
+  /**
+   * SIDE EFFECT:  declares the KIND of an enumerated property's values (epic `spanish` P22),
+   * e.g. `card suit` for a card's `its "suit" is one of clubs, diamonds, hearts or spades`.
+   * - Named in the language's word order (`SP.Language.propertyKindName()`):  `card suit`, `palo de carta`.
+   * - So another type can say `its "suit" is a card suit`:  one of the card's suits, `Card.Suits`.
+   *   And `card suits` / `every card suit` is that list, `a random card suit` one of it.
+   * - A `P.TypeScope` with a `valueKind` naming its `property`:  no class of its own, so nothing compiles for it,
+   *   and the project neither exports it nor writes it in its declarations (`P.ValueKind.property`).
+   * - Claims a stub of it:  a mention above, or the pre-pass's (`SpellParser.declaredTypes()`).
+   * - A type declared with that name keeps it, e.g. `a card suit is a thing`:  no kind then.
+   * - Returns its name, e.g. `CardSuit` -- `undefined` when another type has it.
+   */
+  private static declareKind(
+    match: P.MatchFor<DefinePropertyHas>,
+    typeScope: P.TypeScope,
+    values: Array<string | number>,
+    listName: string
+  ): string | undefined {
+    const { scope } = match
+    const language = SP.Language.of(scope)
+    const { property } = match.groups
+    const name = language.propertyKindType(typeScope.name, `${property.raw ?? property.value}`)
+    const valueKind = { values, listOn: typeScope.name, listName, property: DefinePropertyHas.propertyName(match) }
+    const existing = scope.types?.get(name)
+    if (!existing) scope.types?.add({ name, valueKind, declaredBy: match })
+    // a stub, or ours from an earlier parse of this statement -- see `P.TypeScope.sameStatement()`
+    else if (existing.stub || P.TypeScope.sameStatement(existing.declaredBy, match)) {
+      existing.claim(match, undefined, { valueKind })
+    } else if (existing.declaredBy !== match) return undefined
+    return name
+  }
+
   mutateScope(match: P.MatchFor<this>) {
     const { scope } = match
     const { type, property, specifier } = match.groups
@@ -132,8 +164,11 @@ export class DefinePropertyHas extends SpellStatement<
       const groupName = P.pluralize(upperFirst(property.value))
 
       const { values } = specifierAST
+      // the kind of its values, e.g. `card suit`:  its list is a list of them, so a loop over it knows each is one
+      const kind = DefinePropertyHas.declareKind(match, typeScope, values, groupName)
       const varProps: P.ScopeVariableProps & { enumeration: Array<string | number> } = {
         name: groupName,
+        datatype: kind && P.listOfType(kind),
         enumeration: values,
         initializer: P.enumerationInitializer(values),
         declaredBy: match

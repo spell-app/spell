@@ -63,6 +63,13 @@ export class WriterProject {
    */
   readonly valueKinds = new Map<string, TSList>()
   /**
+   * The kind of each property's values, by name, and where its list is, by `<Class>.<Static>`:
+   * e.g. `CardSuit` => `Card.Suits`, from a card's `its "suit" is one of ...` (epic `spanish` P22).
+   * - It has no class of its own (`P.ValueKind.property`):  a value of it is typed as one of its list's,
+   *   see `TSWriter.typeFor()`.
+   */
+  readonly propertyKinds = new Map<string, string>()
+  /**
    * Members a class gets for TypeScript only, by the class's name (Q25):
    * ones its program uses on it, or on a class below it, but never declares there.  See `TSUndeclared`.
    * - A value given when one is made, `a new foundation with symbol = "♣️"`:
@@ -238,9 +245,16 @@ export class WriterProject {
    * SIDE EFFECT:  notes what the types `layer` declares say they have.
    * - Each type NOT in `written` (the classes the files declare), and not noted already, is noted as imported:
    *   its members in `importedMembers`, its super-type in `superTypes`.
+   * - The kind of a property's values in `propertyKinds` instead:  it has no class.
    */
   private noteTypes(layer: P.Scope, written = new Map<string, P.ASTClassDeclaration>()) {
     for (const type of layer.types?.get() ?? []) {
+      // a property's kind, e.g. `CardSuit`:  no class, only its list -- see `propertyKinds`
+      const { valueKind } = type
+      if (valueKind?.property) {
+        this.propertyKinds.set(type.name, `${valueKind.listOn}.${valueKind.listName}`)
+        continue
+      }
       const members = new Set<string>()
       for (const method of type.methods?.get() ?? []) members.add(method.name)
       for (const variable of type.variables?.get() ?? []) {

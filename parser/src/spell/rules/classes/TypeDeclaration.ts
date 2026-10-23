@@ -88,6 +88,8 @@ export class TypeDeclaration<
    * -- unless it's already defined (no redefinition / merge).
    * - A type only STUBBED by an earlier mention, or left by an earlier parse of this statement, is claimed instead --
    *   see `P.TypeScope.claim()`.
+   * - So is the kind of a property's values of the same name, e.g. `card suit` (`P.ValueKind.property`):
+   *   a type someone declares is what the name means.
    * - An IMPORTED one is declared again anyway, so `SP.SpellDeclarations.checkImportClashes()` can report it.
    * - Its `gender`, from the article it's declared with, e.g. `feminine` for `una carta es una cosa`
    *   (epic `spanish` P8):  see `genderOf()`.
@@ -100,7 +102,8 @@ export class TypeDeclaration<
     const existing = scope.types?.get(name)
     if (existing && !(existing.parentScope instanceof P.ImportScope)) {
       // a stub, or left by an earlier parse of this statement -- see `P.TypeScope.sameStatement()`
-      if (existing.stub || P.TypeScope.sameStatement(existing.declaredBy, match)) {
+      const isPropertyKind = !!existing.valueKind?.property
+      if (existing.stub || isPropertyKind || P.TypeScope.sameStatement(existing.declaredBy, match)) {
         existing.claim(match, superType, options)
       }
       return
@@ -149,9 +152,11 @@ export class TypeDeclaration<
   /**
    * Did ANOTHER line of the project declare `type`?
    * - Not a stub (a mention, or the pre-pass's), an imported type, a built-in, or this line's own earlier parse.
+   * - Nor the kind of a property's values, e.g. `card suit`:  a type declared with its name takes it over.
    */
   private static isDeclaredElsewhere(type: P.TypeScope, match: P.Match): boolean {
     if (type.stub || !type.declaredBy || type.parentScope instanceof P.ImportScope) return false
+    if (type.valueKind?.property) return false
     return !P.TypeScope.sameStatement(type.declaredBy, match)
   }
 

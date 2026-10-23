@@ -190,11 +190,19 @@ and the JavaScript they become.
 | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = ["clubs", "diamonds", "hearts", "spades"]`, and the property |
 | `the color of a card is red if ... otherwise it is black` | `get color() { ... }` |
 | `the value of a card is the position of its rank in card ranks` | `get value() { return spellPosition(positionOf(Card.Ranks, this.rank)) }` |
+| `- its "suit" is a card suit`, in a foundation's outline | `static { this.declareProp("suit", { oneOf: () => Card.Suits }) }` |
+| `card suits`, `every card suit` | `Card.Suits` |
+| `a random card suit` | `core.randomItemOf(Card.Suits)` |
 
 - `Thing`, `List` and `App` are the runtime's base classes ([README-core](README-core.md)).
 - After `a card is a thing`, "card" is a word every line knows, in every file of the project:
   each type a project declares is known before its first line is read, so a line may use one declared further down.
 - A stored property is declared with its choices;  a worked-out one is a getter, read when you ask for it.
+- A property's choices are a kind of their own, named by the type, then the property:  a card's suits make `card suit`.
+  - Another type's property can be one of them, `its "suit" is a card suit`:  setting it to `stars` warns, as a card's own would.
+  - Its plural is the list, `card suits`;  a loop over it can name its item for it, `for each card rank in card ranks`.
+  - It holds plain text and numbers, so it has no properties or phrases of its own:  Spell says so if you give it one.
+  - Spanish puts the words in its own order:  `palo de carta`, plural `palos de carta`.
 - A card's value is its rank's position, so an ace is 1 and a queen is 12:  the Solitaire example's card test checks the queen.
 
 ### Phrases become rules
@@ -524,8 +532,9 @@ They're NEVER edited to follow the live examples, which people change.
 | Project | What it shows |
 | --- | --- |
 | [fizzbuzz](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/fizzbuzz/) | a loop, `if` / `otherwise`, `print` |
-| [cards](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/cards/) | a card, a deck and piles:  a frozen card library, for `lists-from-zero` to import |
-| [lists-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/lists-from-zero/) | that library's deck, its lists counting from 0 |
+| [counter](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/counter/) | a counter, drawn as a button that counts its clicks:  a frozen library, for `counter-app` to import |
+| [counter-app](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/counter-app/) | that library's counter, made and drawn:  one project importing another |
+| [lists-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/lists-from-zero/) | a rack of five tiles, its lists counting from 0 |
 | [thing-references](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/thing-references/) | naming one thing:  `tableau T1`, `the first tableau` |
 | [people](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/people/) | people and what they keep, as a TypeScript library |
 | [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) | a to-do app drawn with Spell UI's form elements |
@@ -550,10 +559,9 @@ The snapshots, for a project `<Project>`:
 | `<Project>.en.snapshot.js` | its words (`Solitario.es.snapshot.js`, in Spanish) |
 | `<Project>.elements.snapshot.js` | a program's drawing half, for Python |
 | `<Project>.lib.snapshot.ts` | the library target, for `people` |
-| `<library>.import.snapshot.js` | each library it imports, as it runs against it:  `lists-from-zero`'s `cards.import.snapshot.js` |
 
-- Five have a Python snapshot too, `PYTHON_FIXTURES`, which the Python runtime runs:
-  `fizzbuzz`, `lists-from-zero`, `people`, `thing-references` and Solitaire.
+- Seven have a Python snapshot too, `PYTHON_FIXTURES`, which the Python runtime runs:
+  `counter`, `counter-app`, `fizzbuzz`, `lists-from-zero`, `people`, `thing-references` and Solitaire.
   What `tsc` and pyright found, and why the to-do app has no Python yet:
   [README-targets](README-targets.md#typescript--the-same-program-typed-as-solid-developers-write-it).
 - They and their tests are spell-app's, beside its other `@spell` groups:

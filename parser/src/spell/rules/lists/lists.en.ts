@@ -258,7 +258,24 @@ lists.addRule(ListPosition, {
 
 // ... and a kind's value, in its kind's own list (epic page `outline-spell`, P12):  `the position of its rank`
 lists.addRule(ListPosition, {
-  syntax: "the? position of {thing:expression}"
+  syntax: "the? position of {thing:expression}",
+  tests: [
+    // ... or a property's own list:  `its "rank" is one of ...`
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "a card is a thing",
+            "a card has a rank as one of ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, jack, queen, king",
+            "card = a new card"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [["the position of the rank of card", "spellPosition(positionOf(Card.Ranks, card.rank))"]]
+    }
+  ]
 })
 
 lists.addRule(StartsWith, {
@@ -911,6 +928,31 @@ lists.addRule(ListIteration, {
             "  if (index > 2) core.append(messages, message)",
             "}))"
           ]
+        ]
+      ]
+    }
+  ]
+})
+
+// the item named for a value kind of several words (epic `spanish` P22)
+lists.addRule(ListIteration, {
+  syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a card is a thing", "a card has a rank as one of ace, 2, 3"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "for each card rank in card ranks: print card rank",
+          "core.map(Card.Ranks, (cardRank) => core.console.log(cardRank))",
+          "core.map(Card.Ranks, (cardRank: (typeof Card.Ranks)[number]) => core.console.log(cardRank))"
+        ],
+        [
+          ["for each card rank in card ranks:", "\tprint it"],
+          "core.map(Card.Ranks, (cardRank) => core.console.log(cardRank))",
+          "core.map(Card.Ranks, (cardRank: (typeof Card.Ranks)[number]) => core.console.log(cardRank))"
         ]
       ]
     }

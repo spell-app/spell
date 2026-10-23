@@ -45,9 +45,10 @@ export class MemberReadExpression<
       return new P.ASTPropertyExpression(match, { object, property: member.output })
     }
     // a value kind's property declared further down, e.g. `the color of its suit` in a card above the deck:
-    // its type's record knows by now (issue I3 of `outline-spell`) -- the static form, as `property_value_getter`'s
+    // its type's record knows by now (issue I3 of `outline-spell`) -- the static form, as `property_value_getter`'s;
+    // not a property's kind, `card rank`, which has no class to hold one (`P.ValueKind.property`)
     const { ownerType } = match.data as MemberData
-    if (!member && ownerType?.valueKind) {
+    if (!member && ownerType?.valueKind && !ownerType.valueKind.property) {
       return MemberReadExpression.builtInMemberAST(match, object, `${ownerType.name}.${property.value}({it})`)
     }
     return new P.ASTPropertyExpression(match, { object, property: P.asAST<P.ASTPropertyLiteral>(property.AST) })
@@ -90,6 +91,9 @@ export class MemberReadExpression<
    */
   static warnIfUndeclared(match: P.Match, ownerType: P.TypeScope | undefined, property: P.Match): void {
     if (!ownerType || !(ownerType.stub || ownerType.declaredBy)) return
+    // the kind of a property's values, `card rank`:  it has none, nor can it (epic `spanish` P22)
+    const ofPropertyKind = SP.SpellWarnings.noMembersOnPropertyKind(match.scope, ownerType)
+    if (ofPropertyKind) return SP.SpellWarnings.note(match, ofPropertyKind, property)
     const language = SP.Language.of(match.scope)
     const words = `${property.raw ?? property.value}`
     const aType = SP.SpellWarnings.exampleNoun(match.scope, ownerType)

@@ -151,7 +151,8 @@
       path: "type:List/method:for each (item) in (a list)",
       description: "Do something with each item in turn, e.g. `for each card in the deck`.\n- Its position too, counting from 1:  `for card and index in the deck`.",
       rules: [
-        { name: "list_iteration", syntax: "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?" }
+        { name: "list_iteration", syntax: "for each? {item:singular_identifier} ((and|,) {position:singular_identifier})? (in|of) {list:expression} :? {statement_body}?" },
+        { name: "list_iteration", syntax: "for each? {item:kind_name} (in|of) {list:expression} :? {statement_body}?" }
       ]
     },
     {

@@ -18,6 +18,8 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - For the `"block"` rule, it then calls [`breakIntoIndentedBlocks()`](../parser/tokenizer/Tokenizer.ts).
   - The result is ONE root `BlockToken`:  its lines (`LineToken`s), and nested blocks of the same kind.
   - indent ~== count of leading whitespace chars (tab === space === 1)
+    - except 1-3 spaces right before a tab, which the tab swallows:  ` \t` is as deep as `\t`, as an editor shows it
+      (`indentWidth()`, epic `spanish`:  a stray space nested a card's `- its "value" ...` under the line above)
   - each extra level pushes a `BlockToken`
   - a blank line takes the indent of the NEXT non-blank line, so it doesn't break a nested block (lookahead)
   - a comment is a single `CommentToken`, to the end of the line:
@@ -407,8 +409,10 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       - so `its last card` stays `its_ordinal`'s
 - A type's class members:  ONE static rule, [`class_member`](rules/classes/ClassMember.ts).
   - its syntax:  `{type:known_type} {member:member_words}`
-  - it takes the longest run that's a class variable of the type, e.g. `card suits includes x` => `Card.Suits`
+  - it takes the longest run that's a class variable of the type, e.g. `deck suits includes x` => `Deck.Suits`
   - it was a rule per enumeration (`EnumerationRule`)
+  - A property's own list, `card suits`, is its KIND's plural:  `kind_values` reads it
+    (see "The kind of a property's values").  Spanish's `palos de carta`, either.
   - `the number of card suits` counts:  `list_count` takes any operand whose datatype is a list
 
 ## Built-in types:  `the length of the name`
@@ -675,6 +679,8 @@ A kind that says so is saved in a file of its own.
   - Errors inside JSX `{...}` live in the JSX rules' `match.data`, not `matched`.
     - `BlockLine` gathers them from anywhere in its statement into `data.errors` too.
       That's `SpellJSX.parseErrorsIn()`.
+    - And from an indented body that's ONE expression, not a `block`:
+      `return` alone, its markup on the lines below.
     - They're reported, but compiled in place.
 - Warnings:  what a program should say, but which doesn't stop it, e.g. a type (epic `output-targets`, Q24).
   - `a calculator has an input` => `Say what "input" is, e.g. "a calculator has an input as text"`
@@ -891,6 +897,8 @@ A kind that says so is saved in a file of its own.
   - e.g. `the position of its rank` => `spellPosition(positionOf(Deck.Ranks, this.rank))`
   - `list_position`'s second syntax keeps the kind's record (`data.kindType`), and reads its list when compiling.
   - A stub which never becomes a kind warns once the project has parsed, and compiles to an empty list.
+  - A property with its OWN list (`its "rank" is one of ace, 2 ... king`) finds it in that list too:
+    `Card.Ranks` (`data.ownList`, from the read's `data.member`;  epic `spanish`).
 - A value kind may be used ABOVE its declaration, e.g. the card above the deck (issue I3):
   - `SpellParser.declaredTypes()` finds `"suits" as one of ...` lines too.
     - Its pattern for them:  `VALUE_KIND_DECLARATION`
@@ -904,6 +912,42 @@ A kind that says so is saved in a file of its own.
   `static get instanceType() { return Card }` (`create_list_type`).
 - A property, alias or phrase on a type nobody declares is refused (`SpellStatement.refuseUnknownType()`).
 
+### The kind of a property's values:  `its "suit" is a card suit`
+
+- A property's own list of values is a kind too (epic `spanish` P22):
+  a card's `its "suit" is one of clubs, ...` (or `has a suit as one of ...`) declares `card suit`.
+  - `define_property_has` declares it beside the list:  `DefinePropertyHas.declareKind()`.
+  - Its name is the language's word order, `SP.Language.propertyKindName()`:
+    English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
+    - Its type's name, `CardSuit`, `PaloDeCarta`:  `SP.Language.propertyKindType()`.
+    - Its plural is any name's of several words:  `card suits`;  `palos de carta`, up to the `de`.
+  - A `P.TypeScope` whose `valueKind` names its `property`:  `{ values, listOn: "Card", listName: "Suits", property: "suit" }`.
+  - Its list's class variable (and instance twin) is a list of it, `list of card-suits` (`P.listOfType()`):
+    so a loop over `card suits` knows each is a card suit.
+- What it gives another type, and the program:
+  - `its "suit" is a card suit`:  `{ oneOf: () => Card.Suits }`, as for a value kind.
+    TypeScript types it as the card's own suit is, `Suit` (`TSWriter.propertyKindType()`);  Python as `Any`.
+  - `card suits` alone is its list:  [`kind_values`](rules/classes/KindValues.ts), `Card.Suits`.
+    - Once `card suit` is a type, `card suits` is ONE name, which `class_member` can no longer split.
+  - `every card suit` (`every_thing`):  the list too, for any value kind.
+  - `a random card suit`:  [`random_kind_value`](rules/classes/RandomKindValue.ts), `core.randomItemOf(Card.Suits)`.
+  - `for each card rank in card ranks`:  a loop's item named for the kind, [`kind_name`](rules/types/KindName.ts);
+    its variable is its words, `card_rank`, read as `card rank`.
+  - `the position of its suit`:  the kind's list, as for a value kind (`list_position`).
+- It has NO class of its own:
+  - Nothing compiles for it, and its project neither exports it (`provides`) nor writes it in its declarations.
+  - An importer makes it again, from the property's declaration (`SpellDeclarations.loadPropertyKind()`), named in
+    the language that declaration was written in;  picking a type with a property of the kind brings the type
+    listing it.
+  - So a property or phrase ON it is refused (`SpellStatement.refusePropertyKind()`):  `the "value" of a card rank is ...`.
+    A member read off one warns, saying the same (`MemberReadExpression.warnIfUndeclared()`).
+  - The scope explorer leaves it out:  its values show on the type listing them.
+- A type declared with its name keeps it (`TypeDeclaration.declareType()`):  `a card suit is a thing` claims the record.
+  A kind's declaration never takes a name another type already has.
+- Used ABOVE the type listing it (the foundation above the card):  `SpellParser.declaredTypes()` stubs it,
+  from the body lines `declaredPropertyKinds()` finds (the language's `propertyListDeclaration`):
+  only lists with `one of` / `either`.
+
 ## Inferred phrases:  `- it "is a (suit)"`
 
 - A `quoted_property_formula` with no `for its ...` INFERS what each blank reads.
@@ -913,6 +957,8 @@ A kind that says so is saved in a file of its own.
     - It names, by its singular, a property of the type with a list of values.
     - The list is its own (`as one of`), or a value kind's.
     - e.g. `is the (rank) of (suits)`:  sources `rank`, `suit`
+    - Where the phrase is USED, a blank takes any of its values, singular or plural, numbers as they are
+      (`placeholderForms()`, epic `spanish`):  `(suit)` reads `the 2 of clubs` and `the queen of spade`.
   - A bare word is always just a word (epic page J9).
   - More after the phrase:  not ours, so `it "is face up" if ...` stays a `quoted_type_expression`.
   - REFUSED, saying why:
@@ -931,6 +977,15 @@ A kind that says so is saved in a file of its own.
   - Its `MethodPostfixRule` compiles to `Rank.is_a_face_card(card.rank)`.
     See its `staticOf`.
   - Postfix phrases only.
+- A phrase on a SUB-type of another of the project's types (a joker's `it "is the (color) joker"`)
+  is a STATIC method of its type, checking the type first (`QuotedPropertyFormulaBits.staticArg`, epic `spanish`):
+  - `static isTheColorJoker(card, color) { return card instanceof Joker && card.color === color }`
+  - every use calls it so, safe on any card:  `the card is the red joker` => `Joker.isTheColorJoker(card, "red")`
+  - Why:  it's used on the super-type's values, which have no such instance method.
+  - A built-in super-type (`a card is a drawable thing`) doesn't count:  that phrase stays an instance method.
+- A thing compared to one of its OWN listed values compares the property that lists it (`is_equal`, epic `spanish`):
+  - `it is clubs`, in a card with `its "suit" is one of clubs ...` => `this.suit == "clubs"`
+  - only when its type is known, the word is no variable, and ONE property lists it (`IsEqual.listedPropertyFor()`)
 - A user's phrase checks WHOSE it is.
   - `CompoundExpression` tells the first suffix after an operand what that operand is.
     - That's [`SuffixLeft`](rules/expressions/expressions.shared.ts):

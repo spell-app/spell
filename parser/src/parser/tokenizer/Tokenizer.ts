@@ -820,7 +820,7 @@ export class Tokenizer {
         lines.push(line)
       } else if (token instanceof P.IndentToken) {
         // pull out leading whitespace as `line.indent`
-        line.record.indent = token.length
+        line.record.indent = indentWidth(token.raw ?? "")
         line.record.leading = token.raw
       } else {
         // add to normal tokens in the line
@@ -1065,4 +1065,18 @@ type TokenizerProps = {
   quoteSymbols?: string[]
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
+}
+
+/** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */
+const SPACES_BEFORE_TAB = / {1,3}\t/g
+
+/**
+ * How deep leading whitespace `raw` indents a line:  one per tab or space,
+ * except a few spaces right before a tab, which the tab swallows.
+ * - So ` \t` is as deep as `\t`, as an editor shows it:  the tab goes to the same tab stop.
+ * - Why:  a stray space before a tab otherwise nests the line under the one before,
+ *   e.g. a property's `- its "value" is ...` read as more of the line above it.
+ */
+function indentWidth(raw: string): number {
+  return raw.replace(SPACES_BEFORE_TAB, "\t").length
 }

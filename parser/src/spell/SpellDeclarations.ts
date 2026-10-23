@@ -77,9 +77,10 @@ export class SpellDeclarations {
    * - Throws if it names something the project doesn't declare.
    */
   static provides(scope: P.ProjectScope, exports?: string[]): string[] {
+    // a property's kind has no class to export:  an importer makes it again (`P.ValueKind.property`)
     const types = scope.types
       .get()
-      .filter((type) => !type.stub)
+      .filter((type) => !type.stub && !type.valueKind?.property)
       .map((type) => type.name)
     const functions = scope.rules
       .get()
@@ -129,6 +130,8 @@ export class SpellDeclarations {
    * - Skips:
    *   - what it no longer declares, e.g. a type it stubbed which a later `a card is a thing` claimed
    *   - what never leaves its file, e.g. local variables
+   *   - the kind of a property's values, e.g. `CardSuit` (`P.ValueKind.property`):
+   *     loading makes it again from the property's list -- see `loadVariables()`
    * - A record is ours if its `declaredBy` holds the SAME `declared` list:
    *   - this statement
    *   - or a clone of it which incremental parsing re-bodied (`BlockLine.reparseBody()`):
@@ -146,7 +149,8 @@ export class SpellDeclarations {
     const constantOutputs: Record<string, string> = {}
     for (const item of mine) {
       if (item instanceof P.TypeScope) {
-        if (!item.stub) {
+        // a property's kind, e.g. `CardSuit`:  loading makes it again from the property's own list
+        if (!item.stub && !item.valueKind?.property) {
           const { name: type, superType, aka, gender, itemType } = item
           merge({ type, superType, aka, gender, itemType })
         }
@@ -288,6 +292,7 @@ export class SpellDeclarations {
    * just what `import` picks, replaying each statement's in order.
    * - Each picked name brings its type dependencies (`superType`, property datatypes) and what it owns:
    *   its properties, constants and rules, e.g. `Card` brings `card suits`.
+   *   - A property of a kind, e.g. a foundation's `its "suit" is a card suit`, brings the type listing it, `Card`.
    * - A type picked as `Card:Playingcard` loads as `Playingcard`, everywhere a loaded record names it:
    *   see `renamed()`.
    *   - Its `runtimeName` stays `Card`:  its class is still called that when the code runs.
@@ -340,7 +345,7 @@ export class SpellDeclarations {
 
   /**
    * Throws `P.ParserError` if parsed project `scope` itself declares a type it also imports,
-   * e.g. its own `a card is a thing` when `Card` comes from `@spell/test/cards`.
+   * e.g. its own `a card is a thing` when `Card` comes from `owen@spell/cards`.
    * - Its imports are the `P.ImportScope` above it -- nothing to check without one.
    * - Types only:  a RULE name may repeat.
    *   - e.g. `draw` methods on two types merge into one `P.Group`, as they would parsing everything from source
@@ -385,6 +390,9 @@ export class SpellDeclarations {
    *   read-only, as there -- see `P.TypeScope.declareOwnerMember()`.
    * - A value kind's property keeps its `readAs`, its static method's call, e.g. `Suit.color({it})`:
    *   so an importer's `the color of its suit` calls it too (epic `spanish` P11).
+   * - A property with its own list of values brings the kind of its values (epic `spanish` P22),
+   *   e.g. `CardSuit` for a card's `suit`, named in the language its declaration is written in:
+   *   so an importer can say `its "suit" is a card suit` too -- see `loadPropertyKind()`.
    */
   private static loadVariables(
     scope: P.ImportScope,
@@ -423,8 +431,10 @@ export class SpellDeclarations {
       )
     }
     if (classVariable) {
+      const kind = property && SpellDeclarations.loadPropertyKind(scope, typeScope, declaration, declaredAt)
       const variable = definedOnly({
         name: classVariable,
+        datatype: kind && P.listOfType(kind),
         enumeration: spellValues(enumeration),
         initializer: enumerationInitializer(enumeration),
         declaredAt
@@ -432,6 +442,28 @@ export class SpellDeclarations {
       typeScope.classVariables.add({ ...variable })
       typeScope.variables.add({ ...variable })
     }
+  }
+
+  /**
+   * The kind of `declaration`'s property's values, made again in import layer `scope`, e.g. `CardSuit`:
+   * as `define_property_has` declared it, where the declaration was written (epic `spanish` P22).
+   * - Its name is in the language of the file that declared it, `defined`:  `palo de carta` from a Spanish file.
+   * - None if a type of that name is there already, e.g. one the project declared itself:  returns `undefined`.
+   * - Returns its name.
+   */
+  private static loadPropertyKind(
+    scope: P.ImportScope,
+    typeScope: P.TypeScope,
+    { property, asWritten, classVariable, enumeration, defined }: SP.SpellDeclaration,
+    declaredAt: P.DeclaredAt | undefined
+  ): string | undefined {
+    const language = SP.Language.forFile(defined)
+    const name = language.propertyKindType(typeScope.name, `${asWritten ?? property}`)
+    if (scope.types.get(name, "LOCAL_ONLY")) return undefined
+    const values = spellValues(enumeration) ?? []
+    const valueKind = { values, listOn: typeScope.name, listName: `${classVariable}`, property: `${property}` }
+    scope.types.add(definedOnly({ name, valueKind, declaredAt }))
+    return name
   }
 
   /**
@@ -584,12 +616,21 @@ export class SpellDeclarations {
     }
     // what each type needs -- `names` grows as we go, so dependencies' dependencies come too
     const needs = new Map<string, string[]>()
-    for (const { type, superType, property, of, datatype } of statements) {
+    // the kind of a property's values, e.g. `CardSuit`, by the type listing them, `Card`:  a type, as far as needs go
+    const kindsListedBy = new Map<string, string>()
+    for (const declaration of statements) {
+      const { type, superType, property, of, datatype, classVariable, asWritten, defined } = declaration
       if (type) needs.set(type, [...(needs.get(type) ?? []), superType ?? ""])
       if (property && of && datatype) needs.set(of, [...(needs.get(of) ?? []), datatype])
+      if (property && of && classVariable) {
+        kindsListedBy.set(SP.Language.forFile(defined).propertyKindType(of, asWritten ?? property), of)
+      }
     }
     for (const name of names) {
-      for (const need of needs.get(name) ?? []) if (need && needs.has(P.typeCase(need))) names.add(P.typeCase(need))
+      for (const need of needs.get(name) ?? []) {
+        const needed = kindsListedBy.get(P.typeCase(need)) ?? P.typeCase(need)
+        if (need && needs.has(needed)) names.add(needed)
+      }
     }
     // a new name MUST be unique among what's loaded
     const loaded = [...names].map((name) => renames.get(name) ?? name)
@@ -716,7 +757,7 @@ export class SpellDeclarations {
   /**
    * `<file>:<start>-<end>` character offsets of `match` in its file, e.g. `/FizzBuzz.spell:23-412`:
    * if it came from a file.
-   * - Project-relative, e.g. `/Card.spell` not `@spell/test/cards/Card.spell`:  a library may move.
+   * - Project-relative, e.g. `/Card.spell` not `owen@spell/cards/Card.spell`:  a library may move.
    */
   private static definedAt(match: P.Match): string | undefined {
     const path = match.getScopeOfType(P.FileScope)?.path

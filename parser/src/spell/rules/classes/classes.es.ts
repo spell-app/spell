@@ -31,6 +31,7 @@ import { DefinePropertyHas } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
+import { KindValues } from "./KindValues"
 import { ListGuard } from "./ListGuard"
 import { MarkdownDescription } from "./MarkdownDescription"
 import { MustRule } from "./MustRule"
@@ -49,6 +50,7 @@ import { PropertyMust } from "./PropertyMust"
 import { PropertyValueEither } from "./PropertyValueEither"
 import { PropertyValueGetter } from "./PropertyValueGetter"
 import { QuotedPropertyFormula } from "./QuotedPropertyFormula"
+import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
@@ -384,11 +386,20 @@ classesEs.addRule(CSSBlock, {
             "    .red { color: crimson }",
             "  `",
             "}",
-            ...drawableElement("Card", "card", [
-              "  @E.protoMerged static elementSetup = {",
-              '    styleSheets: { "test-classes-card": Card.css }',
-              "  } satisfies Partial<E.ElementSetup>"
-            ])
+            "",
+            "/**",
+            " * `<test-classes-card>`:  a card, drawn in its own element, e.g. by `draw the card`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its card's properties;  its methods call its card's.",
+            " * - What every drawable thing's element does, e.g. drawing its card, is `SpellElement`'s.",
+            " */",
+            "export class CardElement extends SpellElement<Card> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-card", "card", [])',
+            "  @E.protoMerged static elementSetup = {",
+            '    styleSheets: { "test-classes-card": Card.css }',
+            "  } satisfies Partial<E.ElementSetup>",
+            "}",
+            "core.useElement(Card, CardElement)"
           ]
         ]
       ]
@@ -1641,6 +1652,57 @@ classesEs.addRule(QuotedPropertyFormula, {
         ["imprimir card es un trébol", 'core.console.log(card.esUnPalo("tréboles"))'],
         ["imprimir card es el 2 de corazones", 'core.console.log(card.esElRangoDePalos(2, "corazones"))']
       ]
+    },
+    // a blank takes its values singular or plural, numbers too:  `(palo)` reads `tréboles`, `(rango)` reads `2`
+    // -- and a sub-type's phrase is its type's static method, which checks the type:  safe on any card
+    {
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "una card es una cosa",
+            "una card tiene un rango como uno de as, 2, 3, 4, 5, 6, 7, 8, 9, 10, jota, reina, rey",
+            "una card tiene un palo como uno de tréboles, diamantes, corazones, espadas",
+            'una card "es el (rango) de (palo)" para sus rangos y sus palos',
+            "un joker es una card",
+            "un joker tiene un color como uno de rojo, negro",
+            "card = una nueva card"
+          ].join("\n"),
+          "block"
+        )
+      },
+      compileAs: "block",
+      tests: [
+        [
+          'un joker "es el joker (color)" para sus colores',
+          [
+            "Joker.esElJokerColor = function (card, color) {",
+            "  return card instanceof Joker && card.color === color",
+            "}"
+          ],
+          [
+            "Joker.esElJokerColor = function (card: Card, color: any /* spell: type unknown */) {",
+            "  return card instanceof Joker && card.color === color",
+            "}"
+          ]
+        ],
+        [
+          'un joker "es el joker (color)" para sus colores\nimprimir card es el joker rojo',
+          [
+            "Joker.esElJokerColor = function (card, color) {",
+            "  return card instanceof Joker && card.color === color",
+            "}",
+            'core.console.log(Joker.esElJokerColor(card, "rojo"))'
+          ],
+          [
+            "Joker.esElJokerColor = function (card: Card, color: any /* spell: type unknown */) {",
+            "  return card instanceof Joker && card.color === color",
+            "}",
+            'core.console.log(Joker.esElJokerColor(card, "rojo"))'
+          ]
+        ],
+        ["imprimir card es el 2 de tréboles", 'core.console.log(card.esElRangoDePalo(2, "tréboles"))'],
+        ["imprimir card es la reina de espada", 'core.console.log(card.esElRangoDePalo("reina", "espadas"))']
+      ]
     }
   ]
 })
@@ -1736,6 +1798,17 @@ classesEs.addRule(EveryThing, {
         ["cada pile", "core.everyThing(Pile)"],
         ["cada tableau", "core.everyThing(Tableau)"]
       ]
+    },
+    {
+      // cada valor de un tipo de valores:  su lista (epic `spanish` P22)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una carta tiene un palo como uno de tréboles, diamantes"].join("\n"),
+          "block"
+        )
+      },
+      tests: [["cada palo de carta", "Carta.Palos"]]
     }
   ]
 })
@@ -1756,6 +1829,52 @@ classesEs.addRule(TheThings, {
         // a variable keeps its meaning
         ["las cards", "cards"],
         ["los gizmos", undefined]
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(KindValues, {
+  syntax: "{type:plural_type}",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          [
+            "una carta es una cosa",
+            "una carta tiene un palo como uno de tréboles, diamantes",
+            "una pila de descartes es una cosa",
+            "una pila de descartes tiene un lado como uno de izquierda, derecha"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["palos de carta", "Carta.Palos"],
+        ["lados de pila de descartes", "PilaDeDescartes.Lados"],
+        // un tipo que no es de valores
+        ["cartas", undefined]
+      ]
+    }
+  ]
+})
+
+classesEs.addRule(RandomKindValue, {
+  syntax: "(un|una) {type:known_type} (al azar|aleatorio|aleatoria)",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(
+          ["una carta es una cosa", "una carta tiene un palo como uno de tréboles, diamantes"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["un palo de carta al azar", "core.randomItemOf(Carta.Palos)"],
+        ["un palo de carta aleatorio", "core.randomItemOf(Carta.Palos)"],
+        ["una carta al azar", undefined]
       ]
     }
   ]

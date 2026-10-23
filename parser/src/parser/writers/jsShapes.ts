@@ -120,8 +120,31 @@ const BUILT_IN_KINDS: Record<P.Datatype, string | undefined> = {
 // ## `core` helpers
 ////////////////
 
-/** A `core` helper written with an operator, which needs parentheses as an operand:  see `JSWriter.tight()`. */
+/**
+ * A `core` helper written with an operator, which needs parentheses as an operand:  see `JSWriter.tight()`.
+ * - Test it on `topLevelOf()` the text:  an `===` inside a callback, `core.filter(xs, (x) => x === y)`, isn't one.
+ */
 export const LOOSE_CORE_CALL = /^!|^typeof |\s(?:===|!==|instanceof)\s/
+
+/**
+ * `text`, a piece of code, without what's inside its brackets:  its top level,
+ * e.g. `core.filter` for `core.filter(xs, (x) => x === y)`.
+ * - Brackets inside quotes count too:  only for a quick look, as `LOOSE_CORE_CALL`'s.
+ */
+export function topLevelOf(text: string): string {
+  let depth = 0
+  let top = ""
+  for (const char of text) {
+    if (OPENERS.includes(char)) depth++
+    if (depth === 0) top += char
+    if (CLOSERS.includes(char)) depth = Math.max(0, depth - 1)
+  }
+  return top
+}
+
+/** Brackets that open and close a nested piece of code -- see `topLevelOf()`. */
+const OPENERS = "([{"
+const CLOSERS = ")]}"
 
 /** Spell's events, through `@spell/core`'s own `on()`, `trigger()` ... -- see `JSWriter.eventCall()`. */
 export const EVENTS = new Set(["on", "off", "once", "trigger"])
@@ -179,7 +202,7 @@ export const CORE_IMPORT = /^import \{ ([^}]*) \} from "@spell\/core"$/m
 
 /**
  * Each class `code` imports from another project, by its name here => [its module, its name there],
- * e.g. `Card` => `["@spell/project/@spell/test/cards", "Card"]`.
+ * e.g. `Card` => `["@spell/project/owen@spell/cards", "Card"]`.
  */
 export function importedClasses(code: string): Map<string, [string, string]> {
   const imported = new Map<string, [string, string]>()

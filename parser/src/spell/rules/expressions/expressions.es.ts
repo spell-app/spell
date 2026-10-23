@@ -239,6 +239,24 @@ expressionsEs.addRule(IsEqual, {
         ["thing no es other", "(thing != other)"],
         ["thing está other", "(thing == other)"]
       ]
+    },
+    // a thing compared to one of the values its type lists:  the property that lists it
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          [
+            "una card es una cosa",
+            "una card tiene un palo como uno de tréboles, diamantes, corazones, espadas",
+            "card = una nueva card"
+          ].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["card es tréboles", '(card.palo == "tréboles")'],
+        ["card no es corazones", '(card.palo != "corazones")']
+      ]
     }
   ]
 })

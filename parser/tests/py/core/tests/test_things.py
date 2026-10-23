@@ -5,9 +5,11 @@
   and another test file's `Card` mustn't stand in for one of these.
 """
 
+import asyncio
 import copy
 import json
 import re
+import time
 
 import pytest
 
@@ -56,6 +58,39 @@ def test_keyword_properties_then_create_once() -> None:
     assert card.created == 1
     assert card.rank_when_created == "queen"
     assert ThingCard().rank is None
+
+
+class TurnedDeck(List):
+    """`a deck is a list of cards` whose `to create it:` turns each card face down, which pauses:  `async def`."""
+
+    async def create(self) -> None:
+        """Spell's set-up that waits:  three cards, each turned face down with a pause, as Solitaire's deck does."""
+        for rank in ("ace", 2, 3):
+            self.append(ThingCard(rank=rank, direction="up"))
+        for card in self:
+            card.direction = "down"
+            await core.pause_for(1, "seconds")
+
+
+def test_a_create_that_waits_runs_to_its_end_as_the_thing_is_made_its_pauses_not_waiting() -> None:
+    """As javascript's constructor runs it:  at once, nothing waiting for its pauses -- in a running loop or not."""
+
+    def made() -> TurnedDeck:
+        start = time.perf_counter()
+        deck = TurnedDeck()
+        assert time.perf_counter() - start < 0.5
+        return deck
+
+    async def inside_a_loop() -> TurnedDeck:
+        return made()
+
+    assert core.pauses
+    for deck in (made(), asyncio.run(inside_a_loop())):
+        assert [card.direction for card in deck] == ["down", "down", "down"]
+    # ...and pauses wait again after
+    start = time.perf_counter()
+    asyncio.run(core.pause_for(20, "msec"))
+    assert time.perf_counter() - start >= 0.015
 
 
 def test_a_default_is_read_but_not_stored() -> None:

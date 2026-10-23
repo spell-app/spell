@@ -147,14 +147,29 @@ export class TSWriter extends JSWriter {
    * TypeScript for spell's `datatype`, e.g. `string` for `text`, `Card` for `Card`;
    * `undefined` if spell doesn't know it, or it has no TypeScript.
    * - A type spell's project declares is in PascalCase, e.g. `Card`:  as we write a type's name (`typeNameOf()`).
+   *   - But the kind of a property's values, e.g. `CardSuit`, is one of its list's:  see `propertyKindType()`.
    * - `list of cards`:  as `list`.
    */
   typeFor(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
     if (typeof datatype !== "string" || !datatype) return undefined
     if (datatype.startsWith("list")) return TSWriter.TYPES.list
     if (Object.hasOwn(TSWriter.TYPES, datatype)) return TSWriter.TYPES[datatype]
-    if (/^\p{Lu}[\p{L}\p{M}\d_$]*$/u.test(datatype)) return this.typeNameOf(datatype)
+    if (/^\p{Lu}[\p{L}\p{M}\d_$]*$/u.test(datatype)) return this.propertyKindType(datatype) ?? this.typeNameOf(datatype)
     return undefined
+  }
+
+  /**
+   * The type of a value of `kind`, the kind of a property's values, e.g. `CardSuit` (epic `spanish` P22):
+   * one of its list's, as the property itself is typed -- `Suit`, else `(typeof Card.Suits)[number]`.
+   * - `undefined` for any other type:  it's a class.
+   */
+  propertyKindType(kind: string): string | undefined {
+    const constant = this.project.propertyKinds.get(kind)
+    if (!constant) return undefined
+    const list = this.project.lists.get(constant)
+    if (list) return list.type ?? `(typeof ${this.listRef(list)})[number]`
+    const [owner = "", name = ""] = constant.split(".")
+    return `(typeof ${this.typeNameOf(owner)}.${this.nameOf(name)})[number]`
   }
 
   /**

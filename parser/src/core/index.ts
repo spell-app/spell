@@ -93,5 +93,13 @@ export {
 // - e.g. `import { core, Thing, h } from "@spell/core"`, then `h("span", { class: "suit" }, () => this.shortSuit)`
 // - see `drawing.ts`
 export { h } from "./drawing"
-export { SPELL_CORE_MODULE, SPELL_ELEMENTS_MODULE, SPELL_CORE_NAMES, type Core, type PropCheck } from "./core.types"
+export {
+  SPELL_CORE_MODULE,
+  SPELL_ELEMENTS_MODULE,
+  SPELL_CORE_NAMES,
+  type Core,
+  type PropCheck,
+  type TestResult,
+  type TestCheck
+} from "./core.types"
 export * from "./classes"

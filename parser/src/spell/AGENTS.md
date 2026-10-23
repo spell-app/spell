@@ -125,7 +125,7 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - Tests read the test projects:  frozen projects, which never change to follow an example.
     - Their group:  `@spell/test`, e.g. `@spell/test/fizzbuzz`, listed in the app in dev only.
     - They and the tests that compile them are spell-app's (Owen, 2026-10-22, epic `spanish` P18):
-      every `@spell` group lives there, so a test project may import another, e.g. `lists-from-zero` the frozen `cards`.
+      every `@spell` group lives there, so a test project may import another, e.g. `counter-app` the frozen `counter`.
     - Two examples are tested as they are, Solitaire and Solitario (epic `spanish` P21):
       their snapshots are spell-app's, in its `tests/spell/__examples__/`, re-blessed when an example changes.
       - A lower repo's tests never read a higher one's:  spell-lang's own tests write their projects inline.

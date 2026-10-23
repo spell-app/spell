@@ -332,9 +332,13 @@ export class PyBaseWriter extends P.ProgramWriter {
   }
 
   /**
-   * `node`, a chain of `+` with text written out in it, as an f-string:  `"Score: " + score` => `f"Score: {score}"`.
-   * - Python won't add text and a number:  an f-string writes each value as text.
-   * - `undefined` when it isn't:  no text in the chain,
+   * `node`, a chain of `+` that builds text, as an f-string:  `"Score: " + score` => `f"Score: {score}"`.
+   * - Python won't add text and a number:  an f-string writes each value as text, as javascript's `+` does.
+   * - Text written out in the chain, first or second:  `"Score: " + score`, `rank + " of " + suit`
+   * - Or no text written out, but the chain gives text and not every value in it is known to be text:
+   *   a card's `rank + suit + direction`, its rank 10 or a letter (Owen's `Card.spell`)
+   *   - Not when the first two are numbers:  javascript adds those first
+   * - `undefined` when it isn't:  no text in the chain, every value text already (Python's `+` joins them),
    *   or text only after two values (`a + b + "!"` adds `a` and `b` first).
    */
   textJoin(node: P.ASTInfixExpression): string | undefined {
@@ -346,8 +350,20 @@ export class PyBaseWriter extends P.ProgramWriter {
     }
     parts.unshift(rest)
     const textAt = parts.findIndex((part) => textLiteral(part) !== undefined)
-    if (textAt < 0 || textAt > 1) return undefined
-    return this.fString(parts.map((part) => textLiteral(part) ?? { value: part }))
+    if (textAt === 0 || textAt === 1) return this.fString(parts.map((part) => textLiteral(part) ?? { value: part }))
+    if (textAt < 0 && this.joinsTextAndMore(node, parts)) return this.fString(parts.map((value) => ({ value })))
+    return undefined
+  }
+
+  /**
+   * Does chain `node`, `parts` added up, give text from values not all known to be text -- see `textJoin()`?
+   * - Not when its first two are numbers:  javascript adds those first.
+   */
+  joinsTextAndMore(node: P.ASTInfixExpression, parts: P.ASTExpression[]): boolean {
+    if (this.kindOf(node) !== "text") return false
+    const kinds = parts.map((part) => this.kindOf(part))
+    if (kinds.every((kind) => kind === "text")) return false
+    return !(kinds[0] === "number" && kinds[1] === "number")
   }
 
   /**
@@ -691,6 +707,8 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - With the position too, `for item, index in my-list`:
    *   `for index, item in enumerate(items):`, from 1 unless the project counts from 0.
    * - A bare `return` in the body ends that turn only:  `continue`.
+   * - A one-line body that's a value, `for each x in xs: print x`, is that value as a statement:
+   *   javascript's callback returns it, `(x) => core.console.log(x)`, but a loop has nothing to return it to.
    */
   loop(node: P.ASTNode): string | undefined {
     const call = unwrapped(node as P.ASTExpression)
@@ -711,7 +729,7 @@ export class PyBaseWriter extends P.ProgramWriter {
       this.noteParams(method)
       if (isRange) this.wholeNumbers.add(item.name)
       try {
-        return this.blockBody(method.body)
+        return this.blockBody(loopBody(method))
       } finally {
         this.wholeNumbers.delete(item.name)
         this.returnContinues = previous
@@ -1516,6 +1534,16 @@ function forEachReturn(body: unknown, callback: (node: P.ASTReturnStatement) => 
 /** The kind (`kindOf()`'s word) of a value spell declares as `datatype`:  `text`, `number`, a class's name. */
 function kindOfDatatype(datatype: P.Datatype | RegExpConstructor | undefined): string | undefined {
   return kindFromDatatype(datatype)
+}
+
+/**
+ * What a loop's function does each turn, as `PyBaseWriter.loop()` writes it:  its body --
+ * but an inline one that's a lone `return x` is `x`, a statement.
+ */
+function loopBody(method: P.ASTMethodDefinition): P.ASTStatementBlock | P.ASTNode {
+  const [only, ...rest] = method.body.statements ?? []
+  if (!method.inline || rest.length || !(only instanceof P.ASTReturnStatement) || !only.value) return method.body
+  return only.value
 }
 
 /** `group`'s statements, and those of the groups in it, in order. */

@@ -156,6 +156,34 @@ export class Language {
   }
 
   /**
+   * The words naming the kind of a property's values, in this language (epic `spanish` P22):
+   * `card suit` for a card's `suit`, `palo de carta` for a carta's `palo` -- see `LanguageWords.propertyKindName`.
+   * - `type`:  the type's name, e.g. `StockPile`, read as its words, `stock pile`.
+   * - `property`:  the property's words, e.g. `short rank` (or its name, `short_rank`).
+   * - What `its "suit" is one of ...` declares, so another type can say `its "suit" is a card suit`:
+   *   see spell's `define_property_has`.
+   */
+  propertyKindName(type: string, property: string): string {
+    const typeWords = `${type}`
+      .split(/(?=\p{Lu})|[-_\s]+/u)
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+    const propertyWords = `${property}`.replace(/[-_\s]+/g, " ").trim()
+    return this.words.propertyKindName.replace("{type}", typeWords).replace("{property}", propertyWords)
+  }
+
+  /**
+   * The type a property's kind is, by its name in this language, e.g. `CardSuit` for a card's `suit`,
+   * `PaloDeCarta` for a carta's `palo`:  `propertyKindName()`'s words as one type name (`P.classCase()`).
+   * - Made singular by this language's inflector, whatever the language in play.
+   */
+  propertyKindType(type: string, property: string): string {
+    const name = this.propertyKindName(type, property).split(" ").join("-")
+    return P.Inflector.using(this.inflector, () => P.classCase(name))
+  }
+
+  /**
    * `noun` with the article it takes, for a message's example:  `an apple`, `the card`, `una carta`, `la dirección`.
    * - `kind`:  `indefinite` (`a`, `un` ...) or `definite` (`the`, `el` ...).
    * - `type`:  the type `noun` names, if any;  Spanish's gender is the type's.
@@ -324,6 +352,12 @@ export type LanguageWords = {
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
   /**
+   * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
+   * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
+   * - See `Language.propertyKindName()`.
+   */
+  propertyKindName: string
+  /**
    * Words which name `it` as an OBJECT -- the thing a method runs on, or the last `get` -- e.g. Spanish's `eso`.
    * - None:  `it` itself, as English writes it (`print it`), the `it` variable's own name.
    * - A variable a person named the same word wins:  this is only a second name for `it`.
@@ -360,6 +394,13 @@ export type DeclarationPatterns = {
   typeDeclaration: RegExp
   /** A line declaring a value kind:  `gim`, its plural name captured, e.g. `suits`. */
   valueKindDeclaration: RegExp
+  /**
+   * A line of a type's body declaring a property with a list of values, its property's words captured
+   * (in the first group, or the second), e.g. `suit` in `- its "suit" is one of ...`:
+   * it declares the kind `card suit` (epic `spanish` P22).
+   * - `iu`, never `g`:  it's tried line by line.
+   */
+  propertyListDeclaration: RegExp
   /** A line starting a method definition, e.g. `to play a card`. */
   methodLine: RegExp
   /** A line re-opening a type, its name captured, e.g. `a solitaire:`. */

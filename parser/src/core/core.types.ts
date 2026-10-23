@@ -88,6 +88,37 @@ export type Core = typeof coreMethods &
   typeof messageMethods &
   typeof deprecatedMethods
 
+// ## Tests
+
+/**
+ * How one test went, as `core.testResults()` keeps it:  the `ActiveTest` it was, once it's ended.
+ * - `name`:  its `message`, e.g. `test card setup`
+ * - `passed`:  every check passed, and it didn't throw
+ * - What runs tests reads them:  `spell test`, and the VS Code runner's Run Tests, which shows each failed check
+ *   in the editor, on its line (epic `spanish`, Card Checks and Test Results).
+ */
+export type TestResult = {
+  name: string
+  method?: string
+  passed: boolean
+  checks: TestCheck[]
+  output: unknown[]
+  threw?: unknown
+}
+
+/**
+ * One `expect()` in a test:  `its rank should be queen`.
+ * - `what`, `expected`:  the spell they were written as, `its rank` and `queen`, as compiled into the call:
+ *   so the language server finds the line it's on.  `expected` is `undefined` for `expect x` with no value.
+ * - `message`:  what it printed, in the program's language, e.g. `Unexpected: ... should be ... but is actually ...`
+ */
+export type TestCheck = {
+  passed: boolean
+  what: string
+  expected?: string
+  message: string
+}
+
 // ## Messages
 
 /**

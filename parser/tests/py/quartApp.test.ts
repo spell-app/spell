@@ -34,8 +34,8 @@ describe("PY.quartApp()", () => {
   })
 
   test("serves each imported project's drawing half too", () => {
-    const app = PY.quartApp({ ...SPEC, projects: { "@spell/project/@spell/test/cards": "Cards.elements.spell.js" } })
-    expect(app).toContain('"@spell/project/@spell/test/cards": "/Cards.elements.spell.js",')
+    const app = PY.quartApp({ ...SPEC, projects: { "@spell/project/owen@spell/cards": "Cards.elements.spell.js" } })
+    expect(app).toContain('"@spell/project/owen@spell/cards": "/Cards.elements.spell.js",')
     expect(app).toContain('not in ["Solitaire.elements.spell.js", "Cards.elements.spell.js"]')
   })
 })

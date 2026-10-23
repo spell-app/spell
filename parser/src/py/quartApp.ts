@@ -34,7 +34,7 @@ export type QuartAppSpec = {
   outputs: string
   /**
    * Each project the program imports:  the module its drawing half imports it as, and its drawing half's file,
-   * which must sit in `outputs` too, e.g. `{ "@spell/project/@spell/test/cards": "cards.elements.spell.js" }`.
+   * which must sit in `outputs` too, e.g. `{ "@spell/project/owen@spell/cards": "cards.elements.spell.js" }`.
    */
   projects?: Record<string, string>
 }

@@ -349,7 +349,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * Each project our drawing half imports, by module, with its own drawing half's file, for `target`'s web app:
-   * e.g. `{ "@spell/project/@spell/test/cards": "cards.elements.spell.js" }` -- see `PY.QuartAppSpec.projects`.
+   * e.g. `{ "@spell/project/owen@spell/cards": "cards.elements.spell.js" }` -- see `PY.QuartAppSpec.projects`.
    * - Each must sit beside our program:  `spell compile` writes them there (spell-app's `writeImports()`).
    * - Only the projects we import ourselves:  one they import in turn isn't listed.
    */
@@ -969,7 +969,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * `import`s leading our compiled output:  spell's runtime, then what we import from other projects.
    * - e.g.
    *   `import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"`
-   *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/@spell/test/cards"`
+   *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/owen@spell/cards"`
    * - Why:  compiled spell reaches everything it didn't declare through `import`s -- NO globals.
    * - A runner rewrites each specifier onto the module it means:
    *   see `runCompiled()` in `spell-app/app/runner/runCompiled`.

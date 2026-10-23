@@ -82,7 +82,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
    * - JSX rules keep what they parse out of their tokens in `match.data`, not `matched`,
    *   so nothing else finds these.
    * - Looks through the statement's own matches and any inline body.
-   *   NOT an indented body:  that's a `block`, which gathers its own errors.
+   *   NOT an indented body that's a `block`:  it gathers its own errors.
+   *   An indented body that's ONE expression, e.g. `return` with its markup on the lines below,
+   *   `BlockLine` asks about too.
    * - The errors still compile where they are, inside the JSX.  This is just so they're REPORTED.
    * - Static:  `BlockLine` asks, about any statement.
    */

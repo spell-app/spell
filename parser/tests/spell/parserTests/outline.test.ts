@@ -631,6 +631,97 @@ describe("outline style", () => {
     })
   })
 
+  describe('the kind of a property\'s values (epic `spanish` P22):  `its "suit" is a card suit`', () => {
+    const CARD = [
+      'a "card" is a thing where:',
+      '\t- its "suit" is one of clubs, diamonds, hearts or spades',
+      "",
+      '\t- its "rank" is one of ace, 2 ... 10, jack, queen, king'
+    ]
+    const FOUNDATION = [
+      'a "foundation" is a thing where:',
+      '\t- its "suit" is a card suit',
+      '\t- its "place" is the position of its suit'
+    ]
+    const PLACE = ["the f is a new foundation with suit = hearts", "set place to the place of the f"]
+
+    test("another type's property of the kind is one of the card's suits, the card above or below", () => {
+      for (const lines of [
+        [...CARD, ...FOUNDATION],
+        [...FOUNDATION, ...CARD]
+      ]) {
+        const js = compile(lines)
+        expect(js).toContain('static { this.declareProp("suit", { oneOf: () => Card.Suits }) }')
+        expect(js).toContain("return spellPosition(positionOf(Card.Suits, this.suit))")
+        expect(runSpell([...lines, ...PLACE])("place")).toEqual({ place: 3 })
+      }
+    })
+
+    test("its plural is its list:  `card ranks`, `every card suit`, `a random card suit`, a loop's item", () => {
+      const js = compile([
+        ...CARD,
+        "set ranks to card ranks",
+        "set suits to every card suit",
+        "set one to a random card suit",
+        "set place to the position of queen in card ranks",
+        "for each card rank in card ranks: print card rank"
+      ])
+      expect(js).toContain("export const ranks = Card.Ranks")
+      expect(js).toContain("export const suits = Card.Suits")
+      expect(js).toContain("export const one = core.randomItemOf(Card.Suits)")
+      expect(js).toContain('export const place = spellPosition(positionOf(Card.Ranks, "queen"))')
+      expect(js).toContain("Card.Ranks.forEach((cardRank) => core.console.log(cardRank))")
+    })
+
+    test("a loop over its list knows each is one:  a member read off one warns", () => {
+      const lines = [...CARD, "for each rank in card ranks", "\tprint the name of rank"]
+      const { files } = parseSpellProject([{ path: "/test.spell", contents: lines.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      expect(files[0]!.warnings).toEqual([
+        "6:11 A card rank is one of the values a card lists:  it can't have properties or phrases of its own"
+      ])
+    })
+
+    test("Spanish names it by its own word order:  `palo de carta`, its plural `palos de carta`", () => {
+      const lines = [
+        'una "carta" es una cosa donde:',
+        '\t- su "palo" es uno de tréboles, diamantes, corazones o espadas',
+        'una "fundación" es una cosa donde:',
+        '\t- su "palo" es un palo de carta',
+        "poner todos a palos de carta",
+        "poner uno a un palo de carta al azar",
+        "para cada palo de carta en cada palo de carta: imprimir palo de carta"
+      ]
+      const { files } = parseSpellProject([{ path: "/test.es.spell", contents: lines.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      const js = withoutComments(files[0]!.compiled)
+      expect(js).toContain('static { this.declareProp("palo", { oneOf: () => Carta.Palos }) }')
+      expect(js).toContain("export const todos = Carta.Palos")
+      expect(js).toContain("export const uno = core.randomItemOf(Carta.Palos)")
+      expect(js).toContain("Carta.Palos.forEach((paloDeCarta) => core.console.log(paloDeCarta))")
+    })
+
+    test("it has no class of its own:  a property or phrase on it is an error", () => {
+      expect(
+        errorsOf([...CARD, 'the "value" of a card rank is 1', 'a card rank "is a face card" if it is jack'])
+      ).toEqual([
+        "5:0 A card rank is one of the values a card lists:  it can't have properties or phrases of its own",
+        "6:0 A card rank is one of the values a card lists:  it can't have properties or phrases of its own"
+      ])
+    })
+
+    test("a type declared with its name keeps it, above or below the card", () => {
+      for (const lines of [
+        [...CARD, "a card suit is a thing"],
+        ["a card suit is a thing", ...CARD]
+      ]) {
+        const js = compile([...lines, "set x to a new card suit"])
+        expect(js).toContain("export class CardSuit extends Thing {}")
+        expect(js).toContain("export const x = new CardSuit()")
+      }
+    })
+  })
+
   describe('inferred phrases (P3, J9):  `it "is a (suit)"` with no `for its suits`', () => {
     const DECK = [
       "a deck is a list of cards with:",

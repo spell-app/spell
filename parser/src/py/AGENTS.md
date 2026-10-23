@@ -48,6 +48,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It calls `spell_core`'s one object, `core`, only where Python has no word for what spell says.
   - A function that waits is `async def`, and every call of it awaits it.
     A program that never waits is plain Python (one target since P22).
+    - A `create()` that waits too:  `spell_core` runs it to its end as the thing is made,
+      its pauses not waiting (`core.run_at_once()`), as javascript's constructor runs it.
 - `PY.ElementsWriter`:  a Python program's DRAWING half, in javascript, `<Project>.elements.spell.js` (P19)
   - For a page that draws the program running in Python, from the state Python sends.
   - It extends `P.JSWriter`:

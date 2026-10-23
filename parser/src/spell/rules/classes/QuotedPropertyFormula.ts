@@ -7,7 +7,7 @@ import { getKnownType } from "spell-lang/spell/rules/types"
 import { Wording } from "spell-lang/spell/rules/expressions"
 import { negatableSyntaxBits } from "spell-lang/spell/rules/methods"
 import { SpellStatement } from "spell-lang/spell/rules/Statement"
-import { placeholderData, type QuotedPropertyFormulaBits } from "./classes.shared"
+import { placeholderData, placeholderForms, type QuotedPropertyFormulaBits } from "./classes.shared"
 import { QuotedPropertyRule } from "./QuotedPropertyRule"
 
 /**
@@ -205,7 +205,8 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
         if (variable && enumeration) {
           const placeholder = placeholderData(instanceVar, variable.enumerationValues || enumeration)
           ruleData.push(placeholder)
-          syntaxParts.push(`(expression:${placeholder.enumeration.join("|")})`)
+          // either inflection, e.g. `club` or `clubs` for `(suit)`;  a number as is, e.g. `2` for `(rank)`
+          syntaxParts.push(`(expression:${placeholderForms(placeholder.values).join("|")})`)
         }
         // a value kind declared further down:  checked where the phrase is used -- see `QuotedPropertyRule`
         else if (kindType?.stub) {
@@ -229,12 +230,27 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
         return article ? `{${article}}` : bit
       })
       .join(" ")
-    return { type, syntax, ruleData, vars, property }
+    return { type, syntax, ruleData, vars, property, ...QuotedPropertyFormula.staticArgFor(match.scope, type) }
+  }
+
+  /**
+   * `{ staticArg }` for a phrase on a sub-type of another of the project's types, e.g. `card` for a joker's:
+   * see `QuotedPropertyFormulaBits.staticArg`.
+   * - Why:  a phrase on a sub-type is used on its super-type's values, `the card is the red joker`,
+   *   where an instance method would be missing:  a card has no `isTheColorJoker()`.
+   * - A built-in super-type doesn't count, e.g. `a card is a drawable thing`:  only cards say a card's phrases.
+   * - A lookup:  `getBits()` makes it while parsing.
+   */
+  private static staticArgFor(scope: P.Scope, type: string): { staticArg?: string } {
+    const superType = scope.types?.get(type)?.superType
+    const superScope = superType ? scope.types?.get(superType) : undefined
+    if (!superScope || SP.isBuiltInTypeScope(superScope)) return {}
+    return { staticArg: superScope.instanceName }
   }
 
   /** Register the quoted-phrase's generated `expression_suffix` rule -- see rule SIDE EFFECTs above. */
   mutateScope(match: P.MatchFor<this>) {
-    const { syntax, property, ruleData, type } = this.getBits(match)
+    const { syntax, property, ruleData, type, staticArg } = this.getBits(match)
 
     // Create an expression suffix to match the quoted statement, e.g. `is not? a queen`.
     // See `scope.addRule()` -- registers on the parser and records the pair for export.
@@ -244,42 +260,59 @@ export class QuotedPropertyFormula extends SpellStatement<"type|alias|sources?",
         output: property,
         of: type,
         values: Object.fromEntries(ruleData.map(({ instanceVar, values }) => [instanceVar, values])),
-        ...(kinds.length ? { kinds: Object.fromEntries(kinds) } : {})
+        ...(kinds.length ? { kinds: Object.fromEntries(kinds) } : {}),
+        // a sub-type's phrase:  its static method, `Joker.isTheColorJoker(card, 'red')`
+        ...(staticArg ? { staticOf: type } : {})
       }),
       { syntax },
       match
     )
   }
 
+  /**
+   * Its method:  each placeholder against its property, all of them true.
+   * - Usually an instance method:  `isTheRankOfSuits(rank, suit) { return this.rank === rank && ... }`
+   * - On a sub-type (`staticArg`), a static one checking the type first:
+   *   `static isTheColorJoker(card, color) { return card instanceof Joker && card.color === color }`
+   */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const { type } = match.groups
-    const { vars, property } = this.getBits(match)
-    // Return AST for the instance method
+    const { vars, property, staticArg } = this.getBits(match)
     const args = vars.map((varName) => new P.ASTVariableExpression(match, { name: varName }))
-    const properties = vars.map((varName) => new P.ASTPropertyLiteral(match, varName))
-    const expressions = args.map(
+    // a sub-type's phrase:  any of its super-type's things, e.g. `card: Card`
+    const thing = staticArg
+      ? new P.ASTVariableExpression(match, { name: staticArg, datatype: P.typeCase(staticArg) })
+      : new P.ASTSelfLiteral(match)
+    const expressions: P.ASTExpression[] = args.map(
       (variable, index) =>
         new P.ASTInfixExpression(match, {
           lhs: new P.ASTPropertyExpression(match, {
-            object: new P.ASTSelfLiteral(match),
-            property: properties[index]
+            object: thing,
+            property: new P.ASTPropertyLiteral(match, vars[index]!)
           }),
           operator: "exactly equals",
           rhs: variable
         })
     )
+    const typeAST = P.matchAST<P.ASTTypeExpression>(type)
+    // a sub-type's phrase:  is it one first, as `is a` asks -- see `is_a`
+    if (staticArg) {
+      const typeName = new P.ASTTypeNameLiteral(match, { value: typeAST.runtimeName, quote: "'" })
+      expressions.unshift(
+        new P.ASTCoreMethodInvocation(match, { methodName: "isOfType", args: [thing, typeName], datatype: "choice" })
+      )
+    }
+    const method = new P.ASTMethodDefinition(match, {
+      args: staticArg ? [thing as P.ASTVariableExpression, ...args] : args,
+      body: new P.ASTReturnStatement(match, {
+        value: P.ASTMultiInfixExpression(match, { expressions, operator: "and" })
+      }),
+      datatype: "choice"
+    })
     const statements: Array<P.ASTStatement | P.ASTExpression | P.ASTComment | P.ASTBlankLine> = [
-      new P.ASTPropertyDefinition(match, {
-        type: P.matchAST<P.ASTTypeExpression>(type),
-        property,
-        method: new P.ASTMethodDefinition(match, {
-          args,
-          body: new P.ASTReturnStatement(match, {
-            value: P.ASTMultiInfixExpression(match, { expressions, operator: "and" })
-          }),
-          datatype: "choice"
-        })
-      })
+      staticArg
+        ? new P.ASTStaticMethod(match, { type: typeAST, name: property, method })
+        : new P.ASTPropertyDefinition(match, { type: typeAST, property, method })
     ]
     return new P.ASTStatementGroup(match, { statements })
   }

@@ -7,7 +7,7 @@ import {
   SuffixLeft,
   type SpellExpressionProps
 } from "spell-lang/spell/rules/expressions"
-import { placeholderData, type QuotedPropertyFormulaBits } from "./classes.shared"
+import { placeholderData, placeholderValueIndex, type QuotedPropertyFormulaBits } from "./classes.shared"
 
 /**
  * Calls a quoted property formula's generated method:
@@ -35,9 +35,17 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
     values: Record<string, Array<string | number>>
     kinds?: Record<string, string>
     of?: string
+    /** A sub-type's phrase:  the type whose STATIC method it calls, e.g. `Joker` -- see `staticArg`. */
+    staticOf?: string
   }
   /** The phrase's owner, e.g. `Card`, if known -- see `parse()`. */
   declare thisType: P.Datatype | undefined
+  /**
+   * A sub-type's phrase:  the type whose STATIC method it calls, given the thing first, e.g. `Joker`:
+   * `the card is the red joker` => `Joker.isTheColorJoker(card, 'red')`, false for a card that's no joker.
+   * - See `QuotedPropertyFormulaBits.staticArg`.
+   */
+  declare staticOf: string | undefined
   /**
    * Calls generated method `output`, e.g. `is_a_$suit` -- also our `ruleName`.
    * - `values`:  each `(var)` placeholder's enumerated values, in order, e.g. `{ suit: ["'clubs'", ...] }`.
@@ -49,20 +57,26 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
    * - What a project's `SPELL: DECLARES` comment holds for us -- see `SP.SpellDeclarations`.
    */
   static specialize<T extends AbstractClass<P.Rule>>(this: T, declared: P.SpecializeWith<T>): T {
-    const { output, values, kinds, of } = declared as (typeof QuotedPropertyRule)["SpecializeWith"]
+    const { output, values, kinds, of, staticOf } = declared as (typeof QuotedPropertyRule)["SpecializeWith"]
     const ruleData = Object.entries(values).map(([instanceVar, varValues]) =>
       placeholderData(instanceVar, varValues, kinds?.[instanceVar])
     )
-    const statics: P.RuleStatics<QuotedPropertyRule> = { ruleName: output, methodName: output, ruleData, thisType: of }
+    const statics: P.RuleStatics<QuotedPropertyRule> = {
+      ruleName: output,
+      methodName: output,
+      ruleData,
+      thisType: of,
+      staticOf
+    }
     return super.specialize(statics, declared) as unknown as T
   }
 
   /** What we write into our statement's `SPELL: DECLARES` comment -- see `P.Rule.declarationProps()`. */
   static declarationProps(
-    { output, values, kinds }: (typeof QuotedPropertyRule)["SpecializeWith"],
+    { output, values, kinds, staticOf }: (typeof QuotedPropertyRule)["SpecializeWith"],
     syntax: string | undefined
   ) {
-    return kinds ? { syntax, output, values, kinds } : { syntax, output, values }
+    return { syntax, output, values, ...(kinds ? { kinds } : {}), ...(staticOf ? { staticOf } : {}) }
   }
 
   /**
@@ -97,10 +111,9 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
   ): string | number | undefined {
     const values = scope.types?.get(data.kind!)?.valueKind?.values
     if (!values || !arg) return undefined
-    const inflector = data.isSingular ? P.singularize : P.pluralize
-    return values.find((value) =>
-      typeof value === "number" ? value === arg.value : inflector(value.replace(/^'(.*)'$/, "$1")) === arg.value
-    )
+    // by its singular or plural, e.g. `club` or `clubs` for `(suit)`
+    const index = placeholderValueIndex(values, arg.value as string | number)
+    return index === -1 ? undefined : values[index]
   }
 
   /** Map each matched placeholder word/number to its compiled enumeration value or literal. */
@@ -124,11 +137,10 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
           return new P.ASTConstantExpression(arg, { name: `${arg.value}`, value: P.spellValueOf(kindArg) })
         }
         if (typeof arg.value === "string") {
-          // Handle singular input values mapping to plural internal values:
-          // - `enumeration`:  "club", "spade", etc
-          // - `values`:  `clubs`, `spades`, etc -- quoted (`'clubs'`) in older declarations
-          const { enumeration, values } = this.ruleData[index]!
-          const valueIndex = enumeration.indexOf(arg.value)
+          // the word said, singular or plural (`club`, `clubs`), to its value:
+          // `values` are `clubs`, `spades`, etc -- quoted (`'clubs'`) in older declarations
+          const { values } = this.ruleData[index]!
+          const valueIndex = placeholderValueIndex(values, arg.value)
           return new P.ASTConstantExpression(arg, {
             name: arg.value,
             // not one of its values:  the word as said (it was the text `arg.value`, a typo)
@@ -144,6 +156,11 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
         return undefined
       })
       .filter((arg): arg is P.ASTConstantExpression | P.ASTNumericLiteral => Boolean(arg))
+    // a sub-type's phrase:  `Joker.isTheColorJoker(card, 'red')` -- see `staticOf`
+    if (this.staticOf) {
+      const thing = new P.ASTTypeExpression(match, { name: this.staticOf })
+      return new P.ASTScopedMethodInvocation(match, { thing, methodName: this.methodName, args: [lhs!, ...args] })
+    }
     return new P.ASTScopedMethodInvocation(match, {
       thing: lhs!,
       methodName: this.methodName,
@@ -157,5 +174,10 @@ type QuotedPropertyRuleData = { kindArgs?: Array<string | number | undefined> }
 
 /** Props bag accepted by `QuotedPropertyRule` -- the generated method, and how to map each placeholder. */
 type QuotedPropertyRuleProps = Prettify<
-  SpellExpressionProps & { methodName: string; ruleData: QuotedPropertyFormulaBits["ruleData"]; thisType?: P.Datatype }
+  SpellExpressionProps & {
+    methodName: string
+    ruleData: QuotedPropertyFormulaBits["ruleData"]
+    thisType?: P.Datatype
+    staticOf?: string
+  }
 >
