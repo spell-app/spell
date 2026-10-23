@@ -287,8 +287,8 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
   an outline.  [Its page](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.
-  - The writers `spell compile` uses:  JavaScript is the target the editor runs, TypeScript is `ts/solid`,
-    Python is `py`.
+  - The writers `spell compile` uses:
+    JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
 - **▶ Run Project:**  the project, running in a panel beside its code ("Run Solitaire").
@@ -356,26 +356,58 @@ The settings it sets for you:
 | `editor.tokenColorCustomizations` | a `#` heading comment in bold from the grammar too |
 
 - Its id is `spell-language` (publisher `spell-app`), shown as "Spell", version 0.8.0.
-- It starts on a window's first `.spell` file (`onLanguage:spell`).
+- It starts on a window's first `.spell`, `.tsx` or `.jsx` file (`activationEvents`);
+  the language server waits for the first `.spell` file.
+- It hands VS Code the HTML and CSS data (`contributes.html.customData`, `contributes.css.customData`),
+  copies in its `out/data/`.
 
 </details>
 
+## What it does in JSX, HTML and CSS files
+
+The same extension helps with custom elements outside Spell, too:
+Spell UI's `<ui-*>` tags, and any set that ships a Custom Elements Manifest.
+
+- **In `.tsx` and `.jsx` files:**  what the JSX types can't say.
+  - `slot="` on a child of a custom element lists the parent tag's slots;
+    `part="`, in a component's own folder, lists its parts.
+  - A slot, part or dashed attribute the tag doesn't have is a warning, in the Problems list:
+    `<ui-button text-alin="left">`.
+  - It reads the manifests of the file's own checkout, so an epic's worktree gets the worktree's.
+  - The editor's own TypeScript stays TypeScript 7:  nothing to switch.
+  - The checks, and where they learn the tags:
+    [README-element.md](README-element.md#the-elements-help--slots-parts-and-dashed-attributes-in-jsx).
+- **In `.html` files:**  autocomplete and hover docs for every `<ui-*>` tag, attribute and value.
+- **In `.css` files:**  every custom property (`--ui-button-padding-block`), part (`::part(icon)`)
+  and custom state (`:state(open)`), with hover docs.
+
+The HTML and CSS data are written by each set's `yarn site:data` (Spell UI's, and our other sets'),
+and copied into the extension when it's built.
+
+- **The catch:  a vocabulary change shows in HTML and CSS only after a rebuild, `spell app vscode`,
+  and "Reload Window".**
+  The JSX help reads the manifests live, with no rebuild.
+- One copy of each tag in every window, an epic's too:  the extension hands VS Code the data once.
+
 ## The settings the repos ship
 
-One folder of editor settings, across five repos:  spell-app's `.vscode/`.
+One folder of editor settings, spell-app's `.vscode/`.
 spell-ui adds a single setting;  the kit, spell-lang and spell-epic ship none.
 
 | File | What it holds |
 | --- | --- |
 | spell-app's [extensions.json](https://github.com/spell-app/spell-app/blob/main/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
-| spell-app's [settings.json](https://github.com/spell-app/spell-app/blob/main/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  `<ui-*>` autocomplete in HTML;  what search skips |
+| spell-app's [settings.json](https://github.com/spell-app/spell-app/blob/main/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  what search skips |
 | spell-app's [launch.json](https://github.com/spell-app/spell-app/blob/main/.vscode/launch.json) | "Run Spell Extension", on F5:  a new window running the extension from `vscode/`, open on the Solitaire example |
 | spell-app's [tasks.json](https://github.com/spell-app/spell-app/blob/main/.vscode/tasks.json) | "Build Spell Extension", which F5 runs first:  `yarn install && yarn build` in `vscode/` |
 | spell-ui's [settings.json](https://github.com/spell-app/spell-ui/blob/main/.vscode/settings.json) | a link in the Markdown preview opens its file in the editor |
 
 **The catch:  VS Code reads a folder's `.vscode/` only when that folder is one of the window's top-level folders.**
-The kit's window and every epic's window are rooted at the kit, so none of these apply in them:
+The kit's window and every epic's window are rooted at the kit, which ships none:
 there, your own settings decide what formats on save.
+
+- The HTML and CSS data don't depend on that:  the extension carries them, in every window.
+
 For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/spell-app`;
 its Claude panel then lists only the sessions started there.
 
@@ -391,7 +423,6 @@ its Claude panel then lists only the sessions started there.
 | (no Markdown) | the format settings skip `**/*.md`:  the `AGENTS.md` files and the READMEs are wrapped by hand |
 | `files.associations`:  `*.json5` as `jsonc` | VS Code has no JSON5 mode, and checks a file against a schema only in its JSON modes |
 | `json.schemas` | a person's `__me.json5` and an org's `__org.json5`, checked against the people library's types;  `spell compile` writes `Person.schema.json` and `Org.schema.json` into the build folder, so they're missing until it has run |
-| `html.customData` | autocomplete and hover docs for every `<ui-*>` tag, attribute and value in `.html` files, from Spell UI's `html-custom-data.json` (its `yarn site:data` writes it) |
 | `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/`, `app/static/semantic-ui-css/` and `yarn.lock`;  Explorer still shows them |
 | `js/ts.experimental.useTsgo: false` | the editor's TypeScript stays the JavaScript one, not the native preview |
 | `vetur.validation.script: false` | a leftover, for Vue's Vetur extension |
@@ -539,14 +570,15 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 | Spell's file | What's in it |
 | --- | --- |
 | [extension.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/extension.ts) | starts the language server, and the TS, JS and PY views |
+| [ElementsHelp.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/ElementsHelp.ts) | custom elements' slot, part and dashed-attribute help in `.tsx` and `.jsx` files:  shows what the kit's `JsxElementHelp` finds |
 | [spellAppRoot.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/spellAppRoot.ts) | which checkout to run:  plain node, no `vscode`, so a script can check it |
 | [RunnerPanel.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/RunnerPanel.ts) | Run Project's panel |
-| [build.mjs](https://github.com/spell-app/spell-app/blob/main/vscode/build.mjs) | the esbuild bundle, `out/extension.js`;  the version check;  Run Project's runner, through spell-app's `yarn build:runner` |
+| [build.mjs](https://github.com/spell-app/spell-app/blob/main/vscode/build.mjs) | the esbuild bundle, `out/extension.js`, with the kit's elements help and TypeScript 6 inside;  the HTML and CSS data, copied into `out/data/`;  the version check;  Run Project's runner, through spell-app's `yarn build:runner` |
 | [syntaxes/](https://github.com/spell-app/spell-app/tree/main/vscode/syntaxes) | the two grammars:  Spell's, and CSS in JavaScript's `` css`...` `` templates |
-| [package.json](https://github.com/spell-app/spell-app/blob/main/vscode/package.json) | the commands, menus, settings and language VS Code reads |
+| [package.json](https://github.com/spell-app/spell-app/blob/main/vscode/package.json) | the commands, menus, settings, language and HTML and CSS data VS Code reads |
 
 - `yarn package` writes `spell-language.vsix`, with `vsce`:
-  only the bundle, the manifest, the grammars, the language settings and the icons go in it.
+  only the bundle, the HTML and CSS data, the manifest, the grammars, the language settings and the icons go in it.
 - The language server is spell-app's [server.ts](https://github.com/spell-app/spell-app/blob/main/src/lsp/server.ts), run by `tsx`.
 
 ## 🌱 Coming

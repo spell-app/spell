@@ -38,6 +38,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   `tsx` takes one tsconfig for every file.
   - So its settings are what every repo's commands need:  `jsx: react-jsx` for spell-app's Ink screens,
     `target: ES2020` so spell-lang's standard decorators are lowered.
+  - The bin hands `tsx` [tsconfig.tsx.json](../../tsconfig.tsx.json), which extends them over EVERY repo's files:
+    `tsx` applies a tsconfig only to the files it includes, and `tsconfig.node.json` includes only the kit's
+    (epic `repo-split` I69:  spell-app's screens crashed in a terminal with "React is not defined").
 - ONE `CliError` class for every repo:  spell-app's `CLI.CliError` re-exports this one.
   `runCommand()` knows a mistake from a crash by it.
 - Where a command works:  the checkout the current folder is in, found by a file only it has

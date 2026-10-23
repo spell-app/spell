@@ -1,3 +1,0 @@
-# For VS Code's search and Quick Open (ripgrep reads .ignore;  git never does):  the child repos the kit's
-# .gitignore leaves out (`/spell-*/`, their own repos) are searched again.
-!/spell-*/

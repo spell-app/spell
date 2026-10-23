@@ -12,7 +12,7 @@
  *     the registry, value sets, converters, class words.
  *   - spell-element reaches it through its settings (`SpellSolidSettings.words`).
  *   - The shared value sets and topics are Spell UI's too (`spell-ui/vocabulary`'s `ValueSets`):
- *     it names them by augmenting `ValueSetNames` and `TopicNames`.
+ *     it names them, and their values, by augmenting `ValueSetValues`, `KindValueSets` and `TopicNames`.
  * - Types only, importing nothing:  it erases completely.
  *   - Node reads it with every vocabulary (`yarn site:data`, `yarn gen:root`):  it MUST NOT reach the element layer.
  */
@@ -359,7 +359,7 @@ export type ComponentTopic = NamesOf<TopicNames>
 ////////////////
 
 /**
- * Names of the shared English value sets in Spell UI's `ValueSets`.
+ * The shared English value sets in Spell UI's `ValueSets`:  each set's name => its values, as a union.
  * - The sets its instances declare, so the class is the ONE list.
  * - `hues` -- Fomantic's `@variationAllColors`;  extensible
  * - `sizes` -- `mini` ... `massive`;  `medium` is the no-op default
@@ -372,20 +372,28 @@ export type ComponentTopic = NamesOf<TopicNames>
  * - `devices` -- responsive targets for `only` / `reversed` (`mobile`, `large screen` ...)
  * - `booleans` -- spellings the boolean converter understands, so a translation can map `sí` => `yes`
  * - `topics` -- what a component is filed under (a vocabulary's `topics`), so a translation maps them once
- * - The names are the RUNTIME's:  Spell UI adds its sets by augmenting this interface,
- *   `declare module "spell-kit/element/vocabulary.types" { interface ValueSetNames extends Record<keyof ValueSets, true> {} }`,
- *   so a vocabulary's `values: "hues"` is checked against them.
+ * - The sets are the RUNTIME's:  Spell UI adds them by augmenting this interface,
+ *   `declare module "spell-kit/element/vocabulary.types" { interface ValueSetValues extends ... {} }`.
+ *   - So a vocabulary's `values: "hues"` is checked against the names,
+ *   - and an attribute of that set reads as its values (`this.size`:  `"mini" | ... | "massive"`;  `SpecValue`).
  */
-export interface ValueSetNames {}
+export interface ValueSetValues {}
 
 /**
- * The name of a shared value set (`ValueSetNames`):  `"hues"`, `"sizes"` ...
+ * The value set an attribute of each kind takes when its spec names none (`kind: "size"` => `"sizes"`).
+ * - The runtime's too:  Spell UI adds its defaults by augmenting this interface (`ValueSets.setFor()`),
+ *   so `{ name: "size", kind: "size" }` reads as the sizes, as it's checked against them.
+ */
+export interface KindValueSets {}
+
+/**
+ * The name of a shared value set (`ValueSetValues`):  `"hues"`, `"sizes"` ...
  * - Any text until a set names them (`NamesOf`).
  */
-export type ValueSetName = NamesOf<ValueSetNames>
+export type ValueSetName = NamesOf<ValueSetValues>
 
 /**
- * The keys of a registry of names (`ValueSetNames`, `TopicNames`), or any text while it has none:
+ * The keys of a registry of names (`ValueSetValues`, `TopicNames`), or any text while it has none:
  * spell-element alone checks no name, a program with Spell UI checks every one.
  */
 export type NamesOf<Registry> = [keyof Registry] extends [never] ? string : Extract<keyof Registry, string>

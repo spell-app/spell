@@ -81,6 +81,16 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [HotElements](../element-tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
+  - [jsx-help/](../element-tools/jsx-help/):
+    the elements help, which completes and checks slot, part and dashed-attribute names in JSX
+    (epic `intellisense` P5, P7;  [README-element.md](../../README-element.md), "The elements help")
+    - [JsxElementHelp](../element-tools/jsx-help/JsxElementHelp.ts):
+      the completions and warnings for one file, as plain data;  reads the JSX with TypeScript 6's API
+    - [ElementCatalog](../element-tools/jsx-help/ElementCatalog.ts):
+      the tags of a package and its dependencies, from their Custom Elements Manifests
+    - Who shows them:  spell-app's VS Code extension (its `vscode/src/ElementsHelp.ts`), which bundles both
+    - [test/jsxFixture](../element-tools/jsx-help/test/jsxFixture.ts):  their tests' package on disk
+      (`writeJsxFixture()`), the kit's and the extension's (`spell-kit/element-tools/jsx-help/test/jsxFixture`)
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.
@@ -182,7 +192,9 @@ As WWOD §4, plus:
 - A set adds the NAMES `src/element/`'s types check against by augmenting its interfaces
   (`declare module "spell-kit/element/elements.types"` ...):
   - `ElementAnimations` (`elementSetup.animation`):  Spell UI adds Fomantic's, in its `components.types.ts`
-  - `ValueSetNames` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
+  - `ValueSetValues`, `KindValueSets` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
+    - `ValueSetValues` holds each set's values, and `KindValueSets` each kind's default set (`size` => `sizes`),
+      so an attribute getter of a set reads as its values (`SpecValue`):  `this.size` is the sizes, not any text
   - Without Spell UI in a program, they hold only `none` / nothing.
 
 ## Defined early

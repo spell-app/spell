@@ -76,9 +76,10 @@ written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-
 and the element a Spell program draws each drawable thing in, like `<solitaire-card>`.
 Its build tools and the test helpers every set's tests use sit beside it, on this page too.
 
-- Code:  [src/element/](src/element/), its tools in [src/element-tools/](src/element-tools/), its test helpers in
-  [src/test-helpers/](src/test-helpers/);  their tests in [tests/element/](tests/element/) and
-  [tests/element-tools/](tests/element-tools/).
+- Code:  [src/element/](src/element/)
+  - its tools in [src/element-tools/](src/element-tools/)
+  - its test helpers in [src/test-helpers/](src/test-helpers/)
+  - their tests in [tests/element/](tests/element/) and [tests/element-tools/](tests/element-tools/)
 - Rules for working on it:  [element's AGENTS.md](src/element/AGENTS.md).
 - The reactivity underneath is Solid's:  [Solid's docs](https://docs.solidjs.com).
 
@@ -220,9 +221,9 @@ flowchart LR
 
 _No second render, no diff:  a write goes straight to the node that shows it._
 
-- A member reads fresh right after a write:  once `pick()` sets `this.sort = "date"`,
-  a read of `this.sort` on the very next line gives `"date"`, with no waiting for a flush,
-  and Solid still redraws what read it.
+- A member reads fresh right after a write:
+  once `pick()` sets `this.sort = "date"`, a read of `this.sort` on the very next line gives `"date"`,
+  with no waiting for a flush, and Solid still redraws what read it.
   - A Solid memo would hand back the old value there, so `@E.derived` is a cache of its own, not a memo.
 - 1,000 `<ui-button>`s put in a page at once are all built, rendered and ready in about 80 ms:
   the median of nine runs, after a warm-up, in Spell UI's
@@ -584,8 +585,8 @@ _From [EpicQuestion.test.tsx](https://github.com/spell-app/spell-epic/blob/main/
 `ElementFixture.render()` waits for every element's `ready`, then runs Solid's `flush()`,
 so the test asserts on the drawn element, not after a guessed number of ticks.
 `expectAccessible()` runs axe through the shadow roots, and fails with a list of what to fix.
-The cost is a real browser to run them in:  Playwright's Chromium, installed once in
-[Setup from zero](README.md#setup-from-zero).
+The cost is a real browser to run them in:
+Playwright's Chromium, installed once in [Setup from zero](README.md#setup-from-zero).
 
 | Test helper | What |
 | --- | --- |
@@ -618,6 +619,50 @@ These close the gap, for every set, in node:
 
 - Import them by name:  `spell-kit/element-tools/<Name>`.
 - `spell-pack` is a bin of the kit:  spell-epic's `yarn pack:build` and `pack:check` run it, from its own folder.
+
+## The elements help:  slots, parts and dashed attributes in JSX
+
+The JSX types can say which attributes a tag takes, but not what goes INSIDE it.
+The app's VS Code extension adds that, in every `.tsx` and `.jsx` file:
+
+```tsx
+<ui-panel>
+  <div slot="acions">...</div>      {/* warning:  <ui-panel> has no slot "acions";  its slots:  label, hint ... */}
+</ui-panel>
+<ui-button text-alin="left" />      {/* warning:  <ui-button> has no attribute "text-alin" */}
+```
+
+- `slot="` on a child of a custom element lists the PARENT tag's slots, each with its description;
+  a slot it doesn't have is a warning (a yellow squiggle, not an error).
+- `part="` in a component's own JSX (a file in its family's folder) lists that component's parts;
+  a part it doesn't list is a warning.
+  - Most of Spell UI writes `part={this.partForName("...")}`, which its types already check.
+- A dashed attribute a custom tag doesn't have is a warning, with a "did you mean" when one is close:
+  TypeScript never checks a dashed name in JSX.
+  - Always allowed:  `data-*`, `aria-*`, and `on-<event>` for each event the tag dispatches (`on-ui-change`).
+- Which children a tag takes isn't checked:  no vocabulary says so yet.
+
+Where it learns the tags:  the Custom Elements Manifest of the file's own package and of each package it depends on,
+named by the package's `"customElements"` field (Spell UI's, from its `yarn site:data`).
+
+- A manifest is re-read as soon as it changes, with no restart.
+- Each file reads its OWN checkout's:  in an epic's window, a worktree's file gets the worktree's manifests.
+- So any set that ships a manifest gets it;  the kit imports none of them.
+
+How it works:
+
+- The checks are the kit's, in [jsx-help/](src/element-tools/jsx-help/):
+  - [`JsxElementHelp`](src/element-tools/jsx-help/JsxElementHelp.ts) finds the completions and warnings,
+    as plain data for any editor
+  - [`ElementCatalog`](src/element-tools/jsx-help/ElementCatalog.ts) reads the manifests
+- The app's VS Code extension shows them ([`ElementsHelp`](https://github.com/spell-app/spell-app/blob/main/vscode/src/ElementsHelp.ts)):
+  completions as you type `"`, warnings in the Problems list as you edit.
+  - Its log, the manifests it found and anything that failed:  the "Spell Elements" output.
+- The editor's own TypeScript stays TypeScript 7:  nothing to switch, no "Use Workspace Version".
+  - The extension reads the JSX with TypeScript 6's JavaScript API, which it carries inside:
+    TypeScript 7 has none yet.
+- `tsc` and `yarn ts` don't run these checks:  they're the editor's only.
+- A change to the checks shows after the extension is rebuilt and installed (`spell app vscode`), then "Reload Window".
 
 ## Who's written on it
 
@@ -708,7 +753,9 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
   still waiting after 5 s, a console warning.
 - Reading the settings before any are installed throws, naming what to import.
 - A set adds the names the types check against by augmenting the framework's interfaces:
-  `ElementAnimations`, `ValueSetNames`, `TopicNames`.
+  `ElementAnimations`, `ValueSetValues`, `KindValueSets`, `TopicNames`.
+  - `ValueSetValues` carries each value set's values too,
+    so an attribute of a set reads as them (`this.size`:  the sizes, not any text).
 
 </details>
 
@@ -731,7 +778,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
 | [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
 | [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types` |
+| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`;  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`, and its tests' fixture package, `test/jsxFixture`) |
 | [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
 | [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 

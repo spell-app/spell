@@ -135,25 +135,38 @@ export type TextKey<V extends E.ComponentVocabulary> = V["texts"][number]["key"]
  * - keyOnly / boolean => `boolean`  (`"no"` / `"false"` ~== false)
  * - keyOrValueAndKey => `true` (bare), `false`, or the validated value
  * - enumerated kinds => the validated value, `undefined` when absent or unknown;
- *   an INLINE value list narrows to its literal union, so `this.type === "submit"` is checked against the vocabulary
+ *   its value set narrows it to a literal union (`SetValues`), so `this.type === "submit"` is checked against the vocabulary
  * - json => `unknown`:  the component casts to its own shape
  */
 export type SpecValue<S extends E.AttributeSpec> = S["kind"] extends "keyOnly" | "boolean"
   ? boolean
   : S["kind"] extends "keyOrValueAndKey"
-    ? InlineValues<S> | boolean
+    ? SetValues<S> | boolean
     : S["kind"] extends "number"
       ? number | undefined
       : S["kind"] extends "width" | "multiple"
         ? string | number | undefined
         : S["kind"] extends "json"
           ? unknown
-          : InlineValues<S> | undefined
+          : SetValues<S> | undefined
 
-/** Literal union of an inline `values` list, else `string`. */
-export type InlineValues<S extends E.AttributeSpec> = S["values"] extends readonly string[]
-  ? S["values"][number]
-  : string
+/**
+ * The values an attribute spec takes, as a literal union, else `string`:
+ * - an inline `values` list:  its values
+ * - a shared set by name (`values: "hues"`):  that set's values (`ValueSetValues`)
+ * - no `values`:  its kind's default set (`KindValueSets`:  `kind: "size"` => the sizes)
+ * - `string` for a free-text attribute, and in a program with no runtime that names the sets
+ */
+export type SetValues<S extends E.AttributeSpec> = S extends { values: infer Values }
+  ? Values extends readonly string[]
+    ? Values[number]
+    : ValuesOfSet<Values>
+  : S["kind"] extends keyof E.KindValueSets
+    ? ValuesOfSet<E.KindValueSets[S["kind"]]>
+    : string
+
+/** The values of the shared set named `Name` (`ValueSetValues`), else `string`. */
+type ValuesOfSet<Name> = [Name] extends [keyof E.ValueSetValues] ? E.ValueSetValues[Name] : string
 
 /**
  * Every attribute of `V` as a converted property, keyed by camelCase canonical name:  `allowAdditions`, `size`.

@@ -7,8 +7,9 @@
 // - Written in P7 for P9:  the folders are this layout's;  the keys marked GUESS are P9's to settle.
 // - A key left out takes its default (`EpicConfig.DEFAULTS`);  `epic config [key]` prints what's in force.
 {
-  // The child repos (their list:  `repos.json5`, beside `package.json`):  naming it switches spell-epic's MULTI-REPO
-  // mode on (epic `epic-engine` P10):  an epic's worktree is one of `spell` with one of every child repo inside it.
+  // The child repos (their list:  `repos.json5`, beside `package.json`).
+  // - Naming it switches spell-epic's MULTI-REPO mode on (epic `epic-engine` P10):
+  //   an epic's worktree is one of `spell`, with one of every child repo inside it.
   "repos": "repos.json5",
 
   // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
@@ -28,8 +29,8 @@
   // The worktree hook runs it BEFORE the window opens, within "installTimeout" seconds (600 left out).
   "installOnCreate": true,
   // The yarn projects of their OWN in an epic's worktree, outside the one install (epic `epic-engine` I65):
-  // the two VS Code extensions.  The hook runs "installCommand" in each, after the one above;  one that fails is a
-  // warning.
+  // the two VS Code extensions.
+  // - The hook runs "installCommand" in each, after the one above;  one that fails is a warning.
   "extraInstalls": ["spell-epic/vscode", "spell-app/vscode"],
 
   // The VS Code windows (`epic window`).
@@ -51,9 +52,10 @@
   // so every window's Claude panel lists every session.
   "linkSessionFolders": true,
 
-  // The content folder's folders every checkout links in at its root (`epic shared link`):  none here (epic-engine
-  // P10).  WWOD and the logs:  the kit TRACKS `agents/` (epic `repo-split` P9):  `agents/wwod/`, and links for the
-  // three logs into the content repo's `agents/`.
+  // The content folder's folders every checkout links in at its root (`epic shared link`):
+  // none here (epic-engine P10).
+  // - WWOD and the logs:  the kit TRACKS `agents/` (epic `repo-split` P9):
+  //   `agents/wwod/`, and links for the three logs into the content repo's `agents/`.
   "sharedFolders": [],
 
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
