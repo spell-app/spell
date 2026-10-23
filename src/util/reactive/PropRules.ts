@@ -9,7 +9,7 @@
  * - This file says:
  *   - whether a value keeps them, for a setter's WARNING (never a refusal)
  *   - what to say when it doesn't
- * - GENERIC, as the rest of `spell-kit/util/reactive`:  no lodash, nothing spell-specific.
+ * - GENERIC, as the rest of `spell/util/reactive`:  no lodash, nothing spell-specific.
  * - Epic `property-editor` P9.
  */
 

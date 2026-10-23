@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { orphanServers, parseLsof, parsePs, pruneReport, type ServerProcess } from "spell-kit/server/page"
+import { orphanServers, parseLsof, parsePs, pruneReport, type ServerProcess } from "spell/server/page"
 
 const NODE = "/usr/local/bin/node"
 const TREES = "/repo/.claude/worktrees"

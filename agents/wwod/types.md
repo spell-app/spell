@@ -94,7 +94,7 @@ From:  original WWOD §11, root `AGENTS.md` "Functions", "Types / Exports" (type
 - **Avoid `null`, use `undefined` instead:**
   - Treat absence of value as logically "null".
   - `undefined` values work for e.g. argument or method spread where `null` does not.
-  - "Looked, not found", where `undefined` already means "not looked yet":  `NONE` from `spell-kit/util` -- SEE:
+  - "Looked, not found", where `undefined` already means "not looked yet":  `NONE` from `spell/util` -- SEE:
     `packages/spell/AGENTS.md` (`match.data`).
 - **Leave an optional property OUT, never fill it with "nothing":**
   - An optional property that doesn't apply is simply absent:  no `null`, `""`, `false` or `"none"` written to
@@ -224,7 +224,7 @@ From:  original WWOD §11, root `AGENTS.md` "Functions", "Types / Exports" (type
   export type ProjectRootPath = `@${string}:${string}`
   ```
 
-- **Ambient globals used bare**, no import:  the toolchain's `spell-kit/toolchain/types` --
+- **Ambient globals used bare**, no import:  the toolchain's `spell/toolchain/types` --
   the list:  the kit's `src/toolchain/AGENTS.md` "Overview".
 
 - **Names assume the namespace:**

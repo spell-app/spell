@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 describe("textFrame()", () => {
   test("puts the length in 1, 2 or 8 bytes, by size", () => {

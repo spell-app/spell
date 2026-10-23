@@ -1,8 +1,8 @@
 /**
- * Types and constants for the `spell` command (`spell-kit/cli`):  exit codes, `CliError`, the flags every command
+ * Types and constants for the `spell` command (`spell/cli`):  exit codes, `CliError`, the flags every command
  * takes, and the shapes a repo hands the kit its commands and hooks in.
  * - Runtime-light:  `import type` only, plus the small `CliError` class and `EXIT` codes.
- * - NEVER imports another repo:  every repo's commands import THIS (`spell-kit/cli`), never the other way.
+ * - NEVER imports another repo:  every repo's commands import THIS (`spell/cli`), never the other way.
  */
 import type { Command } from "commander"
 
@@ -100,14 +100,15 @@ export type CommandList = (spell: Command) => void
  * A repo's hooks, the default export of the file its `package.json` names (`"spell": { "hooks": "./cli/hooks.ts" }`):
  * what it plugs into commands of the repos BELOW it, by name.
  * - Each is a loader, so nothing loads until a command asks:  `language: () => import(...)`
- * - E.g. spell-app's `language`:  the language commands' work, spell-lang's commands, while it needs spell-app's
+ * - E.g. spell-app's `language`:  the language commands' work, spell-parser's commands, while it needs spell-app's
  *   projects (epic `repo-split` P13).
  */
 export type HookList = Record<string, () => Promise<unknown>>
 
 /**
  * A repo whose `package.json` has a `"spell"` entry, as `spellRepos()` finds it.
- * - `name`:  its package's, `spell-lang`;  `short`:  that less `spell-`, the word its commands go under in a clash
+ * - `name`:  its package's, `spell-parser`;  `short`:  that less `spell-` (the kit's, `spell`:  `kit`),
+ *   the word its commands go under in a clash
  * - `root`:  its folder, absolute
  * - `commands`, `hooks`:  its files' absolute paths, when it names them
  */
@@ -154,7 +155,7 @@ export type AgentRulesReport = { sections: number; rules: number; files: number;
 
 /**
  * The commands page's data, from the shared content folder (`spell commands`).
- * - the content folder:  `contentFolderOf()` (`spell-kit/server/contentFolder`)
+ * - the content folder:  `contentFolderOf()` (`spell/server/contentFolder`)
  * - a data file (`DataFile`, epic `epic-workflow` P21), JSON5
  */
 export const COMMANDS_JSON = "guides/dev/commands/commands.json5"

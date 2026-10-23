@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in the kit's `cli/` (`spell-kit/cli`).
+when working with code in the kit's `cli/` (`spell/cli`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the kit's layout, and the house style every repo shares.
@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- The `spell` command's base:  `spell-kit/cli` (`CLI`), from the kit and every other repo.
+- The `spell` command's base:  `spell/cli` (`CLI`), from the kit and every other repo.
   - It reads the command line, prints help, and finds every installed repo's commands.
   - Each repo adds its own commands;  the kit adds a few of its own.
   - It was spell-app's `cli/` until epic `repo-split` P13 (decisions Q33, Q42).
@@ -37,7 +37,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   under `tsx` with the kit's node settings ([tsconfig.node.json](../../tsconfig.node.json)):
   `tsx` takes one tsconfig for every file.
   - So its settings are what every repo's commands need:  `jsx: react-jsx` for spell-app's Ink screens,
-    `target: ES2020` so spell-lang's standard decorators are lowered.
+    `target: ES2020` so spell-parser's standard decorators are lowered.
   - The bin hands `tsx` [tsconfig.tsx.json](../../tsconfig.tsx.json), which extends them over EVERY repo's files:
     `tsx` applies a tsconfig only to the files it includes, and `tsconfig.node.json` includes only the kit's
     (epic `repo-split` I69:  spell-app's screens crashed in a terminal with "React is not defined").
@@ -60,8 +60,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 As WWOD §4, plus:
 
 - Every import by the kit's package name, this folder's too, as the kit's AGENTS.md says:
-  `spell-kit/cli`, `spell-kit/server`, `spell-kit/util/node/json5`;  same-folder peers `./peer`.
-  - The kit's own TypeScript programs read those names as its SOURCE (`spell-kit-source`), never its declarations:
+  `spell/cli`, `spell/server`, `spell/util/node/json5`;  same-folder peers `./peer`.
+  - The kit's own TypeScript programs read those names as its SOURCE (`spell-source`), never its declarations:
     the kit's AGENTS.md, "Imports across repos".
 - `cli` uses `server` and util's json5.  Nothing else in the kit imports it.
 
@@ -77,5 +77,5 @@ As WWOD §20, plus:
 - [program.test.ts](../../tests/cli/program.test.ts):  the clash rule, on made-up repos
   (two repos both naming `check`).
 - [repos.test.ts](../../tests/cli/repos.test.ts):  finding repos and hooks in a made-up kit.
-- The other repos' commands are tested in their repos:  spell-lang's, Spell UI's, spell-app's.
+- The other repos' commands are tested in their repos:  spell-parser's, Spell UI's, spell-app's.
   - spell-app's run every language command end to end, through the kit's bin.

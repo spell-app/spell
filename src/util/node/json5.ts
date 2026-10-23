@@ -5,7 +5,7 @@
  *   spell-epic's site data, and the server's `DataFile`.
  *   - Born in spaces (epic `people-and-orgs` P8, decisions Q4 and J41);  in the kit's assembler from epic `epic-workflow`
  *     P20;  here since epic `repo-split` P1, so its users need util, not the assembler.
- * - `spell-kit/util/node/json5`, never the `spell-kit/util` barrel:  `src/node/` is util's node-only corner, which ui never imports.
+ * - `spell/util/node/json5`, never the `spell/util` barrel:  `src/node/` is util's node-only corner, which ui never imports.
  *
  * ```ts
  * json5Edited('{\n  // who\n  "name": "Owen"\n}', { name: "O" })

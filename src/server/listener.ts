@@ -3,7 +3,7 @@
  */
 import type { IncomingMessage, ServerResponse } from "node:http"
 
-import type { Handler } from "spell-kit/server"
+import type { Handler } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Reply } from "./Reply"
 import { Request } from "./Request"

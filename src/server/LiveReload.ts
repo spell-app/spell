@@ -3,7 +3,7 @@ import { statSync, watch, type FSWatcher } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import type { UpgradeHandler } from "spell-kit/server"
+import type { UpgradeHandler } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
 

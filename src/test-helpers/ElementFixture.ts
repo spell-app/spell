@@ -1,6 +1,6 @@
 import { flush } from "solid-js"
 
-import type { DOMElement } from "spell-kit/element"
+import type { DOMElement } from "spell/element"
 
 import { Fixture } from "./Fixture"
 
@@ -11,7 +11,7 @@ import { Fixture } from "./Fixture"
  *   (Spell UI's `UI.load()`, the settings' `runtime.load()`), so tests assert after `await ElementFixture.settle()`
  *   rather than after a guessed number of ticks.
  * - For every set's elements (Spell UI's, the epics', the brand's, the app's):  it knows only `DOMElement` and
- *   `UIComponent`, the kit's (`spell-kit/test-helpers/ElementFixture`, epic `repo-split` P10).
+ *   `UIComponent`, the kit's (`spell/test-helpers/ElementFixture`, epic `repo-split` P10).
  */
 export class ElementFixture {
   /** Render `html` (see `Fixture.render()`), wait for its elements;  returns the first element. */

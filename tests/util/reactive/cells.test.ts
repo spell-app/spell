@@ -13,7 +13,7 @@ import {
   thing,
   typedJSON,
   type PropInfo
-} from "spell-kit/util"
+} from "spell/util"
 
 /**
  * Spell cells, pinned:  the measured design of `guides/solid/experiments/spell-cells.ts` and `decorators.ts`,
@@ -433,10 +433,10 @@ describe("decorators:  the same runtime shape as compiled spell", () => {
 describe("one context per page", () => {
   test("a second copy of the module shares the page's context", async () => {
     // `?copy`:  Vite loads the file again, as a separate module -- as a `spell-runtime.js` beside the app's
-    // `spell-kit/util`
-    type Cells = typeof import("spell-kit/util/reactive/cells")
+    // `spell/util`
+    type Cells = typeof import("spell/util/reactive/cells")
     // @ts-expect-error -- a query on purpose:  Vite loads the file again, a second module
-    const copy = (await import("spell-kit/util/reactive/cells.ts?copy")) as Cells
+    const copy = (await import("spell/util/reactive/cells.ts?copy")) as Cells
     expect(copy.cellsContext).toBe(cellsContext)
   })
 })

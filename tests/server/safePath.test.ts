@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /** A folder with `site/` to serve and `secret.txt` beside it. */
 const DIR = mkdtempSync(join(tmpdir(), "srv-safe-"))

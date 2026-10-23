@@ -215,7 +215,7 @@ function directiveFor(theme: ThemeName, kind: string): string {
 
 /**
  * The kind of node `id`, labelled `label`, is:  by what it names.
- * - `repo`:  its label starts with a repo's name (`spell-lang: ...`, `spell-kit<br/>...`, "the kit"), or its id is one
+ * - `repo`:  its label starts with a repo's name (`spell-parser: ...`, `spell<br/>...`, "the kit"), or its id is one
  * - `coming`:  its label starts with 🌱, or ends with "coming"
  * - `step`:  its label starts with a step's number (`1 · ...`, `2. ...`)
  * - `folder`:  its label's first word is a folder (`docs/`, `~/www/spell`)
@@ -225,7 +225,7 @@ function directiveFor(theme: ThemeName, kind: string): string {
 export function kindFor(id: string, label: string): Kind | undefined {
   const text = label.replace(/<br\s*\/?>/gi, " ").trim()
   if (/^🌱/u.test(text) || /\bcoming\W*$/i.test(text)) return "coming"
-  if (REPO_LABEL.test(text) || REPO_IDS.has(text)) return "repo"
+  if (REPO_LABEL.test(text) || KIT_LINE.test(label) || REPO_IDS.has(text)) return "repo"
   if (/^\d+\s*(·|\.|\))\s/.test(text)) return "step"
   const first = text.split(/[\s:]/)[0]
   if (/^(~|\.?[\w@-]+)(\/[\w@.-]*)*\/$/.test(first) || /^~\//.test(first)) return "folder"
@@ -233,11 +233,14 @@ export function kindFor(id: string, label: string): Kind | undefined {
   return id === "data" ? "data" : undefined
 }
 
-/** a label that starts with a repo's name, not one of its packages (`spell-lang/core` isn't a repo) */
-const REPO_LABEL = /^(spell-(kit|lang|ui|brand|epic|app)|the kit)(?![/\w'’-])/i
+/** a label that starts with a repo's name, not one of its packages (`spell-parser/core` isn't a repo) */
+const REPO_LABEL = /^(spell-(parser|ui|brand|epic|app)|the kit)(?![/\w'’-])/i
+
+/** the kit's name, `spell`, as a label's whole first line (`spell<br/>util · server`):  `spell compile` is a command */
+const KIT_LINE = /^spell\s*<br\s*\/?>/i
 
 /** the repos' names as a whole label */
-const REPO_IDS = new Set(["spell-kit", "spell-lang", "spell-ui", "spell-brand", "spell-epic", "spell-app"])
+const REPO_IDS = new Set(["spell", "spell-parser", "spell-ui", "spell-brand", "spell-epic", "spell-app"])
 
 ////////////////
 // ## Parsing

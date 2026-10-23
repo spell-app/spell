@@ -2,7 +2,7 @@ import type { Stats } from "node:fs"
 import { readFile } from "node:fs/promises"
 import { extname, resolve } from "node:path"
 
-import type { FileTransform, Handler, HtmlTransform, Mount } from "spell-kit/server"
+import type { FileTransform, Handler, HtmlTransform, Mount } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { typeFor } from "./mime"
 import { Reply } from "./Reply"

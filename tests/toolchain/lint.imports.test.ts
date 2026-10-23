@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 import { RuleTester } from "vite-plus/lint/plugins-dev"
 
-import { IMPORT_RULES, importNameFor } from "spell-kit/toolchain/lint/imports"
+import { IMPORT_RULES, importNameFor } from "spell/toolchain/lint/imports"
 
 /**
  * The `spell/*` lint rule (`lint.imports.ts`, the toolchain's):  what it flags, and what it lets through.
@@ -27,14 +27,14 @@ describe("spell/no-parent-import", () => {
   tester.run("no-parent-import", IMPORT_RULES["no-parent-import"], {
     valid: [
       // by package name, inside its own repo too
-      at("src/element/a.ts", `import { kebabCase } from "spell-kit/util/string"`),
-      at("spell-ui/src/runtime/Focus.ts", `import { E } from "spell-kit/element"`),
+      at("src/element/a.ts", `import { kebabCase } from "spell/util/string"`),
+      at("spell-ui/src/runtime/Focus.ts", `import { E } from "spell/element"`),
       // a same-folder peer
       at("src/element/a.ts", `import { DOMElement } from "./DOMElement"`),
       // a climb to a file outside `src/`:  a config, a glue tool
       at("spell-app/app/vite.shared.ts", `import { x } from "../vite.config.ts"`),
       at("tests/tools/a.test.ts", `import { ReadmeCheck } from "../../tools/readme-check.ts"`),
-      at("spell-lang/tests/core/a.test.ts", `import { x } from "../../vitest.config.ts"`),
+      at("spell-parser/tests/core/a.test.ts", `import { x } from "../../vitest.config.ts"`),
       // a glob names files, not a module
       at("tests/element/a.test.ts", `const files = import.meta.glob("../../src/element/**/*.ts")`),
       // a file path read, not imported
@@ -43,22 +43,22 @@ describe("spell/no-parent-import", () => {
       at("spell-app/src/app/a.ts", `import { UI } from "spell-ui/core"`)
     ],
     invalid: [
-      climbs("src/element/a.ts", `import { x } from "../util/string.ts"`, "spell-kit/util/string"),
-      climbs("src/element/a.ts", `import { U } from "../util"`, "spell-kit/util"),
-      climbs("tests/element/a.test.ts", `import { E } from "../../src/element/index.ts"`, "spell-kit/element"),
+      climbs("src/element/a.ts", `import { x } from "../util/string.ts"`, "spell/util/string"),
+      climbs("src/element/a.ts", `import { U } from "../util"`, "spell/util"),
+      climbs("tests/element/a.test.ts", `import { E } from "../../src/element/index.ts"`, "spell/element"),
       climbs("spell-ui/tests/tools/a.test.ts", `import { Tool } from "../../src/tools/Tool.ts"`, "spell-ui/tools/Tool"),
       climbs("spell-app/src/app/a.ts", "const m = await import(`../../../spell-ui/src/index.ts`)", "spell-ui"),
       climbs("spell-app/src/app/a.ts", `export * from "../lsp/index.ts"`, "spell-app/lsp"),
       climbs("spell-app/tests/app/a.test.ts", `vi.mock("../../src/spaces/index.ts")`, "spell-app/spaces"),
       climbs(
         "spell-app/src/app/a.ts",
-        `type T = import("../../../spell-lang/src/core/model").Thing`,
-        "spell-lang/core/model"
+        `type T = import("../../../spell-parser/src/core/model").Thing`,
+        "spell-parser/core/model"
       ),
       climbs(
         "spell-ui/src/a.ts",
         `declare module "../../src/element/vocabulary.types" {}`,
-        "spell-kit/element/vocabulary.types"
+        "spell/element/vocabulary.types"
       ),
       climbs(
         "spell-ui/src/components/ui-x/a.ts",
@@ -71,8 +71,8 @@ describe("spell/no-parent-import", () => {
 
 describe("importNameFor():  a file's import name, by where it is", () => {
   test("a file under a package's src/:  the package name + its path, no extension, no index", () => {
-    expect(importNameFor(join(KIT, "src/util/string.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/util/string" })
-    expect(importNameFor(join(KIT, "src/element/index.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/element" })
+    expect(importNameFor(join(KIT, "src/util/string.ts"))).toEqual({ pkg: "spell", name: "spell/util/string" })
+    expect(importNameFor(join(KIT, "src/element/index.ts"))).toEqual({ pkg: "spell", name: "spell/element" })
     expect(importNameFor(join(KIT, "spell-ui/src/components/ui-button/UIButton.tsx"))).toEqual({
       pkg: "spell-ui",
       name: "spell-ui/components/ui-button/UIButton"
@@ -81,7 +81,7 @@ describe("importNameFor():  a file's import name, by where it is", () => {
   })
   test("outside any src/:  none", () => {
     expect(importNameFor(join(KIT, "tools/repos.ts"))).toBeUndefined()
-    expect(importNameFor(join(KIT, "spell-lang/vite.config.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "spell-parser/vite.config.ts"))).toBeUndefined()
     expect(importNameFor(join(KIT, "spell-ui/tests/a.test.ts"))).toBeUndefined()
   })
 })
@@ -90,12 +90,12 @@ describe("importNameFor():  a file's import name, by where it is", () => {
 // ## Helpers
 ////////////////
 
-/** A made-up kit `spell-kit`, holding three child repos:  a `package.json` each, all the rule reads. */
+/** A made-up kit `spell`, holding three child repos:  a `package.json` each, all the rule reads. */
 const KIT = realpathSync(mkdtempSync(join(tmpdir(), "lint-imports-")))
 afterAll(() => rmSync(KIT, { recursive: true, force: true }))
 for (const [folder, name] of [
-  [".", "spell-kit"],
-  ["spell-lang", "spell-lang"],
+  [".", "spell"],
+  ["spell-parser", "spell-parser"],
   ["spell-ui", "spell-ui"],
   ["spell-app", "spell-app"]
 ]) {

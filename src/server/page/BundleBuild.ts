@@ -4,7 +4,7 @@ import { createRequire } from "node:module"
 import { dirname, join } from "node:path"
 import { createInterface } from "node:readline"
 
-import type { Handler } from "spell-kit/server"
+import type { Handler } from "spell/server"
 import {
   BUNDLE_WAIT_MS,
   componentSetPath,
@@ -12,7 +12,7 @@ import {
   folderUrl,
   pageServerSettings,
   type ComponentSet
-} from "spell-kit/server/page"
+} from "spell/server/page"
 
 /**
  * Builds the bundles the page server serves, as it starts (`PageServer.start()`).
@@ -20,7 +20,7 @@ import {
  *   - `folders`:  the settings' `"bundles"`, every installed repo's (`pageServerSettings()`)
  * - `start()`:  runs `spell bundle --stale` in the background, with the checkout's OWN `spell` (the kit's, as its
  *   install resolves it)
- *   - it builds only the bundles whose sources changed since their last build (the logic:  `spell-kit/server` `Bundle`)
+ *   - it builds only the bundles whose sources changed since their last build (the logic:  `spell/server` `Bundle`)
  *   - so a start with nothing changed builds nothing
  * - its output goes to the server's log, each line prefixed `bundles:  `
  * - `wait`:  while it runs, a request for a MISSING file in a bundle's folder waits for it to end,
@@ -178,7 +178,7 @@ export type SpawnBuild = (command: string, args: string[], options: SpawnOptions
 export type BundleBuildProps = { root: string; timeout?: number; spawn?: SpawnBuild }
 
 /**
- * The kit's `spell` command (`spell-kit`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:
+ * The kit's `spell` command (`spell`'s `bin/spell.mjs`), as checkout `root`'s install resolves the kit:
  * the checkout's OWN, never the `spell` on `PATH` (maybe main's);  `undefined` when its install has no kit.
  * - By package, never a path into the kit (the kit's `AGENTS.md`, "Imports across repos"):  a test's temp folder,
  *   with no kit installed, builds nothing
@@ -186,7 +186,7 @@ export type BundleBuildProps = { root: string; timeout?: number; spawn?: SpawnBu
  */
 function kitSpell(root: string): string | undefined {
   try {
-    const kit = dirname(createRequire(join(root, "package.json")).resolve("spell-kit/package.json"))
+    const kit = dirname(createRequire(join(root, "package.json")).resolve("spell/package.json"))
     return join(kit, "bin", "spell.mjs")
   } catch {
     return undefined

@@ -14,7 +14,7 @@ const R1 = '/Users/owen/www/spell.worktrees/readme/docs/drafts'
 const OUT = '/Users/owen/www/spell.worktrees/readme/docs/drafts/round2'
 const OUTLINE = '/Users/owen/www/spell.worktrees/readme/spell-app/spaces/@spell/examples/outline-solitaire/Card.spell'
 const DRAWABLE = '/Users/owen/www/spell.worktrees/readme/spell-app/spaces/@spell/examples/drawable-solitaire/Card.spell'
-const SNAPS = '/Users/owen/www/spell.worktrees/readme/spell-lang/tests/spaces/@spell/test'
+const SNAPS = '/Users/owen/www/spell.worktrees/readme/spell-parser/tests/spaces/@spell/test'
 
 const COMMON = `
 You are rewriting the front-page README of Spell (six repos;  this page is the kit's, the root everything is cloned into).

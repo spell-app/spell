@@ -2,14 +2,14 @@ import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
-import { CLI } from "spell-kit/cli"
+import { readJSON5File } from "spell/util/node/json5"
+import { CLI } from "spell/cli"
 
 /**
  * Every repo that adds to `spell`, lowest first:  the kit, then each child repo `repos.json5` lists that's installed
  * and whose `package.json` has a `"spell"` entry (epic `repo-split` Q33).
- * - Where a child repo is:  in the kit, at its folder (`<kit>/spell-lang/`), else installed as a package
- *   (`<kit>/node_modules/spell-lang/`).
+ * - Where a child repo is:  in the kit, at its folder (`<kit>/spell-parser/`), else installed as a package
+ *   (`<kit>/node_modules/spell-parser/`).
  * - `kit`:  the kit to look in, default the one `spell` runs from;  a test passes a made-up one.
  * - NEVER throws for a repo that isn't there:  it isn't listed.
  */
@@ -32,6 +32,11 @@ function childRepoNames(kit: string): string[] {
   return readJSON5File<{ repos?: { name: string }[] }>(file).repos?.map((repo) => repo.name) ?? []
 }
 
+/** The word repo `name`'s commands go under in a clash:  the kit's, `spell`, is `kit`;  the others less `spell-`. */
+function shortNameFor(name: string): string {
+  return name === "spell" ? "kit" : name.replace(/^spell-/, "")
+}
+
 /** The repo at `root`, when its `package.json` has a `"spell"` entry;  else `undefined`. */
 function repoAt(root: string): CLI.SpellRepo | undefined {
   const file = join(root, "package.json")
@@ -41,7 +46,7 @@ function repoAt(root: string): CLI.SpellRepo | undefined {
   const { commands, hooks } = json.spell
   return {
     name: json.name,
-    short: json.name.replace(/^spell-/, ""),
+    short: shortNameFor(json.name),
     root,
     version: json.version ?? "0.0.0",
     ...(commands && { commands: resolve(root, commands) }),

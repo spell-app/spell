@@ -1,4 +1,4 @@
-import type { ServerConfig, ServerInfo } from "spell-kit/server"
+import type { ServerConfig, ServerInfo } from "spell/server"
 import {
   DARK_QUERY,
   EDIT_KEY,
@@ -12,7 +12,7 @@ import {
   SITE_HOME,
   type SiteScheme,
   type SiteTab
-} from "spell-kit/server/site"
+} from "spell/server/site"
 
 /****************
  * ### `<spell-site-header>`

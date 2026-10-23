@@ -247,10 +247,10 @@ In the code:
 
 | Do | Not | Where it lives |
 | --- | --- | --- |
-| import every file by its package's name and its path under `src/`:  `spell-kit/util/string` | a path alias, a `#` import or a `../` climb, even inside one repo | [WWOD §4](agents/wwod/WWOD.md), "ONE name per file" |
+| import every file by its package's name and its path under `src/`:  `spell/util/string` | a path alias, a `#` import or a `../` climb, even inside one repo | [WWOD §4](agents/wwod/WWOD.md), "ONE name per file" |
 | grep the whole repo before renaming or moving anything, and say what you found | rename, and hope | WWOD §1 |
 | record a deviation or a known issue:  in the epic page, or a log | fix it silently | WWOD §1 |
-| ask before adding a runtime dependency | add one because it's handy:  lodash and the kit's `spell-kit/util` come first | WWOD §2 |
+| ask before adding a runtime dependency | add one because it's handy:  lodash and the kit's `spell/util` come first | WWOD §2 |
 | finish with `yarn review` at the root of every repo you touched, and report the test count and its change | call it done because the editor shows no errors | WWOD §1, "Finishing pass" |
 | write "people" in anything people read | "users" | WWOD §3 |
 

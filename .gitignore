@@ -1,4 +1,4 @@
-# The kit `spell-kit` (checked out at `~/www/spell`) tracks its own code (src/, tests/, bin/, scripts/), the house style
+# The kit `spell` (checked out at `~/www/spell`) tracks its own code (src/, tests/, bin/, scripts/), the house style
 # (agents/), and the glue (package.json, yarn.lock, .yarnrc.yml, repos.json5, tools/):
 # every child repo is its own git repo, cloned inside it by `yarn clone`, and ignored here.
 /spell-*/

@@ -1,13 +1,13 @@
 import axe from "axe-core"
 import { expect } from "vite-plus/test"
 
-import { closestAcrossShadow } from "spell-kit/util/dom"
+import { closestAcrossShadow } from "spell/util/dom"
 
 /**
  * Accessibility assertions via `axe-core`, run against live, rendered elements.
  * - Checks the element's subtree INCLUDING open shadow roots -- axe walks the flat tree.
  * - `color-contrast` ignores anything inside a `.ui.disabled` element (see `DISABLED`).
- * - For every set's elements (`spell-kit/test-helpers/A11y`, epic `repo-split` P10).
+ * - For every set's elements (`spell/test-helpers/A11y`, epic `repo-split` P10).
  */
 export class A11y {
   /**

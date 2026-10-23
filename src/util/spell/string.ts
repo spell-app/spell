@@ -1,7 +1,7 @@
 /**
  * Cover lodash string utilities for manipulating case, memoizing returned values.
  * - Parsers ask for the same few names over and over;  memoizing saves the work.
- * - No inflection (singular and plural) here:  that's each language's, `P.Inflector` in `spell-lang/parser`.
+ * - No inflection (singular and plural) here:  that's each language's, `P.Inflector` in `spell-parser/parser`.
  */
 import lowerFirst from "lodash/lowerFirst"
 import toLower from "lodash/toLower"

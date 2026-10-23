@@ -7,7 +7,7 @@
  *     spell-app's terminal screens, Ink's).
  *   - It's `tsconfig.tsx.json`, not `tsconfig.node.json` itself:  `tsx` applies a tsconfig only to the files it
  *     includes, and that one includes only the kit's folders (epic `repo-split` I69).
- * - It runs every installed repo's source (spell-lang's, spell-app's ...), each file imported by its package name
+ * - It runs every installed repo's source (spell-parser's, spell-app's ...), each file imported by its package name
  *   (epic `repo-split` P14):  no alias hook.
  * - Every repo's commands:  `main.ts` reads each one's list (`"spell": { "commands" }` in its `package.json`).
  * - Install on your `PATH` with `yarn cli:install`, at the kit's root -- see `scripts/install-cli.mjs`.

@@ -1,4 +1,4 @@
-import { readEdit, serverConfig } from "spell-kit/server/site"
+import { readEdit, serverConfig } from "spell/server/site"
 
 /****************
  * ### `<spell-section-editor>`

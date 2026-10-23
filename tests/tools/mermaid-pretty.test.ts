@@ -8,7 +8,7 @@ const PAGE = [
   "",
   "```mermaid",
   "flowchart LR",
-  '  kit["spell-kit<br/>util · server"] --> data[".epic/config.json5"]',
+  '  kit["spell<br/>util · server"] --> data[".epic/config.json5"]',
   '  es["Spanish, coming"] -.-> step["1 · tokens"]',
   "```",
   "",
@@ -52,10 +52,10 @@ describe("MermaidPretty", () => {
 
 describe("kindFor()", () => {
   test("sorts a node by what it names", () => {
-    expect(kindFor("lang", "spell-lang: the language")).toBe("repo")
+    expect(kindFor("lang", "spell-parser: the language")).toBe("repo")
     expect(kindFor("x", "the kit")).toBe("repo")
     expect(kindFor("x", "the kit's folders")).toBeUndefined()
-    expect(kindFor("x", "spell-lang/core")).toBeUndefined()
+    expect(kindFor("x", "spell-parser/core")).toBeUndefined()
     expect(kindFor("x", "🌱 sharing")).toBe("coming")
     expect(kindFor("x", "2 · tokens")).toBe("step")
     expect(kindFor("x", "docs/:  the pages")).toBe("folder")

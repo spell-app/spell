@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 describe("toolArgs()", () => {
   test("plain node:  just the script, in the tool's checkout", () => {

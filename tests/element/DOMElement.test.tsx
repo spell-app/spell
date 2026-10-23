@@ -12,9 +12,9 @@ import {
   type DOMElement,
   type DOMElementClass,
   type ElementSetup
-} from "spell-kit/element"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
-import { Fixture } from "spell-kit/test-helpers/Fixture"
+} from "spell/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
+import { Fixture } from "spell/test-helpers/Fixture"
 
 /**
  * The DOM element (`DOMElement`):  attributes and properties, the upgrade step, lifecycle, shadow root,

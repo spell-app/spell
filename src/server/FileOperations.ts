@@ -2,7 +2,7 @@ import { existsSync, lstatSync, statSync } from "node:fs"
 import { cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /**
  * Changes files and folders on disk:  save, create, rename, duplicate, delete.
@@ -18,7 +18,7 @@ import { SRV } from "spell-kit/server"
  * - A save is all at once:  a temp file beside the file, then a rename,
  *   so a reader never sees half a file.
  * - Knows files and folders only:  nothing of pages, projects, people or orgs.
- * - Node built-ins only, like the rest of `spell-kit/server`.
+ * - Node built-ins only, like the rest of `spell/server`.
  */
 export class FileOperations {
   /** checkout the URL paths are under */

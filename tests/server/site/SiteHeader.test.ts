@@ -5,8 +5,8 @@ import { chromium, type Browser, type Page } from "playwright"
 import { build } from "vite"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { PageServer } from "spell-kit/server/page"
-import type { SiteTab } from "spell-kit/server/site/site.types"
+import { PageServer } from "spell/server/page"
+import type { SiteTab } from "spell/server/site/site.types"
 
 /**
  * `<spell-site-header>` in headless Chromium, on pages the page server serves (epic `epic-engine` I42, I43).

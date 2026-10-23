@@ -8,8 +8,8 @@ import {
   type ComponentVocabulary,
   type DOMElement,
   type UIComponentClass
-} from "spell-kit/element"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+} from "spell/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
  * `UIComponent`:  each element draws in a Solid root of its OWN.

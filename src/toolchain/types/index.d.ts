@@ -2,14 +2,14 @@
 
 /**
  * The global types, used bare, no import (WWOD §9 › "Ambient globals used bare"):  every package that wants them
- * names them in its `tsconfig.json`, `"types": [..., "spell-kit/toolchain/types"]`.
+ * names them in its `tsconfig.json`, `"types": [..., "spell/toolchain/types"]`.
  * - Were the repo root's `types/` (`app.d.ts`, `global.d.ts`, `vite-env.d.ts`) until epic `repo-split` P6.
  * - With Vite's client types (`import.meta.env`, `?inline` imports), as `vite-env.d.ts` gave them.
  */
 
 /**
- * Our `package.json` version, e.g. `"0.8.0"` -- read it as `PACKAGE_VERSION` from `spell-kit/util`.
- * - Defined by vite / vitest (`spell-kit/toolchain/packageVersion`), or under `tsx` by `src/packageVersion.node.ts`.
+ * Our `package.json` version, e.g. `"0.8.0"` -- read it as `PACKAGE_VERSION` from `spell/util`.
+ * - Defined by vite / vitest (`spell/toolchain/packageVersion`), or under `tsx` by `src/packageVersion.node.ts`.
  * - `var` so `globalThis.__PACKAGE_VERSION__` is typed too.
  */
 declare var __PACKAGE_VERSION__: string

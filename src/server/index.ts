@@ -1,5 +1,5 @@
 /**
- * `spell-kit/server` barrel:  serving pages locally, and assembling them, for every package.  One namespace, `SRV`.
+ * `spell/server` barrel:  serving pages locally, and assembling them, for every package.  One namespace, `SRV`.
  * - The parts:
  *   - content types, safe paths, static folders
  *   - an Express-shaped router, with body parsing
@@ -13,7 +13,7 @@
  * - Node only.  Beyond node's own modules:  `json5`, linkedom (`Linker`), and oxfmt (`formatHTML()`, loaded when it's
  *   first called);  esbuild comes in as a hook from the caller.
  * - NOTE: `page/` (the page server, its CLI, page edits) and `site/` (the site header, browser code) are NOT here:
- *   opt-in entry points `spell-kit/server/page/...` and `spell-kit/server/site/...`, since they bring dependencies and a CLI.
+ *   opt-in entry points `spell/server/page/...` and `spell/server/site/...`, since they bring dependencies and a CLI.
  */
 export * from "./server.types"
 

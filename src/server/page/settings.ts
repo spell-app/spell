@@ -3,8 +3,8 @@ import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import type { ComponentSet, EngineRoute, PageServerSettings } from "spell-kit/server/page"
+import { contentFolderOf } from "spell/server/contentFolder"
+import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server/page"
 
 /**
  * The page server's settings for checkout `root`:  every installed repo's `"pageServer"` part, merged

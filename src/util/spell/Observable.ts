@@ -18,14 +18,14 @@ import {
   type PropInfo,
   type PropRule,
   type Schema
-} from "spell-kit/util/reactive"
+} from "spell/util/reactive"
 
 import { Derivative } from "./Derivative"
 
 /**
- * Base class giving subclasses reactive `props` and `state`, on spell cells (`spell-kit/util/reactive`).
+ * Base class giving subclasses reactive `props` and `state`, on spell cells (`spell/util/reactive`).
  * - A prop is a getter / setter pair over `getProp()` / `setProp()` -- what compiled spell emits, and what
- *   `@prop accessor` (`spell-kit/util/reactive`) makes for hand-written classes.  Same runtime shape either way.
+ *   `@prop accessor` (`spell/util/reactive`) makes for hand-written classes.  Same runtime shape either way.
  * - Reads and writes are SYNCHRONOUS:  a read right after a write sees it.
  * - Readers re-run when a value they read REALLY changes:  an `===` write notifies nobody.
  *   - Readers:  Solid computations through the host's bridge, and `observe()`.

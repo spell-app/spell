@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, realpathSync, statSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 
-import { NodePackage } from "spell-kit/element-tools/NodePackage"
-import type { CatalogElement, ElementDoc } from "spell-kit/element-tools/tools.types"
+import { NodePackage } from "spell/element-tools/NodePackage"
+import type { CatalogElement, ElementDoc } from "spell/element-tools/tools.types"
 
 /****************
  * ### `ElementCatalog`

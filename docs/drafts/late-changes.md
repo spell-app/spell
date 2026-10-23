@@ -10,7 +10,7 @@ These no longer exist.
 Do not describe them, and do not explain what replaced them (history).
 `p14-check` flags the words.
 
-- the toolchain's run-time alias hook (`spell-kit/toolchain/aliases`, and every `tsx --import` of it)
+- the toolchain's run-time alias hook (`spell/toolchain/aliases`, and every `tsx --import` of it)
 - the `$/` rewrite in `spell-types` (the declarations are built from files that already import by package name)
 - the `spell-folders` bin, and the `"spellFolders"` list in a `package.json`
 - the alias lint rules (`spell/no-cross-repo-alias`, and perhaps `spell/no-cross-package-import`:  name neither)
@@ -28,7 +28,7 @@ So a repo's checks are what the repo-split worktree's `package.json` and `AGENTS
 
 A component pack's module key (what the page's packs share one copy of a module by) is the module's npm name now:
 - `$/ui/core` becomes `spell-ui/core`
-- `$/spell-element` becomes `spell-kit/element`
+- `$/spell-element` becomes `spell/element`
 - every pack and bundle is rebuilt
 
 Write the npm names;  never `$/...`.
@@ -73,7 +73,7 @@ The fact base (`/Users/owen/www/spell.worktrees/repo-split`) now has it all:  re
 
 **Kit, `src/`:**
 - deleted:  `src/toolchain/aliases.ts`, `aliasTable.ts`, `folders.ts`
-- added:  `src/toolchain/sourceNames.ts`, import name `spell-kit/toolchain/sourceNames`:  `sourceNames()`, `sourceFileFor()`,
+- added:  `src/toolchain/sourceNames.ts`, import name `spell/toolchain/sourceNames`:  `sourceNames()`, `sourceFileFor()`,
   `packageRootFor()`, `resolvedFile()`;  the esbuild resolver every build shares
 - `src/element-tools/packModules.ts` keeps only `PACK_MODULES`;  `packModuleKey()` is gone
 
@@ -86,7 +86,7 @@ The fact base (`/Users/owen/www/spell.worktrees/repo-split`) now has it all:  re
   - `kit:format` = `vp fmt .`;  `kit:format:check` = `vp fmt --check .`
   - `kit:review` = ts, lint:fix, format, test
   - over every repo:  `yarn ts | test | lint | review` (`tools/repos.ts`)
-- `package.json`:  no repo has `"spellFolders"`.  `"spellTypes"` lists tsconfig files:  the kit, spell-lang, spell-ui (and the internal repo) have
+- `package.json`:  no repo has `"spellFolders"`.  `"spellTypes"` lists tsconfig files:  the kit, spell-parser, spell-ui (and the internal repo) have
   `["tsconfig.json", "tsconfig.node.json"]`;  spell-epic and spell-app have none.  `spell-types` builds only packages that have `spellTypes`,
   with no `$/` rewrite.
 
@@ -94,10 +94,10 @@ The fact base (`/Users/owen/www/spell.worktrees/repo-split`) now has it all:  re
 import that lands in a package's `src/`, and its message names the package-name import to write.  `PATTERN_FOLDERS` is `{ ui }` for the public
 repos;  `patternLint(names)` takes only names.
 
-**Pack keys:**  `spell-kit/element`, `spell-ui/core`, `spell-ui/forms`, and `spell-ui/components/ui-<x>` for families.
+**Pack keys:**  `spell/element`, `spell-ui/core`, `spell-ui/forms`, and `spell-ui/components/ui-<x>` for families.
 `PACK_FORMAT` is `"spell-pack 2"`.  Generated banners say `spell pack build <name>`.
 
-**`Symbol.for` keys:**  `spell-ui:runtime` (was `@spell-app/ui:runtime`), `spell-kit:cells`, `spell-lang:element-tag`, `spell-lang:element-class`,
+**`Symbol.for` keys:**  `spell-ui:runtime` (was `@spell-app/ui:runtime`), `spell:cells`, `spell-parser:element-tag`, `spell-parser:element-class`,
 `spell-ui:docs-example-sources`, `spell-app:spell-elements`.
 
 **spell-epic:**
@@ -113,9 +113,9 @@ repos;  `patternLint(names)` takes only names.
 - `spell pack create` / `add` write the one-`src/` layout
 
 **spell-app:**  `MOVED_FOLDERS` / `movedFolderPath()` are deleted.  The extension runs only `src/lsp/server.ts` (no fallback).
-`spell speedtest --against` needs a post-P14 spell-lang ref.  No script changes.
+`spell speedtest --against` needs a post-P14 spell-parser ref.  No script changes.
 
-**spell-lang:**  no moves, no script changes.
+**spell-parser:**  no moves, no script changes.
 
 **Stale lines the repo-split session spotted** (line numbers are approximate, and of an unknown version of each page:  grep for the content):
 - kit:  README-toolchain (the alias, `spell-folders` and pack-key material, four places), README-cli (two places:  the epic verbs, `spell-folders`),
@@ -123,4 +123,4 @@ repos;  `patternLint(names)` takes only names.
 - spell-epic:  README-cli (removed verbs), README-adopting (`packageDir`), README-pages (the converter)
 - spell-ui:  README-site (`<ui-section>`'s `header` is now `label`)
 - spell-app:  README-page-server (a numbered item about moved folders;  the routes excerpt must say `src/page-server/` and `src/spaces/`)
-- spell-lang:  README front page (spell-app's `app/` is `src/app/`;  the CLI's `ui` is `src/cli/ui/`)
+- spell-parser:  README front page (spell-app's `app/` is `src/app/`;  the CLI's `ui` is `src/cli/ui/`)

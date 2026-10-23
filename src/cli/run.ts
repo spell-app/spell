@@ -1,7 +1,7 @@
 import chalk from "chalk"
 import { relative } from "node:path"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * Run `work`, then exit with the code it resolves to:  every command's action ends here.

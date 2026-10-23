@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { forget, lazy, once, proto, protoMerged, resets } from "spell-kit/util/decorators"
+import { forget, lazy, once, proto, protoMerged, resets } from "spell/util/decorators"
 
 /**
  * Proves standard decorators are lowered (`vite.decorators.ts`),

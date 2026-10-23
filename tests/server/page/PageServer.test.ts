@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 import {
   PageServer,
   componentSetPath,
@@ -14,8 +14,8 @@ import {
   folderUrl,
   replaceById,
   urlPathOf
-} from "spell-kit/server/page"
-import { ask } from "spell-kit/server/test/serve"
+} from "spell/server/page"
+import { ask } from "spell/server/test/serve"
 
 /**
  * Component sets and engine routes, as the repo root's `package.json` names them (`"pageServer"`):

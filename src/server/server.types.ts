@@ -1,8 +1,8 @@
 /**
- * Types shared across `spell-kit/server`, the constants that go with them (`BUNDLES`), and its small error classes.
+ * Types shared across `spell/server`, the constants that go with them (`BUNDLES`), and its small error classes.
  * - MUST stay runtime-light:  `import type` only, so nothing here loads a class module (WWOD §8).
  */
-import type { SRV } from "spell-kit/server"
+import type { SRV } from "spell/server"
 
 ////////////////
 // ## Handlers
@@ -201,16 +201,16 @@ export const BUNDLE_RECORD = ".bundle.json"
  * What both bundles read of Spell UI:
  * - its source (`Bundle.sourceFiles()` skips the icon packs, which each bundle LINKS, never bundles)
  * - its families (`src/components/`, since epic `repo-split` P14)
- * - the element layer they're written on (`spell-kit/element`)
+ * - the element layer they're written on (`spell/element`)
  * - its Vite config (`baseConfig()`)
- * - the site header (`spell-kit/server/site`)
+ * - the site header (`spell/server/site`)
  * - the lock file
  */
 const SPELL_UI_SOURCES = [
   "spell-ui/src",
-  "spell-kit/src/element",
+  "spell/src/element",
   "spell-ui/vite.config.ts",
-  "spell-kit/src/server/site",
+  "spell/src/server/site",
   "yarn.lock"
 ]
 

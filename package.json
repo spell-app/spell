@@ -1,10 +1,10 @@
 {
-  "name": "spell-kit",
+  "name": "spell",
   "version": "0.0.0",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
-  "repository": "https://github.com/spell-app/spell-kit",
+  "repository": "https://github.com/spell-app/spell",
   "bin": {
     "spell": "./bin/spell.mjs",
     "spell-pack": "./bin/spell-pack.mjs",
@@ -27,94 +27,94 @@
   ],
   "exports": {
     "./toolchain/lint/imports": {
-      "spell-kit-source": "./src/toolchain/lint.imports.ts",
+      "spell-source": "./src/toolchain/lint.imports.ts",
       "types": "./dist-types/src/toolchain/lint.imports.d.ts",
       "default": "./src/toolchain/lint.imports.ts"
     },
     "./toolchain/lint/patterns": {
-      "spell-kit-source": "./src/toolchain/lint.patterns.ts",
+      "spell-source": "./src/toolchain/lint.patterns.ts",
       "types": "./dist-types/src/toolchain/lint.patterns.d.ts",
       "default": "./src/toolchain/lint.patterns.ts"
     },
     "./toolchain/tsconfig.base.json": "./src/toolchain/tsconfig.base.json",
     "./toolchain/types": "./src/toolchain/types/index.d.ts",
     "./toolchain/*": {
-      "spell-kit-source": "./src/toolchain/*.ts",
+      "spell-source": "./src/toolchain/*.ts",
       "types": "./dist-types/src/toolchain/*.d.ts",
       "default": "./src/toolchain/*.ts"
     },
     "./server/checkout": {
-      "spell-kit-source": "./src/server/checkout.ts",
+      "spell-source": "./src/server/checkout.ts",
       "types": "./dist-types/src/server/checkout.d.ts",
       "default": "./src/server/checkout.ts"
     },
     "./server/page/settings": {
-      "spell-kit-source": "./src/server/page/settings.ts",
+      "spell-source": "./src/server/page/settings.ts",
       "types": "./dist-types/src/server/page/settings.d.ts",
       "default": "./src/server/page/settings.ts"
     },
     "./server/page/prune": {
-      "spell-kit-source": "./src/server/page/prune.ts",
+      "spell-source": "./src/server/page/prune.ts",
       "types": "./dist-types/src/server/page/prune.d.ts",
       "default": "./src/server/page/prune.ts"
     },
     "./server/DataFile": {
-      "spell-kit-source": "./src/server/DataFile.ts",
+      "spell-source": "./src/server/DataFile.ts",
       "types": "./dist-types/src/server/DataFile.d.ts",
       "default": "./src/server/DataFile.ts"
     },
     "./server/contentFolder": {
-      "spell-kit-source": "./src/server/contentFolder.ts",
+      "spell-source": "./src/server/contentFolder.ts",
       "types": "./dist-types/src/server/contentFolder.d.ts",
       "default": "./src/server/contentFolder.ts"
     },
     "./util/node/json5": {
-      "spell-kit-source": "./src/util/node/json5.ts",
+      "spell-source": "./src/util/node/json5.ts",
       "types": "./dist-types/src/util/node/json5.d.ts",
       "default": "./src/util/node/json5.ts"
     },
     "./util": {
-      "spell-kit-source": "./src/util/index.ts",
+      "spell-source": "./src/util/index.ts",
       "types": "./dist-types/src/util/index.d.ts",
       "default": "./src/util/index.ts"
     },
     "./util/reactive": {
-      "spell-kit-source": "./src/util/reactive/index.ts",
+      "spell-source": "./src/util/reactive/index.ts",
       "types": "./dist-types/src/util/reactive/index.d.ts",
       "default": "./src/util/reactive/index.ts"
     },
     "./util/spell": {
-      "spell-kit-source": "./src/util/spell/index.ts",
+      "spell-source": "./src/util/spell/index.ts",
       "types": "./dist-types/src/util/spell/index.d.ts",
       "default": "./src/util/spell/index.ts"
     },
     "./server": {
-      "spell-kit-source": "./src/server/index.ts",
+      "spell-source": "./src/server/index.ts",
       "types": "./dist-types/src/server/index.d.ts",
       "default": "./src/server/index.ts"
     },
     "./server/page": {
-      "spell-kit-source": "./src/server/page/index.ts",
+      "spell-source": "./src/server/page/index.ts",
       "types": "./dist-types/src/server/page/index.d.ts",
       "default": "./src/server/page/index.ts"
     },
     "./server/site": {
-      "spell-kit-source": "./src/server/site/index.ts",
+      "spell-source": "./src/server/site/index.ts",
       "types": "./dist-types/src/server/site/index.d.ts",
       "default": "./src/server/site/index.ts"
     },
     "./element": {
-      "spell-kit-source": "./src/element/index.ts",
+      "spell-source": "./src/element/index.ts",
       "types": "./dist-types/src/element/index.d.ts",
       "default": "./src/element/index.ts"
     },
     "./cli": {
-      "spell-kit-source": "./src/cli/index.ts",
+      "spell-source": "./src/cli/index.ts",
       "types": "./dist-types/src/cli/index.d.ts",
       "default": "./src/cli/index.ts"
     },
     "./*": {
-      "spell-kit-source": [
+      "spell-source": [
         "./src/*.ts",
         "./src/*.tsx",
         "./src/*/index.ts",
@@ -128,7 +128,7 @@
       "default": "./src/*"
     },
     "./*.ts": {
-      "spell-kit-source": "./src/*.ts",
+      "spell-source": "./src/*.ts",
       "types": "./dist-types/src/*.d.ts",
       "default": "./src/*.ts"
     },

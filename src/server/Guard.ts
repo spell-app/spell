@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto"
 
-import type { Handler } from "spell-kit/server"
+import type { Handler } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Request } from "./Request"
 import { HttpError } from "./server.types"

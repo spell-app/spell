@@ -1,5 +1,5 @@
 /**
- * Barrel for the `spell` command's base (`spell-kit/cli`, namespace `CLI`):  what every repo's commands build on.
+ * Barrel for the `spell` command's base (`spell/cli`, namespace `CLI`):  what every repo's commands build on.
  * - Node built-ins, commander and chalk only:  each repo's command list imports it, and `spell help` loads them all.
  *   So NOTHING here imports a command's work:  the commands themselves (`commands/`) are imported directly by the
  *   kit's own list, `cli/commands.ts`, when they run.

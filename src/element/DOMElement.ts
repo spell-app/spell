@@ -1,5 +1,5 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
-import type { E } from "spell-kit/element"
+import type { E } from "spell/element"
 
 import { RichAttributes } from "./RichAttributes"
 

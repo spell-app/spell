@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { PACKAGE_VERSION } from "spell-kit/util"
+import { PACKAGE_VERSION } from "spell/util"
 
 describe("`PACKAGE_VERSION`", () => {
   // the version of the package under test, the kit's (util has no package.json of its own), which vite hands over

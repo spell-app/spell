@@ -1,4 +1,4 @@
-// node docs/drafts/tools/p14-check.mjs <page> [<page> ...]      (pages are paths from the kit's root:  README.md, spell-lang/README.md ...)
+// node docs/drafts/tools/p14-check.mjs <page> [<page> ...]      (pages are paths from the kit's root:  README.md, spell-parser/README.md ...)
 //
 // Runs the README check (`tools/readme-check.ts`, this checkout's) on pages written for the FINISHED repo-split (epic
 // repo-split P14:  every repo's code under one `src/`, every import a package name plus its path under `src/`), which
@@ -20,7 +20,7 @@ const MINE = resolve(import.meta.dirname, "../../..")
 const SPLIT = "/Users/owen/www/spell.worktrees/repo-split"
 // one overlay per run (several writers check at once), removed when the check is done
 const OVERLAY = `/private/tmp/claude-501/-Users-owen-www-spell/d5a307a4-0de5-4c43-817b-d113b0c12ede/scratchpad/p14-overlay-${process.pid}`
-const CHILD_REPOS = ["spell-lang", "spell-ui", "spell-epic", "spell-app"]
+const CHILD_REPOS = ["spell-parser", "spell-ui", "spell-epic", "spell-app"]
 const SKIP = new Set([".git", "node_modules", "spell.epics", "spell-brand", "dist-types"])
 const PAGE = /^README(-[\w-]+)?\.md$/
 const MARK = join(MINE, "docs/drafts/workflow-scripts/kit-wave.js")

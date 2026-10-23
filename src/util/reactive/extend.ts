@@ -1,4 +1,4 @@
-import { hasOwnProp } from "spell-kit/util/class"
+import { hasOwnProp } from "spell/util/class"
 
 import { isTrackingCells } from "./cells"
 import { Cell } from "./Cell"

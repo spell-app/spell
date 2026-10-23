@@ -8,8 +8,8 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell-kit 0.0.0
-spell-lang 0.8.0
+spell 0.0.0
+spell-parser 0.8.0
 spell-ui 0.0.1
 spell-app 0.8.0
 ```
@@ -156,8 +156,8 @@ Each repo hands it a list, named in the repo's `package.json`:
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
-  base["spell-kit, the base<br/>server · bundle · commands · wwod · pony · help"]
-  lang["spell-lang<br/>compile · lint · run · test ... thirteen in all"] --> base
+  base["spell, the base<br/>server · bundle · commands · wwod · pony · help"]
+  lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
   app -. "its language hook does their work" .-> lang
@@ -171,9 +171,9 @@ _Each repo hands its commands to the kit's base.
 `spell-epic` adds none:  its tools are `epic`'s._
 
 - The base looks in the kit `spell` runs from, then in each child repo [repos.json5](repos.json5) lists, lowest first
-  (`spellRepos()`):  at its folder in the kit (`spell-lang/`), else installed as a package (`node_modules/spell-lang/`).
+  (`spellRepos()`):  at its folder in the kit (`spell-parser/`), else installed as a package (`node_modules/spell-parser/`).
   Only a `package.json` with a `"spell"` entry counts;  a repo that isn't cloned is simply not there.
-- `spell help` lists them in that order, one heading per repo:  `spell-kit:`, `spell-lang:`, `spell-ui:`, `spell-app:`.
+- `spell help` lists them in that order, one heading per repo:  `spell:`, `spell-parser:`, `spell-ui:`, `spell-app:`.
 - Names stay plain:  `spell compile`, `spell icon`.
   A word two repos both add goes under EACH one's short name, the repo's name less `spell-`,
   and the bare word, hidden from the help, only says where they went.
@@ -187,15 +187,15 @@ _Each repo hands its commands to the kit's base.
 - `spell-app`'s commands live under `app` on purpose, clash or not:  `spell app create`, `spell app serve`.
   The one exception is `spell projects`.
 - A repo can also plug work into a lower repo's commands, by hook (`"hooks": "./src/cli/hooks.ts"`).
-  Today's one hook is `spell-app`'s `language`, which does the work of `spell-lang`'s commands:
+  Today's one hook is `spell-app`'s `language`, which does the work of `spell-parser`'s commands:
   - it finds projects the app's way:  addresses and groups, `@here`, the build folder
   - it runs the steps after a compile or a lint:  the property editor's pages
   - it opens a running program in your browser, for `spell run`
 
-**The unfinished part:  `spell-lang`'s commands need `spell-app` cloned.**
+**The unfinished part:  `spell-parser`'s commands need `spell-app` cloned.**
 Without it, each one stops with a message to clone it, and exits 2:
 `the language commands find projects the app's way for now ... Clone spell-app:  yarn clone spell-app`.
-Moving their work down into `spell-lang` is still to come ([below](#-coming)).
+Moving their work down into `spell-parser` is still to come ([below](#-coming)).
 
 ## The kit
 
@@ -268,12 +268,12 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 
 </details>
 
-## spell-lang
+## spell-parser
 
 The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
 and check its language packs.
-They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `language` hook
-([above](#each-repo-brings-its-own-commands));  the language packs' two are the exception, `spell-lang`'s own.
+They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `language` hook
+([above](#each-repo-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
 
 ### Writing and building
 
@@ -303,7 +303,7 @@ They're `spell-lang`'s, but their work is `spell-app`'s for now, through its `la
 | `spell format --check` | writes nothing, lists the files that would change, and exits 1 if any would |
 
 - The targets are `SP.TARGETS`:  `ts/solid`, `ts/lib`, `py`
-  ([spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md)).
+  ([spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
   A target with a type checker is checked once written, TypeScript by `tsc` and Python by `pyright`:
   its errors are listed, but don't fail the compile.
 - Warnings, e.g. a property with no type, are listed under the errors and never counted:
@@ -488,9 +488,9 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
-- `--against` makes a temporary `git worktree` of `spell-lang` at the ref, and links the kit's `node_modules` into it:
+- `--against` makes a temporary `git worktree` of `spell-parser` at the ref, and links the kit's `node_modules` into it:
   a ref with different dependencies may not run.
-  - The ref must have `spell-lang`'s `src/spell/`;  an older one is refused, with a message.
+  - The ref must have `spell-parser`'s `src/spell/`;  an older one is refused, with a message.
   - The two sides take turns, run by run, so a busy moment hits both alike.
   - The worktree is removed afterwards, even on failure.
 
@@ -501,20 +501,20 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 Spell reads programs in more than one language:
 each language pack registers every rule again, with its own words.
 - When a rule is added in English, these two say which packs still need it, and write the stubs to translate.
-- Their work is `spell-lang`'s own, not the hook's:  they read only its rule files.
+- Their work is `spell-parser`'s own, not the hook's:  they read only its rule files.
 
 | Command | What it does |
 | --- | --- |
-| `spell lang packs check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
-| `spell lang packs fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
+| `spell parser packs check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
+| `spell parser packs fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
 
 <details>
 <summary>What they check, and what fix writes</summary>
 
 | Option | What it does |
 | --- | --- |
-| `spell lang packs check --json` | the report as JSON |
-| `spell lang packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
+| `spell parser packs check --json` | the report as JSON |
+| `spell parser packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
 
 - `check` reads each rules module's files as text, English's (`<module>.en.ts`) and the pack's, and lists:
   - `missing`:  a rule English registers that the pack doesn't
@@ -532,7 +532,7 @@ each language pack registers every rule again, with its own words.
   - the rule's class docstring, and its English registration
   - the module's translations so far
   - the pack's glossary, e.g. Spanish's
-    [GLOSSARY.md](https://github.com/spell-app/spell-lang/blob/main/src/spell/languages/es/GLOSSARY.md)
+    [GLOSSARY.md](https://github.com/spell-app/spell-parser/blob/main/src/spell/languages/es/GLOSSARY.md)
 - `fix` writes only what's missing:  translate each stub, then run `check` and the module's rule tests.
 
 </details>
@@ -540,16 +540,16 @@ each language pack registers every rule again, with its own words.
 
 ### Translating a project
 
-`spell lang translate` writes a project in another language, rule by rule:
+`spell parser translate` writes a project in another language, rule by rule:
 each line is read in its own language, then written again with the same rule's words in the other.
 - The names its people chose (types, properties, methods, values, texts) come from a dictionary beside it,
   `<Project>.<lang>.names.json5`, for a person to review.
 - A name the dictionary lacks is drafted once by `claude -p`, then saved there.
-- Its work is spell-app's (it finds the project the app's way), then `spell-lang`'s `translateProject.ts`.
+- Its work is spell-app's (it finds the project the app's way), then `spell-parser`'s `translateProject.ts`.
 
 | Command | What it does |
 | --- | --- |
-| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person |
+| `spell parser translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -963,15 +963,15 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [tsconfig.tsx.json](tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |
 
 - `tsx` takes one settings file for every file it runs, so this one holds what every repo's commands need:
-  JSX for `spell-app`'s Ink screens, and standard decorators lowered for `spell-lang`.
+  JSX for `spell-app`'s Ink screens, and standard decorators lowered for `spell-parser`.
 - It applies those settings only to the files the settings file includes.
   So `spell` runs under `tsconfig.tsx.json`, which includes every repo:
   under `tsconfig.node.json` alone, `spell-app`'s screens crashed in a terminal with `React is not defined`.
 - The tests:  the kit's in [tests/cli/](tests/cli/), each repo's commands' in that repo's `tests/cli/`.
   - The kit's run the real `spell` as separate processes, so a broken command list in any repo fails them.
   - `spell-app`'s include end-to-end runs of every language command, through the kit's bin.
-- The other repos' lists:  [spell-lang's](https://github.com/spell-app/spell-lang/blob/main/src/cli/commands.ts)
-  (the `language` hook's shape is its [cli.types.ts](https://github.com/spell-app/spell-lang/blob/main/src/cli/cli.types.ts)),
+- The other repos' lists:  [spell-parser's](https://github.com/spell-app/spell-parser/blob/main/src/cli/commands.ts)
+  (the `language` hook's shape is its [cli.types.ts](https://github.com/spell-app/spell-parser/blob/main/src/cli/cli.types.ts)),
   [Spell UI's](https://github.com/spell-app/spell-ui/blob/main/src/cli/commands.ts) ([its README-site.md](https://github.com/spell-app/spell-ui/blob/main/README-site.md)),
   [spell-app's](https://github.com/spell-app/spell-app/blob/main/src/cli/commands.ts) and [its hooks](https://github.com/spell-app/spell-app/blob/main/src/cli/hooks.ts).
 
@@ -1000,8 +1000,8 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 ## 🌱 Coming
 
 Planned, and none of it started:
-- The language commands' work, moved down from `spell-app` into `spell-lang` command by command,
-  so they run with `spell-lang` alone.
+- The language commands' work, moved down from `spell-app` into `spell-parser` command by command,
+  so they run with `spell-parser` alone.
 - `spell lsp`, which starts the language server, so the VS Code extension runs it rather than a `tsx` path.
 - A bundled `spell` on npm, which installs and runs with no checkout at all.
   It needs `keepNames` (rules register by class name), the version stamp, and the projects folder found some other
@@ -1017,7 +1017,7 @@ They're named in the command line's goals and the commands page's roadmap.
 - [README.md](README.md):  setup from zero, and the index of every page
 - [README-server.md](README-server.md):  what `spell server` and `spell app serve` start
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md):  every `epic` verb, in full
-- [spell-lang's README](https://github.com/spell-app/spell-lang/blob/main/README.md):  the language these commands read
+- [spell-parser's README](https://github.com/spell-app/spell-parser/blob/main/README.md):  the language these commands read
 - [README-development.md](README-development.md):  the checks, the tests and the worktrees around them
 
 <details>

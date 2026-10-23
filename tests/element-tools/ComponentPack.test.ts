@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { ComponentPack } from "spell-kit/element-tools/ComponentPack"
-import { ComponentPackError } from "spell-kit/element-tools/tools.types"
+import { ComponentPack } from "spell/element-tools/ComponentPack"
+import { ComponentPackError } from "spell/element-tools/tools.types"
 
 /**
  * The kit's pack tooling (Spell UI's from epic `repo-split` P5, the kit's from P10):  what a pack is, and what its build

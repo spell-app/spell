@@ -2,8 +2,8 @@ import { readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { ElementCatalog } from "spell-kit/element-tools/jsx-help/ElementCatalog"
-import { JsxElementHelp } from "spell-kit/element-tools/jsx-help/JsxElementHelp"
+import { ElementCatalog } from "spell/element-tools/jsx-help/ElementCatalog"
+import { JsxElementHelp } from "spell/element-tools/jsx-help/JsxElementHelp"
 import {
   ATTRIBUTES,
   CARD,
@@ -11,8 +11,8 @@ import {
   MODAL_MANIFEST,
   PAGE,
   writeJsxFixture
-} from "spell-kit/element-tools/jsx-help/test/jsxFixture"
-import { ELEMENT_HELP_CODES } from "spell-kit/element-tools/tools.types"
+} from "spell/element-tools/jsx-help/test/jsxFixture"
+import { ELEMENT_HELP_CODES } from "spell/element-tools/tools.types"
 
 /** The JSX help, over the fixture package (`writeJsxFixture()`):  `<fx-card>` its own, `<fx-modal>` a dependency's. */
 const FIXTURE = writeJsxFixture()

@@ -5,7 +5,7 @@ import type { Plugin } from "vite"
 
 /**
  * Hand code the `package.json` version of the package being built as `__PACKAGE_VERSION__` -- see `PACKAGE_VERSION`
- * in `spell-kit/util`.
+ * in `spell/util`.
  * - MUST be used by every vite config:  `vite.config.ts`, `vitest.config.ts`, `vite.runner.config.ts`.
  * - `packageFolder`:  the package's own folder, `import.meta.dirname` in its config;  its `package.json` gives the
  *   version, so the stamp reaches into no other package.
@@ -21,7 +21,7 @@ export function packageVersion(packageFolder: string): Plugin {
 
 /**
  * The version in the `package.json` of the package `packageFolder` is in:  its own, else the nearest one up (a folder
- * of the kit, `spell-kit`, has none of its own:  the kit's one version, epic `repo-split` P9).
+ * of the kit, `spell`, has none of its own:  the kit's one version, epic `repo-split` P9).
  */
 function readPackageVersion(packageFolder: string): string {
   for (let at = resolve(packageFolder); ; at = dirname(at)) {

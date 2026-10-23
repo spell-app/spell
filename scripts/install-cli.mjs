@@ -31,7 +31,7 @@ import { homedir } from "node:os"
 import { delimiter, dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-/** The kit's root, the `spell-kit` package:  this file is in its `scripts/`. */
+/** The kit's root, the `spell` package:  this file is in its `scripts/`. */
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const onPath = (process.env.PATH ?? "").split(delimiter)
 const localBin = resolve(homedir(), ".local", "bin")

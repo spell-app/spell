@@ -41,7 +41,7 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **Grep the whole repo BEFORE renaming or moving anything**, and record what you found:
   - "nothing outside `Run.ts` reads `run.index`" is what makes a rename a contained change
     rather than a hopeful one.
-  - Same before promoting a helper:  check the destination -- `spell-kit/util`, or the package's own util folder
+  - Same before promoting a helper:  check the destination -- `spell/util`, or the package's own util folder
     (WWOD §8 › "Promotion path") -- for a name collision.
 - **Record deviations and known issues;  NEVER fix them silently**, unless very minor:
   - Epic work:  in its epic page, `epics/<name>/<name>.plan.html`.
@@ -77,8 +77,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 ## 2. General style
 
 - **DRY:  extract logic duplicated more than ~3 lines** into a shared utility:
-  - Before writing one, check `spell-kit/util`, the package's own util folder (`spell-ui/util` ...) and lodash
-    (re-exported by `spell-kit/util`), e.g. lodash for dotted paths, `string.ts` for case conversion.
+  - Before writing one, check `spell/util`, the package's own util folder (`spell-ui/util` ...) and lodash
+    (re-exported by `spell/util`), e.g. lodash for dotted paths, `string.ts` for case conversion.
   - After implementing a feature, look for duplicated blocks and lift them up:  constants and small pure helpers
     into the folder's types file (WWOD §8 › "`<folder>.types.ts`"), the rest into a util file.
   - Two functions doing generally the same thing:  consolidate into one, with arguments or dependency injection --
@@ -86,13 +86,13 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
   - NEVER hard-code the same string more than once:  make it a constant (WWOD §9 › "Named string constants +
     `typeof` types"), or pass a sample message into a helper function which can be overridden.  A platform
     string (`"aria-label"`, `"click"`, `"div"`) is the exception:  inline, same rule.
-  - Where a shared helper lives (the package's util folder, `spell-kit/util` once 2+ packages use it), and the small private
+  - Where a shared helper lives (the package's util folder, `spell/util` once 2+ packages use it), and the small private
     copy when that home would invert the dependency:  SEE:  WWOD §8 › "Promotion path".
 - **Delete a field, option or export nothing reads**, rather than keeping it.
 - **Ask before adding a dependency:**  ask Owen before adding any runtime dependency to a package;  lodash and
-  `spell-kit/util` first (above).
+  `spell/util` first (above).
 - **API layers handle client / server communication and throw:**
-  - `$fetch()` (`spell-kit/util`) throws a `ResponseError` subclass for every failure (WWOD §5 › "Server → client error
+  - `$fetch()` (`spell/util`) throws a `ResponseError` subclass for every failure (WWOD §5 › "Server → client error
     identity");  callers never check `response.ok` themselves.
 - **Models combine property defaulting and business logic:**
   - Complex business logic for manipulating object should be in model class, throw on error,
@@ -192,25 +192,25 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 
 ## 4. Imports
 
-Examples use spell-lang's `parser` and its namespace (`spell-lang/parser`, `P`);  each package's `AGENTS.md` names its
+Examples use spell-parser's `parser` and its namespace (`spell-parser/parser`, `P`);  each package's `AGENTS.md` names its
 own.
 
 - **ONE name per file:  the package's name plus its path under `src/`** (epic `repo-split` P14, Q47):
   - Every repo keeps its code under ONE `src/`, and every file has ONE name, the same in every repo:
-    `spell-kit/util/string` is `src/util/string.ts` of `spell-kit`;  `spell-lang/parser` is the barrel
+    `spell/util/string` is `src/util/string.ts` of `spell`;  `spell-parser/parser` is the barrel
     `src/parser/index.ts`;  `spell-ui/components/ui-button/UIButton`.
   - Inside its own repo too:  NO `$/` alias, NO `#` subpath import, NO `../`.
   - No extension, as a bundler resolves it;  a query stays (`spell-ui/components/ui-parts/UIParts.css?inline`).
   - The names come from the package's `exports`:  one wildcard entry (the kit's `AGENTS.md`, "Imports across repos").
-    - Plain `node`, which adds no extension, writes `.ts` (`spell-kit/util/node/json5.ts`), or uses an entry of its
+    - Plain `node`, which adds no extension, writes `.ts` (`spell/util/node/json5.ts`), or uses an entry of its
       own the package lists.
   - Spell UI's published short names (`spell-ui/ui-code`) are for outside the repos only.
   - A string that only NAMES a module (a `packModules` key) is that same name:  `spell-ui/core` (P14, Q45).
   - Lint fails a `../` import into any package's `src/` (`spell/no-parent-import`, the toolchain's
     `lint.imports.ts`);  its message names the import to write.
 - **The barrel, from another sub-system:**
-  - From ANOTHER sub-system (a folder of `src/` with its own namespace), import its BARREL only (`spell-lang/parser`,
-    never `spell-lang/parser/rules/Rule`), except the leaves its `AGENTS.md` lists for that (opt-in side-effect
+  - From ANOTHER sub-system (a folder of `src/` with its own namespace), import its BARREL only (`spell-parser/parser`,
+    never `spell-parser/parser/rules/Rule`), except the leaves its `AGENTS.md` lists for that (opt-in side-effect
     imports, test helpers, node-only files ...).
     - Everything in `src/` HAS a name, but that's not a license:  a leaf named from outside is a public shape.
   - Other exceptions are in the package's own "Imports".
@@ -220,18 +220,18 @@ own.
     `exports` (`spell-ui/vite.config.ts`), never a path.
 - **Same-folder peers only:**
   - OK to import from direct peers:  `import { Rule } from "./Rule"`, but not subdirectories -- use
-    `spell-lang/parser/...` instead.
+    `spell-parser/parser/...` instead.
   - Need to reach a parent folder?  That's a package-name import.
 - **ONE namespace per sub-system:**
   - Prefer ONE namespace import per sub-system and qualify at use site:
-    `import { P } from "spell-lang/parser"` => `P.Match`, `new P.Symbol(...)`, `P.ASTExpression`.
+    `import { P } from "spell-parser/parser"` => `P.Match`, `new P.Symbol(...)`, `P.ASTExpression`.
     - Applies INSIDE the sub-system as well.
     - Self-import uses full path too, even from same folder as the barrel:
-      `import { P } from "spell-lang/parser"`, NEVER `import { P } from "."`.
+      `import { P } from "spell-parser/parser"`, NEVER `import { P } from "."`.
       Only the barrel itself says `"."`:  `export * as P from "."`.
     - NEVER reach into another sub-system's leaf file for something its barrel exports.
     - OK to refer to file's own class unqualified.
-    - Tests may mix:  `import { P, Match, Parser } from "spell-lang/parser"`.
+    - Tests may mix:  `import { P, Match, Parser } from "spell-parser/parser"`.
   - Why:  one name per type everywhere (`P.AnyMatch`), and `import type { P }` erases completely from output,
     so a `.types.ts` file stays value-free.
   - NOT:  a second namespace per feature folder -- SEE:  WWOD §8 › "ONE self-namespace per package".
@@ -245,12 +245,12 @@ own.
     - NEVER use `P.X` at module-evaluation time:  `extends` clauses, static initializers,
       top-level `new`.  Circular reentry silently yields `undefined` / broken `instanceof`.
     - Import base classes directly from the defining file (a peer's `./File`, else its full name,
-      `spell-kit/element/DOMElement`), with comment:
+      `spell/element/DOMElement`), with comment:
       `// Import directly to avoid circular import`
 
       ```ts
-      // spell-lang's src/parser/scope/TypeScope.ts
-      import { P } from "spell-lang/parser"
+      // spell-parser's src/parser/scope/TypeScope.ts
+      import { P } from "spell-parser/parser"
       // Import directly to avoid circular import
       import { BlockScope } from "./BlockScope"
 
@@ -267,23 +267,23 @@ own.
 - **Import order:**
   - node_modules
   - (blank line)
-  - `spell-kit/util` and other general utilities, general-to-specific
-  - other sub-system barrels, this repo's and other repos' (`spell-ui/...`, `spell-lang/...`), lowest first
+  - `spell/util` and other general utilities, general-to-specific
+  - other sub-system barrels, this repo's and other repos' (`spell-ui/...`, `spell-parser/...`), lowest first
   - own barrel
   - direct peer files, base classes first
   - (blank line)
-  - side-effect imports (`import "spell-lang/parser/rulex"`)
+  - side-effect imports (`import "spell-parser/parser/rulex"`)
   - css files (`./foo.css` if in same folder, else `<package>/path/to/foo.css`)
   - Frameworks (`solid-js` ...) are node_modules:  no group of their own.
 - **One import statement per module:**
-  - Inline type imports:  `import { P, type AnyMatch } from "spell-lang/parser"`.
+  - Inline type imports:  `import { P, type AnyMatch } from "spell-parser/parser"`.
 
 ## 5. Errors
 
 - **Throw typed errors;  NEVER return error unions:**
   - NEVER return `{ ok: false, error }` unions.
   - `TypeError` for bad caller input;  `SyntaxError` for a parse error.
-  - System errors are defined in `spell-kit/util/errors`:  `CustomError`, `UIError`, the `ResponseError` family.
+  - System errors are defined in `spell/util/errors`:  `CustomError`, `UIError`, the `ResponseError` family.
   - A folder's own small error classes, when callers need to tell them apart, live in its `.types.ts`, never one
     file per class -- SEE:  WWOD §8 › "`<folder>.types.ts`".
   - Error details ride in `cause`, typed (WWOD §5 › "Structured error causes").
@@ -322,8 +322,8 @@ own.
   - A cancel (`CanceledError`, a dismissed `editor.prompt()`) aborts silently:  no error shown, nothing logged.
 - **Rethrow with context:**
   - catch => set `error.cause = { method, args }` => rethrow, or
-  - the `makeErrorWrapper(className)` decorator (`spell-kit/util`), which does it for every method of a class.
-  - For a method with several failure points, `getDier(this, "activity", params)` (`spell-kit/util`) returns a scoped
+  - the `makeErrorWrapper(className)` decorator (`spell/util`), which does it for every method of a class.
+  - For a method with several failure points, `getDier(this, "activity", params)` (`spell/util`) returns a scoped
     `die(message, error?)` that throws with that context.
 - **Caller-supplied callbacks run through `safelyCall()` / `safelyCallAll()`:**
   - `safelyCall(predicate, logger?)` for a predicate, `safelyCallAll(list, logger?)` for a
@@ -334,7 +334,7 @@ own.
   - NO hand-written `label` param on either:  a REAL throw carries a stack pointing at the exact
     file and line, which beats anything you'd type, so the wrapper logs a generic message and
     the call site keeps a short inline comment instead.
-  - Both from `spell-kit/util`.
+  - Both from `spell/util`.
 - **User-facing failures go to `editor.showError(error)`**, not thrown exceptions that crash the UI:
   - missing files, API failures the user should know about
   - SEE:  `editor.createApp()` in WWOD §2 › "App controllers use models + API and show feedback to user".
@@ -512,7 +512,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
   - The description:  one line of what it is, then bullets of its responsibilities.
 - **A module or class docstring states its POSITION IN THE IMPORT GRAPH**, and what it must never import or know
   about:
-  - spell-app's `src/app/runner/main.tsx`:  "NEVER imports `spell-lang/core`:  it'd be bundled here, a second copy".
+  - spell-app's `src/app/runner/main.tsx`:  "NEVER imports `spell-parser/core`:  it'd be bundled here, a second copy".
   - spell-app's `src/app/solid/modals/dialogs.ts`:  "`editor` reaches these through a DYNAMIC `import()`, so
     `editor.ts` stays free of Solid and `spell-ui`".
   - What it deliberately does NOT know about, and why that matters -- often what makes it testable, e.g.
@@ -528,7 +528,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
   - A rename updates prose EVERYWHERE in the same commit, including other folders --
     step comments, other modules' docstrings, every README and `AGENTS.md` mention.
   - The README's files table is part of the code:  it changes in the same commit, and a
-    file that LEFT the folder keeps a row pointing at its new home (`*(none -- spell-kit/util)*`).
+    file that LEFT the folder keeps a row pointing at its new home (`*(none -- spell/util)*`).
 - **`// oxfmt-ignore`** only for aligned ternary ladders with per-branch comments
   and hand-packed const tables.  Trailing `//` to force a line break.
   - Respect a `// oxfmt-ignore` someone added by hand.

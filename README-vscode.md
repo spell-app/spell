@@ -169,7 +169,7 @@ flowchart LR
   end
   subgraph checkout["the spell-app checkout your window is on"]
     server["src/lsp/server.ts:  the language server, run by tsx"]
-    lang["spell-lang's parser and writers, as source"]
+    lang["spell-parser's parser and writers, as source"]
     runner["app/dist-runner/:  Run Project's page"]
   end
   ext -- "over stdio" --> server
@@ -189,7 +189,7 @@ all come from the checkout, as they are on disk._
 When a window opens its first `.spell` file, the extension finds the spell-app checkout the window is on,
 and starts THAT checkout's language server, from source, with the kit's `tsx`.
 
-- So the editor runs Spell as it is on disk:  change a rule in spell-lang's parser, restart the server,
+- So the editor runs Spell as it is on disk:  change a rule in spell-parser's parser, restart the server,
   and the squiggles follow.  No rebuild, no reinstall.
 - And one install serves the main checkout and every epic's worktree:  each window runs its own checkout's Spell.
 - A window with no `.spell` file open starts no server.
@@ -239,7 +239,7 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
    - It refuses on a branch behind `main`:  every window runs the ONE installed extension,
      so an older build would downgrade them all.
      It says to merge `main` in first (`epic worktree merge-main`);  `--force` builds anyway.
-   - The build fails unless the extension's version matches spell-lang's (0.8.0, both):  they're released together.
+   - The build fails unless the extension's version matches spell-parser's (0.8.0, both):  they're released together.
 3. Spell Epic, for the epic pages and the docs beside your code:
 
    ```sh
@@ -265,7 +265,7 @@ Neither of Spell's two is on the Marketplace:  like the rest of Spell today, the
 | Oxc (`oxc.oxc-vscode`) | the lint and format every repo uses, oxlint and oxfmt, in the editor;  spell-app recommends it |
 | Vitest | run or debug one test from the gutter |
 | Markdown Preview Mermaid Support | draws the READMEs' pictures in VS Code's Markdown preview |
-| Python and Ruff | the two uv projects:  spell-lang's Python runtime, `spell-core`, and spell-app's Python web server, `spell-quart` |
+| Python and Ruff | the two uv projects:  spell-parser's Python runtime, `spell-core`, and spell-app's Python web server, `spell-quart` |
 | Claude Code | the agent, and its panel of sessions:  [README-agents.md](README-agents.md) |
 | GitLens or Git Graph | five repos' histories side by side |
 
@@ -392,7 +392,7 @@ and copied into the extension when it's built.
 ## The settings the repos ship
 
 One folder of editor settings, spell-app's `.vscode/`.
-spell-ui adds a single setting;  the kit, spell-lang and spell-epic ship none.
+spell-ui adds a single setting;  the kit, spell-parser and spell-epic ship none.
 
 | File | What it holds |
 | --- | --- |

@@ -5,7 +5,7 @@ import JSON5 from "json5"
 
 // The JSON5 editor, util's since `repo-split` P1, the one every JSON5 edit goes through (epic `people-and-orgs` P8);
 // an entry of its own in the kit's `exports`, so plain `node` finds it
-import { json5Edited } from "spell-kit/util/node/json5"
+import { json5Edited } from "spell/util/node/json5"
 
 /****************
  * ### `DataFile`
@@ -33,7 +33,7 @@ import { json5Edited } from "spell-kit/util/node/json5"
  * - The kit's since epic `epic-eject` I5 (it was `spell-epic/data/DataFile`;  the assembler's until `repo-split` P14):
  *   the CLI reads the commands page's data with it (`spell commands`, `spell pack create`), and spell-epic's tooling
  *   imports it from here.
- * - Node only (`node:fs`):  `SRV.DataFile`, or by its own path (`spell-kit/server/DataFile`), which loads only it.
+ * - Node only (`node:fs`):  `SRV.DataFile`, or by its own path (`spell/server/DataFile`), which loads only it.
  * - Its position:  imports only node's own modules, `json5`, and util's JSON5 editor, so plain `node` loads it
  *   (spell-epic's docs tools, `details.js` ...);  NEVER an `enum` or a parameter property.
  *   - Both kit files by names the kit's `exports` list on their own, each pointing at its `.ts`:  plain node adds

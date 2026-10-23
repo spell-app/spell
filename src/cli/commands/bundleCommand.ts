@@ -1,6 +1,6 @@
-import { SRV } from "spell-kit/server"
-import { pageServerRoot } from "spell-kit/server/page/settings"
-import { CLI } from "spell-kit/cli"
+import { SRV } from "spell/server"
+import { pageServerRoot } from "spell/server/page/settings"
+import { CLI } from "spell/cli"
 
 /**
  * `spell bundle [names...]` / `spell bundle check [names...]`:  the bundles the page server serves, BUILT on demand

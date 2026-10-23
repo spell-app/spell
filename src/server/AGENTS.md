@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in the kit's `src/server/` (`spell-kit/server`).
+when working with code in the kit's `src/server/` (`spell/server`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the kit's layout, and the house style every repo shares.
@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- Serving pages locally, and assembling them, for every package:  `spell-kit/server` (`SRV`).
+- Serving pages locally, and assembling them, for every package:  `spell/server` (`SRV`).
   - Assembling (below, "Assembling pages"):  merged in here, its names in `SRV`.
     It was the kit's `assembler/` (namespace `AS`) until epic `repo-split` P14 (Q43).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
@@ -119,7 +119,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It went to spell-server when the repos split (P8), and into the kit with it (P9).
     spell-app's `page-server` (the bundles' build, the highlight.js swap, the `/ui/` bridge) joined it in P16.
 - NOT in the barrel, opt-in by path (WWOD §8 › "Barrels"):
-  - `spell-kit/server/page/...` -- the page server, the KIT's (one per kit:  the main one, each worktree's):
+  - `spell/server/page/...` -- the page server, the KIT's (one per kit:  the main one, each worktree's):
     - its CLI, `spell server`
       - started from the kit's root ONLY (epic `repo-split` P16):  from any folder of the kit, `spell server <verb>`
         finds it (`pageServerRoot()`);  `--root` naming any other folder is an error naming the kit (`kitRootOf()`),
@@ -147,7 +147,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
-        node built-ins, `json5`, `spell-kit/server/contentFolder` and type imports only, and `./settings.ts` with its
+        node built-ins, `json5`, `spell/server/contentFolder` and type imports only, and `./settings.ts` with its
         extension.
     - LOCAL COPIES (`"localCopies"`):  a CDN URL pages load, and the URL this server serves the same file at;  every page
       it serves gets the local one (`withLocalCopies()`), so pages load offline.
@@ -233,7 +233,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - [ProjectBuild](../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
-  - `spell-kit/server/site/...` -- browser code:
+  - `spell/server/site/...` -- browser code:
     - the site header every page shows
       - its TABS are data (`SiteTab`, epic `repo-split` I4):  it names no site's parts
         - served:  the settings' `"siteTabs"`, in the header's order, told every page as `SPELL_SERVER.siteTabs`
@@ -254,7 +254,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `WebServer` imports the leaf, never the browser-only barrel.
     - An epic's state and the Epics page's cards left for `spell-epic/list/` (epic `people-and-orgs` P16).
       - `EpicState`, `EpicCards`
-  - `spell-kit/server/test/...` -- test helpers (`serveHandler`, `ask`)
+  - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
   - the kit's, at its root (node tests):
 
@@ -304,15 +304,15 @@ The steps between a page's content and its file on disk, for every tool that wri
     - a `BUNDLES` entry
     - its output folder in its repo's part of the settings (above)
     - and in the `.gitignore` of the repo that builds it (`/site/_assets/`, in spell-ui's)
-- JSON5 written with its comments kept moved to util, `spell-kit/util/node/json5` (epic `repo-split` P1):
+- JSON5 written with its comments kept moved to util, `spell/util/node/json5` (epic `repo-split` P1):
   its users (ui's tools, app, brand, spaces, spell-epic) need util, not the assembler.
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
   - NEVER make it import spell-epic's code:  spell-epic imports this.
-  - `DataFile` (`SRV.DataFile`, or `spell-kit/server/DataFile` alone):  the tooling's JSON5 data files, here since
+  - `DataFile` (`SRV.DataFile`, or `spell/server/DataFile` alone):  the tooling's JSON5 data files, here since
     epic `epic-eject` I5, so the CLI reads the commands page's data without the engine.
-  - `contentFolderOf()` (`SRV.contentFolderOf()`, or `spell-kit/server/contentFolder` alone, epic `epic-eject`
+  - `contentFolderOf()` (`SRV.contentFolderOf()`, or `spell/server/contentFolder` alone, epic `epic-eject`
     P12):  the repo's shared content folder,
     `contentFolder` in the main checkout's `.epic/config.json5`, so a tool finds the content with no link at the
     checkout's root.
@@ -324,7 +324,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `packages/*/src`, and `packages/*/components` (a component set's elements):
       the old monorepo's spelling, in every page written before the split
       - Under the kit, an old `packages/<name>/` is found through `node_modules`:
-        spell-ui, spell-brand, spell-epic, and the folders of spell-kit, spell-lang and spell-app.
+        spell-ui, spell-brand, spell-epic, and the folders of spell, spell-parser and spell-app.
       - A folder now in its repo's one `src/` drops the old `src/` (epic `repo-split` P11, P14):
         `packages/server/src/x.ts` is the kit's `src/server/x.ts`.
     - `tests/`, where every package's tests live
@@ -352,16 +352,16 @@ The steps between a page's content and its file on disk, for every tool that wri
 ## Imports
 
 - As WWOD §4.
-- Tests use `spell-kit/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
+- Tests use `spell/server/test/serve` (`serveHandler`, `ask`):  real HTTP, through node's HTTP client.
   Never `fetch`, which resolves `..` before sending.
 
 ## Types / Exports
 
 As WWOD §8, plus our self-namespace:
 
-- `SRV` ~== `spell-kit/server`
+- `SRV` ~== `spell/server`
 - Every file by its package name and path under `src/` (epic `repo-split` P14), the kit's own included:
-  `spell-kit/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
+  `spell/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
   - Five that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
     `/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder` (node's modules, `json5` and type
     imports only).

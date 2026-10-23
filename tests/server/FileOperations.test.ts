@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { ask, serveHandler, type Served } from "spell-kit/server/test/serve"
+import { SRV } from "spell/server"
+import { ask, serveHandler, type Served } from "spell/server/test/serve"
 
 /** This run's token, as the page server's `Guard` would hand it to its pages. */
 const TOKEN = "file-operations-token"

@@ -1,13 +1,13 @@
 # WWOD spoke -- Logging & debug
 
-Logging through `spell-kit/util`'s `Logger`, verbosity, and what `console.*` is still for.  Read with
+Logging through `spell/util`'s `Logger`, verbosity, and what `console.*` is still for.  Read with
 `agents/wwod/WWOD.md` (the hub).
 From:  original WWOD §21 "Logging".
 
 ## 19. Logging & debug
 
 - **Log through a `Logger`, not bare `console.*`:**
-  - `new Logger({ prefix, level })` from `spell-kit/util` (`packages/util/src/spell/Logger.ts`).
+  - `new Logger({ prefix, level })` from `spell/util` (`packages/util/src/spell/Logger.ts`).
   - A logger can be turned up or down per subsystem at runtime;  `console.*` can't.
   - TODO:  epic `logger-everywhere` -- today only `Tokenizer` uses `Logger`.
 - **One tagged logger per subsystem, as a class field:**
@@ -56,5 +56,5 @@ From:  original WWOD §21 "Logging".
 - **Debug globals through `setDebugGlobal()`:**
   - Never `console.log` for object inspection:  `setDebugGlobal({ project })` exposes state in the devtools console.
   - NEVER depend on a debug global in code:  it's for a human at the console, nothing else.
-  - From `spell-kit/util`.
-    - TODO:  `spell-kit/util` has no `setDebugGlobal()` yet -- write it.
+  - From `spell/util`.
+    - TODO:  `spell/util` has no `setDebugGlobal()` yet -- write it.

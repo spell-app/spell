@@ -43,7 +43,7 @@ export const SITE_HOME = "pages/index.html"
 
 /**
  * A component set's address, its id caught:  `/components/<id>/`, after a worktree's `/worktrees/<w>`.
- * - MUST match the page server's `COMPONENTS_PREFIX` (`spell-kit/server/page`'s `settings.ts`, node code:  not imported here)
+ * - MUST match the page server's `COMPONENTS_PREFIX` (`spell/server/page`'s `settings.ts`, node code:  not imported here)
  */
 const COMPONENT_SET_ADDRESS = /^(?:\/worktrees\/[^/]+)?\/components\/([^/]+)(?:\/|$)/
 

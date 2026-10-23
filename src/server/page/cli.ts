@@ -26,8 +26,8 @@
  */
 import { relative, resolve, sep } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import { DEFAULT_PORT, PageServer, kitRootOf, pageServerRoot, pruneReport, pruneServers } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import { DEFAULT_PORT, PageServer, kitRootOf, pageServerRoot, pruneReport, pruneServers } from "spell/server/page"
 
 await main(process.argv.slice(2))
 

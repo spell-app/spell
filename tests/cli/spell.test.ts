@@ -31,7 +31,7 @@ describe("spell help", () => {
     const { status, stdout } = spell(["help"])
     expect(status).toBe(0)
     expect(stdout).toMatch(/^Usage: spell \[options\] \[command\]\n/)
-    expect(stdout).toMatch(/^spell-kit:$/m)
+    expect(stdout).toMatch(/^spell:$/m)
     for (const command of ["server", "bundle", "commands", "wwod", "pony", "help"]) {
       expect(stdout).toMatch(new RegExp(`^ {2}${command} `, "m"))
     }

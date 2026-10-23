@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "fs"
 import { join, relative, resolve } from "path"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import type { AgentRulesProblem, AgentRulesReport } from "spell-kit/cli"
+import { contentFolderOf } from "spell/server/contentFolder"
+import type { AgentRulesProblem, AgentRulesReport } from "spell/cli"
 
 /**
  * The agents' rules (epic `wwod`):  WWOD, the house style in `agents/wwod/*.md`, and the files that cite it

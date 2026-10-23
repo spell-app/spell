@@ -3,8 +3,8 @@ import { createHash } from "node:crypto"
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import { pageServerSettings } from "spell-kit/server/page/settings"
+import { SRV } from "spell/server"
+import { pageServerSettings } from "spell/server/page/settings"
 
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
@@ -151,7 +151,7 @@ export class Bundle {
 
   /**
    * Its source files, sorted, by name:  a package's by its npm name and its path in it (`spell-ui/src/core.ts`,
-   * `spell-kit/src/element/index.ts`),
+   * `spell/src/element/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
    * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
    * - the same names wherever the repos are, so a move makes no bundle stale
@@ -165,7 +165,7 @@ export class Bundle {
     const found: Array<[string, string]> = []
     for (const source of this.spec.sources) {
       // a package by its npm name:  scoped (`@scope/name/src`), or unscoped when one's installed by that name
-      // (`spell-ui/src`, `spell-kit/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
+      // (`spell-ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
       // (`yarn.lock`)
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
       const folder = named && packageFolder(named[1]!, this.root)

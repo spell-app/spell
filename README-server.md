@@ -1,4 +1,4 @@
-# `spell-kit/server`:  the page server
+# `spell/server`:  the page server
 
 ```sh
 cd ~/www/spell/spell-app
@@ -73,8 +73,8 @@ With every repo installed, two of their settings add two things more:
 spell-app's script before the body ends, which colours Spell code blocks (on every page but the component sets'),
 and spell-epic's local copy of highlight.js, which the page's cdnjs tag is pointed at, so it loads offline.
 
-- Its import name is `spell-kit/server`, an entry of the kit's one package, its namespace `SRV`:
-  node only, but for the site header's browser code, `spell-kit/server/site` ([below](#the-library-underneath)).
+- Its import name is `spell/server`, an entry of the kit's one package, its namespace `SRV`:
+  node only, but for the site header's browser code, `spell/server/site` ([below](#the-library-underneath)).
 - Code:  [src/server/](src/server/), its tests in [tests/server/](tests/server/).
 - Rules for working on it:  [server's AGENTS.md](src/server/AGENTS.md).
 
@@ -449,7 +449,7 @@ flowchart LR
 _Links before formatting:  linking adds attributes, and the formatter then wraps the lines they made long._
 
 ```ts
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 const linker = new SRV.Linker(root)
 const { text } = linker.link(html, dirname(file))
@@ -581,7 +581,7 @@ DataFile.write(file, answer)
 `contentFolderOf(root)` finds the shared content folder:  the guides, epic pages, sagas and the logs.
 It reads the `contentFolder` in the main checkout's epic settings, `.epic/config.json5`,
 unless `SPELL_SHARED_DIR` says otherwise, and it never throws:  a checkout with none simply has none.
-It's an entry of its own too (`spell-kit/server/contentFolder`), so a command that needs only this loads no linkedom.
+It's an entry of its own too (`spell/server/contentFolder`), so a command that needs only this loads no linkedom.
 
 <details>
 <summary>Adding a step, and what's coming</summary>
@@ -650,7 +650,7 @@ A repo that isn't cloned brings nothing, and the server runs with whatever is th
 A route module is a file whose default export is a name and a `setup()` that runs once, before the server listens:
 
 ```ts
-import type { RouteModule } from "spell-kit/server/page"
+import type { RouteModule } from "spell/server/page"
 
 const helloRoutes: RouteModule = {
   name: "hello",
@@ -751,7 +751,7 @@ They're the content repo's, since they describe its areas and the sets beside th
 A route is a file and one line, in the repo whose code it serves.
 
 1. Write a route module:  a file whose default export is `{ name, setup() }`, a `RouteModule` from
-   `spell-kit/server/page` (above).
+   `spell/server/page` (above).
    - spell-app's [appRoutes.ts](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/routes/appRoutes.ts)
      is a real one.
 2. Add its path to `routes` in that repo's `package.json`, written from the repo's own folder.
@@ -770,7 +770,7 @@ A route is a file and one line, in the repo whose code it serves.
    const answer = await ask(server.info.port, "GET", "/api/hello")
    ```
 
-   - `root` is a temporary folder with a `package.json` of its own;  `ask()` comes from `spell-kit/server/test/serve`.
+   - `root` is a temporary folder with a `package.json` of its own;  `ask()` comes from `spell/server/test/serve`.
 
 Most of what the server serves is a setting, not code:  one entry in a repo's part, then a restart (step 3).
 
@@ -814,16 +814,16 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 - What it imports:  node's own modules, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded on its first
   call);  of the kit, util's JSON5 editor and the toolchain's format settings.
   So anything node-side may import it.
-  The page server's own entry, `spell-kit/server/page`, adds parse5, which finds an element's bytes for the page editor.
-- The site header, every page's fixed top bar, is browser code beside them (`spell-kit/server/site`):
+  The page server's own entry, `spell/server/page`, adds parse5, which finds an element's bytes for the page editor.
+- The site header, every page's fixed top bar, is browser code beside them (`spell/server/site`):
   - `<spell-site-header>`:  the hat logo, the worktree and branch badge, "open in VS Code", the edit pencil,
     the light / dark switch;  its tabs are data, from the settings' `siteTabs`
   - `<spell-section-editor>`:  the edit mode above
   - `defineSite()` defines both, for every set's site bundle
 - Test helpers:
-  - `spell-kit/server/test/serve`:  `serveHandler()` and `ask()`, real HTTP through node's client;
+  - `spell/server/test/serve`:  `serveHandler()` and `ask()`, real HTTP through node's client;
     never `fetch`, which resolves `..` before sending
-  - `spell-kit/server/test/checkouts`:  fake checkouts and worktrees, `fakeMainCheckout()` and `fakeWorktree()`
+  - `spell/server/test/checkouts`:  fake checkouts and worktrees, `fakeMainCheckout()` and `fakeWorktree()`
 
 ## Safety:  it writes files, so it checks who asks
 
@@ -876,7 +876,7 @@ It runs ONE program, a game per visitor;  this one serves a whole checkout, and 
 How it keeps each visitor's game, and what a restart costs it:
 [spell-app's README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md#the-python-server), beside
 [its folder](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/py), a uv project.
-What compiling to Python writes beside the program:  [spell-lang's README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md).
+What compiling to Python writes beside the program:  [spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md).
 
 ## Commands:  `spell server` and `spell bundle`
 
@@ -951,7 +951,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
-  `spell-kit/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.
+  `spell/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.
 
 Tests (node), at the same paths under [tests/server/](tests/server/):
 [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts).

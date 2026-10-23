@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import * as spellElement from "spell-kit/element"
+import * as spellElement from "spell/element"
 
 /**
- * `spell-kit/element`'s barrel.
+ * `spell/element`'s barrel.
  * - The files import the barrel back as `E`:  a cycle, on purpose.
  *   A binding the cycle leaves `undefined` slips past `tsc` and the bundler alike;  this catches it.
- * - It imports only util's generic files (`spell-kit/util/class` ...) and Solid:  never Spell UI, or any other package.
+ * - It imports only util's generic files (`spell/util/class` ...) and Solid:  never Spell UI, or any other package.
  * - How Spell UI carries it (its core entry re-exports every name, and installs its settings):
  *   Spell UI's barrel and settings tests (`tests/ui/src/elements/`).
  */
-describe("spell-kit/element", () => {
+describe("spell/element", () => {
   it("every export is live", () => {
     expect(Object.keys(spellElement).length).toBeGreaterThan(30)
     expect(Object.entries(spellElement).filter(([, value]) => value === undefined)).toEqual([])
@@ -44,7 +44,7 @@ describe("spell-kit/element", () => {
       import: "default"
     })
     const allowed =
-      /^(\.\/|\.$|spell-kit\/element$|spell-kit\/util\/(class|decorators|dom|string|util\.types)$|solid-js$|@solidjs\/web$)/
+      /^(\.\/|\.$|spell\/element$|spell\/util\/(class|decorators|dom|string|util\.types)$|solid-js$|@solidjs\/web$)/
     const strays = Object.entries(sources).flatMap(([file, text]) =>
       [...text.matchAll(/^\s*(?:import|export)\b[^"']*?from\s+["']([^"']+)["']/gm)]
         .map((match) => match[1]!)

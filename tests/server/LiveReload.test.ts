@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 describe("LiveReload", () => {
   const temp = mkdtempSync(join(tmpdir(), "srv-live-"))

@@ -6,7 +6,7 @@ import type { EnvironmentModuleNode, Plugin } from "vite"
  * the Vite plugin for hot module replacement of a set's elements in `yarn dev`, without reloading the page.
  * A set's `vite.config.ts` adds it after the Solid plugin (Spell UI's does);
  * `hotDefinitions` is the absolute path of `HotDefinitions.ts`, in the kit's `src/element/`
- * (`spell-kit/element/HotDefinitions`, resolved from the package's `exports`).
+ * (`spell/element/HotDefinitions`, resolved from the package's `exports`).
  * - Component barrels (`components/ui-<name>/index.ts`, the modules that call `define()`) become HMR boundaries:
  *   the plugin imports `HotDefinitions` into each, and appends `import.meta.hot.accept(() => HotDefinitions.update())`.
  *   Vite re-runs the barrel, whose `define()` of a new version of a class re-defines its tags in place
@@ -21,7 +21,7 @@ import type { EnvironmentModuleNode, Plugin } from "vite"
  * - NOTE: `@solidjs/vite-plugin`'s own refresh transform wraps exported FUNCTION components;
  *   class components get no refresh boundary, so the two don't meet.
  * - From solid-element's Vite plugin, its options made `ui`'s fixed ones (epic `spell-element`, Q11);  the kit's since
- *   epic `repo-split` P10 (`spell-kit/element-tools/HotElements`), beside `HotDefinitions`.
+ *   epic `repo-split` P10 (`spell/element-tools/HotElements`), beside `HotDefinitions`.
  */
 export function hotElements(hotDefinitions: string): Plugin {
   const handler = JSON.stringify(hotDefinitions)

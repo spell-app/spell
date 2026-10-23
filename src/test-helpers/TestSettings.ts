@@ -1,4 +1,4 @@
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 /****************
  * ### `TestSettings`
@@ -163,7 +163,7 @@ const FALSE_WORDS = new Set(["false", "no", "0"])
 const JSON_START = '[{"'
 
 /** The test settings' own animation, `fade`, named as a set names its animations (`ElementAnimations`). */
-declare module "spell-kit/element/elements.types" {
+declare module "spell/element/elements.types" {
   interface ElementAnimations {
     fade: true
   }

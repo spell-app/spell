@@ -12,8 +12,8 @@ import {
 } from "solid-js"
 import { isServer } from "@solidjs/web"
 
-import { camelCase } from "spell-kit/util/string"
-import type { E } from "spell-kit/element"
+import { camelCase } from "spell/util/string"
+import type { E } from "spell/element"
 // Import directly to avoid circular import:  the decorators run as the classes using them are defined
 import { AriaNames } from "./elements.types"
 import { afterSolidUpdate } from "./timing"
@@ -1351,7 +1351,7 @@ const LISTENERS = Symbol("listeners")
 /**
  * Where lowered decorators keep a class's metadata:
  * `Symbol.metadata`, or esbuild's fallback when the engine has none
- * (`spell-kit/util`'s `Schema.ts` polyfills it with the same symbol).
+ * (`spell/util`'s `Schema.ts` polyfills it with the same symbol).
  */
 const METADATA: symbol = (Symbol as { metadata?: symbol }).metadata ?? Symbol.for("Symbol.metadata")
 

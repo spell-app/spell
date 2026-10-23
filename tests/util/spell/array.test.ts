@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { itemsWithHighest } from "spell-kit/util"
+import { itemsWithHighest } from "spell/util"
 
 describe("itemsWithHighest()", () => {
   it("keeps every item tied for the highest score", () => {

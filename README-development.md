@@ -15,7 +15,7 @@ yarn review
 # 4.  What changed, and in which repo (the kit goes by its folder's name, spell)
 epic worktree repos
 # spell:  readme, 0 ahead of main, 0 behind, 7 uncommitted
-# spell-lang:  readme, 0 ahead of main, 0 behind
+# spell-parser:  readme, 0 ahead of main, 0 behind
 # spell-ui:  readme, 0 ahead of main, 0 behind
 # spell-epic:  readme, 0 ahead of main, 0 behind
 # spell-app:  readme, 0 ahead of main, 0 behind
@@ -85,8 +85,8 @@ Here's the end of a real `yarn lint`, run on the day this page was written:
 ```text
 ==================== yarn lint, every repo
 
-spell-kit      passed  (11s)
-spell-lang     passed  (8s)
+spell      passed  (11s)
+spell-parser     passed  (8s)
 spell-ui       passed  (2s)
 spell-epic     passed  (1s)
 spell-app      FAILED  (7s)
@@ -128,7 +128,7 @@ Every repo answers to the same script names, so `yarn test` means the same thing
 - Run TypeScript as `yarn tsc`, never `npx tsc`:  yarn picks the install's TypeScript 7.
 - Two installs these checks need, once:
   - `yarn playwright install chromium`, for the browser tests (CI adds `--with-deps`, for Linux)
-  - uv, which runs spell-lang's and spell-app's Python:  without it, their `test` and `lint` fail at the Python step
+  - uv, which runs spell-parser's and spell-app's Python:  without it, their `test` and `lint` fail at the Python step
 - Not to be confused with `spell lint` and `spell format`, which check and tidy `.spell` programs, not TypeScript.
   🌱 The repo checks as `spell` commands too, under a group of their own:  planned, not started
   ([README-cli.md](README-cli.md#-coming)).
@@ -157,7 +157,7 @@ Spell UI and spell-epic split theirs by where the tests run instead.
 | Repo | Projects |
 | --- | --- |
 | the kit | `util` and `element` (in Chromium);  `util:node`, `server`, `element-tools`, `cli`, `toolchain`, `tools` |
-| spell-lang | `parser`, `markdown`, `core`, `py`, `spell`, `cli` |
+| spell-parser | `parser`, `markdown`, `core`, `py`, `spell`, `cli` |
 | spell-ui | `ssr` (node, Solid's server build), then `browser` |
 | spell-epic | `node`, `browser` |
 | spell-app | `spaces`, `lsp`, `cli`, `app:node`, `app:browser` |
@@ -201,15 +201,15 @@ Where a test runs is decided by its folder and its name, so a new file needs no 
   A name can say which:  `*.ssr.test.tsx` runs in node in Spell UI, `*.browser.test.tsx` in Chromium in spell-app.
 - Spell UI's `yarn test:all` adds Firefox and WebKit;  `yarn test:browsers` installs them.
 - The Python tests are pytest's, run through uv inside the same `yarn test`:
-  spell-lang's Python runtime, spell-app's Python web apps.
+  spell-parser's Python runtime, spell-app's Python web apps.
 - Shared helpers:
-  - the kit's, for every set of elements:  `spell-kit/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
+  - the kit's, for every set of elements:  `spell/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
     ([README-element.md](README-element.md))
   - Spell UI's setup, `spell-ui/test-helpers/setup.ts`, which spell-app's and spell-epic's browser tests run first
 
 Tests reach DOWN only, as code does:
 - A higher repo's tests may use a lower repo's helpers and test data:
-  spell-app's tests parse with spell-lang's `parseSpellProject()`.
+  spell-app's tests parse with spell-parser's `parseSpellProject()`.
 - A lower repo's tests never read a higher one's:  they get a fixture of their own, or the test moves up.
   - Spell's frozen test projects, and the tests that compile them whole, moved up to spell-app that way,
     beside its other `@spell` groups:  its `spaces/@spell/test/` and `tests/spell/`.
@@ -223,9 +223,9 @@ the package's name plus the file's path under the repo's `src/`, with no extensi
 
 ```ts
 // a folder's barrel, by the folder's name:  src/server/index.ts
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 // one file, src/util/string.ts:  the same name from inside the kit, where this line comes from
-import { camelCase, kebabCase } from "spell-kit/util/string"
+import { camelCase, kebabCase } from "spell/util/string"
 // a query stays
 import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
 ```
@@ -234,7 +234,7 @@ _Real lines, from [the router's test](tests/server/Router.test.ts),
 [the kit's tag names for drawable things](src/util/spell/drawable.ts)
 and [Spell UI's label](https://github.com/spell-app/spell-ui/blob/main/src/components/ui-label/UILabel.tsx)._
 
-- The other repos' files go the same way:  `spell-ui/components/ui-button`, `spell-lang/spell`.
+- The other repos' files go the same way:  `spell-ui/components/ui-button`, `spell-parser/spell`.
 - No path aliases and no `../`;  a same-folder peer stays `./Peer`.
   Lint holds it:  `spell/no-parent-import` fails a `../` that climbs into a package's `src/`,
   and its message names the import to write ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules)).
@@ -261,12 +261,12 @@ all on the epic's branch, and an install of its own.
 flowchart LR
   subgraph main["~/www/spell:  the main checkout, on main"]
     kit1["the kit, at the root"]
-    kids1["spell-lang · spell-ui · spell-epic · spell-app, inside it"]
+    kids1["spell-parser · spell-ui · spell-epic · spell-app, inside it"]
     nm1["node_modules/:  the one install"]
   end
   subgraph wt["~/www/spell.worktrees/readme:  an epic's worktree, on readme"]
     kit2["the kit, a worktree of it"]
-    kids2["spell-lang · spell-ui · spell-epic · spell-app, a worktree of each"]
+    kids2["spell-parser · spell-ui · spell-epic · spell-app, a worktree of each"]
     nm2["node_modules/:  an install of its own"]
   end
   main -- "/isolate readme" --> wt
@@ -345,7 +345,7 @@ so a branch that adds a generated file also teaches its own merge to rebuild it.
 
 | Repo | Generated files | Made by |
 | --- | --- | --- |
-| spell-lang | `src/spell/spellSyntax.json`, the syntax table | `yarn spell:gen:syntax` |
+| spell-parser | `src/spell/spellSyntax.json`, the syntax table | `yarn spell:gen:syntax` |
 | spell-ui | `docs/__data/`:  components, icons, search, custom elements, HTML custom data | `yarn site:data` |
 | spell-app | the Spell libraries' compiled `*.lib.ts`;  App UI's `app/docs/__data/` | `spell compile @spell/library`;  `yarn site:data` |
 | every repo | Vitest snapshots, `__snapshots__/*.snap` | `vp test run --update` |
@@ -380,7 +380,7 @@ flowchart LR
   push["a pull request in spell-app, branch x"] --> ci["spell-app's CI"]
   ci -- "has x" --> kit["the kit at x"]
   ci -- "the commit under test" --> app["spell-app at x"]
-  ci -- "no x" --> lang["spell-lang at main"]
+  ci -- "no x" --> lang["spell-parser at main"]
   ci -- "no x" --> ui["spell-ui at main"]
   ci -- "no x" --> epic["spell-epic at main"]
   %% the Spell look:  yarn mermaid:pretty
@@ -412,7 +412,7 @@ The edges:
 2. Node 24, with yarn's cache.
 3. `yarn install`, with `YARN_ENABLE_IMMUTABLE_INSTALLS=false`:
    the lockfile lists child repos that aren't cloned there.
-4. In a child repo, around the clones above:  uv, for spell-lang's and spell-app's Python;
+4. In a child repo, around the clones above:  uv, for spell-parser's and spell-app's Python;
    and spell-epic's extension install (`spell-epic/vscode`, a yarn project of its own, which its `lint` reads).
 5. `yarn playwright install --with-deps chromium`, for the browser tests.
 6. In a child repo, a git name and email:  some tests make throwaway git repos and commit to them.
@@ -428,15 +428,15 @@ The edges:
 ## Where to change what
 
 The code for one behaviour is rarely where its name suggests:
-the squiggle under a word is spell-app's, the rule that put it there is spell-lang's.
+the squiggle under a word is spell-app's, the rule that put it there is spell-parser's.
 Find the row for what you want to change, then read the page beside it before you start.
 
 | To change ... | Look in |
 | --- | --- |
-| how a Spell sentence parses or compiles | spell-lang's [rules](https://github.com/spell-app/spell-lang/tree/main/src/spell/rules) and its [parser](https://github.com/spell-app/spell-lang/tree/main/src/parser) (the engine, Rulex):  [README-spell.md](https://github.com/spell-app/spell-lang/blob/main/README-spell.md), [README-parser.md](https://github.com/spell-app/spell-lang/blob/main/README-parser.md) |
-| a word in Spanish, or a third human language | spell-lang's [language packs](https://github.com/spell-app/spell-lang/tree/main/src/spell/languages) and each rule module's `<module>.es.ts`;  `spell lang packs check`:  [README-spanish.md](https://github.com/spell-app/spell-lang/blob/main/README-spanish.md) |
-| what compiled code runs on | spell-lang's [core](https://github.com/spell-app/spell-lang/tree/main/src/core) (JavaScript) and [py](https://github.com/spell-app/spell-lang/tree/main/src/py) (Python):  [README-core.md](https://github.com/spell-app/spell-lang/blob/main/README-core.md) |
-| the output for one language | the writers, and the list of targets in spell-lang's [`targets.ts`](https://github.com/spell-app/spell-lang/blob/main/src/spell/targets.ts):  [README-targets.md](https://github.com/spell-app/spell-lang/blob/main/README-targets.md) |
+| how a Spell sentence parses or compiles | spell-parser's [rules](https://github.com/spell-app/spell-parser/tree/main/src/spell/rules) and its [parser](https://github.com/spell-app/spell-parser/tree/main/src/parser) (the engine, Rulex):  [README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md), [README-parser.md](https://github.com/spell-app/spell-parser/blob/main/README-parser.md) |
+| a word in Spanish, or a third human language | spell-parser's [language packs](https://github.com/spell-app/spell-parser/tree/main/src/spell/languages) and each rule module's `<module>.es.ts`;  `spell parser packs check`:  [README-spanish.md](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md) |
+| what compiled code runs on | spell-parser's [core](https://github.com/spell-app/spell-parser/tree/main/src/core) (JavaScript) and [py](https://github.com/spell-app/spell-parser/tree/main/src/py) (Python):  [README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md) |
+| the output for one language | the writers, and the list of targets in spell-parser's [`targets.ts`](https://github.com/spell-app/spell-parser/blob/main/src/spell/targets.ts):  [README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md) |
 | errors, hover and completion | the language service ([`SpellLanguageService.ts`](https://github.com/spell-app/spell-app/blob/main/src/lsp/SpellLanguageService.ts)):  [README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) |
 | the editor's screens and behaviour | spell-app's [`src/app/`](https://github.com/spell-app/spell-app/tree/main/src/app):  [`solid/`](https://github.com/spell-app/spell-app/tree/main/src/app/solid), [`pages/`](https://github.com/spell-app/spell-app/tree/main/src/app/pages), [`editor.ts`](https://github.com/spell-app/spell-app/blob/main/src/app/editor.ts);  [README-app.md](https://github.com/spell-app/spell-app/blob/main/README-app.md) |
 | how programs run in a page | spell-app's [runner](https://github.com/spell-app/spell-app/tree/main/src/app/runner) |
@@ -490,7 +490,7 @@ The kit (`~/www/spell`)
 - `favicon [--hat 0.74]`:  Spell's favicon files, from the hat mark
 - `readme:check`, `mermaid:pretty`:  the READMEs' check, and the look of their Mermaid pictures
 
-spell-lang
+spell-parser
 - checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`, `review`
 - `spell:test:rules`, `spell:test:rules:bless`, `spell:test:ui`, `spell:test:coverage`
 - `spell:gen:syntax` (the syntax table), `core:gen:declarations` (the core's method list), `markdown:spec:update`

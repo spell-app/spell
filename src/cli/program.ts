@@ -1,7 +1,7 @@
 import chalk from "chalk"
 import { Command } from "commander"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * The `spell` program itself:  its global flags, every repo's commands under one roof, and `spell help`.
@@ -99,7 +99,7 @@ export function addHelp(program: Command): void {
     .command("help")
     .description("show help -- for one command, e.g. spell help compile, spell help server start")
     .argument("[command...]", "the command to show help for")
-    .helpGroup("spell-kit:")
+    .helpGroup("spell:")
     .action((names: string[]) => {
       let command: Command | undefined = program
       for (const name of names) command = command?.commands.find((each) => each.name() === name)

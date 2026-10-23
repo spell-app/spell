@@ -1,8 +1,8 @@
-# `spell-kit/util`:  the helpers every repo shares
+# `spell/util`:  the helpers every repo shares
 
 ```ts
 import { createSignal } from "solid-js"
-import { reactiveObject } from "spell-kit/util"
+import { reactiveObject } from "spell/util"
 
 const [count, setCount] = createSignal(0)
 setCount(1)
@@ -31,7 +31,7 @@ the test passes, all 30 checks._
 On signals that hold a write back, the second line would still read `up`, and the language would fail its own test.
 It stands on Spell cells instead, and so does the editor.
 
-`spell-kit/util` is the floor of every Spell repo:  the small things more than one package needs,
+`spell/util` is the floor of every Spell repo:  the small things more than one package needs,
 in one folder of the kit, under one import name.
 The cells are its middle layer.
 Under them sit plain helpers with no dependencies at all;  over them, Spell's own utilities.
@@ -39,7 +39,7 @@ Under them sit plain helpers with no dependencies at all;  over them, Spell's ow
 ## This, or lodash?
 
 Lodash, for anything general.
-Util doesn't wrap it or compete with it:  the kit, spell-lang and spell-app depend on lodash themselves,
+Util doesn't wrap it or compete with it:  the kit, spell-parser and spell-app depend on lodash themselves,
 and Spell UI on `lodash-es`, which tree-shakes.
 Util re-exports five of lodash's string functions, and that's all:
 `toLower()`, `lowerFirst()`, `upperFirst()`, `toSnakeCase()`, and `snakeCase()`, the same one memoized.
@@ -59,7 +59,7 @@ Every result in that table came from one run, the two libraries side by side.
 ## One import name, three layers
 
 ```ts
-import { proto, kebabCase, closestAcrossShadow, $fetch, Logger } from "spell-kit/util"
+import { proto, kebabCase, closestAcrossShadow, $fetch, Logger } from "spell/util"
 ```
 
 One barrel, and every helper by its own name:  there's no namespace object, unlike the server's `SRV`.
@@ -72,7 +72,7 @@ flowchart TB
   generic["generic helpers<br/>@proto @lazy @once · class · string · dom"]
   spell --> reactive --> generic
   ui["Spell UI, the kit's element framework"] -. "one file at a time" .-> generic
-  lang["spell-lang, spell-app"] -- "the whole barrel" --> spell
+  lang["spell-parser, spell-app"] -- "the whole barrel" --> spell
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
@@ -82,23 +82,23 @@ flowchart TB
 _Each layer uses only the ones below it;  Spell UI takes the generic files one by one,
 so nothing above them lands in its bundles._
 
-Its biggest reader by far is the language:  242 of spell-lang's files import the barrel,
+Its biggest reader by far is the language:  242 of spell-parser's files import the barrel,
 207 of them in its `spell` folder, against 14 in spell-app's editor, language server, spaces and command line.
 Spell UI and [the kit's element framework](README-element.md) never touch the barrel at all:
 they take the generic files, and re-export them as their own.
 The code is in [src/util/](src/util/), its tests in [tests/util/](tests/util/),
 and the rules for working on it in [util's AGENTS.md](src/util/AGENTS.md).
 
-Every file also has a name of its own, the package's plus its path under `src/` (`spell-kit/util/reactive/cells`).
+Every file also has a name of its own, the package's plus its path under `src/` (`spell/util/reactive/cells`).
 Use the barrel, except for these:
 
 | Import | Why not the barrel | Who imports it so |
 | --- | --- | --- |
-| `spell-kit/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
-| `spell-kit/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
-| `spell-kit/util/spell/Derivative`, `/spell/Logger` | one class, and nothing else | spell-lang's parser:  its `Rule` and its tokenizer |
-| `spell-kit/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
-| `spell-kit/util/node/json5` | node only:  never through a barrel, so no browser code pulls it in | the tools that write JSON5 (below) |
+| `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
+| `spell/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
+| `spell/util/spell/Derivative`, `/spell/Logger` | one class, and nothing else | spell-parser's parser:  its `Rule` and its tokenizer |
+| `spell/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
+| `spell/util/node/json5` | node only:  never through a barrel, so no browser code pulls it in | the tools that write JSON5 (below) |
 
 ## The generic helpers:  what lodash has no shape for
 
@@ -112,7 +112,7 @@ A class field is set only after the base class's constructor has run.
 So a base class can't read its subclass's defaults, and that catches everybody once:
 
 ```ts
-import { proto } from "spell-kit/util"
+import { proto } from "spell/util"
 
 class Rule {
   declare alias: string
@@ -131,7 +131,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 
 - Nothing is copied per instance:  `Object.keys()` of a `WithProto` is `[]`, of a `WithField`, `["alias"]`.
 - Spell's parser is built on it.
-  The [`print` rule](https://github.com/spell-app/spell-lang/blob/main/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
+  The [`print` rule](https://github.com/spell-app/spell-parser/blob/main/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
   and the five repos' code says `@proto static` over 400 times.
 - The edge:  a `static` field only.
   On an instance field it throws `@proto x: only works on 'static' fields.`
@@ -218,7 +218,7 @@ Two things differ, and the hook showed you the first.
 The decorators make a plain class reactive:
 
 ```ts
-import { prop, state, derived, typedJSON } from "spell-kit/util"
+import { prop, state, derived, typedJSON } from "spell/util"
 
 class Card {
   @prop({ default: "down" }) accessor direction!: "up" | "down" // public:  in the class's schema and its JSON
@@ -381,7 +381,7 @@ try {
   So `MissingResourceError`'s "There was a problem loading this thing." and `AuthenticationError`'s
   "You are not authorized to do this." show only on one you build yourself.
 - The family is left out of the barrel on purpose, and the `spell/` barrel's comment asks whether it should stay so.
-  A caller that names one imports it from `spell-kit/util/spell/ResponseErrors`.
+  A caller that names one imports it from `spell/util/spell/ResponseErrors`.
 
 </details>
 
@@ -408,7 +408,7 @@ so the editor and the command line load a project the same way, from a server or
 `json5Edited()` writes it back with every comment where the person left it:
 
 ```ts
-import { json5Edited } from "spell-kit/util/node/json5"
+import { json5Edited } from "spell/util/node/json5"
 
 json5Edited(`{
   // 4747 unless you say otherwise
@@ -465,8 +465,8 @@ Where a new helper goes, in order:
 
 And when you're in there:
 - The generic files import each other as peers (`./class`), and so do the engine's.
-- `spell/` imports the generic files by their own path (`spell-kit/util/class`) and the engine as
-  `spell-kit/util/reactive`, never through `spell-kit/util`:  that barrel re-exports `spell/`, so it'd be a cycle.
+- `spell/` imports the generic files by their own path (`spell/util/class`) and the engine as
+  `spell/util/reactive`, never through `spell/util`:  that barrel re-exports `spell/`, so it'd be a cycle.
 - A decorator starts its line (`@proto static x = 1` is fine):  the toolchain's pre-pass finds it there,
   and misses the file otherwise.
 - Reactive work is Solid work:  read the Solid 2 rules in full first (below, "More in the docs site").
@@ -516,7 +516,7 @@ server running (`spell server start`, then the URL it prints):
 
 - [README-element.md](README-element.md):  the element framework, which re-exports the generic helpers
   and has a `@state` and `@derived` of its own
-- [spell-lang's README-core.md](https://github.com/spell-app/spell-lang/blob/main/README-core.md):  the runtime compiled Spell runs on,
+- [spell-parser's README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md):  the runtime compiled Spell runs on,
   where the same write-then-read happens in English
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass every decorator on this page goes through
 - [README-server.md](README-server.md):  the page server, whose data files are written through the JSON5 helper

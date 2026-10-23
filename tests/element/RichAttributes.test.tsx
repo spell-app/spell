@@ -2,8 +2,8 @@ import { createSignal, flush } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
 import { onTestFinished, describe, expect, test } from "vite-plus/test"
 
-import { UIComponent, type AttributeSpec, type ComponentVocabulary, type UIComponentClass } from "spell-kit/element"
-import { RichAttributes } from "spell-kit/element/RichAttributes"
+import { UIComponent, type AttributeSpec, type ComponentVocabulary, type UIComponentClass } from "spell/element"
+import { RichAttributes } from "spell/element/RichAttributes"
 
 /**
  * `RichAttributes`:  a function or an object given to a dashed tag's attribute, as Solid hands a plain JSX prop.

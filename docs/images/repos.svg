@@ -1,7 +1,7 @@
 <!-- The kit's box shows five folders on purpose: element-tools and test-helpers are left out (Owen, 2026-10-23). -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="800" height="440" role="img" aria-labelledby="title desc">
   <title id="title">Five repos, one checkout</title>
-  <desc id="desc">The five Spell repos stacked by what they use.  At the top, spell-app uses spell-lang and spell-ui, and spell-epic, beside it, uses spell-ui.  spell-lang, the language in English and Spanish, and spell-ui use the kit, spell-kit, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
+  <desc id="desc">The five Spell repos stacked by what they use.  At the top, spell-app uses spell-parser and spell-ui, and spell-epic, beside it, uses spell-ui.  spell-parser, the language in English and Spanish, and spell-ui use the kit, spell, at the bottom, whose folders are util, toolchain, server, element and cli.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
@@ -39,17 +39,17 @@
   <text class="name" x="620" y="116">spell-epic</text>
   <text class="what" x="620" y="136">epics and sagas</text>
 
-  <!-- spell-lang, spell-ui -->
+  <!-- spell-parser, spell-ui -->
   <rect class="repo" x="90" y="220" width="240" height="60" rx="12"/>
-  <text class="name" x="210" y="246">spell-lang</text>
+  <text class="name" x="210" y="246">spell-parser</text>
   <text class="what" x="210" y="266">the language:  English and Spanish</text>
   <rect class="repo" x="460" y="220" width="240" height="60" rx="12"/>
   <text class="name" x="580" y="246">spell-ui</text>
   <text class="what" x="580" y="266">the ui-* elements, and es-*</text>
 
-  <!-- spell-kit -->
+  <!-- spell -->
   <rect class="kit" x="40" y="320" width="720" height="92" rx="14"/>
-  <text class="name" x="400" y="344">spell-kit</text>
+  <text class="name" x="400" y="344">spell</text>
   <text class="what" x="400" y="361" style="font-size:11.5px">the kit:  under every repo, and the one install</text>
   <rect class="chipbox" x="120" y="374" width="96" height="24" rx="12"/>
   <text class="chip" x="168" y="390">util</text>

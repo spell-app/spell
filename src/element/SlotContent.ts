@@ -1,6 +1,6 @@
 import { onSettled } from "solid-js"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 // Import directly to avoid circular import
 import { state } from "./Reactive"
 

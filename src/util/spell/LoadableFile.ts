@@ -1,4 +1,4 @@
-import { extend } from "spell-kit/util/reactive"
+import { extend } from "spell/util/reactive"
 import { KnownFormat, type KnownFormatMimeType } from "./constants"
 import { $fetch, merge$fetchParms, type $FetchParams, type $FetchRequestParams } from "./$fetch"
 import { Loadable, LoadableProps } from "./Loadable"

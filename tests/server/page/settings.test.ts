@@ -10,7 +10,7 @@ import {
   pageServerRoot,
   pageServerSettings,
   settingsParts
-} from "spell-kit/server/page/settings"
+} from "spell/server/page/settings"
 
 /** Write `json` as `path` under `root`, making folders. */
 function put(root: string, path: string, json: unknown): void {

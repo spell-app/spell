@@ -190,7 +190,7 @@ rule(["packages/spell-element", "packages/spell-solid", "spell-element"], ["src/
 // `cli/`:  the kit's (P13);  the monorepo's `packages/cli/` was spell-app's, much of it in the kit since P13
 rule("cli/src", ["src/cli", "spell-app/src/cli"])
 rule("cli/bin", ["bin"])
-const ANY_CLI = ["spell-app/src/cli", "src/cli", "spell-lang/src/cli", "spell-ui/src/cli", "spell-epic/src/cli"]
+const ANY_CLI = ["spell-app/src/cli", "src/cli", "spell-parser/src/cli", "spell-ui/src/cli", "spell-epic/src/cli"]
 rule(["packages/cli/src", "packages/cli"], ANY_CLI)
 rule("packages/cli/bin", ["bin", "spell-epic/bin", "spell-app/bin"])
 // the kit's tests:  `tests/<folder>/src/` -> `tests/<folder>/`
@@ -212,32 +212,32 @@ rule("util", ["src/util"])
 rule(".claude", ["spell-app/.claude"])
 rule(".vscode", ["spell-app/.vscode"])
 
-// spell-lang:  `<folder>/src/` -> `src/<folder>/`;  py's `ts/` too
+// spell-parser:  `<folder>/src/` -> `src/<folder>/`;  py's `ts/` too
 for (const f of ["parser", "markdown", "core", "spell", "cli"]) {
-  if (f !== "cli") rule([`packages/${f}/src`, `${f}/src`], [`spell-lang/src/${f}`])
-  rule(`spell-lang/${f}/src`, [`spell-lang/src/${f}`])
-  rule(`spell-lang/${f}`, [`spell-lang/src/${f}`])
-  rule(`spell-lang/tests/${f}/src`, [`spell-lang/tests/${f}`])
-  if (f !== "cli") rule(`packages/${f}`, [`spell-lang/src/${f}`])
+  if (f !== "cli") rule([`packages/${f}/src`, `${f}/src`], [`spell-parser/src/${f}`])
+  rule(`spell-parser/${f}/src`, [`spell-parser/src/${f}`])
+  rule(`spell-parser/${f}`, [`spell-parser/src/${f}`])
+  rule(`spell-parser/tests/${f}/src`, [`spell-parser/tests/${f}`])
+  if (f !== "cli") rule(`packages/${f}`, [`spell-parser/src/${f}`])
 }
-rule(["packages/py/ts", "spell-lang/py/ts", "py/ts"], ["spell-lang/src/py"])
-rule(["packages/py/core", "spell-lang/py/core"], ["spell-lang/src/py/core"])
-rule(["packages/py", "spell-lang/py"], ["spell-lang/src/py"])
-rule("spell-lang/tests/py/ts", ["spell-lang/tests/py"])
+rule(["packages/py/ts", "spell-parser/py/ts", "py/ts"], ["spell-parser/src/py"])
+rule(["packages/py/core", "spell-parser/py/core"], ["spell-parser/src/py/core"])
+rule(["packages/py", "spell-parser/py"], ["spell-parser/src/py"])
+rule("spell-parser/tests/py/ts", ["spell-parser/tests/py"])
 // the monorepo's root `tests/<package>/` (and its `src/`)
 rule("tests/ui/src", ["spell-ui/tests"])
 rule("tests/ui/test", ["spell-ui/tests/test-helpers", "spell-ui/tests"])
 rule("tests/brand/src", ["spell-brand/tests"])
 rule("tests/epics/src", ["spell-epic/tests"])
 rule("tests/spaces/src", ["spell-app/tests/spaces"])
-rule("tests/spaces", ["spell-lang/tests/spaces", "spell-app/tests/spaces"])
-rule("tests/cli/src", ["tests/cli", "spell-app/tests/cli", "spell-lang/tests/cli", "spell-ui/tests/cli"])
-for (const f of ["parser", "markdown", "core", "spell", "py"]) rule(`tests/${f}/src`, [`spell-lang/tests/${f}`])
+rule("tests/spaces", ["spell-parser/tests/spaces", "spell-app/tests/spaces"])
+rule("tests/cli/src", ["tests/cli", "spell-app/tests/cli", "spell-parser/tests/cli", "spell-ui/tests/cli"])
+for (const f of ["parser", "markdown", "core", "spell", "py"]) rule(`tests/${f}/src`, [`spell-parser/tests/${f}`])
 for (const f of ["app", "lsp", "page-server"]) rule(`tests/${f}/src`, [`spell-app/tests/${f}`])
 rule("tests/ui", ["spell-ui/tests"])
 rule("tests/brand", ["spell-brand/tests"])
 rule("tests/epics", ["spell-epic/tests"])
-for (const f of ["parser", "markdown", "core", "spell", "py"]) rule(`tests/${f}`, [`spell-lang/tests/${f}`])
+for (const f of ["parser", "markdown", "core", "spell", "py"]) rule(`tests/${f}`, [`spell-parser/tests/${f}`])
 for (const f of ["app", "lsp", "page-server"]) rule(`tests/${f}`, [`spell-app/tests/${f}`])
 
 // spell-app:  `app/src/` -> `src/app/` (`app/` stays:  the app's build folder);  `spaces/src/` -> `src/spaces/` ...
@@ -293,7 +293,7 @@ const GENERIC_NAMES = new Set([
 ])
 
 /** The child repos' folders, by their first path segment:  a moved file is looked for in its own repo. */
-const REPO_FOLDER = /^spell-(?:lang|ui|brand|epic|app)$/
+const REPO_FOLDER = /^spell-(?:parser|ui|brand|epic|app)$/
 
 /** Where kit-relative `old` is today, and how it was found;  `undefined` when it can't be placed. */
 export type MappedPath = { path: string; byName?: boolean }
@@ -329,7 +329,7 @@ export function mapPath(layout: Layout, old: string): MappedPath | undefined {
 }
 
 /** Every child repo's folder, for a file that moved between repos. */
-const REPOS = ["spell-lang", "spell-ui", "spell-brand", "spell-epic", "spell-app"]
+const REPOS = ["spell-parser", "spell-ui", "spell-brand", "spell-epic", "spell-app"]
 
 /** The tab name the link check gives kit-relative `rel`:  `Linker.targetFor()`'s formula. */
 export function targetFor(rel: string): string {

@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { ask, serveHandler, type Served } from "spell-kit/server/test/serve"
+import { SRV } from "spell/server"
+import { ask, serveHandler, type Served } from "spell/server/test/serve"
 
 /** Two folders:  `site/` at `/`, `element/` at `/element/`. */
 const DIR = mkdtempSync(join(tmpdir(), "srv-static-"))

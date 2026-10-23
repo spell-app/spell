@@ -198,7 +198,7 @@ export class ReadmeTest {
 
 /** One example on a page:  its commands and the output its fold says they print. */
 export type ReadmeExample = {
-  /** the page, from the kit's root (`spell-lang/README.md`) */
+  /** the page, from the kit's root (`spell-parser/README.md`) */
   page: string
   /** the `sh` block's first line on the page */
   line: number

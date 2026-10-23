@@ -6,9 +6,9 @@ import { dirname, join } from "node:path"
 import { PassThrough } from "node:stream"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { BundleBuild, componentSetPath, componentSets } from "spell-kit/server/page"
-import { ask } from "spell-kit/server/test/serve"
+import { SRV } from "spell/server"
+import { BundleBuild, componentSetPath, componentSets } from "spell/server/page"
+import { ask } from "spell/server/test/serve"
 
 ////////////////
 // ## Fakes
@@ -66,10 +66,10 @@ describe("BundleBuild", () => {
     // a fake kit in its install:  its `spell`, found by package (`kitSpell()`)
     put(
       root,
-      "node_modules/spell-kit/package.json",
-      JSON.stringify({ name: "spell-kit", exports: { "./package.json": "./package.json" } })
+      "node_modules/spell/package.json",
+      JSON.stringify({ name: "spell", exports: { "./package.json": "./package.json" } })
     )
-    put(root, "node_modules/spell-kit/bin/spell.mjs", "")
+    put(root, "node_modules/spell/bin/spell.mjs", "")
     put(root, "spell-brand/_assets/ui/brand-ui.js", "export const OLD = 1")
     put(root, "guides/page.html", "<p>page</p>")
   })
@@ -98,7 +98,7 @@ describe("BundleBuild", () => {
     new BundleBuild({ root, spawn }).start()
     expect(spawn).toHaveBeenCalledWith(
       process.execPath,
-      [join(root, "node_modules/spell-kit/bin/spell.mjs"), "bundle", "--stale"],
+      [join(root, "node_modules/spell/bin/spell.mjs"), "bundle", "--stale"],
       expect.objectContaining({ cwd: root, detached: true })
     )
   })

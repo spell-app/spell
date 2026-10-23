@@ -8,8 +8,8 @@ import {
   type ComponentVocabulary,
   type DOMElement,
   type UIComponentClass
-} from "spell-kit/element"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+} from "spell/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
  * `ShadowEvents`:  Solid's event delegation inside each element's shadow root leaves nothing behind on the event.

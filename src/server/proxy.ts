@@ -8,7 +8,7 @@ import { request as httpRequest, type IncomingMessage } from "node:http"
 import { connect } from "node:net"
 import type { Duplex } from "node:stream"
 
-import type { Handler } from "spell-kit/server"
+import type { Handler } from "spell/server"
 
 /** Where to forward:  a loopback port, possibly started on demand. */
 export type ProxyTarget = () => number | Promise<number>

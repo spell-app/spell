@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { commandNames, commandSources, commandsCommand, pageNames } from "spell-kit/cli/commands/commandsCommand"
+import { commandNames, commandSources, commandsCommand, pageNames } from "spell/cli/commands/commandsCommand"
 
 /** A fake kit and home folder, written once for every test. */
 const ROOT = mkdtempSync(join(tmpdir(), "commands-kit-"))
@@ -14,9 +14,9 @@ afterAll(() => {
 })
 
 // what marks a kit (`CLI.findCheckout(CLI.KIT_MARKER)`), and lists its child repos
-write(ROOT, "repos.json5", "{ repos: [{ name: 'spell-lang' }, { name: 'spell-ui' }, { name: 'spell-epic' }] }")
+write(ROOT, "repos.json5", "{ repos: [{ name: 'spell-parser' }, { name: 'spell-ui' }, { name: 'spell-epic' }] }")
 write(ROOT, "package.json", {
-  name: "spell-kit",
+  name: "spell",
   spell: { commands: "./cli/commands.ts" },
   scripts: { "/////// SECTION": "", ts: "tsc", server: "node server.mjs" }
 })
@@ -25,12 +25,12 @@ write(
   "cli/commands.ts",
   'const server = spell\n  .command("server")\nserver.command("start")\nspell.command("pony")\n'
 )
-write(ROOT, "spell-lang/package.json", {
-  name: "spell-lang",
+write(ROOT, "spell-parser/package.json", {
+  name: "spell-parser",
   spell: { commands: "./cli/commands.ts" },
   scripts: { test: "x" }
 })
-write(ROOT, "spell-lang/cli/commands.ts", 'spell\n  .command("compile")\n')
+write(ROOT, "spell-parser/cli/commands.ts", 'spell\n  .command("compile")\n')
 write(ROOT, "spell-ui/package.json", { name: "spell-ui" })
 write(ROOT, "spell-ui/site/package.json", { scripts: { dev: "astro dev" } })
 // the `epic` command's verbs and the plugin's skills:  spell-epic's
@@ -62,7 +62,7 @@ describe("commandSources()", () => {
       "/session",
       "root server",
       "root ts",
-      "spell-lang test",
+      "spell-parser test",
       "ui-site dev"
     ])
   })
@@ -95,9 +95,9 @@ describe("commandNames()", () => {
 describe("pageNames()", () => {
   test("every name in any surface's cell, one or many", () => {
     const names = pageNames({
-      families: [{ rows: [{ cli: { names: "spell compile" }, yarn: { names: ["root ts", "spell-lang test"] } }, {}] }]
+      families: [{ rows: [{ cli: { names: "spell compile" }, yarn: { names: ["root ts", "spell-parser test"] } }, {}] }]
     })
-    expect([...names].sort()).toEqual(["root ts", "spell compile", "spell-lang test"])
+    expect([...names].sort()).toEqual(["root ts", "spell compile", "spell-parser test"])
   })
 })
 

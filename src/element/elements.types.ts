@@ -1,5 +1,5 @@
 /**
- * Shared types for `spell-kit/element`, what makes a custom element on Solid:
+ * Shared types for `spell/element`, what makes a custom element on Solid:
  * - how a `ComponentVocabulary` becomes typed, converted property values (`AttributeValues`)
  * - what the pieces of `UIComponent` hand each other:  `ElementSetup`, `ResolvedAttribute`, the owner context's
  * - the settings a component set's runtime hands spell-element as it loads (`SpellSolidSettings`)
@@ -8,7 +8,7 @@
  *   so it NEVER loads a class module, the DOM or Solid.
  */
 
-import type { E } from "spell-kit/element"
+import type { E } from "spell/element"
 
 ////////////////
 // ## Class builder
@@ -414,7 +414,7 @@ export type ElementSetup = {
  * - The names are the RUNTIME's:  a component set adds its own by augmenting this interface, so
  *   `elementSetup.animation` is checked against them.
  *   - Spell UI's are Fomantic's (`UIT.Animations`, `components.types.ts`):
- *     `declare module "spell-kit/element/elements.types" { interface ElementAnimations extends Record<UIT.Animation, true> {} }`
+ *     `declare module "spell/element/elements.types" { interface ElementAnimations extends Record<UIT.Animation, true> {} }`
  * - `none` is every set's:  no motion.
  */
 export interface ElementAnimations {

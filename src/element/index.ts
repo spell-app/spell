@@ -1,5 +1,5 @@
 /**
- * Barrel for `spell-kit/element`:  what makes a custom element on Solid, for every component set
+ * Barrel for `spell/element`:  what makes a custom element on Solid, for every component set
  * (Spell UI's, the epics', the app's, the brand's, a space's).
  * - `UIComponent`, the COMPONENT base:  one instance per element, its `render()` returns JSX
  * - `DOMElement`, the DOM element base
@@ -10,9 +10,9 @@
  * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell-ui/core` loads)
  * - the vocabulary's types (`ComponentVocabulary` ...)
  * - `timing`:  when to run something (`afterSolidUpdate()`, `after()` ...)
- * - `spell-kit/util`'s GENERIC helpers, as `spell-ui/util` has them (`@proto`, `@lazy`, `camelCase()` ...):
+ * - `spell/util`'s GENERIC helpers, as `spell-ui/util` has them (`@proto`, `@lazy`, `camelCase()` ...):
  *   a component file reads them through `E` too (`@E.proto`)
- * - It imports only `spell-kit/util`'s generic files and Solid:  NEVER Spell UI, or any other package.
+ * - It imports only `spell/util`'s generic files and Solid:  NEVER Spell UI, or any other package.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIComponent.define`);
  *   the HMR plugin loads it into each component barrel (the kit's `src/element-tools/HotElements.ts`).
  * - NOTE: `ShadowEvents` (Solid's events kept from leaking out of shadow roots) is left out too:
@@ -26,11 +26,11 @@
  *   Spell UI's core bundle carries it, and a component pack reads it from there (`SpellUI.packModules`).
  */
 
-export * from "spell-kit/util/class"
-export * from "spell-kit/util/decorators"
-export * from "spell-kit/util/dom"
-export * from "spell-kit/util/string"
-export * from "spell-kit/util/util.types"
+export * from "spell/util/class"
+export * from "spell/util/decorators"
+export * from "spell/util/dom"
+export * from "spell/util/string"
+export * from "spell/util/util.types"
 
 export * from "./vocabulary.types"
 export * from "./elements.types"
@@ -48,6 +48,6 @@ export * from "./SlotContent"
 
 /**
  * The package namespace (WWOD §4):
- * `import { E } from "spell-kit/element"`, then `E.UIComponent`, `@E.state` (`AGENTS.md`).
+ * `import { E } from "spell/element"`, then `E.UIComponent`, `@E.state` (`AGENTS.md`).
  */
 export * as E from "."

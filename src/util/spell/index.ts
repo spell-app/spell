@@ -1,10 +1,10 @@
 /**
- * Barrel for `spell-kit/util/spell` -- spell's own utilities, flattened into `spell-kit/util` by `../index.ts`.
+ * Barrel for `spell/util/spell` -- spell's own utilities, flattened into `spell/util` by `../index.ts`.
  * - Grouped below by rough concern: constants, app plumbing, language helpers, fetch/observable, DOM, tasks.
  * - A sub-folder, not beside the generic helpers:  `ui` is published and bundles the generic files, and these pull in
  *   lodash, `chalk` and `pluralize`.  `string.ts` and `DOM.ts` also share a name with
  *   the generic `../string.ts` / `../dom.ts` (and macOS is case-insensitive).
- * - NOTE: files here import the generic helpers by deep path (`spell-kit/util/class`), never the `spell-kit/util` barrel:
+ * - NOTE: files here import the generic helpers by deep path (`spell/util/class`), never the `spell/util` barrel:
  *   it re-exports this folder, which would be a cycle.
  * - NOTE: `ResponseErrors.ts` is deliberately NOT re-exported here:
  *   its error classes (`ResponseError`, `MissingResourceError`, etc) are consumed directly

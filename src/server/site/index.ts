@@ -1,10 +1,10 @@
 /**
- * `spell-kit/server/site` barrel:  browser code every page of the site shares -- the site header and the section editor.
- * - Opt-in, NOT in `spell-kit/server`'s barrel:  browser code (DOM), while the barrel is node's.
+ * `spell/server/site` barrel:  browser code every page of the site shares -- the site header and the section editor.
+ * - Opt-in, NOT in `spell/server`'s barrel:  browser code (DOM), while the barrel is node's.
  * - Importing defines nothing:  call `defineSite()`.
  *   spell-epic's docs bundle (`spell-ui.entry.js`), Spell UI's site bundle (`site/_src/site.ts`) and the brand's do.
  */
-import { SectionEditor, SiteHeader, type SiteTab } from "spell-kit/server/site"
+import { SectionEditor, SiteHeader, type SiteTab } from "spell/server/site"
 
 export * from "./site.types"
 export * from "./logoMark"

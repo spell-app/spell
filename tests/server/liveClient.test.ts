@@ -2,7 +2,7 @@ import { Script } from "node:vm"
 
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /** A Mac, the key going to the page itself (no field). */
 const MAC = { apple: true }
