@@ -27,13 +27,20 @@ const MIN_TITLE_PX = 50
  * - `groups`:  `{ element, id, label, glyph }` each, the outline's top-level entries
  * - `badgesOf(element)`:  its badges (`[kind, number, words]`, `toolbarItem()`);  none:  `[]`
  * - the mark:  an item's number for an item (`Q3 · When?` shows 3, coloured by the section's `data-state`:  a
- *   details page's questions, `<epic-ask>`);  else its `<ui-icon>`;  else its number (`2.`);  else its first letter
+ *   details page's questions, `<epic-ask>`);  else its `<ui-icon>`;  else its number (`2.`);  else its access letter,
+ *   shown only while the titles are hidden (`spell-toolbar-icons`)
  * - the title without its number (`2. Markup` is `Markup`), unless it's an item's
+ * - its ACCESS LETTER (Owen, 2026-10-23, epic `debut`:  "the `T` in types could be bold underline black"):
+ *   unique on the toolbar (`accessLetters()`), drawn IN its title (bold, underlined, the text's colour);
+ *   pressing it jumps there as a click does (`wireAccessLetters()`)
  */
 export function titledItems(groups, badgesOf) {
-  return groups.map(({ element, id, label, glyph }) => {
+  const titles = groups.map(({ label }) => (ITEM_ID.test(label) ? label : shortLabel(label)))
+  const letters = accessLetters(titles)
+  return groups.map(({ element, id, label, glyph }, index) => {
     // an item id first in the label (`Q3 · When?`) says more than any icon:  every question's would be the same
-    const itemNumber = label.match(/^[A-Z](\d+)\b/)?.[1]
+    const itemNumber = label.match(ITEM_ID)?.[1]
+    const number = label.match(/^\d+/)?.[0]
     return toolbarItem({
       id,
       tip: label,
@@ -42,12 +49,49 @@ export function titledItems(groups, badgesOf) {
         ? el("b", { slot: "icon", class: "spell-toolbar-number" }, itemNumber)
         : glyph
           ? undefined
-          : el("b", { slot: "icon" }, (label.match(/^\d+/) ?? [label.charAt(0)])[0]),
-      title: itemNumber ? label : shortLabel(label),
+          : number
+            ? el("b", { slot: "icon" }, number)
+            : el("b", { slot: "icon", class: "spell-toolbar-letter" }, (letters[index] ?? label.charAt(0)).toUpperCase()),
+      title: titles[index],
+      letter: letters[index],
       state: element.dataset.state,
       badges: badgesOf(element)
     })
   })
+}
+
+/** An item's id first in a section's label:  `Q3 · When?`. */
+const ITEM_ID = /^[A-Z](\d+)\b/
+
+/**
+ * Each title's ACCESS LETTER, unique among them, lower case;  `undefined` for a title with no free letter.
+ * - its title's first letter, else the next letter IN its title not taken yet:
+ *   `Types` t, `Groups` g, `Content` c, `States` s, `Variations` v, `Group Variations` r
+ * - first come, first served, in toolbar order;  letters only (a-z, accents folded), never a digit or a space
+ * - pure:  no DOM
+ */
+export function accessLetters(titles) {
+  const taken = new Set()
+  return titles.map((title) => {
+    const letters = title
+      .normalize("NFD")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "")
+    const letter = [...letters].find((candidate) => !taken.has(candidate))
+    if (letter) taken.add(letter)
+    return letter
+  })
+}
+
+/**
+ * A title with its access letter marked:  the first occurrence of `letter` in it, any case, as a
+ * `<u class="spell-toolbar-key">`;  the plain title when `letter` is missing or not in it.
+ */
+function titleWithKey(title, letter) {
+  const at = letter ? [...title.normalize("NFD")].findIndex((char) => char.toLowerCase() === letter) : -1
+  if (at < 0) return [title]
+  const chars = [...title.normalize("NFD")]
+  return [chars.slice(0, at).join(""), el("u", { class: "spell-toolbar-key" }, chars[at]), chars.slice(at + 1).join("")]
 }
 
 /**
@@ -64,17 +108,59 @@ export function titledItems(groups, badgesOf) {
  */
 export function toolbarMenu(items, { titled }) {
   const kept = removeToolbar()
-  const toolbar = el("ui-menu", {
+  // a titled toolbar is Spell UI's `<ui-toolbar>` where the page has it:  `‹` / `›` buttons while its items overflow
+  const tag = titled && customElements.get("ui-toolbar") ? "ui-toolbar" : "ui-menu"
+  const toolbar = el(tag, {
     class: titled ? "spell-toolbar spell-toolbar-titled" : "spell-toolbar",
     secondary: true,
     "aria-label": "Sections",
     "data-spell-added": true
   })
   toolbar.append(...items, ...kept)
+  if (titled) wireAccessLetters()
   new MutationObserver((changes) => {
     for (const { target } of changes) if (target.hasAttribute("selected")) scrollIntoRow(target)
   }).observe(toolbar, { attributeFilter: ["selected"], subtree: true })
   return toolbar
+}
+
+/**
+ * A titled toolbar's ACCESS LETTERS (Owen, 2026-10-23, epic `debut`):  a letter pressed on its own jumps to the item
+ * whose `data-key` it is, as clicking it does (the link inside the item is clicked).
+ * - once per page:  it finds the toolbar showing at the time, so a toolbar built again needs nothing
+ * - left alone:  any modifier (Cmd / Ctrl + K is the jump dialog), a key held down, typing (a field, an editable box),
+ *   an open dialog, a focused control that takes keys of its own (a menu, a dropdown, a live example), `/` (the site's
+ *   search) and every key that isn't a letter
+ */
+function wireAccessLetters() {
+  if (accessLettersWired) return
+  accessLettersWired = true
+  document.addEventListener("keydown", (event) => {
+    if (event.metaKey || event.ctrlKey || event.altKey || event.repeat || event.isComposing || event.defaultPrevented)
+      return
+    if (!/^[a-z]$/i.test(event.key) || typingIn(event)) return
+    if (document.querySelector("dialog[open], ui-modal:not([hidden])")) return
+    const toolbar = document.querySelector(".spell-toolbar-titled")
+    const focused = document.activeElement
+    if (!toolbar || (focused && focused !== document.body && !toolbar.contains(focused) && takesKeys(focused))) return
+    const item = toolbar.querySelector(`:scope > [data-key="${event.key.toLowerCase()}"]`)
+    const link = item?.shadowRoot?.querySelector('[part~="item"]')
+    if (!link) return
+    event.preventDefault()
+    link.click()
+  })
+}
+
+/** The page's access letters are listened for (`wireAccessLetters()`). */
+let accessLettersWired = false
+
+/** A focused element that takes letters itself:  a control with a role or a custom element of its own. */
+function takesKeys(element) {
+  return element.matches(
+    '[role="menu"], [role="menubar"], [role="listbox"], [role="combobox"], [role="grid"], [role="tree"], ' +
+      '[role="slider"], [role="tablist"], ui-dropdown, ui-select, ui-search, ui-calendar, ui-menu, ui-tabs, ' +
+      "ui-docs-example *, ui-docs-example"
+  )
 }
 
 /**
@@ -85,7 +171,7 @@ export function toolbarMenu(items, { titled }) {
  *   the pointer through (`spell-toolbar.css`), so it shows in VS Code too;  the badges say theirs in it, and to a
  *   screen reader
  */
-export function toolbarItem({ id, tip, glyph, mark, title, state, badges }) {
+export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges }) {
   const said = [tip, ...badges.map(([, , words]) => words)].join(" · ")
   const item = el(
     "ui-item",
@@ -96,10 +182,12 @@ export function toolbarItem({ id, tip, glyph, mark, title, state, badges }) {
       icon: glyph,
       title: said,
       "aria-label": said,
+      "aria-keyshortcuts": letter?.toUpperCase(),
+      "data-key": letter,
       "data-state": state
     },
     mark,
-    title && el("span", { class: "spell-toolbar-label" }, title),
+    title && el("span", { class: "spell-toolbar-label" }, ...titleWithKey(title, letter)),
     ...badges.map(([kind, number]) =>
       el("ui-label", { class: `spell-toolbar-count ${kind}`, circular: true, size: "mini" }, String(number))
     )
@@ -133,7 +221,8 @@ export function fitTitles(toolbar) {
   const row = toolbarRow(toolbar)
   const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
   toolbar.classList.remove("spell-toolbar-icons")
-  if (!row || !items.length) return
+  // a `<ui-toolbar>` keeps its titles and scrolls, its `‹` / `›` buttons showing what's past either end
+  if (!row || !items.length || toolbar.localName === "ui-toolbar") return
   const style = getComputedStyle(row)
   const others = [...toolbar.children]
     .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)

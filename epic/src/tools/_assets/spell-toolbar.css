@@ -60,7 +60,7 @@
  * - the pointer lands on the item's link, which carries its tooltip (`titleInside()`):  everything inside it lets the
  *   pointer through ("TOOLTIPS that show")
  */
-ui-menu.spell-toolbar {
+:is(ui-menu, ui-toolbar).spell-toolbar {
   --ui-menu-secondary-inline-margin: 0;
   --ui-menu-secondary-item-margin: 0;
   --ui-menu-secondary-item-padding: 0 7px;
@@ -79,7 +79,25 @@ ui-menu.spell-toolbar {
   flex: 1 1 auto;
   min-width: 0;
 }
-ui-menu.spell-toolbar::part(menu) {
+/*
+ * A TITLED toolbar takes a theme's BAR look when it has one (the `--ui-bar-*` tokens;  fruity's:  a grey track hugging
+ * the buttons, the current one a raised white key, as its tab bars);  without them, the ivory pills above
+ */
+:is(ui-menu, ui-toolbar).spell-toolbar-titled {
+  --ui-menu-secondary-item-padding: var(--ui-bar-item-padding, 0 7px);
+  --ui-menu-secondary-item-radius: var(--ui-bar-item-radius, 999px);
+  --ui-menu-secondary-hover-background: var(--ui-bar-hover-background, var(--spell-rail-hover));
+  --ui-menu-secondary-active-background: var(--ui-bar-active-background, var(--spell-rail-selected));
+  --ui-menu-active-shadow: var(--ui-bar-active-shadow, none);
+}
+:is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+  width: var(--ui-bar-track-width, auto);
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--ui-bar-track, none);
+  border-radius: var(--ui-bar-track-radius, 0);
+}
+:is(ui-menu, ui-toolbar).spell-toolbar::part(menu) {
   display: flex;
   gap: 1px;
   min-height: 0;
@@ -141,7 +159,7 @@ ui-menu.spell-toolbar::part(menu) {
   color: var(--spell-state-replied-on);
 }
 /* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
-ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
+:is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
   gap: 6px;
 }
 .spell-toolbar:not(.spell-toolbar-titled) > ui-item::part(item) {
@@ -199,13 +217,22 @@ ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
 
 /* ## A titled toolbar's buttons (a guide's, Epic UI's):  each its mark and its title */
 /* the first button's mark lines up with the column's text (a button's own padding:  7px) */
-ui-menu.spell-toolbar-titled::part(menu) {
-  padding: 3px calc(var(--_out, 16px) - 7px);
+/* a theme's track (`--ui-bar-tracked: 1`):  it sits in the column, inside the band, a little padding round the keys */
+:is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+  margin: calc(5px * var(--ui-bar-tracked, 0)) calc(var(--_out, 16px) * var(--ui-bar-tracked, 0));
+  padding: var(--ui-bar-track-padding, 3px calc(var(--_out, 16px) - 7px));
 }
 .spell-toolbar-titled > ui-item::part(item) {
   flex: 0 1 auto;
   min-width: 0;
   gap: 10px;
+}
+/* a `<ui-toolbar>` scrolls instead:  every title whole, the `‹` / `›` buttons showing what's past either end */
+ui-toolbar.spell-toolbar-titled > ui-item::part(item) {
+  flex: none;
+}
+ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
+  overflow: visible;
 }
 /* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
 .spell-toolbar-icons > ui-item::part(item) {
@@ -219,6 +246,20 @@ ui-menu.spell-toolbar-titled::part(menu) {
   text-overflow: ellipsis;
 }
 .spell-toolbar-icons .spell-toolbar-label {
+  display: none;
+}
+/*
+ * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, underlined, the text's own colour;  the item's letter
+ * mark (a section with no icon) only while the titles are hidden, so the letter never shows twice
+ */
+.spell-toolbar-key {
+  font-weight: 700;
+  color: var(--ui-text-dark, currentColor);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item > b.spell-toolbar-letter {
   display: none;
 }
 .spell-toolbar > ui-item > b[slot="icon"] {
@@ -329,7 +370,7 @@ ui-sticky.spell-site-toolbar::part(sticky) {
   z-index: calc(var(--ui-z-sticky, 10) + 1);
   margin-block: 0 1.5em;
 }
-.spell-site-toolbar > ui-menu.spell-toolbar {
+.spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: var(--site-gutter, 3em);
   margin-inline: calc(-1 * var(--_out));
   background: var(--spell-rail-fill);
@@ -338,8 +379,12 @@ ui-sticky.spell-site-toolbar::part(sticky) {
     0 1px 0 var(--spell-rail-edge);
   backdrop-filter: var(--ui-bar-filter, none);
 }
+/* a `<ui-toolbar>`'s own box fills the band (the menu's host has a box of its own already) */
+.spell-site-toolbar > ui-toolbar.spell-toolbar {
+  display: block;
+}
 @media (max-width: 991.98px) {
-  .spell-site-toolbar > ui-menu.spell-toolbar {
+  .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
     --_out: 1em;
   }
 }

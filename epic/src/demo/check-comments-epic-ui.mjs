@@ -401,7 +401,7 @@ async function checkToolbar(page, name, held) {
   const bar = await page.evaluate(() => {
     const article = document.querySelector("main .site-article")
     const sections = [...article.querySelectorAll(":scope > ui-section[id]")].map((each) => each.id)
-    const toolbar = article.querySelector(":scope > ui-sticky.site-sticky-bar > ui-menu.spell-toolbar")
+    const toolbar = article.querySelector(":scope > ui-sticky.site-sticky-bar > :is(ui-menu, ui-toolbar).spell-toolbar")
     const items = [...(toolbar?.querySelectorAll(":scope > [data-rail]") ?? [])].map((each) => each.dataset.rail)
     const bullhorn = toolbar?.querySelector(":scope > .spell-toolbar-waiting")
     return {
