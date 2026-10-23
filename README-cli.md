@@ -572,6 +572,7 @@ each language pack registers every rule again, with its own words.
 | --- | --- |
 | `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
 | `spell lang translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
+| `spell lang translate-time [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -584,6 +585,7 @@ each language pack registers every rule again, with its own words.
 | `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
+| `--cold` | for timing:  starts from nothing worked out before (below, "Timing it");  needs `--out` |
 
 - It says how long each pass took, and each call to Claude:
   the types in one, the other names in up to 6 at the same time, one more for any name it couldn't read
@@ -606,6 +608,50 @@ each language pack registers every rule again, with its own words.
   and a style sheet's selectors with them;  the project's own drawable things follow its types' new names.
 - A project it imports keeps its own words (`increment el contador`):
   the other language's grammar reads them as the import declares them.
+
+</details>
+
+#### Timing it
+
+A translation usually starts from lists earlier runs worked out, so a second run is quicker than the first
+without saying why.
+- Those lists:
+  - the language's shared glossary
+  - the project's own dictionary, `<Project>.<lang>.names.json5`
+  - with `--update`, the record of each fix-up, `<Project>.<lang>.translated.json5`
+  - with `--seed`, a person's translation
+- `--cold` uses none of them, whatever is on disk:  every name is asked for, every fix-up made again.
+  - It writes only into `--out`, its dictionary and record too:  never the project's folder, never the glossary.
+  - So it needs `--out`, and refuses `--update`, `--seed` and `--learn`.
+- Every report says which it started from, e.g. `pre-calculated:  none (--cold)`,
+  or `pre-calculated:  the Spanish glossary (109 names), the project's dictionary (88 names)`.
+
+`spell lang translate-time` does the timing for you.
+- Each run copies the project to a scratch folder of its own (without its dictionary and record), translates it,
+  and deletes the folder, even when the run fails.
+- With no projects, it times Solitaire and todos-form-based, the two the numbers above were measured on.
+- Then a table for each project, mode and tier:  the min, median and max over its runs, of
+  - each pass's time, and the calls to Claude
+  - the problems left, lint's, and lines still `TODO`
+  - the tests passed, and statements with the same shape as their English
+  - how many of the names Claude drafted are the same as a person's translation, where there is one
+    (Solitaire's is Solitario)
+
+<details>
+<summary>Its options</summary>
+
+| Option | What it does |
+| --- | --- |
+| `--to <lang>` | the language, e.g. `es` |
+| `--runs <count>` | runs of each project, mode and tier (default 1) |
+| `--effort <tiers>` | the tiers to compare, e.g. `fast,balanced` (default `balanced`) |
+| `--mode <modes>` | what each run starts from (default `cold,glossary`):  `cold` (`--cold`), `glossary` (the shared glossary only, as a project translated for the first time), `update` (translated, one English comment changed, then `--update`:  only that run timed) |
+| `--reference <project>` | a person's translation of the one project timed, to compare names with |
+| `--json <file>` | every run's numbers and the table, for comparing over time |
+
+- A run that fails says why, and the rest still run;  it exits 1 if any failed.
+- Its work is spell-app's (it finds the projects, and translates each copy as `spell lang translate` does),
+  then `spell-lang`'s `translateTimes.ts`.
 
 </details>
 
