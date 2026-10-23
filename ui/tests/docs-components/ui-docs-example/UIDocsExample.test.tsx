@@ -1,4 +1,4 @@
-import { describe, expect, it, onTestFinished } from "vite-plus/test"
+import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -97,7 +97,7 @@ describe("<ui-docs-example> code pane", () => {
     expect(toggleOf(host).getAttribute("aria-expanded")).toBe("true")
   })
 
-  it("toggles with the code button:  `ui-toggle`, the reflected `code`, frame on and off", async () => {
+  it("toggles with the code button:  `ui-toggle`, the reflected `code`, frame on and off, the code rolling closed", async () => {
     const { host } = await render(`<ui-docs-example><ui-button>A</ui-button></ui-docs-example>`)
     const events: boolean[] = []
     host.addEventListener("ui-toggle", (event) => events.push((event as CustomEvent<{ open: boolean }>).detail.open))
@@ -116,7 +116,9 @@ describe("<ui-docs-example> code pane", () => {
     await ElementFixture.settle(host)
     expect(events).toEqual([true, false])
     expect(host.hasAttribute("code")).toBe(false)
-    expect(codeOf(host)).toBeNull()
+    // still drawn while it rolls closed, then gone
+    expect(codeOf(host)).not.toBeNull()
+    await vi.waitFor(() => expect(codeOf(host)).toBeNull())
   })
 
   it("is never framed when `bare`", async () => {

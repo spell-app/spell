@@ -27258,6 +27258,10 @@
           "description": "The code pane is open."
         },
         {
+          "name": "code-shown",
+          "description": "The code pane is drawn:  open, or still rolling closed."
+        },
+        {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
         },
