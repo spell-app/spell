@@ -138,26 +138,31 @@ export const TEMPLATE_TAGS = new Set(["css"])
 
 /**
  * The page's name for attribute `name` of element `tag`, as both writers write it.
- * - `changes`:  is its value one that can change, or an object?
+ * - `holdsObject`:  may its value hold an object (`ProgramWriter.mayHoldObject()`)?
  * - `className` => `class`, `htmlFor` => `for`
  * - a camelCase attribute of an HTML tag, lowercased:  `colSpan` => `colspan`
- * - on a tag with a dash (`<ui-form>`), a value that can change, or an object, is a PROPERTY, `prop:value`:
- *   an attribute holds only text.
- *   A handler (`onClick`), a dashed name (`aria-label`) and `ATTRIBUTES_ONLY` stay attributes.
+ * - on a tag with a dash (`<ui-form>`), a value that may hold an object is a PROPERTY,
+ *   `prop:value`:  an attribute holds only text, and `prop:` keeps it out of server-rendered HTML.
+ *   - Text, a number or yes / no that can change stays a plain name, `selected={...}`:
+ *     our elements take it as their attribute, and a server render shows it (epic `solid-17`, J12 B).
+ *   - A handler (`onClick`), a dashed name (`aria-label`) and `ATTRIBUTES_ONLY` stay attributes.
  * - Decided when it compiles.
  *   Before epic `output-targets` P20, compiled javascript drew with `@spell/core`'s `element()` (now deprecated),
  *   which decided it as it drew.
  */
-export function attributeName(tag: string, name: string, changes: boolean): string {
+export function attributeName(tag: string, name: string, holdsObject: boolean): string {
   if (name === "className") return "class"
   if (name === "htmlFor") return "for"
   if (tag.includes("-")) {
     const isProperty = !name.startsWith("on") && !name.includes("-") && !ATTRIBUTES_ONLY.has(name)
-    return isProperty && changes ? `prop:${name}` : name
+    return isProperty && holdsObject ? `prop:${name}` : name
   }
   if (!name.startsWith("on") && /\p{Ll}\p{Lu}/u.test(name)) return name.toLowerCase()
   return name
 }
+
+/** The kinds of value an attribute holds as it is, as `ProgramWriter.kindOf()` says them:  see `attributeName()`. */
+export const PLAIN_KINDS: ReadonlySet<string> = new Set(["text", "number", "choice"])
 
 /** What stays an attribute on a tag with a dash, whatever its value:  see `attributeName()`. */
 export const ATTRIBUTES_ONLY = new Set(["class", "className", "style", "id", "slot", "part"])

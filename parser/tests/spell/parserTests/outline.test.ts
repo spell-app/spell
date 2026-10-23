@@ -838,7 +838,8 @@ describe("outline style", () => {
       '\t- its "caption" is: <span>[rank] of [suit], [[face down]]</span>'
     ]
     const js = compile(lines)
-    expect(js).toContain('{ "prop:source": () => `images/${this.rank}-of-${this.suit}.png` }')
+    // text:  a plain name (an object would be `prop:`)
+    expect(js).toContain("{ source: () => `images/${this.rank}-of-${this.suit}.png` }")
     expect(js).toContain("return `the ${this.rank} of ${this.suit}`")
     expect(js).toContain("`${this.rank} of ${this.suit}, [face down]`")
     expect(runSpell([...lines, 'the card is a new card with rank = 2, suit = "spades"'])("card")).toMatchObject({

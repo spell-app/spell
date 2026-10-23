@@ -1216,8 +1216,8 @@ export class TSWriter extends JSWriter {
 
   /**
    * `name="text"` or `name={value}`, by the page's names, as compiled javascript's `h()` calls name them:
-   * - `class`, `for`, `colspan`;  `prop:value={...}` on a `<ui-*>` tag, for a value that can change:
-   *   see `attributeName()`, which both writers share
+   * - `class`, `for`, `colspan`;  `prop:value={...}` on a `<ui-*>` tag for a value that may hold an object,
+   *   a plain name for text, a number or yes / no:  see `attributeName()`, which both writers share
    * - a handler as an arrow, `onClick={() => autoPlay()}`;  one the drawing shares by its name, `onClick={click}`
    * - no value:  bare on an HTML tag (`hidden`), `{true}` on a `<ui-*>` tag
    * - `undefined` for an attribute that didn't parse:  its error is in the program's parse errors
@@ -1225,7 +1225,7 @@ export class TSWriter extends JSWriter {
   jsxAttribute(tag: string, attribute: P.ASTJSXAttribute): string | undefined {
     const { name, value } = attribute
     if (!value && attribute.error) return undefined
-    const key = attributeName(tag, name, !!value && !isFixedValue(value))
+    const key = attributeName(tag, name, this.mayHoldObject(attribute.propValue))
 
     // bare, as HTML writes it (`hidden`);  a `<ui-*>` tag's bare attribute would ask for an icon called `true`
     if (!value) return tag.includes("-") ? `${key}={true}` : key
