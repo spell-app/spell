@@ -393,12 +393,12 @@ export class JSWriter extends ProgramWriter {
   }
 
   /**
-   * Spell's `is` / `is not` as a person writes it in javascript -- `undefined` to keep its forgiving `==`:
+   * Spell's `is` / `is not` as a person writes it in javascript -- `undefined` to write it by `OPERATORS`:
    * - a choice compared to yes or no:  bare, `pile.droppable`, `!pile.droppable` (Q39)
-   * - nothing:  `=== undefined` / `!== undefined`, as spell's nothing is `undefined`
-   * - both sides' kinds known and alike (text, numbers, choices, one class):
-   *   `===` / `!==`, which then means the same -- `this.operator === "+"`, `this.value === card.value + 1`
-   * - where they aren't, `"2"` is `2` in spell:  `==`
+   * - else `===` / `!==`, by `OPERATORS`:  spell knows what each side is, so `is` means the same thing exactly
+   *   (Owen, 2026-10-23, epic `spanish` P28:  "I think we can move to `===` for is now that we have types");
+   *   it was a forgiving `==` where the two sides' kinds weren't known alike, `"2"` was `2`
+   * - nothing is `undefined`:  `=== undefined` / `!== undefined`
    */
   comparison(node: P.ASTInfixExpression): string | undefined {
     const { operator, lhs, rhs } = node
@@ -409,16 +409,7 @@ export class JSWriter extends ProgramWriter {
     if (yesOrNo instanceof P.ASTBooleanLiteral && this.kindOf(value) === "choice") {
       return yesOrNo.value !== isNot ? this.bare(value) : `!${this.tight(value)}`
     }
-    const strict = isNot ? "!==" : "==="
-    const isNothing = (it: P.ASTExpression) => unwrapped(it) instanceof P.ASTNothingLiteral
-    if (isNothing(lhs) || isNothing(rhs))
-      return `${this.operand(lhs, operator, "lhs")} ${strict} ${this.operand(rhs, operator, "rhs")}`
-    const kind = this.kindOf(lhs)
-    const other = this.kindOf(rhs)
-    // two of the project's things:  `==` and `===` mean the same for objects
-    const areThings = !!kind && !!other && this.project.isClass(kind) && this.project.isClass(other)
-    if (!areThings && (!kind || kind !== other || kind === "list" || kind === "array")) return undefined
-    return `${this.operand(lhs, operator, "lhs")} ${strict} ${this.operand(rhs, operator, "rhs")}`
+    return undefined
   }
 
   /**
@@ -861,7 +852,7 @@ export class JSWriter extends ProgramWriter {
       })
       const args = [...(method.args ?? [])]
       // by its written name:  a parameter that steps aside is `position_`
-      while (args.length && !new RegExp(`\\b${this.variableName(args.at(-1)!)}\\b`).test(body)) args.pop()
+      while (args.length && !jsText.mentions(body, this.variableName(args.at(-1)!))) args.pop()
       const params = args.map((arg, index) =>
         index === 0 && payload ? `${this.variableName(arg)}: ${payload}` : this.arrowParam(arg)
       )
@@ -1458,14 +1449,14 @@ export class JSWriter extends ProgramWriter {
 
   /**
    * Javascript for each infix operator's meaning (`P.ASTOperator`).
-   * - `equals` is `==`, not `===`:  spell's `is` is forgiving, `"2"` is `2`
-   *   -- unless both sides are alike, see `comparison()`.
+   * - `equals` is `===`:  spell's `is` means the same thing exactly (epic `spanish` P28;  `==` before)
+   *   -- a choice compared to yes or no is bare, see `comparison()`.
    */
   static OPERATORS: Record<P.ASTOperator, string> = {
     and: "&&",
     or: "||",
-    equals: "==",
-    "not equals": "!=",
+    equals: "===",
+    "not equals": "!==",
     "exactly equals": "===",
     "not exactly equals": "!==",
     "less than": "<",

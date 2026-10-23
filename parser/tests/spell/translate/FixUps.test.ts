@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { SP } from "spell-lang/spell"
 import { FixUps, type FixUpFile } from "spell-lang/spell/translate/FixUps"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
-import type { ClaudeRunner } from "spell-lang/spell/translate/translate.types"
+import type { ClaudeOptions, ClaudeRunner } from "spell-lang/spell/translate/translate.types"
 
 /**
  * One round of fix-ups (epic `spanish` P25):  the lines asked about, shown in context, and what `claude` answers
@@ -58,12 +58,78 @@ describe("FixUps:  each wrong line, in context, one call a round", () => {
     ])
   })
 
-  test("an answer that isn't JSON fixes nothing, and says so", async () => {
-    const { fixUps } = fixUpsAnswering("Sorry")
+  test("asks for JSON of one shape, the glossary in the system prompt's context", async () => {
+    const options: ClaudeOptions[] = []
+    const run: ClaudeRunner = (_prompt, given = {}) => {
+      options.push(given)
+      return Promise.resolve('{ "fixes": [] }')
+    }
+    const fixUps = new FixUps({ run, names: NAMES, glossary: "es:  `es` is `is`" })
+    await fixUps.round([{ path: "/Carta.es.spell", line: 14, why: [] }], FILES)
+    expect(options[0]!.schema).toMatchObject({
+      required: ["fixes"],
+      additionalProperties: false,
+      properties: { fixes: { type: "array", items: { required: ["file", "line", "text"] } } }
+    })
+    expect(options[0]!.context).toBe("## The Spanish glossary:  spell's own words\nes:  `es` is `is`")
+  })
+
+  test("an answer that isn't JSON:  asked again in two halves at once, so the round isn't lost (P27)", async () => {
+    const answers = [
+      '{ "fixes": [ { "file": "Carta.es.spell", "line": 15, "te',
+      fenced({ fixes: [{ file: "Carta.es.spell", line: 15, text: '- su nombre es "comodín " + su color' }] }),
+      fenced({ fixes: [{ file: "Carta.es.spell", line: 29, text: "línea 29, mejor" }] })
+    ]
+    const prompts: string[] = []
+    const run: ClaudeRunner = (prompt) => {
+      prompts.push(prompt)
+      return Promise.resolve(answers.shift()!)
+    }
+    const fixUps = new FixUps({ run, names: NAMES })
+    const lines = [
+      { path: "/Carta.es.spell", line: 14, why: ["test"] },
+      { path: "/Carta.es.spell", line: 28, why: ["lint"] }
+    ]
+    const fixed = await fixUps.round(lines, FILES)
+    expect(prompts).toHaveLength(3)
+    expect(prompts[1]).toContain("### 1. Carta.es.spell, line 15")
+    expect(prompts[1]).not.toContain("line 29:")
+    expect(prompts[2]).toContain("### 1. Carta.es.spell, line 29")
+    expect(fixed.map(({ line }) => line)).toEqual([14, 28])
+    expect(fixUps.durations).toHaveLength(3)
+    expect(fixUps.notes).toEqual(["claude's fixes weren't JSON:  asked again, in two halves of 1"])
+  })
+
+  test("an answer that isn't JSON twice fixes nothing, and says so;  one line is asked again as it was", async () => {
+    const { fixUps, prompts } = fixUpsAnswering("Sorry")
     expect(await fixUps.round([{ path: "/Carta.es.spell", line: 14, why: [] }], FILES)).toEqual([])
-    expect(fixUps.notes).toEqual(["claude's fixes aren't JSON:  left the lines as they were"])
+    expect(prompts).toHaveLength(2)
+    expect(prompts[1]).toBe(prompts[0])
+    expect(fixUps.notes).toEqual([
+      "claude's fixes weren't JSON:  asked again",
+      "claude's fixes aren't JSON:  left the lines as they were"
+    ])
+  })
+
+  test("claude failing isn't asked again:  the runner retried what was worth it", async () => {
+    let calls = 0
+    const run: ClaudeRunner = () => {
+      calls++
+      return Promise.reject(new Error("Claude API (claude-opus-5-5):  401 authentication_error:  invalid x-api-key"))
+    }
+    const fixUps = new FixUps({ run, names: NAMES })
+    expect(await fixUps.round([{ path: "/Carta.es.spell", line: 14, why: [] }], FILES)).toEqual([])
+    expect(calls).toBe(1)
+    expect(fixUps.notes).toEqual([
+      "claude couldn't fix the lines:  Claude API (claude-opus-5-5):  401 authentication_error:  invalid x-api-key"
+    ])
   })
 })
+
+/** `answer` as JSON in a fence, as `claude -p` answered before it took a schema. */
+function fenced(answer: unknown): string {
+  return `\`\`\`json\n${JSON.stringify(answer)}\n\`\`\``
+}
 
 /** A fix-up pass whose fake `claude` answers `answer`, and keeps each prompt. */
 function fixUpsAnswering(answer: unknown) {

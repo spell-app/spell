@@ -551,13 +551,13 @@ lists.addRule(ListMembershipTest, {
       },
       tests: [
         ["my-list has items where", "core.any(myList, () => {})"],
-        ["my-list has items where the item is 1", "core.any(myList, (item) => item == 1)"],
-        ["my-list has items where it is 1", "core.any(myList, (item) => item == 1)"],
-        ["my-list has items where its foo is 1", "core.any(myList, (item) => item.foo == 1)"],
-        ["my-list has no items where item is 1", "!core.any(myList, (item) => item == 1)"],
-        ["my-list has no items where it is 1", "!core.any(myList, (item) => item == 1)"],
-        ["my-list doesnt have items where item is 1", "!core.any(myList, (item) => item == 1)"],
-        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item == 1)"]
+        ["my-list has items where the item is 1", "core.any(myList, (item) => item === 1)"],
+        ["my-list has items where it is 1", "core.any(myList, (item) => item === 1)"],
+        ["my-list has items where its foo is 1", "core.any(myList, (item) => item.foo === 1)"],
+        ["my-list has no items where item is 1", "!core.any(myList, (item) => item === 1)"],
+        ["my-list has no items where it is 1", "!core.any(myList, (item) => item === 1)"],
+        ["my-list doesnt have items where item is 1", "!core.any(myList, (item) => item === 1)"],
+        ["the foo of the bar does not have items where item is 1", "!core.any(bar.foo, (item) => item === 1)"]
       ]
     }
   ]
@@ -759,16 +759,16 @@ lists.addRule(ListRemoveWhere, {
       },
       tests: [
         ["remove items from my-list where", "core.removeWhere(myList, () => {})"],
-        [`remove items from my-list where item is not "ace"`, 'core.removeWhere(myList, (item) => item != "ace")'],
+        [`remove items from my-list where item is not "ace"`, 'core.removeWhere(myList, (item) => item !== "ace")'],
         [
           "remove cards in deck where the suit of the card is clubs",
-          'core.removeWhere(deck, (card) => card.suit == "clubs")'
+          'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
         [
           "remove cards in deck where the suit of it is clubs",
-          'core.removeWhere(deck, (card) => card.suit == "clubs")'
+          'core.removeWhere(deck, (card) => card.suit === "clubs")'
         ],
-        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit == "clubs")']
+        ["remove cards in deck where its suit is clubs", 'core.removeWhere(deck, (card) => card.suit === "clubs")']
       ]
     }
   ]

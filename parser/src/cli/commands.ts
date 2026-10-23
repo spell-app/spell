@@ -163,18 +163,28 @@ export default function languageCommands(spell: Command): void {
   lang
     .command("translate")
     .description(
-      "write a project in another language:  its names first (<Project>.<lang>.names.json5, one claude -p batch), " +
-        "then line by line, rule by rule, then claude fixes each line that fails lint or a test -- " +
+      "write a project in another language:  its names first (<Project>.<lang>.names.json5:  the shared glossary's, " +
+        "then Claude's), then line by line, rule by rule, then Claude fixes each line that fails lint, a test " +
+        "or the shape check -- through the Claude API with ANTHROPIC_API_KEY set, else claude -p -- " +
         "exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
     .requiredOption("--to <lang>", "the language to write it in, e.g. es")
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
-    .option("--no-ai", "never ask claude -p:  each name the dictionary lacks stays TODO, and no line is fixed up")
+    .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
+    .option("--effort <tier>", "how much every pass spends on its answers:  fast, balanced or best -- default balanced")
+    .option("--names-effort <tier>", "the names pass's own:  fast, balanced or best")
+    .option("--fix-ups-effort <tier>", "the fix-ups' own:  fast, balanced or best")
+    // for experiments:  an exact model and effort, in the runner's own terms, over every tier
+    .addOption(lang.createOption("--model <model>", "an exact model[:effort] for every call").hideHelp())
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
+    )
+    .option(
+      "--learn",
+      "translate nothing:  add the project's names to the language's shared glossary, for every project"
     )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) =>

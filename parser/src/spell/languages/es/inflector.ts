@@ -14,7 +14,7 @@ import { P } from "spell-lang/parser"
 /** Spanish's inflector:  see the file's docstring. */
 export const spanishInflector = new P.Inflector({
   lang: "es",
-  singular: (words) => eachWord(words, singularOf),
+  singular: (words) => eachWord(words, singularOf, "agreeing with the first"),
   plural: (words) => eachWord(words, pluralOf)
 })
 
@@ -24,10 +24,16 @@ export const spanishInflector = new P.Inflector({
  * - Words are split at a space, a dash or an underscore, which stay as they were;
  *   and where a capital follows a small letter, `PilaDeDescartes`.
  * - From a linking word on (`de`, `del`, `con` ...), the rest is left alone:  `carta de juego` => `cartas de juego`.
+ * - `agreeing with the first` (making it singular):  the first word says how many, and a later word is made singular
+ *   only where it agrees with it, ending as it does (epic `spanish` P28):
+ *   - `cuentas-bancarias` => `cuenta-bancaria`:  `-as` and `-as`, an adjective
+ *   - `gestor-tareas`, `gestorTareas` stay as they are:  `gestor` is one already, and `tareas` is what it handles
  */
-function eachWord(words: string, inflect: (word: string) => string): string {
+function eachWord(words: string, inflect: (word: string) => string, rule?: "agreeing with the first"): string {
   // a type's name is in PascalCase by then, `PilaDeDescartes`:  its words split where each is capitalized
   const parts = words.split(/([ _-]+|(?<=\p{Ll})(?=\p{Lu}))/u)
+  const first = parts[0] ?? ""
+  const ending = (word: string) => /(?:as|os|es|s)?$/.exec(word.toLowerCase())![0]
   let linked = false
   return parts
     .map((part, index) => {
@@ -36,6 +42,7 @@ function eachWord(words: string, inflect: (word: string) => string): string {
         linked = true
         return part
       }
+      if (index > 0 && rule && (inflect(first) === first || ending(part) !== ending(first))) return part
       return inflect(part)
     })
     .join("")

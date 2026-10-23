@@ -27,6 +27,37 @@ export type NamesData = {
   genders?: Record<string, string>
 }
 
+/**
+ * What a language pack's names glossary holds, `languages/<lang>/glossary.json5` (epic `spanish` P26):
+ * the names people choose, shared by every project -- see `NamesGlossary`.
+ */
+export type GlossaryData = {
+  /** Each type's or name's English words, singular, e.g. `card` => `{ name: "carta", gender: "feminine", ... }`. */
+  names?: Record<string, GlossaryEntry>
+  /** General method phrases, e.g. `turn it face up` => `{ name: "voltear eso boca arriba", ... }`. */
+  phrases?: Record<string, GlossaryEntry>
+  /** The gender of common nouns, by their word in the other language, singular:  `mano` => `feminine`. */
+  genders?: Record<string, string>
+}
+
+/** One name in a glossary:  its words in the other language, and where it came from. */
+export type GlossaryEntry = {
+  /** Its words in the other language, singular, e.g. `carta`. */
+  name: string
+  /** A noun's gender, e.g. `feminine`. */
+  gender?: string
+  /** Its plural, only where the language's rules get it wrong. */
+  plural?: string
+  /**
+   * Where it came from:  a better source wins when two disagree.
+   * - `reviewed`:  a person checked it
+   * - `seed:<Project>`:  a translation a person made, e.g. `seed:Solitario`
+   * - `learned:<Project>`:  a project's dictionary (`--learn`)
+   * - `drafted`:  written by an AI, unchecked
+   */
+  from: string
+}
+
 /** One section of a names dictionary, e.g. `names`. */
 export type NamesKind = keyof NamesData
 
@@ -136,15 +167,58 @@ export type UIVocabulary = {
 }
 
 /**
- * Runs `claude -p` on `prompt`, and answers what it printed (epic `spanish` P25).
- * - `effort`:  how hard it thinks, `claude --effort`:  less is faster -- default `claude`'s own.
- * - Injected, so a test can answer with a fake;  the command's runs `claude` itself.
- * - throws if `claude` couldn't run, or failed
+ * Asks Claude `prompt`, and answers what it said (epic `spanish` P25-P27):  every pass asks through one of these.
+ * - Two of them, the command picks (`spell-lang/cli/claudeRunners`):
+ *   - the Claude API, straight, when `ANTHROPIC_API_KEY` is set:  no program to start for each call
+ *   - `claude -p` otherwise, signed in as the person
+ * - Injected, so a test can answer with a fake.
+ * - throws if Claude couldn't be asked, or failed
  */
-export type ClaudeRunner = (prompt: string, options?: { effort?: ClaudeEffort }) => Promise<string>
+export type ClaudeRunner = (prompt: string, options?: ClaudeOptions) => Promise<string>
 
-/** How hard `claude` thinks:  `claude --effort`. */
-export type ClaudeEffort = "low" | "medium" | "high"
+/** How a pass wants Claude asked:  see `ClaudeRunner`. */
+export type ClaudeOptions = {
+  /** Which pass asks:  with `tier`, the runner picks its own model and effort for it (`CLAUDE_TIERS`). */
+  pass?: AskingPass
+  /** How much the pass spends on its answers, in any provider's terms:  the runner maps it to `model` and `effort`. */
+  tier?: EffortTier
+  /** How hard it thinks, in Claude's terms:  less is faster -- default the tier's, else the model's own. */
+  effort?: ClaudeEffort
+  /**
+   * Which model, e.g. `opus`, `claude-sonnet-5-5` -- default the tier's, else the runner's:  `claude -p`'s own, the
+   *   API's Opus 5.5.
+   * - `opus`, `sonnet` and `haiku` are the newest of each, through either runner.
+   */
+  model?: string
+  /**
+   * The answer's shape, a JSON schema:  Claude can only answer JSON that fits it.
+   * - Every object in it lists its properties, all required, with `additionalProperties: false`.
+   */
+  schema?: JsonSchema
+  /**
+   * What every call of a pass shares, e.g. the language pack's glossary:  in the system prompt, after its first line.
+   * - The API caches it, so the calls after the first read it for less, and sooner.
+   */
+  context?: string
+}
+
+/** A JSON schema, as `ClaudeOptions.schema` takes it. */
+export type JsonSchema = { [key: string]: unknown }
+
+/**
+ * How much a pass spends on its answers (epic `spanish` P27), in no provider's terms:
+ * each runner maps it to a model and effort of its own (Claude's:  `CLAUDE_TIERS`).
+ * - `fast`:  the quickest answers still good enough to use
+ * - `balanced`:  the default
+ * - `best`:  the best answers, however long they take
+ */
+export type EffortTier = "fast" | "balanced" | "best"
+
+/** A pass that asks:  the names (`NamesPass`), or the fix-ups (`FixUps`). */
+export type AskingPass = "names" | "fixUps"
+
+/** How hard Claude thinks, as `claude --effort` takes it:  less is faster. */
+export type ClaudeEffort = "low" | "medium" | "high" | "xhigh" | "max"
 
 /** Something wrong with one line of a translated project, as lint or a failed test says (epic `spanish` P25). */
 export type LineProblem = {
@@ -154,13 +228,18 @@ export type LineProblem = {
   line: number
   /** What lint or the test said. */
   message: string
-  /** Who said it. */
-  source: "lint" | "test"
+  /** Who said it:  lint, a failed test, or the shape check (`ShapeCheck`:  it compiles to a different program). */
+  source: "lint" | "test" | "shape"
 }
 
 /**
  * Checks a translated project as it is on disk:  lint, then its tests (epic `spanish` P25).
  * - spell-app's, as it finds and runs projects the app's way;  called again after each round of fix-ups.
+ * - `files`:  the translation's spell files as it parsed them, in its own project, for the shape check (P26).
  * - NEVER throws:  a project that won't load is one problem, on its first line.
  */
-export type TranslationChecker = () => Promise<{ problems: LineProblem[]; tests?: { passed: number; failed: number } }>
+export type TranslationChecker = () => Promise<{
+  problems: LineProblem[]
+  tests?: { passed: number; failed: number }
+  files?: SourceFile[]
+}>

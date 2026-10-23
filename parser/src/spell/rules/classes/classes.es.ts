@@ -865,7 +865,7 @@ classesEs.addRule(NewList, {
 })
 
 classesEs.addRule(CreateThing, {
-  syntax: `crear ${A} {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?`,
+  syntax: `crear ${A} (nuevo|nueva)? {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?`,
   tests: [
     {
       title: "creates normal objects properly",
@@ -875,7 +875,9 @@ classesEs.addRule(CreateThing, {
       },
       tests: [
         [`crear una Thing`, `new Thing()`],
-        [`crear una Thing con x = 1, b = sí`, `new Thing({ x: 1, b: true })`]
+        [`crear una Thing con x = 1, b = sí`, `new Thing({ x: 1, b: true })`],
+        // `nueva` may be said:  `crear una nueva tarea con título = "Compras"` (epic `spanish` P28)
+        [`crear una nueva Thing con x = 1`, "new Thing({ x: 1 })"]
       ]
     },
     {
@@ -976,11 +978,79 @@ classesEs.addRule(ClassMember, {
 })
 
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `${A} {type:singular_type} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
+  syntax: `${A} {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
   tests: [
     {
       compileAs: "block",
       tests: [
+        // a plural property, its article agreeing:  `unas` (epic `spanish` P28)
+        // a type whose first word says it's one, written dashed or in camelCase:  a manager of tasks (epic `spanish` P28)
+        [
+          "un gestor-tareas tiene un nombre como texto",
+          [
+            "// un gestor-tareas tiene un nombre como texto",
+            'GestorTareas.declareProp("nombre", { type: "text" })',
+            'Object.defineProperty(GestorTareas.prototype, "nombre", {',
+            '  get() { return this.getProp("nombre") },',
+            '  set(value) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          [
+            "export interface GestorTareas { nombre: string }",
+            "// un gestor-tareas tiene un nombre como texto",
+            'GestorTareas.declareProp("nombre", { type: "text" })',
+            'Object.defineProperty(GestorTareas.prototype, "nombre", {',
+            '  get(this: GestorTareas): string { return this.getProp("nombre") as string },',
+            '  set(this: GestorTareas, value: string) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        ],
+        [
+          "un gestorTareas tiene un nombre como texto",
+          [
+            "// un gestorTareas tiene un nombre como texto",
+            'GestorTareas.declareProp("nombre", { type: "text" })',
+            'Object.defineProperty(GestorTareas.prototype, "nombre", {',
+            '  get() { return this.getProp("nombre") },',
+            '  set(value) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          [
+            "export interface GestorTareas { nombre: string }",
+            "// un gestorTareas tiene un nombre como texto",
+            'GestorTareas.declareProp("nombre", { type: "text" })',
+            'Object.defineProperty(GestorTareas.prototype, "nombre", {',
+            '  get(this: GestorTareas): string { return this.getProp("nombre") as string },',
+            '  set(this: GestorTareas, value: string) { this.setProp("nombre", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        ],
+        [
+          "un player tiene unas notas como texto",
+          [
+            "// un player tiene unas notas como texto",
+            'Player.declareProp("notas", { type: "text" })',
+            'Object.defineProperty(Player.prototype, "notas", {',
+            '  get() { return this.getProp("notas") },',
+            '  set(value) { this.setProp("notas", value) },',
+            "  configurable: true",
+            "})"
+          ],
+          [
+            "export interface Player { notas: string }",
+            "// un player tiene unas notas como texto",
+            'Player.declareProp("notas", { type: "text" })',
+            'Object.defineProperty(Player.prototype, "notas", {',
+            '  get(this: Player): string { return this.getProp("notas") as string },',
+            '  set(this: Player, value: string) { this.setProp("notas", value) },',
+            "  configurable: true",
+            "})"
+          ]
+        ],
         [
           "un player tiene un name como texto",
           [
@@ -1238,7 +1308,7 @@ classesEs.addRule(DefinePropertyHas, {
 })
 
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `(los|las)? {type:plural_type} tienen (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
+  syntax: `(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`,
   tests: [
     {
       compileAs: "block",
@@ -1340,17 +1410,17 @@ classesEs.addRule(DefinePropertyHas, {
 
 // a quoted name in the sentence style:  `una carta tiene un "palo" como uno de ...`
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `${A} {type:singular_type} tiene (un|una|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
+  syntax: `${A} {type:singular_type} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
 })
 
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `(los|las)? {type:plural_type} tienen (un|una|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
+  syntax: `(los|las)? {type:plural_type} tienen (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
 })
 
 // in an outline body:  `- su "palo" es uno de tréboles, diamantes, corazones o espadas`, `- su "rango" es un número`;
 // a plural name says `sus ... son`:  `- sus "comodines" son sí o no` (epic `spanish` I10)
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_it} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`
+  syntax: `{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`
 })
 
 classesEs.addRule(DefinePropertyHas, {
@@ -1359,7 +1429,7 @@ classesEs.addRule(DefinePropertyHas, {
 
 // ... and with the subject left out (P8):  `- tiene un mazo`, `- "palo" es uno de tréboles, diamantes ...`
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_implied} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`
+  syntax: `{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`
 })
 
 classesEs.addRule(DefinePropertyHas, {

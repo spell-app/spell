@@ -33,7 +33,18 @@ describe("the language's spell commands (epic repo-split P13)", () => {
   test("translating a project:  spell lang translate --to (epic spanish P24)", () => {
     const translate = spell.commands.find((command) => command.name() === "lang")!.commands[1]!
     expect(translate.name()).toBe("translate")
-    expect(translate.options.map((option) => option.long)).toEqual(["--to", "--out", "--update", "--no-ai", "--seed"])
+    expect(translate.options.map((option) => option.long)).toEqual([
+      "--to",
+      "--out",
+      "--update",
+      "--no-ai",
+      "--effort",
+      "--names-effort",
+      "--fix-ups-effort",
+      "--model",
+      "--seed",
+      "--learn"
+    ])
   })
 
   test("each project command says how to name projects", () => {

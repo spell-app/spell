@@ -19,6 +19,16 @@ export function isLegalIdentifier(value: string): boolean {
   return LEGAL_IDENTIFIER.test(value)
 }
 
+/**
+ * Does `code` use the identifier `name`, as a whole name:  `índice` in `position(índice)`, not in `índices`?
+ * - NOT `\b`:  javascript's is ASCII only, so it finds no edge beside `í` or `á`,
+ *   and a Spanish name (`índice`, `está`) would never be found (epic `spanish` P28).
+ */
+export function mentions(code: string, name: string): boolean {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  return new RegExp(`(?<![\\p{L}\\p{M}\\d_$])${escaped}(?![\\p{L}\\p{M}\\d_$])`, "u").test(code)
+}
+
 /** `'name'`:  `name` as a single-quoted JS string, backslashes and quotes escaped. */
 export function quoted(name: string): string {
   return `'${name.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`

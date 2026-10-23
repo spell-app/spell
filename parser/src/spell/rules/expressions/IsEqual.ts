@@ -5,7 +5,7 @@ import { Negatable } from "./Negatable"
 import { InfixOperatorSuffix } from "./InfixOperatorSuffix"
 import { Precedence, SuffixLeft, type OperatorOperands } from "./expressions.shared"
 
-/** `is_equal` rule:  `{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `==`/`!=`. */
+/** `is_equal` rule:  `{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`. */
 export class IsEqual extends InfixOperatorSuffix<"operator|expression"> {
   @proto static precedence = Precedence.equality
   @proto static parenthesize = true

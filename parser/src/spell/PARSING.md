@@ -1009,6 +1009,12 @@ A kind that says so is saved in a file of its own.
   - `draw` (the `draw_method` word rule) or `create` (`create_method`):  what runs as a thing is made.
   - English's words are the hooks' names already, `- to create it:`;
     Spanish's `- para crearlo:` and `para crear un mazo:` are `create()` too.
+  - Or a type's outline says it with words of their own, [`create_hook`](rules/methods/CreateHook.ts) (epic `spanish` P28):
+    `- when created (with title as text):`, `- al crearla (con título como texto):`.
+    - Core hands `create()` the props the thing was made with, so its `(with ...)` reads them;
+      a caller just makes one, `create a new task with title = "Shop"`.
+    - Spanish's `al ...` is also an event's handler:  the hook takes only its own words, `create_hook_words`,
+      and beats the handler on them (`Priority.specific`).
 - `it` FUSED into a Spanish verb (`SP.LanguageWords.fusedIt`):  `- para barajarla:`, `- para voltearla boca arriba:`.
   - `MethodDefinition.splitFusedIt()` splits the method's FIRST word into the verb and where `it` was,
     so it reads as English's `- to shuffle it:`:  `barajar {thisArg:expression}?`.

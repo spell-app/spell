@@ -43,6 +43,7 @@ describe("priority and precedence", () => {
         "can_take:  Precedence.comparison",
         "class_member:  Priority.userDeclared",
         "create_drawable_list_type:  Priority.declaration",
+        "create_hook:  Priority.specific",
         "create_list_type:  Priority.declaration",
         "create_one_of_a_kind:  Priority.declaration",
         "create_type:  Priority.declaration",

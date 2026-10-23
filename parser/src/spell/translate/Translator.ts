@@ -4,7 +4,13 @@ import { BODY_KEYWORDS } from "spell-lang/spell/spell.types"
 import { NumberLiteral, TextLiteral } from "spell-lang/spell/rules/core"
 import { CompoundExpression, Wording } from "spell-lang/spell/rules/expressions"
 import { SubjectIt, SubjectRule } from "spell-lang/spell/rules/types"
-import { MethodSignature, QuotedMethodSignature, QuotedSignatureWords } from "spell-lang/spell/rules/methods"
+import {
+  CreateHook,
+  MethodSignature,
+  QuotedMethodSignature,
+  QuotedSignatureWords,
+  WithPropsArg
+} from "spell-lang/spell/rules/methods"
 import { SpellJSX, SpellJSXExpression, SpellJSXText } from "spell-lang/spell/rules/JSX"
 import type { ElementNames } from "./ElementNames"
 import type { TranslationNames } from "./TranslationNames"
@@ -296,6 +302,7 @@ class FileWriting {
     const { rule } = match
     if (rule instanceof SP.Block) return []
     if (rule instanceof SpellJSX) return [this.writeJSX(match, context)]
+    if (rule instanceof CreateHook) return this.writeCreateHook(match, context)
     if (
       rule instanceof MethodSignature ||
       rule instanceof QuotedSignatureWords ||
@@ -498,25 +505,33 @@ class FileWriting {
    * A CALL of a method or quoted phrase this project declared (or one it imports), `ourPhrase` its words as declared:
    * its phrase in the other language
    * (`voltearla boca arriba`), each of its slots filled with the call's arguments, translated.
-   * - Slots:  `it` (or a verb with `it` fused on, `voltearla`), `(name)`, and `a <type>`.
+   * - Slots:  `it` (or a verb with `it` fused on, `voltearla`), `(name)`, and `a <type>`;
+   *   and `(with title as text, ...)`, named arguments a call may leave out:  `con título = "..."` (epic `spanish` P28).
    * - Matched by what they are:  `it` to `it`, `(rank)` to `(rango)`, `a card` to `una carta`;  else in order.
    * - A call that says `not` says it before the phrase:  `no es una figura`.
    */
   writeCall(match: P.Match, ourPhrase: string, context: WriteContext): Piece[] {
     const { names, to } = this.translator
     const theirPhrase = names.phrase(ourPhrase)
-    if (theirPhrase === undefined) return [{ text: match.inputText.trim() }]
+    if (theirPhrase === undefined) {
+      // its arguments all the same, for the names they ask for:  `with title = "Test app"`'s text
+      for (const each of callArguments(match)) this.tryWrite(each, context)
+      return [{ text: match.inputText.trim() }]
+    }
     const ourSlots = phraseSlots(ourPhrase, this.translator, "from")
     // `a <type>` is a slot only where ours has one:  `es una carta numérica` is words
     const hasTypes = ourSlots.some((slot) => slot.kind === "type")
     // an imported project's own words, kept as it declares them:  read as ours are, `increment it`
     const theirSlots = phraseSlots(theirPhrase, this.translator, theirPhrase === ourPhrase ? "from" : "to", hasTypes)
-    const args = callArguments(match)
-    if (args.length !== ourSlots.filter((slot) => slot.kind !== "word").length) {
+    // its named arguments (`with title = ...`) fill the `(with ...)` slot, which a call may leave out
+    const props = (match.groups as { props?: P.Match }).props
+    const args = callArguments(match).filter((each) => each !== props)
+    const positional = ourSlots.filter((slot) => slot.kind !== "word" && slot.kind !== "props")
+    if (args.length !== positional.length) {
       throw this.cant(match, `call ${match.ruleName}:  ${args.length} arguments`)
     }
     // each of our slots' argument, by its slot
-    const argumentFor = new Map(ourSlots.filter((slot) => slot.kind !== "word").map((slot, at) => [slot, args[at]!]))
+    const argumentFor = new Map(positional.map((slot, at) => [slot, args[at]!]))
     const pieces: Piece[] = []
     const operator = (match.groups as { operator?: P.Match }).operator
     if (operator && SP.Negatable.isNegated(operator)) pieces.push({ text: negationWord(to) })
@@ -526,12 +541,52 @@ class FileWriting {
         pieces.push(wordPiece(slot.text, this.translator))
         continue
       }
+      if (slot.kind === "props") {
+        if (props) pieces.push({ text: slot.verb! }, ...this.write(props, { ...context, slot: "props" }))
+        continue
+      }
       const ours = matchingSlot(slot, [...argumentFor.keys()], used, names)
       if (!ours) throw this.cant(match, `call ${match.ruleName}:  slot ${slot.text}`)
       used.add(ours)
       if (slot.verb) pieces.push({ text: slot.verb })
       pieces.push(...this.write(argumentFor.get(ours)!, { ...context, slot: "argument" }))
     }
+    return pieces
+  }
+
+  /** `match` written, for the names it asks the dictionary for;  nothing if it can't be. */
+  tryWrite(match: P.Match, context: WriteContext): void {
+    try {
+      this.write(match, context)
+    } catch (error) {
+      if (!(error instanceof Untranslatable)) throw error
+    }
+  }
+
+  /**
+   * What runs as a thing is made, `- when created (with title as text):`, in the other language's words for it:
+   * `- al crearla (con título como texto):` (epic `spanish` P28).
+   * - Its words are the other language's `create_hook_words`, the one agreeing with the type:
+   *   `crearla` for a `tarea`, `crearlo` for a `mazo`;  never the dictionary's, as they're no name a person chose.
+   * - Its `(with ...)` written as any named arguments are, its names through the dictionary.
+   */
+  writeCreateHook(match: P.Match, context: WriteContext): Piece[] {
+    const { to, names } = this.translator
+    const twin = this.translator.twinsOf(match.rule)[0]
+    const words = to.parser.rules.create_hook_words
+    const lead = twin instanceof P.Sequence && twin.rules[0] ? literalAlternatives(twin.rules[0])[0] : undefined
+    if (!lead || !words) throw this.cant(match)
+    const forms = literalAlternatives(words).filter((form) => !/\s/.test(form))
+    const typeName = typeOf(match.scope)
+    const gender = typeName ? names.type(typeName)?.gender : undefined
+    const ending = gender === "feminine" ? /a$/ : gender === "masculine" ? /o$/ : undefined
+    const hookWords = (ending && forms.find((form) => ending.test(form))) ?? forms[0] ?? literalAlternatives(words)[0]!
+    const pieces: Piece[] = [{ text: lead }, { text: hookWords }]
+    const props = findMatch(match, (each) => each.rule instanceof WithPropsArg)
+    if (props) pieces.push({ text: "(" }, ...this.write(props, { ...context, slot: "props" }), { text: ")" })
+    if (/:\s*$/.test(this.sourceText(match))) pieces.push({ text: ":" })
+    const body = (match.groups as { body?: P.Match }).body
+    if (body && !(body.rule instanceof SP.Block)) pieces.push(...this.write(body, context))
     return pieces
   }
 
@@ -687,9 +742,16 @@ class TemplateWriting {
     this.theirWords = topLevelWords(twin, writing.translator.to)
   }
 
-  /** The pieces, or throws `Untranslatable`. */
+  /**
+   * The pieces, or throws `Untranslatable`.
+   * - A twin with no place for one of our named groups says something else:  `nunca` has nowhere to go in
+   *   `puede soltar una carta si`, so `it can never let go of a card` isn't that (epic `spanish` P28).
+   */
   write(): Piece[] {
     const rules = this.twin instanceof P.Sequence ? this.twin.rules : [this.twin]
+    const theirs = namedGroupsIn(this.twin)
+    const lost = Object.keys(this.groups).find((name) => !theirs.includes(name) && isWordGroup(this.match.rule, name))
+    if (lost) throw this.writing.cant(this.match, `${this.match.ruleName}:  no place for ${lost}`)
     const pieces = rules.flatMap((rule) => this.writeRule(rule))
     // a body the twin's syntax took out of its rules, e.g. `if`'s `{statement_body}`:  inline only
     const body = this.groups.body?.[0]
@@ -809,7 +871,7 @@ class TemplateWriting {
   namedWords(rule: P.Rule, ours: P.Match | undefined): Piece[] {
     const theirs = literalAlternatives(rule)
     const value = ours?.inputText.trim()
-    if (value !== undefined && theirs.includes(value)) return [{ text: value }]
+    if (value !== undefined && (theirs.includes(value) || saysWords(rule, value))) return [{ text: value }]
     const ourRule = findRule(this.match.rule, (each) => each.matchGroup === rule.matchGroup)
     const at = value === undefined || !ourRule ? 0 : literalAlternatives(ourRule).indexOf(value)
     return [literalPiece(theirs, at >= 0 && at < theirs.length ? at : 0, this.writing.translator)]
@@ -852,7 +914,11 @@ class TemplateWriting {
   writeSequence(rule: P.Sequence): Piece[] {
     const names = namedGroupsIn(rule)
     if (rule.matchGroup && names.length === 0) {
-      if (!this.take(rule.matchGroup) && rule.optional) return []
+      const ours = this.take(rule.matchGroup)
+      if (!ours && rule.optional) return []
+      // our words, if theirs can say them too:  `>` stays `>`, `>=` stays `>=` (epic `spanish` P28)
+      const text = ours?.inputText.trim()
+      if (text && !hasSlot(rule) && saysWords(rule, text)) return [{ text }]
     } else if (rule.optional) {
       if (names.length && !names.some((name) => this.has(name))) return []
       if (!names.length && !this.oursFor(rule)?.present) return []
@@ -945,17 +1011,21 @@ function assemble(pieces: Piece[], translator: Translator): string {
   words.forEach((piece, at) => {
     if (!piece.agree) return
     const noun = words.slice(at + 1).find((each) => !each.agree)
-    // an adjective with no name after it says something of the name before it:  `la pila es vacía` (J146)
+    // an adjective with no name after it says something of the name before it:  `la pila es vacía` (J146);
+    // but one right after an article agrees with the word after it, a name or not:  `una nueva lista` (epic `spanish` P28)
     const isArticle = !!articleKindOf(piece.text, translator.to)
+    const afterArticle = at > 0 && !!articleKindOf(words[at - 1]!.text, translator.to)
     const before =
-      !isArticle && !noun?.noun
+      !isArticle && !noun?.noun && !(afterArticle && noun && /^\p{L}/u.test(noun.text))
         ? words
             .slice(0, at)
             .reverse()
             .find((each) => each.noun)
         : undefined
     if (before) piece.text = agreeing(piece, before, translator)
-    else if (noun && /\p{L}/u.test(noun.text)) piece.text = agreeing(piece, noun, translator)
+    else if (noun && /\p{L}/u.test(noun.text)) {
+      piece.text = agreeing(piece, noun, translator, words[at + 1] === noun ? "before its noun" : undefined)
+    }
   })
   let text = ""
   for (const piece of words) {
@@ -967,11 +1037,19 @@ function assemble(pieces: Piece[], translator: Translator): string {
   return contract(text.replace(/(?<=\S) \. \. \.(?= )/g, " ..."), translator.to)
 }
 
-/** `piece`'s form agreeing with `noun` in gender and number, e.g. `la` before `carta`, `nuevas` before `cartas`. */
-function agreeing(piece: Piece, noun: Piece, translator: Translator): string {
+/**
+ * `piece`'s form agreeing with `noun` in gender and number, e.g. `la` before `carta`, `nuevas` before `cartas`.
+ * - `place`:  before its noun, a form that's another without its last `-o` is the one there,
+ *   `primer elemento`, not `primero elemento` (epic `spanish` P28).
+ */
+function agreeing(piece: Piece, noun: Piece, translator: Translator, place?: "before its noun"): string {
   const { to, names } = translator
   const word = noun.text.replace(/^"|"$/g, "").split(/\s+/)[0] ?? ""
-  if (!/\p{L}/u.test(word) || !to.articles?.genderOf) return piece.text
+  if (!/\p{L}/u.test(word)) return piece.text
+  // a language with no genders still agrees its article with the sound of the word:  `a choice`, `an apple`
+  const kindOfPiece = articleKindOf(piece.text, to)
+  if (!to.articles?.genderOf)
+    return kindOfPiece ? (to.articles?.article(kindOfPiece, word, undefined) ?? piece.text) : piece.text
   const gender = noun.gender ?? names.genderOf(word)
   const plural = noun.plural ?? to.inflector.plurality(word) === "plural"
   const candidates = piece.agree!
@@ -994,7 +1072,8 @@ function agreeing(piece: Piece, noun: Piece, translator: Translator): string {
   // its number first, then its gender where its forms have one:  `su` / `sus` don't, `nuevo` / `nueva` do
   const ofNumber = candidates.filter((each) => /s$/.test(each) === plural)
   const wanted = ofNumber.find((each) => isFeminine(each) === (gender === "feminine")) ?? ofNumber[0]
-  return wanted ?? piece.text
+  const short = place && wanted && candidates.find((each) => `${each}o` === wanted)
+  return short || wanted || piece.text
 }
 
 /** Does `word` end as a feminine form does, `-a` / `-as`? */
@@ -1295,6 +1374,29 @@ function namedGroupsIn(rule: P.Rule): string[] {
   return names
 }
 
+/** Is our `rule`'s group `name` words alone, a choice that means something (`(never:never)`), not a slot? */
+function isWordGroup(rule: P.Rule, name: string): boolean {
+  const group = findRule(rule, (each) => each.matchGroup === name)
+  return !!group && !(group instanceof P.Subrule) && !hasSlot(group)
+}
+
+/** Can `rule`, words alone, say `text`:  is `text` its words, in any order (`> =`, `>=`)? */
+function saysWords(rule: P.Rule, text: string): boolean {
+  const words = new Set<string>()
+  const visit = (each: P.Rule) => {
+    if (each instanceof P.Literal) alternativesOf(each.literal).forEach((word) => words.add(word))
+    else if (each instanceof P.Literals)
+      each.literals.forEach((literal) => alternativesOf(literal.literal).forEach((word) => words.add(word)))
+    childRules(each).forEach(visit)
+  }
+  visit(rule)
+  if (!words.size) return false
+  const escaped = [...words]
+    .sort((a, b) => b.length - a.length)
+    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  return new RegExp(`^(?:${escaped.join("|")}|\\s)+$`, "u").test(text)
+}
+
 /** Does `rule` take group `name`, anywhere inside it? */
 function mentions(rule: P.Rule, name: string): boolean {
   return namedGroupsIn(rule).includes(name)
@@ -1335,7 +1437,7 @@ function findMatch(match: P.Match, test: (match: P.Match) => boolean): P.Match |
 }
 
 /** The nested bodies (`block` matches) of `statement`, at any depth but not inside another body. */
-function bodiesIn(statement: P.Match): P.Match[] {
+export function bodiesIn(statement: P.Match): P.Match[] {
   const bodies: P.Match[] = []
   const visit = (match: P.Match) => {
     for (const child of match.matched) {
@@ -1414,10 +1516,11 @@ function membersOf(rule: P.Rule | undefined): P.Rule[] {
  * One word or slot of a method's or quoted phrase's words:
  * - `it`:  the thing it runs on;  `verb`, when fused onto a verb (`voltearla` => `voltear`)
  * - `argument`:  `(rank)`, its `name` the words inside
+ * - `props`:  `(with title as text, ...)`, named arguments, which a call may leave out;  `verb` its first word, `with`
  * - `type`:  `a card`, its `name` the type
  * - `word`:  any other word
  */
-type PhraseSlot = { kind: "it" | "argument" | "type" | "word"; text: string; name?: string; verb?: string }
+type PhraseSlot = { kind: "it" | "argument" | "props" | "type" | "word"; text: string; name?: string; verb?: string }
 
 /** `phrase`'s words and slots, read as language `side` (`from` or `to`) writes them. */
 function phraseSlots(phrase: string, translator: Translator, side: "from" | "to", hasTypes = true): PhraseSlot[] {
@@ -1429,6 +1532,11 @@ function phraseSlots(phrase: string, translator: Translator, side: "from" | "to"
   for (let at = 0; at < words.length; at++) {
     const word = words[at]!
     if (/^\(.*\)$/.test(word)) {
+      const lead = word.slice(1).split(/\s+/)[0]!
+      if (/\s/.test(word) && propsWords(language).includes(lead.toLowerCase())) {
+        slots.push({ kind: "props", text: word, verb: lead })
+        continue
+      }
       slots.push({ kind: "argument", text: word, name: word.slice(1, -1) })
       continue
     }
@@ -1452,6 +1560,13 @@ function phraseSlots(phrase: string, translator: Translator, side: "from" | "to"
     slots.push({ kind: "word", text: word })
   }
   return slots
+}
+
+/** The words a language's named arguments start with (its `with_props_arg`'s):  `with`, `con`. */
+function propsWords(language: SP.Language): string[] {
+  return membersOf(language.parser.rules.with_props_arg).flatMap((rule) =>
+    rule instanceof P.Sequence && rule.rules[0] ? literalAlternatives(rule.rules[0]) : []
+  )
 }
 
 /** The type names a phrase in language `side` may name, longest first:  the dictionary's. */

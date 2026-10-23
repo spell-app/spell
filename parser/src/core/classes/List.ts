@@ -88,7 +88,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   constructor(props?: Record<string, unknown>) {
     super(props)
     registerThing(this)
-    if (runsCreate(List, new.target)) this.create()
+    if (runsCreate(List, new.target)) this.create(props)
   }
 
   /** `items` array as state. */
@@ -128,8 +128,9 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   /**
    * Called once per instance, after constructor props are assigned -- override in a subclass to set up initial state.
    * - NOTE: same timing as `Thing.create()`:  a hand-written subclass with fields MUST be `@thing`.
+   * - `props`:  what it was made with, as `Thing.create()`'s.
    */
-  create(): void {}
+  create(_props?: Record<string, unknown>): void {}
 
   /**
    * Our id, as a thing's:  a list is a thing in spell -- see `Thing.id`.

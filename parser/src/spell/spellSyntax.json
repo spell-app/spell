@@ -869,17 +869,17 @@
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
           "line": 9,
-          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `==`/`!=`.",
+          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing is other",
               "outputs": {
                 "js": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "ts": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "py": {
                   "code": "(thing == other)"
@@ -1363,6 +1363,7 @@
             "url_or_email",
             "draw_method",
             "create_method",
+            "create_hook_words",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1413,6 +1414,9 @@
             },
             {
               "syntax": "(create:create it|create them)"
+            },
+            {
+              "syntax": "(create:created|creating it)"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -3445,7 +3449,7 @@
           "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
-              "syntax": "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
+              "syntax": "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
               "example": "create a Thing",
               "outputs": {
                 "js": {
@@ -6000,10 +6004,10 @@
               "example": "to pick a color:\n\tred if suit is \"hearts\"",
               "outputs": {
                 "js": {
-                  "code": "export function pickAColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "ts": {
-                  "code": "export function pickAColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "py": {
                   "code": "def pick_a_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
@@ -6164,6 +6168,32 @@
             },
             {
               "syntax": "{type:subject_implied} {signature:quoted_method_signature} if? :? {expression_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CreateHook",
+          "ruleNames": ["create_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CreateHook.ts",
+          "line": 20,
+          "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when created (with title as text):`.",
+          "syntaxes": [
+            {
+              "syntax": "when {signature:method_signature} :? {statement_body}?",
+              "example": "a task is a thing where:\n\t- when created (with title as text, done as a choice):\n\t\tprint the title",
+              "outputs": {
+                "js": {
+                  "code": "export class Task extends Thing {\n  create(props = {}) {\n    const { title, done } = props\n    core.console.log(title)\n  }\n}"
+                },
+                "ts": {
+                  "code": "@thing\nexport class Task extends Thing {\n  create(props: { title?: string; done?: boolean } = {}) {\n    const { title, done } = props\n    core.console.log(title)\n  }\n}"
+                },
+                "py": {
+                  "code": "class Task(Thing):\n    def create(self, props: Any = {}) -> None:\n        title = props.title\n        done = props.done\n        core.console.log(title)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]
