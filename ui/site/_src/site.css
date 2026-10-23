@@ -499,6 +499,8 @@
   .site-main {
     --site-tabs-band: 10px;
     --site-tabs-gap: 10px;
+    /* the tabs' panel, in from the column's edges (its band reaching out past this) */
+    --site-tabs-inset: 40px;
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
     --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
@@ -569,6 +571,8 @@
     margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
     /* at a pane's end, up with its section toolbar as it leaves (`--site-tabs-leave`, `SiteSections.markTabsStuck()`) */
     translate: 0 calc(-1 * var(--site-tabs-leave, 0px));
+    /* in from the column's edges (Owen, 2026-10-23:  "Add 40px margin on left/right of this section") */
+    margin-inline: var(--site-tabs-inset);
     /* the top row a little larger than the section toolbar's row under it (Owen:  "use slightly larger font on the top") */
     font-size: calc(var(--ui-font-size) * 1.0667);
   }
@@ -589,9 +593,19 @@
       0 0 0 var(--site-tabs-band) var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background))),
       0 0 0 100vmax var(--ui-section-sticky-background, var(--ui-background));
     clip-path: inset(
-      calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap))) calc(-1 * var(--site-gutter))
+      calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap))) calc(-1 * (var(--site-gutter) + var(--site-tabs-inset)))
         calc(-1 * (var(--site-tabs-band) + var(--site-tabs-gap)))
     );
+  }
+
+  /*
+   * an example that is one line of text (a breadcrumb) sits optically centred in its frame:  its words have no capitals
+   * past the first, so the space over the lowercase letters read as more than the space under the line (Owen,
+   * 2026-10-23:  "Uneven amount of space above and below the breadcrumbs here, bottom looks good";  measured:  18.9px
+   * over the capitals, 18px under the baseline)
+   */
+  ui-docs-example:has(> ui-breadcrumb) {
+    --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
   .site-main ui-section[id] {
