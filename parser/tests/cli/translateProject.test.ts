@@ -2,12 +2,20 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
+import JSON5 from "json5"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell-kit/cli"
 import { parseSpellProject } from "spell-lang/spell/test"
 import { translateProject, type TranslateSource } from "spell-lang/cli/translateProject"
-import type { ClaudeRunner, LineProblem, NamesData } from "spell-lang/spell/translate/translate.types"
+import type { TranslateOptions } from "spell-lang/cli"
+import type {
+  ClaudeRunner,
+  GlossaryData,
+  LineProblem,
+  NamesData,
+  SourceFile
+} from "spell-lang/spell/translate/translate.types"
 
 /**
  * `spell lang translate`'s three passes end to end (epic `spanish` P25):  names, lines, fix-ups --
@@ -34,6 +42,17 @@ const NAMES: NamesData = {
   genders: { color: "masculine", etiqueta: "feminine" }
 }
 
+/** A glossary that knows the card's words, as another project chose them. */
+const GLOSSARY: GlossaryData = {
+  names: {
+    card: { name: "carta", gender: "feminine", from: "reviewed" },
+    color: { name: "color", gender: "masculine", from: "reviewed" },
+    red: { name: "rojo", from: "reviewed" },
+    black: { name: "negro", from: "reviewed" },
+    label: { name: "etiqueta", gender: "feminine", from: "reviewed" }
+  }
+}
+
 /** The line the fix-up writes for the joker's label:  Spanish puts the word first. */
 const FIXED = '- su etiqueta es "comodín " + su color'
 
@@ -53,14 +72,14 @@ afterEach(() => {
 })
 
 describe("translateProject():  names, then lines, then fix-ups", () => {
-  test("cold:  one names call, then one fix-up round for the line in the wrong order;  checked clean", async () => {
+  test("cold:  the types, the names, then one fix-up round for the line in the wrong order;  checked clean", async () => {
     const claude = fakeClaude()
-    const exitCode = await translateProject(source(), { to: "es", out: join(folder, "Cartas") }, claude.run)
+    const exitCode = await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run)
     expect(exitCode).toBe(CLI.EXIT.OK)
-    expect(claude.prompts.map(kindOf)).toEqual(["names", "fix-ups"])
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
     // the fix-up was shown the line, its English, and why
-    expect(claude.prompts[1]).toContain('its color + " joker"')
-    expect(claude.prompts[1]).toContain("may read in the wrong order")
+    expect(claude.prompts[2]).toContain('its color + " joker"')
+    expect(claude.prompts[2]).toContain("may read in the wrong order")
     expect(written()[2]).toBe(`\t${FIXED}`)
     expect(written()[6]).toBe('\tsu etiqueta debería ser "comodín rojo"')
     // the record keeps the fix, for --update
@@ -78,20 +97,20 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
   test("a line a check says is wrong goes back too, round after round, until it passes or 3 rounds are up", async () => {
     // a claude that never fixes it:  three rounds asked, then left for a person
     const claude = fakeClaude({ fixes: [] as unknown[] })
-    const exitCode = await translateProject(source(), { to: "es", out: join(folder, "Cartas") }, claude.run)
+    const exitCode = await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run)
     expect(exitCode).toBe(CLI.EXIT.ERRORS)
-    expect(claude.prompts.map(kindOf)).toEqual(["names", "fix-ups"])
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
     let tries = 0
     const stubborn = fakeClaude(() => ({
       fixes: [{ file: "Carta.es.spell", line: 7, text: `su etiqueta debería ser "otra ${++tries}"` }]
     }))
-    await translateProject(source(), { to: "es", out: join(folder, "Cartas2") }, stubborn.run)
+    await translate(source(), { to: "es", out: join(folder, "Cartas2") }, stubborn.run)
     expect(stubborn.prompts.map(kindOf)).toEqual(["fix-ups", "fix-ups", "fix-ups"])
   })
 
   test("--update:  a fix made before is used again, never asked for;  a person's edit to an unchanged line stays", async () => {
     const out = join(folder, "Cartas")
-    await translateProject(source(), { to: "es", out }, fakeClaude().run)
+    await translate(source(), { to: "es", out }, fakeClaude().run)
     // a person edits the test's first line;  the English test's last line changes
     const lines = written()
     lines[5] = "\tobtener una carta nueva cuyo color es rojo"
@@ -99,7 +118,7 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     const changed = CARD.replace('"red joker"', '"red joker" ')
     writeFileSync(join(folder, "Cards", "Card.spell"), changed)
     const claude = fakeClaude()
-    await translateProject(source(changed), { to: "es", out, update: true }, claude.run)
+    await translate(source(changed), { to: "es", out, update: true }, claude.run)
     // every name is in the dictionary, and the fix in the record:  nothing to ask
     expect(claude.prompts).toEqual([])
     expect(written()[2]).toBe(`\t${FIXED}`)
@@ -108,16 +127,67 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
 
   test("--update with its file gone:  every line written again, the fix from the record, not from claude", async () => {
     const out = join(folder, "Cartas")
-    await translateProject(source(), { to: "es", out }, fakeClaude().run)
+    await translate(source(), { to: "es", out }, fakeClaude().run)
     rmSync(join(out, "Carta.es.spell"))
     const claude = fakeClaude()
-    await translateProject(source(), { to: "es", out, update: true }, claude.run)
+    await translate(source(), { to: "es", out, update: true }, claude.run)
     expect(claude.prompts).toEqual([])
     expect(written()[2]).toBe(`\t${FIXED}`)
   })
 
+  test("the shape check:  a line that reads but compiles to a different program goes back, named, saying why", async () => {
+    // claude's first fix-up also adds a color nobody asked for:  lint and the test can't tell
+    let round = 0
+    const claude = fakeClaude(() =>
+      ++round === 1
+        ? {
+            fixes: [
+              { file: "Carta.es.spell", line: 3, text: FIXED },
+              { file: "Carta.es.spell", line: 2, text: '- su "color" es uno de rojo, negro o azul' }
+            ]
+          }
+        : { fixes: [{ file: "Carta.es.spell", line: 2, text: '- su "color" es uno de rojo o negro' }] }
+    )
+    const exitCode = await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run, true)
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups", "fix-ups"])
+    expect(claude.prompts[3]).toContain(
+      "Carta.es.spell, line 2:  shape:  means something else (compiles to a different program):  the English compiles to `"
+    )
+    expect(written()[1]).toBe('\t- su "color" es uno de rojo o negro')
+    expect(exitCode).toBe(CLI.EXIT.OK)
+    expect(printed()).toContain("  shape:  6 of 6 statements compile to the same program as the English")
+  })
+
+  test("the glossary first:  a name another project chose costs no call;  a choice that differs is said", async () => {
+    writeFileSync(join(folder, "glossary.json5"), JSON.stringify(GLOSSARY))
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run)
+    // every type is in the glossary:  no types call
+    expect(claude.prompts.map(kindOf)).toEqual(["names", "fix-ups"])
+    expect(claude.prompts[0]).not.toContain('"color": ""')
+    expect(printed().find((line) => line.startsWith("  names:"))).toContain("5 from the glossary")
+    // a person picks another word for `label`:  the next run says so
+    const namesFile = join(folder, "Cards", "Cards.es.names.json5")
+    writeFileSync(namesFile, readFileSync(namesFile, "utf8").replace('"label": "etiqueta"', '"label": "rótulo"'))
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    expect(printed()).toContain("    `label` is `rótulo` here, `etiqueta` in the glossary (reviewed)")
+  })
+
+  test("--learn:  the project's names into the glossary, nothing translated", async () => {
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    const claude = fakeClaude()
+    expect(await translate(source(), { to: "es", learn: true }, claude.run)).toBe(CLI.EXIT.OK)
+    expect(claude.prompts).toEqual([])
+    const glossary = JSON5.parse(readFileSync(join(folder, "glossary.json5"), "utf8")) as GlossaryData
+    expect(glossary.names?.card).toEqual({ name: "carta", gender: "feminine", from: "learned:Cards" })
+    expect(glossary.names?.label).toEqual({ name: "etiqueta", gender: "feminine", from: "learned:Cards" })
+    // a project with no dictionary has nothing to learn
+    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    await expect(translate(source(), { to: "es", learn: true }, claude.run)).rejects.toThrow(/translate it first/)
+  })
+
   test("its style sheet comes along, its selectors translated as far as it knows the names", async () => {
-    await translateProject(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
     expect(readFileSync(join(folder, "Cartas", "styles.css"), "utf8")).toBe("ui-text[color] { margin: 0 }\n")
   })
 })
@@ -125,6 +195,27 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
 ////////////////
 // ## Helpers
 ////////////////
+
+/**
+ * `translateProject()`, with the glossary in the temp folder:  none, unless a test writes one.
+ * - `shapes`:  its checker hands back the translation's files, parsed, for the shape check.
+ */
+function translate(source: TranslateSource, options: TranslateOptions, run: ClaudeRunner, shapes = false) {
+  if (shapes) source.checker = (out) => () => Promise.resolve({ problems: check(out), files: parsedIn(out) })
+  return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5") })
+}
+
+/** The translation's file in `out`, parsed in a project of its own. */
+function parsedIn(out: string): SourceFile[] {
+  const contents = readFileSync(join(out, "Carta.es.spell"), "utf8")
+  const { files } = parseSpellProject([{ path: "/Carta.es.spell", contents }])
+  return [{ path: "/Carta.es.spell", contents, match: files[0]!.match }]
+}
+
+/** Everything the command printed, a line each. */
+function printed(): string[] {
+  return vi.mocked(CLI.out).mock.calls.map(([line]) => String(line))
+}
 
 /** The project as spell-app hands it over:  parsed, its declarations, and a checker. */
 function source(contents = CARD): TranslateSource {
@@ -155,15 +246,16 @@ function fakeClaude(answer: unknown = { fixes: [{ file: "Carta.es.spell", line: 
   const run: ClaudeRunner = (prompt) => {
     prompts.push(prompt)
     const reply =
-      kindOf(prompt) === "names" ? NAMES : typeof answer === "function" ? (answer as () => unknown)() : answer
+      kindOf(prompt) !== "fix-ups" ? NAMES : typeof answer === "function" ? (answer as () => unknown)() : answer
     return Promise.resolve(`\`\`\`json\n${JSON.stringify(reply)}\n\`\`\``)
   }
   return { run, prompts }
 }
 
-/** Which pass `prompt` is from. */
-function kindOf(prompt: string): "names" | "fix-ups" {
-  return prompt.startsWith("Translate the names") ? "names" : "fix-ups"
+/** Which pass `prompt` is from:  the names pass's types (shown no program), its names, or a fix-up. */
+function kindOf(prompt: string): "types" | "names" | "fix-ups" {
+  if (!prompt.startsWith("Translate the names")) return "fix-ups"
+  return prompt.includes("## The program") ? "names" : "types"
 }
 
 /** The translation's lines, as on disk. */

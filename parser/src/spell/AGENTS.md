@@ -63,21 +63,29 @@ when working with code in this folder, `src/spell/` of the `spell-lang` package 
   - Other repos import these files by name, e.g. `spell-lang/spell/node/buildTsx`.
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell-lang/spell`'s barrel may import it (WWOD §8 › "Barrels").
-- `translate/` (epic `spanish` P24-P25):  writing a project in another language, names first, then rule by rule
+- `translate/` (epic `spanish` P24-P26):  writing a project in another language, names first, then rule by rule
   (`spell lang translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
-  - `NamesPass`:  every name the project declares and its lines lack, translated by `claude -p` in one batch,
-    each checked readable, the unreadable asked for again once
+  - `NamesGlossary`:  the language pack's shared glossary of names, `languages/<lang>/glossary.json5`:
+    looked up before asking `claude`, each project's choices checked against it, grown by `--learn`
+    - spell as a corpus of programs (Owen, 2026-10-23):  the same English name, the same name in every project
+    - JSON5 read by node only:  nothing imports it, so it never reaches a browser
+  - `NamesPass`:  every name the project declares and its lines lack, and the glossary doesn't have, by `claude -p`:
+    the types in one call, then the rest in up to 6 calls at once, each checked readable,
+    the unreadable (and any word two calls both chose) asked for again once
   - `Translator`:  each line written again with its rule's twin in the other language's pack
     (the same class, registered in the same place), its slots filled with its children, translated the same way;
     it flags the lines whose word order may be wrong (`risky`)
-  - `FixUps`:  each line that fails lint or a test, or the writer couldn't write or flagged, written again by
-    `claude -p` in context, one call a round
+  - `ShapeCheck`:  each translated line compiled beside its source line, names and texts aside (`shapeOf()`):
+    a line that compiles to a different program "means something else"
+  - `FixUps`:  each line that fails lint, a test or the shape check, or the writer couldn't write or flagged,
+    written again by `claude -p` in context, one call a round
   - `ElementNames`:  the tags, attributes and values a project draws with, `<ui-*>` through Spell UI's names
     (handed in by spell-app:  spell-lang never imports Spell UI), in its JSX and its style sheets
   - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`, with its nouns' genders;
     beneath it, the names of the projects it imports
   - `NamesSeeder`:  fills one from a translation a person made (`--seed`)
   - `claude` is always injected (`ClaudeRunner`):  every class here is pure, and tested with a fake.
+    - Another way to ask (the Claude API, straight) is another `ClaudeRunner`:  no pass changes.
   - Imported by path, never through the barrel:  `spell-lang/spell/translate/Translator`.
 - `highlight/`:  `SpellHighlighter`.
   - It colours a snippet without a project, for `<ui-code language="spell">`.

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell-lang/spell"
 import { parseSpellProject } from "spell-lang/spell/test"
+import { shapeOf } from "spell-lang/spell/translate/ShapeCheck"
 import { Translator } from "spell-lang/spell/translate/Translator"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import type { NamesData } from "spell-lang/spell/translate/translate.types"
@@ -9,7 +10,7 @@ import type { NamesData } from "spell-lang/spell/translate/translate.types"
 /**
  * The translator (epic `spanish` P24):  a project written in English, written again in Spanish, rule by rule.
  * - Each case:  the English, the Spanish it writes, and that Spanish read back by Spanish's parser:
- *   no errors, and the same compiled javascript SHAPE as the English (`shapeOf()`:  names and texts left out,
+ *   no errors, and the same compiled javascript SHAPE as the English (`ShapeCheck`'s `shapeOf()`:  names and texts left out,
  *   as they're the dictionary's words).
  * - On a small card game, in the outline style, written inline:  a lower repo's tests never read spell-app's examples.
  */
@@ -213,17 +214,4 @@ function translatedWith(data: NamesData, source: string) {
   const translator = new Translator({ from: ENGLISH, to: SPANISH, names })
   const file = translator.translateFile({ path: "/Card.spell", contents: source, match: files[0]!.match })
   return { names, file, translator }
-}
-
-/**
- * `js`'s shape:  its names and texts each one placeholder, its comments out --
- * so two programs which differ only in their names' language compare equal.
- */
-function shapeOf(js: string): string {
-  return js
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")
-    .replace(/"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "TEXT")
-    .replace(/[\p{L}_$][\p{L}\p{N}_$]*/gu, "NAME")
-    .replace(/\s+/g, " ")
-    .trim()
 }

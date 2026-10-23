@@ -6,8 +6,9 @@ import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import type { ClaudeRunner, DeclarationStatement, MissingName } from "spell-lang/spell/translate/translate.types"
 
 /**
- * The names pass (epic `spanish` P25):  every name a project declares, and what its lines lack, asked for in one go,
- * each answer checked readable by Spanish's parser, the unreadable ones asked for again, once.
+ * The names pass (epic `spanish` P25-P26):  every name a project declares, and what its lines lack -- the types first,
+ * then the rest side by side, a group of files each -- each answer checked readable by Spanish's parser,
+ * the unreadable ones asked for again, once.
  * - `claude` is a fake:  it answers from a table, and keeps each prompt it's given.
  */
 
@@ -24,8 +25,20 @@ const DECLARATIONS: DeclarationStatement[] = [
   { name: '"is a (rank)"', kind: "method", of: "Card", output: "is_a_$rank" }
 ]
 
-/** The game's one file, for the prompt. */
-const FILES = [{ path: "/Card.spell", contents: '// a playing card\na "card" is a thing where:', match: undefined }]
+/** The game's files, for the prompts:  each name in the first that holds it. */
+const FILES = [
+  {
+    path: "/Card.spell",
+    contents:
+      '// a playing card\na "card" is a thing where:\n\t- its "rank" is one of ace, 2 or king\n\t- to turn it over:',
+    match: undefined
+  },
+  {
+    path: "/Pile.spell",
+    contents: 'a "stock pile" is a list of cards\n\tits picture is "ace of hearts"',
+    match: undefined
+  }
+]
 
 /** A good answer to the first call:  every name, with genders. */
 const ANSWER = {
@@ -56,22 +69,61 @@ describe("NamesPass:  every name in one go, before any line", () => {
     ])
   })
 
-  test("one call for the names, one per file for the comments:  the answers into the dictionary, genders too", async () => {
-    const { pass, names, prompts } = namesPass({}, [
-      fenced(ANSWER),
-      fenced({ comments: { "a playing card": "una carta de la baraja" } })
-    ])
+  test("two stages:  the types alone, then the rest a group of files each, side by side;  genders too", async () => {
+    const answer = { ...ANSWER, comments: { "a playing card": "una carta de la baraja" } }
+    const { pass, names, prompts, stages } = namesPass({}, () => fenced(answer))
     const wanted: MissingName[] = [...pass.wanted([]), { kind: "comments", words: "a playing card" }]
     expect(await pass.draft(wanted)).toBe(13)
+    // stage 1:  the types alone, shown no file:  just the program's words
+    expect(prompts[0]).toContain('"card": {')
+    expect(prompts[0]).not.toContain('"rank": ""')
+    expect(prompts[0]).not.toContain("## The program")
+    // stage 2:  a call per file, each shown its own file and the types stage 1 chose
+    expect(prompts).toHaveLength(3)
+    expect(prompts[1]).toContain('"turn it over": ""')
+    expect(prompts[1]).toContain('"a playing card": ""')
+    expect(prompts[1]).toContain("### /Card.spell")
+    expect(prompts[1]).not.toContain("### /Pile.spell")
+    expect(prompts[1]).toContain('"name": "carta"')
+    expect(prompts[2]).toContain('"picture": ""')
+    expect(prompts[2]).toContain("### /Pile.spell")
+    expect(pass.calls.map(({ stage }) => stage)).toEqual(["types", "names", "names"])
+    // the two second-stage calls ran at once:  both started before either ended
+    expect(Math.max(...stages.slice(1).map(({ started }) => started))).toBeLessThan(
+      Math.min(...stages.slice(1).map(({ ended }) => ended))
+    )
     // what it wasn't asked for is left out:  a text no line lacked
     expect(names.data.texts["ace of hearts"]).toBeUndefined()
-    expect(prompts).toHaveLength(2)
-    expect(prompts[0]).toContain('"turn it over": ""')
-    expect(prompts[1]).toContain('"a playing card": ""')
     expect(names.type("cards")).toEqual({ name: "cartas", gender: "feminine" })
-    expect(names.data.comments["a playing card"]).toBe("una carta de la baraja")
     // J146:  a name that isn't a type, by the gender claude gave it -- not a guess by its ending
     expect(names.genderOf("imagen")).toBe("feminine")
+  })
+
+  test("two calls side by side that choose one word for two names:  the later one is asked for again", async () => {
+    const clash = { ...ANSWER, names: { ...ANSWER.names, picture: "rango" } }
+    const again = { names: { picture: "imagen" } }
+    const { pass, names, prompts } = namesPass({}, (prompt) =>
+      fenced(prompt.includes("Your answers spell can't read") ? again : clash)
+    )
+    await pass.draft(pass.wanted([]))
+    expect(pass.calls.map(({ stage }) => stage)).toEqual(["types", "names", "names", "again"])
+    expect(prompts[3]).toContain("`picture` => `rango`:  that's `rank` already -- one word, one thing")
+    expect(names.data.names.rank).toBe("rango")
+    expect(names.data.names.picture).toBe("imagen")
+  })
+
+  test("`groups()`:  evened out by how much each writes, at most 6 calls;  a few names, one call", () => {
+    const { pass } = namesPass({})
+    const many = (count: number, words: string): MissingName[] =>
+      Array.from({ length: count }, (_, at) => ({ kind: "texts", words: `${words} ${String(at).padStart(3, "0")}` }))
+    // names no file holds go with the first group, split while it writes over 400 characters:  60 of 14
+    const groups = pass.groups(many(60, "nowhere at"))
+    expect(groups.map(({ names }) => names.length)).toEqual([15, 15, 15, 15])
+    expect(groups.every(({ files }) => files[0]!.path === "/Card.spell")).toBe(true)
+    // more:  6 calls at most
+    expect(pass.groups(many(200, "nowhere at"))).toHaveLength(6)
+    // a few names:  one call
+    expect(pass.groups(many(3, "nowhere"))).toHaveLength(1)
   })
 
   test("an answer Spanish can't read is asked for again, once, saying why;  still unreadable, left out", async () => {
@@ -82,13 +134,15 @@ describe("NamesPass:  every name in one go, before any line", () => {
       phrases: { "turn it over": "voltear de nuevo", "is a (rank)": "es un rango" }
     }
     const again = { types: { card: { name: "carta", gender: "feminine" } }, names: { picture: "imagen de la carta" } }
-    const { pass, names, prompts } = namesPass({}, [fenced(first), fenced(again)])
+    // the types, then a call per file, then the one call asking again for all of them
+    const { pass, names, prompts } = namesPass({}, [fenced(first), fenced(first), fenced(first), fenced(again)])
     await pass.draft(pass.wanted([]))
-    expect(prompts).toHaveLength(2)
-    expect(prompts[1]).toContain('`card` => `{"name":"carta"}`:  no gender')
-    expect(prompts[1]).toContain("holds `de`, one of spell's own words")
-    expect(prompts[1]).toContain("keeps its `it`")
-    expect(prompts[1]).toContain("keeps 1 `(slots)`, not 0")
+    expect(prompts).toHaveLength(4)
+    expect(pass.calls.map(({ stage }) => stage)).toEqual(["types", "names", "names", "again"])
+    expect(prompts[3]).toContain('`card` => `{"name":"carta"}`:  no gender')
+    expect(prompts[3]).toContain("holds `de`, one of spell's own words")
+    expect(prompts[3]).toContain("keeps its `it`")
+    expect(prompts[3]).toContain("keeps 1 `(slots)`, not 0")
     expect(names.data.types.card).toEqual({ name: "carta", gender: "feminine" })
     expect(names.data.names.picture).toBeUndefined()
     expect(pass.notes.some((note) => note.startsWith("left TODO:  `picture`"))).toBe(true)
@@ -117,20 +171,30 @@ describe("NamesPass:  every name in one go, before any line", () => {
 // ## Helpers
 ////////////////
 
-/** A names pass over `DECLARATIONS`, its dictionary `data`, its fake claude answering `answers` in turn. */
+/**
+ * A names pass over `DECLARATIONS`, its dictionary `data`, its fake claude answering `answers` in turn
+ * (or each prompt by `answers()`), a moment later.
+ * - `stages`:  when each call started and ended, in the order asked.
+ */
 function namesPass(
   data: ConstructorParameters<typeof TranslationNames>[0],
-  answers: string[] = [],
+  answers: string[] | ((prompt: string) => string) = [],
   run?: ClaudeRunner
 ) {
   const names = new TranslationNames(data, { from: ENGLISH, to: SPANISH })
   const prompts: string[] = []
-  const fake: ClaudeRunner = (prompt) => {
+  const stages: Array<{ started: number; ended: number }> = []
+  const fake: ClaudeRunner = async (prompt) => {
     prompts.push(prompt)
-    return Promise.resolve(answers.shift() ?? "")
+    const stage = { started: performance.now(), ended: Infinity }
+    stages.push(stage)
+    const answer = typeof answers === "function" ? answers(prompt) : (answers.shift() ?? "")
+    await new Promise((done) => setTimeout(done, 5))
+    stage.ended = performance.now()
+    return answer
   }
   const pass = new NamesPass({ names, run: run ?? fake, files: FILES, declarations: DECLARATIONS })
-  return { pass, names, prompts }
+  return { pass, names, prompts, stages }
 }
 
 /** `answer` as claude writes it:  JSON in a fence. */

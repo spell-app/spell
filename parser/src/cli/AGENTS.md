@@ -37,14 +37,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell lang translate` (epic `spanish` P24-P25) is half and half:
+- `spell lang translate` (epic `spanish` P24-P26) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation
   - then [translateProject.ts](translateProject.ts), here, runs the three passes (names, lines, fix-ups),
-    runs `claude -p` and writes the files
-  - the translating itself is spell's [translate/](../spell/translate/) (`NamesPass`, `Translator`, `FixUps`),
-    on parsed files:  no node
+    runs `claude -p` (as fast as its flags make it), reads and writes the files, the shared glossary too (`--learn`)
+  - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
+    `ShapeCheck`, `FixUps`), on parsed files:  no node
 - [index.ts](index.ts) (`spell-lang/cli`, here and from every other repo):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape

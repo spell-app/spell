@@ -163,9 +163,9 @@ export default function languageCommands(spell: Command): void {
   lang
     .command("translate")
     .description(
-      "write a project in another language:  its names first (<Project>.<lang>.names.json5, one claude -p batch), " +
-        "then line by line, rule by rule, then claude fixes each line that fails lint or a test -- " +
-        "exits 1 if any line still needs a person"
+      "write a project in another language:  its names first (<Project>.<lang>.names.json5:  the shared glossary's, " +
+        "then claude -p's), then line by line, rule by rule, then claude fixes each line that fails lint, a test " +
+        "or the shape check -- exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
     .requiredOption("--to <lang>", "the language to write it in, e.g. es")
@@ -175,6 +175,10 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
+    )
+    .option(
+      "--learn",
+      "translate nothing:  add the project's names to the language's shared glossary, for every project"
     )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) =>

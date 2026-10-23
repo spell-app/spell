@@ -6,7 +6,8 @@ import type { ClaudeRunner } from "./translate.types"
  * The FIX-UP PASS of a translation (epic `spanish` P25):  each line the mechanical writer got wrong, written again
  * by `claude -p`, in context.
  * - Which lines (`FixUpLine`):  one that fails lint, one a failed test points to, one the writer couldn't write
- *   (`// TODO: translate`), one it wrote whose word order may be wrong (`TranslatedFile.risky`).
+ *   (`// TODO: translate`), one it wrote whose word order may be wrong (`TranslatedFile.risky`),
+ *   one that compiles to a different program than its English (`ShapeCheck`, epic `spanish` P26).
  * - ONE call a round for all of them (`round()`):  each with its English, the Spanish written, the lines around it
  *   in both, and what's wrong;  and the dictionary, so it says each name as the rest of the program does.
  * - Its answer may fix any line it was shown, not only the one asked about:
@@ -115,10 +116,14 @@ export class FixUps {
       `Fix each line so it reads as natural ${to.name}, means what the ${from.name} means, and spell reads it:`,
       "- a line that fails lint or a test:  what it says is wrong.  The fault may be on another line shown:  fix that one.",
       "- a line marked `// TODO: translate`:  write it in full, and drop the note",
+      "- a line that means something else (compiles to a different program):  compare the two javascripts given;",
+      "  a loop's or a step's own variable may read as something else in the translation:  give it another word,",
+      "  on every line shown that uses it",
       `- a text joined to a value with \`+\`:  put its words where ${to.name} says them, e.g.`,
       '  `its color + " joker"` => `"comodín " + su color`;  a test that checks that text must agree with it',
       "- a line that's right already:  leave it out",
-      "- keep each name as the dictionary says it, each line one line, and its indent and `- ` bullet as they are",
+      "- keep each name as the dictionary says it (but for that variable), each line one line,",
+      "  and its indent and `- ` bullet as they are",
       "",
       "Answer with ONE JSON object in a ```json fence:",
       '`{ "fixes": [ { "file": "Carta.es.spell", "line": 142, "text": "- su nombre es \\"comodín \\" + su color" } ] }`',

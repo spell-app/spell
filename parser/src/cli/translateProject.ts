@@ -1,10 +1,14 @@
 /**
- * `spell lang translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24-P25), in three passes:
- * 1. NAMES:  every name the project's people chose, translated by `claude -p` in ONE go (`NamesPass`),
- *    into its names dictionary:  its types, properties, values and methods (its declarations), its texts and comments
+ * `spell lang translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24-P26), in three passes:
+ * 1. NAMES:  every name the project's people chose, into its names dictionary:  its types, properties, values and
+ *    methods (its declarations), its texts and comments
+ *    - first from the language pack's shared glossary (`NamesGlossary`):  no call for a name another project chose
+ *    - the rest by `claude -p` (`NamesPass`):  the types in one small call, then the rest in a few calls at once
  * 2. LINES:  each file written again, line by line, by its rules' twins in the other language (`Translator`)
- * 3. FIX-UPS:  each line that fails lint or a test, couldn't be written, or may read in the wrong order,
- *    written again by `claude -p` in context (`FixUps`);  checked again, a few rounds at most
+ * 3. FIX-UPS:  each line that fails lint or a test, compiles to a different program than its English (`ShapeCheck`),
+ *    couldn't be written, or may read in the wrong order, written again by `claude -p` in context (`FixUps`);
+ *    checked again, a few rounds at most
+ * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
  *   that lints and tests the translation.  So this file needs no project groups, only parsed files.
@@ -27,14 +31,17 @@ import { SP } from "spell-lang/spell"
 import type { TranslateOptions } from "spell-lang/cli"
 import { ElementNames } from "spell-lang/spell/translate/ElementNames"
 import { FixUps, type FixUpFile, type FixUpLine } from "spell-lang/spell/translate/FixUps"
-import { NamesPass } from "spell-lang/spell/translate/NamesPass"
+import { NamesGlossary } from "spell-lang/spell/translate/NamesGlossary"
+import { NamesPass, type NamesStage } from "spell-lang/spell/translate/NamesPass"
 import { NamesSeeder } from "spell-lang/spell/translate/NamesSeeder"
+import { ShapeCheck } from "spell-lang/spell/translate/ShapeCheck"
 import { TranslationNames } from "spell-lang/spell/translate/TranslationNames"
 import { Translator } from "spell-lang/spell/translate/Translator"
 import type {
   ClaudeEffort,
   ClaudeRunner,
   DeclarationStatement,
+  GlossaryData,
   ImportedProject,
   LineProblem,
   MissingName,
@@ -69,14 +76,17 @@ export type TranslateSource = {
 
 /**
  * Translate `source` into language `options.to`, and write it:  see the file's docstring.
- * - `run`:  how to run `claude -p` -- the real one by default;  a test's fake.
- * - Returns the exit code:  `EXIT.ERRORS` if any line still needs a person, fails lint, or a test fails.
- * - Throws `CliError` for a language it doesn't know, or the language the project is already in.
+ * - `run`:  how to ask Claude -- `claude -p` by default;  a test's fake.
+ * - `glossaryFile`:  the shared glossary -- the language pack's `glossary.json5` by default;  a test's own.
+ * - Returns the exit code:  `EXIT.ERRORS` if any line still needs a person, fails lint, a test, or the shape check.
+ * - Throws `CliError` for a language it doesn't know, or the language the project is already in;
+ *   with `--learn`, for a project with no dictionary yet.
  */
 export async function translateProject(
   source: TranslateSource,
   options: TranslateOptions,
-  run: ClaudeRunner = runClaude
+  run: ClaudeRunner = runClaude,
+  { glossaryFile = glossaryFileFor(options.to) }: { glossaryFile?: string } = {}
 ): Promise<number> {
   const started = performance.now()
   const from = SP.Language.forFile(source.files[0]?.path ?? "")
@@ -89,10 +99,14 @@ export async function translateProject(
 
   const paths = translationPaths(source, to)
   const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
+  const shared = new NamesGlossary(existsSync(glossaryFile) ? readJSON5File<GlossaryData>(glossaryFile) : {})
+  if (options.learn) return learn(source, names, shared, paths.names, glossaryFile)
   const seeded = source.seed ? new NamesSeeder(names).seed(source.files, source.seed) : 0
   for (const imported of source.imports ?? []) {
     names.addImported(imported.names ?? TranslationNames.asDeclared(imported.declarations.statements))
   }
+  // the glossary's genders beneath ours, so an article agrees without a guess
+  names.addImported({ genders: shared.data.genders })
   const record = options.update && existsSync(paths.record) ? readJSON5File<TranslationRecord>(paths.record) : undefined
   const glossary = glossaryFor(to.lang)
   const timings: Timings = {}
@@ -109,9 +123,14 @@ export async function translateProject(
     files: source.files,
     declarations: source.declarations ?? [],
     words: source.words,
-    glossary
+    glossary,
+    shared: shared.relevantTo(source.files.map((file) => file.contents).join("\n"))
   })
-  const wanted = namesPass.wanted(missingIn(translated.files, plans))
+  // what the glossary knows first:  no call for it
+  const { filled: fromGlossary, rest: wanted } = shared.fill(
+    names,
+    namesPass.wanted(missingIn(translated.files, plans))
+  )
   const drafted = ai ? await namesPass.draft(wanted) : 0
   timings.names = performance.now() - mark
 
@@ -140,7 +159,7 @@ export async function translateProject(
   // 3. fix-ups:  each line wrong in context, a round at a time, checked between
   mark = performance.now()
   const fixUps = new FixUps({ run, names, glossary })
-  const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai })
+  const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai, shapes: new ShapeCheck() })
   timings.fixUps = performance.now() - mark
 
   writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toJSON(), null, 2)}\n`))
@@ -156,10 +175,12 @@ export async function translateProject(
     plans,
     seeded,
     drafted,
+    fromGlossary,
+    differences: shared.differences(names),
     paths,
     timings,
     checked,
-    calls: { names: namesPass.durations, fixUps: fixUps.durations },
+    calls: { names: namesPass.calls, fixUps: fixUps.durations },
     notes: [...namesPass.notes, ...fixUps.notes]
   })
 }
@@ -314,6 +335,8 @@ function hashOf(line: string): string {
  * - Round 1 also takes each line the writer couldn't write, and each it flagged `risky` (word order);
  *   the later rounds, what's still wrong.
  * - Only lines written THIS run:  a kept line (`--update`) is a person's, or was fixed before.
+ * - Each check also compares each line's compiled shape with its English's (`shapes`):
+ *   a line that compiles to a different program is a problem too, "means something else".
  * - With no checker, one round, of the lines the writer flagged;  with `--no-ai`, a check and no fixes.
  * - SIDE EFFECT:  rewrites each file it fixes, and adds each fix to `fixes`, for the record.
  */
@@ -323,7 +346,8 @@ async function fixUp({
   outFolder,
   fixUps,
   fixes,
-  ai
+  ai,
+  shapes
 }: {
   source: TranslateSource
   outputs: TranslationOutput[]
@@ -331,13 +355,15 @@ async function fixUp({
   fixUps: FixUps
   fixes: RecordedFix[]
   ai: boolean
+  shapes: ShapeCheck
 }): Promise<CheckResult> {
   const check = source.checker?.(outFolder)
   const byPath = new Map(outputs.map((output) => [output.path, output]))
   const files = new Map<string, FixUpFile>(outputs.map((output) => [output.path, output]))
+  const pairs = new Map(outputs.map((output) => [output.file.path, output.path]))
   let result: CheckResult = { problems: [], checks: 0 }
   for (let round = 0; ; round++) {
-    if (check) result = { ...(await check()), checks: round + 1 }
+    if (check) result = withShapes(await check(), round + 1, shapes, source.files, pairs)
     const wanted = new Map<string, FixUpLine>()
     const want = (path: string, line: number, why: string) => {
       const output = byPath.get(path)
@@ -382,8 +408,45 @@ async function fixUp({
 /** How many rounds of fix-ups, at most:  each one a `claude` call, and a check after. */
 const MAX_ROUNDS = 3
 
-/** How the last check went, and how many checks there were. */
-type CheckResult = Awaited<ReturnType<TranslationChecker>> & { checks: number }
+/**
+ * `checked` (one check's result) with the shape check's problems added:  each line of the translation whose
+ * compiled shape differs from its English's (`ShapeCheck`), when the checker gave back the files it parsed.
+ */
+function withShapes(
+  checked: Awaited<ReturnType<TranslationChecker>>,
+  checks: number,
+  shapes: ShapeCheck,
+  sources: SourceFile[],
+  pairs: Map<string, string>
+): CheckResult {
+  if (!checked.files) return { ...checked, checks }
+  const mismatches = shapes.compare(sources, checked.files, pairs)
+  const from = SP.Language.forFile(sources[0]?.path ?? "").name
+  const problems: LineProblem[] = mismatches.map(({ path, line, difference }) => ({
+    path,
+    line,
+    message: `${SHAPE_MESSAGE}:  the ${from} compiles to \`${difference.english}\`, this to \`${difference.translated}\``,
+    source: "shape"
+  }))
+  return {
+    ...checked,
+    problems: [...checked.problems, ...problems],
+    checks,
+    shapes: { statements: shapes.statements, same: shapes.statements - mismatches.length }
+  }
+}
+
+/** What the shape check says of a line that compiles to a different program than its English. */
+const SHAPE_MESSAGE = "means something else (compiles to a different program)"
+
+/**
+ * How the last check went, and how many checks there were;
+ * with how many statements the shape check compared, and how many had the same shape.
+ */
+type CheckResult = Awaited<ReturnType<TranslationChecker>> & {
+  checks: number
+  shapes?: { statements: number; same: number }
+}
 
 ////////////////
 // ## Files
@@ -540,15 +603,25 @@ const NOT_COPIED =
 
 /**
  * Run `claude -p` on `prompt`:  what it printed.
- * - With no tools, from a folder of its own:  it only answers, and reads no project's `CLAUDE.md` first.
- * - `effort`:  `claude --effort`, when given.
- * - Several at once run side by side (the names pass's comments).
+ * - As fast as its flags make it (epic `spanish` P26):
+ *   - no tools, from a folder of its own:  it only answers
+ *   - `--safe-mode`, `--strict-mcp-config`:  none of the person's hooks, plugins, MCP servers or `CLAUDE.md`
+ *   - its own short system prompt, not Claude Code's long one
+ *   - `--no-session-persistence`:  no session saved
+ * - `effort`, `model`:  `claude --effort`, `--model`, when given.
+ * - Several at once run side by side (the names pass's second stage).
  * - throws if it couldn't run, or failed
  * - SIDE EFFECT:  runs `claude`;  it must be on the `PATH`, signed in.
  */
-function runClaude(prompt: string, { effort }: { effort?: ClaudeEffort } = {}): Promise<string> {
+function runClaude(prompt: string, { effort, model }: { effort?: ClaudeEffort; model?: string } = {}): Promise<string> {
   return new Promise((done, fail) => {
-    const args = ["-p", "--tools", "", ...(effort ? ["--effort", effort] : [])]
+    const args = [
+      "-p",
+      ...["--tools", "", "--safe-mode", "--strict-mcp-config", "--no-session-persistence"],
+      ...["--system-prompt", CLAUDE_SYSTEM_PROMPT],
+      ...(effort ? ["--effort", effort] : []),
+      ...(model ? ["--model", model] : [])
+    ]
     const child = spawn("claude", args, { cwd: tmpdir(), stdio: ["pipe", "pipe", "pipe"] })
     let stdout = ""
     let stderr = ""
@@ -560,14 +633,53 @@ function runClaude(prompt: string, { effort }: { effort?: ClaudeEffort } = {}): 
   })
 }
 
+/** What `claude -p` is told it is, in place of Claude Code's own system prompt. */
+const CLAUDE_SYSTEM_PROMPT =
+  "You translate programs written in spell, a programming language of plain words, from one human language into " +
+  "another.  Answer only with what you're asked for, in the form asked for."
+
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */
 function glossaryFor(lang: string): string | undefined {
   const path = join(LANGUAGES_FOLDER, lang, "GLOSSARY.md")
   return existsSync(path) ? readFileSync(path, "utf8") : undefined
 }
 
+/** The language pack's names glossary, `languages/<lang>/glossary.json5`:  see `NamesGlossary`. */
+function glossaryFileFor(lang: string): string {
+  return join(LANGUAGES_FOLDER, lang, "glossary.json5")
+}
+
 /** spell's language packs' folder. */
 const LANGUAGES_FOLDER = fileURLToPath(new URL("../spell/languages/", import.meta.url))
+
+////////////////
+// ## Learning
+////////////////
+
+/**
+ * `--learn`:  add `source`'s dictionary (`names`, from `namesPath`) to the shared glossary, and write it:
+ * every project after it gets the same names.
+ * - Prints how many it added, and each name it kept because the glossary's own source is as good or better.
+ * - throws `CliError` if the project has no dictionary yet:  translate it first
+ */
+function learn(
+  source: TranslateSource,
+  names: TranslationNames,
+  shared: NamesGlossary,
+  namesPath: string,
+  glossaryFile: string
+): number {
+  if (!existsSync(namesPath)) {
+    throw new CLI.CliError(`${source.projectName} has no ${basename(namesPath)} to learn from:  translate it first`)
+  }
+  const { added, kept } = shared.learn(names, source.projectName)
+  writeFileSync(glossaryFile, keepingCommentsIn(glossaryFile, `${JSON.stringify(shared.toJSON(), null, 2)}\n`))
+  CLI.out(
+    `${source.projectName}'s names in the ${names.to.name} glossary:  ${added} added, ${CLI.relativePath(glossaryFile)}`
+  )
+  for (const each of kept) CLI.out(`  ${each}`)
+  return CLI.EXIT.OK
+}
 
 ////////////////
 // ## Reporting
@@ -586,10 +698,12 @@ function report(done: {
   plans: LinePlan[]
   seeded: number
   drafted: number
+  fromGlossary: number
+  differences: string[]
   paths: { names: string; record: string }
   timings: Timings
   checked: CheckResult
-  calls: { names: number[]; fixUps: number[] }
+  calls: { names: Array<{ stage: NamesStage; ms: number }>; fixUps: number[] }
   notes: string[]
 }): number {
   const { source, to, outFolder, translated, outputs, plans, seeded, drafted, paths, timings, checked, calls } = done
@@ -605,6 +719,7 @@ function report(done: {
   CLI.out(
     `  names:  ${CLI.relativePath(paths.names)}` +
       (seeded ? `, ${seeded} seeded` : "") +
+      (done.fromGlossary ? `, ${done.fromGlossary} from the glossary` : "") +
       (drafted ? `, ${drafted} drafted by claude:  review them` : "")
   )
   const fixed = outputs.reduce(
@@ -618,12 +733,24 @@ function report(done: {
     `  passes:  names ${seconds(timings.names)}, lines ${seconds(timings.lines)}, fix-ups ${seconds(timings.fixUps)}` +
       ` (${plural(fixed, "line")} fixed in ${plural(calls.fixUps.length, "round")}, ${plural(checked.checks, "check")})`
   )
+  const stage = (name: NamesStage) => calls.names.filter((call) => call.stage === name).map(({ ms }) => ms)
+  const namesCalls = (["types", "names", "again"] as const)
+    .filter((name) => stage(name).length)
+    .map((name) => `${name} ${stage(name).length}${each(stage(name))}`)
   CLI.out(
-    `  claude -p:  ${calls.names.length + calls.fixUps.length} calls:  names ${calls.names.length}${each(calls.names)}, ` +
-      `fix-ups ${calls.fixUps.length}${each(calls.fixUps)}`
+    `  claude -p:  ${calls.names.length + calls.fixUps.length} calls:  ` +
+      [...namesCalls, `fix-ups ${calls.fixUps.length}${each(calls.fixUps)}`].join(", ")
   )
-  const { tests } = checked
+  const { tests, shapes } = checked
   if (tests && tests.passed + tests.failed) CLI.out(`  tests:  ${tests.passed} passed, ${tests.failed} failed`)
+  if (shapes) {
+    const from = SP.Language.forFile(source.files[0]?.path ?? "").name
+    CLI.out(`  shape:  ${shapes.same} of ${shapes.statements} statements compile to the same program as the ${from}`)
+  }
+  if (done.differences.length) {
+    CLI.out(`  ${plural(done.differences.length, "name")} chosen otherwise than the ${to.name} glossary:`)
+    for (const difference of done.differences) CLI.out(`    ${difference}`)
+  }
   for (const note of done.notes) CLI.err(`  ${note}`)
   const todo = outputs.flatMap((output) =>
     output.lines.flatMap((line, index) => {

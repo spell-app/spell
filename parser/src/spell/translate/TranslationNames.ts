@@ -72,6 +72,7 @@ export class TranslationNames {
    * - `data`:  its own dictionary, when we import its translation;
    *   else its names as it declares them (`declaredIn()`), each itself:
    *   the only words the other language's parser reads for a project in ours, `increment el contador`.
+   * - Also the pack's glossary's `genders` (`NamesGlossary`):  beneath ours, never written to our file.
    */
   addImported(data: NamesData): void {
     for (const kind of NAMES_KINDS) Object.assign(this.imported[kind], data[kind])
@@ -151,7 +152,8 @@ export class TranslationNames {
 
   /**
    * The gender of a noun in the OTHER language, `words` as written there (`cartas`, `pila de reserva`):
-   * its type's, if it names one;  else the dictionary's `genders` (`imagen` => `feminine`, epic `spanish` J146);
+   * its type's, if it names one;  else the dictionary's `genders` (`imagen` => `feminine`, epic `spanish` J146),
+   * then an import's or the glossary's (epic `spanish` P26);
    * else the pack's guess by its ending -- `undefined` for a language with none.
    */
   genderOf(words: string): string | undefined {
@@ -162,8 +164,11 @@ export class TranslationNames {
       ({ name }) => name === singular || name === words
     )
     if (type?.gender) return type.gender
-    const known = this.data.genders[singular] ?? this.data.genders[words] ?? this.data.genders[words.split(" ")[0]!]
-    if (known) return known
+    // ours, else beneath them:  an import's, the glossary's (`addImported()`)
+    for (const genders of [this.data.genders, this.imported.genders]) {
+      const known = genders[singular] ?? genders[words] ?? genders[words.split(" ")[0]!]
+      if (known) return known
+    }
     // its guess, by the other language's own rules for singular and plural:  `as` is one ace
     const article = P.Inflector.using(this.to.inflector, () => articles.article("definite", singular, undefined))
     return articles.genderOf(article)

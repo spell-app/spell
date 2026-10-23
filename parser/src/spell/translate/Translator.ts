@@ -1335,7 +1335,7 @@ function findMatch(match: P.Match, test: (match: P.Match) => boolean): P.Match |
 }
 
 /** The nested bodies (`block` matches) of `statement`, at any depth but not inside another body. */
-function bodiesIn(statement: P.Match): P.Match[] {
+export function bodiesIn(statement: P.Match): P.Match[] {
   const bodies: P.Match[] = []
   const visit = (match: P.Match) => {
     for (const child of match.matched) {
