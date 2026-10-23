@@ -60,7 +60,7 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       return [["bedtime", ...rest]]
     }
     case "open":
-      // the Spell Docs tab, unless `--review` (Owen, 2026-10-12);  the tool's own `open` keeps the Review tab
+      // the Epic Docs tab, unless `--review` (Owen, 2026-10-12);  the tool's own `open` keeps the Review tab
       refused(verb, target)
       return [["open", ...args.filter((arg) => arg !== "--review"), ...(args.includes("--review") ? [] : ["--docs"])]]
     case "update":

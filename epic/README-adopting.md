@@ -3,20 +3,28 @@
 ```sh
 cd ~/www/my-app
 epic init
-# ~/www/my-app/.epic/config.json5:  written
-#   contentFolder:  "../my-app.epics"
-#   baseBranch:  "main"
-#   worktreesFolder:  "../my-app.worktrees"
-#   installCommand:  "npm install"
-#   ... 14 more, one a line
-# ~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
-# ~/www/my-app/epics:  linked
-# ~/www/my-app/sagas:  linked
-# ~/www/my-app/guides:  linked
-# ~/www/my-app/pages:  linked
-# ~/www/my-app/.gitignore:  written
-# next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+~/www/my-app/.epic/config.json5:  written
+  contentFolder:  "../my-app.epics"
+  baseBranch:  "main"
+  worktreesFolder:  "../my-app.worktrees"
+  installCommand:  "npm install"
+  ... 18 more, one a line
+~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
+~/www/my-app/epics:  linked
+~/www/my-app/sagas:  linked
+~/www/my-app/guides:  linked
+~/www/my-app/pages:  linked
+~/www/my-app/.gitignore:  written
+next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them
+```
+
+</details>
 
 _A repo that had never heard of Spell, set up for epics in one command.
 Real output, trimmed, the home folder shortened to `~`._
@@ -101,8 +109,16 @@ Then check that `epic` answers:
 
 ```sh
 epic --version
-# epic 85f239f (main) ~/www/spell/spell-epic
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+epic ... (...) .../spell-epic
+```
+
+</details>
 
 - `--version` names the code that answers:  its commit, its branch and the checkout it's in.
 - `~/.local/bin`, where the link goes, may not be on your `PATH`:  put the link wherever yours looks.
@@ -241,6 +257,9 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 | `app.start` | not written | the shell command that starts the app, run in the background when it doesn't answer (`"npm run dev"`) |
 | `repos` | not written | a MULTI-REPO checkout's child repos (a list, or a file such as `"repos.json5"`):  an epic's worktree is then a worktree of the top with one of every child repo inside it, all on the epic's branch;  a child finds its top as the folder above it (`epic config top`) |
 | `checkoutPatches` | not written:  a comment shows how | fixes every checkout gets at once, the worktrees behind `main` too (`epic worktree patch`):  each an `id`, a `date`, a `why`, and a `copy` (a file of `main`'s, put where it isn't tracked yet, git-excluded) or a `run` (a command, once per checkout) |
+| `voices` | not written | the repo's own voices, a name to a file from the main checkout (`"code": "agents/wwod/writing.md"`), over `spell-epic`'s `voices/<name>.md` (`epic voice`) |
+| `pageVoices` | not written | the voice each kind of page is written in, over the defaults:  `readme` for READMEs and guides, `code` for code and epic pages |
+| `promptAck` | not written | whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy;  on unless `false` |
 
 - Files your build generates (bundles, data) can be listed in `.epic/generators.json5`,
   each with a `name`, its `outputs`, the `cwd` and the command to `run`.
@@ -253,7 +272,8 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
 <summary>The values a key takes when the file leaves it out:  Spell's, not yours</summary>
 
 The built-in defaults describe an older Spell checkout, the one the tooling grew up in.
-`epic init` writes every key but `app`, `repos` and `checkoutPatches`, whose defaults are neutral:  keep the rest in the file.
+`epic init` writes every key but `app`, `repos`, `checkoutPatches`, `voices`, `pageVoices` and `promptAck`,
+whose defaults are neutral:  keep the rest in the file.
 
 | Key | Default |
 | --- | --- |
@@ -271,6 +291,9 @@ The built-in defaults describe an older Spell checkout, the one the tooling grew
 | `repoTemplates`, `windowsFolder`, `repos` | `""`;  `windowsFolder` `""` means the content folder's `windows/` |
 | `app` | `path` `"/editor/"`, the rest `""` |
 | `checkoutPatches` | `[]` |
+| `voices` | `{}` |
+| `pageVoices` | `readme` and `guide` `"readme"`, `code` and `epic-page` `"code"` |
+| `promptAck` | `true` |
 
 - NEVER list `agents` in `sharedFolders` in a repo that's also a loaded plugin.
   Claude Code reads a plugin's root `agents/` as agent types:  `spell-epic`'s own list is `[]`.

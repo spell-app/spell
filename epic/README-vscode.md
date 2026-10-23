@@ -86,10 +86,18 @@ To check it took, ask a Claude Code session in that window to run `epic window w
 
 ```sh
 epic window which
-# pid        41413
-# workspace  (none:  not opened from a .code-workspace)
-# folders    /Users/<you>/www/spell
 ```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+pid        41413
+workspace  (none:  not opened from a .code-workspace)
+folders    /Users/<you>/www/spell
+```
+
+</details>
 
 - `pid` is the window's extension host, the process the extension runs in;  the bridge, below, says why it matters.
 - Before the install, or before the reload, it exits 1:
@@ -141,7 +149,6 @@ as VS Code's Simple Browser does, docked in the right side bar beside your code 
 | Epic Docs, `spellEpic.docView` | the Spell hat | any guide or docs page, an epic page too | `epic open <name>`, `epic pages open <page> --vs`, `/spell-docs` (spell-app's skill) |
 
 - Each view holds ONE page, and keeps its own:  the page you're reviewing stays put while the docs move.
-- Some help text still calls Epic Docs "Spell Docs":  it's the same view.
 
 Four things a browser tab wouldn't do:
 - **It doesn't reload under you.**
@@ -416,20 +423,30 @@ The type check is `yarn vscode:check`.
 The tests are seven, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
 
 ```sh
-cd ~/www/spell/spell-epic
 yarn test:vscode
-# ✔ stamped() and samePage():  a fresh ?t=, ignored with the hash when comparing
-# ...
-# ✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59)
-# ℹ tests 7
-# ℹ pass 7
-# ℹ fail 0
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+...
+✔ stamped() and samePage():  a fresh ?t=, ignored with the hash when comparing ...
+...
+✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59) ...
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+...
+```
+
+</details>
 
 - `yarn test` runs them with the rest, and with the bridge's other side's own, [window.test.mjs](tests/window.test.mjs).
 - The views and the bridge's server need a running VS Code, so they have no tests:
   try a change by hand, in a window reloaded after the install.
-- `vscode/`'s own `yarn check` stops at `Command not found: node_modules/.bin/tsc`:
+- `vscode/`'s own `yarn check` stops at `command not found: node_modules/.bin/tsc`:
   it looks for TypeScript in spell-epic's folder, and the one install keeps it at the kit's root.
 
 ## See also

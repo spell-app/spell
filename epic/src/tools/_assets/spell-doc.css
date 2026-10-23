@@ -1513,10 +1513,12 @@ ui-section:has(> epic-ask)::part(heading) {
  * - `visibility`, not `display`:  the page keeps its layout, and so its scroll position
  * - never forever:  `spell-uncloak` shows it anyway after 2s, e.g. a page opened from `file://` whose bundle failed
  *   to load (`check-spell.js` still reports an element that never defines)
+ * - and an element a root defined before its family loads (`:state(pending)`)
  * - NOT the page notes' plain markup (`<spell-notes>` ...):  no element is ever defined for it, so it would only
  *   ever show 2s late
  */
-:not(:defined, spell-notes, spell-note, spell-note-reply) {
+:not(:defined, spell-notes, spell-note, spell-note-reply),
+:state(pending) {
   visibility: hidden;
   animation: spell-uncloak 0s 2s forwards;
 }

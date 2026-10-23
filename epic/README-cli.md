@@ -2,25 +2,33 @@
 
 ```sh
 epic summary readme
-# READMEs
-#   [x] P1 · Map and Outlines  (3h)
-#   [x] P2 · Kit Pages  (3-4h)
-#   ...
-#   [x] P8 · Cross-links and Pictures  (2h)
-#   [ ] P9 · Post-split Cleanup  (2h)
-#   [x] P10 · Doc Review  (1h)
-#   [ ] P11 · Voice Rewrite  (4h)
-# estimate:  27h-33h in all, 6h left
-# next:  P9 · Post-split Cleanup
-# open judgements:
-#   - J16  README-lsp says spell lsp starts the server, though it isn't built
-# open issues:
-#   - I3  Only spell-app has a .vscode/extensions.json
-#   ...
 ```
 
+<details>
+<summary>Output</summary>
+
+```text
+READMEs
+  [x] P1 · Map and Outlines  (3h)
+  [x] P2 · Kit Pages  (3-4h)
+...
+  [x] P8 · Cross-links and Pictures  (2h)
+  [~] P9 · Post-split Cleanup  (2h)
+  [x] P10 · Doc Review  (1h)
+  [x] P11 · Voice Rewrite  (4h)
+...
+estimate:  ...h in all, ...h left
+open judgements:
+...
+open issues:
+  - I3  Only spell-app has a .vscode/extensions.json
+...
+```
+
+</details>
+
 The plan for the pages you're reading came back in 0.4 seconds:
-eleven phases, what's left of them, and the loose ends.
+sixteen phases, what's left of them (P9, under way:  `[~]`), and the loose ends.
 P11 is the rewrite this page came out of.
 
 `gh issue list` asks a server for rows in a database.
@@ -33,7 +41,7 @@ When Claude runs `epic close readme#J16`, the item closes on your screen, with n
 
 `epic` is the command line under spell-epic's skills:  `/epic`, `/isolate`, `/bg` and the rest run it for Claude,
 and you can type any of it yourself.
-It has 62 verbs, and 108 more inside its groups (`epic window` alone has fifteen);  this page has every one.
+It has 63 verbs, and 111 more inside its groups (`epic window` alone has fifteen);  this page has every one.
 You'll type about six.
 
 **Claude Code only, for now:**
@@ -51,13 +59,15 @@ The skills run the rest.
 
 ```sh
 epic --version
-# epic 85f239f (readme) ~/www/spell.worktrees/readme/spell-epic
+# epic 9e30810 (readme) ~/www/spell.worktrees/readme/spell-epic
 epic list
 # in progress:  (not reviewed / items)
-#   repo-split               156 / 336  (../spell.worktrees/repo-split)
-#   readme                    35 / 108  (../spell.worktrees/readme)
+#   epic-engine              148 / 281  (../../spell.worktrees/epic-engine/spell-epic)
+#   ...
+#   readme                    36 / 109  (../../spell.worktrees/readme/spell-epic)
 #   ...
 # future:  (not reviewed / items)
+#   ...
 #   crdt                       0 / 4
 #   ...
 # done:  (not reviewed / items)
@@ -97,8 +107,16 @@ _The forms `epic --help` lists, as it prints them._
 
   ```sh
   epic close seo J3
-  # close:  epic close seo#J3  (the id goes after a #, not "seo J3")
   ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  close:  epic close seo#J3  (the id goes after a #, not "seo J3")
+  ```
+
+  </details>
 
 - A SHORT ADDRESS names an item through its saga, `SAGA:/<saga>/<epic>#<id>`:
   you can type it in chat, and `epic pages open` and `epic pages link` take it.
@@ -114,7 +132,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
   (its main checkout has `.epic/config.json5`), so any folder of the repo will do.
   Outside every such repo, it works on spell-epic's own checkout, the one its code is in.
 - Pages are the exception, and the point.
-  They live in the content folder, which every checkout links in ([below](#shared-content)),
+  They live in the content folder, which every checkout reads where it is ([below](#shared-content)),
   so no worktree has a copy to fall out of step.
 - It works in a worktree made a moment ago, before its install:
   the code that runs is main's, with its packages already installed.
@@ -195,10 +213,19 @@ _One loop, driven by exit codes:  0 means work, 2 means arm it again._
 
   ```sh
   epic stok
-  # epic stok?  no such verb.  The verbs:
-  #   send, requests, file, home, merge, ...
-  # epic <verb> --help says what each does.
   ```
+
+  <details>
+  <summary>Output</summary>
+
+  ```text
+  epic stok?  no such verb.  The verbs:
+    send, requests, file, home, merge, ...
+  ...
+  epic <verb> --help says what each does.
+  ```
+
+  </details>
 
 ## Every verb, by group
 
@@ -348,8 +375,16 @@ The inbox's own verb goes first, then the epic;  the other order is refused, wit
 
 ```sh
 epic inbox seo wait
-# inbox:  epic inbox wait seo  (the inbox's verb goes first)
 ```
+
+<details>
+<summary>Output</summary>
+
+```text
+inbox:  epic inbox wait seo  (the inbox's verb goes first)
+```
+
+</details>
 
 | Verb | What it does |
 | --- | --- |
@@ -465,7 +500,8 @@ Lost track?  `epic status`.
 ### Shared content
 
 The epic pages aren't in your repo.
-They live in the content folder, a git repo of its own beside the checkout, linked into every checkout:
+They live in the content folder, a git repo of its own beside the checkout, which every checkout reads where it is
+(a repo whose config names `sharedFolders` links those in too):
 that's why `main` and each worktree edit ONE page.
 You'll rarely type these:  the turn-end hook runs `epic shared commit` after every turn.
 
@@ -594,7 +630,7 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   Driving it all from other agents is planned ([README.md](README.md#-coming)).
 - **Fast to start, not always to finish.**
   `epic` starts fast, but a verb that reads every page reads every page:
-  `epic list` took 4.2 s here, over 48 epics.
+  `epic list` took 4.8 s here, over 50 epics.
 - **No undo verb.**
   Each verb writes at once.
   The undo is git:  the content folder commits after every turn,

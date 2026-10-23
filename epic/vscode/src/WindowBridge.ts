@@ -29,7 +29,7 @@
  *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, view, query)`
  *     - `hash`:  an id on the page to land on
  *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
- *     - `view`:  the side bar tab, `"docs"` ("Spell Docs", the default) or `"review"` ("Review")
+ *     - `view`:  the side bar tab, `"docs"` ("Epic Docs", the default) or `"review"` ("Review")
  *   - `reload-view { view? }`:  rebuild that doc view from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
  *   - `close-window {}`:  close this window, just after answering (`/isolate done` closes the worktree's window)

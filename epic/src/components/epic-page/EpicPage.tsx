@@ -467,8 +467,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     window.addEventListener("resize", this.measure, { signal: listeners.signal })
     this.measure()
     // the toolbar's chips, once the sections have drawn (`onFilter()` follows their changes after that)
-    void customElements
-      .whenDefined(SECTIONS)
+    void E.DOMElement.whenAttached(SECTIONS)
       .then(() => Promise.all(this.filterHosts().map((section) => section.ready)))
       .then(this.bumpFilters)
     return () => {
@@ -1238,7 +1237,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.untracked
   private async copyAndSay(text: string): Promise<boolean> {
     if (!(await Clipboard.copy(text))) return false
-    if (customElements.get("ui-toast")) {
+    if (E.DOMElement.isAttached("ui-toast")) {
       UI.toast({
         id: COPIED_TOAST_ID,
         class: "blue",
