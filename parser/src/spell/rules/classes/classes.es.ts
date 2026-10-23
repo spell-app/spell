@@ -142,10 +142,16 @@ classesEs.addRule(Wording.specialize({ ruleName: "url_or_email", meanings: ["url
 })
 
 // Which drawing a type writes, for `draw_it`:  `para dibujarlo` is `draw`, a list's `para dibujar cada elemento` is
-// `draw_each_item` -- Spanish fuses `it` into its verb, `dibujarlo` (`dibujarla` for a feminine type)
-classesEs.addRule(Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item"] }), {
-  syntax: "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento))"
-})
+// `draw_each_item`, and its `para dibujar su marcador`, what it shows while it's empty, `draw_its_placeholder` --
+// Spanish fuses `it` into its verb, `dibujarlo` (`dibujarla` for a feminine type)
+classesEs.addRule(
+  Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item", "draw_its_placeholder"] }),
+  {
+    syntax:
+      "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento)|" +
+      "(draw_its_placeholder:dibujar su marcador))"
+  }
+)
 
 classesEs.addRule(WithNestedStatements, {
   syntax: "(donde|con)? :",

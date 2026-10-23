@@ -320,10 +320,16 @@ export class Tableau extends Pile {
   ([Solitaire's Card.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spell)).
   - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
     `- to draw it:` unquoted takes a method's body, which returns it.
-- A drawable list has two:
+- A drawable list has three:
   - its `to draw it` is the WRAPPER around its items, by default nothing but the place they show
   - its `to draw each item` is the wrapper each item is drawn in, by default just the item's own drawing:
     `core.drawItems()` draws each item with it, `drawEachItem(item)`
+  - its `to draw its placeholder` is what it shows while it's empty, by default nothing:
+    `drawItsPlaceholder()`, e.g. a stock pile's face-down card (Spanish:  `para dibujar su marcador`)
+- A drawable list's element numbers its items for CSS:  each one's `--index`, from 0, and its own `--count`,
+  so a pile can lay its cards out with no code
+  ([Solitaire's styles.css](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/styles.css)).
+- A thing that moves from one list to another glides there on the page.
 - A drawable list's wrapper may have named places a child can fill,
   `<children name="header"/>`, filled by a child written `<h3 in="header">`.
 

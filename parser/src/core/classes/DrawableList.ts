@@ -25,13 +25,15 @@ import { List } from "./List"
  */
 export class DrawableList<T = unknown> extends List<T> {
   /**
-   * Its outside, with a `<slot>` where its items show -- just the slot, by default.
+   * Its outside, with a `<slot>` where its items show -- by default the slot, and its placeholder while it's empty.
    * - Override it, e.g. `to draw it:  return <div class="pile"><children/></div>`:
    *   spell's `<children/>` is the web's `<slot>`, compiled to `h("slot")`.
+   *   An override draws its own placeholder, if it wants one:  `{draw its placeholder}`.
    * - Its items are NOT drawn here:  they're its element's children -- see `core.drawThing()`.
    */
   draw(): Drawing {
-    return (h("slot") as unknown as () => Drawing)()
+    // the placeholder in a function of its own:  only it re-runs as the list empties and fills
+    return [() => (this.isEmpty ? this.drawItsPlaceholder() : undefined), (h("slot") as unknown as () => Drawing)()]
   }
 
   /**

@@ -79,10 +79,14 @@ classes.addRule(Wording.specialize({ ruleName: "url_or_email", meanings: ["url",
   syntax: "((url:url)|(email:email))"
 })
 
-// Which drawing a type writes, for `draw_it`:  `to draw it` is `draw`, a list's `to draw each item` is `draw_each_item`
-classes.addRule(Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item"] }), {
-  syntax: "((draw:draw it)|(draw_each_item:draw each item))"
-})
+// Which drawing a type writes, for `draw_it`:  `to draw it` is `draw`;  a list's `to draw each item` is `draw_each_item`,
+// and its `to draw its placeholder`, what it shows while it's empty, `draw_its_placeholder`
+classes.addRule(
+  Wording.specialize({ ruleName: "draw_method", meanings: ["draw", "draw_each_item", "draw_its_placeholder"] }),
+  {
+    syntax: "((draw:draw it)|(draw_each_item:draw each item)|(draw_its_placeholder:draw its placeholder))"
+  }
+)
 
 classes.addRule(WithNestedStatements, {
   syntax: "(where|with)? :",

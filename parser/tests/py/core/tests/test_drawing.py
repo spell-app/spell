@@ -167,6 +167,19 @@ def test_drawable_things_with_no_tag_draw_as_any_thing_and_a_drawable_list_as_it
     assert str(core.draw_thing(DrawableList([Token()]))) == "<slot></slot>"
 
 
+def test_an_empty_drawable_list_draws_its_placeholder_before_its_slot(core: Core) -> None:
+    """`to draw its placeholder`:  what a drawable list shows while it's empty (epic `outline-spell` P27)."""
+
+    class Spot(DrawableList):
+        def draw_its_placeholder(self) -> Element:
+            return h("b", "spot")
+
+    spot = Spot()
+    assert [str(node) for node in core.draw_thing(spot)] == ["<b>spot</b>", "<slot></slot>"]
+    spot.append(1)
+    assert str(core.draw_thing(spot)) == "<slot></slot>"
+
+
 class Chip(Drawable):
     element_tag = "game-chip"
     value = prop(type="number")
