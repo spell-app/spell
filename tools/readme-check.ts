@@ -355,7 +355,23 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
   {
     pattern: /examples\/solitaire(?![-\w])/,
     rule: "example",
-    message: "deleted:  drawable-solitaire or outline-solitaire"
+    message: "deleted:  now Solitaire, with a capital S"
+  },
+  {
+    pattern: /examples\/(?:drawable|outline)-solitaire\b/,
+    rule: "example",
+    message: "deleted (epic spanish P11):  one example now, Solitaire, and its Spanish twin, Solitario"
+  },
+  {
+    pattern: /@spell\/test\/(?:cards-from-zero|card-table|klondike|drawable-solitaire|outline-solitaire)(?![-\w])/,
+    rule: "example",
+    message: "deleted (epic spanish P11):  lists-from-zero imports the frozen card library, @spell/test/cards"
+  },
+  // the fixture page names a bare `@spell/test/solitaire` beside a stale example:  match its GitHub path form
+  {
+    pattern: /@spell\/library\/cards\b|@spell\/test\/cartas\b|spaces\/@spell\/test\/solitaire\b|<cards-card\b/,
+    rule: "example",
+    message: "deleted (epic spanish P21):  the cards are Solitaire's own files;  the examples are tested as they are"
   },
   { pattern: /\bsolitaire-import\b/, rule: "example", message: "deleted" },
   {

@@ -253,7 +253,7 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
    - No script installs it for you:  install it again after a change you want in every window.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
 5. Open the kit, `code ~/www/spell`, and any `.spell` file in it:
-   `spell-app/spaces/@spell/examples/drawable-solitaire/Card.spell`, say.
+   `spell-app/spaces/@spell/examples/Solitaire/Solitaire.spell`, say.
    With epics, every window opens from a window file instead ([below](#windows-and-worktrees)).
 
 Neither of Spell's two is on the Marketplace:  like the rest of Spell today, they run from a checkout of the kit.
@@ -291,7 +291,7 @@ The colours start in the grammar inside the `.vsix`;  everything else comes from
     JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
   - Each view's tab ends in its language, `Card.spell.ts`, so all three can be open at once.
   - A file outside any Spell project gets a one-line comment saying so.
-- **▶ Run Project:**  the project, running in a panel beside its code ("Run drawable-solitaire").
+- **▶ Run Project:**  the project, running in a panel beside its code ("Run Solitaire").
   - It's the runner Spell's editor uses in the browser,
     so a game in progress survives your change:  only the panel's Restart starts afresh.
   - It compiles when it opens, on Restart, and each time you save one of the project's files.
@@ -468,12 +468,11 @@ Here's the window this page was written in, the `readme` epic's, as `epic window
 {
   "folders": [
     { "path": "../../../../spell.worktrees/readme", "name": "⎇ readme" },
-    { "path": "../../..", "name": "spell" },
     { "path": "../..", "name": "spell.epics" }
   ],
   "settings": {
     "workbench.colorTheme": "Quiet Light",
-    "files.exclude": { ".claude/worktrees": true, "*": { "when": ".spell-main" } },
+    "files.exclude": { ".claude/worktrees": true },
     "workbench.colorCustomizations": { "titleBar.activeBackground": "#218345", "...": "..." }
   },
   "spell": { "package": "spell" }
@@ -483,8 +482,7 @@ Here's the window this page was written in, the `readme` epic's, as `epic window
 _`ongoing/readme.code-workspace`, its colours trimmed:
 the paths are relative to the file, in the content folder's `windows/`._
 
-The worktree first, then the main checkout with every file hidden (the `*` that applies only beside a `.spell-main`
-marker), then the content folder.
+The worktree, then the content folder:  no main checkout (`windows.worktreeOnly`, in the kit's epic settings).
 The kit's own window, `spell.code-workspace`, has just the last two:
 `spell`, the main checkout at `~/www/spell`, and `spell.epics`.
 
@@ -492,8 +490,12 @@ The kit's own window, `spell.code-workspace`, has just the last two:
   So every new worktree's session folder is a link to the main checkout's (`linkSessionFolders`, in the epic
   settings):  every session saves there, wherever it started, and every window lists them all.
 - An epic's worktree comes first, so a new Claude tab starts its session inside it, with nothing to enter.
-  - The main checkout stays, for its Source Control.
-    Its files are hidden (`files.exclude`, beside its `.spell-main` marker):  the worktree has the same ones.
+  - The main checkout isn't in it (2026-10-22):  every file was listed twice in Quick Open, the main checkout's
+    beside the worktree's.
+    - Its files were hidden in the Explorer, beside a `.spell-main` marker, but VS Code's file search ignores that
+      kind of rule.
+    - `epic window init` drops it from the worktree windows written before.
+    - So an epic's window shows the worktree's Source Control only;  the main checkout's is in the kit's own window.
   - A window written with the main checkout first keeps that order:
     `init` never reorders an open window's folders, since a new first folder restarts its extensions.
 - The kit's window turns `git.detectWorktrees` on, so every epic's worktree shows in its Source Control too.

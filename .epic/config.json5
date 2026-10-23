@@ -41,7 +41,11 @@
     // The repo root's folder name in every window:  folder 1, so the Claude panel lists every repo's sessions.
     "repoName": "spell",
     // The content repo's folder name in every window.
-    "contentName": "spell.epics"
+    "contentName": "spell.epics",
+    // A worktree's window holds the worktree, then the content repo:  no main checkout (Owen, 2026-10-22).  Quick
+    // Open listed every file twice with it there, the main checkout's beside the worktree's.  The Claude panel still
+    // lists every session:  each worktree's saved-session folder links to the main one's ("linkSessionFolders").
+    "worktreeOnly": true
   },
 
   // Whether the worktree hook links each NEW worktree's saved-session folder to the main checkout's,

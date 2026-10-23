@@ -1,14 +1,17 @@
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { fileURLToPath } from "node:url"
-import { describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test } from "vite-plus/test"
 import { RuleTester } from "vite-plus/lint/plugins-dev"
 
 import { IMPORT_RULES, importNameFor } from "spell-kit/toolchain/lint/imports"
 
 /**
  * The `spell/*` lint rule (`lint.imports.ts`, the toolchain's):  what it flags, and what it lets through.
- * - The rule reads where a file IS, so every case names its file, from the kit `spell-kit` (`at()`):
- *   the kit and its child repos as they are on disk, each one package with its code under ONE `src/`.
+ * - The rule reads where a file IS, so every case names its file (`at()`), in a made-up kit (`KIT`):
+ *   the kit and three child repos, each one package with its code under ONE `src/`.
+ * - Made up, not the kit on disk:  the rule finds a file's package by the nearest `package.json`,
+ *   and the kit's CI clones no child repo.
  */
 
 ////////////////
@@ -68,18 +71,18 @@ describe("spell/no-parent-import", () => {
 
 describe("importNameFor():  a file's import name, by where it is", () => {
   test("a file under a package's src/:  the package name + its path, no extension, no index", () => {
-    expect(importNameFor(join(TOP, "src/util/string.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/util/string" })
-    expect(importNameFor(join(TOP, "src/element/index.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/element" })
-    expect(importNameFor(join(TOP, "spell-ui/src/components/ui-button/UIButton.tsx"))).toEqual({
+    expect(importNameFor(join(KIT, "src/util/string.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/util/string" })
+    expect(importNameFor(join(KIT, "src/element/index.ts"))).toEqual({ pkg: "spell-kit", name: "spell-kit/element" })
+    expect(importNameFor(join(KIT, "spell-ui/src/components/ui-button/UIButton.tsx"))).toEqual({
       pkg: "spell-ui",
       name: "spell-ui/components/ui-button/UIButton"
     })
-    expect(importNameFor(join(TOP, "spell-ui/src/index.ts"))).toEqual({ pkg: "spell-ui", name: "spell-ui" })
+    expect(importNameFor(join(KIT, "spell-ui/src/index.ts"))).toEqual({ pkg: "spell-ui", name: "spell-ui" })
   })
   test("outside any src/:  none", () => {
-    expect(importNameFor(join(TOP, "tools/repos.ts"))).toBeUndefined()
-    expect(importNameFor(join(TOP, "spell-lang/vite.config.ts"))).toBeUndefined()
-    expect(importNameFor(join(TOP, "spell-ui/tests/a.test.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "tools/repos.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "spell-lang/vite.config.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "spell-ui/tests/a.test.ts"))).toBeUndefined()
   })
 })
 
@@ -87,12 +90,22 @@ describe("importNameFor():  a file's import name, by where it is", () => {
 // ## Helpers
 ////////////////
 
-/** The kit `spell-kit`, holding every child repo:  this file is in its `tests/toolchain/`. */
-const TOP = fileURLToPath(new URL("../../", import.meta.url))
+/** A made-up kit `spell-kit`, holding three child repos:  a `package.json` each, all the rule reads. */
+const KIT = realpathSync(mkdtempSync(join(tmpdir(), "lint-imports-")))
+afterAll(() => rmSync(KIT, { recursive: true, force: true }))
+for (const [folder, name] of [
+  [".", "spell-kit"],
+  ["spell-lang", "spell-lang"],
+  ["spell-ui", "spell-ui"],
+  ["spell-app", "spell-app"]
+]) {
+  mkdirSync(join(KIT, folder), { recursive: true })
+  writeFileSync(join(KIT, folder, "package.json"), JSON.stringify({ name }))
+}
 
-/** A case:  `code`, in the file at `file` (from the kit). */
+/** A case:  `code`, in the file at `file` (from the made-up kit). */
 function at(file: string, code: string) {
-  return { code, filename: join(TOP, file) }
+  return { code, filename: join(KIT, file) }
 }
 
 /** A case the rule flags once, its message naming the import name `fix`. */
