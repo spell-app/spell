@@ -339,8 +339,8 @@
 
   /*
    * The page's TITLE, stuck (`SiteSections.stickTitle()`):  a line of no height first in the column, holding a bar
-   * that shows while the masthead's title is scrolled away (`main.site-title-away`):  watched through a marker of no height after
-   * it, `.site-title-marker`;  the title in the heading face,
+   * that shows once the masthead has scrolled away (`main.site-title-away`):  watched through a marker of no height just
+   * before the column, `.site-title-marker`, so it shows as it pins;  the title in the heading face,
    * out to the column's edges as the section titles are.
    */
   .site-page-title {

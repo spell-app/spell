@@ -131,10 +131,10 @@ export class SiteSections {
 
   /**
    * The page's title sticks (Owen, 2026-10-23, epic `debut`:  "Breadcrumb title isn't sticky"):  a compact bar under
-   * the top bar, showing while the masthead's title is scrolled away (`site.css`, `.site-page-title`).
+   * the top bar, showing once the whole masthead has scrolled away, as the bar pins (`site.css`, `.site-page-title`).
    * - the line goes first in the column (`.site-body`), the masthead's title text in it;  none without a masthead title
    * - `main` gets `site-title-away` while it shows, which makes room for it in every offset below (`measure()`)
-   * - SIDE EFFECT:  the line in `main`;  one `IntersectionObserver` on the masthead's title, replaced per page
+   * - SIDE EFFECT:  the line in `main`;  one `IntersectionObserver` on a marker just before the column, replaced per page
    */
   private stickTitle(main: HTMLElement): void {
     this.titleWatch?.disconnect()
@@ -155,13 +155,14 @@ export class SiteSections {
       column.prepend(line)
     }
     line.firstElementChild!.textContent = words
-    // the title's host draws no box of its own (`display: contents`):  a marker of no height just after it is watched
-    let marker = title.nextElementSibling
+    // watched:  a marker of no height just before the column, so the bar shows only once it can pin under the top bar
+    // (watching the title itself showed it early, mid-page, over the tabs, while the masthead's last line was in view)
+    let marker = column.previousElementSibling
     if (!marker?.classList.contains(TITLE_MARKER)) {
       marker = document.createElement("div")
       marker.className = TITLE_MARKER
       marker.setAttribute("aria-hidden", "true")
-      title.after(marker)
+      column.before(marker)
     }
     const siteTop = parseFloat(getComputedStyle(this.probe).top) || 0
     this.titleWatch = new IntersectionObserver(
@@ -487,7 +488,7 @@ const MASTHEAD_TITLE = ".site-masthead .site-title"
 /** The stuck page title's line, first in the column (`site.css`). */
 const PAGE_TITLE = "site-page-title"
 
-/** A marker of no height just after the masthead's title, which `stickTitle()` watches (`site.css`). */
+/** A marker of no height just before the page's column, which `stickTitle()` watches (`site.css`). */
 const TITLE_MARKER = "site-title-marker"
 
 /** `main`'s class while the masthead's title is scrolled away:  the stuck page title shows. */
