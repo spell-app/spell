@@ -182,6 +182,13 @@
   .ui.example:not(.bare) [part~="demo"]::part(segment) {
     margin: 0;
   }
+  /*
+   * the frame is the glass:  the demo and the code inside it blur nothing again (a theme's segment glass did, a shade
+   * off the frame round it;  Owen, 2026-10-23:  "Lose whatever is causing background color shift under code")
+   */
+  .ui.example:not(.bare) :is([part~="demo"], [part~="code"])::part(segment) {
+    backdrop-filter: none;
+  }
   :host(:state(open)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
     margin: 0;
     padding: 1em;
