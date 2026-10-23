@@ -22,6 +22,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `test-threw` | a test that threw | `test` |
 | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
 | `confirm-default` | `confirm` with no page:  the JavaScript core's only, so far | `question` |
+| `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
 """
 
 import re
@@ -35,6 +36,7 @@ MESSAGES: dict[str, str] = {
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
     "confirm-default": "{question} (yes)",
+    "drop-event": "{thing}-drop",
 }
 
 # A named placeholder in a message, `{type}`.

@@ -7,6 +7,7 @@
     "test-step": "▶️ Executing   {step}",
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
-    "confirm-default": "{question} (yes)"
+    "confirm-default": "{question} (yes)",
+    "drop-event": "{thing}-drop"
   }
 }

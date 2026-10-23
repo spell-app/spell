@@ -17,6 +17,9 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   - On a `ui-*` tag, a value that can change and may hold an object is a property, `prop:value`;
  *     text, a number or yes / no keeps its plain name (`ProgramWriter.mayHoldObject()`).
  * - A dotted tag, `<UI.Form>`, is an error:  `P.ASTJSXElement.tagError()`.
+ * - An element with an `onClick` looks clickable by itself (epic `outline-spell` P28):
+ *   a pointer cursor, and its text can't be selected -- `style="cursor:pointer;user-select:none"`,
+ *   unless it says its own `style`.  So every target writes it the same:  see `clickableAttrs()`.
  * - Spell's own words become the web's as the AST is built, so both writers write the web's:
  *   - `<children/>` => `h("slot")`
  *   - `<children name="header"/>` => `h("slot", { name: "header" })`
@@ -64,7 +67,22 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   getAST(match: P.MatchFor<this>): P.ASTJSXElement {
     const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
-    return new P.ASTJSXElement(match, { tagName, attrs, children: this.childASTs(match) })
+    return new P.ASTJSXElement(match, {
+      tagName,
+      attrs: SpellJSX.clickableAttrs(match, attrs),
+      children: this.childASTs(match)
+    })
+  }
+
+  /**
+   * `attrs`, plus `style="cursor:pointer;user-select:none"` when they say `onClick` and no `style`:
+   * what can be clicked shows it, and a click never selects its text.
+   */
+  private static clickableAttrs(match: P.AnyMatch, attrs: P.ASTJSXAttribute[] | undefined) {
+    const named = (name: string) => attrs?.some((attr) => attr?.name === name)
+    if (!attrs || !named("onClick") || named("style")) return attrs
+    const style = new P.ASTStringLiteral(match, { value: CLICKABLE_STYLE, quote: '"' })
+    return [...attrs, new P.ASTJSXAttribute(match, { name: "style", value: style })]
   }
 
   /** The ASTs of `match`'s children, leaving out what writes nothing (e.g. blank `jsxText`). */
@@ -111,3 +129,7 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     }
   }
 }
+
+/** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */
+// written as Solid's compiler writes it into a TypeScript drawing, so every target draws the same
+const CLICKABLE_STYLE = "cursor:pointer;user-select:none"
