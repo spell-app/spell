@@ -289,7 +289,7 @@ ifEs.addRule(ValueIf, {
       tests: [
         [
           ["para elegir un color:", `\tred si suit es "hearts"`],
-          ["export function elegirUnColor() {", '  if (suit == "hearts") return "red"', "}"]
+          ["export function elegirUnColor() {", '  if (suit === "hearts") return "red"', "}"]
         ]
       ]
     },

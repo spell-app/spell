@@ -869,17 +869,17 @@
           "internal": false,
           "file": "src/spell/rules/expressions/IsEqual.ts",
           "line": 9,
-          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `==`/`!=`.",
+          "purpose": "`{lhs} is [not] {rhs}`, e.g. `thing is other` -- compiles to `===`/`!==`.",
           "syntaxes": [
             {
               "syntax": "{operator:is_or_is_not} {expression:operand}",
               "example": "thing is other",
               "outputs": {
                 "js": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "ts": {
-                  "code": "(thing == other)"
+                  "code": "(thing === other)"
                 },
                 "py": {
                   "code": "(thing == other)"
@@ -1357,11 +1357,14 @@
             "print_kind",
             "take_or_give_up",
             "drag_or_drop",
+            "drag_moment",
+            "right_away",
             "draggable_or_droppable",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
             "create_method",
+            "create_hook_words",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1393,10 +1396,16 @@
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
             },
             {
-              "syntax": "((dragged:dragged)|(dropped_on:dropped on))"
+              "syntax": "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
             },
             {
-              "syntax": "((dragged:draggable)|(dropped_on:droppable))"
+              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))"
+            },
+            {
+              "syntax": "((immediately:immediately|right away))"
+            },
+            {
+              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -1409,6 +1418,9 @@
             },
             {
               "syntax": "(create:create it|create them)"
+            },
+            {
+              "syntax": "(create:created|creating it)"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -2836,8 +2848,8 @@
           "ruleNames": ["list_empty"],
           "internal": false,
           "file": "src/spell/rules/lists/ListEmpty.ts",
-          "line": 10,
-          "purpose": "Empty a list in-place, e.g. `empty my-list` => `core.clear(myList)`.",
+          "line": 13,
+          "purpose": "Empty a list in place, or clear a value back to its empty one.",
           "syntaxes": [
             {
               "syntax": "(empty|clear) {list:expression}",
@@ -3441,7 +3453,7 @@
           "purpose": "`create a thing` -- same as `new_thing`, worded with `create` instead of `a new`.",
           "syntaxes": [
             {
-              "syntax": "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
+              "syntax": "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
               "example": "create a Thing",
               "outputs": {
                 "js": {
@@ -3961,7 +3973,7 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 25,
+          "line": 29,
           "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
           "syntaxes": [
             {
@@ -4881,6 +4893,43 @@
           "syntaxes": [
             {
               "syntax": "(a|an) {type} {with_nested_statements}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DragHandler",
+          "ruleNames": ["drag_handler"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DragHandler.ts",
+          "line": 42,
+          "purpose": "What a list does as a thing is dragged over it, out of it, or dropped on it, on the page (epic `outline-spell` P28).",
+          "syntaxes": [
+            {
+              "syntax": "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "when something is {moment:drag_moment} it :? {statement_body}?"
+            },
+            {
+              "syntax": "while (a|an) {item:type} is dragged over it :? {statement_body}?"
+            },
+            {
+              "syntax": "while something is dragged over it :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ItemsReordered",
+          "ruleNames": ["items_reordered"],
+          "internal": false,
+          "file": "src/spell/rules/classes/ItemsReordered.ts",
+          "line": 27,
+          "purpose": "People may reorder a list's items on the page, by dragging them (epic `outline-spell` P30).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
             }
           ],
           "aliases": ["statement"]
@@ -5973,10 +6022,10 @@
               "example": "to pick a color:\n\tred if suit is \"hearts\"",
               "outputs": {
                 "js": {
-                  "code": "export function pickAColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "ts": {
-                  "code": "export function pickAColor() {\n  if (suit == \"hearts\") return \"red\"\n}"
+                  "code": "export function pickAColor() {\n  if (suit === \"hearts\") return \"red\"\n}"
                 },
                 "py": {
                   "code": "def pick_a_color() -> Any:\n    if suit == \"hearts\":\n        return \"red\""
@@ -6137,6 +6186,32 @@
             },
             {
               "syntax": "{type:subject_implied} {signature:quoted_method_signature} if? :? {expression_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CreateHook",
+          "ruleNames": ["create_hook"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CreateHook.ts",
+          "line": 20,
+          "purpose": "What runs as a thing is made, in its type's outline, e.g. `- when created (with title as text):`.",
+          "syntaxes": [
+            {
+              "syntax": "when {signature:method_signature} :? {statement_body}?",
+              "example": "a task is a thing where:\n\t- when created (with title as text, done as a choice):\n\t\tprint the title",
+              "outputs": {
+                "js": {
+                  "code": "export class Task extends Thing {\n  create(props = {}) {\n    const { title, done } = props\n    core.console.log(title)\n  }\n}"
+                },
+                "ts": {
+                  "code": "@thing\nexport class Task extends Thing {\n  create(props: { title?: string; done?: boolean } = {}) {\n    const { title, done } = props\n    core.console.log(title)\n  }\n}"
+                },
+                "py": {
+                  "code": "class Task(Thing):\n    def create(self, props: Any = {}) -> None:\n        title = props.title\n        done = props.done\n        core.console.log(title)"
+                }
+              }
             }
           ],
           "aliases": ["statement"]

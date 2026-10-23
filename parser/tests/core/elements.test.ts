@@ -155,3 +155,81 @@ describe("css`...`", () => {
     return css(Object.assign([text], { raw: [text] }))
   }
 })
+
+/** A list's drag handlers, as the page runs them (epic `outline-spell` P28):  `core.runHandler()`, `startWhile()`. */
+describe("drag handlers", () => {
+  /** A sign, its hint and its count as compiled spell declares them. */
+  class Sign extends Thing {
+    get hint(): string {
+      return this.getProp("hint") ?? ""
+    }
+    set hint(value: string) {
+      this.setProp("hint", value)
+    }
+    get count(): number {
+      return this.getProp("count") ?? 0
+    }
+    set count(value: number) {
+      this.setProp("count", value)
+    }
+  }
+  /** A tray with a sign:  `- while a token is dragged over it:` sets its sign's hint, and counts. */
+  class Tray extends DrawableList {
+    sign = new Sign()
+    whileTokenDraggedOver(label: string) {
+      this.sign.hint = `drop ${label} here`
+      this.sign.hint = "twice"
+      this.sign.count = this.sign.count + 1
+    }
+  }
+
+  test("startWhile() runs a `while` handler;  endWhile() puts back what it set, as it was", () => {
+    const tray = new Tray()
+    tray.sign.hint = "empty"
+    core.startWhile(tray, "whileTokenDraggedOver", "a")
+    expect([tray.sign.hint, tray.sign.count]).toEqual(["twice", 1])
+    core.endWhile(tray, "whileTokenDraggedOver")
+    // put back as it was before:  the count it never had is unset again, so reads its default
+    expect([tray.sign.hint, tray.sign.count]).toEqual(["empty", 0])
+    // ended:  nothing to put back again
+    tray.sign.hint = "later"
+    core.endWhile(tray, "whileTokenDraggedOver")
+    expect(tray.sign.hint).toBe("later")
+  })
+
+  test("starting it again ends the last first;  runHandler() just runs it", () => {
+    const tray = new Tray()
+    core.startWhile(tray, "whileTokenDraggedOver", "a")
+    core.startWhile(tray, "whileTokenDraggedOver", "b")
+    expect(tray.sign.count).toBe(1)
+    core.endWhile(tray, "whileTokenDraggedOver")
+    expect(tray.sign.count).toBe(0)
+    core.runHandler(tray, "whileTokenDraggedOver", "c")
+    expect(tray.sign.count).toBe(1)
+  })
+
+  test("a page whose program runs elsewhere sends them there (`core.remote`)", () => {
+    const sent: unknown[][] = []
+    const tray = new Tray()
+    core.remote = {
+      run: (...args) => sent.push(["run", ...args.slice(1)]),
+      startWhile: (...args) => sent.push(["startWhile", ...args.slice(1)]),
+      endWhile: (...args) => sent.push(["endWhile", ...args.slice(1)]),
+      set: () => {},
+      trigger: (...args) => sent.push(["trigger", ...args])
+    }
+    try {
+      core.startWhile(tray, "whileTokenDraggedOver", "a")
+      core.endWhile(tray, "whileTokenDraggedOver")
+      core.runHandler(tray, "whenTokenDroppedOn", "a")
+    } finally {
+      core.remote = undefined
+    }
+    expect(tray.sign.count).toBe(0)
+    expect(sent).toEqual([
+      ["startWhile", "whileTokenDraggedOver", ["a"]],
+      ["endWhile", "whileTokenDraggedOver"],
+      ["run", "whenTokenDroppedOn", ["a"]]
+    ])
+  })
+})

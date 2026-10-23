@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell-parser/spell"
 import { parseSpellProject } from "spell-parser/spell/test"
+import { shapeOf } from "spell-parser/spell/translate/ShapeCheck"
 import { Translator } from "spell-parser/spell/translate/Translator"
 import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
 import type { NamesData } from "spell-parser/spell/translate/translate.types"
@@ -9,7 +10,7 @@ import type { NamesData } from "spell-parser/spell/translate/translate.types"
 /**
  * The translator (epic `spanish` P24):  a project written in English, written again in Spanish, rule by rule.
  * - Each case:  the English, the Spanish it writes, and that Spanish read back by Spanish's parser:
- *   no errors, and the same compiled javascript SHAPE as the English (`shapeOf()`:  names and texts left out,
+ *   no errors, and the same compiled javascript SHAPE as the English (`ShapeCheck`'s `shapeOf()`:  names and texts left out,
  *   as they're the dictionary's words).
  * - On a small card game, in the outline style, written inline:  a lower repo's tests never read spell-app's examples.
  */
@@ -112,7 +113,7 @@ para probar la preparación de la carta
 	para cada carta en la pila
 		poner cuenta a cuenta + 1
 	cuenta debería ser 1
-	la pila es vacío debería ser no
+	la pila es vacía debería ser no
 	pausar 10 mseg
 	imprimir "as de corazones"
 `
@@ -144,11 +145,130 @@ describe("Translator:  English to Spanish, rule by rule", () => {
     expect(names.data.names.pile).toBe(TranslationNames.TODO)
   })
 
+  test("a text joined to a value with `+` is written, and flagged for the fix-up pass:  its word order", () => {
+    const { file } = translatedWith({ ...NAMES, texts: { ...NAMES.texts, " of ": " de " } }, CARD)
+    const at = CARD.split("\n").findIndex((line) => line.includes('" of "'))
+    expect(file.lines[at]).toBe('\t- su "nombre" es su rango + " de " + su palo')
+    expect(file.risky.get(at)).toBe('text joined to a value:  `its rank + " of " + its suit`')
+    expect([...file.risky.keys()]).toEqual([at])
+  })
+
+  test("a possessive agrees in number with a name of either gender:  `sus espadas`, `sus corazones`", () => {
+    const source = 'a "card" is a thing where:\n\t- its "spades" is a number\n\t- its "hearts" is a number\n'
+    expect(translated(source).lines.slice(1, 3)).toEqual([
+      '\t- sus "espadas" es un número',
+      '\t- sus "corazones" es un número'
+    ])
+  })
+
   test("a comment the dictionary lacks stays as it was, and is no TODO", () => {
     const file = translatedWith({ ...NAMES, comments: {} }, CARD).file
     expect(file.lines[0]).toBe("// a playing card")
     expect(file.todo.has(0)).toBe(false)
     expect(file.missing.get(0)).toEqual([{ kind: "comments", words: "a playing card" }])
+  })
+})
+
+/** A to-do list's names in Spanish:  its type written `todo-list`, keyed as declared, `todo list`. */
+const TODO_NAMES: NamesData = {
+  types: { task: { name: "tarea", gender: "feminine" }, "todo list": { name: "agenda", gender: "feminine" } },
+  names: { title: "título", done: "hecha", tasks: "tareas", points: "puntos", plan: "plan", item: "elemento" },
+  phrases: {
+    "create a new task (with title as text, done as a choice)":
+      "crear una nueva tarea (con título como texto, hecha como una opción)"
+  },
+  texts: { Shop: "Compras" }
+}
+
+/** A to-do list, in English (epic `spanish` P28):  a call with named arguments, with and without them. */
+const TODOS = `a task is a thing
+a task has a title as text
+a task has a property done as yes or no
+a todo-list is a thing
+a todo-list has a property tasks as a new list of tasks
+to create a new task (with title as text, done as a choice)
+	print the title
+create a new task
+create a new task with title = "Shop", done = yes
+points = 3
+if points > 0 print points
+plan = a new todo-list
+print the title of the first item of the tasks of plan
+`
+
+describe("Translator:  calls, words and agreement (epic `spanish` P28)", () => {
+  const { file } = translatedWith(TODO_NAMES, TODOS)
+
+  test("a call with named arguments:  their `with` in the other language;  without them, none", () => {
+    expect(file.lines.slice(7, 9)).toEqual([
+      "crear una nueva tarea",
+      'crear una nueva tarea con título = "Compras", hecha = sí'
+    ])
+    expect(file.todo.size).toBe(0)
+  })
+
+  test("a type written with a dash is the one declared with a space:  `todo-list` is `todo list`", () => {
+    expect(file.lines[3]).toBe("una agenda es una cosa")
+  })
+
+  test("a plural property's article agrees;  an adjective after an article agrees with the word after it", () => {
+    expect(file.lines[4]).toBe("una agenda tiene unas tareas como una nueva lista de tareas")
+  })
+
+  test("a symbol stays itself:  `>` is `>`, never the first of `(<|>)`", () => {
+    expect(file.lines[10]).toBe("si puntos > 0 imprimir puntos")
+  })
+
+  test("`primer` before a masculine noun;  `del` takes the ordinal's article", () => {
+    expect(file.lines[12]).toBe("imprimir el título del primer elemento de las tareas de plan")
+  })
+
+  test("the Spanish reads back, with no errors, as the same program", () => {
+    const english = parseSpellProject([{ path: "/Todos.spell", contents: TODOS }]).files[0]!
+    const spanish = parseSpellProject([{ path: "/Todos.es.spell", contents: file.lines.join("\n") }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(shapeOf(spanish.compiled)).toBe(shapeOf(english.compiled))
+  })
+})
+
+describe("Translator:  what runs as a thing is made (epic `spanish` P28)", () => {
+  const source = `a task is a thing where:
+	- its "title" is a text
+	- when created (with title as text, done as a choice):
+		print the title
+create a new task with title = "Shop"
+`
+  const { file } = translatedWith(TODO_NAMES, source)
+
+  test("its hook in the other language's words, agreeing with the type:  `al crearla (con ...)`", () => {
+    expect(file.lines[2]).toBe("\t- al crearla (con título como texto, hecha como una opción):")
+    expect(file.lines[4]).toBe('crear una nueva tarea con título = "Compras"')
+    expect(file.todo.size).toBe(0)
+  })
+
+  test("Spanish to English too:  `al crearla` is `when created`", () => {
+    const spanishSource = file.lines.join("\n")
+    const { files } = parseSpellProject([{ path: "/Tarea.es.spell", contents: spanishSource }])
+    const back: NamesData = {
+      types: { tarea: { name: "task" } },
+      names: { título: "title", hecha: "done" },
+      texts: { Compras: "Shop" }
+    }
+    const names = new TranslationNames(back, { from: SPANISH, to: ENGLISH })
+    const translator = new Translator({ from: SPANISH, to: ENGLISH, names })
+    const english = translator.translateFile({
+      path: "/Tarea.es.spell",
+      contents: spanishSource,
+      match: files[0]!.match
+    })
+    expect(english.lines[2]).toBe("\t- when created (with title as text, done as a choice):")
+  })
+
+  test("and reads back as the same program", () => {
+    const english = parseSpellProject([{ path: "/Task.spell", contents: source }]).files[0]!
+    const spanish = parseSpellProject([{ path: "/Tarea.es.spell", contents: file.lines.join("\n") }]).files[0]!
+    expect(spanish.errors).toEqual([])
+    expect(shapeOf(spanish.compiled)).toBe(shapeOf(english.compiled))
   })
 })
 
@@ -197,17 +317,4 @@ function translatedWith(data: NamesData, source: string) {
   const translator = new Translator({ from: ENGLISH, to: SPANISH, names })
   const file = translator.translateFile({ path: "/Card.spell", contents: source, match: files[0]!.match })
   return { names, file, translator }
-}
-
-/**
- * `js`'s shape:  its names and texts each one placeholder, its comments out --
- * so two programs which differ only in their names' language compare equal.
- */
-function shapeOf(js: string): string {
-  return js
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")
-    .replace(/"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "TEXT")
-    .replace(/[\p{L}_$][\p{L}\p{N}_$]*/gu, "NAME")
-    .replace(/\s+/g, " ")
-    .trim()
 }

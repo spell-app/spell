@@ -4,6 +4,7 @@ exports[`testing spell module methods, in Spanish > rule group specs > match sna
 {
   "bare_type_arg": "type",
   "create_animation": "asAnimation|signature|body?",
+  "create_hook": "signature|body?",
   "quoted_type_expression": "type|signature|body?",
   "to_do_something": "asTest?|signature|body?",
   "type_method_arg": "type",

@@ -178,13 +178,13 @@ describe("TSWriter", () => {
       operator: "and",
       rhs: new P.ASTParenthesizedExpression(match, { expression: isUp })
     })
-    expect(writer.bare(both)).toBe('this.rank == "up" && this.rank == "up"')
+    expect(writer.bare(both)).toBe('this.rank === "up" && this.rank === "up"')
 
     const ifUp = new P.ASTIfStatement(match, {
       condition: isUp,
       statements: new P.ASTReturnStatement(match, { value: text("+") })
     })
-    expect(writer.write(ifUp)).toBe('if (this.rank == "up") return "+"')
+    expect(writer.write(ifUp)).toBe('if (this.rank === "up") return "+"')
   })
 
   test("a list a property's values come from stays in its class, typed:  `Card.Suits`, read when set", () => {
@@ -458,7 +458,7 @@ describe("TSWriter", () => {
     )
   })
 
-  test("comparisons:  === where both sides are alike, a choice bare, nothing === undefined", () => {
+  test("comparisons:  ===, a choice bare, nothing === undefined", () => {
     const text = (value: string) => new P.ASTStringLiteral(match, { value, quote: '"' })
     const is = (lhs: P.ASTExpression, rhs: P.ASTExpression) =>
       new P.ASTInfixExpression(match, { lhs, operator: "equals", rhs })
@@ -468,7 +468,8 @@ describe("TSWriter", () => {
     expect(writer.bare(is(done, new P.ASTBooleanLiteral(match, false)))).toBe("!done")
     const unknown = new P.ASTVariableExpression(match, { name: "x" })
     expect(writer.bare(is(unknown, new P.ASTNothingLiteral(match)))).toBe("x === undefined")
-    expect(writer.bare(is(unknown, new P.ASTNumericLiteral(match, 2)))).toBe("x == 2")
+    // `is` is `===` whatever the sides are (epic `spanish` P28)
+    expect(writer.bare(is(unknown, new P.ASTNumericLiteral(match, 2)))).toBe("x === 2")
   })
 
   test("text that isn't empty:  `!!x`, and bare in an `if`", () => {

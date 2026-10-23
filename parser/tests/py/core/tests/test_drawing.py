@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from spell_core import App, Core, Drawable, DrawableList, List, Thing, core, h, prop
-from spell_core.drawing import Element
+from spell_core.drawing import Element, element_html
 from spell_core.run import main
 
 # What the JavaScript run printed for each drawing in `test_written_as_linkedom_writes_it()`, by its name
@@ -304,3 +304,12 @@ def test_page_prints_nothing_for_a_program_that_drew_nothing(
     program.write_text("print('fizz')\n")
     main([str(program), "--page"])
     assert capsys.readouterr().out == "fizz\n"
+
+
+def test_a_thing_given_as_an_attribute_prints_as_javascript_writes_it() -> None:
+    """A form's `value={it}`:  `[object Object]`, as JavaScript's page holds it (epic outline-spell P29)."""
+
+    class Note(Thing):
+        title = prop(type="text")
+
+    assert element_html(h("ui-form", {"value": Note(title="a")})) == '<ui-form value="[object Object]"></ui-form>'

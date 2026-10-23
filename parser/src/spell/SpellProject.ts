@@ -551,7 +551,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                         listsStartAt: this.contents?.listsStartAt
                       }
                     )
-                    elementsFile.contents = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
+                    const drawing = SP.SpellDeclarations.split(elements, this.scope!, { version, exports }).code
+                    // the language it speaks, if not English:  its page turns Spell UI's on before it draws (`<es-texto>`)
+                    const { lang } = this.languages[0]!
+                    elementsFile.contents =
+                      lang === "en" ? drawing : `${drawing.trimEnd()}\n\nexport const lang = ${JSON.stringify(lang)}\n`
                     // and its web app, `Solitaire.app.py`, for a target with one
                     if (target.appSuffix) {
                       const name = this.projectName ?? this.projectId

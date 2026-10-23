@@ -28,7 +28,7 @@ asyncEs.addRule(Await, {
         ["esperar a 1", "await 1"],
         ["poner el result a esperar 1", "export const result = await 1"],
         ["esperar 2 es 1", "await (2 === 1)"],
-        ["si esperar 2 es 1 entonces imprimir 1", "if (await 2 == 1) core.console.log(1)"]
+        ["si esperar 2 es 1 entonces imprimir 1", "if (await 2 === 1) core.console.log(1)"]
       ]
     },
     {

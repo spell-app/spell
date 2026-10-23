@@ -885,7 +885,7 @@ describe("outline style", () => {
         '\t\t\treturn <div class="back"/>',
         '\t\treturn <div class="front"/>'
       ])
-      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction == "down"\) return h\("div", \{ class: "back" \}\)/)
+      expect(js).toMatch(/draw\(\) \{\s+if \(this\.direction === "down"\) return h\("div", \{ class: "back" \}\)/)
     })
 
     test("a drawable list:  `to draw it` is the wrapper around its items, `to draw each item` the one around each", () => {
@@ -948,6 +948,72 @@ describe("outline style", () => {
       expect(js).toContain("static canBeDragged = true")
       expect(js).toContain("static canBeDragged = false")
       expect(js).toContain("static canBeDroppedOn = true")
+    })
+
+    test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- it can be dropped on",
+        '\t- its "hint" is text',
+        "\t- when a card is dragged over it:",
+        '\t\tset its hint to "drop here"',
+        "\t- when a card is dragged out of it:",
+        '\t\tset its hint to ""',
+        "\t- when a card is dropped on it:",
+        "\t\tadd the card to it"
+      ])
+      expect(js).toMatch(/whenCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whenCardDraggedOutOf\(card\) \{\s+this\.hint = ""/)
+      expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
+    })
+
+    test("`- while a card is dragged over it`, `- when something is dropped on it`:  `the thing` is any thing (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- it can be dropped on",
+        '\t- its "hint" is text',
+        "\t- while a card is dragged over it:",
+        '\t\tset its hint to "drop here"',
+        "\t- while something is dragged over it:",
+        '\t\tset its hint to "not here"',
+        "\t- when something is dropped on it:",
+        "\t\tprint the thing",
+        "\t- when something is dragged out of it:",
+        "\t\tclear its hint"
+      ])
+      expect(js).toMatch(/whileCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whileThingDraggedOver\(thing\) \{\s+this\.hint = "not here"/)
+      expect(js).toMatch(/whenThingDroppedOn\(thing\) \{\s+core\.console\.log\(thing\)/)
+      expect(js).toMatch(/whenThingDraggedOutOf\(thing\) \{\s+this\.hint = ""/)
+    })
+
+    test("`- it can be selected`;  `the selection of the tasks`, what people selected (outline-spell P29)", () => {
+      const js = compile([
+        "a task is a drawable thing where:",
+        "\t- it can be selected",
+        "a to-do is a drawable list of tasks",
+        "to show the selection of a to-do",
+        "\tprint the length of the selection of the to-do"
+      ])
+      expect(js).toContain("static canBeSelected = true")
+      expect(js).toContain("core.console.log(core.itemCountOf(this.selection))")
+    })
+
+    test("`- its items can be reordered (after 1.5 seconds)`:  the seconds the page waits, on the class (outline-spell P30)", () => {
+      const js = compile([
+        "a task is a drawable thing",
+        "a checklist is a drawable list of tasks where:",
+        "\t- its items can be reordered",
+        "a backlog is a drawable list of tasks where:",
+        "\t- its items can be reordered after 1.5 seconds",
+        "a queue is a drawable list of tasks where:",
+        "\t- its items can be reordered immediately"
+      ])
+      expect(js).toContain("static reorderItemsAfter = 2")
+      expect(js).toContain("static reorderItemsAfter = 1.5")
+      expect(js).toContain("static reorderItemsAfter = 0")
     })
 
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {

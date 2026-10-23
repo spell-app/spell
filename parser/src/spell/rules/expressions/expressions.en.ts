@@ -152,7 +152,7 @@ expressions.addRule(CompoundExpression, {
       beforeEach(scope: P.Scope) {
         scope.variables?.add("card")
       },
-      tests: [[`the suit of the card is "ace"`, `(card.suit == "ace")`]]
+      tests: [[`the suit of the card is "ace"`, '(card.suit === "ace")']]
     },
     {
       title: "postfix binds like a comparison:  after arithmetic, before `and`",
@@ -163,7 +163,7 @@ expressions.addRule(CompoundExpression, {
       },
       tests: [
         ["x + y is empty", "core.isEmpty(x + y)"],
-        ["x is 1 and y is empty", "(x == 1 && core.isEmpty(y))"]
+        ["x is 1 and y is empty", "(x === 1 && core.isEmpty(y))"]
       ]
     }
   ]
@@ -198,7 +198,7 @@ expressions.addRule(And, {
       tests: [
         ["thing and other", "(thing && other)"],
         ["thing and other and yet-another", "(thing && other && yetAnother)"],
-        ["thing is 1 and other is 2", "(thing == 1 && other == 2)"]
+        ["thing is 1 and other is 2", "(thing === 1 && other === 2)"]
       ]
     }
   ]
@@ -228,8 +228,8 @@ expressions.addRule(IsEqual, {
         scope.variables?.add("other")
       },
       tests: [
-        ["thing is other", "(thing == other)"],
-        ["thing is not other", "(thing != other)"]
+        ["thing is other", "(thing === other)"],
+        ["thing is not other", "(thing !== other)"]
       ]
     },
     // a thing compared to one of the values its type lists:  the property that lists it
@@ -246,8 +246,8 @@ expressions.addRule(IsEqual, {
         )
       },
       tests: [
-        ["card is clubs", '(card.suit == "clubs")'],
-        ["card is not hearts", '(card.suit != "hearts")']
+        ["card is clubs", '(card.suit === "clubs")'],
+        ["card is not hearts", '(card.suit !== "hearts")']
       ]
     }
   ]
@@ -366,7 +366,7 @@ expressions.addRule(IsIn, {
       tests: [
         ["thing is green or blue", 'core.includes(["green", "blue"], thing)'],
         ["thing is not green or blue", '!core.includes(["green", "blue"], thing)'],
-        ["thing is green or thing is blue", '(thing == "green" || thing == "blue")']
+        ["thing is green or thing is blue", '(thing === "green" || thing === "blue")']
       ]
     }
   ]

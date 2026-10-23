@@ -34,6 +34,34 @@ export class DrawableList<T = unknown> extends List<T> {
   static canBeDragged = false
 
   /**
+   * How many seconds the pointer rests before dragged items move into place, if people may reorder our items:
+   * `- its items can be reordered` says 2, `... after 1.5 seconds` 1.5 (epic `outline-spell` P30).
+   * - `undefined`:  they may not.
+   * - A page may say otherwise for one list:  its element's `move-delay`.
+   */
+  static reorderItemsAfter: number | undefined = undefined
+
+  /**
+   * Our items people have selected on the page, in our order:  spell's `the selection of the tasks`
+   * (epic `outline-spell` P29).
+   * - Only items whose type says `can be selected`:  the page selects them as people click (`select()`).
+   * - An item taken out of us leaves it too.
+   * - Tracked:  a drawing showing it, e.g. a property editor's `value`, follows each change.
+   * - A plain array, which every list word reads:  so a form or property editor edits them all at once
+   *   (`<ui-property-editor value={the selection of the tasks}>`), and it owns nothing.
+   * - The page's alone:  never saved, nor sent to a program running elsewhere.
+   */
+  get selection(): T[] {
+    const chosen = this.getState<T[]>("selection") ?? []
+    return [...this].filter((item) => chosen.includes(item))
+  }
+
+  /** SIDE EFFECT:  select `items`, those of ours, instead of what was selected -- see `selection`. */
+  select(items: Iterable<T>): void {
+    this.setState("selection", [...items])
+  }
+
+  /**
    * Its outside, with a `<slot>` where its items show -- by default the slot, and its placeholder while it's empty.
    * - Override it, e.g. `to draw it:  return <div class="pile"><children/></div>`:
    *   spell's `<children/>` is the web's `<slot>`, compiled to `h("slot")`.

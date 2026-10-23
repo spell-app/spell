@@ -20,6 +20,7 @@
       "name": "doNothing",
       "of": "core",
       "module": "core",
+      "section": "Changes put back (core.startWhile())",
       "description": "Do nothing -- use this as a placeholder, e.g. in an `if` branch."
     },
     {
@@ -27,6 +28,7 @@
       "name": "flush",
       "of": "core",
       "module": "core",
+      "section": "Changes put back (core.startWhile())",
       "description": "Settle everything that follows spell state NOW:  pending derived checks, then the host's Solid."
     },
     {
@@ -1296,6 +1298,81 @@
       "of": "core",
       "module": "elements",
       "description": "What the page does just before things MOVE from one list to another, e.g. a card onto the discards -- `undefined` until the page running programs sets it."
+    },
+    {
+      "property": "remote",
+      "of": "core",
+      "module": "elements",
+      "description": "Where a page sends what its program runs, when the program runs ELSEWHERE, e.g. in Python -- `undefined` when it runs here."
+    },
+    {
+      "kind": "method",
+      "name": "runHandler",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "owner"
+        },
+        {
+          "name": "method"
+        },
+        {
+          "name": "...args"
+        }
+      ],
+      "description": "Run `owner`'s method `method` with `args`, e.g. a pile's `whenCardDroppedOn(card)`, for the page."
+    },
+    {
+      "kind": "method",
+      "name": "moveBefore",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "items"
+        },
+        {
+          "name": "before"
+        }
+      ],
+      "description": "Move `items` into `list` before `before`, at its end with none:  a page reordering a list as people drag (epic `outline-spell` P30) -- see `List.moveBefore()`."
+    },
+    {
+      "kind": "method",
+      "name": "startWhile",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "owner"
+        },
+        {
+          "name": "method"
+        },
+        {
+          "name": "...args"
+        }
+      ],
+      "description": "Run `owner`'s `while` handler `method` with `args`, e.g. a pile's `whileCardDraggedOver(card)`, till `endWhile()`:  what it sets is put back then."
+    },
+    {
+      "kind": "method",
+      "name": "endWhile",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "owner"
+        },
+        {
+          "name": "method"
+        }
+      ],
+      "description": "End `owner`'s `while` handler `method`, started by `startWhile()`:  put back what it set.  Nothing if it isn't running."
     },
     {
       "kind": "method",

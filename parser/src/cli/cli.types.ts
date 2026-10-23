@@ -30,6 +30,7 @@ export type LanguageCommands = {
   repl(project: string[], options: GlobalOptions): Promise<number>
   explain(word: string[], options: ExplainOptions): Promise<number>
   translate(project: string[], options: TranslateOptions): Promise<number>
+  translateTime(projects: string[], options: TranslateTimeOptions): Promise<number>
 }
 
 /** One of the language's commands, by name:  `compile`, `lint` ... */
@@ -46,6 +47,14 @@ export type LanguageCommand = keyof LanguageCommands
  * - `update`:  re-translate only the lines changed since the last run;  the rest stay as they are, hand edits too
  * - `ai`:  `false` (`--no-ai`) leaves each name the dictionary lacks as `TODO`, instead of asking `claude -p`
  * - `seed`:  a project translated by hand, whose names fill the dictionary first, e.g. `@spell/examples/Solitario`
+ * - `learn`:  translate nothing;  add the project's dictionary to the language's shared glossary (epic `spanish` P26)
+ * - `effort`:  how much every pass spends on its answers, `fast`, `balanced` or `best` -- default `balanced`
+ *   (epic `spanish` P27);  the runner maps it to its own model and effort
+ * - `namesEffort`, `fixUpsEffort`:  one pass's, over `effort` -- `--names-effort`, `--fix-ups-effort`
+ * - `model`:  HIDDEN, for experiments:  an exact model and effort for every call, in the runner's own terms,
+ *   `<model>[:<effort>]` (`claude-sonnet-5-5:medium`), over every tier
+ * - `cold`:  for timing (epic `spanish` P29):  nothing pre-calculated -- no shared glossary, no dictionary of the
+ *   project's, no record of fix-ups, no seed -- and nothing written but into `out`, which it needs
  */
 export type TranslateOptions = GlobalOptions & {
   to: string
@@ -53,6 +62,31 @@ export type TranslateOptions = GlobalOptions & {
   update?: boolean
   ai?: boolean
   seed?: string
+  learn?: boolean
+  effort?: string
+  namesEffort?: string
+  fixUpsEffort?: string
+  model?: string
+  cold?: boolean
+}
+
+/**
+ * `spell parser translate-time` flags (epic `spanish` P29):  timing `spell parser translate`, on scratch copies.
+ * - `to`:  the language, e.g. `es`
+ * - `runs`:  how many runs of each project, mode and tier -- default 1
+ * - `effort`:  the tiers to compare, comma-separated, e.g. `fast,balanced` -- default `balanced`
+ * - `mode`:  what each run starts from, comma-separated (`TimingMode`) -- default `cold,glossary`
+ * - `reference`:  a translation a person made, to compare the drafted names with -- one project only;
+ *   spell-app knows the examples' twins (Solitaire's Solitario) itself
+ * - `json`:  write every run and the table's numbers to this file too
+ */
+export type TranslateTimeOptions = GlobalOptions & {
+  to: string
+  runs?: number
+  effort?: string
+  mode?: string
+  reference?: string
+  json?: string
 }
 
 /**

@@ -3,7 +3,8 @@
  * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest;
  * and `spell parser packs check|fix`, for the language packs (epic `spanish` P7);
  * and `spell parser translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
- * finds projects the app's way, then `translateProject.ts`.
+ * finds projects the app's way, then `translateProject.ts`;  `spell parser translate-time` times it (P29,
+ * `translateTimes.ts`), the same way.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
@@ -163,22 +164,59 @@ export default function languageCommands(spell: Command): void {
   parser
     .command("translate")
     .description(
-      "write a project in another language, rule by rule, its names from <Project>.<lang>.names.json5 -- " +
+      "write a project in another language:  its names first (<Project>.<lang>.names.json5:  the shared glossary's, " +
+        "then Claude's), then line by line, rule by rule, then Claude fixes each line that fails lint, a test " +
+        "or the shape check -- through the Claude API with ANTHROPIC_API_KEY set, else claude -p -- " +
         "exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
     .requiredOption("--to <lang>", "the language to write it in, e.g. es")
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
-    .option("--no-ai", "leave each name the dictionary lacks as TODO, instead of asking claude -p")
+    .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
+    .option("--effort <tier>", "how much every pass spends on its answers:  fast, balanced or best -- default balanced")
+    .option("--names-effort <tier>", "the names pass's own:  fast, balanced or best")
+    .option("--fix-ups-effort <tier>", "the fix-ups' own:  fast, balanced or best")
+    // for experiments:  an exact model and effort, in the runner's own terms, over every tier
+    .addOption(parser.createOption("--model <model>", "an exact model[:effort] for every call").hideHelp())
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
+    )
+    .option(
+      "--learn",
+      "translate nothing:  add the project's names to the language's shared glossary, for every project"
+    )
+    .option(
+      "--cold",
+      "for timing:  nothing pre-calculated -- no shared glossary, no dictionary of the project's, no record, no seed -- " +
+        "written only into --out, which it needs"
     )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) =>
       language("translate", listOf(project), command)
     )
+
+  parser
+    .command("translate-time")
+    .description(
+      "time spell parser translate:  each run on a scratch copy of the project, deleted after -- a table of each pass's " +
+        "time, calls, problems left, lint, tests, shape and how many names agree with a person's translation, " +
+        "min, median and max over the runs"
+    )
+    .argument("[projects...]", `${PROJECTS_ARG} -- default Solitaire and todos-form-based`)
+    .requiredOption("--to <lang>", "the language to write them in, e.g. es")
+    .option("--runs <count>", "runs of each project, mode and tier -- default 1", (value) => Number(value))
+    .option("--effort <tiers>", "the tiers to compare, e.g. fast,balanced -- default balanced")
+    .option(
+      "--mode <modes>",
+      "what each run starts from:  cold (nothing pre-calculated), glossary (the shared glossary), " +
+        "update (translated, one English line changed, then --update) -- default cold,glossary"
+    )
+    .option("--reference <project>", "a person's translation of the one project, to compare names with")
+    .option("--json <file>", "write every run, and the table, to this file too")
+    .addHelpText("after", PROJECT_HELP)
+    .action((projects: string[], _options, command: Command) => language("translateTime", projects, command))
 }
 
 /**

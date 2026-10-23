@@ -154,8 +154,8 @@ variablesEs.addRule(ImpliedIt, {
       },
       tests: [
         ["está vacío", "core.isEmpty(it)"],
-        ["no es 1", "(it != 1)"],
-        ["es 1 y no está vacío", "(it == 1 && !core.isEmpty(it))"],
+        ["no es 1", "(it !== 1)"],
+        ["es 1 y no está vacío", "(it === 1 && !core.isEmpty(it))"],
         ["no", "false"],
         ["vacío", undefined],
         ["es", undefined]

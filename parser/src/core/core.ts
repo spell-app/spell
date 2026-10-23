@@ -9,7 +9,7 @@
 import _isArrayLike from "lodash/isArrayLike"
 import isEqual from "lodash/isEqual"
 
-import { brokenRule, flushCells, ruleWarning, withoutCreate } from "spell/util"
+import { brokenRule, flushCells, peekProp, ruleWarning, withoutCreate } from "spell/util"
 // Import directly, never through the barrel:
 // `spell-parser/core/model` loads this file, and must not load drawing (Solid)
 import { assert } from "./assert"
@@ -67,6 +67,47 @@ export function programThings(): Core["things"] | undefined {
  */
 export function registerThing(thing: object): void {
   programThings()?.add(thing as Parameters<Core["things"]["add"]>[0])
+}
+
+////////////////
+// ## Changes put back (`core.startWhile()`)
+////////////////
+
+/** The props set while a `while` handler runs, each one's value before:  `undefined` when none is running. */
+let recording: Array<{ target: object; property: string; was: unknown }> | undefined
+
+/**
+ * SIDE EFFECT:  `target`'s prop `property` is about to be set to `value`:  `Thing` and `List` call it from `setProp()`.
+ * - Nothing if it has that value already.
+ * - A `while` handler running:  its value now is noted, to put back -- only its first, what it had before the handler.
+ * - A program running elsewhere (`core.remote`, e.g. Python):  it's set there too,
+ *   e.g. a task's title typed into a page's form.
+ */
+export function noteSetting(target: object, property: string, value: unknown): void {
+  const was = peekProp(target, property)
+  if (was === value) return
+  const isNoted = recording?.some((change) => change.target === target && change.property === property)
+  if (recording && !isNoted) recording.push({ target, property, was })
+  ;(core as Partial<Pick<Core, "remote">>).remote?.set(target, property, value)
+}
+
+/**
+ * Run `run`, noting every prop it sets:  returns what puts them all back, as they were.
+ * - Only what it sets before it first waits:  a handler's steps after a pause aren't put back.
+ * - What it adds to or takes from a list stays.
+ */
+export function recordingSettings(run: () => unknown): () => void {
+  const outer = recording
+  const changes: NonNullable<typeof recording> = []
+  recording = changes
+  try {
+    run()
+  } finally {
+    recording = outer
+  }
+  return () => {
+    for (const { target, property, was } of changes.reverse()) (target as Record<string, unknown>)[property] = was
+  }
 }
 
 /** Meta-programming, exports, type-checking, path access, equality, math and iteration primitives. */

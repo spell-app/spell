@@ -393,6 +393,36 @@ describe("guards:  only a move asks them", () => {
   })
 })
 
+describe("reordering:  `moveBefore()` (outline-spell P30)", () => {
+  test("a list's own items change places, in the order given;  none:  to the end", () => {
+    const [a, b, c, d] = cards(4)
+    const pile = new Pile({})
+    core.append(pile, a, b, c, d)
+    expect(pile.moveBefore([d!, b!], a)).toBe(true)
+    expect(itemsOf(pile)).toEqual([d, b, a, c])
+    pile.moveBefore([d!])
+    expect(itemsOf(pile)).toEqual([b, a, c, d])
+    // `before` one of them:  the next that isn't
+    pile.moveBefore([c!, b!], b)
+    expect(itemsOf(pile)).toEqual([c, b, a, d])
+  })
+
+  test("another list's item comes over only as a move would", () => {
+    const [a, b, c] = cards(3)
+    const stock = new StockPile({})
+    const pile = new Pile({})
+    core.append(stock, a, b)
+    core.append(pile, c)
+    // `a` isn't the stock's last card:  it stays;  `b` comes over, its owner changing
+    expect(pile.moveBefore([a!, b!], c)).toBe(true)
+    expect(itemsOf(pile)).toEqual([b, c])
+    expect(itemsOf(stock)).toEqual([a])
+    expect(b!.pile).toBe(pile)
+    expect(new Foundation({}).moveBefore([c!])).toBe(true)
+    expect(pile.moveBefore([c!])).toBe(false)
+  })
+})
+
 describe("JSON (output-targets Q49)", () => {
   test('a list is its `"$type"`, its own props, then its items:  each item by its own JSON', () => {
     const deck = new NamedDeck({ name: "spare" })

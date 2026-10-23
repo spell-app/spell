@@ -76,6 +76,15 @@ describe("Spanish's inflector", () => {
     expect(spanishInflector.typeCase("cuentas-bancarias")).toBe("CuentaBancaria")
   })
 
+  test("a name of several words is one when its first word is:  `gestor-tareas` handles tasks (epic `spanish` P28)", () => {
+    expect(spanishInflector.singularize("gestor-tareas")).toBe("gestor-tareas")
+    expect(spanishInflector.singularize("gestorTareas")).toBe("gestorTareas")
+    expect(spanishInflector.plurality("gestorTareas")).toBe("singular")
+    expect(spanishInflector.singularize("gestores-tareas")).toBe("gestor-tareas")
+    expect(spanishInflector.pluralize("gestor-tareas")).toBe("gestores-tareas")
+    expect(spanishInflector.typeCase("gestores-tareas")).toBe("GestorTareas")
+  })
+
   test("a name of several words keeps its number after a linking word, in PascalCase too (J96)", () => {
     expect(spanishInflector.typeCase("pila-de-descartes")).toBe("PilaDeDescartes")
     expect(spanishInflector.typeCase("pilas-de-descartes")).toBe("PilaDeDescartes")

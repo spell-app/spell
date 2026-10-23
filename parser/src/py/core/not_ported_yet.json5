@@ -27,6 +27,16 @@
       ]
     },
     {
+      "why": "A page's drag handlers (epic outline-spell P28):  the page calls them;  a Python program's page sends them to its things, as `start_while()` and `end_while()`",
+      "names": [
+        "remote",
+        "runHandler",
+        "moveBefore",
+        "startWhile",
+        "endWhile"
+      ]
+    },
+    {
       "why": "A recompile keeping the last run's things (epic drawable-thing P16, P17):  the page's runners only;  a Python program never keeps them",
       "names": [
         "isCarryingOver",

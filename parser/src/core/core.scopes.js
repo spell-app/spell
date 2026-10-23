@@ -10,7 +10,7 @@
         { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "new_thing", syntax: "a new {type:known_type} ((with|where|whose) {props:object_literal_properties})?" },
-        { name: "create_thing", syntax: "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?" }
+        { name: "create_thing", syntax: "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?" }
       ]
     },
     {
@@ -266,6 +266,11 @@
     {
       path: "type:DrawableList",
       super: "type:List"
+    },
+    {
+      path: "type:DrawableList/property:selection",
+      detail: "list",
+      description: "Its items people have selected on the page, in its order -- `the selection of the tasks`.\n- Only items whose type says so:  `a task can be selected`.\n- A click selects one;  shift selects up to it, command (ctrl) adds or takes one away.\n- e.g. a property editor of every selected task:  `<ui-property-editor value={the selection of the tasks}>`.\n- The page's alone:  it's never saved."
     },
     {
       path: "type:Text",

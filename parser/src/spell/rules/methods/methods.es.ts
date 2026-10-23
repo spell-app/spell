@@ -15,6 +15,7 @@ import { Synonyms, Wording } from "spell-parser/spell/rules/expressions"
 
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
+import { CreateHook } from "./CreateHook"
 import { MethodKeyword } from "./MethodKeyword"
 import { MethodSignature } from "./MethodSignature"
 import { QuotedMethodSignature } from "./QuotedMethodSignature"
@@ -38,6 +39,11 @@ methodsEs.addRule(Synonyms.specialize({ ruleName: "receiver_of" }), { syntax: "(
 // `para crear un mazo:` -- Spanish fuses `it` into its verb, as `dibujarlo` -- see `MethodDefinition.hookOf()`
 methodsEs.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["create"] }), {
   syntax: "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
+})
+
+// the words of what runs as a thing is made, in its type's outline:  `- al crearla:` -- see `CreateHook`
+methodsEs.addRule(Wording.specialize({ ruleName: "create_hook_words", meanings: ["create"] }), {
+  syntax: "(create:crearla|crearlo|crearlas|crearlos|crear (la|lo|las|los)?)"
 })
 
 methodsEs.addRule(MethodKeyword)
@@ -1008,4 +1014,51 @@ methodsEs.addRule(QuotedTypeExpression, {
 // - NOT `es`:  `- "suit" es ...` is a property, as `su "suit" es ...` -- see `isPropertyWithoutSubject()`
 methodsEs.addRule(QuotedTypeExpression, {
   syntax: "{type:subject_implied} {signature:quoted_method_signature} si? :? {expression_body}?"
+})
+
+// what runs as a thing is made, in its type's outline:  `- al crearla (con ...):`,
+// also `- al crear:` and `- al crear la:` (epic `spanish` P28)
+methodsEs.addRule(CreateHook, {
+  syntax: "al {signature:method_signature} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          [
+            "una tarea es una cosa donde:",
+            "\t- al crearla (con título como texto, hecha como una opción):",
+            "\t\timprimir el título"
+          ],
+          [
+            "export class Tarea extends Thing {",
+            "  create(props = {}) {",
+            "    const { título, hecha } = props",
+            "    core.console.log(título)",
+            "  }",
+            "}"
+          ],
+          [
+            "@thing",
+            "export class Tarea extends Thing {",
+            "  create(props: { título?: string; hecha?: boolean } = {}) {",
+            "    const { título, hecha } = props",
+            "    core.console.log(título)",
+            "  }",
+            "}"
+          ]
+        ],
+        [
+          ["una tarea es una cosa donde:", "\t- al crear:", "\t\timprimir 1"],
+          ["export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
+        ],
+        [
+          ["una tarea es una cosa donde:", "\t- al crear la:", "\t\timprimir 1"],
+          ["export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"],
+          ["@thing", "export class Tarea extends Thing {", "  create() {", "    core.console.log(1)", "  }", "}"]
+        ]
+      ]
+    }
+  ]
 })

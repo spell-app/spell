@@ -424,7 +424,21 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "```"
     ),
     rules: ["create_drawable_list_type", "draw_it"],
-    members: []
+    members: [
+      {
+        words: "selection",
+        kind: "property",
+        datatype: "list",
+        readAs: "{it}.selection",
+        docstring: md(
+          "Its items people have selected on the page, in its order -- `the selection of the tasks`.",
+          "- Only items whose type says so:  `a task can be selected`.",
+          "- A click selects one;  shift selects up to it, command (ctrl) adds or takes one away.",
+          "- e.g. a property editor of every selected task:  `<ui-property-editor value={the selection of the tasks}>`.",
+          "- The page's alone:  it's never saved."
+        )
+      }
+    ]
   },
   {
     name: "text",

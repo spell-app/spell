@@ -20,6 +20,7 @@ import re
 from collections.abc import Iterable, Mapping
 
 from spell_core.js_text import js_string
+from spell_core.things import Thing
 
 # Elements HTML never closes:  `<br>`, not `<br></br>`.  linkedom's list.
 VOID_ELEMENTS = frozenset({
@@ -137,6 +138,9 @@ def attribute_value(name: str, value: object) -> str | None:
         return None
     if value is True:
         return ""
+    # a thing given as an attribute, e.g. a form's `value={it}`:  JavaScript writes it `[object Object]`
+    if isinstance(value, Thing):
+        return "[object Object]"
     text = js_string(value)
     if name == "class":
         return " ".join(dict.fromkeys(name for name in CLASS_SPACE.split(text) if name))

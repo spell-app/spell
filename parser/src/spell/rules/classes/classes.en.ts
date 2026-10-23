@@ -46,6 +46,8 @@ import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
+import { DragHandler } from "./DragHandler"
+import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -70,15 +72,29 @@ classes.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["ta
   syntax: "((take:add|take)|(give_up:release|remove|give up|let go of))"
 })
 
-// What a type's things may be, for `drag_and_drop`:  dragged, or dropped on
-classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:dragged)|(dropped_on:dropped on))"
+// What a type's things may be, for `drag_and_drop`:  dragged, dropped on, or selected
+classes.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on", "selected"] }), {
+  syntax: "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
+})
+
+// When a list's drag handler runs, for `drag_handler`:  `when a card is dropped on it`
+classes.addRule(
+  Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
+  { syntax: "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))" }
+)
+
+// No wait, for `items_reordered`:  `- its items can be reordered immediately`
+classes.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immediately"] }), {
+  syntax: "((immediately:immediately|right away))"
 })
 
 // The same, as adjectives, for `drag_and_drop`:  `is draggable`, `is not droppable`
-classes.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
-  syntax: "((dragged:draggable)|(dropped_on:droppable))"
-})
+classes.addRule(
+  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  {
+    syntax: "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+  }
+)
 
 // Which bound, for `must_rule`:  `be at least 3 letters long`
 classes.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -551,7 +567,8 @@ classes.addRule(DragAndDrop, {
       },
       tests: [
         ["a card can be dragged", "Card.canBeDragged = true"],
-        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"]
+        ["a pile can be dropped on", "Pile.canBeDroppedOn = true"],
+        ["a card can be selected", "Card.canBeSelected = true"]
       ]
     }
   ]
@@ -569,13 +586,24 @@ classes.addRule(DragAndDrop, {
       tests: [
         ["a card is draggable", "Card.canBeDragged = true"],
         ["a pile is droppable", "Pile.canBeDroppedOn = true"],
-        ["a card is not draggable", "Card.canBeDragged = false"]
+        ["a card is not draggable", "Card.canBeDragged = false"],
+        ["a card is selectable", "Card.canBeSelected = true"]
       ]
     }
   ]
 })
 
 // in a type's outline body -- tests in `parserTests/outline.test.ts`:  `- it can be dragged`, `- can be dropped on`
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- when a card is dropped on it:`
+classes.addRule(DragHandler, { syntax: "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "when something is {moment:drag_moment} it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while (a|an) {item:type} is dragged over it :? {statement_body}?" })
+classes.addRule(DragHandler, { syntax: "while something is dragged over it :? {statement_body}?" })
+// in a list type's outline body -- tests in `parserTests/outline.test.ts`:  `- its items can be reordered`
+classes.addRule(ItemsReordered, {
+  syntax: "{type:subject_its} items can be reordered (after {seconds:number} (second|seconds)|{now:right_away})?"
+})
+
 for (const subject of ["subject_it", "subject_implied"]) {
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} can be {what:drag_or_drop}` })
   classes.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
@@ -854,7 +882,7 @@ classes.addRule(NewList, {
 })
 
 classes.addRule(CreateThing, {
-  syntax: "create (a|an) {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
+  syntax: "create (a|an) new? {type:known_type} ((with|where|whose) {props:object_literal_properties})?",
   tests: [
     {
       title: "creates normal objects properly",
@@ -864,7 +892,9 @@ classes.addRule(CreateThing, {
       },
       tests: [
         [`create a Thing`, `new Thing()`],
-        [`create a Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`]
+        [`create a Thing with a = 1, b = yes`, `new Thing({ a: 1, b: true })`],
+        // `new` may be said:  `create a new task with title = "Shop"` (epic `spanish` P28)
+        [`create a new Thing with a = 1`, "new Thing({ a: 1 })"]
       ]
     },
     {

@@ -4,7 +4,7 @@
 import _ from "lodash"
 
 import { Cell, isTrackingCells, ITEMS_KEY, Observable, runsCreate, typedJSON, type PropInfo } from "spell/util"
-import { registerThing, core } from "spell-parser/core/core"
+import { registerThing, noteSetting, core } from "spell-parser/core/core"
 import type { CollectionIterationCallback } from "spell-parser/core/collection-other"
 import type { Drawing } from "spell-parser/core/drawing"
 import type { PropCheck } from "spell-parser/core/core.types"
@@ -88,7 +88,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   constructor(props?: Record<string, unknown>) {
     super(props)
     registerThing(this)
-    if (runsCreate(List, new.target)) this.create()
+    if (runsCreate(List, new.target)) this.create(props)
   }
 
   /** `items` array as state. */
@@ -116,6 +116,7 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
+    noteSetting(this, property, value)
     return super.setProp(property, value)
   }
 
@@ -127,8 +128,9 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   /**
    * Called once per instance, after constructor props are assigned -- override in a subclass to set up initial state.
    * - NOTE: same timing as `Thing.create()`:  a hand-written subclass with fields MUST be `@thing`.
+   * - `props`:  what it was made with, as `Thing.create()`'s.
    */
-  create(): void {}
+  create(_props?: Record<string, unknown>): void {}
 
   /**
    * Our id, as a thing's:  a list is a thing in spell -- see `Thing.id`.
@@ -642,6 +644,33 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
     if (!this.canTake(item)) return false
     this.add(item)
     return true
+  }
+
+  /**
+   * Move `items` here, before `before` -- at our end with none:  a page reordering us as people drag (epic `outline-spell`
+   * P30, `core.moveBefore()`).
+   * - Ours already:  they just change places, in the order given.
+   * - Another list's:  only those it lets go and we take, as `moveHere()`;  the rest stay where they are.
+   * - `before` one of `items`:  the next of ours after it that isn't.
+   * - Returns whether any moved.
+   */
+  moveBefore(items: T[], before?: T): boolean {
+    const current = this.items
+    const moving = items.filter((item) => current.includes(item) || this.wouldTake(item))
+    if (!moving.length) return false
+    let place = before === undefined ? -1 : current.indexOf(before)
+    while (place >= 0 && moving.includes(current[place]!)) place = place + 1 < current.length ? place + 1 : -1
+    const anchor = place < 0 ? undefined : current[place]
+    const rest = current.filter((item) => !moving.includes(item))
+    const at = anchor === undefined ? rest.length : rest.indexOf(anchor)
+    this.writeItems([...rest.slice(0, at), ...moving, ...rest.slice(at)])
+    return true
+  }
+
+  /** Would `item`, another list's, come here as `moveHere()` moves it:  its list lets it go, and we take it? */
+  private wouldTake(item: T): boolean {
+    const owner = this.family?.ownerOf(item, "UNTRACKED")
+    return (!owner || owner.canGiveUp(item)) && this.canTake(item)
   }
 
   /** Convert to string by joining with comma. */

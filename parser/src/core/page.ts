@@ -25,6 +25,7 @@
  * - ONE page at a time:  the messages go to the last one started.
  */
 import { core } from "./core"
+import type { RemoteProgram } from "./elements"
 import { App } from "./classes/App"
 import { List } from "./classes/List"
 import { Thing } from "./classes/Thing"
@@ -52,6 +53,19 @@ export type Page = {
   mirror: StateMirror
 }
 
+/** Is the page taking in the program's state, or a patch, now?  Its writes are the program's own:  never sent back. */
+let isReading = false
+
+/** Run `read`, the page taking in the program's state:  `isReading` meanwhile. */
+function reading<T>(read: () => T): T {
+  isReading = true
+  try {
+    return read()
+  } finally {
+    isReading = false
+  }
+}
+
 /** The page messages go to, the last one started. */
 let current: { mirror: StateMirror; send: (message: PageMessage) => void } | undefined
 
@@ -59,12 +73,31 @@ let current: { mirror: StateMirror; send: (message: PageMessage) => void } | und
 export function startPage({ modules, state, send }: PageSpec): Page {
   const mirror = new StateMirror({ nameOf: javascriptName })
   current = { mirror, send }
+  core.remote = REMOTE
   for (const module of modules) core.things.addClasses(module)
-  const things = mirror.read(state) as Record<string, unknown>
+  const things = reading(() => mirror.read(state)) as Record<string, unknown>
   for (const module of modules) (module.adopt as ((state: unknown) => void) | undefined)?.(things)
   const app = Object.values(things).find((value) => value instanceof App) as App | undefined
   app?.start()
-  return { mirror, receive: (next: unknown) => void mirror.read(next) }
+  return { mirror, receive: (next: unknown) => void reading(() => mirror.read(next)) }
+}
+
+/**
+ * How a page runs its lists' drag handlers:  in the program, by their Python names (`core.remote`).
+ * - `core.runHandler(pile, "whenCardDroppedOn", [card])` => `{ "call": "when_card_dropped_on", "on": "Pile#..." }`
+ * - `core.startWhile()` / `endWhile()` => `start_while` / `end_while` on the list, naming its handler:
+ *   `{ "call": "start_while", "on": "Pile#...", "args": ["while_card_dragged_over", "Card#..."] }`
+ */
+const REMOTE: RemoteProgram = {
+  run: (owner, method, args) => sendCall(snakeCase(method), args, owner as Thing),
+  startWhile: (owner, method, args) => sendCall("start_while", [snakeCase(method), ...args], owner as Thing),
+  endWhile: (owner, method) => sendCall("end_while", [snakeCase(method)], owner as Thing),
+  // one of the program's things, changed by the page:  not as it takes in the program's own state (`isReading`)
+  set: (owner, property, value) => {
+    if (isReading || !current?.mirror.idOf(owner as Thing)) return
+    sendCall("set_prop", [snakeCase(property), value], owner as Thing)
+  },
+  trigger: (name, details) => sendTrigger(name, details)
 }
 
 /**

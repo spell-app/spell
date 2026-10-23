@@ -91,6 +91,53 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/canBeDroppedOn = false/)
     })
 
+    test("`cuando una carta se suelta sobre ella`:  English's `when a card is dropped on it` (outline-spell P28)", () => {
+      const { code, errors } = compiled("drag-handler", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- cuando una carta se arrastra sobre ella:",
+        "\t\timprimir 1",
+        "\t- cuando una carta se arrastra fuera de ella:",
+        "\t\timprimir 2",
+        "\t- cuando una carta se suelta sobre ella:",
+        "\t\timprimir la carta"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whenCartaDraggedOver\(carta\)/)
+      expect(code).toMatch(/whenCartaDraggedOutOf\(carta\)/)
+      expect(code).toMatch(/whenCartaDroppedOn\(carta\)/)
+    })
+
+    test("`mientras una carta se arrastra sobre ella`, `cuando algo se suelta sobre ella`:  English's `while ...`, `something` (outline-spell P28)", () => {
+      const { code, errors } = compiled("drag-while", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- mientras una carta se arrastra sobre ella:",
+        "\t\timprimir la carta",
+        "\t- mientras algo se arrastra sobre ella:",
+        "\t\timprimir 1",
+        "\t- cuando algo se suelta sobre ella:",
+        "\t\timprimir la cosa"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whileCartaDraggedOver\(carta\)/)
+      expect(code).toMatch(/whileThingDraggedOver\(cosa\)/)
+      expect(code).toMatch(/whenThingDroppedOn\(cosa\) \{\s+core\.console\.log\(cosa\)/)
+    })
+
+    test("`- sus elementos se pueden reordenar (después de 1 segundo)`:  English's `its items can be reordered` (outline-spell P30)", () => {
+      const { code, errors } = compiled("reorder", [
+        "una tarea es una cosa dibujable",
+        "una agenda es una lista dibujable de tareas:",
+        "\t- sus elementos se pueden reordenar después de 1 segundo",
+        "una cola es una lista dibujable de tareas:",
+        "\t- sus elementos se pueden reordenar de inmediato"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/reorderItemsAfter = 1\b/)
+      expect(code).toMatch(/reorderItemsAfter = 0/)
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",
