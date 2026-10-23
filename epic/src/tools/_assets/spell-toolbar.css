@@ -469,6 +469,8 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
 ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
   position: relative;
   box-sizing: border-box;
+  /* room for its two concave curves inside the top band, however long its row:  it scrolls instead */
+  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
   padding: 0 var(--site-tabs-band, 8px) var(--site-tabs-band, 8px);
   /* round the track's ends:  half its height (24px) and the band */
   border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
