@@ -345,11 +345,11 @@ spell test @spell/examples/Solitaire 2>/dev/null
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (30 checks)
+✓ test card setup  (25 checks)
 ✓ test jokers  (15 checks)
-✓ test deck creation  (7 checks)
+✓ test deck creation  (10 checks)
 ✓ test deck with jokers  (5 checks)
-✓ test piles  (8 checks)
+✓ test piles  (9 checks)
 ✓ test the moves  (11 checks)
 
 6 passed
@@ -430,10 +430,12 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-spell-app/spaces/@spell/examples/Solitaire/Card.spell:25
+spell-app/spaces/@spell/examples/Solitaire/Card.spell:16
 
 Spell
-    - its "color" is the color of its suit
+    - its "color" is:
+      red if its suit is diamonds or hearts
+      black otherwise
 ```
 
 </details>
@@ -671,7 +673,7 @@ owen@spell       Projects       ...
 @spell/examples  Examples       5 projects
 @spell/guides    Guides         0 projects
 @spell/library   Libraries      1 project
-@spell/test      Test fixtures  6 projects
+@spell/test      Test fixtures  7 projects
 ```
 
 </details>
