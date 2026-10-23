@@ -321,7 +321,8 @@ and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
 
 - It adds 18 skills and 8 hooks, and puts `epic` on every session's `PATH`.
-- An edit to it is live at once for `epic` and the hooks;  a skill's new text after `/reload-plugins`.
+- An edit to it is live at once for `epic` and the hooks (once step 5 below links them);  a skill's new text after
+  `/reload-plugins`;  its inbox monitor in sessions started after.
 - A repo opts in with `.epic/config.json5`:  where its content folder, worktrees and windows are.
   The kit's [.epic/config.json5](.epic/config.json5) turns on MULTI-REPO mode, so an epic's worktree holds every repo.
 - Every `epic` verb:  [README-cli.md](README-cli.md).
@@ -333,15 +334,21 @@ claude plugin marketplace add ~/www/spell/spell-epic --scope user
 claude plugin install spell-epic@spell-epic --scope user
 for skill in ~/www/spell/spell-epic/skills/*/; do ln -s "$skill" ~/.claude/skills/; done
 ln -s ~/www/spell/spell-epic/bin/epic ~/.local/bin/epic
+cache=~/.claude/plugins/cache/spell-epic/spell-epic/0.1.0 && rm -rf "$cache" && ln -s ~/www/spell/spell-epic "$cache"
 ```
 
 1. Adds spell-epic's folder as a marketplace of one, for the whole machine.
-   A marketplace added from a local path loads its plugin IN PLACE:
-   no copy, no version pin;  an edit there is the plugin.
 2. Installs the plugin from it.
+   Claude Code COPIES the folder at install, and runs the plugin's hooks and monitor from the copy:  step 5.
 3. Links each skill into your own skills folder, so you type a bare `/epic`:
    a plugin's skills are otherwise named `/spell-epic:epic`.
 4. Puts `epic` on your terminal's `PATH`, outside Claude Code.
+5. Swaps that copy for a link to spell-epic's folder, so the hooks and the inbox monitor run `main`'s code, as the
+   skills and `epic` do.
+   - Without it, the copy stays as it was the day it was installed.  From 2026-10-18 to 2026-10-23 every session ran
+     that day's hooks, and no session ran the inbox monitor, which came after (epic `epic-engine` I79).
+   - The folder's name is the plugin's version (`plugin.json`).  Reinstalling or updating the plugin puts a copy back:
+     run step 5 again.
 
 - To try it in ONE session first, with nothing installed:  `claude --plugin-dir ~/www/spell/spell-epic`.
 - For the Review tab and window moves, install its VS Code extension too:
