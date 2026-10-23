@@ -157,7 +157,7 @@
    * On the segment's own box, NOT through `--ui-segment-padding`:
    * that token would inherit into every segment the example shows.
    */
-  :host(:not(:state(open))) [part~="demo"]::part(segment),
+  :host(:not(:state(code-shown))) [part~="demo"]::part(segment),
   .ui.bare.example [part~="demo"]::part(segment) {
     padding: 0;
   }
@@ -202,15 +202,16 @@
    * is open";  then, on a first try that boxed the demo inside the frame, "This is not what I wanted"):
    * - ONE card:  the demo its top band, out to the frame's edges, as it sits closed;  the code under it, edge to edge
    * - the demo over the code, casting its shadow down onto it
-   * - the code a shade deeper, rolling open from under the demo (its height from 0;  at once where the browser can't
-   *   ease to `auto`);  its long lines scroll sideways, never cut off
+   * - the code a shade deeper, rolling open from under the demo, and closed again (its height from 0 and back;  at once
+   *   where the browser can't ease to `auto`);  its long lines scroll sideways, never cut off
+   * - closing, the card keeps this look (`:state(code-shown)`) until the code has rolled away
    * - the code button pressed in
    */
-  :host(:state(open)) .ui.example:not(.bare) > .frame {
+  :host(:state(code-shown)) .ui.example:not(.bare) > .frame {
     padding: 0;
     overflow: hidden;
   }
-  :host(:state(open)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
+  :host(:state(code-shown)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
     position: relative;
     z-index: 1;
     margin: 0;
@@ -234,7 +235,9 @@
     background: color-mix(in oklab, var(--ui-text-color) 3%, transparent);
     box-shadow: none;
     interpolate-size: allow-keywords;
-    transition: height 0.26s var(--ui-ease-out, ease-out);
+    transition:
+      height 0.26s var(--ui-ease-out, ease-out),
+      padding-block 0.26s var(--ui-ease-out, ease-out);
   }
   .ui.example {
     /* the code's side padding:  the frame's, so its text starts under the demo's */
@@ -244,6 +247,11 @@
     .ui.example:not(.bare) [part~="code"]::part(segment) {
       height: 0;
     }
+  }
+  /* rolling closed:  still drawn (`:state(code-shown)`) while its height eases back to 0 */
+  :host(:not(:state(open))) .ui.example:not(.bare) [part~="code"]::part(segment) {
+    height: 0;
+    padding-block: 0;
   }
   :host(:state(open)) .frame > [part~="toggle"]::part(button) {
     background: color-mix(in oklab, var(--ui-text-color) 6%, var(--_ui-docs-example-toggle-background));

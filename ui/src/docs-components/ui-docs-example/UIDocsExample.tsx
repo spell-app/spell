@@ -60,6 +60,25 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   @E.controlled("code")
   accessor isCodeOpen = false
 
+  /**
+   * The code pane is drawn:  open, or still rolling closed (Owen, 2026-10-23, epic `debut`:  "code examples need to roll
+   * closed as well");  the open card's look stays until it has.
+   */
+  @E.cssState("code-shown")
+  @E.state
+  accessor isCodeShown = false
+
+  /** Drawn at once as it opens;  as it closes, once its roll (`CLOSE_SECONDS`) is done, unless it opened again. */
+  @E.onChange("isCodeOpen")
+  protected onCodeOpenChanged(isOpen: boolean) {
+    this.closingTimer?.cancel()
+    if (isOpen) this.isCodeShown = true
+    else if (this.isCodeShown) this.closingTimer = E.after(CLOSE_SECONDS, () => (this.isCodeShown = false))
+  }
+
+  /** The wait for the code to finish rolling closed (`onCodeOpenChanged()`). */
+  private closingTimer?: E.CancelablePromise<unknown>
+
   /** Open or close the code pane, as the viewer did with `event`. */
   toggle(event?: Event): void {
     const next = !this.isCodeOpen
@@ -71,9 +90,9 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
     return this.isCodeOpen ? this.translationForKey("hideCode") : this.translationForKey("showCode")
   }
 
-  /** The live example sits in a frame:  the code is open and the example isn't `bare`. */
+  /** The live example sits in a frame:  the code is shown (open, or rolling closed) and the example isn't `bare`. */
   private get demoIsFramed(): boolean {
-    return this.isCodeOpen && !this.bare
+    return this.isCodeShown && !this.bare
   }
 
   ////////////////
@@ -138,7 +157,7 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
           >
             <slot />
           </ui-segment>
-          <Show when={this.isCodeOpen}>
+          <Show when={this.isCodeShown}>
             <ui-segment
               id={CODE_PANE_ID}
               part={this.partForName("code")}
@@ -164,6 +183,9 @@ export interface UIDocsExample extends E.AttributeValues<typeof docsExampleVocab
 
 /** Class word of the header row:  the title. */
 const HEADING_CLASS = "heading"
+
+/** How long the code takes to roll closed, s:  `UIDocsExample.css`'s transition (0.26s), and a little more. */
+const CLOSE_SECONDS = 0.3
 
 /** Class word of the frame:  the live example, the code pane, and the code button over their top right corner. */
 const FRAME_CLASS = "frame"

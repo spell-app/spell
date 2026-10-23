@@ -91,7 +91,10 @@ export const docsExampleVocabulary = {
     { name: "code", description: "The `<ui-segment>` around the code pane." },
     { name: "source", description: "The `<ui-code>` showing the markup." }
   ],
-  states: [{ name: "open", description: "The code pane is open." }],
+  states: [
+    { name: "open", description: "The code pane is open." },
+    { name: "code-shown", description: "The code pane is drawn:  open, or still rolling closed." }
+  ],
   texts: [
     { key: "showCode", text: "Show code", description: "The code button's label while the code is hidden." },
     { key: "hideCode", text: "Hide code", description: "The code button's label while the code shows." }
