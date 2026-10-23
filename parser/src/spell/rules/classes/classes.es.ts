@@ -55,6 +55,7 @@ import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
 import { DragAndDrop } from "./DragAndDrop"
+import { DragHandler } from "./DragHandler"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -136,6 +137,12 @@ classesEs.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["
 classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
   syntax: "((dragged:arrastrar)|(dropped_on:soltar encima))"
 })
+
+// When a list's drag handler runs, for `drag_handler`:  `cuando una carta se suelta sobre ella`
+classesEs.addRule(
+  Wording.specialize({ ruleName: "drag_moment", meanings: ["dragged_over", "dragged_out_of", "dropped_on"] }),
+  { syntax: "((dragged_over:arrastra sobre)|(dragged_out_of:arrastra fuera de)|(dropped_on:suelta sobre))" }
+)
 
 // The same, as adjectives:  `es arrastrable`, `no es soltable`
 classesEs.addRule(Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on"] }), {
@@ -556,6 +563,11 @@ classesEs.addRule(DragAndDrop, {
       ]
     }
   ]
+})
+
+// in a list type's outline body:  `- cuando una carta se suelta sobre ella:`
+classesEs.addRule(DragHandler, {
+  syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
 })
 
 for (const subject of ["subject_it", "subject_implied"]) {

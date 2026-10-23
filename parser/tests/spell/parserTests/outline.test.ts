@@ -950,6 +950,24 @@ describe("outline style", () => {
       expect(js).toContain("static canBeDroppedOn = true")
     })
 
+    test("`- when a card is dragged over it`, `... dragged out of it`, `... dropped on it`:  methods typed by the card (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        'a "pile" is a drawable list of cards where:',
+        "\t- it can be dropped on",
+        '\t- its "hint" is text',
+        "\t- when a card is dragged over it:",
+        '\t\tset its hint to "drop here"',
+        "\t- when a card is dragged out of it:",
+        '\t\tset its hint to ""',
+        "\t- when a card is dropped on it:",
+        "\t\tadd the card to it"
+      ])
+      expect(js).toMatch(/whenCardDraggedOver\(card\) \{\s+this\.hint = "drop here"/)
+      expect(js).toMatch(/whenCardDraggedOutOf\(card\) \{\s+this\.hint = ""/)
+      expect(js).toMatch(/whenCardDroppedOn\(card\) \{\s+this\.append\(card\)/)
+    })
+
     test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
       const js = compile([
         "a card is a drawable thing where:",

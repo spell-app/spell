@@ -51,6 +51,7 @@ describe("priority and precedence", () => {
         "divided_by:  Precedence.product",
         "does_not_include:  Precedence.comparison",
         "drag_and_drop:  Priority.declaration",
+        "drag_handler:  Priority.declaration",
         "draw_it:  Priority.declaration",
         "draw_items:  Priority.specific",
         "draw_thing:  Priority.preferred",
