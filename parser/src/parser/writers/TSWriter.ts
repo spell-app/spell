@@ -1002,6 +1002,7 @@ export class TSWriter extends JSWriter {
     "handedThing",
     "hasInertContent",
     "handlerFor",
+    "hasThere",
     "heardPlaced",
     "idName",
     "internalState",
