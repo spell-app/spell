@@ -309,7 +309,8 @@
   }
   /* less air round the page's header (Owen, 2026-10-23:  "too much whitespace") */
   .site-masthead::part(segment) {
-    padding-block: 1.25em 0.25em;
+    /* 8px more under the title line (Owen, 2026-10-23:  "8px additional space below breadcrumb and subhead") */
+    padding-block: 1.25em calc(0.25em + 8px);
   }
   .site-body::part(container) {
     position: relative;
@@ -330,19 +331,22 @@
    */
   .site-masthead {
     --_site-head-end: var(--site-gutter);
+    /* each icon's cell, as far apart as the top bar's icons (Owen:  "match icon spacing in top bar") */
+    --_site-head-icon: 33px;
   }
   @media not (--ui-large-monitor) {
     .site-masthead {
-      /* the top bar's palette is centred its padding (8px) and half its box in;  an icon cell here is 2.25em */
-      --_site-head-end: calc(8px + var(--site-topbar-button, 29.5px) / 2 - 1.125em);
+      /* the top bar's palette is centred its padding (8px) and half its box in;  so is the last icon's cell here */
+      --_site-head-end: calc(8px + var(--site-topbar-button, 29.5px) / 2 - var(--_site-head-icon) / 2);
     }
   }
   .site-masthead > ui-container::part(container) {
     display: grid;
     grid-template-columns:
-      minmax(0, 1fr) var(--_site-send-width, 0px) var(--_site-mark-width, 0px) 0.5em
-      auto auto auto;
-    column-gap: 0.25em;
+      minmax(0, 1fr) var(--_site-send-width, 0px) var(--_site-mark-width, 0px) 0.75em
+      var(--_site-head-icon) var(--_site-head-icon) var(--_site-head-icon);
+    /* the cells touch:  their own width is the spacing;  the title keeps clear of the row by its own padding */
+    column-gap: 0;
     align-items: start;
     margin-inline-end: var(--_site-head-end);
   }
@@ -364,7 +368,8 @@
     --_site-send-width: 3.5em;
   }
   .site-masthead:has(> .spell-comment-mark.at-page) {
-    --_site-mark-width: 2.25em;
+    /* no more than the bullhorn and a little air before the pill's end (Owen:  "Too much space to right of bullhorn") */
+    --_site-mark-width: 1.6em;
   }
   .site-main > .site-masthead > [data-head-tool="send"],
   .site-main > .site-masthead > .spell-comment-mark.at-page {
@@ -377,14 +382,14 @@
     height: 2.25em;
     margin: 0.2em var(--site-gutter) 0;
   }
-  /* laid over their columns:  the bullhorn past the three icons (3 x 2.25em), their gaps and the space (1em) */
+  /* laid over their columns:  the bullhorn past the three icons' cells and the space (0.75em) */
   .site-main > .site-masthead > [data-head-tool="send"] {
     width: var(--_site-send-width);
-    margin-inline-end: calc(var(--_site-head-end) + 8.25em + var(--_site-mark-width, 0px));
+    margin-inline-end: calc(var(--_site-head-end) + 3 * var(--_site-head-icon) + 0.75em + var(--_site-mark-width, 0px));
   }
   .site-main > .site-masthead > .spell-comment-mark.at-page {
     width: var(--_site-mark-width);
-    margin-inline-end: calc(var(--_site-head-end) + 8.25em);
+    margin-inline-end: calc(var(--_site-head-end) + 3 * var(--_site-head-icon) + 0.75em);
   }
   /* ... and drawn as ONE pill:  Send's ring opens on its right, the bullhorn closes it */
   .site-masthead:has(> .spell-comment-mark.at-page) > [data-head-tool="send"] {
@@ -417,6 +422,7 @@
     display: block;
     grid-column: 1;
     grid-row: 1;
+    padding-inline-end: 0.5em;
     /* never broken inside a word ("Breadcrum / b"):  between words only */
     overflow-wrap: normal;
   }
@@ -454,14 +460,17 @@
   }
   @keyframes site-masthead-fill {
     from {
-      background-color: transparent;
+      /* a theme's wallpaper is the page's own, so it needs no fading in:  a clear fill under it drew the page's gradient
+         twice, a shade off the page round it (Owen:  "lose whatever is making that background shift") */
+      background-color: var(--ui-bar-wallpaper-color, transparent);
       backdrop-filter: none;
     }
   }
   /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
   .site-subtitle {
     margin: 0 var(--site-gutter);
-    padding-block-end: 0.25em;
+    /* 8px more under it (Owen:  "8px additional space below breadcrumb and subhead") */
+    padding-block-end: calc(0.25em + 8px);
     font-family: var(--ui-font-family-heading);
     font-size: 1.34em;
     line-height: 1.2;
@@ -502,7 +511,7 @@
   }
   /* the palette the links' size and look:  a plain round icon button */
   .site-themes::part(palette) {
-    width: 2.25em;
+    width: var(--_site-head-icon, 2.25em);
     height: 2.25em;
     padding: 0;
     border: 0;
@@ -531,7 +540,7 @@
     gap: 0.25em;
   }
   .site-page-links > ui-item::part(item) {
-    width: 2.25em;
+    width: var(--_site-head-icon, 2.25em);
     height: 2.25em;
     padding: 0;
     justify-content: center;
