@@ -232,7 +232,7 @@ export class SpellLocation {
   }
 
   /**
-   * The file's path in its project, from a file's address:  `@spell/library/cards/a/Card.spell` => `/a/Card.spell`.
+   * The file's path in its project, from a file's address:  `@spell/examples/Solitaire/a/Card.spell` => `/a/Card.spell`.
    * - `undefined` if it isn't a file's address, or its group isn't registered (a compile with no groups:  a test's).
    */
   static filePathOf(address: string): string | undefined {
@@ -244,7 +244,7 @@ export class SpellLocation {
   }
 
   /**
-   * Is `text` an address, `@spell/library/cards` or `owen@spell/errors`,
+   * Is `text` an address, `@spell/library/people` or `owen@spell/errors`,
    * rather than a file's path in a project (`/Card.spell`)?
    * - An address's first part holds an `@`, which no file's name may (`isValidPathSegment()`).
    */

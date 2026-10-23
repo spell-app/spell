@@ -9,7 +9,7 @@ from spell_core import core
 from spell_core.playing import PagePlayer, PatchMismatchError, play_page
 
 # Solitaire compiled to Python, which imports nothing but spell_core:
-# a frozen copy of the `solitaire` test project's snapshot, spell-app's `spaces/@spell/test/solitaire/`
+# a frozen copy of the Solitaire example's Python snapshot, spell-app's `tests/spell/__examples__/Solitaire/`
 # (`.txt`, so neither pytest nor ruff reads it as code;  `run_program()` runs it all the same).
 SOLITAIRE = Path(__file__).parent / "solitaire.snapshot.py.txt"
 

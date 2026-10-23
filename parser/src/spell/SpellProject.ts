@@ -349,7 +349,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * Each project our drawing half imports, by module, with its own drawing half's file, for `target`'s web app:
-   * e.g. `{ "@spell/project/@spell/library/cards": "cards.elements.spell.js" }` -- see `PY.QuartAppSpec.projects`.
+   * e.g. `{ "@spell/project/@spell/test/cards": "cards.elements.spell.js" }` -- see `PY.QuartAppSpec.projects`.
    * - Each must sit beside our program:  `spell compile` writes them there (spell-app's `writeImports()`).
    * - Only the projects we import ourselves:  one they import in turn isn't listed.
    */
@@ -878,7 +878,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * Other projects we import, from our project file:  entries naming a project, e.g. `@spell/library/cards`.
+   * Other projects we import, from our project file:  entries naming a project, e.g. `@spell/library/people`.
    * - Kept out of `imports`:  they aren't files of ours.
    * - Inactive ones are left out.
    */
@@ -969,7 +969,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * `import`s leading our compiled output:  spell's runtime, then what we import from other projects.
    * - e.g.
    *   `import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"`
-   *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/@spell/library/cards"`
+   *   `import { Card as Playingcard, Deck, Pile } from "@spell/project/@spell/test/cards"`
    * - Why:  compiled spell reaches everything it didn't declare through `import`s -- NO globals.
    * - A runner rewrites each specifier onto the module it means:
    *   see `runCompiled()` in `spell-app/app/runner/runCompiled`.
@@ -996,7 +996,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
-   * Project id an `imports` entry's `path` names:  the project's address, as it is, e.g. `@spell/library/cards`.
+   * Project id an `imports` entry's `path` names:  the project's address, as it is, e.g. `@spell/library/people`.
    * - throws `TypeError` if it isn't an address, or names a file (`.../Card.spell`:  a dot in its last part, Q41)
    * - Its shape only:  whether its group is known waits for loading it.
    *   So a compile with no groups registered (a test's) can still name its imports.

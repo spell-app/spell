@@ -303,7 +303,7 @@ A shared method list and shared expected files keep the two cores in step
 ([README-core](README-core.md#the-typescript-and-python-runtimes-side-by-side)).
 
 To run it you need Python 3.12 or later and [uv](https://docs.astral.sh/uv/) on your `PATH`.
-Here's the Solitaire example's card, the card library's, testing itself in Python:
+Here's the Solitaire example's card testing itself in Python:
 
 ```sh
 spell run @spell/examples/Solitaire --target py --no-browser

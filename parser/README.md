@@ -243,7 +243,7 @@ Six ideas carry most of the language, and each reads both ways:
   `core.includes(["diamonds", "hearts"], this.suit)`.
   Write it in JavaScript the way you'd say it, `suit == "diamonds" || "hearts"`, and it's never false.
   Sums come before comparisons, too:
-  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/solitaire/Solitaire.spell),
+  the tableau's rule in [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell),
   `its value is the value of the card + 1`, is `this.value === card.value + 1`.
 - **Lists count from 1.**  `the first card of the deck` is the first, and `card 2 of the deck` the second,
   as a person counts.
@@ -510,13 +510,16 @@ the second box on the left of the picture above.
 Each file's name says its language, `Carta.es.spell`, and its outline reads the way an English one does:
 
 ```spell
-una carta es una cosa
-las cartas tienen un palo como uno de tréboles, diamantes, corazones o espadas
-el color de una carta es rojo si su palo es o bien diamantes o corazones de lo contrario es negro
+una "carta" es una cosa dibujable donde:
+
+	## palos, rangos y colores:  los tipos de valores propios de la carta
+	- "palos" como uno de tréboles, diamantes, corazones o espadas
+	- "rangos" como uno de as, 2 ... 10, jota, dama o rey
+	- "colores" como uno de rojo o negro
 ```
 
-_Three lines of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/cartas/Carta.es.spell),
-from `cartas`, the frozen `cards` project translated line for line._
+_The top of [Carta.es.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitario/Carta.es.spell),
+from Solitario, the Solitaire example in Spanish._
 
 - It isn't a translation layer, or a second parser:  the same rule classes are registered twice.
   - Each folder of rules has `<folder>.en.ts`, the rules with their English syntax and tests,

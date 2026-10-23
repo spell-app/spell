@@ -1247,7 +1247,7 @@ A kind that says so is saved in a file of its own.
     - e.g. `__members/`, `__project.json5` ...
   - Known by that list, never by the `__` alone:  `__init__.py` and `__snapshots__/` are a project's files.
 - A project's file, `__project.json5` (`SP.PROJECT_FILE`), imports:
-  - another project by its address, `{ "path": "@spell/library/cards" }`
+  - another project by its address, `{ "path": "@spell/library/people" }`
   - its own files by their paths in it, `{ "path": "/Card.spell" }`
   - `SpellLocation.isAddress()` tells them apart:  only an address has an `@` in its first part.
   - An old `project.json` is read too.
@@ -1413,7 +1413,7 @@ A kind that says so is saved in a file of its own.
         - owner, what `getDeclaration()` said, and `declaredAt`
   - `SpellProject.projectImports`:  the entries of `imports` that name a project.
     They're in its project file.
-    - e.g. `@spell/library/cards` ~== `@spell/library/cards`
+    - e.g. `@spell/library/people` ~== `@spell/library/people`
     - Its "Loading" task reads each one's `<Project>.declarations.json5`.
       - That's `SpellProject.declarationsOf()`.
       - It then builds the `ImportScope` our scope goes under.
