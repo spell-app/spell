@@ -11,7 +11,14 @@ import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
 import { PropertyEditorPages, PropertySchemas } from "spell-ui/property"
 import type { ComponentVocabulary, PropertySchema } from "spell-ui/vocabulary"
 import { propertyEditorVocabulary } from "./UIPropertyEditor.en"
-import { GROUP_TAG, MADE_ATTRIBUTE, MADE_FROM, PROPERTY_TAG, VALUE_FROM_ATTRIBUTE } from "./UIPropertyEditor.types"
+import {
+  GROUP_SELECTOR,
+  MADE_ATTRIBUTE,
+  MADE_FROM,
+  PROPERTY_SELECTOR,
+  PROPERTY_TAG,
+  VALUE_FROM_ATTRIBUTE
+} from "./UIPropertyEditor.types"
 
 import editorCSS from "./UIPropertyEditor.css?inline"
 
@@ -80,18 +87,38 @@ export class UIPropertyEditor extends UIForm {
     return E.Reactive.attributeValue(this, "schema")
   }
 
-  /** The schema its properties read, resolved;  `undefined` while there's none (or the runtime isn't in yet). */
+  /**
+   * The schema its properties read, resolved;  `undefined` while there's none (or the runtime isn't in yet).
+   * - A tag not defined yet, e.g. a program's `<task-list-task>` drawn after the editor:
+   *   read again once it is (`waitForSchemaTag()`), so the properties are remade with its kinds and values.
+   */
   get currentSchema(): PropertySchema | undefined {
     const given = this.schemaGiven
     if (typeof given === "string") {
       if (!this.isReady) return undefined
+      // tracked:  it changes as a tag the schema names is defined
+      void this.schemaTagsDefined
       const added = UI.propertyControls.schema(given)
       if (added) return added
       const vocabulary = UI.vocabulary.get(given)
+      if (!vocabulary) this.waitForSchemaTag(given)
       return vocabulary ? PropertySchemas.fromVocabulary(vocabulary) : undefined
     }
     if (!given || typeof given !== "object" || !("attributes" in given)) return undefined
     return "tag" in given ? PropertySchemas.fromVocabulary(given as ComponentVocabulary) : (given as PropertySchema)
+  }
+
+  /** How many tags `schema` named have been defined since it was read:  `currentSchema` reads it, to read again. */
+  @E.state private accessor schemaTagsDefined = 0
+
+  /** The tags `waitForSchemaTag()` is waiting for:  once each. */
+  private readonly schemaTagsAwaited = new Set<string>()
+
+  /** SIDE EFFECT:  once `tag` is defined, `currentSchema` is read again -- its vocabulary is in by then. */
+  private waitForSchemaTag(tag: string) {
+    if (this.schemaTagsAwaited.has(tag) || !tag.includes("-") || typeof customElements === "undefined") return
+    this.schemaTagsAwaited.add(tag)
+    void customElements.whenDefined(tag).then(() => this.schemaTagsDefined++)
   }
 
   /** Empty of the author's properties:  make one per attribute of the schema (see the class doc). */
@@ -189,7 +216,7 @@ export class UIPropertyEditor extends UIForm {
       made.setAttribute(MADE_ATTRIBUTE, MADE_FROM.source)
       this.domElement.append(made)
     }
-    for (const group of this.domElement.querySelectorAll(`${GROUP_TAG}[select]`)) {
+    for (const group of this.domElement.querySelectorAll(`${GROUP_SELECTOR}[select]`)) {
       if (group.children.length) continue
       const part = page.querySelector(group.getAttribute("select")!)
       for (const child of part?.children ?? []) group.append(document.importNode(child, true))
@@ -258,6 +285,12 @@ export class UIPropertyEditor extends UIForm {
   ////////////////
 
   /** `:state(readonly)`:  `readonly`. */
+  /** Always `:state(property-editor)`:  how its family finds it, whatever its tag is called (`EDITOR_SELECTOR`). */
+  @E.cssState("property-editor")
+  get isPropertyEditor(): boolean {
+    return true
+  }
+
   @E.cssState("readonly")
   get isReadOnly(): boolean {
     return this.attributes.readonly != null && this.attributes.readonly !== "false"
@@ -341,7 +374,7 @@ export class UIPropertyEditor extends UIForm {
 
   /** A property was written:  `ui-change` from the editor and the property, then its "on change" rules. */
   protected onWritten({ control, name, value, things }: WrittenProperty) {
-    const property = control.closest(PROPERTY_TAG)
+    const property = control.closest(PROPERTY_SELECTOR)
     property?.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { name, value }, bubbles: false }))
     this.send(OWN.change, { name, value, things })
     const spec = this.currentSchema?.attributes.find((candidate) => candidate.name === name)
@@ -361,7 +394,7 @@ export class UIPropertyEditor extends UIForm {
 
   /** A field was checked:  its group shows the error state, and hears `ui-invalid`. */
   protected onFieldChecked(field: { identifier: string; controls: Element[] }, messages: readonly string[]) {
-    const group = field.controls[0]?.closest(GROUP_TAG) as DOMGroupLike | null
+    const group = field.controls[0]?.closest(GROUP_SELECTOR) as DOMGroupLike | null
     if (!group) return
     group.markFieldFailed?.(field.identifier, messages.length > 0)
     if (messages.length) {
@@ -377,22 +410,22 @@ export class UIPropertyEditor extends UIForm {
     const properties = new Set<Element>()
     const groups = new Set<Element>()
     for (const control of held) {
-      const property = control.closest(PROPERTY_TAG)
+      const property = control.closest(PROPERTY_SELECTOR)
       if (property) properties.add(property)
-      const group = control.closest(GROUP_TAG)
+      const group = control.closest(GROUP_SELECTOR)
       if (group) groups.add(group)
     }
-    for (const property of this.domElement.querySelectorAll(PROPERTY_TAG)) {
+    for (const property of this.domElement.querySelectorAll(PROPERTY_SELECTOR)) {
       ;(property as PropertyLike).markChanged?.(properties.has(property))
     }
-    for (const group of this.domElement.querySelectorAll(GROUP_TAG)) {
+    for (const group of this.domElement.querySelectorAll(GROUP_SELECTOR)) {
       ;(group as DOMGroupLike).markChanged?.(groups.has(group))
     }
   }
 
   /** A submit or a save passed:  each group hears `ui-success`. */
   protected onSucceeded() {
-    for (const group of this.domElement.querySelectorAll(GROUP_TAG)) {
+    for (const group of this.domElement.querySelectorAll(GROUP_SELECTOR)) {
       group.dispatchEvent(new CustomEvent(SUCCESS_EVENT, { detail: { values: this.values }, bubbles: false }))
     }
   }

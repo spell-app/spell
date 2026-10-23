@@ -456,8 +456,8 @@ export class FormBinding {
     if (FormFields.isCheckable(control)) {
       const chosen = FormFields.isRadio(control) ? FormBinding.isRadioValue(control, value) : !!value
       if (FormFields.isChosen(control) === chosen) return
-      if (control instanceof HTMLInputElement) control.checked = chosen
-      else (control as Element & { selected: boolean }).selected = chosen
+      // `checked`:  a native checkbox's, and a `ui-*` one's in any language (`selected`)
+      ;(control as Element & { checked: boolean }).checked = chosen
       return
     }
     const shown = Array.isArray(value) ? value : FormBinding.textOf(value)

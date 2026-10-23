@@ -7,7 +7,14 @@ import { PropertySchemas } from "spell-ui/property"
 import type { AttributeSpec, PropertySchema, ValueType } from "spell-ui/vocabulary"
 import type { Choice, PropertyControl } from "spell-ui/runtime"
 import { propertyVocabulary } from "./UIProperty.en"
-import { EDITOR_TAG, GROUP_TAG, MADE_ATTRIBUTE, VALUE_FROM_ATTRIBUTE } from "./UIPropertyEditor.types"
+import {
+  EDITOR_SELECTOR,
+  EDITOR_TAG,
+  GROUP_SELECTOR,
+  GROUP_TAG,
+  MADE_ATTRIBUTE,
+  VALUE_FROM_ATTRIBUTE
+} from "./UIPropertyEditor.types"
 
 import propertyCSS from "./UIProperty.css?inline"
 
@@ -89,11 +96,17 @@ export class UIProperty extends UIField {
   /** The `<ui-property-editor>` around it, while connected. */
   @E.state accessor editor: DOMEditorLike | undefined = undefined
 
-  /** Find the editor (and a `readonly` group or editor) on connect. */
+  /**
+   * Find the editor (and a `readonly` group or editor) on connect.
+   * - The editor by what it is, the nearest element around us with a schema:
+   *   so a translated one is found too (`<es-editor-propiedades>`), before its state is drawn.
+   */
   @E.whileConnected
   protected watchEditor() {
-    this.editor = (this.domElement.closest(EDITOR_TAG) as DOMEditorLike | null) ?? undefined
-    this.isInReadonly = !!this.domElement.parentElement?.closest(`${GROUP_TAG}[readonly], ${EDITOR_TAG}[readonly]`)
+    this.editor = UIProperty.editorAround(this.domElement)
+    const readonly = [GROUP_TAG, EDITOR_TAG].map((tag) => `${tag}[readonly]`)
+    readonly.push(`${GROUP_SELECTOR}:state(readonly)`, `${EDITOR_SELECTOR}:state(readonly)`)
+    this.isInReadonly = !!this.domElement.parentElement?.closest(readonly.join(", "))
     return () => {
       this.editor = undefined
     }
@@ -144,6 +157,12 @@ export class UIProperty extends UIField {
   @E.state accessor isInReadonly = false
 
   /** `:state(readonly)`:  its own `readonly`, or a group's or the editor's. */
+  /** Always `:state(property)`:  how its family finds it, whatever its tag is called (`PROPERTY_SELECTOR`). */
+  @E.cssState("property")
+  get isProperty(): boolean {
+    return true
+  }
+
   @E.cssState("readonly")
   get isReadOnly(): boolean {
     return !!this.readonly || this.isInReadonly
@@ -271,6 +290,14 @@ export class UIProperty extends UIField {
   ////////////////
   // ## Statics
   ////////////////
+
+  /** The editor around `element`, the nearest with a schema (`currentSchema`) -- `undefined` if none. */
+  static editorAround(element: Element): DOMEditorLike | undefined {
+    for (let at = element.parentElement; at; at = at.parentElement) {
+      if ("currentSchema" in at) return at as DOMEditorLike
+    }
+    return undefined
+  }
 
   /**
    * What `schema` says of property `name`;  a dotted name reaches into a nested thing's `attributesOf`.
