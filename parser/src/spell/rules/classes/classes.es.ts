@@ -92,7 +92,7 @@ const THE = "(el|la|los|las)"
 /** `of`, and `of the`. */
 const OF = "(de|del)"
 
-/** `is`, and `are`, in an outline body:  `- "palo" es ...`, `- fundaciones son ...`. */
+/** `is`, and `are`, in an outline body:  `- "palo" es ...`, `- fundaciones son ...`, `- sus "comodines" son ...`. */
 const IS_OR_ARE = "(es|son)"
 
 /** What a drawable type's element writes, after its class:  see English's `create_type` tests. */
@@ -1301,13 +1301,14 @@ classesEs.addRule(DefinePropertyHas, {
   syntax: `(los|las)? {type:plural_type} tienen (un|una|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
 })
 
-// in an outline body:  `- su "palo" es uno de tréboles, diamantes, corazones o espadas`, `- su "rango" es un número`
+// in an outline body:  `- su "palo" es uno de tréboles, diamantes, corazones o espadas`, `- su "rango" es un número`;
+// a plural name says `sus ... son`:  `- sus "comodines" son sí o no` (epic `spanish` I10)
 classesEs.addRule(DefinePropertyHas, {
   syntax: `{type:subject_it} tiene (un|una|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`
 })
 
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_its} {property:quoted_member} es {specifier:outline_specifier} ${RULES}`
+  syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier} ${RULES}`
 })
 
 // ... and with the subject left out (P8):  `- tiene un mazo`, `- "palo" es uno de tréboles, diamantes ...`
@@ -1326,7 +1327,7 @@ classesEs.addRule(DefinePropertyHas, {
 
 // ... and the quotes are optional:  `- su rango es un número`
 classesEs.addRule(DefinePropertyHas, {
-  syntax: `{type:subject_its} {property:member_words} es {specifier:outline_specifier} ${RULES}`
+  syntax: `{type:subject_its} {property:member_words} ${IS_OR_ARE} {specifier:outline_specifier} ${RULES}`
 })
 
 classesEs.addRule(OutlineSpecifierEnum, {
@@ -1593,13 +1594,13 @@ classesEs.addRule(PropertyValueGetter, {
   ]
 })
 
-// in an outline body:  `- su "color" es el color de su palo`
+// in an outline body:  `- su "color" es el color de su palo`, `- sus "nombres" son ...`
 classesEs.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_its} {property:quoted_member} es :? {expression_body}?"
+  syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} :? {expression_body}?`
 })
 
 classesEs.addRule(PropertyValueGetter, {
-  syntax: "{type:subject_its} {property:member_words} es :? {expression_body}?"
+  syntax: `{type:subject_its} {property:member_words} ${IS_OR_ARE} :? {expression_body}?`
 })
 
 // ... and with the subject left out (P8):  `- "color" es el color de su palo`
@@ -1855,12 +1856,17 @@ classesEs.addRule(TheThings, {
     {
       compileAs: "expression",
       beforeEach(scope: P.Scope) {
-        scope.compile(["una pila es una lista de things", "un tableau es una pila"].join("\n"), "block")
+        scope.compile(
+          ["una pila es una lista de things", "un tableau es una pila", "una base es una pila"].join("\n"),
+          "block"
+        )
         scope.variables?.add("cards")
       },
       tests: [
         ["las pilas", "core.everyThing(Pila)"],
         ["los tableaus", "core.everyThing(Tableau)"],
+        // a plural in -ses:  `base`, not `bas` (epic `spanish` I9)
+        ["las bases", "core.everyThing(Base)"],
         ["el tableau", undefined],
         // a variable keeps its meaning
         ["las cards", "cards"],

@@ -876,6 +876,8 @@ A kind that says so is saved in a file of its own.
 - A value-per-line body ([ValueIf.ts](rules/if/ValueIf.ts), at `Priority.overridable`):
   - `value_if`:  `red if it is diamonds or hearts` => `if (...) { return 'red' }`
     - it may name the other value too:  `... otherwise it is black` => then `return 'black'`
+    - inside an expression too, `"↑" if it is face up otherwise it is "↓"` (`backwards_if`):
+      `it is` there is never a comparison (epic `spanish` I8;  Spanish's `de lo contrario es`)
   - `value_otherwise`:  `black otherwise` => `return 'black'`
   - Only in a getter's or method's body:  anywhere else, an error saying where it belongs (epic page I9).
     Outside a function, its `return` would make a program that won't load.
@@ -1237,6 +1239,8 @@ A kind that says so is saved in a file of its own.
   - Its quick test looks the words up first:  it's an expression, tried at almost every word.
   - An event's name of several words too, `on card click`, `fire event card click` (`event_words`):
     the same event as `card-click`.
+    - A linking word may sit between two of its words (word rule `event_name_link`, epic `spanish` I11):
+      `al clic en carta con una carta` is `clic-en-carta`, its name ending at `con`.
 - `getAST()` NEVER changes scope or looks it up.
   - ASTs are built lazily, e.g. at compile, when scope may have moved on.
   - What an AST needs from scope is looked up WHILE PARSING, into `match.data`:

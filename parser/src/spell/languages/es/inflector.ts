@@ -94,8 +94,9 @@ export function singularOf(word: string): string {
     // jóvenes => joven:  the plural's own accent goes
     if (/[áéíóú]/u.test(lowerStem) && /en$/.test(lowerStem)) return removeAccents(stem)
     // a consonant a Spanish word may end in (or y) before -es:  colores, color;  reyes, rey;  tréboles, trébol
-    if (/[lnrdjsxy]$/u.test(lowerStem)) return stem
-    // any other:  the -e is the word's own, `diamantes` is `diamante`
+    if (/[lnrdjxy]$/u.test(lowerStem)) return stem
+    // any other:  the -e is the word's own, `diamantes` is `diamante`;  `bases` is `base`, not `bas` (epic `spanish` I9):
+    // a singular ending in an unstressed -s doesn't change (`UNCHANGING`), and a stressed one took its accent back above
     return word.slice(0, -1)
   }
   if (lower.endsWith("s")) return word.slice(0, -1)
@@ -151,6 +152,7 @@ const IRREGULAR_SINGULARS = new Map([
   ["toses", "tos"],
   ["gases", "gas"],
   ["dioses", "dios"],
+  ["compases", "compás"],
   ["reyes", "rey"],
   ["leyes", "ley"],
   ["bueyes", "buey"],
@@ -182,12 +184,13 @@ const IRREGULAR_PLURALS = new Map([...IRREGULAR_SINGULARS].map(([plural, singula
 const GAINS_ACCENT = new Set(["joven", "examen", "orden", "origen", "imagen", "volumen", "margen", "virgen", "crimen"])
 
 /**
- * A stem whose singular ends in a stressed -ón, -ín, -án, -én, -ún, -és:
+ * A stem whose singular ends in a stressed -ón, -ín, -án, -én, -ún, -és, -ús:
  * the plural lost the written accent, which the singular takes back.
- * - `corazones` => `corazón`, `jardines` => `jardín`, `alemanes` => `alemán`, `ingleses` => `inglés`
+ * - `corazones` => `corazón`, `jardines` => `jardín`, `alemanes` => `alemán`, `ingleses` => `inglés`,
+ *   `autobuses` => `autobús`
  * - Not a one-syllable word (`pan`, `fin`):  those never had one (and the common ones are in `IRREGULAR_SINGULARS`).
  */
-const TAKES_ACCENT_BACK = /(?:i?on|in|an|un|es|en)$/u
+const TAKES_ACCENT_BACK = /(?:i?on|in|an|un|es|en|us)$/u
 
 ////////////////
 // ## Helpers

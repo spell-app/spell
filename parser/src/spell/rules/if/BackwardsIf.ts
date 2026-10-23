@@ -6,6 +6,8 @@ import { InfixOperatorSuffix, Precedence } from "spell-lang/spell/rules/expressi
  * `backwards_if` rule:  postfix ternary, `{expr} if {condition} (else|otherwise) {expr}`.
  * - English word order ("do X if Y else Z"), rather than `condition ? then : else`.
  * - e.g. `1 if bar else 2`
+ * - `otherwise it is 2` says the same (epic `spanish` I8):  `it is` there is never a comparison with `2`.
+ *   Spanish's `de lo contrario es "↓"` is that form, as the glossary words it.
  * - An `expression_suffix`:  `lhs` (the value before `if`) is supplied by `CompoundExpression`'s shunting-yard.
  *   This rule's own `syntax` only spells out `operator` (actually the *condition* expression here)
  *   and the trailing `rhs` expression.

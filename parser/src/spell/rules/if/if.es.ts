@@ -244,7 +244,7 @@ ifEs.addRule(If, {
 })
 
 ifEs.addRule(BackwardsIf, {
-  syntax: "si {operator:expression} (si no|sino|de lo contrario) {expression}",
+  syntax: "si {operator:expression} (si no|sino|de lo contrario) es? {expression}",
   tests: [
     {
       title: "correctly matches single-line backwards_if statements",
@@ -266,6 +266,11 @@ ifEs.addRule(BackwardsIf, {
         {
           input: `poner color a "red" si 1 + 1 sino "black"`,
           js: 'export const color = 1 + 1 ? "red" : "black"'
+        },
+        {
+          title: "`de lo contrario es X` is the other value, never a comparison with it (epic `spanish` I8)",
+          input: `poner color a "red" si bar de lo contrario es "black"`,
+          js: 'export const color = bar ? "red" : "black"'
         }
       ]
     }

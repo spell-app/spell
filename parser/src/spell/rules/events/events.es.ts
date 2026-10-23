@@ -7,6 +7,7 @@
  */
 import { P } from "spell-lang/parser"
 import { SpellParser } from "spell-lang/spell/SpellParser"
+import { Synonyms } from "spell-lang/spell/rules/expressions"
 
 import { EventWords } from "./EventWords"
 import { On } from "./On"
@@ -14,6 +15,9 @@ import { Trigger } from "./Trigger"
 
 /** Spanish's `events` rules. */
 export const eventsEs = new SpellParser({ module: "events" })
+
+// a word that may link two words of an event's name:  `clic en carta`, `fin del juego` (epic `spanish` I11)
+eventsEs.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "(en|de|del|sobre)" })
 
 eventsEs.addRule(EventWords)
 
@@ -44,7 +48,12 @@ eventsEs.addRule(Trigger, {
   tests: [
     {
       compileAs: "statement",
-      tests: [["lanzar evento card click con card = 1", 'trigger("card-click", { card: 1 })']]
+      tests: [
+        ["lanzar evento card click con card = 1", 'trigger("card-click", { card: 1 })'],
+        // a linking word inside the name, which ends at `con` (epic `spanish` I11)
+        ["disparar evento clic en carta con carta = 1", 'trigger("clic-en-carta", { carta: 1 })'],
+        ["disparar evento fin del juego", 'trigger("fin-del-juego")']
+      ]
     }
   ]
 })
@@ -94,5 +103,23 @@ eventsEs.addRule(On, {
 // `al card click con una card`:  an event's name of several words, the same event as `card-click` -- see `event_words`
 eventsEs.addRule(On, {
   syntax: "al evento? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
-  tests: [{ compileAs: "block", tests: [["al card click", 'on("card-click")']] }]
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.types?.add("carta")
+      },
+      tests: [
+        ["al card click", 'on("card-click")'],
+        // a linking word inside the name, which ends at `con` (epic `spanish` I11)
+        [
+          ["al clic en carta con una carta", "\timprimir 1"],
+          ['on("clic-en-carta", (event) => {', "  const { carta } = event", "  core.console.log(1)", "})"],
+          'on<{ carta: Carta }>("clic-en-carta", ({ carta }) => core.console.log(1))'
+        ],
+        // never the last word:  `al clic en` is event `clic`, then a word it can't read
+        ["al clic en", ['on("clic")', '/* PARSE ERROR: No entiendo "en" */']]
+      ]
+    }
+  ]
 })

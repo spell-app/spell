@@ -1312,7 +1312,14 @@
         },
         {
           "className": "Synonyms",
-          "ruleNames": ["indefinite_article", "definite_article", "is_or_are", "has_or_belongs", "receiver_of"],
+          "ruleNames": [
+            "indefinite_article",
+            "definite_article",
+            "is_or_are",
+            "has_or_belongs",
+            "event_name_link",
+            "receiver_of"
+          ],
           "internal": false,
           "file": "src/spell/rules/expressions/Synonyms.ts",
           "line": 14,
@@ -1329,6 +1336,9 @@
             },
             {
               "syntax": "(has|belongs)/i"
+            },
+            {
+              "syntax": "on"
             },
             {
               "syntax": "of"
@@ -5811,7 +5821,7 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 13,
+          "line": 17,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -5904,11 +5914,11 @@
           "ruleNames": ["backwards_if"],
           "internal": false,
           "file": "src/spell/rules/if/BackwardsIf.ts",
-          "line": 14,
+          "line": 16,
           "purpose": "Postfix ternary, `{expr} if {condition} (else|otherwise) {expr}`.",
           "syntaxes": [
             {
-              "syntax": "if {operator:expression} (else|otherwise) {expression}",
+              "syntax": "if {operator:expression} (else|otherwise) (it is)? {expression}",
               "example": "print 1 if bar else 2",
               "outputs": {
                 "js": {
