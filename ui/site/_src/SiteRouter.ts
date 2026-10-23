@@ -145,6 +145,9 @@ export class SiteRouter {
 
   /** `<ui-docs-nav>` followed a link:  take it over. */
   private onNavigate(event: CustomEvent<{ href: string }>): void {
+    // a link in the nav flyout (narrow screens):  it slides shut at once, while the page loads
+    const flyout = SiteRouter.navFlyout()
+    if (flyout && event.composedPath().includes(flyout)) SiteRouter.closeNavFlyout()
     const url = new URL(event.detail.href, location.href)
     if (!this.isRoutable(url) || this.isSamePage(url)) return
     event.preventDefault()
@@ -254,8 +257,7 @@ export class SiteRouter {
     if (main) SiteRouter.runScripts(main)
     this.followPage()
     // the nav flyout (narrow screens) closes, as a full load would have closed it
-    const flyout = document.querySelector<HTMLElement>("ui-flyout#site-nav-flyout")
-    if (flyout && !flyout.hidden) flyout.hidden = true
+    SiteRouter.closeNavFlyout()
     // `<spell-site-header>` re-draws:  its title and "open in VS Code" link
     document.dispatchEvent(new Event(PAGE_EVENT))
   }
@@ -263,6 +265,17 @@ export class SiteRouter {
   ////////////////
   // ## Helpers
   ////////////////
+
+  /** The layout's nav flyout (narrow screens), if the page has one. */
+  private static navFlyout(): HTMLElement | undefined {
+    return document.querySelector<HTMLElement>(NAV_FLYOUT) ?? undefined
+  }
+
+  /** Close the nav flyout, if open:  it slides shut (`<ui-flyout>`). */
+  private static closeNavFlyout(): void {
+    const flyout = SiteRouter.navFlyout()
+    if (flyout && !flyout.hidden) flyout.hidden = true
+  }
 
   /** The page's `main`, in the layout's content box (or the include in it). */
   private main(): HTMLElement | undefined {
@@ -418,3 +431,6 @@ const TOC_TAG = "ui-docs-toc"
 
 /** Id of a page's tabs, which the toc follows. */
 const SITE_TABS_ID = "site-tabs"
+
+/** The layout's nav flyout, which narrow screens open from the menu button. */
+const NAV_FLYOUT = "ui-flyout#site-nav-flyout"

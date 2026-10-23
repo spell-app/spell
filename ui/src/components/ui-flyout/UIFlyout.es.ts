@@ -11,6 +11,7 @@ export const flyoutEs = {
   tag: "ui-flyout",
   name: "panel-flotante",
   aka: ["panel lateral", "cajón", "panel deslizante", "hoja lateral"],
+  attributes: { modeless: "sin-bloqueo" },
   values: { closedby: { none: "none" } },
   parts: { flyout: "panel-flotante" },
   texts: { close: "Cerrar" }

@@ -2,7 +2,7 @@
  * `<ui-flyout>`:  port of Fomantic's `flyout.less` + `flyout.variables`;  the dimmer is the dialog's `::backdrop`.
  * - Shadow markup contract (`DialogComponent`'s, shared with `<ui-modal>`):
  *   `<dialog class="ui [position] [keyOnly ...] [N wide] flyout [word width]" part="flyout">`, opened with
- *   `showModal()` (focus trap, `inert` page, top layer), holding in order:
+ *   `showModal()` (focus trap, `inert` page, top layer;  `show()` when `modeless`:  no dimmer), holding in order:
  *   - `<div class="header" part="header">` -- the `header` shorthand
  *   - `<div class="content" part="content">` -- the `content` shorthand
  *   - the default `<slot>`:  `<ui-header>`, `<ui-content>`, `<ui-actions>` ... parts
@@ -394,6 +394,17 @@
 }
 
 /*******************************
+            Modeless
+*******************************/
+
+@layer ui.components.flyout.variations {
+  /* Shown with `show()`, so not in the top layer:  its own stacking, over the page's fixed bars. */
+  dialog.ui.modeless.flyout {
+    z-index: var(--ui-z-modal);
+  }
+}
+
+/*******************************
             States
 *******************************/
 
@@ -412,4 +423,15 @@
       transform: var(--_flyout-hidden);
     }
   }
+}
+
+/*
+ * Hidden:  the DOM element stays `display: contents` while `hidden`, its `<dialog>` hiding itself.
+ * - UNLAYERED, and one attribute more specific than `reset.css`'s `[hidden]` rule, which it must beat:
+ *   that rule took the element away the moment `hidden` was written, before `close()` ran,
+ *   so the dialog never slid out (it vanished).
+ * - A closed dialog is `display: none` once its exit transition ends:  nothing of it shows.
+ */
+:host([hidden][hidden]:not([hidden="until-found"])) {
+  display: contents;
 }

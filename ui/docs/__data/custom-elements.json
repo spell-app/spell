@@ -7218,6 +7218,14 @@
               "fieldName": "blurring"
             },
             {
+              "name": "modeless",
+              "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "modeless"
+            },
+            {
               "name": "width",
               "description": "Width of a `left` / `right` flyout:  Fomantic's words (`very thin`, `thin`, `wide`, `very wide`) or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).",
               "type": {

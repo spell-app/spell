@@ -9,6 +9,7 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  * The base of the components behind `<ui-modal>` and `<ui-flyout>`:
  * everything they do, on a shadow `<dialog class="ui … <noun>" part="<rootPart>">` shown with `showModal()`.
  * The browser gives it the focus trap, the `inert` page, the top layer and the `::backdrop` (the dimmer).
+ * A subclass may be MODELESS (`isModeless`:  `<ui-flyout modeless>`):  `show()`, the page left usable.
  *
  * - A subclass adds only its names and looks:
  *   `vocabulary`, `elementSetup.styleSheets` (and `animation`), `rootPart`, `overlayKind`, `shownClass`.
@@ -65,6 +66,14 @@ export abstract class DialogComponent<
 
   /** `UI.overlays` kind:  `modal` or `flyout`. */
   declare overlayKind: E.OverlayKind
+
+  /**
+   * Hook:  shown without blocking the page (`show()`, not `showModal()`):  no `::backdrop`, no scroll lock, no
+   * focus trap, and a click on the page doesn't close it.  Default `false`;  `<ui-flyout modeless>`.
+   */
+  protected get isModeless(): boolean {
+    return false
+  }
 
   // The dialog attributes this base reads (see the class docs):
   // each vocabulary's getters, declared here since `V` is unknown to this class.
@@ -173,7 +182,9 @@ export abstract class DialogComponent<
   }
 
   /**
-   * `showModal()` and register with `UI.overlays`;  nothing when already open.
+   * `showModal()` (`show()` when `isModeless`) and register with `UI.overlays`;  nothing when already open.
+   * - Modeless:  the overlay entry isn't `modal` (no scroll lock), and only Escape dismisses it (`closerequest` for
+   *   `any`):  the page stays usable, a click on it included.
    * - `closedby` is applied here:
    *   natively when supported (the browser's light dismiss), else by the overlay entry's outside-click handling.
    * - A `<dialog>` that other keyframes animated out (`hidden` on it) shows again first.
@@ -181,15 +192,18 @@ export abstract class DialogComponent<
   private show() {
     const dialog = this.dialog
     if (!dialog) return
-    const closedBy = this.closedBy
+    const isModeless = this.isModeless
+    const closedBy = isModeless && this.closedBy === "any" ? "closerequest" : this.closedBy
     const isNative = UI.browser.supports.dialogClosedBy
     if (isNative) dialog.setAttribute("closedby", closedBy)
     else dialog.removeAttribute("closedby")
     this.overlayEntry.closeOnEscape = closedBy !== "none"
     this.overlayEntry.closeOnOutsideClick = !isNative && closedBy === "any"
+    this.overlayEntry.modal = !isModeless
     UI.transitions.reveal(dialog)
     if (!dialog.open) {
-      dialog.showModal()
+      if (isModeless) dialog.show()
+      else dialog.showModal()
       UI.focus.enter(dialog)
     }
     UI.overlays.open(this.overlayEntry)

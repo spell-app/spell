@@ -351,3 +351,55 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
     }
   })
 })
+
+////////////////
+// ## Modeless, and sliding out
+////////////////
+
+describe("<ui-flyout> modeless", () => {
+  it("shows with show():  no dimmer, no scroll lock, the page still clickable;  a click on it leaves it open", async () => {
+    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless header="Hi" content="Body"></ui-flyout>`)
+    const clicks = record<MouseEvent>(trigger, "click")
+    await open(host)
+    expect(dialog.open).toBe(true)
+    expect(dialog.matches(":modal")).toBe(false)
+    expect(document.documentElement.classList.contains("ui-scroll-locked")).toBe(false)
+    expect(dialog.className).toContain("modeless")
+    // the page isn't inert:  focus reaches it, and a click on it lands, leaving the flyout open
+    trigger.focus()
+    expect(document.activeElement).toBe(trigger)
+    await userEvent.click(document.body, { position: { x: innerWidth - 5, y: 5 } })
+    trigger.click()
+    await settle()
+    expect(clicks).toHaveLength(1)
+    expect(dialog.open).toBe(true)
+  })
+
+  it("Escape and the close icon still close it", async () => {
+    const { host, dialog, trigger } = await flyout(`<ui-flyout modeless closable header="Hi">x</ui-flyout>`)
+    const closes = record(host, "ui-close")
+    await open(host, trigger)
+    await userEvent.keyboard("{Escape}")
+    await settle()
+    expect(dialog.open).toBe(false)
+    await open(host, trigger)
+    dialog.querySelector<HTMLButtonElement>("[part~=close]")!.click()
+    await settle()
+    expect(dialog.open).toBe(false)
+    expect(closes.map((detail) => detail.reason)).toEqual(["escape", "close"])
+  })
+})
+
+describe("<ui-flyout> sliding out", () => {
+  it("stays drawn while `hidden` slides it out:  the DOM element keeps its box until the dialog has left", async () => {
+    const { host, dialog } = await flyout(`<ui-flyout header="Hi">x</ui-flyout>`)
+    host.style.setProperty("--ui-flyout-duration", "400ms")
+    onTestFinished(() => void host.style.removeProperty("--ui-flyout-duration"))
+    await open(host)
+    host.hidden = true
+    await settle()
+    expect(getComputedStyle(host).display).toBe("contents")
+    expect(getComputedStyle(dialog).display).not.toBe("none")
+    expect(dialog.getAnimations().length).toBeGreaterThan(0)
+  })
+})

@@ -17,7 +17,7 @@ import type { E } from "spell-ui/core"
 /****************
  * ### `<ui-flyout>`
  * A side modal, sliding in from an edge of the viewport:
- * `<dialog class="ui [position] ... flyout" part="flyout">`, shown with `showModal()`.
+ * `<dialog class="ui [position] ... flyout" part="flyout">`, shown with `showModal()` (`show()` when `modeless`).
  ****************/
 export const flyoutVocabulary = {
   tag: "ui-flyout",
@@ -36,6 +36,13 @@ export const flyoutVocabulary = {
     { name: "fullscreen", kind: "keyOnly", description: "The whole viewport wide." },
     { name: "inverted", kind: "keyOnly", description: "The dark scheme." },
     { name: "blurring", kind: "keyOnly", description: "Blurs and greys the page behind its dimmer." },
+    {
+      name: "modeless",
+      kind: "keyOnly",
+      description:
+        "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  " +
+        "a click on the page leaves it open;  Escape and its own buttons still close it."
+    },
     {
       name: "width",
       kind: "width",

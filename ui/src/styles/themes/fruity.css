@@ -41,7 +41,7 @@
     --fruity-track: light-dark(rgb(118 118 128 / 0.12), rgb(118 118 128 / 0.24));
     --fruity-blur: blur(28px) saturate(1.7);
     /* bars that stick over scrolling content (a page's top bar, sticky titles):  glass too */
-    --fruity-bar: light-dark(rgb(255 255 255 / 0.6), rgb(30 28 38 / 0.62));
+    --fruity-bar: light-dark(rgb(255 255 255 / 0.94), rgb(30 28 38 / 0.92));
 
     /* The wallpaper behind the page:  each wash a `light-dark()` colour, so the gradient follows the scheme */
     --fruity-wallpaper:
@@ -305,8 +305,11 @@
     --ui-menu-active-background: var(--fruity-accent-wash);
     --ui-menu-active-color: var(--fruity-accent-text);
 
-    /* Segmented menus (tab bars):  a grey track, the chosen segment a raised white key, no dividers */
-    --ui-menu-segmented-background: var(--fruity-track);
+    /*
+     * Segmented menus (tab bars):  a grey track, solid as a Mac one (it sits on bars),
+     * the chosen segment a raised white key, no dividers
+     */
+    --ui-menu-segmented-background: light-dark(#e9e9ee, #3a3846);
     --ui-menu-segmented-border: none;
     --ui-menu-segmented-padding: 2px;
     --ui-menu-segmented-divider: transparent;
@@ -315,6 +318,7 @@
     --ui-menu-segmented-active-background: light-dark(#ffffff, rgb(255 255 255 / 0.2));
     --ui-menu-segmented-active-color: var(--ui-text-color);
     --ui-menu-segmented-active-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+    --ui-menu-active-focus-color: var(--ui-focus-color);
 
     /* The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash */
     --ui-docs-nav-background: light-dark(rgb(255 255 255 / 0.78), rgb(30 28 38 / 0.8));

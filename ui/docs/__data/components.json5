@@ -8186,6 +8186,11 @@
           "description": "Blurs and greys the page behind its dimmer."
         },
         {
+          "name": "modeless",
+          "kind": "keyOnly",
+          "description": "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it."
+        },
+        {
           "name": "width",
           "kind": "width",
           "values": [
@@ -39328,6 +39333,7 @@
         "ui-dimmer",
         "ui-docs-nav",
         "ui-dropdown",
+        "ui-flyout",
         "ui-input",
         "ui-label",
         "ui-menu",

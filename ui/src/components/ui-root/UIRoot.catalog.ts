@@ -464,7 +464,18 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-flyout": {
     folder: "ui-flyout",
-    attributes: ["position", "fullscreen", "inverted", "blurring", "width", "closable", "closedby", "header", "content"]
+    attributes: [
+      "position",
+      "fullscreen",
+      "inverted",
+      "blurring",
+      "modeless",
+      "width",
+      "closable",
+      "closedby",
+      "header",
+      "content"
+    ]
   },
   "ui-form": {
     folder: "ui-form",

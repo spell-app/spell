@@ -8333,6 +8333,16 @@ export interface UIFlyoutAttributes {
    */
   "prop:blurring"?: boolean | ""
   /**
+   * No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  a click on the page leaves it open;  Escape and its own buttons still close it.
+   * - takes:  flag (present / absent)
+   */
+  modeless?: boolean | ""
+  /**
+   * `modeless`, as the DOM element's property.
+   * @deprecated write `modeless` -- `prop:` stays only for compiled spell
+   */
+  "prop:modeless"?: boolean | ""
+  /**
    * Width of a `left` / `right` flyout:  Fomantic's words (`very thin`, `thin`, `wide`, `very wide`) or columns of the viewport (`4`, `1/4`, `25%` => `four wide`).
    * - takes:  `1`-`16`, a fraction (`1/4`) or a percentage
    */

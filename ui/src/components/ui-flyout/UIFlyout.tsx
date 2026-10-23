@@ -9,7 +9,8 @@ import flyoutCSS from "./UIFlyout.css?inline"
  * ### `UIFlyout`
  * The component behind `<ui-flyout>`:  Fomantic's flyout, a side modal.
  * A shadow `<dialog class="ui [position] … flyout" part="flyout">` shown with `showModal()`,
- * sliding in from `position` (left by default) over a `::backdrop` dimmer.
+ * sliding in from `position` (left by default) over a `::backdrop` dimmer;
+ * `modeless`:  shown with `show()`, no dimmer, the page left usable.
  *
  * - Its behaviour is `<ui-modal>`'s, through the shared `DialogComponent` (modal family):
  *   `visible` / `hidden`, `closedby`, the `closable` icon, approve / deny, `--show` / `--close` invoker commands,
@@ -30,6 +31,11 @@ export class UIFlyout extends DialogComponent<Vocabulary> {
   @E.proto static rootPart = "flyout"
   @E.proto static overlayKind = "flyout" as const
   @E.proto static shownClass = "visible"
+
+  /** `modeless`:  shown without a dimmer, the page left usable. */
+  protected get isModeless(): boolean {
+    return this.modeless
+  }
 
   /** A word width (`thin`) goes before the noun (`UIT.WordWidthClasses`), after the shown class. */
   protected get extraClass(): string | undefined {

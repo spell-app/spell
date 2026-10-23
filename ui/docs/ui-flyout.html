@@ -343,6 +343,22 @@
                   ></ui-flyout>
                 </ui-docs-example>
               </ui-section>
+              <ui-section id="examples-variations-modeless" label="Modeless" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`modeless` leaves the page usable while it shows:  no dimmer, and a click on the page doesn't close it.  Escape and its close icon still do.  The docs' own side column opens this way on narrow screens."
+                >
+                  <ui-button commandfor="flyout-modeless" command="--toggle">Toggle</ui-button>
+                  <ui-flyout
+                    id="flyout-modeless"
+                    position="right"
+                    width="thin"
+                    modeless
+                    header="Modeless"
+                    content="Scroll and click the page:  this stays open."
+                    closable
+                  ></ui-flyout>
+                </ui-docs-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 
