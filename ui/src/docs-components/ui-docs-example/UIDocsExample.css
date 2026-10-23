@@ -229,7 +229,8 @@
     box-sizing: border-box;
     height: auto;
     margin: 0;
-    padding: 0.5em var(--_ui-docs-example-code-inline) 0.75em;
+    /* little below the last line (Owen, 2026-10-23:  "less padding below") */
+    padding: 0.5em var(--_ui-docs-example-code-inline) 0.125em;
     overflow-x: auto;
     overflow-y: hidden;
     border: none;
