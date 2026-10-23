@@ -111,7 +111,11 @@ export class SiteSections {
     const band = lengthOf("--site-tabs-band")
     const gap = lengthOf("--site-tabs-gap")
     // the panel round the tabs:  a gap below the site top, its band, the track;  its band and a gap below it
-    const trackBottom = siteTop + gap + band + (bar?.getBoundingClientRect().height ?? 0)
+    const trackHeight = bar?.getBoundingClientRect().height ?? 0
+    const trackBottom = siteTop + gap + band + trackHeight
+    // the joined panel is drawn by the toolbar's box reaching up behind the track (`--site-tabs-track`)
+    const track = `${Math.round(trackHeight)}px`
+    if (main.style.getPropertyValue(TABS_TRACK) !== track) main.style.setProperty(TABS_TRACK, track)
     let top = bar ? trackBottom + band + gap : siteTop
     // a page's own sticky bar:  the section toolbar under the tabs is the panel's lower half, stuck right under the
     // track;  another (the kitchen sink's theme picker) below the panel;  the titles below either
@@ -487,6 +491,9 @@ const MASTHEAD_TITLE = ".site-masthead .site-title"
 
 /** The stuck page title's line, first in the column (`site.css`). */
 const PAGE_TITLE = "site-page-title"
+
+/** `main`'s custom property:  the tabs' track height, px, for the panel the section toolbar draws behind it. */
+const TABS_TRACK = "--site-tabs-track"
 
 /** A marker of no height just before the page's column, which `stickTitle()` watches (`site.css`). */
 const TITLE_MARKER = "site-title-marker"

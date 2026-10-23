@@ -161,8 +161,12 @@
     --ui-bar-background: var(--fruity-bar);
     --ui-bar-filter: var(--fruity-blur);
     --ui-bar-color: var(--ui-text-color);
-    /* a section title in place (not stuck):  a faint white glass, 30%;  stuck, the bar's 95% (Owen, 2026-10-23) */
-    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.3), rgb(30 28 38 / 0.3));
+    /*
+     * a section title:  in place, near-solid white (85%);  stuck, a lighter glass (60%) that blurs what slides under it
+     * (Owen, 2026-10-23:  "more opaque when not sticky, less when sticky, transition the opacity")
+     */
+    --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.85), rgb(30 28 38 / 0.85));
+    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.6), rgb(30 28 38 / 0.6));
     --ui-bar-rest-filter: var(--fruity-blur);
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;

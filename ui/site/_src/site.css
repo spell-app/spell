@@ -303,13 +303,14 @@
     --site-tabs-band: 8px;
     --site-tabs-gap: 10px;
     --site-panel-radius: calc(var(--ui-radius-m, 10px) + var(--site-tabs-band));
-    --ui-section-sticky-background: var(--ui-bar-background, var(--ui-background));
+    --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
   .site-main ui-section[sticky]::part(title) {
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
     padding-block: 0.4em;
     backdrop-filter: var(--ui-bar-filter, none);
+    transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
     background: var(--ui-bar-rest-background, none);
@@ -327,14 +328,14 @@
     position: sticky;
     /* the panel's top edge a gap below the top bar (and the page's title, while it shows) */
     top: calc(var(--site-top) + var(--site-page-title-height, 0px) + var(--site-tabs-gap) + var(--site-tabs-band));
-    z-index: calc(var(--ui-z-sticky) + 1);
+    /* above the section toolbar, whose box draws the panel behind it */
+    z-index: calc(var(--ui-z-sticky) + 2);
     margin-block-start: calc(var(--site-tabs-gap) + var(--site-tabs-band));
-    /* the panel round the track:  its colour, its rounded corners following the track's */
-    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
   }
-  /* tabs with no section toolbar under them:  the panel's own gap below */
+  /* tabs with no section toolbar under them:  the panel round the track is their own, and its gap below */
   .site-tabs:not(:has(ui-sticky.spell-site-toolbar))::part(menu) {
     margin-block-end: calc(var(--site-tabs-gap) + var(--site-tabs-band));
+    box-shadow: 0 0 0 var(--site-tabs-band) var(--ui-bar-background, var(--ui-background));
   }
 
   /*
@@ -359,8 +360,8 @@
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: var(--ui-bar-background, var(--ui-background));
-    backdrop-filter: var(--ui-bar-filter, none);
+    /* the page's own background (Owen:  "should be page bg, not white") */
+    background: var(--ui-background);
     border-block-end: 1px solid var(--ui-border-color);
     color: var(--ui-text-dark);
     font: var(--ui-font-weight-bold, 700) 1.125em / 1 var(--ui-font-family-heading);
