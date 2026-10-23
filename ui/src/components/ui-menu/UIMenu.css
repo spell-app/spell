@@ -1350,16 +1350,19 @@
 *******************************/
 
 @layer ui.components.menu.states {
-  /* Hover / pressed:  links and buttons (every item of a `link` menu in static markup). */
+  /*
+   * Hover / pressed:  links and buttons (every item of a `link` menu in static markup);  a menu's own button items too
+   * (`<ui-tabs>`' tabs:  Owen, 2026-10-23, epic `debut`:  "Top tabs should get darkening hover like second level")
+   */
   :host(:state(in-menu)) > :is(a, button).item:hover,
-  .ui.menu :is(a.item, .link.item):hover,
+  .ui.menu :is(a.item, button.item, .link.item):hover,
   .ui.link.menu .item:hover {
     color: var(--_ui-menu-hover-color);
     background: var(--_ui-menu-hover-background);
     cursor: pointer;
   }
   :host(:state(in-menu)) > :is(a, button).item:active,
-  .ui.menu :is(a.item, .link.item):active,
+  .ui.menu :is(a.item, button.item, .link.item):active,
   .ui.link.menu .item:active {
     color: var(--_ui-menu-pressed-color);
     background: var(--_ui-menu-pressed-background);
