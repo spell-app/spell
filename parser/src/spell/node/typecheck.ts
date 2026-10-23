@@ -22,14 +22,15 @@ export const CODE_FOLDERS = (() => {
 /**
  * The editor app's source folder (`src/app/` in spell-app), when it's installed beside spell-lang;  else `undefined`.
  * - The `ts/solid` target's check reads its types (`typecheck()`):  compiled spell's elements ARE the app's.
- * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none, and the checks that need it skip
- *   (epic `repo-split` C11).
+ * - A higher repo's:  spell-lang alone (`yarn clone spell-lang`) has none,
+ *   and the checks that need it skip themselves (epic `repo-split` C11).
  */
 export const APP_DIR: string | undefined = installedPackage("spell-app", "src/app")
 
 /**
- * The real folder of installed package `name` (found up from spell's own folder, in `node_modules`), or of its folder
- * `sub` (`spell-app`'s `src/app/`, epic `repo-split` P14:  one package, its code under one `src/`);  else `undefined`.
+ * The real folder of installed package `name`, or of its folder `sub`;  else `undefined`.
+ * - Found up from spell's own folder, in `node_modules`.
+ * - `sub`:  e.g. `spell-app`'s `src/app/` (epic `repo-split` P14:  one package, its code under one `src/`)
  */
 function installedPackage(name: string, sub = ""): string | undefined {
   for (let folder = CODE_FOLDERS.srcDir; ; folder = dirname(folder)) {
@@ -48,7 +49,7 @@ function installedPackage(name: string, sub = ""): string | undefined {
  *   - So a collection helper's callback takes its collection's item type (`CollectionOf`),
  *     e.g. a `Card` for a `List<Card>` (epic `output-targets`, J14, T7).
  * - Solid's JSX, read as `app` reads its own (`jsx: "preserve"`, `jsxImportSource: "@solidjs/web"`).
- *   - `<ui-*>` tags are typed as `app` types them (`UI_JSX_TYPES`).
+ *   - `<ui-*>` tags are typed as `app` types them:  Spell UI's exact types (`UI_JSX_TYPES`).
  * - Standard decorators (`@prop`, `@drawn`), never `experimentalDecorators`.
  * - A drawable type's element class (epic `drawable-thing` P10), `class CardElement extends SpellElement<Card>`:
  *   - checked against app's `SpellElement` and Spell UI's declarations (`spell-ui`'s, epic `repo-split` I12)
@@ -118,12 +119,29 @@ function nodeModulesDir(): string {
 }
 
 /**
- * `<ui-*>` tags' JSX types:  `app`'s, which types each `ui-*` tag loosely (HTML attributes, plus anything else).
- * - `spell-ui` ships no JSX types:  this is where the app's Solid code gets them,
- *   so compiled spell's `<ui-button>` checks the same way.
- * - A declaration file only:  nothing of `app`'s runs here.
+ * `<ui-*>` tags' JSX types:  Spell UI's, exact (`spell-ui/jsx`, generated from its vocabularies), as the app uses them.
+ * - So compiled spell's `<ui-button size="enormous">` is an error, as it is in the app's own code.
+ * - Written into the checked folder as a file of its own (`UI_JSX_FILE`), naming them by package:
+ *   spell-lang never imports Spell UI, a repo above it.
+ *   - The folder finds Spell UI as it finds the app:  installed beside spell-lang, through its `node_modules` link.
+ * - Types only:  nothing of Spell UI's runs here.
+ * - Translated tags (a Spanish program's `<es-boton>`) stay loose, as the app types them:
+ *   the generated types name the English tags only.
  */
-const UI_JSX_TYPES = "solid/solid.types.ts"
+const UI_JSX_TYPES = `import type { JSX } from "@solidjs/web"
+import type {} from "spell-ui/jsx"
+
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements {
+      [tag: \`es-\${string}\`]: JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+    }
+  }
+}
+`
+
+/** The file in the checked folder holding `UI_JSX_TYPES`. */
+const UI_JSX_FILE = "ui-jsx.types.ts"
 
 /**
  * What compiled TypeScript imports as `@spell/elements`:  app's `SpellElement`, and Spell UI's `E`.
@@ -133,12 +151,13 @@ const SPELL_ELEMENTS_SOURCE = "runner/spellElements.ts"
 
 /**
  * A `tsconfig.json` checking `names`, with `@spell/core` pointing at `core`'s source.
- * - spell-lang's settings (its root `tsconfig.json`), plus Solid's JSX and `<ui-*>`'s JSX types -- see `typecheck()`.
+ * - spell-lang's settings (its root `tsconfig.json`),
+ *   plus Solid's JSX and `<ui-*>`'s JSX types (`UI_JSX_FILE`):  see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
  * - ONE core:  the app's own imports of `spell-lang/core` go to the same source,
  *   by spell-lang's own condition (`spell-lang-source`, in the settings it extends).
- * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations, through the
- *   folder's `node_modules` link (epic `repo-split` I12).
+ * - The other repos' packages (`spell-kit/util`, `spell-ui` ...) by their declarations,
+ *   through the folder's `node_modules` link (epic `repo-split` I12).
  */
 function tsconfig(names: string[], projects: Record<string, string>) {
   const { coreDir } = CODE_FOLDERS
@@ -157,13 +176,13 @@ function tsconfig(names: string[], projects: Record<string, string>) {
       lib: ["ES2023", "DOM", "DOM.Iterable"],
       jsx: "preserve",
       jsxImportSource: "@solidjs/web",
-      // the repo's global types (`Prettify` ...), through the folder's `node_modules` link;  `vite/client`:  `core`
-      // uses none of it (the toolchain's types bring it all the same)
+      // the repo's global types (`Prettify` ...), through the folder's `node_modules` link
+      // - `vite/client`:  not named, as `core` uses none of it (the toolchain's types bring it all the same)
       // NO `typeRoots`:  found by package name, through the folder's `node_modules` link and the kit's `exports`
       types: ["node", "spell-kit/toolchain/types"],
       noUnusedLocals: false
     },
-    files: [...names, resolve(app, UI_JSX_TYPES)],
+    files: [...names, UI_JSX_FILE],
     // none:  `files` only (else spell-lang's own `include` would be inherited)
     include: []
   }
@@ -171,6 +190,7 @@ function tsconfig(names: string[], projects: Record<string, string>) {
 
 /**
  * `run(folder)`, with `files` written into a new temp folder, and a `tsconfig.json` for them (`tsconfig()`).
+ * - With them, the `<ui-*>` tags' JSX types (`UI_JSX_FILE`).
  * - The folder is removed after.
  * - The folder links the repo's `node_modules`, so `solid-js` and `@solidjs/web` resolve from it.
  */
@@ -184,6 +204,7 @@ function inTscFolder<T>(
     // a link, NOT a copy:  `rmSync()` below removes the link, never what it points to
     symlinkSync(nodeModulesDir(), join(folder, "node_modules"), "dir")
     for (const [name, code] of Object.entries(files)) writeFileSync(join(folder, name), code)
+    writeFileSync(join(folder, UI_JSX_FILE), UI_JSX_TYPES)
     writeFileSync(join(folder, "tsconfig.json"), JSON.stringify(tsconfig(Object.keys(files), projects), null, 2))
     return run(folder)
   } finally {
@@ -192,7 +213,8 @@ function inTscFolder<T>(
 }
 
 /**
- * `tsc`'s error lines for the project in `folder`, run there, so a file's are `Solitaire.tsx(...)`;  none if clean.
+ * `tsc`'s error lines for the project in `folder`;  none if clean.
+ * - Run there, so a file's lines start with its bare name:  `Solitaire.tsx(...)`.
  */
 function runTsc(folder: string): string[] {
   try {
