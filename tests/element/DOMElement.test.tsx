@@ -297,6 +297,18 @@ describe("DOMElement property values", () => {
     host.etiqueta = "B"
     expect(host.getAttribute("etiqueta")).toBe("B")
   })
+
+  test("valueNamed() / setValueNamed() read and write by the canonical name, in any language (outline-spell P29)", async () => {
+    const { define } = testTag("named", [attribute("label", "string")])
+    const tag = `x-dom-nombrado-${tagCount}`
+    define(tag, { lang: "es", attributes: { label: "etiqueta" } })
+    const host = await renderTag(tag, `etiqueta="A"`)
+    expect(host.valueNamed("label")).toBe("A")
+    host.setValueNamed("label", "B")
+    expect(host.etiqueta).toBe("B")
+    expect(host.getAttribute("etiqueta")).toBe("B")
+    expect(() => host.valueNamed("nope")).toThrow(TypeError)
+  })
 })
 
 ////////////////
