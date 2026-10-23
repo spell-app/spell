@@ -132,6 +132,10 @@
   ) {
   opacity: 1;
 }
+/* the Spell UI site's page header draws its bullhorn as the end of Send's pill (its `site.css`):  always shown there */
+.site-main > .site-masthead > .spell-comment-mark.at-page {
+  opacity: 1;
+}
 /*
  * a box of THREADS (`<epic-threads>`):  a column of them, a little apart, 8px below its block and 12px above the next
  * (its own sheet);  until the epics pack has drawn it, the same, so nothing jumps as it upgrades
