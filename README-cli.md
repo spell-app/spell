@@ -543,13 +543,21 @@ each language pack registers every rule again, with its own words.
 `spell lang translate` writes a project in another language, in three passes:
 1. Names:  every name its people chose (types, properties, values, methods, texts, comments).
    - First from the language's shared glossary:  a name another project chose costs no call, and reads the same.
-   - The rest by `claude -p`:  the types alone in one small call, then the other names in a few calls at once,
+   - The rest by Claude:  the types alone in one small call, then the other names in a few calls at once,
      each shown the types and the glossary, so one thing has one word everywhere.
    - Each noun comes with its gender, and each name is checked readable by the other language's grammar first.
 2. Lines:  each line read in its own language, then written again with the same rule's words in the other.
 3. Fix-ups:  the translation is linted, its tests run, and each line compiled beside its English:
    each line that fails, compiles to a different program, couldn't be written, or may read in the wrong order
-   goes back to `claude -p`, in context, a few rounds at most.
+   goes back to Claude, in context, a few rounds at most.
+
+- It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
+  - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
+  - On Solitaire, cold, through `claude -p`:  45 s in all, the names 20 s, the fix-ups 25 s, in 8 calls.
+  - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
+    system prompt, which the API caches across the calls.
+  - The model is Opus 5.5 (`opus`) at low effort for the names;  `--model` picks another for every call.
+    Opus 5.5 always thinks a little;  Sonnet 5.5 and Haiku 5.5 through the API don't think at all.
 
 - The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
 - The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-lang:
@@ -567,13 +575,17 @@ each language pack registers every rule again, with its own words.
 | Option | What it does |
 | --- | --- |
 | `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
-| `--no-ai` | never asks `claude -p`:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
+| `--no-ai` | never asks Claude:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
+| `--model <model>` | asks that Claude model every call, e.g. `sonnet`, `haiku` or `claude-sonnet-5-5`;  `opus`, `sonnet` and `haiku` are the newest of each |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
 
-- It says how long each pass took, and each `claude -p` call:
+- It says how long each pass took, and each call to Claude:
   the types in one, the other names in up to 6 at the same time, one more for any name it couldn't read
   (or that two calls gave the same word), one per round of fix-ups.
+- A fix-up answer that isn't JSON anyway (cut off, say) is asked again in two halves, so the round isn't lost.
+- Through the API, a 429 (too many requests) or an overloaded API is asked again a few times, a few seconds apart;
+  any other failure says what it was (`Claude API (claude-opus-5-5):  401 authentication_error:  ...`).
 - And the shape check:  how many statements compile to the same program as the English, names and texts aside.
   A line that reads and lints but means something else (`si no está boca arriba` for `if it is face up`)
   is named, with where the two programs differ.
