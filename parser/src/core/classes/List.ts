@@ -578,6 +578,14 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
       return
     }
     const previous = this.items
+    // the page hears of what's moving here from another list of ours FIRST, while its elements are where they were
+    if (core.beforeMove) {
+      const arriving = next.filter((item) => {
+        const owner = family.ownerOf(item, "UNTRACKED")
+        return owner !== undefined && owner !== this
+      })
+      if (arriving.length) core.beforeMove(arriving)
+    }
     this.setState("items", next)
     const kept = new Set(next)
     for (const item of previous) {

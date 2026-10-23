@@ -56,15 +56,27 @@ class DrawableList(List):
 
     - Its tag:  `element_tag`, as a `Drawable`'s.
     - `core.draw_thing()` draws it as that element:  its `draw()` inside, its items' elements in the `<slot>`.
-      - That's just the `<slot>` by default:  the element shows its items and nothing else.
+      - That's just the `<slot>` by default:  the element shows its items and nothing else,
+        or its placeholder while it's empty (`draw_its_placeholder()`).
     """
 
     # our element's tag, e.g. `solitaire-pile`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
 
-    def draw(self) -> Element:
-        """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show -- just the slot."""
-        return h("slot")
+    def draw(self) -> object:
+        """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show.
+
+        - By default the slot, after our placeholder while we're empty (`draw_its_placeholder()`).
+        """
+        placeholder = self.draw_its_placeholder() if self.is_empty else None
+        return [placeholder, h("slot")] if placeholder is not None else h("slot")
+
+    def draw_its_placeholder(self) -> object:
+        """What we show while we're empty, `to draw its placeholder` -- nothing, unless a sub-class says.
+
+        - e.g. a stock pile's face-down card:  the JavaScript core's `List.drawItsPlaceholder()`.
+        """
+        return None
 
     def draw_each_item(self, item: object) -> object:
         """`item` drawn as one of ours, `to draw each item`:  its own drawing, or its text if it can't draw."""

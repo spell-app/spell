@@ -31,6 +31,17 @@ export const elementsMethods = defineCoreModule({
   elementDefiner: undefined as ElementDefiner | undefined,
 
   /**
+   * What the page does just before things MOVE from one list to another, e.g. a card onto the discards --
+   * `undefined` until the page running programs sets it.
+   * - app's `SpellElement.tsx` sets it:  it notes where each thing's element is on screen,
+   *   so the element glides from there to where it lands.
+   * - Called with the things arriving in a list from another of its family, BEFORE the lists change:
+   *   so their elements are still where they were.
+   *   Never for a thing added from nowhere, or a list that isn't exclusive (`List.writeItems()`).
+   */
+  beforeMove: undefined as ((things: unknown[]) => void) | undefined,
+
+  /**
    * Name the element of drawable class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag.
    * - What a drawable class's static field calls as it's declared:
    *   `static elementTag = core.defineElement(this, "Solitaire")`.

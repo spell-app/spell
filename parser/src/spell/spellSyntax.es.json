@@ -1400,7 +1400,7 @@
               "syntax": "((url:url)|(email:email|correo electrónico|correo electronico|correo))"
             },
             {
-              "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento))"
+              "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento)|(draw_its_placeholder:dibujar su marcador))"
             },
             {
               "syntax": "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
@@ -4886,7 +4886,7 @@
           "ruleNames": ["draw_it"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawIt.ts",
-          "line": 41,
+          "line": 44,
           "purpose": "How a type draws, in its outline body (epic `spanish` P20).",
           "syntaxes": [
             {
@@ -5214,7 +5214,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 28,
+          "line": 31,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

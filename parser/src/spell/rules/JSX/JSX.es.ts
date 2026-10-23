@@ -154,10 +154,11 @@ JSXEs.addRule(SpellJSX, {
             "  number: 1,",
             "  boolean: true,",
             "  expression: () => 1 + 1,",
-            "  onClick: (event) => core.console.log(event.target.value)",
+            "  onClick: (event) => core.console.log(event.target.value),",
+            '  style: "cursor:pointer;user-select:none"',
             "})"
           ],
-          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} />'
+          '<input attronly={true} text="text" number={1} boolean={true} expression={1 + 1} onClick={(event) => core.console.log(event.target.value)} style="cursor:pointer;user-select:none" />'
         ]
       ]
     },
@@ -279,8 +280,16 @@ JSXEs.addRule(SpellJSX, {
         // a handler, a value from the program, a class
         [
           `<es-boton onClick={imprimir 1} className="mano">{el rank de la card}</es-boton>`,
-          'h("es-boton", { class: "mano", onClick: () => core.console.log(1) }, () => card.rank)',
-          '<es-boton class="mano" onClick={() => core.console.log(1)}>{card.rank}</es-boton>'
+          [
+            'h("es-boton", { class: "mano", onClick: () => core.console.log(1), style: "cursor:pointer;user-select:none" },',
+            "  () => card.rank",
+            ")"
+          ],
+          [
+            '<es-boton class="mano" onClick={() => core.console.log(1)} style="cursor:pointer;user-select:none">',
+            "  {card.rank}",
+            "</es-boton>"
+          ]
         ],
         // a value that can change is set as the element's property, by its Spanish name:
         // Spell UI names a Spanish tag's properties in Spanish (`discontinuo`, its `dashed`)

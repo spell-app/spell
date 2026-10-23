@@ -912,8 +912,35 @@ describe("outline style", () => {
       expect(js).toMatch(/drawEachItem\(item\) \{\s+return h\("b", \(\) => core\.drawThing\(item\)\)/)
     })
 
+    test("a list's `to draw its placeholder` is what it shows while it's empty:  `drawItsPlaceholder()` (outline-spell P27)", () => {
+      const js = compile([
+        "a card is a drawable thing",
+        "a pile is a drawable list of cards where:",
+        '\t- to "draw its placeholder": <div part="placeholder"/>',
+        "a heap is a drawable list of cards where:",
+        "\t- to draw its placeholder:",
+        '\t\treturn <div class="spot"/>'
+      ])
+      expect(js).toMatch(/drawItsPlaceholder\(\) \{\s+return h\("div", \{ part: "placeholder" \}\)/)
+      expect(js).toMatch(/drawItsPlaceholder\(\) \{\s+return h\("div", \{ class: "spot" \}\)/)
+    })
+
+    test("what has an onClick looks clickable by itself;  its own style wins (outline-spell P28)", () => {
+      const js = compile([
+        "a card is a drawable thing where:",
+        "\t- to draw it:",
+        '\t\treturn <div><b onClick={print 1}/><i onClick={print 2} style="color: red"/><u/></div>'
+      ])
+      expect(js).toContain(
+        'h("b", { onClick: () => core.console.log(1), style: "cursor:pointer;user-select:none" })'
+      )
+      expect(js).toContain('h("i", { onClick: () => core.console.log(2), style: "color: red" })')
+      expect(js).toContain('h("u")')
+    })
+
     test("only a list draws each item;  a thing's sides are gone:  `draw its front` is no drawing", () => {
       expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw each item": <b/>'])).toHaveLength(1)
+      expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its placeholder": <b/>'])).toHaveLength(1)
       expect(errorsOf(["a card is a drawable thing where:", '\t- to "draw its front": <b/>'])).toHaveLength(1)
     })
   })

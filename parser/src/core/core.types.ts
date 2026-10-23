@@ -139,6 +139,7 @@ export type TestCheck = {
  * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
+ * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  *
  * - Python's `spell_core` has the same table (`messages.py`):  both read `messages.expected.json5` in their tests.
  */
@@ -149,7 +150,8 @@ export const CORE_MESSAGES = {
   "test-step": "▶️ Executing   {step}",
   "test-threw": "Error in test {test}:",
   "cant-draw": "⚠ {type} can't draw",
-  "confirm-default": "{question} (yes)"
+  "confirm-default": "{question} (yes)",
+  "drop-event": "{thing}-drop"
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

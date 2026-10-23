@@ -312,6 +312,23 @@ describe("@drawn", () => {
       expect(Errored).toHaveBeenCalledTimes(2)
     })
 
+    test("by default, its wrapper shows its placeholder while it's empty, before the slot", () => {
+      class SpotHeap extends Heap {
+        override drawItsPlaceholder(): Drawing {
+          return h("b", "spot") as unknown as Drawing
+        }
+      }
+      const heap = new SpotHeap()
+      draw(() => core.drawOwn(heap))
+      expect(element.innerHTML).toBe(`<b>spot</b><slot></slot>`)
+      heap.add(7)
+      core.flush()
+      expect(element.innerHTML).toBe(`<slot></slot>`)
+      heap.clear()
+      core.flush()
+      expect(element.innerHTML).toBe(`<b>spot</b><slot></slot>`)
+    })
+
     test("`to draw each item` wraps each item;  one that throws shows its stand-in, and the rest keeps drawing", () => {
       const pile = new SpotPile()
       pile.add(new PlainCard({ rank: "ace" }), new Card({ rank: 3, isBroken: true }))

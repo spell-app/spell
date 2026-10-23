@@ -54,6 +54,18 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toContain('return h("b", () => core.drawThing(item))')
     })
 
+    test("a drawable list:  `para dibujar su marcador` is what it shows while it's empty, `drawItsPlaceholder()` (outline-spell P27)", () => {
+      const { code, errors } = compiled("draw-its-placeholder", [
+        "una carta es una cosa dibujable",
+        "una pila es una lista dibujable de cartas:",
+        "\t- para dibujar su marcador:",
+        '\t\tdevolver <div part="marcador"/>'
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/drawItsPlaceholder\(\) \{\s+return h\("div", \{ part: "marcador" \}\)/)
+      expect(code).not.toContain("dibujarSuMarcador")
+    })
+
     test("a thing's sides are gone:  `dibujar su frente` is no drawing", () => {
       const { errors } = compiled("no-sides", [
         "una carta es una cosa dibujable:",
