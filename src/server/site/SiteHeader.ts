@@ -55,6 +55,8 @@ import {
  *   (the Spell UI site's side column and top bar)
  *   - no light / dark button (the page has its own)
  *   - no room kept on the page (`--spell-site-header-height` is 0)
+ * - Parts, for a page that docks it:  `bar` (the row), `nav` (its links;  the Spell UI site's top bar keeps them on one
+ *   line, scrolling sideways)
  * - Re-draws on `spell-site:page` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
@@ -222,7 +224,7 @@ export class SiteHeader extends HTMLElement {
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
   <a class="brand" href="${escape(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
-  <nav aria-label="Site">${links}</nav>
+  <nav part="nav" aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
   ${this.docked ? "" : `<button class="tool" data-action="theme" title="${themeLabel}" aria-label="${themeLabel}">${ICONS[shown]}</button>`}
