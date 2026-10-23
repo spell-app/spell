@@ -139,6 +139,8 @@ const ICONS = {
   "solid/flask": ["flask"],
   "solid/code-branch": ["code branch"],
   "solid/folder": ["folder"],
+  // a test run's screenshot picker (`<epic-test-run>`, epic `epic-engine` I75)
+  "regular/file-image": ["file image"],
   "solid/calendar": ["calendar"],
   // the pony (`brand/pony.html`, epic `claude-design`)
   "solid/horse": ["horse"],

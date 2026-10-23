@@ -154,6 +154,13 @@ export const epicTestRunVocabulary = {
       text: "Paste a screenshot (⌘V) or drop one here",
       description: "The failure's screenshot area, empty."
     },
+    {
+      key: "choose",
+      text: "Choose a file",
+      description:
+        "The empty screenshot area's button:  a file picker.  In VS Code's side bar a file dragged in never reaches " +
+        "the page, so this is the way there besides pasting."
+    },
     { key: "saving", text: "Saving the screenshot ...", description: "The screenshot area while it uploads." },
     { key: "tooBig", text: "That screenshot is over 8 MB:  crop it first.", description: "A notice:  too big." },
     { key: "notImage", text: "Only an image goes here.", description: "A notice:  something else was dropped." },

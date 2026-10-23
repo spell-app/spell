@@ -30,8 +30,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - The four ANSWERS, one button group:  Passed (green), Failed (red), Skip (grey), Not now (yellow)
  *   - each a review mark, `{ action: "test", result, note?, shot? }`, through the page's one `ReviewClient`
  *   - the fill rule:  grey outline at rest, dashed in its colour once chosen, outlined once sent
- *   - Passed, Skip and Not now move on to the next test;  Failed opens the failure's screenshot area:  pasted (⌘V) or
- *     dropped, saved through `POST shot` and shown as a thumbnail
+ *   - Passed, Skip and Not now move on to the next test;  Failed opens the failure's screenshot area:  pasted (⌘V),
+ *     dropped or chosen (its picker:  a file dragged into VS Code's side bar never reaches the page), saved through
+ *     `POST shot` and shown as a thumbnail
  * - A COMMENT on every card, under the answers (Owen, 2026-10-19:  "e.g. it did part of what you asked, I want to
  *   explain how"):  an `<epic-text-box>`, kept as he types -- in the test's answer once it has one (its `note`), else
  *   as the inbox's draft for it -- so it survives a reload, goes with whichever answer he picks, before or after
@@ -477,7 +478,29 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           <Show
             when={shot()}
             fallback={
-              <span class="drop-words">{this.translationForKey(this.savingShot === id ? "saving" : "paste")}</span>
+              <>
+                <span class="drop-words">{this.translationForKey(this.savingShot === id ? "saving" : "paste")}</span>
+                <Show when={this.savingShot !== id}>
+                  {/* VS Code's side bar never lets a dragged file reach the page:  a picker does (I75) */}
+                  <ui-button
+                    class="choose"
+                    basic=""
+                    size="mini"
+                    icon="file image"
+                    onClick={(event: MouseEvent) =>
+                      (event.currentTarget as HTMLElement).parentElement?.querySelector("input")?.click()
+                    }
+                  >
+                    {this.translationForKey("choose")}
+                  </ui-button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(event: Event) => this.onChoose(event.currentTarget as HTMLInputElement)}
+                  />
+                </Show>
+              </>
             }
           >
             {(src) => (
@@ -860,6 +883,14 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     if (!file) return
     event.preventDefault()
     this.track(this.takeShot(file))
+  }
+
+  /** A file chosen with the screenshot area's picker. */
+  @E.untracked
+  private onChoose(input: HTMLInputElement) {
+    const file = input.files?.[0]
+    input.value = ""
+    if (file) this.track(this.takeShot(file))
   }
 
   /** A file dropped on the screenshot's area. */
