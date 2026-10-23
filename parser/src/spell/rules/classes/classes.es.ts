@@ -54,6 +54,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
+import { DragAndDrop } from "./DragAndDrop"
 import { SavedInline } from "./SavedInline"
 import { ThePropertyOfAThing } from "./ThePropertyOfAThing"
 import { TheThings } from "./TheThings"
@@ -129,6 +130,11 @@ function drawableClass(type: string, superType: string, members: string[] = []):
 // Which way a list's item moves, for `list_guard`:  `una pila puede soltar una carta si: ...` means `give_up`
 classesEs.addRule(Wording.specialize({ ruleName: "take_or_give_up", meanings: ["take", "give_up"] }), {
   syntax: "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
+})
+
+// What a type's things may be, for `drag_and_drop`:  `se puede arrastrar`, `se puede soltar encima`
+classesEs.addRule(Wording.specialize({ ruleName: "drag_or_drop", meanings: ["dragged", "dropped_on"] }), {
+  syntax: "((dragged:arrastrar)|(dropped_on:soltar encima))"
 })
 
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
@@ -507,6 +513,30 @@ classesEs.addRule(CanBelongToMany, {
     }
   ]
 })
+
+// `una carta se puede arrastrar`, `una pila se puede soltar encima`:  English's `can be dragged`, `can be dropped on`
+classesEs.addRule(DragAndDrop, {
+  syntax: `${A} {type:known_type} se puede {what:drag_or_drop}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(
+          ["una carta es una cosa dibujable", "una pila es una lista dibujable de cartas"].join("\n"),
+          "block"
+        )
+      },
+      tests: [
+        ["una carta se puede arrastrar", "Carta.canBeDragged = true"],
+        ["una pila se puede soltar encima", "Pila.canBeDroppedOn = true"]
+      ]
+    }
+  ]
+})
+
+for (const subject of ["subject_it", "subject_implied"]) {
+  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
+}
 
 classesEs.addRule(SavedInline, {
   syntax: `${A} {type:known_type} se guarda dentro`,

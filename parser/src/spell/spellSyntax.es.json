@@ -1359,6 +1359,7 @@
             "before_or_after",
             "print_kind",
             "take_or_give_up",
+            "drag_or_drop",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1392,6 +1393,9 @@
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
+            },
+            {
+              "syntax": "((dragged:arrastrar)|(dropped_on:soltar encima))"
             },
             {
               "syntax": "((at_least:al menos|como mínimo|como minimo)|(at_most:como mucho|a lo sumo|como máximo|como maximo))"
@@ -3972,6 +3976,38 @@
                   "code": ""
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DragAndDrop",
+          "ruleNames": ["drag_and_drop"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DragAndDrop.ts",
+          "line": 23,
+          "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {type:known_type} se puede {what:drag_or_drop}",
+              "example": "una carta se puede arrastrar",
+              "outputs": {
+                "js": {
+                  "code": "Carta.canBeDragged = true"
+                },
+                "ts": {
+                  "code": "Carta.canBeDragged = true"
+                },
+                "py": {
+                  "code": "Carta.can_be_dragged = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} se puede {what:drag_or_drop}"
+            },
+            {
+              "syntax": "{type:subject_implied} se puede {what:drag_or_drop}"
             }
           ],
           "aliases": ["statement"]

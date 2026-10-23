@@ -1346,6 +1346,7 @@
             "before_or_after",
             "print_kind",
             "take_or_give_up",
+            "drag_or_drop",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1379,6 +1380,9 @@
             },
             {
               "syntax": "((take:add|take)|(give_up:release|remove|give up|let go of))"
+            },
+            {
+              "syntax": "((dragged:dragged)|(dropped_on:dropped on))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -3934,6 +3938,38 @@
                   "code": ""
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DragAndDrop",
+          "ruleNames": ["drag_and_drop"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DragAndDrop.ts",
+          "line": 23,
+          "purpose": "Which things a page lets people drag, and which lists they may drop them on (epic `outline-spell` P28).",
+          "syntaxes": [
+            {
+              "syntax": "(a|an) {type:known_type} can be {what:drag_or_drop}",
+              "example": "a card can be dragged",
+              "outputs": {
+                "js": {
+                  "code": "Card.canBeDragged = true"
+                },
+                "ts": {
+                  "code": "Card.canBeDragged = true"
+                },
+                "py": {
+                  "code": "Card.can_be_dragged = True"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_it} can be {what:drag_or_drop}"
+            },
+            {
+              "syntax": "{type:subject_implied} can be {what:drag_or_drop}"
             }
           ],
           "aliases": ["statement"]

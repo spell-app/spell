@@ -49,6 +49,8 @@ class Drawable(Thing):
 
     # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
+    # may a page let people drag our things?  `a card can be dragged` says yes -- the JavaScript core's `canBeDragged`
+    can_be_dragged: bool = False
 
 
 class DrawableList(List):
@@ -62,6 +64,10 @@ class DrawableList(List):
 
     # our element's tag, e.g. `solitaire-pile`:  the compiled class names it -- see `core.element_tag_of()`
     element_tag: str | None = None
+    # may a page let people drop a thing on our lists?  `a pile can be dropped on` says yes -- `canBeDroppedOn`
+    can_be_dropped_on: bool = False
+    # may a page let people drag our lists themselves?  `a pile can be dragged`
+    can_be_dragged: bool = False
 
     def draw(self) -> object:
         """Our outside, `to draw it`:  the wrapper around our items, a `<slot>` where they show.
