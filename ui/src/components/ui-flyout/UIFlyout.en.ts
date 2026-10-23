@@ -41,7 +41,7 @@ export const flyoutVocabulary = {
       kind: "keyOnly",
       description:
         "No dimmer, and the page stays usable while it shows (Fomantic's `dimPage: false`):  " +
-        "a click on the page leaves it open;  Escape and its own buttons still close it."
+        "a click on the page lands, and closes it as it does;  so do Escape and its own buttons."
     },
     {
       name: "width",

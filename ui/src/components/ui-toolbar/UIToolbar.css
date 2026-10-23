@@ -1,0 +1,99 @@
+/*
+ * `<ui-toolbar>`:  a menu whose items scroll sideways, with a `‹` / `›` button at each end.
+ * - Adopted after `UIMenu.css`, which draws the menu and its items as for `<ui-menu>`:  this sheet only lays out the
+ *   box around them (`.ui.toolbar`), keeps the items on one line, and draws the two buttons.
+ * - The menu's own box scrolls, its scrollbar hidden;  a button not shown (nothing more that way) keeps its room
+ *   (`visibility`), so the items don't jump as it comes and goes.
+ * - Tokens (public, never declared here:  read through private aliases):
+ *
+ * | Token | What | Default |
+ * | --- | --- | --- |
+ * | `--ui-toolbar-gap` | space between a button and the items | `0.25em` |
+ * | `--ui-toolbar-button-size` | each button's width and height | `1.75em` |
+ * | `--ui-toolbar-button-background` | a button at rest | `transparent` |
+ * | `--ui-toolbar-button-hover-background` | a button under the pointer | a faint ink |
+ * | `--ui-toolbar-button-color` | its chevron | `--ui-text-muted` |
+ */
+
+@layer ui.components.toolbar.types, ui.components.toolbar.states;
+
+@layer ui.components.toolbar.types {
+  /* the toolbar itself (not an item, which adopts this sheet too):  a box of its own, whose width the page sets */
+  :host(:not(:state(in-menu))) {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ui.toolbar {
+    --_ui-toolbar-gap: var(--ui-toolbar-gap, 0.25em);
+    --_ui-toolbar-button-size: var(--ui-toolbar-button-size, 1.75em);
+    --_ui-toolbar-button-background: var(--ui-toolbar-button-background, transparent);
+    --_ui-toolbar-button-hover-background: var(
+      --ui-toolbar-button-hover-background,
+      oklch(from var(--ui-ink) l c h / 0.08)
+    );
+    --_ui-toolbar-button-color: var(--ui-toolbar-button-color, var(--ui-text-muted));
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-toolbar-gap);
+    min-width: 0;
+  }
+
+  /* the menu's own box scrolls:  its items on one line, never shrunk */
+  .ui.toolbar > .ui.menu {
+    --_ui-menu-item-flex: 0 0 auto;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .ui.toolbar > .ui.menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* the two buttons:  quiet round keys */
+  .ui.toolbar > .scroll {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--_ui-toolbar-button-size);
+    height: var(--_ui-toolbar-button-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    font: inherit;
+    color: var(--_ui-toolbar-button-color);
+    background: var(--_ui-toolbar-button-background);
+    cursor: pointer;
+  }
+  .ui.toolbar > .scroll > svg {
+    width: 0.875em;
+    height: 0.875em;
+    fill: currentColor;
+    pointer-events: none;
+  }
+}
+
+@layer ui.components.toolbar.states {
+  /* nothing to scroll:  no buttons at all */
+  .ui.toolbar > .scroll[hidden] {
+    display: none;
+  }
+  /* at that end already:  hidden, its room kept */
+  .ui.toolbar > .scroll:not([data-can]) {
+    visibility: hidden;
+  }
+  .ui.toolbar > .scroll:hover {
+    color: var(--ui-text-color);
+    background: var(--_ui-toolbar-button-hover-background);
+  }
+  .ui.toolbar > .scroll:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: 1px;
+  }
+}

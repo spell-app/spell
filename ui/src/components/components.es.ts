@@ -123,6 +123,7 @@ import { tabsEs } from "spell-ui/components/ui-tab/UITabs.es"
 import { tableEs } from "spell-ui/components/ui-table/UITable.es"
 import { textEs } from "spell-ui/components/ui-text/UIText.es"
 import { toastEs } from "spell-ui/components/ui-toast/UIToast.es"
+import { toolbarEs } from "spell-ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell-ui/components/ui-transition/UITransition.es"
 import { treeDiagramEs } from "spell-ui/components/ui-tree-diagram/UITreeDiagram.es"
 import { visibilityEs } from "spell-ui/components/ui-visibility/UIVisibility.es"
@@ -708,6 +709,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   tableEs,
   textEs,
   toastEs,
+  toolbarEs,
   transitionEs,
   treeDiagramEs,
   visibilityEs

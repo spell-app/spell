@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
 import { menuVocabulary } from "./UIMenu.en"
+import { SegmentedThumb } from "./SegmentedThumb"
 
 import menuCSS from "./UIMenu.css?inline"
 
@@ -50,17 +51,21 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
  *   (a click, or Enter or Space on it);  only the TOP menu sends it.
  *   - A menu never moves `selected` itself, EXCEPT a `segmented` one (a single-choice control):
  *     it selects the activated item and unselects the rest, unless a listener cancels the `ui-select`.
+ *
+ * - A top-level `segmented` menu draws ONE sliding thumb under its items (`SegmentedThumb`),
+ *   moved to each new choice as Apple's segmented control slides.
  ****************/
 export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.ItemOwner {
   @E.proto static vocabulary = menuVocabulary
-  @E.protoMerged static elementSetup = {
+  // `Partial`:  `<ui-toolbar>` extends the menu, stating other keys
+  @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { menu: menuCSS },
     cssStates: ["vertical"],
     // a sub-menu is a part of its menu:  an item's header looks past it to the menu
     isAPart: true,
     // nothing to delegate to:  the items are the focus targets
     delegatesFocus: false
-  } satisfies Partial<E.ElementSetup>
+  }
 
   /** Once it has drawn (`isReady`):  re-apply the roving tabindexes, over the items it drew. */
   @E.onChange("isReady")
@@ -154,6 +159,51 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       if (element !== item) element.removeAttribute(UIT.ACTIVE)
       element.selected = element === item
     }
+  }
+
+  ////////////////
+  // ## The sliding thumb
+  ////////////////
+
+  /** The top menu's box (its `nav`, or the menubar), while rendered:  a segmented menu's track. */
+  protected box: HTMLElement | undefined
+
+  /** A segmented menu's sliding thumb, while drawn. */
+  private thumb: SegmentedThumb | undefined
+
+  /** A top-level `segmented` menu, rendered:  it draws a sliding thumb. */
+  get hasThumb(): boolean {
+    return !this.parentMenu && this.appearance === SEGMENTED && this.isReady
+  }
+
+  /** SIDE EFFECT:  the thumb, drawn on the menu's box while `hasThumb`;  its cleanup takes it down. */
+  @E.onChange("hasThumb", "interactive")
+  protected onThumbChanged(hasThumb: boolean) {
+    const box = this.box
+    if (!hasThumb || !box) return
+    const thumb = new SegmentedThumb({ track: box, chosenBox: () => this.chosenBox() })
+    this.thumb = thumb
+    const stop = thumb.start()
+    return () => {
+      stop()
+      this.thumb = undefined
+    }
+  }
+
+  /** An item's `selected` (or `active`) changed, or items came and went:  the thumb moves to the chosen one. */
+  @E.watches({ attributes: true, subtree: true, childList: true, attributeFilter: [UIT.SELECTED, UIT.ACTIVE] })
+  protected onChoiceChanged() {
+    this.thumb?.update()
+  }
+
+  /** The chosen item's box (in its own shadow root), among the items this menu owns. */
+  @E.untracked
+  private chosenBox(): HTMLElement | undefined {
+    for (const element of this.domElement.querySelectorAll<HTMLElement>("*")) {
+      if (!this.itemsThatAsked.has(element) || element.hidden || !element.matches(SELECTED_STATE)) continue
+      return element.shadowRoot?.querySelector<HTMLElement>(ITEM_BOX) ?? undefined
+    }
+    return undefined
   }
 
   ////////////////
@@ -259,7 +309,10 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
         </Match>
         <Match when={this.interactive}>
           <div
-            ref={(element: HTMLElement) => (this.bar = element)}
+            ref={(element: HTMLElement) => {
+              this.bar = element
+              this.box = element
+            }}
             class={this.rootClass}
             part={this.partForName("menu")}
             role="menubar"
@@ -271,6 +324,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
         </Match>
         <Match when={true}>
           <nav
+            ref={(element: HTMLElement) => (this.box = element)}
             class={this.rootClass}
             part={this.partForName("menu")}
             aria-label={this.attributes["aria-label"] ?? undefined}
@@ -311,6 +365,9 @@ export interface UIMenu extends E.AttributeValues<typeof menuVocabulary> {}
 
 /** Selector of a selected item DOM element:  the menubar's first tab stop. */
 const SELECTED_STATE = ":state(selected)"
+
+/** Selector of an item's box in its shadow root:  what a segmented menu's thumb covers. */
+const ITEM_BOX = `.${UIT.ITEM}`
 
 /** The `appearance` of a single-choice menu:  it moves `selected` itself. */
 const SEGMENTED: UIT.MenuAppearance = "segmented"

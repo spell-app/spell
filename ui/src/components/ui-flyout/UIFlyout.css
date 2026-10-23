@@ -52,7 +52,9 @@
     --_ui-flyout-width: var(--ui-flyout-width, 400px);
     --_ui-flyout-shadow: var(--ui-flyout-shadow, 0 0 20px var(--ui-border-color));
     --_ui-flyout-dimmer-background: var(--ui-flyout-dimmer-background, oklch(0 0 0 / 0.4));
-    --_ui-flyout-duration: var(--ui-flyout-duration, var(--ui-duration-slower));
+    /* opening:  quick, easing out;  closing:  quicker, easing in (macOS's pace) */
+    --_ui-flyout-duration: var(--ui-flyout-duration, 220ms);
+    --_ui-flyout-close-duration: var(--ui-flyout-close-duration, 160ms);
     --_ui-flyout-close-size: var(--ui-flyout-close-size, 1.25em);
     --_ui-flyout-close-hitbox: var(--ui-flyout-close-hitbox, 2.25em);
     --_ui-flyout-close-opacity: var(--ui-flyout-close-opacity, 0.8);
@@ -98,15 +100,21 @@
   }
 
   /* The element's `<dialog>`:  shown while `[open]`, sliding with `display` / `overlay` kept for the exit. */
+  /* the closed rule's transition runs as it closes, the open rule's as it opens */
   dialog.ui.flyout {
     transition:
-      transform var(--_ui-flyout-duration) var(--ui-ease),
-      visibility var(--_ui-flyout-duration) allow-discrete,
-      display var(--_ui-flyout-duration) allow-discrete,
-      overlay var(--_ui-flyout-duration) allow-discrete;
+      transform var(--_ui-flyout-close-duration) var(--ui-ease-in),
+      visibility var(--_ui-flyout-close-duration) allow-discrete,
+      display var(--_ui-flyout-close-duration) allow-discrete,
+      overlay var(--_ui-flyout-close-duration) allow-discrete;
   }
   dialog.ui.flyout[open] {
     display: flex;
+    transition:
+      transform var(--_ui-flyout-duration) var(--ui-ease-out),
+      visibility var(--_ui-flyout-duration) allow-discrete,
+      display var(--_ui-flyout-duration) allow-discrete,
+      overlay var(--_ui-flyout-duration) allow-discrete;
   }
 
   /* The dimmer. */
@@ -114,9 +122,9 @@
     background: var(--_ui-flyout-dimmer-background);
     opacity: 1;
     transition:
-      opacity var(--_ui-flyout-duration) var(--ui-ease),
-      display var(--_ui-flyout-duration) allow-discrete,
-      overlay var(--_ui-flyout-duration) allow-discrete;
+      opacity var(--_ui-flyout-close-duration) var(--ui-ease-in),
+      display var(--_ui-flyout-close-duration) allow-discrete,
+      overlay var(--_ui-flyout-close-duration) allow-discrete;
   }
   dialog.ui.flyout:not([open])::backdrop {
     opacity: 0;
