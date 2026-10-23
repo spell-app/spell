@@ -269,7 +269,10 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     )
   }
 
-  /** The head:  "Testing", "4 of 9", Done testing;  then the bar of how many are answered. */
+  /**
+   * The head:  "Testing", "4 of 9", Done testing;  then the bar of where the run is, as the words say (Owen,
+   * 2026-10-22:  "We're on 3 of 6, but the bar is only 20% full?");  how many are answered, its tooltip.
+   */
   private head(): JSX.Element {
     const total = () => this.tests().length
     const answered = () => total() - this.counts().open
@@ -297,7 +300,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
           part={this.partForName("progress")}
           size="tiny"
           color="green"
-          value={answered()}
+          value={at()}
           total={total() || 1}
           aria-label={this.translationForKey("answered", { count: answered(), total: total() })}
           title={this.translationForKey("answered", { count: answered(), total: total() })}

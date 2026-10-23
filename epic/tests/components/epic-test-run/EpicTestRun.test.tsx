@@ -213,14 +213,14 @@ describe("<epic-test-run>", () => {
     expect(location.hash).toBe("#v3")
   })
 
-  test("P / S / N answer and move on;  each a test mark, dashed until sent;  the bar counts them", async () => {
+  test("P / S / N answer and move on;  each a test mark, dashed until sent;  the bar follows where the run is", async () => {
     await adoptClient(routes)
     const host = await render()
     await key(host, "p")
     expect(routes.inbox.marks.v1).toMatchObject({ action: "test", result: "passed" })
     await afterAnswer(host)
     expect(card(host).id).toBe("V2")
-    expect(runOf(host)!.querySelector("ui-progress")!.getAttribute("value")).toBe("1")
+    expect(runOf(host)!.querySelector("ui-progress")!.getAttribute("value")).toBe("2")
     await key(host, "s")
     await afterAnswer(host)
     await key(host, "n")

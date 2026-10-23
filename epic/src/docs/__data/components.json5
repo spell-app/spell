@@ -5060,7 +5060,7 @@
         },
         {
           "name": "progress",
-          "description": "The thin bar under the head:  how many tests are answered (`<ui-progress>`)."
+          "description": "The thin bar under the head:  where the run is, as \"4 of 9\" says;  how many are answered, its tooltip (`<ui-progress>`)."
         },
         {
           "name": "card",

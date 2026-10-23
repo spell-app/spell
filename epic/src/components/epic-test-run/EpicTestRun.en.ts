@@ -53,7 +53,12 @@ export const epicTestRunVocabulary = {
         'Its head:  "Testing", "4 of 9", and Done testing;  with the bar under it, a full-width band, sticky under ' +
         "the page's header."
     },
-    { name: "progress", description: "The thin bar under the head:  how many tests are answered (`<ui-progress>`)." },
+    {
+      name: "progress",
+      description:
+        'The thin bar under the head:  where the run is, as "4 of 9" says;  how many are answered, its tooltip ' +
+        "(`<ui-progress>`)."
+    },
     { name: "card", description: "The current test's card, or the summary's." },
     {
       name: "answers",
