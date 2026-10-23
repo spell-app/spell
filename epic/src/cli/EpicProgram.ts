@@ -932,7 +932,9 @@ Prints the new item's id.  The letter after # is its kind:
 --calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
 A test (V) Owen's test run steps him through, its fields HTML, or plain text:  steps as "1. ... 2. ..." become a
 numbered list, "- " lines bullets (epic details seo#V3 takes them too):
-  --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run
+  --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run;
+                      the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
+                      fenced block in plain text), which the run shows with a Copy button;  a wait its own step
   --should <html>     what should happen
   --example <png>     a screenshot of it, copied to tests/<id>.png beside the page;  or a line of text
   --if-not <html>     what to tell Claude when it doesn't

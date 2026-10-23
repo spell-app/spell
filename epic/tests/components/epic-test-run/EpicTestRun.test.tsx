@@ -213,6 +213,29 @@ describe("<epic-test-run>", () => {
     expect(location.hash).toBe("#v3")
   })
 
+  // epic-engine r16, Owen:  "put them in code blocks with exactly what I need to type"
+  test("a Step's code blocks, at any depth, are copyable:  Spell UI's <ui-code copy>, the doc's <pre> untouched", async () => {
+    await adoptClient(routes)
+    const step =
+      `<epic-field label="Step"><p>In VS Code's terminal, run:</p>` +
+      `<pre><code class="language-zsh">cd spell-ui\nepic window which\n</code></pre>` +
+      `<ol><li>Then:<pre><code>yarn test</code></pre></li></ol></epic-field>`
+    const host = await render("?test=1", PAGE.replace(/<epic-field label="Step">.*?<\/epic-field>/, step))
+    const codes = Array.from(runOf(host)!.querySelectorAll(".card .step .prose ui-code"))
+    expect(codes.map((code) => [code.getAttribute("language"), code.hasAttribute("copy"), code.textContent])).toEqual([
+      ["zsh", true, "cd spell-ui\nepic window which"],
+      ["sh", true, "yarn test"]
+    ])
+    expect(runOf(host)!.querySelector(".card .step pre")).toBeNull()
+    expect(host.querySelectorAll("#v1 pre")).toHaveLength(2)
+
+    const copied = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
+    await ElementFixture.settle(codes[0]!)
+    ;(codes[0]!.shadowRoot!.querySelector("button.copy") as HTMLElement).click()
+    expect(copied).toHaveBeenCalledWith("cd spell-ui\nepic window which")
+    copied.mockRestore()
+  })
+
   test("P / S / N answer and move on;  each a test mark, dashed until sent;  the bar follows where the run is", async () => {
     await adoptClient(routes)
     const host = await render()

@@ -29,6 +29,7 @@ export class TestRun {
    * Test `item`'s fields, as the run shows them:  its `<epic-field label="Step">`, `Should`, `Example`, `If not`;
    * an older test's prose (every child but its slotted ones and its commits) as the Step.
    * - the Step's action links (`a.epic-test-action`) come out as buttons;  the Example's images as thumbnails
+   * - the Step's code blocks (`<pre>`) as Spell UI's `<ui-code copy>`, with a Copy button (`copyable()`)
    * - `loading` while its part file hasn't arrived:  a `source` and no `:state(loaded)` yet
    */
   static fieldsOf(item: Element): TestFields {
@@ -44,7 +45,7 @@ export class TestRun {
     const steps = TestRun.takeOut(step || should ? TestRun.copyOf(step) : TestRun.prose(item), ACTION_LINK)
     const examples = TestRun.takeOut(TestRun.copyOf(example), "img")
     return {
-      step: steps.kept,
+      step: TestRun.copyable(steps.kept),
       actions: steps.taken.map((link) => ({
         href: link.getAttribute("href") ?? "",
         text: (link.textContent ?? "").trim(),
@@ -59,6 +60,28 @@ export class TestRun {
       ifNot: TestRun.copyOf(ifNot),
       loading
     }
+  }
+
+  /**
+   * `nodes` (copies) with each code block, at any depth, as Spell UI's `<ui-code copy>`:  highlighted, with a Copy
+   * button, so Owen pastes what a step says to type rather than retyping it (epic `epic-engine` r16:  "put them in
+   * code blocks with exactly what I need to type").
+   * - its language:  the block's `language-x` class, else `sh` (a step's code is mostly a terminal's)
+   */
+  private static copyable(nodes: Node[]): Node[] {
+    const codeFor = (pre: Element) => {
+      const code = pre.ownerDocument.createElement(UI_CODE)
+      code.setAttribute("copy", "")
+      code.setAttribute("language", /\blanguage-([\w-]+)/.exec(pre.querySelector("code")?.className ?? "")?.[1] ?? "sh")
+      code.textContent = (pre.textContent ?? "").replace(/\n$/, "")
+      return code
+    }
+    return nodes.map((node) => {
+      if (!(node instanceof Element)) return node
+      if (node.localName === "pre") return codeFor(node)
+      for (const pre of Array.from(node.querySelectorAll("pre"))) pre.replaceWith(codeFor(pre))
+      return node
+    })
   }
 
   /** `field`'s children, copied;  none without one. */
@@ -104,6 +127,9 @@ export class TestRun {
 
 /** A field's tag. */
 const FIELD = "epic-field"
+
+/** Spell UI's code block, which has a Copy button:  a Step's code blocks become one. */
+const UI_CODE = "ui-code"
 
 /** A test put off by an earlier run's Not now (the tool's `deferred`, a date):  last in the order. */
 const DEFERRED = "deferred"

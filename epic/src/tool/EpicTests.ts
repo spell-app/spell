@@ -157,21 +157,38 @@ export class EpicTests {
    *   showed as one run-on paragraph (Owen, 2026-10-22:  "text is not markdown formatted")
    * - steps numbered from 1, inline or a line each:  a numbered list;  lines starting `- `:  a bullet list
    * - else paragraphs, at blank lines;  `` `code` `` in backticks becomes code;  everything else escaped
+   * - a FENCED block (```` ```sh ```` ... ```` ``` ````, each on a line of its own) is a code block, kept line for line,
+   *   inside its step when it's in one:  the test run shows it with a Copy button (epic `epic-engine` r16)
    */
   static proseHTML(value: string): string {
     if (HTML_TAG.test(value)) return value
-    const text = value.trim()
-    const steps = EpicTests.stepsOf(text)
-    if (steps) return `<ol>${steps.map((step) => `<li>${inlineHTML(step)}</li>`).join("")}</ol>`
-    const lines = text.split("\n").map((line) => line.trim())
+    // The fenced blocks first, each a mark of its own paragraph, so their lines and numbers are never read as prose
+    const blocks: string[] = []
+    const text = value.trim().replace(FENCE, (_, language: string, code: string) => {
+      const index = blocks.push(codeHTML(code, language)) - 1
+      return `\n\n${BLOCK_MARK}${index}${BLOCK_MARK}\n\n`
+    })
+    const withBlocks = (html: string) =>
+      html
+        .replace(BLOCK_PARAGRAPH, (_, index: string) => blocks[Number(index)]!)
+        .replace(BLOCK, (_, index: string) => blocks[Number(index)]!)
+    const steps = EpicTests.stepsOf(text.trim())
+    if (steps) return withBlocks(`<ol>${steps.map((step) => `<li>${inlineHTML(step)}</li>`).join("")}</ol>`)
+    const lines = text
+      .trim()
+      .split("\n")
+      .map((line) => line.trim())
     if (lines.length > 1 && lines.every((line) => !line || BULLET.test(line))) {
       const items = lines.filter(Boolean).map((line) => `<li>${inlineHTML(line.replace(BULLET, ""))}</li>`)
       return `<ul>${items.join("")}</ul>`
     }
-    return text
-      .split(/\n\s*\n/)
-      .map((paragraph) => `<p>${inlineHTML(paragraph)}</p>`)
-      .join("")
+    return withBlocks(
+      text
+        .trim()
+        .split(/\n\s*\n/)
+        .map((paragraph) => `<p>${inlineHTML(paragraph)}</p>`)
+        .join("")
+    )
   }
 
   /**
@@ -205,6 +222,22 @@ const STEP_NUMBER = /(^|\s)(\d{1,2})\.\s/g
 
 /** A bullet line's start:  `- ` or `* `. */
 const BULLET = /^[-*]\s+/
+
+/** A fenced code block:  ```` ``` ```` and its language on a line, the code, ```` ``` ```` on a line. */
+const FENCE = /^[ \t]*```([\w-]*)[ \t]*\n([\s\S]*?)\n[ \t]*```[ \t]*$/gm
+
+/** Marks a fenced block's place while the prose around it is read:  a private-use character no text has. */
+const BLOCK_MARK = "\uE000"
+
+/** A block's mark, `\uE0003\uE000`;  and the same as a paragraph of its own. */
+const BLOCK = new RegExp(`${BLOCK_MARK}(\\d+)${BLOCK_MARK}`, "g")
+const BLOCK_PARAGRAPH = new RegExp(`<p>\\s*${BLOCK_MARK}(\\d+)${BLOCK_MARK}\\s*</p>`, "g")
+
+/** A fenced block as HTML:  `<pre><code class="language-sh">`, its text escaped, line for line. */
+function codeHTML(code: string, language: string): string {
+  const named = language ? ` class="language-${language}"` : ""
+  return `<pre><code${named}>${PlanMarkup.text(code)}</code></pre>`
+}
 
 /** Plain text as HTML:  escaped, `` `code` `` as code, its lines run together. */
 function inlineHTML(text: string): string {

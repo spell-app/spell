@@ -231,6 +231,16 @@ The markup is in `PLAN-DOC.md` ("Phases", "Items", "Log"). What to write in each
   (epic `epic-engine` P4):  its fields, in this order, each an `<epic-field label>`:
   - Step:  exactly what to do, short;  `--step`.  A page to open is an ACTION link, shown as a button in the run:
     `<a class="epic-test-action" href="...">Open the Epics page</a>` (an `epic pages link` URL)
+    - HOW a step is written (epic `epic-engine` r16;  Owen, 2026-10-22:  "You are making me think too much to do this
+      stuff ... put them in code blocks with exactly what I need to type"):
+      - it names the app, the window and the menu or keys:  "In VS Code's `⎇ repo-split` window, View > Output (⇧⌘U),
+        pick `Spell` in its list", never "the Output panel" (his:  "What is the output panel?")
+      - everything to type in a code block, `cd` included:  `<pre><code>cd spell-ui</code></pre>`, or in plain text a
+        fenced block;  the run shows each with a Copy button
+      - a new terminal in a worktree's window asks which folder:  the step says which to pick, or `cd`s first
+      - a wait or a look between commands is a step of its own, between their blocks
+      - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
+      - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
   - Should:  what should happen;  `--should`
   - Example, optional:  a screenshot Claude took (`--example shot.png`, copied to `tests/<id>.png` beside the page)
     and / or a line of text

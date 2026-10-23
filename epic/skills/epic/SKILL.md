@@ -387,6 +387,16 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
 
        - `--step`:  short, exact;  a page to open is an action link, a button in the run:
          `<a class="epic-test-action" href="<an epic pages link URL>">Open the Epics page</a>`
+       - HOW a step is written (epic `epic-engine` r16;  Owen, 2026-10-22:  "You are making me think too much to do this
+         stuff ... put them in code blocks with exactly what I need to type"):
+         - it names the app, the window and the menu or keys:  "In VS Code's `⎇ repo-split` window, View > Output (⇧⌘U),
+           pick `Spell` in its list", never "the Output panel" (his:  "What is the output panel?")
+         - everything to type in a code block, `cd` included:  `<pre><code>cd spell-ui</code></pre>`, or in plain text a
+           fenced block;  the run shows each with a Copy button
+         - a new terminal in a worktree's window asks which folder:  the step says which to pick, or `cd`s first
+         - a wait or a look between commands is a step of its own, between their blocks
+         - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
+         - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
        - `details <name>#V3 --step ... --should ...` rewrites an older test in these fields
      - He answers it in the run (passed, failed, skip, not now);  `inbox apply` closes it (7.3).

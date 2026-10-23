@@ -147,6 +147,17 @@ describe("a test's fields given as plain text (EpicTests.proseHTML)", () => {
     expect(EpicTests.proseHTML("<p>kept</p>")).toBe("<p>kept</p>")
     expect(EpicTests.proseHTML("Step 2. comes before 1. here")).toBe("<p>Step 2. comes before 1. here</p>")
   })
+
+  // epic-engine r16, Owen:  "put them in code blocks with exactly what I need to type"
+  test("a fenced block is a code block, line for line, inside its step;  its numbers never read as steps", () => {
+    expect(EpicTests.proseHTML("1. In the terminal, run:\n```sh\ncd spell-ui\n2. x < y\n```\n2. Then look.")).toBe(
+      '<ol><li>In the terminal, run: <pre><code class="language-sh">cd spell-ui\n2. x &lt; y</code></pre></li>' +
+        "<li>Then look.</li></ol>"
+    )
+    expect(EpicTests.proseHTML("Run:\n\n```\nyarn test\n```\n\nThen check it.")).toBe(
+      "<p>Run:</p><pre><code>yarn test</code></pre><p>Then check it.</p>"
+    )
+  })
 })
 
 describe("test <epic>", () => {
