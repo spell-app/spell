@@ -537,6 +537,40 @@ each language pack registers every rule again, with its own words.
 
 </details>
 
+
+### Translating a project
+
+`spell lang translate` writes a project in another language, rule by rule:
+each line is read in its own language, then written again with the same rule's words in the other.
+- The names its people chose (types, properties, methods, values, texts) come from a dictionary beside it,
+  `<Project>.<lang>.names.json5`, for a person to review.
+- A name the dictionary lacks is drafted once by `claude -p`, then saved there.
+- Its work is spell-app's (it finds the project the app's way), then `spell-lang`'s `translateProject.ts`.
+
+| Command | What it does |
+| --- | --- |
+| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person |
+
+<details>
+<summary>Its options, and what it leaves for a person</summary>
+
+| Option | What it does |
+| --- | --- |
+| `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
+| `--no-ai` | leaves each name the dictionary lacks as `TODO` in it, instead of asking `claude -p` |
+| `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
+| `--out <folder>` | writes it there instead |
+
+- A line it can't write keeps its English, marked `// TODO: translate (why)`:
+  a name still missing, or a rule it can't write in that language yet.
+- Comments go through the dictionary too;  one it lacks stays as it was, and is no TODO.
+- JSX keeps its tags and attributes;  each `{expression}` in it is translated.
+- A text glued from pieces (`its color + " joker"`) keeps its order:
+  a language that says it the other way round (`"comodín " + su color`) needs the dictionary's text to fit,
+  or a person, once:  `--update` keeps their line.
+
+</details>
+
 ## spell-ui
 
 Spell UI's four:  find an icon, render pages as plain HTML, build component packs and the design system.
