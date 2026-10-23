@@ -103,7 +103,14 @@
     gap: 12px;
     height: var(--site-topbar-height);
     padding-inline: 8px;
-    background: var(--ui-bar-background, var(--ui-background));
+    /*
+     * a theme's wallpaper, fixed as the page's is, so it reads as the page, as the page header's title line under it
+     * does (Owen, 2026-10-23:  "Spell UI doesn't need to go to white since we're keeping the background");  else the
+     * bar's glass
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-bar-background, var(--ui-background)));
+    background-image: var(--ui-bar-wallpaper, none);
+    background-attachment: fixed;
     backdrop-filter: var(--ui-bar-filter, none);
     border-block-end: 1px solid var(--ui-border-color);
   }
@@ -162,7 +169,8 @@
   }
   @keyframes site-topbar-fill {
     from {
-      background-color: transparent;
+      /* a theme's wallpaper needs no fading in:  over a clear fill it would draw the page's gradient twice */
+      background-color: var(--ui-bar-wallpaper-color, transparent);
       border-block-end-color: transparent;
       backdrop-filter: none;
     }
@@ -482,8 +490,9 @@
    * up, the browser scrolled back to keep its place, and near the top that undid the scroll that tightened it
    */
   .site-main.site-head-stuck > .site-masthead::part(segment) {
-    padding-block: 0.625em calc((0.25em + 8px) / 4);
-    margin-block-end: calc(0.625em + (0.25em + 8px) * 0.75);
+    /* then half that again (Owen, 2026-10-23:  "Reduce padding by 1/2 when page header is sticky") */
+    padding-block: 0.3125em calc((0.25em + 8px) / 8);
+    margin-block-end: calc(0.9375em + (0.25em + 8px) * 0.875);
   }
   /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
   .site-subtitle {
