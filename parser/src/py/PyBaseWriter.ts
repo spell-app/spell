@@ -1049,7 +1049,7 @@ export class PyBaseWriter extends P.ProgramWriter {
       .map((attribute) => {
         const value = attribute.propValue
         // by the page's names, `class` first, as javascript draws them:  the core contract compares the HTML
-        const key = attributeName(node.tagName, attribute.name, value instanceof P.ASTJSXLiveValue)
+        const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         return `${this.quoted(key)}: ${value ? this.bare(value) : "True"}`
       })
       .sort((a, b) => Number(b.startsWith('"class"')) - Number(a.startsWith('"class"')))

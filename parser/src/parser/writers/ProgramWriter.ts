@@ -8,6 +8,7 @@ import {
   kindFromDatatype,
   kindOfType,
   newListItemName,
+  PLAIN_KINDS,
   readsMember,
   unwrapped
 } from "./jsShapes"
@@ -318,6 +319,18 @@ export abstract class ProgramWriter extends Writer {
   ////////////////
   // ## What a value is
   ////////////////
+
+  /**
+   * May JSX value `value` (an attribute's `propValue`) hold an object (a thing, a list, a date)?
+   * - A value that can't change (a literal, an element, a function):  no.
+   * - One that can (`ASTJSXLiveValue`):  yes, unless `kindOf()` says text, a number or yes / no (`PLAIN_KINDS`).
+   *   One it can't tell counts as an object, as every live value did before (epic `solid-17`, J12 B).
+   * - What `attributeName()` asks:  on a dashed tag, an object is written `prop:name`, the rest by its plain name.
+   */
+  mayHoldObject(value: P.ASTExpression | undefined): boolean {
+    if (!(value instanceof P.ASTJSXLiveValue)) return false
+    return !PLAIN_KINDS.has(this.kindOf(value.expression) ?? "")
+  }
 
   /**
    * What `node` is, as far as writing it goes -- or `undefined` if the writer can't tell:

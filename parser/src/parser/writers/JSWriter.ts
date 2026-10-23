@@ -1415,7 +1415,7 @@ export class JSWriter extends ProgramWriter {
     const props = (node.attrs ?? [])
       .map((attribute) => {
         const value = attribute.propValue
-        const key = attributeName(node.tagName, attribute.name, value instanceof P.ASTJSXLiveValue)
+        const key = attributeName(node.tagName, attribute.name, this.mayHoldObject(value))
         const error = attribute.error ? ` ${this.write(attribute.error)}` : ""
         return `${jsText.isLegalIdentifier(key) ? key : JSON.stringify(key)}: ${this.write(value)}${error}`
       })
