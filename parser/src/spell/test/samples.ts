@@ -10,7 +10,7 @@ const SAMPLES_DIR = import.meta.dirname
 
 /**
  * `Cards.sample.tsx`:  Solid TypeScript as the `ts/solid` target writes it -- `@prop`, `@drawn`, JSX with `<Show>`,
- * `<For>` and a `<ui-button>`, a click handler -- written by hand.  Its own docstring says more.
+ * `core.drawThing()` / `core.drawItems()` and a `<ui-button>`, a click handler -- written by hand.  Its own docstring says more.
  */
 export function solidSample(): string {
   return readFileSync(resolve(SAMPLES_DIR, "Cards.sample.tsx"), "utf8")

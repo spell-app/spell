@@ -107,7 +107,7 @@ class LiveCard extends Card {
   }
 }
 
-/** A pile drawing its cards with a plain call, as `ts/solid`'s `<For>` and `{stock.draw()}` do. */
+/** A pile drawing its cards with a plain call, `card.draw()`, as hand-written code may:  `@drawn`'s own boundary holds. */
 class Pile extends List<Card> {
   @drawn
   override draw(): Drawing {

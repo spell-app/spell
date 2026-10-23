@@ -57,6 +57,7 @@ describe("priority and precedence", () => {
         "ends_with:  Precedence.comparison",
         "exists:  Precedence.comparison",
         "gt_lt:  Precedence.comparison",
+        "implied_it:  Priority.preferred",
         "includes:  Precedence.comparison",
         "is_a:  Precedence.comparison",
         "is_defined:  Priority.preferred, Precedence.comparison",

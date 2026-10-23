@@ -18,7 +18,7 @@ import { WordsAssignment } from "./WordsAssignment"
 export const assignmentEs = new SpellParser({ module: "assignment" })
 
 assignmentEs.addRule(AssignmentStatement, {
-  syntax: "(thing:{expression}|{variable}) = {value:expression}",
+  syntax: "(thing:{variable}|{expression}) = {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -36,7 +36,7 @@ assignmentEs.addRule(AssignmentStatement, {
 })
 
 assignmentEs.addRule(AssignmentStatement, {
-  syntax: "sea (thing:{expression}|{variable}) = {value:expression}",
+  syntax: "sea (thing:{variable}|{expression}) = {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -57,7 +57,7 @@ assignmentEs.addRule(AssignmentStatement, {
 })
 
 assignmentEs.addRule(AssignmentStatement, {
-  syntax: "(poner|fijar) (thing:{expression}|{variable}) (a|al|en) {value:expression}",
+  syntax: "(poner|fijar) (thing:{variable}|{expression}) (a|al|en) {value:expression}",
   tests: [
     {
       ...setupAssignmentStatement(),
@@ -69,6 +69,12 @@ assignmentEs.addRule(AssignmentStatement, {
           ts: "export const unknownVar: boolean = true"
         },
         { title: "existing var", input: "fijar thing en si", js: "thing = true" },
+        {
+          title: "a number word is a name where it can't be a number (J96)",
+          input: "poner tres a 3",
+          js: "export const tres = 3",
+          ts: "export const tres: number = 3"
+        },
         {
           title: "alias var reassign works",
           input: "poner it al name de it",

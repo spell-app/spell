@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 9,
+          "line": 13,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -354,6 +354,16 @@
               }
             }
           ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ImpliedIt",
+          "ruleNames": ["implied_it"],
+          "internal": false,
+          "file": "src/spell/rules/variables/ImpliedIt.ts",
+          "line": 19,
+          "purpose": "`it` LEFT OUT, before `is`, where the language drops its subject (epic `spanish` J96).",
+          "syntaxes": [],
           "aliases": ["expression"]
         },
         {
@@ -1339,6 +1349,7 @@
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
+            "create_method",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1377,6 +1388,9 @@
             },
             {
               "syntax": "((draw:draw it)|(draw_each_item:draw each item))"
+            },
+            {
+              "syntax": "(create:create it|create them)"
             },
             {
               "syntax": "((second:second)|(seconds:seconds)|(sec:sec)|(millisecond:millisecond)|(milliseconds:milliseconds)|(msec:msec)|(tick:tick)|(ticks:ticks))"
@@ -4988,7 +5002,7 @@
           "ruleNames": ["draw_thing"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawThing.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Draw a single thing, e.g. `draw the card`.",
           "syntaxes": [
             {
@@ -5013,7 +5027,7 @@
                   "code": "core.drawItems(deck)"
                 },
                 "ts": {
-                  "code": "<For each={deck.items}>{(item) => item.draw()}</For>"
+                  "code": "core.drawItems(deck)"
                 },
                 "py": {
                   "code": "core.draw_items(deck)"
@@ -5394,7 +5408,7 @@
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
-              "syntax": "(thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "(thing:{variable}|{expression}) = {value:expression}",
               "example": "unknown-var = yes",
               "outputs": {
                 "js": {
@@ -5409,7 +5423,7 @@
               }
             },
             {
-              "syntax": "let (thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "let (thing:{variable}|{expression}) = {value:expression}",
               "example": "let the name of thing = \"bob\"",
               "outputs": {
                 "js": {
@@ -5424,7 +5438,7 @@
               }
             },
             {
-              "syntax": "set (thing:{expression}|{variable}) to {value:expression}",
+              "syntax": "set (thing:{variable}|{expression}) to {value:expression}",
               "example": "set unknown-var to yes",
               "outputs": {
                 "js": {

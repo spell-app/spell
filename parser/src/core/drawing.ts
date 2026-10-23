@@ -11,8 +11,9 @@
  *   when its `draw()` throws, it shows a small stand-in, and the rest keeps drawing.
  *   ONE boundary, for both targets:
  *   - compiled JavaScript draws a thing with `core.drawThing(card)`, which puts its `draw()` in the boundary
- *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself,
- *     so a parent draws a child with a plain call, `{card.draw()}`
+ *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself:
+ *     it draws a child with `core.drawThing(card)` too, which calls a `@drawn` `draw()` straight
+ *     (a bare `{card.draw()}` would skip a drawable thing's element -- epic `spanish` J100)
  *   - `h()` returns a THUNK, a function that makes the element:  the boundary makes it, once (`madeOnce()`)
  * - Solid comes from the PAGE, never a copy of its own:
  *   `spell-runtime.js` imports `solid-js`, `@solidjs/web` and `@solidjs/h` from the page's one shared Solid,
@@ -154,12 +155,11 @@ Object.assign(core, drawingMethods)
 
 /**
  * `@drawn draw() { ... }`:  the drawing in its own error boundary, the same boundary `core.drawThing()` gives.
- * - So a parent draws a child with a plain call, `{card.draw()}`:
- *   it neither re-runs when the card's reads change, nor dies with the card's errors.
- *   The card's drawing re-runs by itself, inside its boundary.
+ * - So its drawing neither re-runs when the card's reads change, nor dies with the card's errors:
+ *   the card's drawing re-runs by itself, inside its boundary.
  * - What compiled TypeScript (`ts/solid`) and hand-written classes write.
- *   - Compiled JavaScript has no decorators:
- *     it draws a thing with `core.drawThing(card)`, which puts a `draw()` in the same boundary.
+ *   - Both targets draw a thing with `core.drawThing(card)`:  javascript's `draw()`, with no decorators, gets the
+ *     same boundary there.
  *   - ONE boundary, `drawInBoundary()`, for both targets.
  * - SIDE EFFECT:  marks the method it returns (`isDrawn()`), so `drawThing()` calls it straight:
  *   no second boundary around it.

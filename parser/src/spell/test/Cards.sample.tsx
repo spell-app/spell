@@ -9,7 +9,7 @@
  * - NOT part of spell's own `tsc`:  it imports `@spell/core`, as compiled spell does,
  *   which only those resolve (`tsconfig.json`'s `exclude`).
  */
-import { Show, For } from "solid-js"
+import { Show } from "solid-js"
 import { core, List, App, Thing, prop, thing, drawn } from "@spell/core"
 
 /** card ranks */
@@ -82,7 +82,7 @@ export class Pile extends List<Card> {
   draw() {
     return (
       <div class="Pile" title={this.name}>
-        <For each={this.items}>{(card) => card.draw()}</For>
+        {core.drawItems(this)}
       </div>
     )
   }
@@ -109,8 +109,8 @@ export class Game extends App {
         <ui-button class="score" value={this.score} onClick={() => this.score++}>
           Score {this.score}
         </ui-button>
-        {this.stock.draw()}
-        <p class="top">{core.getItemAt(this.stock, -1)?.draw()}</p>
+        {core.drawThing(this.stock)}
+        <p class="top">{core.drawThing(core.getItemAt(this.stock, -1))}</p>
       </div>
     )
   }

@@ -189,9 +189,13 @@ export class Parser extends Derivative {
    * - Returns the names found, in order:  `P.IncrementalProject` re-parses everything when an edit changes them.
    */
   stubDeclaredTypes(scope: P.Scope, texts: string[]): string[] {
-    const names = texts.flatMap((text) => this.declaredTypes(text))
-    for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true })
-    return names
+    // our language in play:  a name is made singular by its own language's inflector (`pila de descartes`)
+    return this.inPlay(() => {
+      const names = texts.flatMap((text) => this.declaredTypes(text))
+      const lang = this.inflector?.lang
+      for (const name of names) if (!scope.types?.get(name)) scope.types?.add({ name, stub: true, lang })
+      return names
+    })
   }
 
   /**

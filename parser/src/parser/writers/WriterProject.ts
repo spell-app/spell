@@ -29,7 +29,7 @@ export class WriterProject {
   readonly movedMembers = new Map<string, Array<P.ASTClassMember | P.ASTComment | P.ASTBlankLine>>()
   /** Every statement moved into a class, so it's written nowhere else. */
   readonly moved = new Set<P.ASTNode>()
-  /** Each list class's own item type, e.g. `Card` for `Pile`:  names `<For>`'s item (`card`) -- see `itemTypeOf()`. */
+  /** Each list class's own item type, e.g. `Card` for `Pile`:  `Pile<Card>`, a list item's type -- see `itemTypeOf()`. */
   readonly itemTypes = new Map<string, string>()
   /** Each class's super-type, by name, e.g. `Pile` for `Tableau`. */
   readonly superTypes = new Map<string, string>()

@@ -10,6 +10,7 @@ import { variables } from "./variables.parser"
 import { VARIABLE_SYNTAX } from "./variables.shared"
 import { Identifier } from "./Identifier"
 import { KnownVariable } from "./KnownVariable"
+import { ImpliedIt } from "./ImpliedIt"
 import { KnownWordsVariable } from "./KnownWordsVariable"
 import { PluralIdentifier } from "./PluralIdentifier"
 import { SingularIdentifier } from "./SingularIdentifier"
@@ -129,3 +130,6 @@ variables.addRule(KnownWordsVariable, {
     }
   ]
 })
+
+// `it` left out before `is`:  English writes its `it`, so with no words to come before, it never matches
+variables.addRule(ImpliedIt)

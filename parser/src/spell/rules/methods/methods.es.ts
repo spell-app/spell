@@ -11,7 +11,7 @@
  */
 import { P } from "spell-lang/parser"
 import { SpellParser } from "spell-lang/spell/SpellParser"
-import { Synonyms } from "spell-lang/spell/rules/expressions"
+import { Synonyms, Wording } from "spell-lang/spell/rules/expressions"
 
 import { BareTypeArg } from "./BareTypeArg"
 import { CreateAnimation } from "./CreateAnimation"
@@ -33,6 +33,12 @@ export const methodsEs = new SpellParser({ module: "methods" })
 // the word before a method's receiver, where a type's outline body leaves it out:
 // `repartir las cartas del solitario` -- see `MethodDefinition.takeSubject()`
 methodsEs.addRule(Synonyms.specialize({ ruleName: "receiver_of" }), { syntax: "(de|del)" })
+
+// what runs as a thing is made, its `create()` hook:  `- para crearlo:` (`crearla`, `crear eso`), or
+// `para crear un mazo:` -- Spanish fuses `it` into its verb, as `dibujarlo` -- see `MethodDefinition.hookOf()`
+methodsEs.addRule(Wording.specialize({ ruleName: "create_method", meanings: ["create"] }), {
+  syntax: "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
+})
 
 methodsEs.addRule(MethodKeyword)
 
@@ -95,10 +101,10 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "paren-free type arg in signature:  a known type is a parameter",
           input: "para crear una card",
-          js: ["Card.prototype.crear = function () {}"],
+          js: "Card.prototype.create = function () {}",
           ts: [
-            "export interface Card { crear(): any /* spell: type unknown */ }",
-            "Card.prototype.crear = function (this: Card) {}"
+            "export interface Card { create(): any /* spell: type unknown */ }",
+            "Card.prototype.create = function (this: Card) {}"
           ]
         },
         {
@@ -115,10 +121,10 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "paren-free type arg in signature - `eso` (it)",
           input: "para crear una card: imprimir eso",
-          js: [`Card.prototype.crear = function () {`, `  return core.console.log(this)`, `}`],
+          js: ["Card.prototype.create = function () {", "  return core.console.log(this)", "}"],
           ts: [
-            "export interface Card { crear(): any /* spell: type unknown */ }",
-            "Card.prototype.crear = function (this: Card) {",
+            "export interface Card { create(): any /* spell: type unknown */ }",
+            "Card.prototype.create = function (this: Card) {",
             "  return core.console.log(this)",
             "}"
           ]
@@ -173,10 +179,10 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "type arg in signature - thisVar",
           input: "para crear (una card): imprimir la card",
-          js: [`Card.prototype.crear = function () {`, `  return core.console.log(this)`, `}`],
+          js: ["Card.prototype.create = function () {", "  return core.console.log(this)", "}"],
           ts: [
-            "export interface Card { crear(): any /* spell: type unknown */ }",
-            "Card.prototype.crear = function (this: Card) {",
+            "export interface Card { create(): any /* spell: type unknown */ }",
+            "Card.prototype.create = function (this: Card) {",
             "  return core.console.log(this)",
             "}"
           ]
@@ -184,10 +190,10 @@ methodsEs.addRule(ToDoSomething, {
         {
           title: "type arg in signature - its",
           input: "para crear (una card): poner su number a 1",
-          js: [`Card.prototype.crear = function () {`, `  this.number = 1`, `}`],
+          js: ["Card.prototype.create = function () {", "  this.number = 1", "}"],
           ts: [
-            "export interface Card { crear(): any /* spell: type unknown */ }",
-            "Card.prototype.crear = function (this: Card) {",
+            "export interface Card { create(): any /* spell: type unknown */ }",
+            "Card.prototype.create = function (this: Card) {",
             "  this.number = 1",
             "}"
           ]

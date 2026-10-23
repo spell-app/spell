@@ -26,23 +26,19 @@ draw.addRule(DrawItems, {
       tests: [
         {
           input: "draw each card in the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "draw cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "draw the cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         },
         {
           input: "draw all cards of the deck",
-          js: "core.drawItems(deck)",
-          ts: "<For each={deck.items}>{(item) => item.draw()}</For>"
+          js: "core.drawItems(deck)"
         }
       ]
     }

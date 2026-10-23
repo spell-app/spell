@@ -574,6 +574,54 @@ export function typeName(written: string): P.Datatype {
   return P.typeName(written, typeWords, words.listOfWord)
 }
 
+/**
+ * The type `written` names in ANOTHER language's grammar than `scope`'s, and that language (epic `spanish` J89):
+ * `cards` in a Spanish file names `Card`, declared in an English one.
+ * - Only a type DECLARED in that language (`languageOfType()`), made singular by its inflector:
+ *   Spanish's rules read `cards` as one word, as `mes` or `as`, so its own singular finds no type.
+ * - `undefined` if no other language's singular names one -- or `scope` knows no types.
+ * - A lookup:  call it WHILE PARSING.
+ */
+export function typeInItsOwnLanguage(
+  scope: P.Scope,
+  written: string
+): { type: P.TypeScope; language: SP.Language } | undefined {
+  const own = SP.Language.of(scope)
+  for (const language of SP.Language.all.values()) {
+    if (language === own) continue
+    const datatype = P.Inflector.using(language.inflector, () => {
+      const name = typeName(written)
+      return P.isValueType(name) ? undefined : P.classCase(name)
+    })
+    const type = datatype ? scope.types?.get(datatype) : undefined
+    if (type && languageOfType(type) === language.lang) return { type, language }
+  }
+  return undefined
+}
+
+/**
+ * `word` made singular, by its own language when it names a type in another language's grammar:
+ * `cards` => `card` in a Spanish file, when an English one declares `Card` -- see `typeInItsOwnLanguage()`.
+ * - Else by the language in play, as `P.singularize()`.
+ * - A lookup:  call it WHILE PARSING.
+ */
+export function singularIn(scope: P.Scope, word: string): string {
+  const inItsOwn = typeInItsOwnLanguage(scope, word)
+  return P.Inflector.using(inItsOwn?.language.inflector, () => P.singularize(word))
+}
+
+/**
+ * The language type `type` was declared in, e.g. `en`:
+ * a stub's own (`P.TypeScope.lang`), else its declaring statement's file's, else the file it was imported from.
+ * - `undefined` for a built-in type, declared by nobody.
+ */
+export function languageOfType(type: P.TypeScope): string | undefined {
+  if (type.lang) return type.lang
+  if (type.declaredBy) return SP.Language.of(type.declaredBy.scope).lang
+  if (type.declaredAt) return SP.Language.forFile(type.declaredAt.path).lang
+  return undefined
+}
+
 ////////////////
 // ## Loading
 ////////////////

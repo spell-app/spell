@@ -170,4 +170,42 @@ describe("a project mixing languages", () => {
     const { code } = compiledSpellProject([{ path: "/Juego.es.spell", contents }])
     expect(code).toContain('new Pila({ name: "reserva" })')
   })
+
+  test("a quoted type name of several words keeps its number (J96):  `pila de descartes`", () => {
+    const lines = [
+      "una carta es una cosa",
+      "una pila es una lista de cartas",
+      'una "pila de descartes" es una pila',
+      "poner p a una nueva pila de descartes",
+      "poner ps a una nueva lista de pilas de descartes"
+    ]
+    const { files } = parseSpellProject([{ path: "/Pilas.es.spell", contents: lines.join("\n") }])
+    const compiled = files[0]!.compiled
+    expect(compiled).not.toContain("PARSE ERROR")
+    expect(compiled).toContain("export class PilaDeDescartes extends Pila")
+    expect(compiled).toContain("new PilaDeDescartes()")
+    expect(compiled).toContain('new List({ instanceType: "PilaDeDescartes" })')
+  })
+
+  // a Spanish file naming an English type in its plural:  English's inflector, the type's own language, says it
+  test.each([
+    ["the English file first", true],
+    ["the Spanish file first", false]
+  ])("an English type's plural, in a Spanish file, names it (J89):  %s", (_title, englishFirst) => {
+    const english = { path: "/Card.en.spell", contents: "a card is a thing" }
+    const lines = [
+      "un mazo es una lista de cards",
+      "poner m a un nuevo mazo",
+      "poner xs a una nueva lista de cards",
+      "poner ys a las cards en m donde es una card"
+    ]
+    const spanish = { path: "/Mazo.es.spell", contents: lines.join("\n") }
+    const { files } = parseSpellProject(englishFirst ? [english, spanish] : [spanish, english])
+    const compiled = files.find((file) => file.path === "/Mazo.es.spell")!.compiled
+    expect(compiled).not.toContain("PARSE ERROR")
+    // read ahead of its declaration, the class is a getter's:  `static get instanceType() { return Card }`
+    expect(compiled).toMatch(/instanceType = Card|return Card/)
+    expect(compiled).toContain('new List({ instanceType: "Card" })')
+    expect(compiled).toContain("m.filter((card) => card instanceof Card)")
+  })
 })

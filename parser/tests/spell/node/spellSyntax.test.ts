@@ -66,9 +66,9 @@ describe("the spell syntax table, spellSyntax.json", () => {
   test("a rule registered with several syntaxes:  each, with an example from its own tests", () => {
     const { syntaxes } = rows.find((row) => row.className === "AssignmentStatement")!
     expect(syntaxes.map(({ syntax, example }) => [syntax, example])).toEqual([
-      ["(thing:{expression}|{variable}) = {value:expression}", "unknown-var = yes"],
-      ["let (thing:{expression}|{variable}) = {value:expression}", 'let the name of thing = "bob"'],
-      ["set (thing:{expression}|{variable}) to {value:expression}", "set unknown-var to yes"],
+      ["(thing:{variable}|{expression}) = {value:expression}", "unknown-var = yes"],
+      ["let (thing:{variable}|{expression}) = {value:expression}", 'let the name of thing = "bob"'],
+      ["set (thing:{variable}|{expression}) to {value:expression}", "set unknown-var to yes"],
       ["{thing:variable} is {value:expression}", 'bob is a new person whose name is "bob"']
     ])
   })
@@ -185,7 +185,9 @@ describe("Spanish's spell syntax table, spellSyntax.es.json", () => {
 
   test("a word rule says its Spanish words", () => {
     const row = rows.find((it) => it.className === "Negatable")
-    expect(row?.syntaxes[0]).toEqual({ syntax: "(es|está|esta|(negated:no es|no está|no esta))" })
+    expect(row?.syntaxes[0]).toEqual({
+      syntax: "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
+    })
   })
 
   test("every example compiles, in javascript", () => {

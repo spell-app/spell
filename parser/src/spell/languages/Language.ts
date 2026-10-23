@@ -330,6 +330,19 @@ export type LanguageWords = {
    */
   itWords?: Set<string>
   /**
+   * A verb with `it` fused onto its end, its verb captured, e.g. Spanish's `barajarla` => `barajar` (epic `spanish` J96).
+   * - In a type's outline body, `- para barajarla:` is English's `- to shuffle it:`:  the receiver goes where `it` was.
+   * - None:  the language writes `it` as a word of its own, `subject_it`.
+   */
+  fusedIt?: RegExp
+  /**
+   * A little word and the two it stands for, e.g. Spanish's `{ al: "a el", del: "de el" }` (epic `spanish` J96).
+   * - A method's words and its calls may say either:  `dar la vuelta al mazo` is `dar la vuelta a el mazo`,
+   *   and before an argument, `mover (una carta) a (una pila)` takes `mover la carta al montón`.
+   * - None:  the language has none.
+   */
+  contractions?: Record<string, string>
+  /**
    * The language's words for the built-in types' members, by their English words:  `{ length: ["largo", "longitud"] }`.
    * - Each reads as its English one does (`SP.BUILT_IN_TYPE_TABLE`'s `readAs`).
    * - A `stored` member's compiles to its English name, and sets too:  Spanish's `nombre` is `.name`.

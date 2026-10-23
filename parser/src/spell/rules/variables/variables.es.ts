@@ -12,6 +12,7 @@ import { SpellParser } from "spell-lang/spell/SpellParser"
 
 import { Identifier } from "./Identifier"
 import { KnownVariable } from "./KnownVariable"
+import { ImpliedIt } from "./ImpliedIt"
 import { KnownWordsVariable } from "./KnownWordsVariable"
 import { PluralIdentifier } from "./PluralIdentifier"
 import { SingularIdentifier } from "./SingularIdentifier"
@@ -136,6 +137,34 @@ variablesEs.addRule(KnownWordsVariable, {
         ["la carta de juego", "cartaDeJuego"],
         ["carta de mazo", undefined]
       ]
+    }
+  ]
+})
+
+// `eso` left out before `es` / `está`, as Spanish leaves its subject out:  `si es un trébol` in a card's method
+variablesEs.addRule(ImpliedIt, {
+  syntax:
+    "(es|está|esta|son|están|estan|puede|pueden|no es|no está|no esta|no son|no están|no estan|no puede|no pueden)",
+  tests: [
+    {
+      title: "`eso`, dejado fuera ante `es`:  lo que `eso` sería",
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("it")
+      },
+      tests: [
+        ["está vacío", "core.isEmpty(it)"],
+        ["no es 1", "(it != 1)"],
+        ["es 1 y no está vacío", "(it == 1 && !core.isEmpty(it))"],
+        ["no", "false"],
+        ["vacío", undefined],
+        ["es", undefined]
+      ]
+    },
+    {
+      title: "sin `eso` que leer, nada",
+      compileAs: "expression",
+      tests: [["está vacío", undefined]]
     }
   ]
 })

@@ -45,9 +45,10 @@ export const expressionsEs = new SpellParser({ module: "expressions" })
 // ## Word rules:  Spanish's words for each of English's, under the same names and meanings
 ////////////////
 
-// Every form of `is`, `{is_or_is_not}`:  `no` goes before the verb
+// Every form of `is`, `{is_or_is_not}`:  `no` goes before the verb;
+// and its plural, `son` / `están`, which English's `is` has no need of:  `las cartas están vacías`
 expressionsEs.addRule(Negatable.specialize({ ruleName: "is_or_is_not", alias: "is" }), {
-  syntax: "(es|está|esta|(negated:no es|no está|no esta))"
+  syntax: "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
 })
 
 // `es un`, and the plural's `son unos`, or bare `son`:  `cartas que no son figuras`
@@ -460,17 +461,23 @@ expressionsEs.addRule(ThereIsA, {
 })
 
 expressionsEs.addRule(IsEmpty, {
-  syntax: "{operator:is_or_is_not} (vacío|vacio|vacía|vacia)",
+  // each gender and number:  `el mazo está vacío`, `la pila está vacía`, `las pilas están vacías`
+  syntax: "{operator:is_or_is_not} (vacío|vacio|vacía|vacia|vacíos|vacios|vacías|vacias)",
   tests: [
     {
       compileAs: "expression",
       beforeEach(scope: P.Scope) {
         scope.variables?.add("thing")
+        scope.variables?.add("things")
       },
       tests: [
         ["thing está vacío", "core.isEmpty(thing)"],
         ["thing esta vacia", "core.isEmpty(thing)"],
-        ["thing no está vacío", "!core.isEmpty(thing)"]
+        ["thing no está vacío", "!core.isEmpty(thing)"],
+        ["things están vacíos", "core.isEmpty(things)"],
+        ["things estan vacias", "core.isEmpty(things)"],
+        ["things no están vacías", "!core.isEmpty(things)"],
+        ["things son vacíos", "core.isEmpty(things)"]
       ]
     }
   ]

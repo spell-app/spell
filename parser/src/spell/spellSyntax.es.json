@@ -143,7 +143,7 @@
           "ruleNames": ["number_as_string"],
           "internal": false,
           "file": "src/spell/rules/core/NumberAsString.ts",
-          "line": 9,
+          "line": 13,
           "purpose": "`number` spelled out as a string, `zero` to `ten` -- the language's `VALUE_MAP` does the word-to-number lookup.",
           "syntaxes": [
             {
@@ -350,6 +350,32 @@
                 },
                 "py": {
                   "code": "pila_inicial"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "ImpliedIt",
+          "ruleNames": ["implied_it"],
+          "internal": false,
+          "file": "src/spell/rules/variables/ImpliedIt.ts",
+          "line": 19,
+          "purpose": "`it` LEFT OUT, before `is`, where the language drops its subject (epic `spanish` J96).",
+          "syntaxes": [
+            {
+              "syntax": "(es|está|esta|son|están|estan|puede|pueden|no es|no está|no esta|no son|no están|no estan|no puede|no pueden)",
+              "example": "está vacío",
+              "outputs": {
+                "js": {
+                  "code": "core.isEmpty(it)"
+                },
+                "ts": {
+                  "code": "core.isEmpty(it)"
+                },
+                "py": {
+                  "code": "core.is_empty(it)"
                 }
               }
             }
@@ -1126,7 +1152,7 @@
           "purpose": "`{lhs} is [not] empty` postfix, e.g. `thing is empty`.",
           "syntaxes": [
             {
-              "syntax": "{operator:is_or_is_not} (vacío|vacio|vacía|vacia)",
+              "syntax": "{operator:is_or_is_not} (vacío|vacio|vacía|vacia|vacíos|vacios|vacías|vacias)",
               "example": "thing está vacío",
               "outputs": {
                 "js": {
@@ -1259,7 +1285,7 @@
           "purpose": "A word and its negated forms, e.g. `is_or_is_not`: `(is|(negated:is not|isn't|isnt))`.",
           "syntaxes": [
             {
-              "syntax": "(es|está|esta|(negated:no es|no está|no esta))"
+              "syntax": "(es|está|esta|son|están|estan|(negated:no es|no está|no esta|no son|no están|no estan))"
             },
             {
               "syntax": "(es un|es una|son unos|son unas|son|(negated:no es un|no es una|no son unos|no son unas|no son))"
@@ -1336,6 +1362,7 @@
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
+            "create_method",
             "pause_units",
             "spell_jsx_tag",
             "spell_jsx_attribute"
@@ -1374,6 +1401,9 @@
             },
             {
               "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento))"
+            },
+            {
+              "syntax": "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
             },
             {
               "syntax": "((second:segundo)|(seconds:segundos)|(sec:seg)|(millisecond:milisegundo)|(milliseconds:milisegundos)|(msec:mseg|ms)|(tick:tic)|(ticks:tics))"
@@ -5011,7 +5041,7 @@
           "ruleNames": ["draw_thing"],
           "internal": false,
           "file": "src/spell/rules/draw/DrawThing.ts",
-          "line": 13,
+          "line": 15,
           "purpose": "Draw a single thing, e.g. `draw the card`.",
           "syntaxes": [
             {
@@ -5036,7 +5066,7 @@
                   "code": "core.drawItems(deck)"
                 },
                 "ts": {
-                  "code": "<For each={deck.items}>{(item) => item.draw()}</For>"
+                  "code": "core.drawItems(deck)"
                 },
                 "py": {
                   "code": "core.draw_items(deck)"
@@ -5413,7 +5443,7 @@
           "purpose": "Assignment, via any of 4 equivalent surface forms: `{thing} = {value}`, `let {thing} = {value}`, `set {thing} to {value}`, or `{variable} is {value}`.",
           "syntaxes": [
             {
-              "syntax": "(thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "(thing:{variable}|{expression}) = {value:expression}",
               "example": "unknown-var = sí",
               "outputs": {
                 "js": {
@@ -5428,7 +5458,7 @@
               }
             },
             {
-              "syntax": "sea (thing:{expression}|{variable}) = {value:expression}",
+              "syntax": "sea (thing:{variable}|{expression}) = {value:expression}",
               "example": "sea el name de thing = \"bob\"",
               "outputs": {
                 "js": {
@@ -5443,7 +5473,7 @@
               }
             },
             {
-              "syntax": "(poner|fijar) (thing:{expression}|{variable}) (a|al|en) {value:expression}",
+              "syntax": "(poner|fijar) (thing:{variable}|{expression}) (a|al|en) {value:expression}",
               "example": "poner unknown-var a sí",
               "outputs": {
                 "js": {

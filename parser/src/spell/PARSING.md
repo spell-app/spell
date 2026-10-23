@@ -204,6 +204,15 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - `scope.addRule()` records only the statement rule, so a project's declarations write ONE rule.
     Loading it registers both again.
   - Editors map a twin back with `SpellStatement.statementRuleOf()`.
+- `implied_it` ([ImpliedIt.ts](rules/variables/ImpliedIt.ts)):  `it` LEFT OUT before `is`, where a language drops
+  its subject (epic `spanish` J96).
+  - e.g. Spanish's `si es un trébol` in a card's method, `rojo si es diamantes o corazones` in a suit's getter
+  - An operand taking no tokens, so the verb is its suffix:  `CompoundExpression` takes it only with one after it.
+  - Only where `it` is a variable;  its `syntax` is the words it comes before, none in English.
+  - `Priority.preferred`, so `no es ...` isn't `no` (false) compared with something.
+- A number word is a name where it can't be a number (J96):
+  - the target of `set` / `poner` tries `{variable}` first:  `set three to 3`
+  - a variable of the name in scope wins over the number (`NumberAsString.parse()`)
 - Give-back (`Sequence`, see "Rules and matching") lets a full `{x:expression}` slot before a word work:
   - `remove {thisArg:expression} of {callArgs:expression}`, on `remove the card of the pile`
 - Expecting mode:  out of tokens after the operand or a suffix,
@@ -323,6 +332,8 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
   - several:  `bank account`
   - `a bank account aka account is a thing`:  ONE type, compiled `Bank_Account`, as `bank-account` would be.
   - Afterwards `bank account(s)` and `account(s)` both name it.
+- A name of several words is made singular or plural by its language:  Spanish's only up to a linking word,
+  `pilas de descartes` => `pila de descartes`, in PascalCase too (`PilaDeDescartes`).
 - A DECLARATION's name is [`type_words`](rules/types/TypeWords.ts):  every word up to a blacklisted one or `aka`.
   - Or blacklisted words too, when the whole name runs up to `is` or `aka` (epic `spanish` P14):
     `a card in play is a thing`, `una carta de juego es una cosa`.
@@ -937,6 +948,19 @@ A kind that says so is saved in a file of its own.
   - A list's `- to draw each item:` => `drawEachItem(item) {...}`, the item as `item` or its type's name.
   - English's unquoted `to draw it:` stays `to_do_something`'s, the same `draw()`;
     Spanish's `para dibujarlo:` is this rule's, as the fused `-lo` makes no method name.
+- A method's HOOK, by what its words mean (`MethodDefinition.hookOf()`, epic `spanish` J96):
+  - `draw` (the `draw_method` word rule) or `create` (`create_method`):  what runs as a thing is made.
+  - English's words are the hooks' names already, `- to create it:`;
+    Spanish's `- para crearlo:` and `para crear un mazo:` are `create()` too.
+- `it` FUSED into a Spanish verb (`SP.LanguageWords.fusedIt`):  `- para barajarla:`, `- para voltearla boca arriba:`.
+  - `MethodDefinition.splitFusedIt()` splits the method's FIRST word into the verb and where `it` was,
+    so it reads as English's `- to shuffle it:`:  `barajar {thisArg:expression}?`.
+  - Its receiver is optional, as `subject_implied` leaves out `it`:
+    in the type's own methods, `voltear boca arriba` turns this one.
+- `al` is `a el`, `del` is `de el` (`SP.LanguageWords.contractions`):  a method's words and its calls say either.
+  - Its call syntax takes both (`MethodDefinition.withContractions()`):  `dar la vuelta (al|a el) mazo`,
+    and `(a|al)` before an argument, `mover la carta al montón`.
+  - Its name says the short one (`contractedName()`):  either way of writing it makes one method.
   - ONE drawing per thing:  the front / back sides (`draw_side`) are gone (epic `spanish` P20).
 - A one-line indented body (a `{nested_expression}`) parses in the statement's `nestedScope`.
   - e.g. `return` + markup, or `draw_it`'s
@@ -1028,6 +1052,14 @@ A kind that says so is saved in a file of its own.
       - a one-of-a-kind app, with no article:  `solitaire is an app` (P21)
     - `P.IncrementalProject` and `parseSpellProject()` both do it.
     - An edit which changes WHICH types a file declares re-parses the whole project.
+    - Each file's parser stubs its own, in play (`inPlay()`):  a name is made singular by its own language,
+      and the stub notes it (`P.TypeScope.lang`).
+- A type's name in ANOTHER language's grammar (epic `spanish` J89):  `cards` in a Spanish file, for an English `Card`.
+  - Spanish reads `cards` as one word (`mes`, `as`), so its own singular finds no type.
+  - Then each other language's singular is tried, for a type DECLARED in that language:
+    `SP.typeInItsOwnLanguage()`, `SP.languageOfType()`.
+  - `SpellType` names the type it found, and `singular_type` / `plural_type` / a `where`'s item count as that
+    language does.
   - Then every METHOD they define is made callable ahead of its definition (P22, `parser.stubDeclaredMethods()`).
     - So a line can call a method defined further down, or in a later file:  `play test-card` above `to play a card`.
     - `SpellParser.declaredMethods()` scans for their first lines, without parsing:

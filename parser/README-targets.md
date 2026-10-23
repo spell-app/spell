@@ -158,7 +158,7 @@ Each rule's first test in the [syntax table](src/spell/spellSyntax.json) is writ
 | Spell | JavaScript | TypeScript | Python |
 | --- | --- | --- | --- |
 | `a deck is a list of cards` | `class Deck extends List` | `class Deck extends List<Card>` | `class Deck(List):`, `item_type = Card` |
-| `draw each card in the deck` | `core.drawItems(deck)` | `<For each={deck.items}>{(item) => item.draw()}</For>` | `core.draw_items(deck)` |
+| `draw each card in the deck` | `core.drawItems(deck)` | `core.drawItems(deck)` | `core.draw_items(deck)` |
 | `<a/>` | `h("a")` | `<a />` | `h("a")` |
 
 _TypeScript leaves JavaScript only to type or to draw;  where Python has no word of its own, it calls `core`.
@@ -175,8 +175,9 @@ More rows, JavaScript beside Python:  [README-core](README-core.md#the-typescrip
   (`play(): Promise<boolean | undefined>`).
 - Standard decorators:  `@prop`, `@derived`, `@thing`, and `@drawn` on `draw()`,
   which draws each thing in its own error boundary.
+- Drawing a thing or a list's items is JavaScript's:  `core.drawThing(this.stock)`, `core.drawItems(this)`.
+  So a drawable thing shows as its own element, and a drawable list's items as its children.
 - Real JSX, which Solid's compiler builds, in Solid's shapes where they fit:
-  - `draw cards in it` becomes a `<For>`
   - an `if ... return` chain becomes a `<Show>` or a `<Switch>`
   - any other `to draw` re-runs whole, in its error boundary
 - A type Spell doesn't know is written `any /* spell: type unknown */`, never a bare `any`:

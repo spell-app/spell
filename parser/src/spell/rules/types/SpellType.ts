@@ -69,13 +69,28 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
     // Pick up `type` scope based on canonical, singular type name
-    const scopeType = scope.types?.get(match.value)
+    const scopeType = scope.types?.get(match.value) ?? this.inItsOwnLanguage(scope, match)
     // NOTE: `scopeType.name` is the class name
     //       `scopeType.instanceName` is the instance case name
     if (scopeType && SpellType.isShortName(scopeType, match.value))
       return this.typeMatch(scope, [tokens[0]!], scopeType)
     match.data.scopeType = scopeType ?? NONE
     return match
+  }
+
+  /**
+   * The type `match` names in ANOTHER language's grammar:  `cards` in a Spanish file names `Card`, declared in English.
+   * - See `SP.typeInItsOwnLanguage()` (epic `spanish` J89).
+   * - SIDE EFFECT:  sets `match.value` to the type's name, so what reads it (`NewList`, `CreateListType` ...)
+   *   names that type;  and `data.readIn`, the language, for `inflectingAsRead()`.
+   * - `undefined` if no other language's singular names one.
+   */
+  private inItsOwnLanguage(scope: P.Scope, match: P.MatchFor<this>): P.TypeScope | undefined {
+    const found = SP.typeInItsOwnLanguage(scope, `${match.raw ?? match.value}`)
+    if (!found) return undefined
+    match.value = found.type.name
+    ;(match.data as TypeMatchData).readIn = found.language
+    return found.type
   }
 
   /**
@@ -178,6 +193,14 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     return (match.data as TypeMatchData).numberWord ?? `${match.raw}`
   }
 
+  /**
+   * Run `work` with the inflector of the language `match` was read in:  its type's own, for `cards` in Spanish
+   * (`inItsOwnLanguage()`), else the one in play.  So `singular_type` and `plural_type` count it as written.
+   */
+  static inflectingAsRead<T>(match: P.Match, work: () => T): T {
+    return P.Inflector.using((match.data as TypeMatchData).readIn?.inflector, work)
+  }
+
   /** `words` as one dashed name, e.g. `bank-accounts`:  how `typeCase()` reads a name of several words. */
   static joined(words: P.Token[]): string {
     return words.map((token) => token.value).join("-")
@@ -202,6 +225,8 @@ type TypeMatchData = {
   scopeType?: P.TypeScope | typeof NONE
   /** The word saying whether it names one or several, when not all of it:  see `SpellType.numberWordOf()`. */
   numberWord?: string
+  /** The language whose grammar it was read in, when not the file's:  see `SpellType.inItsOwnLanguage()`. */
+  readIn?: SP.Language
 }
 
 /**
