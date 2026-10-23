@@ -565,13 +565,45 @@ export function liveClient(): void {
     if ((command === "copy" || command === "cut") && !selectedText()) return
     event.preventDefault()
     if (command === "paste") {
-      // it comes back as the extension's `edit` message:  that one is the page's own, never a repeat
-      pastePending = true
-      window.parent.postMessage({ spell: "edit", command: "paste" }, "*")
+      void pasteKey().catch((error) => console.error("spell-server:  paste", error))
       return
     }
     lastKey = { command, at: Date.now() }
     edit(command)
+  }
+
+  /**
+   * Cmd / Ctrl + V in the framed page (`editKey()`):  an IMAGE on the clipboard is pasted as the browser would, a
+   * `paste` event carrying the file on the focused element;  else the text, through the extension.
+   * - why:  `editKey()` takes the key from VS Code, which pastes only text into a view (`DocView.ts` `edit()`), so
+   *   an image never reached the page (a test run's failure screenshot:  epic `epic-engine` I75, Owen 2026-10-22)
+   * - the frame may read the clipboard (`allow="clipboard-read"`);  refused or empty:  the text route, as before
+   */
+  async function pasteKey() {
+    const image = await clipboardImage()
+    if (image) {
+      const data = new DataTransfer()
+      data.items.add(image)
+      const target = document.activeElement ?? document.body
+      target.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }))
+      return
+    }
+    // it comes back as the extension's `edit` message:  that one is the page's own, never a repeat
+    pastePending = true
+    window.parent.postMessage({ spell: "edit", command: "paste" }, "*")
+  }
+
+  /** The clipboard's first image, as a file;  `undefined` with none, or when the page may not read it. */
+  async function clipboardImage(): Promise<File | undefined> {
+    try {
+      for (const item of await navigator.clipboard.read()) {
+        const type = item.types.find((each) => each.startsWith("image/"))
+        if (type) return new File([await item.getType(type)], `pasted.${type.slice(6)}`, { type })
+      }
+    } catch {
+      // no permission, or nothing readable:  the text route
+    }
+    return undefined
   }
 
   /**
