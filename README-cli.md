@@ -553,11 +553,13 @@ each language pack registers every rule again, with its own words.
 
 - It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
   - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
-  - On Solitaire, cold, through `claude -p`:  45 s in all, the names 20 s, the fix-ups 25 s, in 8 calls.
+  - On Solitaire, cold, through `claude -p`:  31-41 s in all, the names 22-31 s, the fix-ups 9-10 s, in 7 or 8 calls.
   - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
     system prompt, which the API caches across the calls.
-  - The model is Opus 5.5 (`opus`) at low effort for the names;  `--model` picks another for every call.
-    Opus 5.5 always thinks a little;  Sonnet 5.5 and Haiku 5.5 through the API don't think at all.
+  - `--effort fast|balanced|best` says how much each pass spends on its answers, `balanced` unless asked;
+    the runner picks a model and how hard it thinks for each pass at each one.
+    - On Solitaire and todos, more thought made no better names, only slower ones, so today `fast` and `balanced`
+      ask the same, and `best` thinks harder only over the fix-ups.
 
 - The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
 - The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-lang:
@@ -576,7 +578,8 @@ each language pack registers every rule again, with its own words.
 | --- | --- |
 | `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
 | `--no-ai` | never asks Claude:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
-| `--model <model>` | asks that Claude model every call, e.g. `sonnet`, `haiku` or `claude-sonnet-5-5`;  `opus`, `sonnet` and `haiku` are the newest of each |
+| `--effort <tier>` | how much every pass spends on its answers:  `fast`, `balanced` (the default) or `best` |
+| `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
 
