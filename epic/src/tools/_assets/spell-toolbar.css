@@ -15,8 +15,9 @@
  * `<epic-page>` reads them too (`--epic-toolbar-*`)
  */
 :root {
-  --spell-rail-bg: var(--ui-brown-background, light-dark(#f7efe2, #2c2152));
-  --spell-rail-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+  /* a theme that gives bars a look of its own (`--ui-bar-background`, `--ui-bar-color`:  fruity's glass) wins over the ivory */
+  --spell-rail-bg: var(--ui-bar-background, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+  --spell-rail-ink: var(--ui-bar-color, var(--ui-brown-text, light-dark(#534323, #eaddc4)));
   --spell-rail-hover: color-mix(in srgb, var(--spell-rail-ink) 9%, var(--spell-rail-bg));
   --spell-rail-selected: color-mix(in srgb, var(--spell-rail-ink) 18%, var(--spell-rail-bg));
   --spell-rail-rule: color-mix(in srgb, var(--spell-rail-ink) 22%, transparent);
@@ -27,8 +28,14 @@
    */
   --spell-head-fill: color-mix(in oklab, var(--spell-rail-bg) 45%, var(--spell-bg));
   --spell-rail-edge: color-mix(in oklab, var(--spell-rail-ink) 22%, var(--spell-rail-bg));
-  /* the ivory over the opaque surface, in case a theme's is see-through:  text scrolls under the stuck bar */
-  --spell-rail-fill: linear-gradient(var(--spell-rail-bg), var(--spell-rail-bg)) var(--ui-surface, Canvas);
+  /*
+   * the ivory over the opaque surface, in case a theme's is see-through:  text scrolls under the stuck bar;  a theme's
+   * own bar look alone, its `--ui-bar-filter` blurring what scrolls under it
+   */
+  --spell-rail-fill: var(
+    --ui-bar-background,
+    linear-gradient(var(--spell-rail-bg), var(--spell-rail-bg)) var(--ui-surface, Canvas)
+  );
 }
 
 /*
@@ -329,6 +336,7 @@ ui-sticky.spell-site-toolbar::part(sticky) {
   box-shadow:
     0 -1px 0 var(--spell-rail-edge),
     0 1px 0 var(--spell-rail-edge);
+  backdrop-filter: var(--ui-bar-filter, none);
 }
 @media (max-width: 991.98px) {
   .spell-site-toolbar > ui-menu.spell-toolbar {

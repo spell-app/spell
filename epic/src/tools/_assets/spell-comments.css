@@ -26,8 +26,9 @@
   --spell-muted: var(--spell-text-muted, var(--ui-text-muted, GrayText));
   --spell-rule: var(--spell-border-subtle, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
   --spell-doc-accent: var(--spell-text-accent, var(--ui-link, LinkText));
-  --spell-rail-bg: var(--ui-brown-background, light-dark(#f7efe2, #2c2152));
-  --spell-rail-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+  /* a theme that gives bars a look of its own (`--ui-bar-background`, `--ui-bar-color`:  fruity's glass) wins over the ivory */
+  --spell-rail-bg: var(--ui-bar-background, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));
+  --spell-rail-ink: var(--ui-bar-color, var(--ui-brown-text, light-dark(#534323, #eaddc4)));
   --spell-rail-hover: color-mix(in srgb, var(--spell-rail-ink) 9%, var(--spell-rail-bg));
   --spell-rail-rule: color-mix(in srgb, var(--spell-rail-ink) 22%, transparent);
 }
