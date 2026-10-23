@@ -540,16 +540,21 @@ each language pack registers every rule again, with its own words.
 
 ### Translating a project
 
-`spell lang translate` writes a project in another language, rule by rule:
-each line is read in its own language, then written again with the same rule's words in the other.
-- The names its people chose (types, properties, methods, values, texts) come from a dictionary beside it,
-  `<Project>.<lang>.names.json5`, for a person to review.
-- A name the dictionary lacks is drafted once by `claude -p`, then saved there.
+`spell lang translate` writes a project in another language, in three passes:
+1. Names:  every name its people chose (types, properties, values, methods, texts, comments), translated by
+   `claude -p` in one batch, so one thing has one word everywhere.
+   Each noun comes with its gender, and each name is checked readable by the other language's grammar first.
+2. Lines:  each line read in its own language, then written again with the same rule's words in the other.
+3. Fix-ups:  the translation is linted and its tests run;
+   each line that fails, couldn't be written, or may read in the wrong order goes back to `claude -p`,
+   in context, a few rounds at most.
+
+- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
 - Its work is spell-app's (it finds the project the app's way), then `spell-lang`'s `translateProject.ts`.
 
 | Command | What it does |
 | --- | --- |
-| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person |
+| `spell lang translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, or a test fails |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -557,17 +562,24 @@ each line is read in its own language, then written again with the same rule's w
 | Option | What it does |
 | --- | --- |
 | `--update` | re-translates only the lines changed since the last run (a hash per line, in `<Project>.<lang>.translated.json5`);  every other line stays as it is, a hand edit too |
-| `--no-ai` | leaves each name the dictionary lacks as `TODO` in it, instead of asking `claude -p` |
+| `--no-ai` | never asks `claude -p`:  each name the dictionary lacks stays `TODO` in it, and no line is fixed up |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead |
 
+- It says how long each pass took, and each `claude -p` call:
+  the names in one, the comments in one per file at the same time, a second for any name it couldn't read,
+  one per round of fix-ups.
 - A line it can't write keeps its English, marked `// TODO: translate (why)`:
   a name still missing, or a rule it can't write in that language yet.
-- Comments go through the dictionary too;  one it lacks stays as it was, and is no TODO.
-- JSX keeps its tags and attributes;  each `{expression}` in it is translated.
-- A text glued from pieces (`its color + " joker"`) keeps its order:
-  a language that says it the other way round (`"comodín " + su color`) needs the dictionary's text to fit,
-  or a person, once:  `--update` keeps their line.
+  The fix-up pass writes it, unless `--no-ai`.
+- A text glued from pieces (`its color + " joker"`) may need its words in another order (`"comodín " + su color`):
+  each such line goes to the fix-up pass even when it lints.
+- Each fix-up is kept in the record, so `--update` writes the same line again without asking;
+  a line kept as it was (a hand edit) is never sent.
+- `<ui-*>` tags, their attributes and values become Spell UI's in that language (`<es-texto color="rojo">`),
+  and a style sheet's selectors with them;  the project's own drawable things follow its types' new names.
+- A project it imports keeps its own words (`increment el contador`):
+  the other language's grammar reads them as the import declares them.
 
 </details>
 
