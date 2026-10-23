@@ -863,6 +863,10 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
 - It works in the epic's checkout, in a window Owen picks, from where the epic page says it stopped.
 - The epic page is the memory:  read it, don't redo it.
 
+0. In ANOTHER epic's window (the prompt hook's note says so;  epic `epic-engine` r15:  "this should open the epic in
+   a new window!"):  never resumed here.
+   - "From another worktree", steps 4-5, with `--prompt "/epic resume <name>"`:  a launch, or a fresh session's move.
+   - Then stop:  the epic's own window resumes it.
 0. Already home:  this window or this session is ALREADY the epic's own (Owen, 2026-10-10):
    - the window:  `epic window which` says `ongoing/<name>.code-workspace` (in `epic config windowsFolder`)
    - or the session:  its folder is `epic worktree path <name>`'s

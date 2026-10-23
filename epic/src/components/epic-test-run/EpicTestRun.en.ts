@@ -47,8 +47,18 @@ export const epicTestRunVocabulary = {
   slots: [],
   parts: [
     { name: "base", description: "The run:  its head, the progress bar, then the card." },
-    { name: "head", description: 'Its head:  "Testing", "4 of 9", and Done testing.' },
-    { name: "progress", description: "The thin bar under the head:  how many tests are answered (`<ui-progress>`)." },
+    {
+      name: "head",
+      description:
+        'Its head:  "Testing", "4 of 9", and Done testing;  with the bar under it, a full-width band, sticky under ' +
+        "the page's header."
+    },
+    {
+      name: "progress",
+      description:
+        'The thin bar under the head:  where the run is, as "4 of 9" says;  how many are answered, its tooltip ' +
+        "(`<ui-progress>`)."
+    },
     { name: "card", description: "The current test's card, or the summary's." },
     {
       name: "answers",
@@ -62,9 +72,11 @@ export const epicTestRunVocabulary = {
     },
     {
       name: "failure",
-      description: "Under the comment once Failed:  the screenshot's paste and drop area."
+      description:
+        "Under the comment on every card:  the screenshot's area (paste, drop or choose one), going with whichever " +
+        "answer is picked;  its part name from when only Failed had it."
     },
-    { name: "moves", description: "Back and Next, at the card's foot." },
+    { name: "moves", description: "Back and Next:  a full-width band of their own, pinned to the window's bottom." },
     {
       name: "summary",
       description: "The summary card:  the counts, the tests commented on, Send results, the next epic."
@@ -153,6 +165,13 @@ export const epicTestRunVocabulary = {
       key: "paste",
       text: "Paste a screenshot (⌘V) or drop one here",
       description: "The failure's screenshot area, empty."
+    },
+    {
+      key: "choose",
+      text: "Choose a file",
+      description:
+        "The empty screenshot area's button:  a file picker.  In VS Code's side bar a file dragged in never reaches " +
+        "the page, so this is the way there besides pasting."
     },
     { key: "saving", text: "Saving the screenshot ...", description: "The screenshot area while it uploads." },
     { key: "tooBig", text: "That screenshot is over 8 MB:  crop it first.", description: "A notice:  too big." },

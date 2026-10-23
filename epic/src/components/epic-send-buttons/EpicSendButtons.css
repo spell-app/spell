@@ -1,11 +1,12 @@
 /*
  * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send and its countdown, ONE pill.
  * - The plane's round end, a hairline, the wand's round end;  each a circle as tall as the pill.
- * - The pill's outline wears the fill rule, from `state` (`templates/epics/plan-doc.md`, "Colours"):  a grey
- *   outline with nothing to send, dashed blue with something not sent, a blue outline once sent.
+ * - The pill's outline:  a grey hairline, and a blue one once sent (`state`);  never dashed (Owen, 2026-10-22:
+ *   "Lose the dotted outline around both").
  * - Countdown off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
- * - The wand blue while countdown mode is on (`:state(countdown)`), grey while off;  while it counts, a blue ring
- *   round it drains (`stroke-dashoffset`, set each second by the element;  eased over the second).
+ * - The wand FILLED light blue, its icon white, while countdown mode is on (`:state(countdown)`);  grey while off.
+ * - While it counts, a very light grey ring round the wand turns blue, clockwise from the top, as the 2 minutes run
+ *   (`stroke-dasharray`, set each second by the element;  eased over the second;  Owen, 2026-10-22).
  * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
  *   - `--epic-send-buttons-size`:  each round end's size.  Default 28px (an epic page's `--epic-control-size`).
  *   - `--epic-send-buttons-rule`:  the grey outline and the hairline.  Default:  Spell UI's border colour.
@@ -35,9 +36,6 @@
     border: 1px solid var(--_rule);
     border-radius: 999px;
   }
-  .group[data-state="unsent"] {
-    border: 1.5px dashed var(--_tint);
-  }
   .group[data-state="sent"] {
     border: 1.5px solid var(--_tint);
   }
@@ -66,10 +64,18 @@
     outline: 2px solid var(--ui-focus-color, var(--_tint));
     outline-offset: 1px;
   }
-  /* the plane wears the group's state;  the wand, the mode */
-  .send:is([data-state="unsent"], [data-state="sent"]),
-  :host(:state(countdown)) .countdown {
+  /* the plane wears the group's state */
+  .send:is([data-state="unsent"], [data-state="sent"]) {
     color: var(--_tint);
+  }
+  /* the wand, the mode:  on, filled light blue, its icon white */
+  :host(:state(countdown)) .countdown {
+    /* see-through, so it reads light blue on a light page and a quieter blue on a dark one;  the icon white on both */
+    background: color-mix(in oklab, var(--_tint) 55%, transparent);
+    color: #fff;
+  }
+  :host(:state(countdown)) .countdown:hover {
+    background: color-mix(in oklab, var(--_tint) 75%, transparent);
   }
   /* countdown off, something not sent:  it waits for a press, plainly */
   :host(:state(waiting)) .send {
@@ -125,17 +131,17 @@
     fill: none;
     stroke-width: 2.5;
   }
+  /* very light grey, turning blue as the countdown runs */
   .ring .track {
-    stroke: color-mix(in oklab, var(--_tint) 18%, transparent);
+    stroke: color-mix(in oklab, var(--_rule) 60%, transparent);
   }
-  .ring .left {
+  .ring .elapsed {
     stroke: var(--_tint);
-    stroke-dasharray: 100;
     stroke-linecap: round;
-    transition: stroke-dashoffset 1s linear;
+    transition: stroke-dasharray 1s linear;
   }
   @media (prefers-reduced-motion: reduce) {
-    .ring .left {
+    .ring .elapsed {
       transition: none;
     }
   }

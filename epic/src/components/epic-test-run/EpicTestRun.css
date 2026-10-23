@@ -9,6 +9,15 @@
  *   its colour once chosen, outlined in it once sent.
  * - The fields' copies keep the page's look for prose:  paragraphs, lists, code, links.
  * - Units:  px and em, never rem (WWOD §18).
+ * - A MODAL's shape (Owen, 2026-10-22:  "the test pages feel like a modal, with the buttons on the bottom whether the
+ *   page needs to scroll or not";  then "the buttons should not be part of the test card but rather pinned to the
+ *   window with no margin around ... the Testing 2 of 6 and done testing + bar underneath should be full width and
+ *   sticky"):
+ *   - the run fills the window below the page's sticky header
+ *   - its head (Testing, where, Done testing, the progress bar):  a full-width band, sticky under the page's header
+ *   - Back and Next:  a full-width band of their own, pinned to the window's bottom, nothing under it
+ *   - the card between them, scrolling under both
+ *   - both bands out to the run's edges (`--epic-inset` back out), their contents in the column
  */
 
 @layer ui.components.epic-test-run;
@@ -33,10 +42,28 @@
     display: block;
     box-sizing: border-box;
     /* the page's column, as its blocks sit:  `--epic-inset` in from the bands' edges */
-    padding: 0 var(--epic-inset, 16px) 24px;
+    padding: 0 var(--epic-inset, 16px);
     color: var(--_run-ink);
     font-size: 16px;
     line-height: 1.5;
+  }
+
+  /* the window below the page's sticky header (the site's header, then the epic's:  `--epic-head-h`, measured) */
+  [part~="base"] {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--spell-site-header-height, 0px) - var(--epic-head-h, 0px));
+  }
+
+  /* ## The head's band:  sticky under the page's header, full width */
+  .top {
+    position: sticky;
+    top: calc(var(--spell-site-header-height, 0px) + var(--epic-head-h, 0px));
+    z-index: 2;
+    margin-inline: calc(-1 * var(--epic-inset, 16px));
+    padding: 0 var(--epic-inset, 16px) 10px;
+    border-block-end: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+    background: var(--epic-bg, var(--ui-background, Canvas));
   }
 
   /* ## The head:  "Testing", "4 of 9", Done testing;  the bar under it */
@@ -62,7 +89,6 @@
   }
   .bar {
     display: block;
-    margin-block-end: 14px;
   }
   .bar::part(progress) {
     margin: 0;
@@ -74,7 +100,7 @@
     display: block;
     box-sizing: border-box;
     min-width: 0;
-    margin: 0;
+    margin: 14px 0;
     padding: 14px 16px 12px;
     border: 1px solid var(--_run-rule);
     border-radius: 12px;
@@ -294,13 +320,25 @@
     margin-inline-start: auto;
   }
 
-  /* ## Back and Next, at the card's foot */
+  /*
+   * ## Back and Next:  a band of their own at the window's bottom
+   * - pushed to the run's foot (it fills the window) and pinned there while the card runs on:  so Next is always in
+   *   the same place, a long test or not
+   * - full width, no margin round it;  the page's ground and a soft shadow above, so what scrolls under it stays
+   *   readable
+   */
   .moves {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 2;
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    padding-block-start: 10px;
+    margin: auto calc(-1 * var(--epic-inset, 16px)) 0;
+    padding: 10px var(--epic-inset, 16px);
     border-block-start: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+    background: var(--epic-bg, var(--ui-background, Canvas));
+    box-shadow: 0 -8px 12px -10px rgb(0 0 0 / 0.3);
   }
 
   /* ## The summary */

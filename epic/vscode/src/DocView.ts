@@ -24,7 +24,8 @@
  *   "Epic Docs" shows the default repo's home page on the epic server, else the window's first folder's;
  *   "Review" a line saying how to fill it.
  * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
- *   then Inspect and Show Console (`openDevTools()`).
+ *   then Inspect (`toggleDevTools()`).
+ *   - the Review tab's:  its epic list right of Home (Owen, 2026-10-22)
  *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
  *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
  * - "Review" has a list button too, "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`):
@@ -59,7 +60,7 @@
  * - NOTE:  the FIRST show in a window opens the side bar with focus on the view:
  *   VS Code has no way to open a view without focusing it.  Later shows keep focus where it is.
  */
-import { spawn } from "child_process"
+import { execFile, spawn } from "child_process"
 import { randomBytes } from "crypto"
 import { existsSync } from "fs"
 import { join } from "path"
@@ -187,7 +188,6 @@ export class DocView implements vscode.WebviewViewProvider {
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.docView.inspect", () => DocView.toggleDevTools()),
-      vscode.commands.registerCommand("spellEpic.docView.showConsole", () => DocView.toggleDevTools()),
       ...MENU.map((item) =>
         vscode.commands.registerCommand(`spellEpic.docMenu.${item}`, (context?: MenuContext) =>
           DocView.withId(context?.webview)?.menuItem(item)
@@ -197,15 +197,18 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The Inspect and Show Console buttons, on both views' title bars:
+   * The Inspect button, on both views' title bars:
    * open the developer tools that hold the page, and close them on the next click
    * (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
    * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):
    *   the window's tools, the same ones "Open Webview Developer Tools" opens in desktop VS Code
    *   (`webviewCommands.ts` calls `nativeHostService.openDevTools()`), but it closes them too
-   * - both open the SAME tools, on the tab last used:  neither command takes a tab or mode
-   *   - so each button's tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab
-   *     and the page's frame (`127.0.0.1`) in its context menu
+   * - the tools open on the tab last used:  the command takes no tab or mode
+   *   - so the tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab and the
+   *     page's frame (`127.0.0.1`) in its context menu
+   * - NOT the page's frame by itself:  VS Code has no way to choose the console's frame, and since webviews became
+   *   plain iframes the tools open at `top` (Owen asked, 2026-10-22).  Show Console, a second button opening the same
+   *   tools, went then
    * - only in desktop VS Code:  elsewhere the command isn't there, and a warning says so
    */
   static async toggleDevTools(): Promise<void> {
@@ -268,15 +271,22 @@ export class DocView implements vscode.WebviewViewProvider {
    * - the view's script catches that call (`html()`) and sends it here
    * - copy / cut:  the page sends back its selection (`{ spell: "clipboard", text }`), which goes on the clipboard here
    *   (the page can't:  copying needs a key press IN it);  cut then deletes it there
-   * - paste:  the clipboard's text, sent in, typed where the caret is
+   * - paste:  the clipboard's IMAGE when it holds one (`clipboardImage()`), which the page pastes as a browser would (a
+   *   test run's failure screenshot:  epic `epic-engine` I75);  else its text, typed where the caret is
    * - select all, undo, redo:  the page does them (`document.execCommand()`)
    * - Not keybindings (P2 tried them):
    *   `focusedView` is never set while focus is in a webview view's page, so they never fired
    */
   async edit({ command }: EditCommand): Promise<void> {
     if (!this.view) return
-    const text = command === "paste" ? await vscode.env.clipboard.readText() : undefined
-    void this.view.webview.postMessage({ spell: "edit", command, ...(text !== undefined && { text }) })
+    const image = command === "paste" ? await clipboardImage() : undefined
+    const text = command === "paste" && !image ? await vscode.env.clipboard.readText() : undefined
+    void this.view.webview.postMessage({
+      spell: "edit",
+      command,
+      ...(text !== undefined && { text }),
+      ...(image && { image })
+    })
   }
 
   /**
@@ -698,3 +708,29 @@ type Clipboard = { spell: "clipboard"; text?: string }
  * the frame's `data-vscode-context` (`rightClick()` in `html()`), and the view's id, `webview`.
  */
 type MenuContext = { webview?: string; spellField?: boolean; spellSelection?: boolean }
+
+/** The most a pasted image may be, as the page's own limit for a screenshot:  8 MB. */
+const IMAGE_MAX_BYTES = 8 * 1024 * 1024
+
+/**
+ * The clipboard's image, as a PNG `data:` URL;  `undefined` with none, or off macOS.
+ * - why:  VS Code's clipboard API is text only, and the page in the view may not read the clipboard itself
+ *   (`navigator.clipboard.read()` is refused there:  epic `epic-engine` I75)
+ * - macOS hands it over through AppleScript:  `the clipboard as «class PNGf»`, printed as `«data PNGf<hex>»`
+ * - NEVER throws:  no image, a failure, or one over `IMAGE_MAX_BYTES`, all `undefined`
+ */
+function clipboardImage(): Promise<string | undefined> {
+  if (process.platform !== "darwin") return Promise.resolve(undefined)
+  const script = ["try", "return the clipboard as «class PNGf»", "on error", 'return ""', "end try"]
+  return new Promise((resolve) => {
+    execFile(
+      "osascript",
+      script.flatMap((line) => ["-e", line]),
+      { maxBuffer: IMAGE_MAX_BYTES * 2 + 1024, encoding: "utf8" },
+      (error, stdout) => {
+        const hex = /«data PNGf([0-9A-F]+)»/i.exec(error ? "" : stdout)?.[1]
+        resolve(hex ? `data:image/png;base64,${Buffer.from(hex, "hex").toString("base64")}` : undefined)
+      }
+    )
+  })
+}

@@ -1043,6 +1043,8 @@ export class PlanDoc extends PlanReader {
    * - his COMMENT (the mark's `note`, any result;  Owen, 2026-10-19:  "it did part of what you asked, I want to
    *   explain how"):  kept on the test as his reply (`keepNote()`, `<epic-reply from="Owen" re="test passed">`);
    *   a failure's in its new issue too, a skip's in the cancel line
+   * - his SCREENSHOT (`shot`, any result since 2026-10-22:  the run takes one on every card):  a failure's in its new
+   *   issue;  any other answer's in that reply, under his words (a reply of the screenshot alone, with none)
    * - dropped (`gone`) when `item` isn't a test;  left for Claude when the result is none of those
    */
   private applyTest(
@@ -1052,7 +1054,10 @@ export class PlanDoc extends PlanReader {
   ): MarkResult {
     const label = item.id.toUpperCase()
     if (kind !== "test") return { applied: false, gone: true, left: `${label} isn't a test:  its answer dropped` }
-    if (note) this.keepNote(item.id, { note, action: TEST_NOTE_AS[result!] ?? "test", at })
+    const replyShot = result === "failed" ? undefined : shot
+    if (note || replyShot) {
+      this.keepNote(item.id, { note: note ?? "", action: TEST_NOTE_AS[result!] ?? "test", at, shot: replyShot })
+    }
     switch (result) {
       case "passed":
         if (item.getAttribute("status") !== "done") this.setItem(item.id, "done")
@@ -1327,7 +1332,7 @@ export class PlanDoc extends PlanReader {
    *   the summary's:  under the summary, `<epic-reply slot="notes">`
    * - an item is stamped (`changed`);  no UPDATE flag:  nothing about the item changed but the record
    */
-  keepNote(id: string, { note, action, when, at }: KeptNote): void {
+  keepNote(id: string, { note, action, when, at, shot }: KeptNote): void {
     const stamp = PlanTime.clockTime(at ? new Date(at) : this.now)
     const how = action === "revisit" ? `revisit ${when === "now" ? "now" : "soon"}` : action
     const part = this.overviewPart(id)
@@ -1335,7 +1340,9 @@ export class PlanDoc extends PlanReader {
     const host = this.reviewPart(id)?.element ?? this.item(id)
     const replies = Array.from(host.querySelectorAll(":scope > epic-reply"))
     if (replies.some(isSame)) return
-    const reply = this.make("epic-reply", { from: "Owen", at: stamp, re: how }, `<p>${PlanMarkup.text(note)}</p>`)
+    const said = note ? `<p>${PlanMarkup.text(note)}</p>` : ""
+    const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="Owen's screenshot"></p>` : ""
+    const reply = this.make("epic-reply", { from: "Owen", at: stamp, re: how }, `${said}${image}`)
     if (host.localName === "epic-summary") reply.setAttribute("slot", NOTES_SLOT)
     const next = replies.find((each) => (each.getAttribute("at") ?? "") >= stamp)
     if (next) next.before(reply)

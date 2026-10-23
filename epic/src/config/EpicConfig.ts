@@ -86,8 +86,14 @@ export class EpicConfig {
     promptAck: true
   }
 
-  /** the voices spell-epic ships, one `<name>.md` each:  its `voices/` folder (epic `readme` P12) */
-  static readonly ENGINE_VOICES = resolve(import.meta.dirname, "../../voices")
+  /**
+   * the voices spell-epic ships, one `<name>.md` each:  its `voices/` folder (epic `readme` P12)
+   * - worked out when read:  the VS Code extension's bundle has no `import.meta.dirname`, and a constant
+   *   computed as the class loads stopped it starting (epic `epic-engine` I76)
+   */
+  static get ENGINE_VOICES(): string {
+    return resolve(import.meta.dirname ?? ".", "../../voices")
+  }
 
   /**
    * where the window files were before epic `epic-eject` P13, from the main checkout:

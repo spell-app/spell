@@ -213,14 +213,14 @@ describe("<epic-test-run>", () => {
     expect(location.hash).toBe("#v3")
   })
 
-  test("P / S / N answer and move on;  each a test mark, dashed until sent;  the bar counts them", async () => {
+  test("P / S / N answer and move on;  each a test mark, dashed until sent;  the bar follows where the run is", async () => {
     await adoptClient(routes)
     const host = await render()
     await key(host, "p")
     expect(routes.inbox.marks.v1).toMatchObject({ action: "test", result: "passed" })
     await afterAnswer(host)
     expect(card(host).id).toBe("V2")
-    expect(runOf(host)!.querySelector("ui-progress")!.getAttribute("value")).toBe("1")
+    expect(runOf(host)!.querySelector("ui-progress")!.getAttribute("value")).toBe("2")
     await key(host, "s")
     await afterAnswer(host)
     await key(host, "n")
@@ -286,6 +286,23 @@ describe("<epic-test-run>", () => {
     expect(routes.inbox.marks.v1).toMatchObject({ note: "Still cut short" })
     await settle(host)
     expect(runOf(host)!.querySelector(".drop ui-button.shot img")).not.toBeNull()
+  })
+
+  // Owen, 2026-10-22:  "you lost the picture input" -- it had shown only once Failed was pressed
+  test("the screenshot's area on EVERY card:  one pasted before an answer goes with it, Passed too", async () => {
+    await adoptClient(routes)
+    const host = await render()
+    expect(runOf(host)!.querySelector(".drop")).not.toBeNull()
+    const data = new DataTransfer()
+    data.items.add(new File([new Uint8Array([137, 80, 78, 71])], "shot.png", { type: "image/png" }))
+    document.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true }))
+    await vi.waitFor(() => expect(routes.posts.some(([route]) => route === "shot")).toBe(true))
+    await settle(host)
+    expect(routes.inbox.marks.v1).toBeUndefined()
+    answer(host, "passed").click()
+    await vi.waitFor(() =>
+      expect(routes.inbox.marks.v1).toMatchObject({ result: "passed", shot: "tests/v1-20261019-1432.png" })
+    )
   })
 
   test("a COMMENT on every card:  a draft before an answer, then with whichever answer;  the summary lists it", async () => {

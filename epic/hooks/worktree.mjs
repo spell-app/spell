@@ -92,7 +92,7 @@
  * - Then removes the worktree's saved-session link, if it IS a link to the main checkout's folder.
  */
 import { execFileSync, spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
+import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { CheckoutPatches } from "spell-epic/command/CheckoutPatches.ts"
@@ -127,6 +127,24 @@ class Worktree {
     return dirname(Worktree.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"))
   }
 
+  /**
+   * Whether `path` holds a live checkout to reuse:  its `.git` there, and, for a worktree's `.git` FILE, the git folder
+   * it names there too.
+   * - throws for a DEAD one (epic `epic-engine` r15):  a folder left from a removed worktree, its git folder gone;
+   *   reused, it would make a broken worktree.  Never deleted here:  it may hold work.
+   */
+  static isLive(path) {
+    const dotGit = join(path, ".git")
+    if (!existsSync(dotGit)) return false
+    if (lstatSync(dotGit).isDirectory()) return true
+    const gitdir = /^gitdir:\s*(.+)$/m.exec(readFileSync(dotGit, "utf8"))?.[1]?.trim()
+    if (gitdir && existsSync(resolve(path, gitdir))) return true
+    throw new Error(
+      `${path} is left from a removed worktree (its git folder ${gitdir ?? "?"} is gone):  ` +
+        `move it aside or delete it, then try again`
+    )
+  }
+
   /** Whether `branch` exists. */
   static hasBranch(root, branch) {
     try {
@@ -157,7 +175,7 @@ class Worktree {
     if (config.top) return Worktree.createAll(name, config.top)
     // where it is (either place), else the new place
     const path = config.worktreeFolder(name)
-    if (existsSync(join(path, ".git"))) {
+    if (Worktree.isLive(path)) {
       console.error(`worktree hook:  reusing ${path}`)
       return path
     }
@@ -188,7 +206,7 @@ class Worktree {
     const checkouts = top.repoCheckouts(name)
     const made = []
     for (const { repo, main, worktree } of checkouts) {
-      if (existsSync(join(worktree, ".git"))) {
+      if (Worktree.isLive(worktree)) {
         console.error(`worktree hook:  reusing ${worktree}`)
         continue
       }

@@ -178,17 +178,17 @@ Two quirks you'll meet in the first minute:
 
 ### The buttons
 
-Both title bars carry the same row, and Review adds a list button at its front:
+Both title bars carry the same row, and Review adds a list button right of Home:
 
 | Button | What it does |
 | --- | --- |
-| Review:  Open Epic... | lists every epic page of every registered repo, and of the window's first folder, newest first, by title;  the one you pick opens in Review, in any window.  No terminal, no Claude:  it's how you review on a plane |
 | Back, Forward | the page's own history.  The view can't read a frame from another origin, so the page reports where it is;  a page from no page server never does, and both stay off |
 | Reload | the page again, in the same frame |
 | Home Page | a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
+| Review:  Open Epic... | lists every epic page of every registered repo, and of the window's first folder, newest first, by title;  the one you pick opens in Review, in any window.  No terminal, no Claude:  it's how you review on a plane |
 | Restart Page Server | stops and starts the server behind the page, then shows the page again, on its new port if it moved |
 | Open in Browser | the page, in your default browser |
-| Inspect, Show Console | VS Code's Developer Tools, which hold the page;  a second click closes them.  Both open the same tools, so each tooltip says what to pick next:  Cmd + Shift + C for the element picker, or the Console tab and the page's frame (`127.0.0.1`) in the menu at its top left.  Desktop VS Code only |
+| Inspect | VS Code's Developer Tools, which hold the page;  a second click closes them.  The tooltip says what to pick next:  Cmd + Shift + C for the element picker, or the Console tab and the page's frame (`127.0.0.1`) in the menu at its top left;  VS Code can't choose the frame itself.  Desktop VS Code only |
 
 ### When a page misbehaves
 

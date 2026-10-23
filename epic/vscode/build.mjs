@@ -6,8 +6,11 @@
  * - Every repo's files by their package names (`spell-kit/server`, `spell-epic/server/RepoList`;  epic `repo-split`
  *   P14), found as their source files by the kit's `sourceNames()`:  esbuild alone finds neither a name without its extension
  *   nor a folder's `index.ts`.
+ * - Then the bundle is LOADED once, `vscode` stubbed (`loadOnce()`):  a crash as it loads fails the build, here,
+ *   rather than leaving every window's extension dead (epic `epic-engine` I76)
  */
 import { build } from "esbuild"
+import Module, { createRequire } from "node:module"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -32,3 +35,24 @@ await build({
   logOverride: { "empty-import-meta": "silent" },
   logLevel: "info"
 })
+
+await loadOnce(resolve(here, "out/extension.js"))
+
+/**
+ * Load the built extension as VS Code would, `require()` with `vscode` a stub, and throw what it throws.
+ * - catches what runs as a file loads:  a class's static fields, top-level constants
+ *   (`EpicConfig.ENGINE_VOICES` read `import.meta.dirname`, empty in this CommonJS bundle:  every window's extension
+ *   failed to start)
+ * - the stub answers every property with itself, so loading never touches a real VS Code;  `activate()` isn't run
+ */
+async function loadOnce(file) {
+  const stub = new Proxy(function vscode() {}, { get: (_target, key) => (key === "then" ? undefined : stub) })
+  const load = Module._load
+  Module._load = (request, ...rest) => (request === "vscode" ? stub : load(request, ...rest))
+  try {
+    createRequire(file)(file)
+  } finally {
+    Module._load = load
+  }
+  console.log("  loaded once:  no error as it loads")
+}
