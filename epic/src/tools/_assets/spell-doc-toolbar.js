@@ -103,16 +103,19 @@ function titleWithKey(title, letter) {
  *   page's, marks only, every item the same width
  * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
  *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-toolbar.css`)
+ * - `segmented`:  the toolbar under a page's tabs (Spell UI's components pages) is a SEGMENTED menu, as the tabs are:
+ *   the same pills, and the same sliding key as the section read changes (Owen, 2026-10-23:  "Secondary tabs need to
+ *   be pills like top tabs")
  * - the current item scrolled into view, on a row scrolled sideways (`scrollIntoRow()`)
  * - SIDE EFFECT:  removes the toolbar built before (`removeToolbar()`), keeping what was added to its row
  */
-export function toolbarMenu(items, { titled }) {
+export function toolbarMenu(items, { titled, segmented = false }) {
   const kept = removeToolbar()
   // a titled toolbar is Spell UI's `<ui-toolbar>` where the page has it:  `‹` / `›` buttons while its items overflow
   const tag = titled && customElements.get("ui-toolbar") ? "ui-toolbar" : "ui-menu"
   const toolbar = el(tag, {
-    class: titled ? "spell-toolbar spell-toolbar-titled" : "spell-toolbar",
-    secondary: true,
+    class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"].filter(Boolean).join(" "),
+    ...(segmented ? { appearance: "segmented" } : { secondary: true }),
     "aria-label": "Sections",
     "data-spell-added": true
   })

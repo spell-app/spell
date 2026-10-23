@@ -90,14 +90,14 @@
   --ui-menu-secondary-active-background: var(--ui-bar-active-background, var(--spell-rail-selected));
   --ui-menu-active-shadow: var(--ui-bar-active-shadow, none);
 }
-:is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+:is(ui-menu, ui-toolbar).spell-toolbar-titled:not(.spell-toolbar-segmented)::part(menu) {
   width: var(--ui-bar-track-width, auto);
   max-width: 100%;
   box-sizing: border-box;
   background: var(--ui-bar-track, none);
   border-radius: var(--ui-bar-track-radius, 0);
 }
-:is(ui-menu, ui-toolbar).spell-toolbar::part(menu) {
+:is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-segmented)::part(menu) {
   display: flex;
   gap: 1px;
   min-height: 0;
@@ -218,7 +218,7 @@
 /* ## A titled toolbar's buttons (a guide's, Epic UI's):  each its mark and its title */
 /* the first button's mark lines up with the column's text (a button's own padding:  7px) */
 /* a theme's track (`--ui-bar-tracked: 1`):  it sits in the column, inside the band, a little padding round the keys */
-:is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+:is(ui-menu, ui-toolbar).spell-toolbar-titled:not(.spell-toolbar-segmented)::part(menu) {
   margin: calc(5px * var(--ui-bar-tracked, 0)) calc(var(--_out, 16px) * var(--ui-bar-tracked, 0));
   padding: var(--ui-bar-track-padding, 3px calc(var(--_out, 16px) - 7px));
 }
@@ -286,6 +286,10 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   text-align: center;
 }
 .spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item > b.spell-toolbar-letter {
+  display: none;
+}
+/* its icon box too, while the letter mark is all it would hold:  else the title sits off centre in its button */
+.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item:has(> b.spell-toolbar-letter)::part(icon) {
   display: none;
 }
 .spell-toolbar > ui-item > b[slot="icon"] {
@@ -430,17 +434,37 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   margin-inline: calc(-1 * var(--site-tabs-band, 8px));
   padding: var(--site-tabs-band, 8px);
   border-radius: var(--site-panel-radius, 18px);
-  background: var(--ui-bar-background, var(--spell-rail-fill));
-  backdrop-filter: var(--ui-bar-filter, none);
-  /*
-   * ONE panel, no seam (Owen:  "doesn't look like one bar (notches)"):  two copies of this box, moved up by all and by
-   * half of the tabs' track and band (`--site-tabs-track`, measured by `SiteSections`), so its colour reaches up
-   * behind the tabs;  the copies overlap past the corners, so no corner shows where they meet
-   */
+  /* the panel is drawn behind it (`::before`), so this box only places the track */
   --_panel-up: calc(var(--site-tabs-track, 34px) + var(--site-tabs-band, 8px));
-  box-shadow:
-    0 calc(-1 * var(--_panel-up)) 0 0 var(--ui-bar-background, var(--spell-rail-bg)),
-    0 calc(-0.5 * var(--_panel-up)) 0 0 var(--ui-bar-background, var(--spell-rail-bg));
+}
+/*
+ * ONE panel (Owen:  "doesn't look like one bar (notches)";  "make tab surround 50% opaque"):  a box of its own behind
+ * the toolbar, reaching up behind the tabs (`--site-tabs-track`, measured by `SiteSections`);  a theme's panel glass
+ * (`--ui-bar-panel-background`), blurring what's behind it
+ */
+ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--_panel-up)) 0 0;
+  z-index: -1;
+  border-radius: var(--site-panel-radius, 18px);
+  background: var(--ui-bar-panel-background, var(--ui-bar-background, var(--spell-rail-fill)));
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+/*
+ * while the tabs are stuck (`main.site-tabs-stuck`, set by the site;  through a pane's end too, as the panel leaves), a
+ * STRIP behind the panel, out to the column's edges and over the gaps above and below it, in the stuck
+ * titles' colour (Owen:  "Don't show content underneath tabs when scrolling up"):  the page scrolling under it never
+ * shows round the floating panel
+ */
+.site-tabs-stuck ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * (var(--_panel-up) + var(--site-tabs-gap, 10px)))
+    calc(var(--site-tabs-band, 8px) - var(--site-gutter, 3em)) calc(-1 * var(--site-tabs-gap, 10px));
+  z-index: -2;
+  background: var(--ui-section-sticky-background, var(--ui-bar-background, var(--spell-rail-fill)));
+  backdrop-filter: var(--ui-bar-filter, none);
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: 0px;
