@@ -316,6 +316,15 @@
     [part~="demo"]::part(segment) {
       overflow-x: auto;
     }
+    /*
+     * ... but not for a few px:  an example drawn a pixel or two past its box (a fluid tabular menu is 2px wider, so
+     * its tabs' borders meet) scrolled sideways for nothing (Owen, 2026-10-23:  "this has slight horizontal scroll,
+     * doesn't need it");  a little padding, out into the frame's own, takes it in
+     */
+    :host(:not(:state(code-shown))) .ui.example:not(.bare) [part~="demo"]::part(segment) {
+      margin-inline: -8px;
+      padding-inline: 8px;
+    }
   }
 }
 

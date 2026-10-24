@@ -690,12 +690,22 @@
     margin-inline: calc(-1 * var(--site-gutter));
     padding-inline: var(--site-gutter);
     padding-block: 0.4em;
-    background-color: var(--ui-section-sticky-background);
+    /*
+     * stuck:  a theme's wallpaper, fixed as the page's is, under its white tint (`--ui-bar-wallpaper`,
+     * `--ui-bar-wallpaper-tint`):  the bar reads as the page, the tint it has in place, but hides what scrolls under it
+     * (Owen, 2026-10-23:  stuck titles as solid white bars "look bad");  else the stuck titles' colour
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-section-sticky-background));
+    background-image:
+      linear-gradient(var(--ui-bar-wallpaper-tint, transparent), var(--ui-bar-wallpaper-tint, transparent)),
+      var(--ui-bar-wallpaper, none);
+    background-attachment: scroll, fixed;
     backdrop-filter: var(--ui-bar-filter, none);
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
     background-color: var(--ui-bar-rest-background, transparent);
+    background-image: none;
     backdrop-filter: var(--ui-bar-rest-filter, none);
   }
   /*
