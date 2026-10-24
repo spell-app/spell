@@ -409,8 +409,10 @@ With `--review`, a person reviews the names before any line is written with them
 After the names pass a page opens in the editor's side bar, a row per name Claude drafted:
 accept it, type over it, or pick one of the alternatives Claude gave, and tick a name "for every project"
 to put it in the shared glossary.
+Each answer is used as you give it, and one Spell can't read says why on its row straight away.
 After Send, the lines are written with the answers, each kept in the dictionary as reviewed;
-without an answer in time (30 minutes, `--review-timeout`), Claude's names stand.
+with no Send in time (30 minutes, `--review-timeout`), the answers given by then count and Claude's names stand for the rest.
+The page also shows each pass as it runs, and picks the effort for the next one.
 
 - Every option, and what it leaves for a person:
   [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project).

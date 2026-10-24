@@ -171,9 +171,13 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--review",
       "between the names and the lines, show the names it drafted on a page in the Review tab:  accept, type or pick " +
-        "each, tick it for every project, then Send;  the lines use your answers"
+        "each (used as you give it), tick it for every project, then Send;  the lines use your answers.  " +
+        "The page shows each pass, and picks the effort for the next"
     )
-    .option("--review-timeout <time>", "how long --review waits for Send:  minutes, or 90s, 10m, 1h -- default 30")
+    .option(
+      "--review-timeout <time>",
+      "how long --review takes answers before going on without Send:  minutes, or 90s, 10m, 1h -- default 30"
+    )
     .option(
       "--cold",
       "for timing:  nothing pre-calculated -- no shared glossary, no dictionary of the project's, no record, no seed -- " +

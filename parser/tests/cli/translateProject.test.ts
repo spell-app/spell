@@ -373,13 +373,13 @@ describe("--out keeps what it writes (J186)", () => {
   })
 })
 
-describe("--review:  a person reviews the names drafted, between the names and the lines (P31)", () => {
+describe("--review:  a person reviews the names drafted, between the names and the lines (P31, P32)", () => {
   test("accepted, typed, picked and ticked:  the dictionary, the glossary and the lines use them", async () => {
-    const review = fakeReview(() => ({
-      "types:card": { outcome: "accepted", value: "carta", ticked: true },
-      "names:label": { outcome: "picked", value: "rótulo" },
-      "texts:red joker": { outcome: "typed", value: "comodín colorado" }
-    }))
+    const review = fakeRun([
+      answer("types:card", "accepted", "carta", true),
+      answer("names:label", "picked", "rótulo"),
+      answer("texts:red joker", "typed", "comodín colorado")
+    ])
     const claude = fakeClaude()
     await translate(source(), { to: "es", out: join(folder, "Cartas"), review: true }, claude.run, false, review.open)
     // the names pass asked for alternatives, in the same calls
@@ -387,8 +387,12 @@ describe("--review:  a person reviews the names drafted, between the names and t
     expect(claude.prompts[1]).toContain("`alternatives`")
     // one run, a row per name drafted, before any line was written
     expect(review.opened).toHaveLength(1)
-    expect(review.opened[0]).toMatchObject({ title: "Names for Cards, in Spanish", answerLabel: "Spanish" })
-    const label = review.rounds[0]!.find((row) => row.id === "names:label")!
+    expect(review.opened[0]).toMatchObject({
+      title: "Names for Cards, in Spanish",
+      answerLabel: "Spanish",
+      effort: { choices: ["fast", "balanced", "best"], initial: "balanced" }
+    })
+    const label = review.rows.find((row) => row.id === "names:label")!
     expect(label).toMatchObject({
       value: "etiqueta",
       alternatives: ["rótulo", "leyenda"],
@@ -396,7 +400,9 @@ describe("--review:  a person reviews the names drafted, between the names and t
       cells: { english: "label", kind: "name", from: "Claude", gender: "feminine" }
     })
     expect(label.cells.lines).toBe('Card.spell:3  - its "label" is its color + " joker"')
-    expect(review.rounds[0]!.find((row) => row.id === "texts:red joker")!.tick).toBeUndefined()
+    expect(review.rows.find((row) => row.id === "texts:red joker")!.tick).toBeUndefined()
+    // each answer taken as it came
+    expect(review.taken).toEqual(["types:card", "names:label", "texts:red joker"])
     expect(review.finished).toEqual(["done"])
     // the dictionary:  the answers, marked reviewed;  the rest as drafted
     const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
@@ -414,11 +420,18 @@ describe("--review:  a person reviews the names drafted, between the names and t
     )
   })
 
-  test("an answer spell can't read comes back as a row of its own, saying why;  a readable one then goes in", async () => {
-    // the second round's row has an id of its own
-    const review = fakeReview((round) =>
-      round === 1 ? { "names:label": typed("carta") } : { "names:label~2": typed("rótulo") }
-    )
+  test("an answer spell can't read:  its row says why at once, before Send;  the person's next one goes in", async () => {
+    const review = fakeRun([
+      answer("names:label", "typed", "carta"),
+      // the page shows the row saying why, while the command still listens:  he types another
+      (rows) => {
+        expect(rows.find((row) => row.id === "names:label")).toMatchObject({
+          value: "etiqueta",
+          cells: { from: "not readable:  `carta`:  that's `card` already -- one word, one thing" }
+        })
+        return answer("names:label", "typed", "rótulo")
+      }
+    ])
     await translate(
       source(),
       { to: "es", out: join(folder, "Cartas"), review: true },
@@ -426,20 +439,55 @@ describe("--review:  a person reviews the names drafted, between the names and t
       false,
       review.open
     )
-    expect(review.rounds).toHaveLength(2)
-    expect(review.rounds[1]).toEqual([
-      expect.objectContaining({
-        id: "names:label~2",
-        value: "etiqueta",
-        details: expect.arrayContaining(["Not readable:  `carta`:  that's `card` already -- one word, one thing"])
-      })
-    ])
+    // one row id throughout;  taken only once readable;  shown as asked again
+    expect(review.taken).toEqual(["names:label"])
+    expect(review.rows.find((row) => row.id === "names:label")!.cells.from).toBe("Claude")
+    expect(review.progress).toContain("can't read `carta`:  that's `card` already -- one word, one thing:  try another")
     const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
     expect(names.names?.label).toBe("rótulo")
+    expect(names.reviewed).toEqual({ names: ["label"] })
   })
 
-  test("no Send in time:  every proposal kept, as drafted, and the report says so", async () => {
-    const review = fakeReview(() => ({ "names:label": { outcome: "typed", value: "rótulo" } }), { timedOut: true })
+  test("an answer still unreadable at Send:  kept as drafted, and noted", async () => {
+    const review = fakeRun([answer("names:label", "typed", "carta")])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    expect(review.taken).toEqual([])
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("etiqueta")
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  0 accepted, 0 typed, 0 picked, 7 left as drafted, 1 still unreadable, kept as drafted"
+    )
+  })
+
+  test("an answer changed after it was taken:  the new one, checked again;  cleared, the proposal again", async () => {
+    const review = fakeRun([
+      answer("names:label", "typed", "rótulo"),
+      answer("names:color", "typed", "tono"),
+      answer("names:label", "picked", "leyenda"),
+      answer("names:color", "typed", "")
+    ])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    expect(review.taken).toEqual(["names:label", "names:color", "names:label"])
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("leyenda")
+    expect(names.names?.color).toBe("color")
+    expect(names.reviewed).toEqual({ names: ["label"] })
+  })
+
+  test("no Send in time (J187):  the answers given by then count, the rest stay as drafted;  the run ends timed-out", async () => {
+    const review = fakeRun([answer("names:label", "typed", "rótulo")], { end: "timed-out" })
     await translate(
       source(),
       { to: "es", out: join(folder, "Cartas"), review: true },
@@ -448,20 +496,84 @@ describe("--review:  a person reviews the names drafted, between the names and t
       review.open
     )
     const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
-    expect(names.names?.label).toBe("etiqueta")
-    expect(names.reviewed).toBeUndefined()
+    expect(names.names?.label).toBe("rótulo")
+    expect(names.names?.color).toBe("color")
+    expect(names.reviewed).toEqual({ names: ["label"] })
+    expect(written()[6]).toMatch(/^\tsu rótulo /)
+    expect(review.finished).toEqual(["timed-out"])
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  no Send in time:  0 accepted, 1 typed, 0 picked, 7 left as drafted"
+    )
+  })
+
+  test("the passes on the page, in order;  the effort picked there takes at the next pass", async () => {
+    const asked: string[] = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      asked.push(`${kindOf(prompt)} ${options?.tier}`)
+      return claude.run(prompt, options)
+    }
+    // he switches to best while answering:  the names pass ran already, the fix-ups take it
+    const review = fakeRun([{ effort: "best" }, answer("names:label", "typed", "rótulo")])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true, effort: "fast" },
+      run,
+      false,
+      review.open
+    )
+    expect(review.opened[0]!.effort).toMatchObject({ initial: "fast" })
+    expect(asked).toEqual(["types fast", "names fast", "fix-ups best"])
+    expect(review.passes).toEqual([
+      "start names at fast, total 8",
+      "update names, done 1, calls 1",
+      "update names, done 8, calls 2",
+      "end names, calls 2",
+      "start lines at best, total 8",
+      "end lines, done 8",
+      "start fix-ups at best",
+      "update fix-ups, done 0, total 2, calls 0",
+      "update fix-ups, done 1, total 2, calls 1",
+      "update fix-ups, done 1, total 2, calls 1",
+      "end fix-ups",
+      "finish done"
+    ])
+  })
+
+  test("a pass's own flag wins over the page's effort, and the page says so", async () => {
+    const asked: string[] = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      asked.push(`${kindOf(prompt)} ${options?.tier}`)
+      return claude.run(prompt, options)
+    }
+    const review = fakeRun([{ effort: "fast" }])
+    const options = { to: "es", out: join(folder, "Cartas"), review: true, namesEffort: "best", fixUpsEffort: "best" }
+    await translate(source(), options, run, false, review.open)
+    expect(review.opened[0]!.effort).toMatchObject({ initial: "balanced" })
+    expect(asked).toEqual(["types best", "names best", "fix-ups best"])
+    expect(review.passes).toContain("start names at best, total 8")
+    expect(review.passes).toContain("start fix-ups at best")
+    expect(review.progress).toContain("names:  at best, by --names-effort, not the page's balanced")
+    expect(review.progress).toContain("fix-ups:  at best, by --fix-ups-effort, not the page's fast")
+  })
+
+  test("a run that fails ends stopped, and the error goes on", async () => {
+    const review = fakeRun([])
+    const failing = { ...source(), checker: () => () => Promise.reject(new Error("the checker broke")) }
+    const options = { to: "es", out: join(folder, "Cartas"), review: true }
+    await expect(translate(failing, options, fakeClaude().run, false, review.open)).rejects.toThrow("the checker broke")
     expect(review.finished).toEqual(["stopped"])
-    expect(printed()).toContain("  review:  /runs/test/:  no Send in time:  kept the names as drafted")
   })
 
   test("--no-ai:  the names still missing, to type;  a type's gender after it", async () => {
-    const review = fakeReview(() => ({ "types:card": { outcome: "typed", value: "naipe (m)" } }))
+    const review = fakeRun([answer("types:card", "typed", "naipe (m)")])
     const claude = fakeClaude()
     const options = { to: "es", out: join(folder, "Cartas"), review: true, ai: false }
     // no checker:  the fake one reads the file as `Carta`
     await translate({ ...source(), checker: undefined }, options, claude.run, false, review.open)
     expect(claude.prompts).toEqual([])
-    const card = review.rounds[0]!.find((row) => row.id === "types:card")!
+    const card = review.rows.find((row) => row.id === "types:card")!
     expect(card).toMatchObject({ value: "", cells: { from: "missing (--no-ai)" } })
     expect(card.alternatives).toBeUndefined()
     const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
@@ -470,7 +582,7 @@ describe("--review:  a person reviews the names drafted, between the names and t
   })
 
   test("without --review no run opens, and nothing asks for alternatives;  --cold refuses it", async () => {
-    const review = fakeReview(() => ({}))
+    const review = fakeRun([])
     const claude = fakeClaude()
     await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run, false, review.open)
     expect(review.opened).toEqual([])
@@ -499,42 +611,79 @@ function translate(
   return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5"), openRun })
 }
 
-/** A typed answer, `value`. */
-function typed(value: string): Omit<SRV.RunAnswer, "at"> {
-  return { outcome: "typed", value }
+/** One step of a fake run:  a row's answer, given;  or the effort picked on the page. */
+type RunStep = SRV.RunRowAnswer | { effort: string }
+
+/** `rowId`'s answer, given now. */
+function answer(rowId: string, outcome: SRV.RunOutcome, value: string, ticked?: boolean): SRV.RunRowAnswer {
+  return { rowId, answer: { outcome, value, ...(ticked ? { ticked } : {}), at: new Date().toISOString() } }
 }
 
 /**
- * A fake review run (`--review`), for `translate()`'s `openRun`:  each wait answers what `answers(round)` gives,
- * from round 1, sent at once -- or, with `timedOut`, unsent.
- * - It keeps what it was opened with, each round's rows, and how it finished.
+ * A fake steered run (`--review`), for `translate()`'s `openRun`:  its answers come one at a time
+ * (`answersAsTheyCome()`), each of `steps` in turn -- a step, or a function of the rows the page shows NOW giving one,
+ * so a test can answer what it sees;  then they end as `end` says (Send, by default).
+ * - Its effort:  the one it was opened with, until a step picks another.
+ * - It keeps what it was opened with, its rows as shown now, rows taken, progress lines, passes and how it finished.
  */
-function fakeReview(
-  answers: (round: number) => Partial<Record<string, Omit<SRV.RunAnswer, "at">>>,
-  { timedOut = false } = {}
+function fakeRun(
+  steps: Array<RunStep | ((rows: SRV.RunRow[]) => RunStep)>,
+  { end = "sent" }: { end?: SRV.RunAnswersEnd } = {}
 ) {
   const opened: SRV.RunOpenProps[] = []
-  const rounds: SRV.RunRow[][] = []
+  const taken: string[] = []
+  const progress: string[] = []
+  const passes: string[] = []
   const finished: string[] = []
-  let rows: SRV.RunRow[] = []
+  const shown = { rows: [] as SRV.RunRow[] }
+  let picked: string | undefined
+  let pass = ""
+  const facts = (said: SRV.RunPassStart = {}) =>
+    (["done", "total", "calls"] as const)
+      .flatMap((key) => (said[key] === undefined ? [] : [`, ${key} ${said[key]}`]))
+      .join("")
   const open: ReviewRunOpener = (props) => {
     opened.push(props)
     return {
       show: () => Promise.resolve("/runs/test/"),
-      progress: () => {},
-      setRows: (given) => (rows = given),
-      wait: () => {
-        rounds.push(rows)
-        const at = new Date().toISOString()
-        const given = Object.entries(answers(rounds.length)).flatMap(([id, answer]) =>
-          answer ? [[id, { ...answer, at }]] : []
-        )
-        return Promise.resolve({ rows: Object.fromEntries(given), ...(timedOut ? {} : { sent: at }), timedOut })
+      progress: (text) => progress.push(text),
+      setRows: (rows) => (shown.rows = rows),
+      async *answersAsTheyCome() {
+        for (const each of steps) {
+          await Promise.resolve()
+          const step = typeof each === "function" ? each(shown.rows) : each
+          if ("effort" in step) picked = step.effort
+          else yield step
+        }
+        return end
       },
-      finish: (status = "done") => finished.push(status)
+      take: (...rowIds) => taken.push(...rowIds),
+      get effort() {
+        return picked ?? props.effort?.initial
+      },
+      startPass: (name, said = {}) => {
+        pass = name
+        passes.push(`start ${name} at ${said.effort ?? picked ?? props.effort?.initial}${facts(said)}`)
+      },
+      updatePass: (said) => passes.push(`update ${pass}${facts(said)}`),
+      endPass: (said) => passes.push(`end ${pass}${facts(said)}`),
+      finish: (status = "done") => {
+        passes.push(`finish ${status}`)
+        finished.push(status)
+      }
     }
   }
-  return { open, opened, rounds, finished }
+  return {
+    open,
+    opened,
+    taken,
+    progress,
+    passes,
+    finished,
+    get rows() {
+      return shown.rows
+    }
+  }
 }
 
 /** The translation's file in `out`, parsed in a project of its own. */

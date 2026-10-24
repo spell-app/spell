@@ -52,6 +52,11 @@ export class NamesPass {
   readonly notes: string[] = []
   /** Whether each call asks for alternatives too:  see `alternativesFor()`. */
   readonly askAlternatives: boolean
+  /**
+   * Called as each call returns, side by side ones too:  its stage, and how many names it asked for.
+   * - for a page's status card (`spell translate --review`, epic `spanish` P32)
+   */
+  readonly onAnswer?: (call: { stage: NamesStage; asked: number }) => void
   /** The alternatives each answer gave, by `<kind>:<words>`, readable ones only:  see `alternativesFor()`. */
   private readonly alternatives = new Map<string, Array<string | TranslatedType>>()
 
@@ -63,7 +68,8 @@ export class NamesPass {
     words,
     glossary,
     shared,
-    alternatives = false
+    alternatives = false,
+    onAnswer
   }: {
     names: TranslationNames
     run: ClaudeRunner
@@ -73,6 +79,7 @@ export class NamesPass {
     glossary?: string
     shared?: NamesData
     alternatives?: boolean
+    onAnswer?: NamesPass["onAnswer"]
   }) {
     this.names = names
     this.run = run
@@ -82,6 +89,7 @@ export class NamesPass {
     this.glossary = glossary
     this.shared = shared
     this.askAlternatives = alternatives
+    this.onAnswer = onAnswer
   }
 
   /**
@@ -354,6 +362,7 @@ export class NamesPass {
       return {}
     } finally {
       this.calls.push({ stage, ms: performance.now() - started })
+      this.onAnswer?.({ stage, asked: wanted.length })
     }
     const parsed = jsonIn(answer) as
       | (Omit<NamesData, "genders"> & { genders?: unknown; alternatives?: Record<string, Record<string, unknown>> })

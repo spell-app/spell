@@ -8,15 +8,19 @@ import type { MissingName, NamesKind, SourceFile, TranslatedType } from "spell-p
 
 /****************
  * ### `NamesReview`
- * `spell translate --review` (epic `spanish` P31):  the names a translation drafted, shown to a person on a page
+ * `spell translate --review` (epic `spanish` P31, P32):  the names a translation drafted, shown to a person on a page
  * before any line is written with them -- a COMMAND RUN (the kit's `SRV.CommandRun`), in the Review tab.
- * - `open()`, before the names pass:  the page, its progress lines while Claude drafts
- * - `review()`, after it:  a row per name drafted (not the glossary's, not the dictionary's), then waits for Send;
- *   each answer goes into the dictionary, marked reviewed, so `--update` never asks again
- *   - accepted:  the proposal, as it was;  typed or picked:  checked readable first, as a drafted name is
- *     (`NamesPass.problemWith()`), and one that isn't comes back as a row of its own, a second round, saying why
+ * - `open()`, before the names pass:  the page, with the effort picker (`--effort`'s tiers)
+ * - `review()`, after it:  a row per name drafted (not the glossary's, not the dictionary's), then each answer AS
+ *   IT'S GIVEN (`answersAsTheyCome()`), until Send or `--review-timeout`;  each answer goes into the dictionary,
+ *   marked reviewed, so `--update` never asks again
+ *   - accepted:  the proposal, as it was;  typed or picked:  checked readable at once, as a drafted name is
+ *     (`NamesPass.problemWith()`);  one that isn't, its row says why straight away, for a person to try again
+ *   - a good one is TAKEN (`take()`):  the page marks it;  changed again, it's checked again
  *   - ticked "for every project":  into `ticked`, for the command to add to the shared glossary
- *   - no Send in time:  every proposal kept, as drafted, and the report says so
+ *   - no Send in time:  the answers given so far count (J187), the rest stay as drafted
+ * - The run stays open through the lines and the fix-ups:  the command shows its passes there, reads the effort
+ *   picked before each, and finishes it (`finish()`) when it's done.
  * - With `--no-ai`, its rows are the names still missing, to type:  no proposal, no alternatives.
  * - Knows nothing of files:  the command reads and writes the dictionary and the glossary.
  * - Its run comes from `opener`, injected:  the kit's `CommandRun.open()` (`openCommandRun()`), a test's fake.
@@ -37,10 +41,12 @@ export class NamesReview {
   readonly projectName: string
   /** The command, as a person would type it, for the page. */
   readonly command: string
-  /** How long to wait for Send, each round, ms. */
+  /** How long to listen for answers, until Send, ms. */
   readonly timeoutMs: number
   /** Whether Claude drafted the names (`false`:  `--no-ai`, every row typed). */
   readonly ai: boolean
+  /** The efforts the page offers, and the one it starts at (`--effort`). */
+  readonly effort: SRV.RunEffortChoice
   /** The names a person ticked "for every project", readable:  the command adds them to the shared glossary. */
   readonly ticked: MissingName[] = []
   /** How it went, for the report:  see `ReviewOutcome`. */
@@ -49,6 +55,8 @@ export class NamesReview {
   run?: ReviewRun
   /** Where its page is:  its URL, else its path. */
   where?: string
+  /** The rows asked, by row id, as `review()` shows them. */
+  private readonly asked = new Map<string, AskedRow>()
 
   constructor(props: NamesReviewProps) {
     this.names = props.names
@@ -60,6 +68,7 @@ export class NamesReview {
     this.command = props.command
     this.timeoutMs = props.timeoutMs
     this.ai = props.ai
+    this.effort = props.effort
   }
 
   /**
@@ -74,14 +83,16 @@ export class NamesReview {
       command: this.command,
       title: `Names for ${this.projectName}, in ${to.name}`,
       description: this.ai
-        ? `Each name Claude drafted:  accept it, type over it, or pick another.  ` +
+        ? `Each name Claude drafted:  accept it, type over it, or pick another;  each is used as you give it.  ` +
           `Tick "${TICK_LABEL}" to put it in the ${to.name} glossary.  ` +
-          `Then Send:  the lines are written with your names, and --update never asks again.`
+          `Then Send:  the lines are written with your names, and --update never asks again.  ` +
+          `The effort takes at the next pass.`
         : `Each name the dictionary lacks (--no-ai):  type it, or leave it TODO.  ` +
           `Tick "${TICK_LABEL}" to put it in the ${to.name} glossary.  Then Send.`,
       columns: COLUMNS,
       answerLabel: to.name,
-      rows: []
+      rows: [],
+      effort: this.effort
     })
     this.where = await this.run.show()
     this.run.progress(this.ai ? `names:  asking Claude for ${asking}` : `names:  ${asking} missing (--no-ai)`)
@@ -89,46 +100,58 @@ export class NamesReview {
   }
 
   /**
-   * Show `wanted` (the names this run asked for) as rows, wait for Send, and put the answers in the dictionary:
-   * see the class docstring.
+   * Show `wanted` (the names this run asked for) as rows, and take each answer as it comes, until Send or the time
+   * limit:  see the class docstring.
    * - `drafting`:  how long the names pass took, ms, for its progress line
-   * - SIDE EFFECT:  changes `names`, `ticked`, `outcome`;  finishes the run
+   * - leaves the run OPEN:  the command shows its next passes there, and finishes it
+   * - SIDE EFFECT:  changes `names`, `ticked`, `outcome`
    */
   async review(wanted: MissingName[], drafting: number): Promise<this> {
     const run = this.run!
-    const rows = wanted.filter(({ kind }) => kind !== "genders").map((name) => this.rowFor(name))
+    for (const name of wanted.filter(({ kind }) => kind !== "genders")) {
+      const { row } = this.rowFor(name)
+      this.asked.set(row.id, { name, row, original: this.entryOf(name) })
+    }
+    const rows = [...this.asked.values()]
     const drafted = rows.filter(({ row }) => row.value).length
-    run.setRows(rows.map(({ row }) => row))
+    this.showRows()
     run.progress(
       this.ai
         ? `names:  ${drafted} drafted in ${seconds(drafting)};  your turn:  accept, type or pick, then Send`
         : `names:  ${rows.length} to type, then Send`
     )
-    let round = rows
-    for (let second = false; round.length; second = true) {
-      run.progress(`waiting for Send, until ${clockTime(Date.now() + this.timeoutMs)}`)
-      const answers = await run.wait({ timeoutMs: this.timeoutMs })
-      if (answers.timedOut) {
-        this.outcome.timedOut = true
-        this.outcome.untouched += round.length
-        run.progress(`no Send in time:  kept ${this.ai ? "every name as drafted" : "every name TODO"}`)
-        run.finish("stopped")
-        return this
-      }
-      const again = this.apply(round, answers.rows)
-      if (!again.length) break
-      if (second) {
-        for (const { name, why } of again) this.outcome.unreadable.push(`\`${name.words}\`:  ${why}`)
-        break
-      }
-      round = again.map(({ name, why }) => this.rowFor(name, why))
-      run.setRows(round.map(({ row }) => row))
-      run.progress(`${again.length} answers spell can't read:  try them again, then Send`)
+    run.progress(`each answer is used as you give it;  Send by ${clockTime(Date.now() + this.timeoutMs)} to go on`)
+    const answers = run.answersAsTheyCome({ timeoutMs: this.timeoutMs })
+    let next = await answers.next()
+    while (!next.done) {
+      this.take(next.value)
+      next = await answers.next()
     }
-    const { accepted, typed, picked } = this.outcome
-    run.progress(`names:  ${accepted} accepted, ${typed} typed, ${picked} picked;  writing the lines`)
-    run.finish("done")
+    this.settle(next.value)
+    const { accepted, typed, picked, timedOut } = this.outcome
+    run.progress(
+      `${timedOut ? "no Send in time:  " : ""}names:  ${accepted} accepted, ${typed} typed, ${picked} picked;  ` +
+        "writing the lines"
+    )
     return this
+  }
+
+  /**
+   * Until the returned undo is called:  on Ctrl-C (`SIGINT`) or `SIGTERM`, finish the run `stopped`, so its page
+   * says so, and exit (130, or 143).
+   * - SIDE EFFECT:  process signal listeners
+   */
+  finishOnInterrupt(): () => void {
+    const onSignal = (signal: NodeJS.Signals) => {
+      this.run?.finish("stopped")
+      process.exit(signal === "SIGINT" ? 130 : 143)
+    }
+    process.once("SIGINT", onSignal)
+    process.once("SIGTERM", onSignal)
+    return () => {
+      process.off("SIGINT", onSignal)
+      process.off("SIGTERM", onSignal)
+    }
   }
 
   ////////////////
@@ -138,7 +161,7 @@ export class NamesReview {
   /**
    * `name`'s row:  its English, gender, kind, where it came from, the first line it's in;  its proposal, the
    * alternatives Claude gave, a tick for a name the glossary can hold.
-   * - `why`:  a second round's, why the answer given can't be read;  its row id is the first's, `~2`
+   * - `why`:  why the answer given can't be read, shown on the row while it stands;  its id is the same
    */
   rowFor(name: MissingName, why?: string): ReviewRow {
     const proposal = this.valueOf(name)
@@ -148,7 +171,7 @@ export class NamesReview {
       .filter((each) => each !== proposal)
     const lines = this.linesWith(name)
     const row: SRV.RunRow = {
-      id: `${name.kind}:${name.words}${why ? "~2" : ""}`,
+      id: `${name.kind}:${name.words}`,
       cells: {
         english: name.words,
         gender: this.genderOf(name, proposal) ?? "",
@@ -206,37 +229,78 @@ export class NamesReview {
   ////////////////
 
   /**
-   * Put each answer of `round` into the dictionary:  the ones it can't read, and why, to ask again.
-   * - no answer:  the proposal stays, as drafted
-   * - `accepted`:  the proposal, marked reviewed
-   * - `typed`, `picked`:  checked readable (`problemWith()`), then set and marked reviewed
-   * - ticked:  into `ticked`, once its value is readable
+   * Take one answer, as it's given:  into the dictionary at once, or, when spell can't read it, its row saying why.
+   * - empty, or `TODO`:  the proposal again, as drafted
+   * - `accepted`:  the proposal
+   * - `typed`, `picked`:  checked readable (`problemWith()`), then set;  the row is marked taken (`take()`)
+   * - given again (changed):  the one before undone first, then this one taken the same way
+   * - a row this review didn't ask:  left alone
+   * - SIDE EFFECT:  changes `names`;  `setRows()` when a row's problem comes or goes
    */
-  private apply(round: ReviewRow[], answers: Record<string, SRV.RunAnswer>): Array<{ name: MissingName; why: string }> {
-    const again: Array<{ name: MissingName; why: string }> = []
-    for (const { name, row } of round) {
-      const answer = answers[row.id]
-      const value = answer?.value.trim()
-      if (!answer || !value || value === TranslationNames.TODO) {
-        this.outcome.untouched++
+  private take({ rowId, answer }: SRV.RunRowAnswer): void {
+    const asked = this.asked.get(rowId)
+    if (!asked) return
+    const { name, row } = asked
+    this.restore(asked)
+    asked.taken = undefined
+    const value = answer.value.trim()
+    if (!value || value === TranslationNames.TODO) return this.showProblem(asked, undefined)
+    if (answer.outcome === "accepted" && value === row.value) {
+      asked.taken = { outcome: "accepted", ticked: !!answer.ticked }
+    } else {
+      const typed = this.answerFor(name, value, row.value)
+      const why = this.problemWith(name, typed)
+      if (why) return this.showProblem(asked, `\`${value}\`:  ${why}`)
+      this.names.add(name.kind, name.words, typed)
+      asked.taken = { outcome: answer.outcome === "picked" ? "picked" : "typed", ticked: !!answer.ticked }
+    }
+    this.showProblem(asked, undefined)
+    this.run!.take(rowId)
+  }
+
+  /**
+   * Once the answers stop coming (`end`):  each taken one marked reviewed, and counted;  ticked ones into `ticked`;
+   * each still unreadable noted, kept as drafted.
+   * - no Send (`timed-out`, or the run finished meanwhile):  `outcome.timedOut`, the answers taken still count
+   */
+  private settle(end: SRV.RunAnswersEnd): void {
+    this.outcome.timedOut = end !== "sent"
+    for (const { name, taken, problem } of this.asked.values()) {
+      if (problem) this.outcome.unreadable.push(`\`${name.words}\`:  ${problem}`)
+      if (!taken) {
+        if (!problem) this.outcome.untouched++
         continue
       }
-      if (answer.outcome === "accepted" && value === row.value) {
-        this.outcome.accepted++
-      } else {
-        const typed = this.answerFor(name, value, row.value)
-        const why = this.problemWith(name, typed)
-        if (why) {
-          again.push({ name, why: `\`${value}\`:  ${why}` })
-          continue
-        }
-        this.names.add(name.kind, name.words, typed)
-        this.outcome[answer.outcome === "picked" ? "picked" : "typed"]++
-      }
+      this.outcome[taken.outcome]++
       this.names.markReviewed(name)
-      if (answer.ticked && TICKABLE.includes(name.kind)) this.ticked.push(name)
+      if (taken.ticked && TICKABLE.includes(name.kind)) this.ticked.push(name)
     }
-    return again
+  }
+
+  /** Show `asked`'s row saying why its answer can't be read, or as asked (`why` undefined), when that changed. */
+  private showProblem(asked: AskedRow, why: string | undefined): void {
+    if (asked.problem === why) return
+    asked.problem = why
+    asked.shown = why ? this.rowFor(asked.name, why).row : undefined
+    this.showRows()
+    if (why) this.run!.progress(`can't read ${why}:  try another`)
+  }
+
+  /** The rows, each as asked, or saying why its answer can't be read.  SIDE EFFECT:  `setRows()`. */
+  private showRows(): void {
+    this.run!.setRows([...this.asked.values()].map(({ row, shown }) => shown ?? row))
+  }
+
+  /** `name`'s entry in the dictionary now:  a type's `{ name, gender }`, or text;  `undefined` for none. */
+  private entryOf({ kind, words }: MissingName): string | TranslatedType | undefined {
+    const entry = (this.names.data[kind] as Record<string, string | TranslatedType | undefined>)[words]
+    return typeof entry === "object" ? { ...entry } : entry
+  }
+
+  /** Put `asked`'s name back as drafted, undoing an answer taken before.  SIDE EFFECT:  changes `names`. */
+  private restore({ name, original }: AskedRow): void {
+    if (original !== undefined) this.names.add(name.kind, name.words, original)
+    else delete (this.names.data[name.kind] as Record<string, unknown>)[name.words]
   }
 
   /**
@@ -278,11 +342,13 @@ export class NamesReview {
   // ## Reporting
   ////////////////
 
-  /** How it went, a line for the report:  `review:  3 accepted, 1 typed, ...` */
+  /**
+   * How it went, a line for the report:  `review:  3 accepted, 1 typed, ...`;
+   * `review:  no Send in time:  0 accepted, 1 typed, ...` when time ran out, the answers taken by then counted.
+   */
   get summary(): string {
     const { accepted, typed, picked, untouched, timedOut, unreadable } = this.outcome
-    const where = this.where ? `${this.where}:  ` : ""
-    if (timedOut) return `review:  ${where}no Send in time:  kept the names as ${this.ai ? "drafted" : "they were"}`
+    const where = `${this.where ? `${this.where}:  ` : ""}${timedOut ? "no Send in time:  " : ""}`
     const parts = [`${accepted} accepted`, `${typed} typed`, `${picked} picked`]
     if (this.ticked.length) parts.push(`${this.ticked.length} for every project`)
     if (untouched) parts.push(`${untouched} left as ${this.ai ? "drafted" : "they were"}`)
@@ -294,12 +360,12 @@ export class NamesReview {
 /** `new NamesReview()`'s props:  see its fields. */
 export type NamesReviewProps = Pick<
   NamesReview,
-  "names" | "pass" | "files" | "opener" | "root" | "projectName" | "command" | "timeoutMs" | "ai"
+  "names" | "pass" | "files" | "opener" | "root" | "projectName" | "command" | "timeoutMs" | "ai" | "effort"
 >
 
 /**
  * How a review went:  how many rows were accepted, typed, picked or left alone (`untouched`);
- * whether time ran out;  each answer still unreadable after the second round, and why.
+ * whether time ran out (no Send:  the answers taken still count);  each answer still unreadable at the end, and why.
  */
 export type ReviewOutcome = {
   accepted: number
@@ -313,7 +379,21 @@ export type ReviewOutcome = {
 /** One row, and the name it's for. */
 type ReviewRow = { name: MissingName; row: SRV.RunRow }
 
-/** What a review needs of a command run:  the kit's `CommandRun` has it all, a test's fake too. */
+/**
+ * A row `review()` asks:  its name, its row as asked, and its dictionary entry as drafted (`original`, to undo an
+ * answer by);  the answer taken, if one is;  why the one given can't be read, and its row saying so, while it stands.
+ */
+type AskedRow = ReviewRow & {
+  original: string | TranslatedType | undefined
+  taken?: { outcome: "accepted" | "typed" | "picked"; ticked: boolean }
+  problem?: string
+  shown?: SRV.RunRow
+}
+
+/**
+ * What a review needs of a command run:  the kit's `CommandRun` has it all, a test's fake too.
+ * - The command uses the rest (P32):  the passes, the effort picked, `finish()`.
+ */
 export type ReviewRun = {
   /** show the page:  where it is, its URL or its path */
   show(): Promise<string>
@@ -321,10 +401,20 @@ export type ReviewRun = {
   progress(text: string): unknown
   /** replace the rows:  answers are kept by row id */
   setRows(rows: SRV.RunRow[]): unknown
-  /** wait for Send, or the time limit */
-  wait(props: SRV.RunWaitProps): Promise<SRV.RunWaitResult>
-  /** end the run:  `done`, or `stopped` */
-  finish(status?: "done" | "stopped"): unknown
+  /** each row's answer as it's given, until Send, the time limit or `finish()`:  its return value says which */
+  answersAsTheyCome(props: SRV.RunAnswersProps): AsyncGenerator<SRV.RunRowAnswer, SRV.RunAnswersEnd>
+  /** mark rows taken:  the page shows them so */
+  take(...rowIds: string[]): unknown
+  /** the effort picked on the page now, else the one it opened with */
+  readonly effort: string | undefined
+  /** start a pass on the page's status card;  `effort`:  the one it runs at, when it isn't the page's */
+  startPass(name: string, facts?: SRV.RunPassStart): unknown
+  /** how far the current pass has got */
+  updatePass(facts: SRV.RunPassFacts): unknown
+  /** end the current pass */
+  endPass(facts?: SRV.RunPassFacts): unknown
+  /** end the run:  `done`, `stopped` or `timed-out` */
+  finish(status?: Exclude<SRV.RunStatus, "open">): unknown
 }
 
 /** Opens a review's run:  the kit's `CommandRun.open()` (`openCommandRun()`), or a test's fake. */
@@ -359,7 +449,7 @@ export function reviewTimeoutMs(timeout: string | undefined): number {
   return Number(amount) * UNIT_MS[unit]!
 }
 
-/** How long a review waits for Send, each round, by default:  30 minutes. */
+/** How long a review takes answers before going on without Send, by default:  30 minutes. */
 const DEFAULT_TIMEOUT_MS = 30 * 60_000
 
 /** `--review-timeout`'s units, in ms. */
