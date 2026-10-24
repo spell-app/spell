@@ -53,6 +53,12 @@
     display: grid;
     grid-template-columns: var(--site-nav-width) minmax(0, 1fr) var(--site-aside-width);
     align-items: start;
+    /*
+     * how far a section title runs past the page column:  across the gap to the side columns' cards, touching them
+     * (under a card, it showed through its glass)
+     */
+    --_site-band-start: var(--site-nav-margin);
+    --_site-band-end: var(--site-nav-margin);
   }
   /* the page column:  its `main` (the content box, then the router's include), then the footer */
   .site-page {
@@ -66,6 +72,8 @@
   .site-nav {
     position: sticky;
     top: var(--site-top);
+    /* over the section titles, which run out under it to the page's edge */
+    z-index: calc(var(--ui-z-sticky) + 1);
     box-sizing: border-box;
     height: calc(100dvh - var(--site-top));
     padding: var(--site-nav-margin);
@@ -113,7 +121,7 @@
     background-color: var(--ui-bar-wallpaper-color, var(--ui-bar-background, var(--ui-background)));
     background-image: var(--ui-bar-wallpaper, none);
     background-attachment: fixed;
-    backdrop-filter: var(--ui-bar-filter, none);
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
     border-block-end: 1px solid var(--ui-border-color);
   }
   /* the bar's box fills the bar, its slots in one row */
@@ -462,13 +470,21 @@
   .site-main > .site-masthead::part(segment) {
     position: sticky;
     top: var(--site-top);
+    /*
+     * its fill out to the side columns' cards, as the section titles' (`--_site-band-start` / `-end`):
+     * transparent borders the background shows under, a negative margin keeping its words where they were
+     */
+    margin-inline: calc(-1 * var(--_site-band-start)) calc(-1 * var(--_site-band-end));
+    border-inline-style: solid;
+    border-inline-color: transparent;
+    border-inline-width: var(--_site-band-start) var(--_site-band-end);
     /* over the sticky tabs (+2) and titles;  under the top bar's flyout and menus */
     z-index: calc(var(--ui-z-sticky) + 3);
     /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`);  else the bar's glass */
     background-color: var(--ui-bar-wallpaper-color, var(--ui-bar-background, var(--ui-background)));
     background-image: var(--ui-bar-wallpaper, none);
     background-attachment: fixed;
-    backdrop-filter: var(--ui-bar-filter, none);
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
   }
   @supports (animation-timeline: scroll()) {
     .site-masthead::part(segment) {
@@ -632,13 +648,26 @@
    */
   .site-aside {
     position: sticky;
-    top: var(--site-top);
+    top: calc(var(--site-top) + var(--site-nav-margin));
+    z-index: calc(var(--ui-z-sticky) + 1);
     box-sizing: border-box;
-    max-height: calc(100dvh - var(--site-top));
+    height: calc(100dvh - var(--site-top) - 2 * var(--site-nav-margin));
+    margin: var(--site-nav-margin);
     overflow-y: auto;
     overscroll-behavior: contain;
-    /* clear of the content's title bands, which run out to the column's edge */
-    padding: 1.5em 1.5em 2em 16px;
+    padding: 1.25em 1.25em 2em;
+    /*
+     * a card, as the nav column's panel is (Owen:  "This sidebar should look like the one on the left"):
+     * the panel's own tokens, with its defaults (`UIDocsNav.css`)
+     */
+    background: var(--ui-docs-nav-background, light-dark(#fffdf8, var(--ui-surface)));
+    border: 1px solid
+      var(
+        --ui-docs-nav-border-color,
+        light-dark(color-mix(in oklab, var(--ui-brown-background), var(--ui-brown) 9%), var(--ui-border-color))
+      );
+    border-radius: var(--ui-docs-nav-radius, var(--ui-radius-l));
+    box-shadow: var(--ui-docs-nav-shadow, var(--ui-shadow-raised));
   }
   /*
    * its site links:  ONE row that scrolls with `‹` / `›`, as the top bar's
@@ -706,10 +735,11 @@
    *   - a stuck title:  `--ui-bar-title-background` (fruity's 75%)
    *   - in place:  `--ui-bar-rest-background` (50%)
    *   - the panel:  `--ui-bar-panel-background` (50%)
-   *   - behind them:  `--ui-bar-filter` / `--ui-bar-rest-filter`
+   *   - behind them:  `--ui-bar-filter` / `--ui-bar-rest-filter`;  none over a theme's wallpaper
+   *     (`--ui-bar-wallpaper-filter`):  a blur's saturation there drew a second, deeper gradient, seams at its ends
    * - While the panel is stuck, a strip in the stuck titles' colour fills round it (spell-toolbar.css),
    *   so nothing scrolling under shows in its gaps.
-   * - Section titles reach the column's edges (the gutter), their text where it was.
+   * - Section titles reach the side columns' cards, their text where it was (`--_site-band-start` / `-end`).
    * - `.site-sections-probe`:  resolves `--site-top` to pixels for `SiteSections` (a `calc()` stays text otherwise).
    */
   .site-main {
@@ -749,8 +779,13 @@
    *   the switch was between two different properties' values, and never eased
    */
   .site-main ui-section[sticky]::part(title) {
-    margin-inline: calc(-1 * var(--site-gutter));
-    padding-inline: var(--site-gutter);
+    /*
+     * out to the side columns' cards, the page's full width;  the title's words stay where they were
+     * (Owen:  "Headers should go the full width of the page, leaving the content where it is")
+     */
+    margin-inline: calc(-1 * (var(--site-gutter) + var(--_site-band-start)))
+      calc(-1 * (var(--site-gutter) + var(--_site-band-end)));
+    padding-inline: calc(var(--site-gutter) + var(--_site-band-start)) calc(var(--site-gutter) + var(--_site-band-end));
     padding-block: 0.4em;
     /*
      * stuck:  a theme's wallpaper, fixed as the page's is, under its white tint
@@ -763,13 +798,13 @@
       linear-gradient(var(--ui-bar-wallpaper-tint, transparent), var(--ui-bar-wallpaper-tint, transparent)),
       var(--ui-bar-wallpaper, none);
     background-attachment: scroll, fixed;
-    backdrop-filter: var(--ui-bar-filter, none);
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
     background-color: var(--ui-bar-rest-background, transparent);
     background-image: none;
-    backdrop-filter: var(--ui-bar-rest-filter, none);
+    backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
   }
   /*
    * a section's first nested title sits right under its own, open:  no gap
@@ -892,6 +927,7 @@
     }
     .site-layout {
       grid-template-columns: var(--site-nav-width) minmax(0, 1fr);
+      --_site-band-end: 0px;
     }
     .site-aside {
       display: none;
@@ -902,6 +938,7 @@
   @media not (--ui-computer) {
     .site-layout {
       grid-template-columns: minmax(0, 1fr);
+      --_site-band-start: 0px;
     }
     .site-nav {
       display: none;

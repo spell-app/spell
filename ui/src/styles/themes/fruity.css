@@ -451,8 +451,12 @@
   .ui.inverted.segment:not(.basic) {
     background-color: rgb(28 26 36 / 0.9);
   }
-  /* the docs' side column, docked or in its flyout (page only:  the panel is the element's own box) */
-  ui-docs-nav {
+  /*
+   * the docs' side column in its flyout, over the page (page only:  the panel is the element's own box)
+   * - NOT docked:  there it sits on the smooth wallpaper, and the blur's saturation drew a second, deeper gradient
+   *   under it, a seam at its edges (Owen:  "I'm seeing lines in the gradients")
+   */
+  ui-flyout ui-docs-nav {
     backdrop-filter: var(--fruity-blur);
   }
   /* a flyout blurs the page it covers, as a modal does */
