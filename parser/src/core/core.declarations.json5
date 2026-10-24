@@ -1339,7 +1339,7 @@
           "name": "before"
         }
       ],
-      "description": "Move `items` into `list` before `before`, at its end with none:  a page reordering a list as people drag (epic `outline-spell` P30) -- see `List.moveBefore()`."
+      "description": "Move `items` into `list` before `before`, at its end with none -- see `List.moveBefore()`."
     },
     {
       "kind": "method",

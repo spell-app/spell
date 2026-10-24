@@ -37,7 +37,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell translate` (epic `spanish` P24-P27) is half and half:
+- `spell translate` (epic `spanish` P24-P29) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation

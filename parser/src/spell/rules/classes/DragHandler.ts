@@ -8,8 +8,8 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
 import { type MethodBody } from "./classes.shared"
 
 /**
- * `drag_handler` rule:  what a list does as a thing is dragged over it, out of it, or dropped on it, on the page
- * (epic `outline-spell` P28).
+ * `drag_handler` rule:  what a list does on the page as a thing is dragged over it, out of it, or dropped on it.
+ * - Epic `outline-spell` P28.
  *
  * ```spell
  * a "pile" is a drawable list of cards where:
@@ -25,13 +25,13 @@ import { type MethodBody } from "./classes.shared"
  * - Typed by its words:  it runs only when the thing dragged is that type, a sub-type's too (a joker is a card),
  *   so inside it `the card` is a card -- no checking it by hand.
  * - `something` for any thing:  `when something is dropped on it:`, the thing as `the thing`.
- *   A typed handler runs instead, when the thing's type has one.
+ *   - A typed handler runs instead, when the thing's type has one.
  * - `it` / `its` are the list, as in any of its type's methods.
  * - They react, they never decide:  whether the list takes a drop is its own rule, `can take a card if: ...`,
- *   which also lights its glow.  `dragged over` runs for a list that can be dropped on, whether it takes the thing
- *   or not.
- * - `dropped on it` runs only for a drop the list takes;  the program's `<thing>-drop` event is sent only when no
- *   such handler is.
+ *   which also lights its glow.
+ *   - `dragged over` runs for a list that can be dropped on, whether it takes the thing or not.
+ *   - `dropped on it` runs only for a drop the list takes.
+ *   - The program's `<thing>-drop` event is sent only when the list has no `dropped on it`.
  * - Only in a type's outline body:  the list is the subject.
  * - Spanish:  `cuando una carta se arrastra sobre ella:`, `... se arrastra fuera de ella:`, `... se suelta sobre ella:`.
  * - Compiles to a method of the list's class, named for the item's type and the moment, which the page calls:

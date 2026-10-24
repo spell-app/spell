@@ -28,6 +28,8 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, line for line, cards and all, and it deals, plays and passes the same six tests.
+A person wrote it;  `spell translate` writes a first draft of one for any English project
+(below, "Translating a project").
 
 ![The Spell editor in Spanish:  Carta.es.spell on the left;  on the right Solitario dealt, its menu reading Solitario Klondike, Puntos, Jugar solo, Trampa, Depurar;  the panes titled Aplicación and Salida en JavaScript](docs/images/spanish/solitario-editor.png)
 
@@ -82,7 +84,7 @@ spell explain si --in @spell/examples/Solitario
 if  si {condition:expression} (entonces|:)? {statement_body}?
 e.g. si x
 
-backwards_if  si {operator:expression} (si no|sino|de lo contrario) {expression}
+backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
 e.g. imprimir 1 si bar si no 2
 ```
 
@@ -217,6 +219,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | Spell UI | every component has a Spanish tag:  `<es-boton>`, `<es-menu>`, `<es-cuadricula columnas="7">` |
 | drawing | a Spanish drawable gets its tag from its Spanish names, `<solitario-carta>` |
 | the editor | its menus and panes, on a Spanish page;  colouring, completion and hover in each file's language |
+| translating | `spell translate <project> --to es`:  an English project written again in Spanish (below) |
 
 ### A wrong article is a warning
 
@@ -346,6 +349,68 @@ Spanish (es):  complete, 19 modules
 - A difference on purpose is marked in the pack's file, `// packs: ok -- why`, so the check passes.
 - Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
 
+## Translating a project
+
+`spell translate` writes an English project again in Spanish, as a project of its own beside it.
+Solitaire comes out linted clean and passing its six tests, with no person in the loop, in under a minute:
+about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
+
+It works in three passes:
+1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
+   - First from the Spanish glossary, a list shared by every project:  `carta` is `carta` in every program.
+   - The rest by Claude, the types first, then the other names in a few calls at once.
+   - They land in a dictionary beside the project, `<Project>.es.names.json5`, for a person to review.
+2. **Lines:**  each line read in English, then written again with the SAME rule's Spanish words,
+   its articles agreeing by gender.
+   No model writes these:  the rule that read the line writes it back.
+3. **Fix-ups:**  the translation is linted, its tests run, and each statement compiled beside its English one.
+   A line that fails, couldn't be written, or compiles to a different program
+   goes back to Claude, in context, a few rounds at most.
+
+Without Claude (`--no-ai`), the lines are still written, and each name the dictionary lacks is marked for a person.
+Here with `--cold` too, which starts from no glossary and writes only into `--out`:
+
+```sh
+spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (1 files, ...)
+  10 of 10 lines translated
+  names:  /tmp/fizzbuzz-es/fizzbuzz.es.names.json5
+  pre-calculated:  none (--cold)
+  passes:  names ..., lines ..., fix-ups ... (0 lines fixed in 0 rounds, 1 check)
+  claude -p:  0 calls:  fix-ups 0
+  shape:  7 of 7 statements compile to the same program as the English
+  7 lines still need a person, marked // TODO: translate:
+    FizzBuzz.es.spell:2  phrases "play fizzbuzz"
+    FizzBuzz.es.spell:3  names "number"
+    FizzBuzz.es.spell:4  names "number", texts "fizzbuzz"
+    FizzBuzz.es.spell:5  names "number", texts "fizz"
+    FizzBuzz.es.spell:6  names "number", texts "buzz"
+    FizzBuzz.es.spell:7  names "number"
+    FizzBuzz.es.spell:9  phrases "play fizzbuzz"
+```
+
+</details>
+
+- Every line is Spanish but its names:  `para number de 1 a 100`, `si el number dividido por 15 es un entero: ...`.
+  It exits 1, because seven lines still need a person.
+- With Claude, the same command fills the names in and fixes the lines;
+  through the Claude API when `ANTHROPIC_API_KEY` is set, else through `claude -p`, a little slower.
+- `--update` re-translates only the English lines changed since the last run:  hand edits to the Spanish stay.
+- `--effort fast|balanced|best` says how much Claude spends;  `spell translate speedtest` times whole runs.
+- Every option, and what it leaves for a person:
+  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project).
+
+**The edge:**  the translation reads differently from a person's.
+Translated cold, Solitaire's names match the hand-made Solitario's about 7 times in 10
+(`reina` where Solitario says `dama`), and its comments are worded otherwise:
+it's a first draft that runs, for a Spanish speaker to review.
+
 ## The edges
 
 **First drafts.**
@@ -370,7 +435,9 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
   target and compares, runs Solitaire there and not Solitario yet.
 - The docs teach English Spell.
   The Spanish syntax table is generated, [spellSyntax.es.json](src/spell/spellSyntax.es.json), but no page reads it yet.
-- A file read back in the other language:  an English program shown in Spanish, or the reverse.
+- A file read back in the other language:  an English program shown in Spanish, or the reverse, as you read it.
+  The translator writes a second project, which then lives on its own:  `--update` carries English changes over.
+- Translating the other way:  the command takes any pack as `--to`, but only English into Spanish has been tried.
 - A third language:  Norwegian and Portuguese are next, with help from friends;  neither is started
   ([README](README.md#a-third-human-language)).
 
@@ -382,6 +449,8 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 | the rules' Spanish, a file per module | [src/spell/rules/](src/spell/rules/), each `<module>.es.ts` |
 | which language a file is | `SP.Language.forFile()`, [Language.ts](src/spell/languages/Language.ts) |
 | the pack check and fix | [packsCommand.ts](src/cli/packsCommand.ts) |
+| the translator | its passes in [src/spell/translate/](src/spell/translate/);  the command in [translateProject.ts](src/cli/translateProject.ts), Claude in [claudeRunners.ts](src/cli/claudeRunners.ts), the timing in [translateTimes.ts](src/cli/translateTimes.ts) |
+| the Spanish glossary of names, shared by every project | [glossary.json5](src/spell/languages/es/glossary.json5) |
 | the runtime's messages | [core's messages.ts](src/core/messages.ts), and `spell_core`'s [messages.py](src/py/core/spell_core/messages.py) |
 | the Spanish example | [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/), and its snapshots in [tests/spell/__examples__/](https://github.com/spell-app/spell-app/tree/main/tests/spell/__examples__/) |
 | Spell UI's Spanish | `UI<Name>.es.ts` beside each component, and [components.es.ts](https://github.com/spell-app/spell-ui/blob/main/src/components/components.es.ts) for what many share |
@@ -392,5 +461,6 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - [README-parser](README-parser.md#spell-in-another-human-language):  one rule's code in both languages, and how a third starts
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
 - [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
+- [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
 - [Spell UI's runtime page](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
 - [spell-parser's README](README.md):  the language, its pipeline, and every page of the repo

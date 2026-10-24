@@ -330,7 +330,7 @@ spell explain if
 if  if {condition:expression} (then|:)? {statement_body}?
 e.g. if a
 
-backwards_if  if {operator:expression} (else|otherwise) {expression}
+backwards_if  if {operator:expression} (else|otherwise) (it is)? {expression}
 e.g. print 1 if bar else 2
 ```
 
@@ -409,11 +409,11 @@ Lint first.
 ## The language commands
 
 You've just used four of them.
-The kit's `spell` takes fourteen commands from this repo:
+The kit's `spell` takes fifteen commands from this repo:
 `compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
 `parse`, `repl`, `explain` and `describe` show what Spell made of it;  `speedtest` times the parser;
-`lang packs check` and `lang packs fix` check the language packs against English;
-and `lang translate` writes a project in another language.
+`translate` writes a project in another language, `translate check` and `translate fix` check the language packs against English,
+and `translate speedtest` times a translation.
 [commands.ts](src/cli/commands.ts) lists them, and spell-parser's `package.json` names that file,
 `"spell": { "commands" }`.
 What each does, every option, with examples:
@@ -437,7 +437,9 @@ The names live here, and each command hands its work to spell-app's `language` h
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
 | [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell translate check` and `fix`:  what each language pack lacks against English, and stubs for it |
-| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell translate`'s work once spell-app has parsed the project:  its dictionary, `claude -p`, its files |
+| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell translate`'s work once spell-app has parsed the project:  its three passes, its dictionary, its files |
+| [cli/claudeRunners.ts](src/cli/claudeRunners.ts) | how the translator asks Claude:  the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`;  `--effort`'s tiers |
+| [cli/translateTimes.ts](src/cli/translateTimes.ts) | `spell translate speedtest`:  scratch copies, runs, and the table |
 | [cli/index.ts](src/cli/index.ts) | `spell-parser/cli`:  the types, for spell-app |
 
 </details>
@@ -477,7 +479,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [parser/rulex/](src/parser/rulex/) | `spell-parser/parser/rulex` | Rulex, the syntax rules are written in:  a rule with a syntax string needs this import | [README-rulex](README-rulex.md) <ul><li>what moves if you know regular expressions</li><li>three real rules from Spell's grammar;  your program writes Rulex too</li><li>what it can't say;  it compiles once, when a rule registers</li><li>the cheat sheet</li></ul> |
 | [markdown/](src/markdown/) | `spell-parser/markdown` | GitHub's Markdown, on the same parser, drawing HTML or `ui-*` tags | [README-markdown](README-markdown.md) <ul><li>a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, and slower and bigger than marked;  who draws with it</li><li>the spec as the scoreboard</li></ul> |
 | [spell/](src/spell/) | `spell-parser/spell` | Spell itself:  its twenty rule modules, projects, the compiler | [README-spell](README-spell.md) <ul><li>two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests, ids</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
-| [spell/languages/](src/spell/languages/) | `spell-parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  the edges</li></ul> |
+| [spell/languages/](src/spell/languages/) | `spell-parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
 | [core/](src/core/) | `spell-parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell-parser/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
 | [cli/](src/cli/) | `spell-parser/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser) |
@@ -530,6 +532,8 @@ from Solitario, the Solitaire example in Spanish, line for line._
 - Names keep their Spanish, accents and all:  `"es una figura"` compiles to `get esUnaFigura()`.
 - One project may mix languages, each file read by its own rules.
 - The parser, a test's lines, Spell UI's tags and the editor all speak it;  a wrong article is a warning.
+- `spell translate` writes an English project again in Spanish:  names first, then each line by its own rule,
+  then Claude fixes what fails lint, a test, or compiles to a different program.
 - **Not yet:**  docs that teach Spanish Spell, and a third language (below).
 - Solitario's tests, the commands to try, pictures of the editor, and every edge:
   [README-spanish](README-spanish.md).
@@ -626,5 +630,5 @@ MIT, as spell-parser's [package.json](package.json) says.
 - [README-parser](README-parser.md):  the parser on its own, if the rules-as-classes part is why you came
 - [README-spell](README-spell.md):  everything a line of Spell can say, and how to add a rule
 - [README-targets](README-targets.md):  what each target writes, and what each one costs
-- [README-spanish](README-spanish.md):  Spell in Spanish, with Solitario to run and the editor speaking it
+- [README-spanish](README-spanish.md):  Spell in Spanish, with Solitario to run, the editor speaking it, and a project translated into it
 - [the kit's README](https://github.com/spell-app/spell/blob/main/README.md):  setup from zero, the five repos, and every page of every repo

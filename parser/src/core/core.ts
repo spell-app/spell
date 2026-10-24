@@ -80,8 +80,8 @@ let recording: Array<{ target: object; property: string; was: unknown }> | undef
  * SIDE EFFECT:  `target`'s prop `property` is about to be set to `value`:  `Thing` and `List` call it from `setProp()`.
  * - Nothing if it has that value already.
  * - A `while` handler running:  its value now is noted, to put back -- only its first, what it had before the handler.
- * - A program running elsewhere (`core.remote`, e.g. Python):  it's set there too,
- *   e.g. a task's title typed into a page's form.
+ * - A program running elsewhere (`core.remote`, e.g. Python):
+ *   it's set there too, e.g. a task's title typed into a page's form.
  */
 export function noteSetting(target: object, property: string, value: unknown): void {
   const was = peekProp(target, property)

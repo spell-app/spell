@@ -42,13 +42,15 @@ export class DrawableList<T = unknown> extends List<T> {
   static reorderItemsAfter: number | undefined = undefined
 
   /**
-   * Our items people have selected on the page, in our order:  spell's `the selection of the tasks`
-   * (epic `outline-spell` P29).
+   * Our items people have selected on the page, in our order (epic `outline-spell` P29).
+   * - Spell's `the selection of the tasks`.
    * - Only items whose type says `can be selected`:  the page selects them as people click (`select()`).
    * - An item taken out of us leaves it too.
    * - Tracked:  a drawing showing it, e.g. a property editor's `value`, follows each change.
-   * - A plain array, which every list word reads:  so a form or property editor edits them all at once
-   *   (`<ui-property-editor value={the selection of the tasks}>`), and it owns nothing.
+   * - A plain array, not a `List`, which every list word reads:
+   *   - so a form or property editor edits them all at once
+   *     (`<ui-property-editor value={the selection of the tasks}>`)
+   *   - and the items stay ours:  being selected never moves them out of us
    * - The page's alone:  never saved, nor sent to a program running elsewhere.
    */
   get selection(): T[] {

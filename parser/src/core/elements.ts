@@ -44,7 +44,9 @@ export const elementsMethods = defineCoreModule({
   /**
    * Where a page sends what its program runs, when the program runs ELSEWHERE, e.g. in Python --
    * `undefined` when it runs here.
-   * - `startPage()` (`page.ts`) sets it:  a list's drag handlers then run there, by their Python names.
+   * - `startPage()` (`page.ts`) sets it.
+   * - Then what the page does to the program runs there, by its Python names:
+   *   a list's drag handlers, a reorder (`moveBefore()`), a property a form set, an event (`<thing>-drop`).
    */
   remote: undefined as RemoteProgram | undefined,
 
@@ -59,8 +61,8 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
-   * Move `items` into `list` before `before`, at its end with none:  a page reordering a list as people drag
-   * (epic `outline-spell` P30) -- see `List.moveBefore()`.
+   * Move `items` into `list` before `before`, at its end with none -- see `List.moveBefore()`.
+   * - What a page calls as people drag to reorder a list (epic `outline-spell` P30).
    * - In the program, wherever it runs (`remote`):  Python's list moves them, `move_before()`.
    */
   moveBefore(list: object, items: unknown[], before?: unknown): void {
@@ -343,8 +345,9 @@ const ELEMENT_TAG = Symbol.for("spell-parser:element-tag")
 const ELEMENT_CLASS = Symbol.for("spell-parser:element-class")
 
 /**
- * A program running elsewhere, as a page reaches it (`core.remote`):  `core.runHandler()`, `startWhile()` and
- * `endWhile()`, run there.
+ * A program running elsewhere, as a page reaches it (`core.remote`).
+ * - `core.runHandler()`, `startWhile()`, `endWhile()` and `moveBefore()` run there (`run()` ...).
+ * - So does a property the page set, and an event it sent (`set()`, `trigger()`).
  * - `method` is the page's name for it, `whenCardDroppedOn`:  the program's own, `when_card_dropped_on`, is its to say.
  */
 export type RemoteProgram = {

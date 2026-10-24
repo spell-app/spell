@@ -13,8 +13,8 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * ```
  * - Dragged over the list, a blue line shows where the dragged items would go;  the items stay where they are, dimmed.
  * - Once the pointer rests there 2 seconds, they move there, while the drag goes on;  let go, and they move at once.
- * - Another wait:  `- its items can be reordered after 1.5 seconds`;  or none, `... immediately` (`right away`):
- *   they move as the line does.
+ * - Another wait:  `- its items can be reordered after 1.5 seconds`.
+ * - Or none, `... immediately` (`right away`):  no line, the items move as the pointer does.
  *   The page may say otherwise for one list, its element's `move-delay="1"`.
  * - A selected item drags with every other selected one (`a task can be selected`).
  * - The items must be draggable themselves:  `a task can be dragged`.

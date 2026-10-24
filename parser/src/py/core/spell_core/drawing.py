@@ -138,7 +138,7 @@ def attribute_value(name: str, value: object) -> str | None:
         return None
     if value is True:
         return ""
-    # a thing given as an attribute, e.g. a form's `value={it}`:  JavaScript writes it `[object Object]`
+    # a thing given as an attribute, e.g. a form's `value={it}`:  `[object Object]`, as JavaScript writes it
     if isinstance(value, Thing):
         return "[object Object]"
     text = js_string(value)
