@@ -60,6 +60,12 @@ const SECTIONS_TOP = "--site-sections-top"
 /** How long a jump's landing takes the site (`SiteSections.go()`:  the root ready, the unfold, two frames), ms. */
 const LANDING_MS = 350
 
+/** A toolbar click's section stays marked until the page has scrolled to it and been still this long, ms. */
+const GLIDE_QUIET_MS = 200
+
+/** ... and no longer than this after the click, ms, whatever the scroll does. */
+const GLIDE_MAX_MS = 2000
+
 /** The sheets:  beside this script, wherever it's served from. */
 const SHEETS = ["spell-comments.css", "spell-toolbar.css"].map(
   (name) => new URL(name, document.currentScript?.src ?? location.href).href
@@ -156,7 +162,35 @@ function drawToolbar(sections, { signal }) {
     .then(() => nextFrames(2))
     .then(remeasure)
   let scheduled = false
+  // a clicked item is the current one at once, and stays so while the page glides to its section:  following the
+  // scroll meanwhile flipped the mark through every section passed (Owen, 2026-10-23, epic `debut`:  "When these
+  // buttons are pressed, they flip back and forth while the page is scrolling");  held until the scroll has been
+  // still for `GLIDE_QUIET_MS`, `GLIDE_MAX_MS` at most
+  let held = undefined
+  let quiet = 0
+  let heldSince = 0
+  const release = () => {
+    held = undefined
+    follow()
+  }
+  const holdQuiet = () => {
+    clearTimeout(quiet)
+    quiet = setTimeout(release, Math.max(0, Math.min(GLIDE_QUIET_MS, heldSince + GLIDE_MAX_MS - Date.now())))
+  }
+  toolbar.addEventListener(
+    "click",
+    (event) => {
+      const item = event.composedPath().find((node) => node.localName === "ui-item" && node.hasAttribute("data-rail"))
+      if (!item) return
+      held = item.dataset.rail
+      heldSince = Date.now()
+      markCurrent(toolbar, held)
+      holdQuiet()
+    },
+    { signal }
+  )
   const follow = () => {
+    if (held !== undefined) return holdQuiet()
     if (scheduled) return
     scheduled = true
     requestAnimationFrame(() => {
@@ -165,6 +199,7 @@ function drawToolbar(sections, { signal }) {
         markCurrent(toolbar, currentSection(document.querySelector(PAGE_MAIN), sections)?.id ?? sections[0].id)
     })
   }
+  signal.addEventListener("abort", () => clearTimeout(quiet), { once: true })
   addEventListener("scroll", follow, { passive: true, signal })
   addEventListener("resize", follow, { passive: true, signal })
   follow()
