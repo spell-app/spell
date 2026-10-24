@@ -197,6 +197,8 @@ export class SiteSections {
    *   so the masthead holds the line alone, and sticks for the whole page (`site.css`, "The page header").
    * - Its words as written (links, code ...) move, not a copy.
    *   The paragraph is marked `data-spell-added`, as the runtime's own boxes are.
+   * - A family page's note of its other tags' pages (`.site-own-pages`, "`<ui-radio>` has its own page") moves too,
+   *   under the subhead:  in the masthead's grid it fell into the narrow cell beside the icons.
    * - SIDE EFFECT:  `main`'s DOM;  once per page (a page shown again is a fresh `main`)
    */
   private static splitSubtitle(main: HTMLElement): void {
@@ -209,6 +211,8 @@ export class SiteSections {
     subtitle.append(...subhead.childNodes)
     subhead.remove()
     masthead.after(subtitle)
+    const ownPages = masthead.querySelector(OWN_PAGES)
+    if (ownPages) subtitle.after(ownPages)
   }
 
   ////////////////
@@ -532,6 +536,9 @@ const MASTHEAD_SUBHEAD = ".site-masthead .site-title > ui-header"
 
 /** The paragraph the subhead's words move into (`site.css`). */
 const SUBTITLE_CLASS = "site-subtitle"
+
+/** A family page's note of its other tags' own pages, in its masthead:  moved under the subhead. */
+const OWN_PAGES = ".site-own-pages"
 
 /** `main`'s custom property:  the masthead's stuck height, px;  the sticky lines below start under it (`measure()`). */
 const HEAD_HEIGHT = "--site-head-height"
