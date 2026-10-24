@@ -7,6 +7,8 @@
  *   which would land in `ui`'s `core` bundle and published declarations.
  *   - An allowed exception to "import another package's barrel only".
  *   - Add a file here when `util` gains a GENERIC one.
+ *     NOT `persist/` (`PrefStore` ...):  in `core` it cost every page 1.9 kB (`yarn measure`, 2026-10-24),
+ *     so the few files that keep preferences import it by file (`spell/util/persist/PrefStore`).
  *   - `yarn measure` and `yarn smoke` catch a leak.
  * - Its place in the import graph:  the BOTTOM of `ui`, importing nothing of it,
  *   so it's safe to import anywhere, including `*.types.ts` files, node tooling and the runtime's lazily-loaded chunk.
