@@ -627,6 +627,8 @@ run.finish()                                                         // or "stop
 ```
 
 - `run.effort` is read fresh each time:  what was picked on the page, else the one it started with.
+- A pass the command runs at an effort of its own (a flag of its own beat the page's pick) says so:
+  `run.startPass("names", { total, effort: "best" })`, and the card shows that one.
 - `updatePass()` is throttled, and `endPass()` always writes the last state.
 - `answersAsTheyCome()` gives a row again when its answer changes, and keeps the heartbeat while it runs.
 

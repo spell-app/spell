@@ -588,7 +588,7 @@ each language pack registers every rule again, with its own words.
 | Command | What it does |
 | --- | --- |
 | `spell translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
-| `spell translate [project] --to es --review` | the same, but between the names and the lines it shows the names it drafted on a page, waits for Send, and writes the lines with the answers (below, "Reviewing the names") |
+| `spell translate [project] --to es --review` | the same, but between the names and the lines it shows the names it drafted on a page, takes each answer as it's given until Send, and writes the lines with them;  the page shows each pass, and picks the effort (below, "Reviewing the names") |
 | `spell translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
 | `spell translate speedtest [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
@@ -603,7 +603,7 @@ each language pack registers every rule again, with its own words.
 | `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
 | `--out <folder>` | writes it there instead, its dictionary and record too:  nothing is written beside the project.  A dictionary already beside it is read, never written;  `--update` passes the same `--out` to find its record |
-| `--review-timeout <time>` | how long `--review` waits for Send:  minutes (`30`, the default), or `90s`, `10m`, `1h` |
+| `--review-timeout <time>` | how long `--review` takes answers before going on without Send:  minutes (`30`, the default), or `90s`, `10m`, `1h` |
 | `--cold` | for timing:  starts from nothing worked out before (below, "Timing it");  needs `--out` |
 
 - It says how long each pass took, and each call to Claude:
@@ -640,13 +640,23 @@ Batch by default, so CI never waits:  with `--review`, a person sees every name 
   - Accept the proposal, type over it, or pick one of the 2 or 3 alternatives Claude gave in the same calls
     (types, names and phrases;  a text or a comment has none).
   - Tick "for every project" and the name goes into the shared glossary too, as `reviewed`.
+- Each answer reaches the command as you give it, no Send needed:  it goes in the dictionary at once,
+  and the row shows "taken".
+  - Change it again and the new one replaces it;  clear the box and Claude's proposal is back.
+- A typed or picked answer is checked as it arrives, as a drafted name is.
+  One Spell can't read (`carta` for `label`, when `card` is `carta`) turns its row into a note saying why, right away:
+  type another.  Still unreadable at the end, the proposal stays and the report says so.
 - Then Send:  the lines are written with the answers, and each goes in the dictionary marked `reviewed`,
   so `--update` never asks again, and `--learn` ranks it above a seed's.
-- A typed or picked answer is checked as a drafted name is.
-  One Spell can't read (`carta` for `label`, when `card` is `carta`) comes back as a row of its own, saying why;
-  still unreadable, the proposal stays and the report says so.
 - A type's gender:  its proposal's, the alternative's, or say it after the name, `naipe (m)`.
-- No Send in time (`--review-timeout`, 30 minutes):  every proposal is kept as drafted, and the report says so.
+- No Send in time (`--review-timeout`, 30 minutes):  the answers given by then are used, the rest kept as drafted,
+  and the report says `no Send in time`.
+- The page's status card shows each pass as it runs:  names (how many drafted, its calls), lines, fix-ups
+  (lines wanted and fixed, its rounds), each with its time and effort.
+- Its effort picker (fast, balanced, best) starts at `--effort`, and takes at the next pass:
+  pick it while answering and the fix-ups run at it.
+  - `--names-effort` or `--fix-ups-effort` still wins for its pass, and the page says so.
+- The run ends "finished", "its wait ran out" (no Send in time), or "stopped" (the command failed, or Ctrl-C).
 - With `--no-ai`, its rows are the names still missing, to type.
 - `--cold` refuses it:  a timing that waits for a person times nothing.
 - The page is a command run of the kit's page server, at `/runs/<id>/`.

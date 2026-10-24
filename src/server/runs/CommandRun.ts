@@ -18,6 +18,7 @@ import {
   type RunPage,
   type RunPass,
   type RunPassFacts,
+  type RunPassStart,
   type RunRow,
   type RunRowAnswer,
   type RunStatus,
@@ -249,13 +250,15 @@ export class CommandRun {
 
   /**
    * Start a pass (`names`, `lines` ...):  the page's status card shows it running, with the effort it runs at.
+   * - that effort:  `facts.effort` when the command runs the pass at one of its own (a flag of its own won over the
+   *   page's pick), else `effort`, as picked now
    * - ends the one before, if it's still running
    * - SIDE EFFECT:  rewrites `run.json5`, at once
    */
-  startPass(name: string, facts: RunPassFacts = {}): this {
+  startPass(name: string, { effort: _effort, ...facts }: RunPassStart = {}): this {
     if (this.current) this.endPass()
     const pass: RunPass = { name, state: "running", ...facts, ms: 0, started: new Date().toISOString() }
-    const effort = this.effort
+    const effort = _effort ?? this.effort
     if (effort !== undefined) pass.effort = effort
     let index = 0
     this.edit((page) => {

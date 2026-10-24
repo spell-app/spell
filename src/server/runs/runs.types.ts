@@ -225,6 +225,12 @@ export type RunAnswersEnd = "sent" | "timed-out" | "aborted" | "finished"
 export type RunPassFacts = Pick<RunPass, "done" | "total" | "calls">
 
 /**
+ * What `CommandRun.startPass()` takes:  its facts, and the effort it runs at when that isn't the page's
+ * (spell-parser's `--names-effort`, which wins over the page's pick for its pass).
+ */
+export type RunPassStart = RunPassFacts & Pick<RunPass, "effort">
+
+/**
  * Thrown by `CommandRun` when it can't find or make a run;  `kind` says why:
  * - `no-content-folder`:  the checkout names no content folder (`.epic/config.json5`'s `contentFolder`)
  * - `no-run`:  `CommandRun.at()` found no `run.json5` in the run's folder

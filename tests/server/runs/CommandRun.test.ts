@@ -223,9 +223,13 @@ describe("CommandRun passes", () => {
     expect(names).toMatchObject({ name: "names", state: "done", done: 41, total: 41, calls: 3 })
     expect(names.ms).toBeGreaterThanOrEqual(25)
     expect(lines).toMatchObject({ name: "lines", state: "running", effort: "balanced" })
+    // a pass the command runs at an effort of its own (a flag of its own won):  that one, not the page's
+    run.startPass("fix-ups", { effort: "best" })
+    expect(run.page.passes![2]).toMatchObject({ name: "fix-ups", effort: "best" })
+    expect(run.page.passes![1].state).toBe("done")
     // finish() ends the pass still running
     run.finish()
-    expect(run.page.passes![1].state).toBe("done")
+    expect(run.page.passes![2].state).toBe("done")
     expect(run.page.status).toBe("done")
   })
 
