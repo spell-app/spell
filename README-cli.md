@@ -158,7 +158,7 @@ Each repo hands it a list, named in the repo's `package.json`:
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
-  base["spell, the base<br/>server · bundle · commands · wwod · pony · help"]
+  base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
   lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
@@ -213,6 +213,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
+| `spell publish [--dry-run]` | builds, packs and checks every repo's npm package, installs them in a scratch project, then publishes them, lowest first;  `--dry-run` stops before publishing |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -221,7 +222,7 @@ The page server belongs to a kit, and starts from its root only:
 run from any folder of an epic's worktree, `spell server start` starts that worktree's.
 
 <details>
-<summary>Every verb of server, and every option of bundle, commands, wwod and pony</summary>
+<summary>Every verb of server, and every option of bundle, commands, wwod, publish and pony</summary>
 
 | Verb | What it does |
 | --- | --- |
@@ -254,6 +255,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod check` | the default, and the only verb |
 | `spell wwod check <files...>` | those files too, beyond the default set |
 | `spell wwod --json` | the report as JSON |
+| `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
+| `spell publish --no-scratch` | skips the scratch install, which needs the network |
+| `spell publish --json` | the packed packages and every check as JSON |
 | `spell pony --gallop` | her legs gallop:  in place in a terminal, else one stride's frames |
 
 - Which bundles there are:  the `"bundles"` in the kit's page server settings, every installed repo's merged.
@@ -267,6 +271,17 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     and that every backticked repo path exists.
   - Where:  WWOD, every `AGENTS.md` and `CLAUDE.md`, the Solid 2 rules, and the skills (citations only).
   - Exits 1 on a broken one.
+- `spell publish`:  five packages, `spell` first, each repo that has a `"spellPublish"` in its `package.json`.
+  - Each is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
+    types stripped, standard decorators lowered, Solid's JSX compiled.
+  - Each is staged in the kit's `dist-packs/stage/<name>/` (git-ignored) with a `package.json` made for npm:
+    no `private`, `workspaces`, scripts or dev dependencies;  the checkout's own never changes.
+  - One version for all, the kit's, and the published `spell` depends on every other package:
+    one install brings them all.
+  - Then `npm pack`, the checks (built code only, every `exports` file packed, one `DOMElement`),
+    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`.
+  - Without `--dry-run`, and only when every check passed:  `npm publish` for each, lowest first.
+    `npm login` first.
 
 </details>
 
@@ -1042,6 +1057,11 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [commands/bundleCommand.ts](src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
 | [commands/commandsCommand.ts](src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
 | [commands/wwodCommand.ts](src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](src/cli/commands/wwod.ts) |
+| [commands/publishCommand.ts](src/cli/commands/publishCommand.ts) | `spell publish`:  which repos, the version, the order, the publish |
+| [publish/PackageBuild.ts](src/cli/publish/PackageBuild.ts) | one repo's `src/` built into the JavaScript its package ships |
+| [publish/PublishedPackage.ts](src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
+| [publish/ScratchInstall.ts](src/cli/publish/ScratchInstall.ts) | the packed packages installed in a scratch project, and its three checks |
+| [publish/publish.types.ts](src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
 | [commands/ponyCommand.ts](src/cli/commands/ponyCommand.ts) | `spell pony` |
 | [tsconfig.node.json](tsconfig.node.json) | the kit's node settings, and its node type check |
 | [tsconfig.tsx.json](tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |

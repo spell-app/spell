@@ -25,3 +25,6 @@ PARKED-*.md
 # the declarations the kit builds for the repos above it (`spell-types`, epic repo-split I12):  never committed
 dist-types/
 
+
+# `spell publish`'s packed packages and their staging folders (epic repo-split P19):  never committed
+/dist-packs/

@@ -38,6 +38,23 @@ describe("spellRepos()", () => {
   })
 })
 
+describe("spellRepos(), the kit installed from npm", () => {
+  test("each child repo beside it in node_modules", () => {
+    const project = mkdtempSync(join(tmpdir(), "spell-installed-"))
+    const kit = join(project, "node_modules", "spell")
+    mkdirSync(kit, { recursive: true })
+    writeFileSync(join(kit, "repos.json5"), "{ repos: [{ name: 'spell-parser' }, { name: 'spell-brand' }] }")
+    writeFileSync(join(kit, "package.json"), JSON.stringify({ name: "spell", spell: { commands: "./c.js" } }))
+    mkdirSync(join(project, "node_modules", "spell-parser"))
+    writeFileSync(
+      join(project, "node_modules", "spell-parser", "package.json"),
+      JSON.stringify({ name: "spell-parser", spell: { commands: "./c.js" } })
+    )
+    expect(CLI.spellRepos(kit).map((repo) => repo.root)).toEqual([kit, join(project, "node_modules", "spell-parser")])
+    rmSync(project, { recursive: true, force: true })
+  })
+})
+
 describe("hook() / needHook()", () => {
   test("the first repo's hook by that name, loaded;  none:  undefined, or needHook's CliError", async () => {
     const repos = CLI.spellRepos(KIT)

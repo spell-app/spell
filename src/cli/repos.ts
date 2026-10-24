@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
-import { join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
 import { readJSON5File } from "spell/util/node/json5"
@@ -9,7 +9,8 @@ import { CLI } from "spell/cli"
  * Every repo that adds to `spell`, lowest first:  the kit, then each child repo `repos.json5` lists that's installed
  * and whose `package.json` has a `"spell"` entry (epic `repo-split` Q33).
  * - Where a child repo is:  in the kit, at its folder (`<kit>/spell-parser/`), else installed as a package
- *   (`<kit>/node_modules/spell-parser/`).
+ *   (`<kit>/node_modules/spell-parser/`), else beside the kit when the kit is itself installed from npm
+ *   (`<project>/node_modules/spell/`, and `spell-parser` beside it:  epic `repo-split` P19).
  * - `kit`:  the kit to look in, default the one `spell` runs from;  a test passes a made-up one.
  * - NEVER throws for a repo that isn't there:  it isn't listed.
  */
@@ -18,11 +19,18 @@ export function spellRepos(kit = CLI.KIT_ROOT): CLI.SpellRepo[] {
   const kitRepo = repoAt(kit)
   if (kitRepo) found.push(kitRepo)
   for (const name of childRepoNames(kit)) {
-    const root = [join(kit, name), join(kit, "node_modules", name)].find((dir) => existsSync(join(dir, "package.json")))
+    const root = [join(kit, name), join(kit, "node_modules", name), ...besideKit(kit, name)].find((dir) =>
+      existsSync(join(dir, "package.json"))
+    )
     const repo = root && repoAt(root)
     if (repo) found.push(repo)
   }
   return found
+}
+
+/** Where package `name` is when the kit is installed in a `node_modules` folder:  beside it;  else nowhere. */
+function besideKit(kit: string, name: string): string[] {
+  return basename(dirname(kit)) === "node_modules" ? [join(dirname(kit), name)] : []
 }
 
 /** The child repos' names, lowest first, from the kit's `repos.json5`;  none without one. */
