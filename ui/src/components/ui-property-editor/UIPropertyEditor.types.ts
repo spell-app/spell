@@ -42,9 +42,10 @@ export const GROUP_TAG = "ui-property-group"
 export const PROPERTY_TAG = "ui-property"
 
 /**
- * The family's elements, for `closest()` and `querySelectorAll()`, whatever each tag is called in a translation
- * (`<es-editor-propiedades>`):  the state each always carries, as `<ui-field>`'s `:state(field)`.
- * - Only once it's drawn:  a property finds its editor as it connects by what it is instead (`UIProperty`).
+ * Selectors for the family's elements, for `closest()` and `querySelectorAll()`:
+ * the custom state each always carries, as `<ui-field>` carries `:state(field)`.
+ * - So they find the elements whatever a translation calls their tags, e.g. `<es-editor-propiedades>`.
+ * - Only once an element is drawn:  before that, a property finds its editor by what it is (`UIProperty`).
  */
 export const EDITOR_SELECTOR = ":state(property-editor)"
 export const GROUP_SELECTOR = ":state(property-group)"
