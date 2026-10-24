@@ -51,7 +51,11 @@ export function titledItems(groups, badgesOf) {
           ? undefined
           : number
             ? el("b", { slot: "icon" }, number)
-            : el("b", { slot: "icon", class: "spell-toolbar-letter" }, (letters[index] ?? label.charAt(0)).toUpperCase()),
+            : el(
+                "b",
+                { slot: "icon", class: "spell-toolbar-letter" },
+                (letters[index] ?? label.charAt(0)).toUpperCase()
+              ),
       title: titles[index],
       letter: letters[index],
       state: element.dataset.state,
@@ -114,7 +118,9 @@ export function toolbarMenu(items, { titled, segmented = false }) {
   // a titled toolbar is Spell UI's `<ui-toolbar>` where the page has it:  `‹` / `›` buttons while its items overflow
   const tag = titled && customElements.get("ui-toolbar") ? "ui-toolbar" : "ui-menu"
   const toolbar = el(tag, {
-    class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"].filter(Boolean).join(" "),
+    class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"]
+      .filter(Boolean)
+      .join(" "),
     ...(segmented ? { appearance: "segmented" } : { secondary: true }),
     "aria-label": "Sections",
     "data-spell-added": true
@@ -183,7 +189,8 @@ function wireKeyTips(toolbar) {
     else showUnder(item)
   }
   const showUnder = (item) => {
-    const box = item.shadowRoot?.querySelector('[part~="item"]')?.getBoundingClientRect() ?? item.getBoundingClientRect()
+    const box =
+      item.shadowRoot?.querySelector('[part~="item"]')?.getBoundingClientRect() ?? item.getBoundingClientRect()
     tip.querySelector("kbd").textContent = item.dataset.key.toUpperCase()
     if (!tip.matches(":popover-open")) tip.showPopover()
     const width = tip.offsetWidth
