@@ -27,9 +27,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  readme  pony        (help is the program's own)
+  server  bundle  commands  wwod  readme  publish  pony        (help is the program's own)
   ```
 
+- `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:
+  - it loads esbuild, Solid's compiler, Lightning CSS and Playwright when it runs
+  - it names no child repo:  each says how it publishes in its `package.json`, `"spellPublish"`
+    ([publish.types.ts](publish/publish.types.ts))
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
   - Every repo's command list imports it, and `spell help` loads them all.
   - So it never exports a command's work:  [commands.ts](commands.ts) imports each one's file when it runs.
@@ -77,5 +81,7 @@ As WWOD §20, plus:
 - [program.test.ts](../../tests/cli/program.test.ts):  the clash rule, on made-up repos
   (two repos both naming `check`).
 - [repos.test.ts](../../tests/cli/repos.test.ts):  finding repos and hooks in a made-up kit.
+- [publish/](../../tests/cli/publish/):  `PackageBuild` and `PublishedPackage` on a made-up repo.
+  - The real five packages and the scratch install:  `spell publish --dry-run`, too slow for a unit test.
 - The other repos' commands are tested in their repos:  spell-parser's, Spell UI's, spell-app's.
   - spell-app's run every language command end to end, through the kit's bin.

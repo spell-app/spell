@@ -158,7 +158,7 @@ Each repo hands it a list, named in the repo's `package.json`:
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
-  base["spell, the base<br/>server · bundle · commands · wwod · pony · help"]
+  base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
   lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
@@ -213,6 +213,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
+| `spell publish [--dry-run]` | builds, packs and checks every repo's npm package, installs them in a scratch project, then publishes them, lowest first;  `--dry-run` stops before publishing |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
 
@@ -221,7 +222,7 @@ The page server belongs to a kit, and starts from its root only:
 run from any folder of an epic's worktree, `spell server start` starts that worktree's.
 
 <details>
-<summary>Every verb of server, and every option of bundle, commands, wwod and pony</summary>
+<summary>Every verb of server, and every option of bundle, commands, wwod, publish and pony</summary>
 
 | Verb | What it does |
 | --- | --- |
@@ -254,6 +255,9 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod check` | the default, and the only verb |
 | `spell wwod check <files...>` | those files too, beyond the default set |
 | `spell wwod --json` | the report as JSON |
+| `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
+| `spell publish --no-scratch` | skips the scratch install, which needs the network |
+| `spell publish --json` | the packed packages and every check as JSON |
 | `spell pony --gallop` | her legs gallop:  in place in a terminal, else one stride's frames |
 
 - Which bundles there are:  the `"bundles"` in the kit's page server settings, every installed repo's merged.
@@ -267,6 +271,17 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     and that every backticked repo path exists.
   - Where:  WWOD, every `AGENTS.md` and `CLAUDE.md`, the Solid 2 rules, and the skills (citations only).
   - Exits 1 on a broken one.
+- `spell publish`:  five packages, `spell` first, each repo that has a `"spellPublish"` in its `package.json`.
+  - Each is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
+    types stripped, standard decorators lowered, Solid's JSX compiled.
+  - Each is staged in the kit's `dist-packs/stage/<name>/` (git-ignored) with a `package.json` made for npm:
+    no `private`, `workspaces`, scripts or dev dependencies;  the checkout's own never changes.
+  - One version for all, the kit's, and the published `spell` depends on every other package:
+    one install brings them all.
+  - Then `npm pack`, the checks (built code only, every `exports` file packed, one `DOMElement`),
+    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`.
+  - Without `--dry-run`, and only when every check passed:  `npm publish` for each, lowest first.
+    `npm login` first.
 
 </details>
 
@@ -555,7 +570,8 @@ each language pack registers every rule again, with its own words.
 
 - It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
   - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
-  - On Solitaire, cold, through `claude -p`:  31-41 s in all, the names 22-31 s, the fix-ups 9-10 s, in 7 or 8 calls.
+  - On Solitaire through `claude -p`, from the shared glossary alone:  31-41 s in all, the names 22-31 s,
+    the fix-ups 9-10 s, in 7 or 8 calls;  with `--cold`, nothing pre-calculated, about 52 s.
   - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
     system prompt, which the API caches across the calls.
   - `--effort fast|balanced|best` says how much each pass spends on its answers, `balanced` unless asked;
@@ -563,7 +579,8 @@ each language pack registers every rule again, with its own words.
     - On Solitaire and todos, more thought made no better names, only slower ones, so today `fast` and `balanced`
       ask the same, and `best` thinks harder only over the fix-ups.
 
-- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
+- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review;
+  with `--out`, in that folder instead, with everything else the run writes (below).
 - The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-parser:
   card games' words and common ones, each with its gender and where it came from.
 - Its work is spell-app's (it finds the project the app's way), then `spell-parser`'s `translateProject.ts`.
@@ -571,6 +588,7 @@ each language pack registers every rule again, with its own words.
 | Command | What it does |
 | --- | --- |
 | `spell translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
+| `spell translate [project] --to es --review` | the same, but between the names and the lines it shows the names it drafted on a page, takes each answer as it's given until Send, and writes the lines with them;  the page shows each pass, and picks the effort (below, "Reviewing the names") |
 | `spell translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
 | `spell translate speedtest [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
@@ -584,7 +602,8 @@ each language pack registers every rule again, with its own words.
 | `--effort <tier>` | how much every pass spends on its answers:  `fast`, `balanced` (the default) or `best` |
 | `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
-| `--out <folder>` | writes it there instead |
+| `--out <folder>` | writes it there instead, its dictionary and record too:  nothing is written beside the project.  A dictionary already beside it is read, never written;  `--update` passes the same `--out` to find its record |
+| `--review-timeout <time>` | how long `--review` takes answers before going on without Send:  minutes (`30`, the default), or `90s`, `10m`, `1h` |
 | `--cold` | for timing:  starts from nothing worked out before (below, "Timing it");  needs `--out` |
 
 - It says how long each pass took, and each call to Claude:
@@ -610,6 +629,37 @@ each language pack registers every rule again, with its own words.
   the other language's grammar reads them as the import declares them.
 
 </details>
+
+#### Reviewing the names
+
+Batch by default, so CI never waits:  with `--review`, a person sees every name before a line is written with it.
+- After the names pass, a page opens in the side bar's Review tab (else a browser):
+  a row per name Claude drafted, never the glossary's or the dictionary's.
+  - Each row:  the English, the gender, the kind (type, name, phrase, text, comment), where it came from,
+    and the first line that uses it;  the other lines fold under it.
+  - Accept the proposal, type over it, or pick one of the 2 or 3 alternatives Claude gave in the same calls
+    (types, names and phrases;  a text or a comment has none).
+  - Tick "for every project" and the name goes into the shared glossary too, as `reviewed`.
+- Each answer reaches the command as you give it, no Send needed:  it goes in the dictionary at once,
+  and the row shows "taken".
+  - Change it again and the new one replaces it;  clear the box and Claude's proposal is back.
+- A typed or picked answer is checked as it arrives, as a drafted name is.
+  One Spell can't read (`carta` for `label`, when `card` is `carta`) turns its row into a note saying why, right away:
+  type another.  Still unreadable at the end, the proposal stays and the report says so.
+- Then Send:  the lines are written with the answers, and each goes in the dictionary marked `reviewed`,
+  so `--update` never asks again, and `--learn` ranks it above a seed's.
+- A type's gender:  its proposal's, the alternative's, or say it after the name, `naipe (m)`.
+- No Send in time (`--review-timeout`, 30 minutes):  the answers given by then are used, the rest kept as drafted,
+  and the report says `no Send in time`.
+- The page's status card shows each pass as it runs:  names (how many drafted, its calls), lines, fix-ups
+  (lines wanted and fixed, its rounds), each with its time and effort.
+- Its effort picker (fast, balanced, best) starts at `--effort`, and takes at the next pass:
+  pick it while answering and the fix-ups run at it.
+  - `--names-effort` or `--fix-ups-effort` still wins for its pass, and the page says so.
+- The run ends "finished", "its wait ran out" (no Send in time), or "stopped" (the command failed, or Ctrl-C).
+- With `--no-ai`, its rows are the names still missing, to type.
+- `--cold` refuses it:  a timing that waits for a person times nothing.
+- The page is a command run of the kit's page server, at `/runs/<id>/`.
 
 #### Timing it
 
@@ -1044,6 +1094,11 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [commands/bundleCommand.ts](src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
 | [commands/commandsCommand.ts](src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
 | [commands/wwodCommand.ts](src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](src/cli/commands/wwod.ts) |
+| [commands/publishCommand.ts](src/cli/commands/publishCommand.ts) | `spell publish`:  which repos, the version, the order, the publish |
+| [publish/PackageBuild.ts](src/cli/publish/PackageBuild.ts) | one repo's `src/` built into the JavaScript its package ships |
+| [publish/PublishedPackage.ts](src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
+| [publish/ScratchInstall.ts](src/cli/publish/ScratchInstall.ts) | the packed packages installed in a scratch project, and its three checks |
+| [publish/publish.types.ts](src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
 | [commands/ponyCommand.ts](src/cli/commands/ponyCommand.ts) | `spell pony` |
 | [tsconfig.node.json](tsconfig.node.json) | the kit's node settings, and its node type check |
 | [tsconfig.tsx.json](tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |

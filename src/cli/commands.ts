@@ -8,6 +8,8 @@
  * - `spell wwod [check]`:  WWOD's citations and paths
  * - `spell readme check | test [pages...]`:  every repo's README pages, checked, or their examples run
  *   (epic `readme` P16)
+ * - `spell publish [--dry-run]`:  every repo's npm package, built, packed and checked, then published, lowest first
+ *   (epic `repo-split` P19)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
  * - `spell help`:  the program's own (`addHelp()`), not this list's
  * - Loads fast:  each action imports its command's file when it runs.
@@ -131,6 +133,20 @@ export default function kitCommands(spell: Command): void {
     .option("--list", "only list the examples, without running them")
     .action((pages: string[], options: { list?: boolean }) =>
       CLI.runCommand(() => CLI.runTool(README_TEST, [...pages, ...(options.list ? ["--list"] : [])]))
+    )
+
+  ////////////////
+  // ## Publishing
+  ////////////////
+
+  spell
+    .command("publish")
+    .description("build, pack and check every repo's npm package, install them in a scratch project, then publish")
+    .option("--dry-run", "stop before publishing:  build, pack, check, scratch install")
+    .option("--no-scratch", "skip the scratch install (it needs the network)")
+    .option("--json", "print the packed packages and every check as JSON")
+    .action((options: CLI.PublishOptions) =>
+      CLI.runCommand(async () => (await import("spell/cli/commands/publishCommand")).publishCommand(options))
     )
 
   ////////////////

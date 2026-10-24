@@ -44,7 +44,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Every direct esbuild build uses it.
     - Why:  esbuild adds no extension to `exports`' `./src/*`, and finds no folder's `index.ts` (epic `repo-split` I50).
 - Its commands, bins of the kit's `package.json`, in the kit's `bin/` (beside `spell` and `spell-pack`):
-  - [`spell-types`](../../bin/spell-types.ts):  built declarations (below, "spell-types")
+  - [`spell-types`](../../bin/spell-types.ts):  built declarations (below, "spell-types");
+    its entry is [typesMain.ts](typesMain.ts), which the published bin imports too (`spell publish`)
   - `spell-folders` is gone (epic `repo-split` P14):  every repo is one `src/`, checked by plain scripts.
 - Its files import each other as same-folder peers, with `.ts` extensions (`./lint.patterns.ts`).
   - The bins import them by package name (`spell/toolchain/declarations`).
