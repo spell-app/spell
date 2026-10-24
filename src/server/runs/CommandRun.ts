@@ -32,7 +32,7 @@ import {
  * and carries on with them.  The first is spell-parser's translator, with the names it drafted.
  *
  * ```ts
- * const run = SRV.CommandRun.open({ root, command: "spell parser translate todos --to es", title: "Names for todos",
+ * const run = SRV.CommandRun.open({ root, command: "spell translate todos --to es", title: "Names for todos",
  *   columns: [{ key: "english", label: "English" }], answerLabel: "Spanish", rows })
  * await run.show()                                        // the page, in VS Code's side bar or a browser
  * run.progress("names:  41 drafted in 6 s")
@@ -86,7 +86,7 @@ export class CommandRun {
   /**
    * Open a new run:  make its folder, and write its `run.json5`, status `open`.
    * - `effort`:  the choices Owen may pick on the page, and the one it starts with;  none:  no picker
-   * - its id:  `props.id`, else a slug of the command and the local time (`spell-parser-translate-20261023-1912`),
+   * - its id:  `props.id`, else a slug of the command and the local time (`spell-translate-20261023-1912`),
    *   `-2`, `-3` ... added when that folder is there
    * - throws `CommandRunError`:  no content folder (`no-content-folder`), or a given `id` already there (`run-exists`)
    * - SIDE EFFECT:  makes the folder, writes `run.json5`

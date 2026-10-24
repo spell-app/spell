@@ -1,6 +1,6 @@
 {
   "name": "spell",
-  "version": "0.0.0",
+  "version": "0.8.0",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
@@ -227,6 +227,16 @@
   "packageManager": "yarn@4.18.0",
   "spell": {
     "commands": "./src/cli/commands.ts"
+  },
+  "spellPublish": {
+    "files": [
+      "repos.json5"
+    ],
+    "bin": {
+      "spell": "cli/main",
+      "spell-pack": "element-tools/packMain",
+      "spell-types": "toolchain/typesMain"
+    }
   },
   "spellTypes": [
     "tsconfig.json",

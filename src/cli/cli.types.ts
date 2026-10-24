@@ -75,6 +75,18 @@ export type WwodOptions = GlobalOptions & {
 }
 
 /**
+ * `spell publish` flags.
+ * - `dryRun`:  build, pack and check every package, then install them in a scratch project;  publish nothing
+ * - `scratch`:  `false` (`--no-scratch`) skips the scratch install, which needs the network
+ * - `json`:  print the packed packages and every check as JSON
+ */
+export type PublishOptions = GlobalOptions & {
+  dryRun?: boolean
+  scratch?: boolean
+  json?: boolean
+}
+
+/**
  * `spell pony` flags.
  * - `gallop`:  her legs gallop (epic `property-editor` P8)
  */
