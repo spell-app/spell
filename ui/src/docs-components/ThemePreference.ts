@@ -17,7 +17,7 @@ import {
  * The docs site viewer's LOOK -- theme (`UI.themes`) and colour scheme --
  * remembered per viewer, re-applied on every page.
  * `<ui-docs-themes>` changes it;  the site entry (`site/_src/site.ts`) calls `restore()` once per page.
- * - Theme:  `DOCS_DEFAULT_THEME` (`spell`, the brand) until the viewer picks another;
+ * - Theme:  `defaultTheme` (the docs: `DOCS_DEFAULT_THEME`, `spell`, the brand) until the viewer picks another;
  *   picking Plain (our own look, `undefined`) is stored as `DOCS_PLAIN_THEME`, so it outlives the page.
  * - Stored in `localStorage` (`DOCS_LOOK_KEYS`), every access in try/catch:
  *   a private window or blocked storage just forgets between pages.
@@ -44,8 +44,26 @@ import {
  * - Imports the core entry (`UI`, `spell-ui/core`), which the site entry loads anyway;
  *   the runtime chunk (`UI.themes`) loads only to apply a theme.
  * - Static only:  the look is one per page.
+ * - Another site reuses it with its own default theme and theme key (`site()`):
+ *   the editor app starts in `fruity`, and remembers its theme apart from the docs';  the SCHEME stays shared.
  ****************/
 export class ThemePreference {
+  /** The theme a viewer who never picked one sees:  `DOCS_DEFAULT_THEME`, unless a site set its own (`site()`). */
+  static defaultTheme: string = DOCS_DEFAULT_THEME
+
+  /** The `localStorage` key of the chosen theme:  `DOCS_LOOK_KEYS.theme`, unless a site set its own (`site()`). */
+  static themeKey: string = DOCS_LOOK_KEYS.theme
+
+  /**
+   * Make this page another site's:  its own default theme, and its own key for the chosen theme.
+   * - Call BEFORE the first read (`restore()`, a picker):  a look read before stays in memory.
+   * - e.g. the editor app:  `ThemePreference.site({ defaultTheme: "fruity", themeKey: "spell-app:theme" })`
+   */
+  static site({ defaultTheme, themeKey }: ThemeSite): void {
+    ThemePreference.defaultTheme = defaultTheme
+    ThemePreference.themeKey = themeKey
+  }
+
   /**
    * Inline `<head>` script re-applying the stored scheme before first paint, as `applyScheme()` does.
    * - The page template (`templates/spell-ui-docs.html`) inlines it, in `<head>` before the stylesheet `<link>`.
@@ -80,7 +98,8 @@ export class ThemePreference {
   static async setTheme(name: string | undefined): Promise<void> {
     const theme = name || undefined
     ThemePreference.update({ ...ThemePreference.look, theme })
-    ThemePreference.store(DOCS_LOOK_KEYS.theme, theme === DOCS_DEFAULT_THEME ? undefined : (theme ?? DOCS_PLAIN_THEME))
+    const stored = theme === ThemePreference.defaultTheme ? undefined : (theme ?? DOCS_PLAIN_THEME)
+    ThemePreference.store(ThemePreference.themeKey, stored)
     await ThemePreference.applyTheme(theme)
   }
 
@@ -209,17 +228,18 @@ export class ThemePreference {
     const { themes } = await UI.load()
     const known = [...themes.own, themes.base, ...themes.names]
     if (name !== undefined && !known.includes(name)) {
-      return ThemePreference.setTheme(name === DOCS_DEFAULT_THEME ? undefined : DOCS_DEFAULT_THEME)
+      const fallback = ThemePreference.defaultTheme
+      return ThemePreference.setTheme(name === fallback ? undefined : fallback)
     }
     await themes.apply(name)
   }
 
-  /** The stored look;  anything unreadable is the default (`DOCS_DEFAULT_THEME`, `system`). */
+  /** The stored look;  anything unreadable is the default (`defaultTheme`, `system`). */
   private static read(): DocsLook {
     const scheme = (ThemePreference.load(DOCS_LOOK_KEYS.scheme) ?? ThemePreference.migrateScheme()) as
       | DocsScheme
       | undefined
-    const theme = ThemePreference.load(DOCS_LOOK_KEYS.theme) || DOCS_DEFAULT_THEME
+    const theme = ThemePreference.load(ThemePreference.themeKey) || ThemePreference.defaultTheme
     return {
       theme: theme === DOCS_PLAIN_THEME ? undefined : theme,
       scheme: scheme && scheme !== "system" && DocsSchemes.includes(scheme) ? scheme : "system"
@@ -259,4 +279,12 @@ export class ThemePreference {
       // private window / blocked storage:  the look still holds for this page, in memory
     }
   }
+}
+
+/** What `ThemePreference.site()` takes:  another site's own theme settings. */
+export type ThemeSite = {
+  /** the theme a viewer who never picked one sees, e.g. `fruity` */
+  defaultTheme: string
+  /** the `localStorage` key of the chosen theme, e.g. `spell-app:theme` */
+  themeKey: string
 }

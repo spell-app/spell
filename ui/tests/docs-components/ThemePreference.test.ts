@@ -69,6 +69,27 @@ describe("ThemePreference.restore()", () => {
   })
 })
 
+describe("ThemePreference.site()", () => {
+  afterEach(() => ThemePreference.site({ defaultTheme: DOCS_DEFAULT_THEME, themeKey: DOCS_LOOK_KEYS.theme }))
+
+  test("another site's own default theme and key:  the docs' theme key is left alone", async () => {
+    localStorage.setItem(DOCS_LOOK_KEYS.theme, "github")
+    ThemePreference.site({ defaultTheme: "fruity", themeKey: "test-site:theme" })
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(UI.themes.current).toBe("fruity")
+
+    await ThemePreference.setTheme("material")
+    expect(localStorage.getItem("test-site:theme")).toBe("material")
+    expect(localStorage.getItem(DOCS_LOOK_KEYS.theme)).toBe("github")
+
+    // its default is stored as no key at all, as the docs' is
+    await ThemePreference.setTheme("fruity")
+    expect(localStorage.getItem("test-site:theme")).toBeNull()
+    localStorage.removeItem("test-site:theme")
+  })
+})
+
 describe("ThemePreference.applyScheme()", () => {
   test("a scheme switch turns transitions off for a frame (`DOCS_SCHEME_SWITCHING`)", async () => {
     const root = document.documentElement
