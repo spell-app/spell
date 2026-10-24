@@ -507,16 +507,16 @@ each language pack registers every rule again, with its own words.
 
 | Command | What it does |
 | --- | --- |
-| `spell parser packs check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
-| `spell parser packs fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
+| `spell translate check [lang]` | lists, per rule file, what a pack lacks against English, and exits 1 if anything;  default:  every pack but English |
+| `spell translate fix [lang]` | writes a stub for each missing registration into its `<module>.<lang>.ts`, English copied and marked `// TODO: translate`, then lists them to review |
 
 <details>
 <summary>What they check, and what fix writes</summary>
 
 | Option | What it does |
 | --- | --- |
-| `spell parser packs check --json` | the report as JSON |
-| `spell parser packs fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
+| `spell translate check --json` | the report as JSON |
+| `spell translate fix --ai` | asks `claude -p` to translate each stub, marked `// AI draft:  review` instead;  one it can't keeps the stub |
 
 - `check` reads each rules module's files as text, English's (`<module>.en.ts`) and the pack's, and lists:
   - `missing`:  a rule English registers that the pack doesn't
@@ -542,7 +542,7 @@ each language pack registers every rule again, with its own words.
 
 ### Translating a project
 
-`spell parser translate` writes a project in another language, in three passes:
+`spell translate` writes a project in another language, in three passes:
 1. Names:  every name its people chose (types, properties, values, methods, texts, comments).
    - First from the language's shared glossary:  a name another project chose costs no call, and reads the same.
    - The rest by Claude:  the types alone in one small call, then the other names in a few calls at once,
@@ -570,9 +570,9 @@ each language pack registers every rule again, with its own words.
 
 | Command | What it does |
 | --- | --- |
-| `spell parser translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
-| `spell parser translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
-| `spell parser translate-time [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
+| `spell translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
+| `spell translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
+| `spell translate speedtest [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
 <details>
 <summary>Its options, and what it leaves for a person</summary>
@@ -626,7 +626,7 @@ without saying why.
 - Every report says which it started from, e.g. `pre-calculated:  none (--cold)`,
   or `pre-calculated:  the Spanish glossary (109 names), the project's dictionary (88 names)`.
 
-`spell parser translate-time` does the timing for you.
+`spell translate speedtest` does the timing for you.
 - Each run copies the project to a scratch folder of its own (without its dictionary and record), translates it,
   and deletes the folder, even when the run fails.
 - With no projects, it times Solitaire and todos-form-based, the two the numbers above were measured on.
@@ -650,7 +650,7 @@ without saying why.
 | `--json <file>` | every run's numbers and the table, for comparing over time |
 
 - A run that fails says why, and the rest still run;  it exits 1 if any failed.
-- Its work is spell-app's (it finds the projects, and translates each copy as `spell parser translate` does),
+- Its work is spell-app's (it finds the projects, and translates each copy as `spell translate` does),
   then `spell-parser`'s `translateTimes.ts`.
 
 </details>
