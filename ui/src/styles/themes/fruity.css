@@ -184,6 +184,8 @@
     --ui-button-or-background: light-dark(#ffffff, #2c2a36);
     --ui-button-or-color: var(--ui-text-muted);
     --ui-button-or-gap: 0px;
+    /* a text menu's chosen item (text tabs):  semibold as well as coloured, never colour alone (the designer, C17) */
+    --ui-menu-text-active-weight: 600;
     --ui-bar-wallpaper-color: var(--ui-background);
     /* nothing to blur under an opaque wallpaper:  a blur there drew seams where two such bars meet */
     --ui-bar-wallpaper-filter: none;

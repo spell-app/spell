@@ -155,6 +155,7 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             basic={this.demoIsFramed ? undefined : ""}
             attached={this.demoIsFramed ? UIT.TOP : undefined}
           >
+            <span class={TOGGLE_ROOM_CLASS} aria-hidden="true" />
             <slot />
           </ui-segment>
           <Show when={this.isCodeShown}>
@@ -183,6 +184,9 @@ export interface UIDocsExample extends E.AttributeValues<typeof docsExampleVocab
 
 /** Class word of the header row:  the title. */
 const HEADING_CLASS = "heading"
+
+/** Class word of the float that keeps the code button's corner clear of the demo's first line (`UIDocsExample.css`). */
+const TOGGLE_ROOM_CLASS = "toggle-room"
 
 /** How long the code takes to roll closed, s:  `UIDocsExample.css`'s transition (0.26s), and a little more. */
 const CLOSE_SECONDS = 0.3

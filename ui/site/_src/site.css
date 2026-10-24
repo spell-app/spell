@@ -694,7 +694,8 @@
   /* phones:  the tabs need the width */
   @media (--ui-mobile) {
     .site-main {
-      --site-tabs-inset: 0px;
+      /* the band's width:  its glass then starts at the gutter, never closer to the screen's edge (the designer, T5) */
+      --site-tabs-inset: var(--site-tabs-band);
     }
   }
   .site-main {

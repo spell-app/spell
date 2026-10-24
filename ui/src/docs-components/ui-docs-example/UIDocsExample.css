@@ -188,9 +188,22 @@
   /* the demo flush with the frame's padding, open or closed:  as much room above it as below (Owen, 2026-10-23) */
   .ui.example:not(.bare) [part~="demo"]::part(segment) {
     margin: 0;
-    /* room for the code button over the corner, so the demo's last button never runs under it (the designer, T50 /
-       C26:  "Like", "Forks 1,048", "Next" did, on a phone);  the button is 28px, its inset in from the frame's edge */
-    padding-inline-end: var(--_ui-docs-example-toggle-room);
+  }
+  /*
+   * room for the code button over the corner, so the demo's first line never runs under it (the designer, T50 / C26:
+   * "Like", "Forks 1,048", "Next" did, on a phone):  a float as wide and tall as the button's corner, first in the
+   * demo, which the first line's buttons and words wrap round;  the rest of the demo keeps the frame's whole width
+   * (padding down the whole demo left its right side three times its left:  the designer, T3)
+   * - the button is 28px wide and about 1.35em tall, its inset in from the frame's edge;  the demo's content starts
+   *   the frame's padding (1em, 0.75em) in
+   */
+  .toggle-room {
+    float: inline-end;
+    width: var(--_ui-docs-example-toggle-room);
+    height: calc(var(--_ui-docs-example-toggle-inset) - 0.75em + 1.35em);
+  }
+  .ui.bare.example .toggle-room {
+    display: none;
   }
   .ui.example {
     --_ui-docs-example-toggle-room: calc(28px + var(--_ui-docs-example-toggle-inset) - 1em + 0.4em);
@@ -222,8 +235,6 @@
     z-index: 1;
     margin: 0;
     padding: var(--_ui-docs-example-frame-padding);
-    /* the code button's room again, from the frame's edge now (the demo runs out to it) */
-    padding-inline-end: calc(1em + var(--_ui-docs-example-toggle-room));
     border: none;
     /* its bottom corners round, the frame's:  a card over the code (Owen, 2026-10-23:  "The example should keep its
        rounding on the bottom when opened, like the picture I pasted last") */
@@ -331,7 +342,7 @@
      */
     :host(:not(:state(code-shown))) .ui.example:not(.bare) [part~="demo"]::part(segment) {
       margin-inline: -8px;
-      padding-inline: 8px calc(8px + var(--_ui-docs-example-toggle-room));
+      padding-inline: 8px;
     }
   }
 }
