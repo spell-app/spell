@@ -503,6 +503,14 @@
     font-size: 1.34em;
     line-height: 1.2;
     color: var(--ui-text-muted);
+    transition: opacity var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
+  }
+  /*
+   * once the page scrolls, the subhead fades:  sliding up under the title line, it showed between that line and the
+   * tabs (Owen, 2026-10-23:  "page content peeking out under top header ... when scrolled")
+   */
+  .site-head-stuck > .site-subtitle {
+    opacity: 0;
   }
   /* the icon row:  every button the same 2.25em box, centred on the title's first line */
   .site-masthead .site-page-links,
