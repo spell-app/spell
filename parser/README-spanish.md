@@ -359,7 +359,8 @@ It works in three passes:
 1. **Names:**  every name the project chose (types, properties, values, methods, texts, comments), with its gender.
    - First from the Spanish glossary, a list shared by every project:  `carta` is `carta` in every program.
    - The rest by Claude, the types first, then the other names in a few calls at once.
-   - They land in a dictionary beside the project, `<Project>.es.names.json5`, for a person to review.
+   - They land in a dictionary beside the project, `<Project>.es.names.json5`, for a person to review
+     (with `--out`, in that folder, with the rest of what the run writes).
 2. **Lines:**  each line read in English, then written again with the SAME rule's Spanish words,
    its articles agreeing by gender.
    No model writes these:  the rule that read the line writes it back.
@@ -403,6 +404,14 @@ fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (1 files, ...)
   through the Claude API when `ANTHROPIC_API_KEY` is set, else through `claude -p`, a little slower.
 - `--update` re-translates only the English lines changed since the last run:  hand edits to the Spanish stay.
 - `--effort fast|balanced|best` says how much Claude spends;  `spell translate speedtest` times whole runs.
+
+With `--review`, a person reviews the names before any line is written with them.
+After the names pass a page opens in the editor's side bar, a row per name Claude drafted:
+accept it, type over it, or pick one of the alternatives Claude gave, and tick a name "for every project"
+to put it in the shared glossary.
+After Send, the lines are written with the answers, each kept in the dictionary as reviewed;
+without an answer in time (30 minutes, `--review-timeout`), Claude's names stand.
+
 - Every option, and what it leaves for a person:
   [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project).
 
@@ -449,7 +458,7 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 | the rules' Spanish, a file per module | [src/spell/rules/](src/spell/rules/), each `<module>.es.ts` |
 | which language a file is | `SP.Language.forFile()`, [Language.ts](src/spell/languages/Language.ts) |
 | the pack check and fix | [packsCommand.ts](src/cli/packsCommand.ts) |
-| the translator | its passes in [src/spell/translate/](src/spell/translate/);  the command in [translateProject.ts](src/cli/translateProject.ts), Claude in [claudeRunners.ts](src/cli/claudeRunners.ts), the timing in [translateTimes.ts](src/cli/translateTimes.ts) |
+| the translator | its passes in [src/spell/translate/](src/spell/translate/);  the command in [translateProject.ts](src/cli/translateProject.ts), its review page in [NamesReview.ts](src/cli/NamesReview.ts), Claude in [claudeRunners.ts](src/cli/claudeRunners.ts), the timing in [translateTimes.ts](src/cli/translateTimes.ts) |
 | the Spanish glossary of names, shared by every project | [glossary.json5](src/spell/languages/es/glossary.json5) |
 | the runtime's messages | [core's messages.ts](src/core/messages.ts), and `spell_core`'s [messages.py](src/py/core/spell_core/messages.py) |
 | the Spanish example | [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/), and its snapshots in [tests/spell/__examples__/](https://github.com/spell-app/spell-app/tree/main/tests/spell/__examples__/) |

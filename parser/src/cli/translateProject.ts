@@ -11,6 +11,8 @@
  * - Claude through the API when `ANTHROPIC_API_KEY` is set, else `claude -p` (`claudeRunnerFor()`, epic `spanish` P27);
  *   `--effort fast|balanced|best` says how much every pass spends, `--names-effort` and `--fix-ups-effort` one pass's
  *   (`askingFor()`):  the runner picks the model and effort for each (`CLAUDE_TIERS`).
+ * - `--review` (epic `spanish` P31):  between the names and the lines, the names drafted shown to a person on a page
+ *   in the Review tab (`NamesReview`, a command run), and the lines written with the answers;  without it, batch.
  * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - `--cold` (epic `spanish` P29), for timing:  from nothing pre-calculated -- no shared glossary, no dictionary of
  *   the project's, no record, no seed -- and it writes only into `--out`.  Every report says which it started from.
@@ -19,7 +21,7 @@
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
  *   that lints and tests the translation.  So this file needs no project groups, only parsed files.
- * - Beside the project, two files of its own:
+ * - Beside the project, two files of its own -- in `--out` instead, when it's given (`translationPaths()`):
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
@@ -35,6 +37,7 @@ import { CLI } from "spell/cli"
 import { SP } from "spell-parser/spell"
 import type { TranslateOptions } from "spell-parser/cli"
 import { claudeRunnerFor, type ChosenRunner } from "spell-parser/cli/claudeRunners"
+import { NamesReview, openCommandRun, reviewTimeoutMs, type ReviewRunOpener } from "spell-parser/cli/NamesReview"
 import { ElementNames } from "spell-parser/spell/translate/ElementNames"
 import { FixUps, type FixUpFile, type FixUpLine } from "spell-parser/spell/translate/FixUps"
 import { NamesGlossary } from "spell-parser/spell/translate/NamesGlossary"
@@ -55,6 +58,7 @@ import type {
   LineProblem,
   MissingName,
   NamesData,
+  NamesFile,
   NamesKind,
   SourceFile,
   TranslatedFile,
@@ -91,11 +95,12 @@ export type TranslateSource = {
 }
 
 /**
- * Where `translateProject()` reads the shared glossary, and whether it prints:
+ * Where `translateProject()` reads the shared glossary, whether it prints, and how it opens a review:
  * - `glossaryFile`:  the language pack's `glossary.json5` by default;  a test's own
  * - `print`:  `false` prints nothing -- `spell translate speedtest` prints a table of its own
+ * - `openRun`:  opens `--review`'s page -- the kit's `CommandRun.open()` by default (`openCommandRun()`);  a test's fake
  */
-export type TranslateSettings = { glossaryFile?: string; print?: boolean }
+export type TranslateSettings = { glossaryFile?: string; print?: boolean; openRun?: ReviewRunOpener }
 
 /**
  * What one translation did, in numbers:  what `translateProject()` prints, for a program to read
@@ -170,13 +175,14 @@ export async function translateProject(
  * `translateProject()`, and what it did in numbers (`TranslationResult`):  for `spell translate speedtest`.
  * - `--cold`:  nothing pre-calculated -- no shared glossary, no dictionary of the project's, no record --
  *   and its dictionary and record written only into `--out`, never beside the project.
+ * - `--review`:  waits for a person between the names and the lines (`NamesReview`);  its time is in no pass's.
  * - Throws as `translateProject()` does.
  */
 export async function translationOf(
   source: TranslateSource,
   options: TranslateOptions,
   run?: ClaudeRunner,
-  { glossaryFile = glossaryFileFor(options.to), print = true }: TranslateSettings = {}
+  { glossaryFile = glossaryFileFor(options.to), print = true, openRun = openCommandRun }: TranslateSettings = {}
 ): Promise<TranslationResult> {
   const started = performance.now()
   const { from, to } = languagesOf(source, options)
@@ -188,10 +194,11 @@ export async function translationOf(
   // each pass's tier, checked before anything's asked
   const asking = { names: askingFor(options, "names"), fixUps: askingFor(options, "fixUps") }
   const askFor = (pass: AskingPass) => withTier(chosen.run, asking[pass])
+  const timeoutMs = options.review ? reviewTimeoutMs(options.reviewTimeout) : 0
 
   // what earlier runs and other projects worked out:  none of it, cold
   const paths = translationPaths(source, to, options)
-  const names = new TranslationNames(!cold && existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, {
+  const names = new TranslationNames(!cold && paths.namesFrom ? readJSON5File<NamesFile>(paths.namesFrom) : {}, {
     from,
     to
   })
@@ -227,17 +234,34 @@ export async function translationOf(
     declarations: source.declarations ?? [],
     words: source.words,
     glossary,
-    shared: shared.relevantTo(source.files.map((file) => file.contents).join("\n"))
+    shared: shared.relevantTo(source.files.map((file) => file.contents).join("\n")),
+    alternatives: !!options.review && ai
   })
   // what the glossary knows first:  no call for it
   const { filled: fromGlossary, rest: wanted } = shared.fill(
     names,
     namesPass.wanted(missingIn(translated.files, plans))
   )
+  const review =
+    options.review && wanted.length
+      ? await new NamesReview({
+          names,
+          pass: namesPass,
+          files: source.files,
+          opener: openRun,
+          root: source.folder,
+          projectName: source.projectName,
+          command: `spell translate ${source.projectName} --to ${to.lang} --review`,
+          timeoutMs,
+          ai
+        }).open(wanted.length)
+      : undefined
   const drafted = ai ? await namesPass.draft(wanted) : 0
   timings.names = performance.now() - mark
+  // a person's turn:  in no pass's time
+  if (review) await review.review(wanted, timings.names)
 
-  // 2. lines:  each written again with the dictionary
+  // 2. lines:  each written again with the dictionary, a person's answers in it
   mark = performance.now()
   const outName = projectNameIn(names, source.projectName)
   outFolder = outFolderFor(source, names, options, record)
@@ -265,7 +289,13 @@ export async function translationOf(
   const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai, shapes: new ShapeCheck() })
   timings.fixUps = performance.now() - mark
 
-  writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toJSON(), null, 2)}\n`))
+  mkdirSync(dirname(paths.names), { recursive: true })
+  writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toFile(), null, 2)}\n`))
+  // the names a person ticked "for every project":  never cold, which `checkCold()` refuses anyway
+  if (review?.ticked.length && !cold) {
+    shared.addReviewed(names, review.ticked)
+    writeFileSync(glossaryFile, keepingCommentsIn(glossaryFile, `${JSON.stringify(shared.toJSON(), null, 2)}\n`))
+  }
   writeFileSync(paths.record, `${JSON.stringify(recordOf(source, outputs, to, outFolder, fixes), null, 2)}\n`)
   timings.total = performance.now() - started
 
@@ -284,9 +314,14 @@ export async function translationOf(
     timings: timings as Required<Timings>,
     checked,
     calls: { names: namesPass.calls, fixUps: fixUps.durations, via: chosen.via },
-    notes: [...namesPass.notes, ...fixUps.notes],
+    notes: [
+      ...namesPass.notes,
+      ...(review?.outcome.unreadable.map((why) => `review:  still unreadable, kept as drafted:  ${why}`) ?? []),
+      ...fixUps.notes
+    ],
     lists,
     agreement: source.reference && agreementOf(names, wanted, source.files, source.reference),
+    review: review?.summary ?? (options.review ? "review:  nothing drafted to review" : undefined),
     print
   })
 }
@@ -308,11 +343,12 @@ function languagesOf(source: TranslateSource, options: TranslateOptions): { from
 /**
  * `--cold` translates from nothing pre-calculated, and writes only where `--out` says, so it rules out:
  * - `--update`, `--seed` and `--learn`:  each reads or writes a list it mustn't
+ * - `--review`:  a person's answers are a list too, and a timing that waits for one times nothing
  * - no `--out`:  its dictionary and record would go beside the project
  * - throws `CliError` naming the flag
  */
 function checkCold(options: TranslateOptions): void {
-  for (const flag of ["update", "seed", "learn"] as const) {
+  for (const flag of ["update", "seed", "learn", "review"] as const) {
     if (options[flag]) throw new CLI.CliError(`--cold uses nothing pre-calculated:  drop --${flag}`)
   }
   if (!options.out) throw new CLI.CliError("--cold writes only where --out says:  pass --out <folder>")
@@ -596,13 +632,19 @@ type CheckResult = Awaited<ReturnType<TranslationChecker>> & {
 ////////////////
 
 /**
- * Where `source`'s dictionary and record live:  beside it, `<Project>.<lang>.names.json5`, `.translated.json5`;
- * with `--cold`, in `--out`, so the project is never written to.
+ * Where `source`'s dictionary and record are written:  beside it, `<Project>.<lang>.names.json5`, `.translated.json5`;
+ * with `--out`, in `--out`, so a translation written elsewhere never writes to the project (epic `spanish` J186).
+ * - `namesFrom`:  the dictionary to READ, if there is one:  `names`, else, with `--out`, the one beside the project
+ *   (a person's, or a run's without `--out`), read and never written;  `--cold` reads neither (`translationOf()`)
+ * - `--update` finds its record in the same place:  it passes the same `--out`, or none
  */
 function translationPaths(source: TranslateSource, to: SP.Language, options: TranslateOptions) {
-  const folder = options.cold && options.out ? resolve(options.out) : source.folder
-  const base = join(folder, `${source.projectName}.${to.lang}`)
-  return { names: `${base}.names.json5`, record: `${base}.translated.json5` }
+  const fileIn = (folder: string, suffix: string) => join(folder, `${source.projectName}.${to.lang}.${suffix}`)
+  const folder = options.out ? resolve(options.out) : source.folder
+  const names = fileIn(folder, "names.json5")
+  const beside = fileIn(source.folder, "names.json5")
+  const namesFrom = existsSync(names) ? names : existsSync(beside) ? beside : undefined
+  return { names, namesFrom, record: fileIn(folder, "translated.json5") }
 }
 
 /**
@@ -810,10 +852,10 @@ function learnFrom(
 ): number {
   if (options.cold) checkCold(options)
   const { from, to } = languagesOf(source, options)
-  const paths = translationPaths(source, to, options)
-  const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
+  const { namesFrom, names: namesPath } = translationPaths(source, to, options)
+  const names = new TranslationNames(namesFrom ? readJSON5File<NamesFile>(namesFrom) : {}, { from, to })
   const shared = new NamesGlossary(existsSync(glossaryFile) ? readJSON5File<GlossaryData>(glossaryFile) : {})
-  return learn(source, names, shared, paths.names, glossaryFile)
+  return learn(source, names, shared, namesFrom ?? namesPath, glossaryFile)
 }
 
 /**
@@ -870,6 +912,8 @@ function report(done: {
   notes: string[]
   lists: TranslationLists
   agreement?: TranslationResult["agreement"]
+  /** `--review`'s line:  how it went (`NamesReview.summary`) */
+  review?: string
   print: boolean
 }): TranslationResult {
   const { source, to, outFolder, translated, outputs, plans, seeded, drafted, paths, timings, checked, calls } = done
@@ -889,6 +933,7 @@ function report(done: {
       (drafted ? `, ${drafted} drafted by claude:  review them` : "")
   )
   out(`  pre-calculated:  ${listsLine(done.lists, to)}`)
+  if (done.review) out(`  ${done.review}`)
   const fixed = outputs.reduce(
     (sum, output) =>
       sum + output.lines.filter((line, at) => line !== output.translated.lines[at] && output.written.has(at)).length,

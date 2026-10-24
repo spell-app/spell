@@ -438,6 +438,7 @@ The names live here, and each command hands its work to spell-app's `language` h
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
 | [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell translate check` and `fix`:  what each language pack lacks against English, and stubs for it |
 | [cli/translateProject.ts](src/cli/translateProject.ts) | `spell translate`'s work once spell-app has parsed the project:  its three passes, its dictionary, its files |
+| [cli/NamesReview.ts](src/cli/NamesReview.ts) | `spell translate --review`:  the names drafted, on a page in the Review tab, and the answers back into the dictionary and the glossary |
 | [cli/claudeRunners.ts](src/cli/claudeRunners.ts) | how the translator asks Claude:  the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`;  `--effort`'s tiers |
 | [cli/translateTimes.ts](src/cli/translateTimes.ts) | `spell translate speedtest`:  scratch copies, runs, and the table |
 | [cli/index.ts](src/cli/index.ts) | `spell-parser/cli`:  the types, for spell-app |

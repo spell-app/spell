@@ -54,6 +54,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `--model <model>[:<effort>]`, hidden, for experiments:  an exact model and effort for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
+  - `--out` keeps everything the run writes, its dictionary and record too (epic `spanish` J186):
+    a dictionary beside the project is read, never written;  `--update` finds its record by the same `--out`
+  - `--review` (epic `spanish` P31):  between the names and the lines, [NamesReview.ts](NamesReview.ts) shows the names
+    drafted on a page, a COMMAND RUN of the kit's (`SRV.CommandRun`, in the Review tab), and waits for Send
+    - a row per name drafted, with Claude's alternatives (`NamesPass`, asked in the same calls with `--review`);
+      accepted, typed or picked, each answer is checked readable, marked reviewed in the dictionary
+      (`TranslationNames.reviewed`), and ticked ones go into the shared glossary (`NamesGlossary.addReviewed()`)
+    - an unreadable answer comes back once as a row of its own;  no Send by `--review-timeout`:  the proposals stand
+    - its run is injected (`TranslateSettings.openRun`):  `openCommandRun()` loads `spell/server` only then
   - `--cold` (epic `spanish` P29), for timing:  none of the lists earlier runs worked out -- the shared glossary,
     the project's dictionary, the record of fix-ups, a seed -- and nothing written but into `--out`
     - every report says which it started from (`pre-calculated:`, `TranslationLists`)
@@ -83,6 +92,8 @@ As WWOD §20, plus:
 - `spell translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
   its `--cold` too, each list ignored, in the same file;
+  its `--review`, with a fake run (accepted, typed, picked, ticked, unreadable, timed out), and `--out`'s files (J186),
+  in the same file;
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
   the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).

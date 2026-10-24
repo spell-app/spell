@@ -6,14 +6,17 @@ import JSON5 from "json5"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
+import type { SRV } from "spell/server"
 import { parseSpellProject } from "spell-parser/spell/test"
 import { translateProject, translationOf, type TranslateSource } from "spell-parser/cli/translateProject"
 import type { TranslateOptions } from "spell-parser/cli"
+import type { ReviewRunOpener } from "spell-parser/cli/NamesReview"
 import type {
   ClaudeRunner,
   GlossaryData,
   LineProblem,
   NamesData,
+  NamesFile,
   SourceFile
 } from "spell-parser/spell/translate/translate.types"
 
@@ -50,6 +53,12 @@ const NAMES: NamesData = {
   phrases: { "card labels": "etiquetas de cartas" },
   texts: { " joker": " comodín", "red joker": "comodín rojo" },
   genders: { color: "masculine", etiqueta: "feminine" }
+}
+
+/** The other choices the fake `claude` gives, with `--review`:  the type's, and the label's. */
+const ALTERNATIVES = {
+  types: { card: [{ name: "naipe", gender: "masculine" }] },
+  names: { label: ["rótulo", "leyenda"] }
 }
 
 /** A glossary that knows the card's words, as another project chose them. */
@@ -92,8 +101,8 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     expect(claude.prompts[2]).toContain("may read in the wrong order")
     expect(written()[2]).toBe(`\t${FIXED}`)
     expect(written()[6]).toBe('\tsu etiqueta debería ser "comodín rojo"')
-    // the record keeps the fix, for --update
-    const record = JSON.parse(readFileSync(join(folder, "Cards", "Cards.es.translated.json5"), "utf8"))
+    // the record keeps the fix, for --update:  in --out, with the translation (J186)
+    const record = JSON.parse(readFileSync(join(folder, "Cartas", "Cards.es.translated.json5"), "utf8"))
     expect(record.fixes).toEqual([
       {
         path: "/Card.spell",
@@ -132,8 +141,7 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
       "fix-ups fixUps:best undefined:undefined"
     ])
     asked.length = 0
-    // cold again:  no dictionary from the run before;  no flags:  balanced
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    // cold again:  another --out has no dictionary from the run before (J186);  no flags:  balanced
     await translate(source(), { to: "es", out: join(folder, "Cartas2"), model: "sonnet:medium" }, run)
     expect(asked).toEqual([
       "types names:balanced sonnet:medium",
@@ -153,7 +161,8 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     const stubborn = fakeClaude(() => ({
       fixes: [{ file: "Carta.es.spell", line: 7, text: `su etiqueta debería ser "otra ${++tries}"` }]
     }))
-    await translate(source(), { to: "es", out: join(folder, "Cartas2") }, stubborn.run)
+    // the same --out:  its dictionary has every name now
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, stubborn.run)
     expect(stubborn.prompts.map(kindOf)).toEqual(["fix-ups", "fix-ups", "fix-ups"])
   })
 
@@ -216,23 +225,25 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     expect(claude.prompts[0]).not.toContain('"color": ""')
     expect(printed().find((line) => line.startsWith("  names:"))).toContain("5 from the glossary")
     // a person picks another word for `label`:  the next run says so
-    const namesFile = join(folder, "Cards", "Cards.es.names.json5")
+    const namesFile = join(folder, "Cartas", "Cards.es.names.json5")
     writeFileSync(namesFile, readFileSync(namesFile, "utf8").replace('"label": "etiqueta"', '"label": "rótulo"'))
     await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
     expect(printed()).toContain("    `label` is `rótulo` here, `etiqueta` in the glossary (reviewed)")
   })
 
   test("--learn:  the project's names into the glossary, nothing translated", async () => {
-    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    const out = join(folder, "Cartas")
+    await translate(source(), { to: "es", out }, fakeClaude().run)
     const claude = fakeClaude()
-    expect(await translate(source(), { to: "es", learn: true }, claude.run)).toBe(CLI.EXIT.OK)
+    // its dictionary is in --out (J186):  --learn finds it there
+    expect(await translate(source(), { to: "es", out, learn: true }, claude.run)).toBe(CLI.EXIT.OK)
     expect(claude.prompts).toEqual([])
     const glossary = JSON5.parse(readFileSync(join(folder, "glossary.json5"), "utf8")) as GlossaryData
     expect(glossary.names?.card).toEqual({ name: "carta", gender: "feminine", from: "learned:Cards" })
     expect(glossary.names?.label).toEqual({ name: "etiqueta", gender: "feminine", from: "learned:Cards" })
     // a project with no dictionary has nothing to learn
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
-    await expect(translate(source(), { to: "es", learn: true }, claude.run)).rejects.toThrow(/translate it first/)
+    rmSync(join(out, "Cards.es.names.json5"))
+    await expect(translate(source(), { to: "es", out, learn: true }, claude.run)).rejects.toThrow(/translate it first/)
   })
 
   test("the report says what it started from:  the glossary, the project's dictionary", async () => {
@@ -295,7 +306,7 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
     const warm = fakeClaude()
     await translate(seeded, { to: "es", out: join(folder, "Cartas") }, warm.run)
     expect(warm.prompts.map(kindOf)).not.toContain("types")
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    rmSync(join(folder, "Cartas", "Cards.es.names.json5"))
     const cold = fakeClaude()
     await translate(seeded, { to: "es", out: join(folder, "Cold"), cold: true }, cold.run)
     expect(cold.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
@@ -338,6 +349,137 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
   })
 })
 
+describe("--out keeps what it writes (J186)", () => {
+  test("its dictionary and record go into --out;  a dictionary beside the project is read, never written", async () => {
+    // a person's dictionary, beside the project:  every name in it
+    const beside = join(folder, "Cards", "Cards.es.names.json5")
+    writeFileSync(beside, JSON.stringify(NAMES))
+    const out = join(folder, "Cartas")
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out }, claude.run)
+    expect(claude.prompts.map(kindOf)).toEqual(["fix-ups"])
+    expect(readdirSync(join(folder, "Cards")).sort()).toEqual([
+      "Card.spell",
+      "Cards.es.names.json5",
+      "__project.json5",
+      "styles.css"
+    ])
+    expect(readFileSync(beside, "utf8")).toBe(JSON.stringify(NAMES))
+    expect(readdirSync(out)).toEqual(expect.arrayContaining(["Cards.es.names.json5", "Cards.es.translated.json5"]))
+    // --update with the same --out finds its record there:  nothing asked again
+    const again = fakeClaude()
+    await translate(source(), { to: "es", out, update: true }, again.run)
+    expect(again.prompts).toEqual([])
+  })
+})
+
+describe("--review:  a person reviews the names drafted, between the names and the lines (P31)", () => {
+  test("accepted, typed, picked and ticked:  the dictionary, the glossary and the lines use them", async () => {
+    const review = fakeReview(() => ({
+      "types:card": { outcome: "accepted", value: "carta", ticked: true },
+      "names:label": { outcome: "picked", value: "rótulo" },
+      "texts:red joker": { outcome: "typed", value: "comodín colorado" }
+    }))
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas"), review: true }, claude.run, false, review.open)
+    // the names pass asked for alternatives, in the same calls
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
+    expect(claude.prompts[1]).toContain("`alternatives`")
+    // one run, a row per name drafted, before any line was written
+    expect(review.opened).toHaveLength(1)
+    expect(review.opened[0]).toMatchObject({ title: "Names for Cards, in Spanish", answerLabel: "Spanish" })
+    const label = review.rounds[0]!.find((row) => row.id === "names:label")!
+    expect(label).toMatchObject({
+      value: "etiqueta",
+      alternatives: ["rótulo", "leyenda"],
+      tick: { label: "for every project" },
+      cells: { english: "label", kind: "name", from: "Claude", gender: "feminine" }
+    })
+    expect(label.cells.lines).toBe('Card.spell:3  - its "label" is its color + " joker"')
+    expect(review.rounds[0]!.find((row) => row.id === "texts:red joker")!.tick).toBeUndefined()
+    expect(review.finished).toEqual(["done"])
+    // the dictionary:  the answers, marked reviewed;  the rest as drafted
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("rótulo")
+    expect(names.names?.color).toBe("color")
+    expect(names.texts?.["red joker"]).toBe("comodín colorado")
+    expect(names.reviewed).toEqual({ names: ["label"], texts: ["red joker"], types: ["card"] })
+    // the glossary:  the ticked one, as reviewed
+    const glossary = JSON5.parse(readFileSync(join(folder, "glossary.json5"), "utf8")) as GlossaryData
+    expect(glossary.names).toEqual({ card: { name: "carta", gender: "feminine", from: "reviewed" } })
+    // the lines:  written with the answers
+    expect(written()[6]).toBe('\tsu rótulo debería ser "comodín colorado"')
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  1 accepted, 1 typed, 1 picked, 1 for every project, 5 left as drafted"
+    )
+  })
+
+  test("an answer spell can't read comes back as a row of its own, saying why;  a readable one then goes in", async () => {
+    // the second round's row has an id of its own
+    const review = fakeReview((round) =>
+      round === 1 ? { "names:label": typed("carta") } : { "names:label~2": typed("rótulo") }
+    )
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    expect(review.rounds).toHaveLength(2)
+    expect(review.rounds[1]).toEqual([
+      expect.objectContaining({
+        id: "names:label~2",
+        value: "etiqueta",
+        details: expect.arrayContaining(["Not readable:  `carta`:  that's `card` already -- one word, one thing"])
+      })
+    ])
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("rótulo")
+  })
+
+  test("no Send in time:  every proposal kept, as drafted, and the report says so", async () => {
+    const review = fakeReview(() => ({ "names:label": { outcome: "typed", value: "rótulo" } }), { timedOut: true })
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("etiqueta")
+    expect(names.reviewed).toBeUndefined()
+    expect(review.finished).toEqual(["stopped"])
+    expect(printed()).toContain("  review:  /runs/test/:  no Send in time:  kept the names as drafted")
+  })
+
+  test("--no-ai:  the names still missing, to type;  a type's gender after it", async () => {
+    const review = fakeReview(() => ({ "types:card": { outcome: "typed", value: "naipe (m)" } }))
+    const claude = fakeClaude()
+    const options = { to: "es", out: join(folder, "Cartas"), review: true, ai: false }
+    // no checker:  the fake one reads the file as `Carta`
+    await translate({ ...source(), checker: undefined }, options, claude.run, false, review.open)
+    expect(claude.prompts).toEqual([])
+    const card = review.rounds[0]!.find((row) => row.id === "types:card")!
+    expect(card).toMatchObject({ value: "", cells: { from: "missing (--no-ai)" } })
+    expect(card.alternatives).toBeUndefined()
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.types?.card).toEqual({ name: "naipe", gender: "masculine" })
+    expect(readFileSync(join(folder, "Cartas", "Naipe.es.spell"), "utf8")).toMatch(/^un "naipe" es una cosa donde:/)
+  })
+
+  test("without --review no run opens, and nothing asks for alternatives;  --cold refuses it", async () => {
+    const review = fakeReview(() => ({}))
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run, false, review.open)
+    expect(review.opened).toEqual([])
+    expect(claude.prompts[1]).not.toContain("`alternatives`")
+    const cold = { to: "es", out: join(folder, "Cold"), cold: true, review: true }
+    await expect(translate(source(), cold, claude.run, false, review.open)).rejects.toThrow("drop --review")
+  })
+})
+
 ////////////////
 // ## Helpers
 ////////////////
@@ -346,9 +488,53 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
  * `translateProject()`, with the glossary in the temp folder:  none, unless a test writes one.
  * - `shapes`:  its checker hands back the translation's files, parsed, for the shape check.
  */
-function translate(source: TranslateSource, options: TranslateOptions, run: ClaudeRunner, shapes = false) {
+function translate(
+  source: TranslateSource,
+  options: TranslateOptions,
+  run: ClaudeRunner,
+  shapes = false,
+  openRun?: ReviewRunOpener
+) {
   if (shapes) source.checker = (out) => () => Promise.resolve({ problems: check(out), files: parsedIn(out) })
-  return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5") })
+  return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5"), openRun })
+}
+
+/** A typed answer, `value`. */
+function typed(value: string): Omit<SRV.RunAnswer, "at"> {
+  return { outcome: "typed", value }
+}
+
+/**
+ * A fake review run (`--review`), for `translate()`'s `openRun`:  each wait answers what `answers(round)` gives,
+ * from round 1, sent at once -- or, with `timedOut`, unsent.
+ * - It keeps what it was opened with, each round's rows, and how it finished.
+ */
+function fakeReview(
+  answers: (round: number) => Partial<Record<string, Omit<SRV.RunAnswer, "at">>>,
+  { timedOut = false } = {}
+) {
+  const opened: SRV.RunOpenProps[] = []
+  const rounds: SRV.RunRow[][] = []
+  const finished: string[] = []
+  let rows: SRV.RunRow[] = []
+  const open: ReviewRunOpener = (props) => {
+    opened.push(props)
+    return {
+      show: () => Promise.resolve("/runs/test/"),
+      progress: () => {},
+      setRows: (given) => (rows = given),
+      wait: () => {
+        rounds.push(rows)
+        const at = new Date().toISOString()
+        const given = Object.entries(answers(rounds.length)).flatMap(([id, answer]) =>
+          answer ? [[id, { ...answer, at }]] : []
+        )
+        return Promise.resolve({ rows: Object.fromEntries(given), ...(timedOut ? {} : { sent: at }), timedOut })
+      },
+      finish: (status = "done") => finished.push(status)
+    }
+  }
+  return { open, opened, rounds, finished }
 }
 
 /** The translation's file in `out`, parsed in a project of its own. */
@@ -398,7 +584,11 @@ function fakeClaude(answer: unknown = { fixes: [{ file: "Carta.es.spell", line: 
   const run: ClaudeRunner = (prompt) => {
     prompts.push(prompt)
     const reply =
-      kindOf(prompt) !== "fix-ups" ? NAMES : typeof answer === "function" ? (answer as () => unknown)() : answer
+      kindOf(prompt) !== "fix-ups"
+        ? { ...NAMES, alternatives: ALTERNATIVES }
+        : typeof answer === "function"
+          ? (answer as () => unknown)()
+          : answer
     return Promise.resolve(`\`\`\`json\n${JSON.stringify(reply)}\n\`\`\``)
   }
   return { run, prompts }
