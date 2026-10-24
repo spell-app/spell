@@ -37,9 +37,9 @@ test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...`
 
 // epic `epic-engine` P23:  a command run's folder holds no page;  the openers show its page, which the route serves
 test("a command run's folder, or a file in it, is its page, `runs/<id>/`;  nothing else is", () => {
-  const folder = join(CONTENT, "pages", "runs", "spell-lang-translate-20261023-1912")
-  expect(pagePath(folder)).toBe("runs/spell-lang-translate-20261023-1912/")
-  expect(runPagePath(join(folder, "run.json5"))).toBe("runs/spell-lang-translate-20261023-1912/")
+  const folder = join(CONTENT, "pages", "runs", "spell-translate-20261023-1912")
+  expect(pagePath(folder)).toBe("runs/spell-translate-20261023-1912/")
+  expect(runPagePath(join(folder, "run.json5"))).toBe("runs/spell-translate-20261023-1912/")
   expect(runPagePath(join(CONTENT, "pages", "runs"))).toBeUndefined()
   expect(runPagePath(join(CONTENT, "pages", "details", "x.html"))).toBeUndefined()
 })

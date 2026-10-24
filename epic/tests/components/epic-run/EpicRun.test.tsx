@@ -15,7 +15,7 @@ import "spell-epic/components/epic-run"
 /** A run of three rows:  one with alternatives, one with a tick box and details, one plain. */
 const RUN: RunPage = {
   id: "demo",
-  command: "spell lang translate todos --to es",
+  command: "spell translate todos --to es",
   title: "Names for todos, in Spanish",
   description: "Accept, type over, or pick;  Send and the translator writes the lines.",
   columns: [
@@ -107,7 +107,7 @@ describe("<epic-run>, <epic-run-row>", () => {
     adoptForm()
     const run = await drawRun()
     expect(run.matches(":state(waiting)")).toBe(true)
-    expect(part(run, "who")!.textContent).toBe("spell lang translate todos --to es is waiting")
+    expect(part(run, "who")!.textContent).toBe("spell translate todos --to es is waiting")
     expect(part(run, "description")!.textContent).toContain("Accept, type over")
     expect(part(run, "progress")!.textContent).toContain("waiting for Owen")
     expect(part(run, "progress")!.querySelector("summary")!.textContent).toBe("Progress · 2")

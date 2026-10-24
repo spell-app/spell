@@ -1547,7 +1547,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 ## Run pages
 
 - A COMMAND's review page (epic `epic-engine` P23):  a command, not Claude, stops to ask Owen, and carries on with his
-  answers.  The first:  the Spanish translator (`spell lang translate`), with the names it drafted.
+  answers.  The first:  the Spanish translator (`spell translate`), with the names it drafted.
 - Who does what (every arrow down):
   - the kit's `SRV.CommandRun` (`spell/server/runs/`):  writes the run's folder, `pages/runs/<id>/` in the content
     folder, waits for Send with a heartbeat, reads the answers back;  its files' shapes, the contract with this side:
