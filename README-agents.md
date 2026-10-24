@@ -320,7 +320,7 @@ the epic pages and their review loop, worktrees and VS Code windows, parking and
 and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
 
-- It adds 18 skills and 8 hooks, and puts `epic` on every session's `PATH`.
+- It adds 19 skills and 8 hooks, and puts `epic` on every session's `PATH`.
 - An edit to it is live at once for `epic` and the hooks (once step 5 below links them);  a skill's new text after
   `/reload-plugins`;  its inbox monitor in sessions started after.
 - A repo opts in with `.epic/config.json5`:  where its content folder, worktrees and windows are.
@@ -389,7 +389,7 @@ The kit's [.epic/config.json5](.epic/config.json5), key by key:
 A SKILL is a packaged workflow Claude runs when you type its name (`/epic seo`), or when what you ask matches it.
 A HOOK is a script Claude Code runs on an event:  a session starting, a prompt sent, a turn ending.
 
-The plugin brings 18 skills in three groups;  spell-app has five of its own.
+The plugin brings 19 skills in three groups;  spell-app has five of its own.
 
 | The plugin's [`skills/`](https://github.com/spell-app/spell-epic/tree/main/skills) | For |
 | --- | --- |
