@@ -36,6 +36,12 @@ const RENAMES: [RegExp, string][] = [
   [/command\.name\(\) === "lang"\)/g, 'command.name() === "parser")']
 ]
 
+/**
+ * A line that tells of the rename, an old name then an arrow (or "is now", "became") and a new one:
+ * left as it is, on main and on every branch (`(\`spell-lang\` => \`spell-parser\`, ...)`)
+ */
+const RENAME_MENTION = /spell-(kit|lang)\b`?\s*(=>|->|→|is now|became|becomes)\s*`?spell/
+
 /** spell-lang's folder:  old name, new name. */
 const OLD_FOLDER = "spell-lang"
 const NEW_FOLDER = "spell-parser"
@@ -77,13 +83,20 @@ function renameIn(repo: string): void {
     // binary:  a NUL byte
     if (before.includes("\0")) continue
     let count = 0
-    let after = before
-    for (const [pattern, name] of RENAMES) {
-      after = after.replace(pattern, () => {
-        count++
-        return name
+    // line by line:  a line that names the rename itself (`spell-lang` => `spell-parser`) keeps its old name
+    const after = before
+      .split("\n")
+      .map((line) => {
+        if (RENAME_MENTION.test(line)) return line
+        for (const [pattern, name] of RENAMES) {
+          line = line.replace(pattern, () => {
+            count++
+            return name
+          })
+        }
+        return line
       })
-    }
+      .join("\n")
     if (!count) continue
     changedFiles++
     changedNames += count
