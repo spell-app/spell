@@ -30,9 +30,9 @@ export const WAITING_HEARTBEAT_MS = 30_000
 
 /** What a command asks:  `run.json5`. */
 export type RunPage = {
-  /** the run's id:  its folder's name, `<command slug>-<time>` (`spell-parser-translate-20261023-1912`) */
+  /** the run's id:  its folder's name, `<command slug>-<time>` (`spell-translate-20261023-1912`) */
   id: string
-  /** the command, as Owen would type it:  `spell parser translate todos --to es` */
+  /** the command, as Owen would type it:  `spell translate todos --to es` */
   command: string
   /** the page's title:  `Names for todos, in Spanish` */
   title: string

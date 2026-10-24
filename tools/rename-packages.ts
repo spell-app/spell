@@ -27,6 +27,13 @@ const TOP = resolve(import.meta.dirname, "..")
 
 /** Each old name, as a whole name (no letter, digit, `_` or `-` before;  no letter, digit or `_` after), and its new one. */
 const RENAMES: [RegExp, string][] = [
+  // spell-parser's translating tools are `spell translate ...` (epic `repo-split` P18, Q55), first:  the rules
+  // below would make them `spell parser ...`
+  [/\bspell (?:lang|parser) packs check\|fix\b/g, "spell translate check|fix"],
+  [/\bspell (?:lang|parser) packs (check|fix)\b/g, "spell translate $1"],
+  [/\bspell (?:lang|parser) translate-time\b/g, "spell translate speedtest"],
+  [/\bspell (?:lang|parser) translate\b/g, "spell translate"],
+  [/(?<![\w-])spell-(?:lang|parser)-translate(?=-)/g, "spell-translate"],
   [/(?<![\w-])spell-kit(?!\w)/g, "spell"],
   [/(?<![\w-])spell-lang(?!\w)/g, "spell-parser"],
   [/\bspellLangRepo\b/g, "spellParserRepo"],

@@ -45,7 +45,7 @@ const ROWS: SRV.RunRow[] = [
 function openRun(): SRV.CommandRun {
   return SRV.CommandRun.open({
     root,
-    command: "spell parser translate todos --to es",
+    command: "spell translate todos --to es",
     title: "Names for todos, in Spanish",
     columns: [{ key: "english", label: "English" }],
     answerLabel: "Spanish",
@@ -70,13 +70,13 @@ function after(ms: number): Promise<void> {
 describe("CommandRun.open()", () => {
   test("writes run.json5 in pages/runs/<id>/, status open, and gives its page's path", () => {
     const run = openRun()
-    expect(run.id).toMatch(/^spell-parser-translate-todos-\d{8}-\d{4}(-\d+)?$/)
+    expect(run.id).toMatch(/^spell-translate-todos-\d{8}-\d{4}(-\d+)?$/)
     expect(run.folder).toBe(join(content, "pages/runs", run.id))
     expect(run.path).toBe(`/runs/${run.id}/`)
     expect(run.url("http://127.0.0.1:4747/")).toBe(`http://127.0.0.1:4747/runs/${run.id}/`)
     expect(run.page).toMatchObject({
       id: run.id,
-      command: "spell parser translate todos --to es",
+      command: "spell translate todos --to es",
       answerLabel: "Spanish",
       rows: ROWS,
       progress: [],
@@ -147,7 +147,7 @@ describe("CommandRun.wait()", () => {
     expect(SRV.CommandRun.isWaiting(run.folder)).toBe(true)
     expect(SRV.DataFile.read(join(run.folder, SRV.RUN_FILES.waiting))).toMatchObject({
       pid: process.pid,
-      command: "spell parser translate todos --to es"
+      command: "spell translate todos --to es"
     })
     // an answer without Send doesn't end it
     answer(run, { rows: { todo: ACCEPTED } })

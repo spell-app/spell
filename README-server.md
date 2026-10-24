@@ -583,7 +583,7 @@ A command can stop, show rows to answer on a page, wait for Send, and carry on w
 
 ```ts
 const run = SRV.CommandRun.open({
-  root, command: "spell parser translate todos --to es", title: "Names for todos, in Spanish",
+  root, command: "spell translate todos --to es", title: "Names for todos, in Spanish",
   columns: [{ key: "english", label: "English" }], answerLabel: "Spanish",
   rows: [{ id: "todo", cells: { english: "Todo" }, value: "Tarea", alternatives: ["Pendiente"] }]
 })
