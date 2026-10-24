@@ -72,8 +72,11 @@
   .site-nav {
     position: sticky;
     top: var(--site-top);
-    /* over the section titles, which run out under it to the page's edge */
-    z-index: calc(var(--ui-z-sticky) + 1);
+    /*
+     * over the page's bars:  the title line (+3), the tabs, the section titles, which run out to its edge;
+     * so its shadow falls on them, as on the page (under the title line, its shadow was cut off:  "Another gradient bobble")
+     */
+    z-index: calc(var(--ui-z-sticky) + 4);
     box-sizing: border-box;
     height: calc(100dvh - var(--site-top));
     padding: var(--site-nav-margin);
@@ -649,7 +652,8 @@
   .site-aside {
     position: sticky;
     top: calc(var(--site-top) + var(--site-nav-margin));
-    z-index: calc(var(--ui-z-sticky) + 1);
+    /* over the page's bars, as the nav column is */
+    z-index: calc(var(--ui-z-sticky) + 4);
     box-sizing: border-box;
     height: calc(100dvh - var(--site-top) - 2 * var(--site-nav-margin));
     margin: var(--site-nav-margin);
@@ -669,47 +673,6 @@
     border-radius: var(--ui-docs-nav-radius, var(--ui-radius-l));
     box-shadow: var(--ui-docs-nav-shadow, var(--ui-shadow-raised));
   }
-  /*
-   * its site links:  ONE row that scrolls with `‹` / `›`, as the top bar's
-   * (bars don't wrap:  they wrapped onto four rows in the column's width)
-   */
-  .site-aside-bar {
-    width: 100%;
-  }
-  .site-aside-bar::part(menu) {
-    border: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-  .site-aside-links {
-    flex: none;
-  }
-  .site-aside-links::part(bar),
-  .site-aside-links::part(nav) {
-    flex-wrap: nowrap;
-  }
-  /* its palette a plain icon, as every other */
-  .site-aside-themes::part(palette) {
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-  .site-aside-themes::part(palette):hover {
-    background: color-mix(in oklab, currentColor 10%, transparent);
-  }
-  /* its header:  the docked site header over the look controls, a rule below them */
-  .site-aside-head {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding-block-end: 1.25em;
-    margin-block-end: 1.5em;
-    border-block-end: 1px solid var(--ui-border-color);
-  }
-
   /* ## Content:  section headers land below the fixed bar */
   .site-tabs [id],
   .site-article [id] {
