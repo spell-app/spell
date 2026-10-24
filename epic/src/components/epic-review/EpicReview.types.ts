@@ -34,8 +34,10 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `thread`:  a comment thread's, while it's Owen's turn (`<epic-thread>`, epic `epic-engine` P3):
  *   That's good, Reply, Skip it (`THREAD_BUTTONS`);  no note box, no inbox
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
+ * - `proposal`:  an open phase while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
+ *   P29):  Looks good and Defer (`PROPOSAL_BUTTONS`);  its note box a part's
  */
-export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed"] as const
+export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal"] as const
 
 /** One of `REVIEW_KINDS`. */
 export type ReviewKind = (typeof REVIEW_KINDS)[number]
@@ -70,15 +72,24 @@ export type ReviewButtonSpec = {
    * what it does (`ReviewClient.press()`;  `details` is Do Now, the inbox's name for an immediate request;
    * `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "details" | "next" | "drop"
+  action: "approve" | "todo" | "revisit" | "details" | "next" | "drop" | "defer"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
   icon: string
   /** its name:  the plain tooltip */
-  label: "approve" | "todo" | "revisit" | "doNow" | "next" | "revisitNote" | "drop"
+  label: "approve" | "todo" | "revisit" | "doNow" | "next" | "revisitNote" | "drop" | "looksGood" | "defer"
   /** what it does, for a screen reader */
-  tip: "approveTip" | "todoTip" | "revisitTip" | "doNowTip" | "nextTip" | "revisitNoteTip" | "dropTip"
+  tip:
+    | "approveTip"
+    | "todoTip"
+    | "revisitTip"
+    | "doNowTip"
+    | "nextTip"
+    | "revisitNoteTip"
+    | "dropTip"
+    | "looksGoodTip"
+    | "deferTip"
 }
 
 /**
@@ -116,13 +127,26 @@ export const TODO_BUTTONS: readonly ReviewButtonSpec[] = [
  */
 export const PART_BUTTONS: readonly ReviewButtonSpec[] = REVIEW_BUTTONS.filter((spec) => spec.action !== "approve")
 
+/**
+ * An open phase's review buttons while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
+ * P29;  Owen, 2026-10-24:  "when in 'approval' mode like this, these buttons were 'looks good' and 'defer'"):
+ * - Looks good (`approve`, green:  decided):  the phase stands as written;  `inbox apply` notes it
+ * - Defer (`defer`, grey:  not now):  the phase after the others, still to do;  `inbox apply` moves it
+ * - the usual part buttons (`PART_BUTTONS`) come back once building starts
+ */
+export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "approve", color: "green", icon: "thumbs up", label: "looksGood", tip: "looksGoodTip" },
+  { action: "defer", color: "grey", icon: "clock", label: "defer", tip: "deferTip" }
+]
+
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
   todo: TODO_BUTTONS,
   part: PART_BUTTONS,
   thread: [],
-  closed: []
+  closed: [],
+  proposal: PROPOSAL_BUTTONS
 }
 
 /**
@@ -233,7 +257,8 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   todo: TODO_NOTE_BUTTONS,
   part: NOTE_BUTTONS,
   thread: [],
-  closed: []
+  closed: [],
+  proposal: NOTE_BUTTONS
 }
 
 ////////////////
@@ -344,6 +369,8 @@ export const REVIEW_NAME_TEXTS = [
     description: "A todo's review button:  Revisit's name."
   },
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
+  { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
+  { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
 
@@ -372,6 +399,16 @@ export const REVIEW_TEXTS = [
     key: "dropTip",
     text: "Canceled, struck through, once Claude applies it",
     description: "A todo's review button:  what the x does."
+  },
+  {
+    key: "looksGoodTip",
+    text: "The phase stands as written",
+    description: "A phase's review button while the phases are agreed:  what Looks good does."
+  },
+  {
+    key: "deferTip",
+    text: "Later:  after the other phases, still to do, once Claude applies it",
+    description: "A phase's review button while the phases are agreed:  what Defer does."
   },
   {
     key: "waiting",

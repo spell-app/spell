@@ -217,7 +217,7 @@ export type ItemDescription = {
   id: string
   /**
    * `PlanItem.kindOf()`'s:  `judgement`, `overview` (an Overview sub-section, Q14), `item` (an id of no kind);
-   * `phase` and `summary` (epic `airplane` P2)
+   * `phase` and `summary` (epic `airplane` P2);  `stage`, the page header's stage button (epic `epic-engine` P29)
    */
   kind: string
   /** its status, `open` when missing */
@@ -505,6 +505,8 @@ export type PlanMark = {
   result?: string
   /** a test answer's screenshot, from the epic page's folder:  `tests/v3-20261019-1432.png` */
   shot?: string
+  /** the stage a stage button's mark ends (`action: "accept"`, epic `epic-engine` P29):  `overview`, `phases` */
+  stage?: string
   /** when Owen made the mark (ISO) */
   at?: string
 }

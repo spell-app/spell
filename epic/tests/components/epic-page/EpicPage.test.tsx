@@ -458,6 +458,11 @@ class FakeRoutes {
         this.inbox.sent = new Date(Date.now() + 1000).toISOString()
         this.inbox.unsentComments = []
       }
+      if (route === "mark") {
+        const { id, mark } = body as { id: string; mark: Inbox["marks"][string] | null }
+        if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
+        else delete this.inbox.marks[id]
+      }
       if (route === "new") {
         const at = new Date().toISOString()
         this.inbox.marks.new1 = { ...(body.entry as object), action: "new", at } as Inbox["marks"][string]
@@ -1031,5 +1036,116 @@ describe("<epic-page> Agents running", () => {
     await client.refresh()
     await ElementFixture.tick()
     expect(agentsRoot(host).querySelector(".agents")).toBeNull()
+  })
+})
+
+////////////////
+// ## Stages (epic `epic-engine` P29)
+////////////////
+
+/** A page in `stage` (none:  `""`):  an open phase and a done one, a question, a judgement call, todos and the log. */
+function stagedPage(stage: string): string {
+  return (
+    `<epic-page epic="demo" title="Demo"${stage ? ` stage="${stage}"` : ""}>` +
+    `<epic-overview id="overview"><p slot="summary">Two sentences.</p></epic-overview>` +
+    `<epic-section id="phases" kind="phases">` +
+    `<epic-phase id="p-one" title="One" status="todo"></epic-phase>` +
+    `<epic-phase id="p-two" title="Two" status="done"></epic-phase></epic-section>` +
+    `<epic-section id="decisions" kind="questions"><epic-item id="q1" title="Which?" status="open"></epic-item>` +
+    `<epic-item id="q2" title="That?" status="open"></epic-item></epic-section>` +
+    `<epic-section id="judgements" kind="judgements"><epic-item id="j1" title="Kept" status="open"></epic-item></epic-section>` +
+    `<epic-section id="todos" kind="todos"><epic-item id="t1" title="Later" status="open"></epic-item></epic-section>` +
+    `<epic-section id="log" kind="log"><epic-event at="2026-10-24T10:00">made</epic-event></epic-section>` +
+    `</epic-page>`
+  )
+}
+
+/** The page's top-level blocks that show, each as its title says:  `2. Questions`. */
+function shownBlocks(host: Element): string[] {
+  return Array.from(host.children)
+    .filter((block) => getComputedStyle(block).display !== "none")
+    .map((block) => (block as unknown as { contentsEntry?: { label: string } }).contentsEntry?.label ?? block.id)
+}
+
+/** `phase`'s review buttons, by action. */
+function pillsOf(phase: Element): string[] {
+  const review = phase.shadowRoot!.querySelector('epic-review[shows="buttons"]')
+  return Array.from(review?.shadowRoot?.querySelectorAll("ui-button[data-action]") ?? [], (button) =>
+    button.getAttribute("data-action")!
+  )
+}
+
+describe("<epic-page> stages", () => {
+  afterEach(() => {
+    ReviewClient.adopt(undefined)
+  })
+
+  test("overview:  only the Overview, Questions and Todos show, numbered as they show;  the toolbar's chips count only them", async () => {
+    const host = await render(stagedPage("overview"))
+    await vi.waitFor(() => expect(shownBlocks(host)).toEqual(["1. Overview", "2. Questions", "3. Todos"]))
+    // the step label says the stage, not a phase that doesn't show
+    expect(step(host)?.words).toBe("OVERVIEW")
+    // the file still holds them:  only a view
+    expect(host.querySelectorAll(":scope > epic-section")).toHaveLength(5)
+    await vi.waitFor(() =>
+      expect(pageChips(host).reduce((sum, chip) => sum + Number(chip.replace(/\D/g, "")), 0)).toBe(3)
+    )
+  })
+
+  test("phases:  the Phases too;  building, or no stage (every page before stages):  everything", async () => {
+    const phases = await render(stagedPage("phases"))
+    await vi.waitFor(() =>
+      expect(shownBlocks(phases)).toEqual(["1. Overview", "2. Phases", "3. Questions", "4. Todos"])
+    )
+    expect(step(phases)?.words).toBe("PHASES")
+    for (const stage of ["building", ""]) {
+      const host = await render(stagedPage(stage))
+      await vi.waitFor(() => expect(shownBlocks(host)).toHaveLength(6))
+    }
+    // the stage moved on (the live update patches the attribute):  the sections follow
+    phases.setAttribute("stage", "building")
+    await vi.waitFor(() => expect(shownBlocks(phases)).toHaveLength(6))
+  })
+
+  test("the header's stage button:  Accept Overview in Send's place, what's open in its tooltip;  a press sends its mark;  building:  Send again", async () => {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.listening = { session: "s1", since: at, seen: at }
+    await adoptClient(routes)
+    const host = await render(stagedPage("overview"))
+    const button = () => plane(host)
+    await vi.waitFor(() => expect(button()?.textContent).toContain("Accept Overview"))
+    expect(button().title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
+    // the wand stays:  the countdown still sends answers by itself
+    expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).not.toBeNull()
+    button().click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
+    expect(routes.posts[0]![1]).toEqual({
+      page: "/epics/demo/demo.plan.html",
+      id: "stage",
+      mark: { action: "accept", stage: "overview" }
+    })
+    routes.inbox.marks.stage = { action: "accept", stage: "overview", at }
+    await ReviewClient.forPage().refresh()
+    await vi.waitFor(() => expect(sendGroup(host).hasAttribute("accepted")).toBe(true))
+    expect(button().title).toBe("Overview accepted:  waiting for Claude to write the phases")
+    // the session moved it on:  Accept Phases;  then building, the plane
+    host.setAttribute("stage", "phases")
+    await vi.waitFor(() => expect(button().textContent).toContain("Accept Phases"))
+    expect(sendGroup(host).hasAttribute("accepted")).toBe(false)
+    host.setAttribute("stage", "building")
+    await vi.waitFor(() => expect(sendGroup(host).hasAttribute("accept")).toBe(false))
+    expect(button().textContent).not.toContain("Accept")
+    await expectAccessible(host)
+  })
+
+  test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {
+    await adoptClient(new FakeRoutes())
+    const host = await render(stagedPage("phases"))
+    const [one, two] = Array.from(host.querySelectorAll("epic-phase"))
+    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["approve", "defer"]))
+    expect(pillsOf(two!)).toEqual(["revisit", "todo", "details"])
+    host.setAttribute("stage", "building")
+    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["revisit", "todo", "details"]))
   })
 })

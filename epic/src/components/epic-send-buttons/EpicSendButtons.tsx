@@ -25,6 +25,10 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *   - while it counts (mode on, something not sent):  a very light grey ring round it turns blue, clockwise, over
  *     the 2 minutes, starting again at every key, click or scroll on the page;  its tooltip says how long is left
  *   - at the end the owner is asked to send (`auto` true):  an epic page sends as Review Now did (decision Q7)
+ * - a STAGE BUTTON in the plane's place (`accept`, epic `epic-engine` P29):  a check and its words ("Accept
+ *   Overview"), green;  a press asks its owner as the plane's does, and the owner accepts the stage
+ *   - outlined green once pressed (`accepted`), waiting for the session to move the page on
+ *   - the wand stays:  the countdown still sends what's unsent by itself
  * - the countdown is the PAGE's, not this element's:  a Send drawn again (a guide's, at every redraw of its comments)
  *   finds it where it was, its ring too
  * - its owners:  `<epic-page>` (the header), `<epic-send>` (a details page) and the docs runtime's comments
@@ -63,10 +67,16 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return !this.manual && !!this.countdown?.isRunning
   }
 
-  /** Countdown off, something not sent:  the plane is filled, waiting for a press. */
+  /** Countdown off, something not sent:  the plane is filled, waiting for a press;  never the stage button. */
   @E.cssState("waiting")
   get isWaiting(): boolean {
-    return !this.isCountdownOn && this.isUnsent
+    return !this.accept && !this.isCountdownOn && this.isUnsent
+  }
+
+  /** The plane's place holds the stage button (`accept`):  its words, not the plane. */
+  @E.cssState("stage")
+  get isStageButton(): boolean {
+    return !!this.accept
   }
 
   /** Something not sent yet. */
@@ -116,20 +126,26 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
         part={this.partForName("base")}
         role="group"
         aria-label={this.translationForKey("group")}
-        data-state={this.state ?? "idle"}
+        data-state={this.groupState}
       >
         <button
           type="button"
-          class={SEND}
+          class={[SEND, { [ACCEPT]: !!this.accept }]}
           part={this.partForName("send")}
-          data-state={this.state ?? "idle"}
+          data-state={this.groupState}
           aria-busy={this.busy ? "true" : undefined}
-          aria-label={this.sendTip || this.translationForKey("send")}
-          title={this.sendTip || this.translationForKey("send")}
+          aria-label={this.sendTip || this.accept || this.translationForKey("send")}
+          title={this.sendTip || this.accept || this.translationForKey("send")}
           onClick={() => this.askToSend(false)}
         >
-          <ui-icon name={this.busy ? "circle notch" : "paper plane"} loading={this.busy ? "" : undefined} />
-          <Show when={(this.count ?? 0) > 0}>
+          <ui-icon
+            name={this.busy ? "circle notch" : this.accept ? "circle check" : "paper plane"}
+            loading={this.busy ? "" : undefined}
+          />
+          <Show when={this.accept}>
+            <span class={ACCEPT_WORDS}>{this.accept}</span>
+          </Show>
+          <Show when={!this.accept && (this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
               {this.count}
             </span>
@@ -165,6 +181,15 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     )
   }
 
+  /**
+   * The group's `data-state`, its outline and the plane's colour:  `state`;  the stage button's own,
+   * `accepted` once pressed, else `idle`.
+   */
+  get groupState(): string {
+    if (this.accept) return this.accepted ? "accepted" : "idle"
+    return this.state ?? "idle"
+  }
+
   /** The wand's tooltip:  the mode, when it sends, what a click does. */
   get countdownTip(): string {
     if (!this.isCountdownOn) return this.translationForKey("countdownOff")
@@ -188,6 +213,8 @@ export interface EpicSendButtons extends E.AttributeValues<typeof epicSendButton
 /** Classes of the shadow markup. */
 const GROUP = "group"
 const SEND = "send"
+const ACCEPT = "accept"
+const ACCEPT_WORDS = "accept-words"
 const COUNT = "count"
 const COUNTDOWN = "countdown"
 const RING = "ring"

@@ -139,3 +139,33 @@ describe("<epic-send-buttons>", () => {
     })
   })
 })
+
+// epic `epic-engine` P29:  the stage button in the plane's place
+describe("<epic-send-buttons accept>", () => {
+  test("a check and its words in the plane's place, green, no badge;  a press asks as the plane's;  accepted:  outlined green", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(
+      `<epic-send-buttons state="unsent" count="2" accept="Accept Overview" send-tip="The Overview is agreed"></epic-send-buttons>`
+    )
+    await ElementFixture.settle()
+    const send = part(group, "send")!
+    expect(send.textContent!.trim()).toBe("Accept Overview")
+    expect(send.querySelector("ui-icon")!.getAttribute("name")).toBe("circle check")
+    expect(part(group, "count")).toBeNull()
+    expect(part(group, "base")!.dataset.state).toBe("idle")
+    // never the plane's filled blue, the countdown off or not
+    expect(getComputedStyle(send).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
+    const heard = asks(group)
+    send.click()
+    expect(heard).toEqual([false])
+    const rule = () => getComputedStyle(part(group, "base")!).borderTopColor
+    const grey = rule()
+    group.setAttribute("accepted", "")
+    await ElementFixture.tick()
+    expect(part(group, "base")!.dataset.state).toBe("accepted")
+    // the words' green
+    expect(rule()).not.toBe(grey)
+    expect(rule()).toBe(getComputedStyle(send).color)
+    await expectAccessible(group)
+  })
+})

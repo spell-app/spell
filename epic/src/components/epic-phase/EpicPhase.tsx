@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { PhaseIds } from "spell-epic/phases"
+import { PageStages, PhaseIds } from "spell-epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
@@ -49,6 +49,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
  *   - Revisit and Edit unfold it (`epic-show-note`)
+ *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
+ *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -80,6 +82,16 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** How many plan changes its title says it has:  `changes`, while it isn't done;  0 for none. */
   get changedCount(): number {
     return this.shownStatus === "done" ? 0 : (this.changes ?? 0)
+  }
+
+  /**
+   * PROPOSED:  open (not done), on a page whose phases are being agreed (`stage="phases"`, epic `epic-engine` P29):
+   * its review pills are Looks good and Defer.
+   * - read again on every layout change (the page's `layout`:  its `stage` changing too)
+   */
+  get isProposed(): boolean {
+    void this.layout
+    return this.shownStatus !== "done" && PageStages.of(this.page) === "phases"
   }
 
   /**
@@ -177,7 +189,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   // ## Review
   ////////////////
 
-  /** The review buttons at the title's end:  Revisit, Make Todo, Do Now. */
+  /** The review buttons at the title's end:  Revisit, Make Todo, Do Now;  proposed, Looks good and Defer. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
   }
@@ -192,7 +204,13 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
     return (
-      <epic-review of={this.id} label={`P${this.number}`} shows={shows} buttons="part" part={this.partForName(part)} />
+      <epic-review
+        of={this.id}
+        label={`P${this.number}`}
+        shows={shows}
+        buttons={this.isProposed ? "proposal" : "part"}
+        part={this.partForName(part)}
+      />
     )
   }
 

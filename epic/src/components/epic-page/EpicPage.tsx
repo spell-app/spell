@@ -6,8 +6,8 @@ import { E, UI } from "spell-ui/core"
 import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell-epic/list/EpicState"
 
 import { PlanDates } from "spell-epic/dates"
-import { PhaseIds } from "spell-epic/phases"
-import { NOBODY_LISTENING, SAGA_PREFIX, isAirplane, isImmediate } from "spell-epic/review"
+import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
+import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, isAirplane, isImmediate } from "spell-epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
@@ -68,6 +68,7 @@ import {
   type HeaderMarks,
   type PageSignals,
   type PhaseLine,
+  type StageButton,
   type StepLabel
 } from "./EpicPage.types"
 
@@ -98,7 +99,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *       as the tooltip once the page server says them (`GET /api/epics/pages`'s `saga`);  by its id until then, and
  *       from `file://`
  *   - a future epic's notice, then its children
- * - The step label follows the phases, in the colours of decision Q20:
+ * - The step label follows the phases, in the colours of decision Q20;  while the page is in a stage (P29), the stage
+ *   instead (`OVERVIEW`, `PHASES`, grey), since its phases may not show yet, and none while the stage button shows,
+ *   which says it in its words:
  *   - the active one (outlined blue:  Claude is on it;  links to it)
  *   - else DONE (solid green) once every phase is done;  else the next one (grey)
  *   - none without phases;  FUTURE (grey:  not started) for a future epic
@@ -127,6 +130,15 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     as Review Now did (decision Q7).  Off, the plane is filled blue until he presses it.
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
+ * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
+ *   - `overview`:  only the Overview, Questions and Todos show;  `phases`:  the Phases too;  `building` (or none):
+ *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
+ *     what shows (`spell-doc-runtime.js` reads the same rule)
+ *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON (Q14:  "Accept Overview", then
+ *     "Accept Phases";  `stageButton()`):  a press sends what's unsent, with an accept mark (`accept()`), and the
+ *     session moves the page on (`epic inbox apply`);  its tooltip says what's still open ("2 questions open"),
+ *     a reminder, never a lock.  The wand stays:  the countdown still sends Owen's answers by itself
+ *   - Send's plane is back once building starts
  * - THE PILL, under the review line, while marks, comments or Do Now requests wait and nobody can take them:
  *   no session listening (solid orange, a warning), or airplane mode;  a click copies the review line's command,
  *   and, out of airplane mode, starts the review in the epic's own session (`ReviewClient.startReview()`)
@@ -340,7 +352,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    */
   readonly state = createMemo((): EpicState | undefined => {
     this.signals.layout.get()
-    if (this.isSaga) return undefined
+    // a saga has no phases;  a page still being agreed says its stage instead (P29)
+    if (this.isSaga || PageStages.isPlanning(this.pageStage)) return undefined
     const phases = this.phases()
     const active = phases.find((phase) => phase.status === ACTIVE)
     const client = this.review.client
@@ -357,11 +370,55 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
+   * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):  its words, its tooltip,
+   * and whether it was pressed (its mark, `stage`, in the inbox);  `undefined` once building, or not reviewed.
+   * - the tooltip says what's still open:  the open questions ("2 questions open"), a reminder, never a lock
+   */
+  readonly stageButton = createMemo((): StageButton | undefined => {
+    this.signals.layout.get()
+    const stage = this.pageStage
+    const client = this.review.client
+    if (!PageStages.isPlanning(stage) || !this.review.reviewing() || !client) return undefined
+    const mark = client.inbox.marks[STAGE_ID]
+    const accepted = mark?.action === "accept" && mark.stage === stage
+    const texts = STAGE_TEXTS[stage]
+    const open = this.domElement.querySelectorAll(OPEN_QUESTIONS).length
+    const unsent = client.unsentMarkCount + client.unsentCommentCount - (accepted && !client.isSent(mark) ? 1 : 0)
+    const still = open
+      ? this.translationForKey(open === 1 ? "openQuestionsOne" : "openQuestionsMany", { count: open })
+      : this.translationForKey("nothingOpen")
+    const tip = accepted
+      ? this.translationForKey(texts.accepted)
+      : [
+          this.translationForKey(texts.tip),
+          still,
+          unsent ? this.translationForKey("acceptSends", { count: unsent }) : ""
+        ]
+          .filter(Boolean)
+          .join(" · ")
+    return { label: this.translationForKey(texts.label), tip, accepted }
+  })
+
+  /**
    * The step label;  `undefined` for none.
    * - while the epic has a state (`state()`), its icon and colour are the state's, the state's why under its tooltip
    *   (Owen, 2026-10-10:  the state's own mark beside it only repeated it)
    */
   readonly step = createMemo((): StepLabel | undefined => {
+    this.signals.layout.get()
+    // still being agreed (epic `epic-engine` P29):  the stage, not a phase that may not show yet
+    const stage = this.pageStage
+    if (PageStages.isPlanning(stage)) {
+      // the stage button says it already, in its words:  no second label beside it (and room for the name on a phone)
+      if (this.stageButton()) return undefined
+      const texts = STAGE_TEXTS[stage]
+      return {
+        color: "grey",
+        icon: "route",
+        words: this.translationForKey(texts.step),
+        tip: this.translationForKey(texts.stepTip)
+      }
+    }
     const label = this.phaseStep()
     const state = this.state()
     if (!label || !state) return label
@@ -372,6 +429,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       tip: `${label.tip ?? label.words}\n${state.tip}`
     }
   })
+
+  /** The page's stage (`stage`):  `building` for none (`PageStages.read()`);  a saga page is always building. */
+  get pageStage(): PageStage {
+    return this.isSaga ? "building" : PageStages.read(this.stage)
+  }
 
   /** Where the page's marks stand, for Send and the pill;  `undefined` while the page isn't reviewed. */
   readonly marks = createMemo((): HeaderMarks | undefined => {
@@ -845,12 +907,19 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * - a press, or the countdown running out:  `onSendAsked()`
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
+    const stage = () => this.stageButton()
     return (
       <epic-send-buttons
         class={SEND}
         part={this.partForName("send")}
         state={marks().send}
-        send-tip={this.withNobody(this.sendWords(marks()), marks(), marks().send !== "idle")}
+        accept={stage()?.label}
+        accepted={stage()?.accepted ? "" : undefined}
+        send-tip={
+          stage()
+            ? this.withNobody(stage()!.tip, marks(), true)
+            : this.withNobody(this.sendWords(marks()), marks(), marks().send !== "idle")
+        }
       />
     )
   }
@@ -863,7 +932,27 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.on(SEND_ASKED, { target: "renderRoot" })
   protected onSendAsked(event: CustomEvent<SendAskedDetail>) {
     event.stopPropagation()
-    void this.review.client?.send({ now: event.detail.auto })
+    if (!event.detail.auto && this.stageButton()) void this.accept()
+    else void this.review.client?.send({ now: event.detail.auto })
+  }
+
+  /**
+   * The STAGE BUTTON pressed (Accept Overview, Accept Phases;  epic `epic-engine` P29):  the page's accept mark
+   * (`{ action: "accept", stage }`, keyed `stage`), then Send, so it goes at once with whatever else is unsent and wakes
+   * the epic when nobody listens.
+   * - pressed again once accepted:  sent again, nothing more (the mark stands until the session applies it)
+   */
+  @E.untracked
+  private async accept() {
+    const client = this.review.client
+    if (!client) return
+    const stage = this.pageStage
+    if (!PageStages.isPlanning(stage)) return
+    const mark = client.markOf(STAGE_ID)
+    if (mark?.action !== "accept" || mark.stage !== stage) {
+      if (!(await client.save(STAGE_ID, { action: "accept", stage }))) return
+    }
+    await client.send()
   }
 
   /**
@@ -1147,7 +1236,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /** The sections below that have a state filter (`DOMEpicSectionElement`):  the item sections. */
   private filterHosts(): FilterHost[] {
-    return Array.from(this.domElement.querySelectorAll<FilterHost>(SECTIONS))
+    // not the sections the page's stage hides (P29):  their chips would count what doesn't show
+    return Array.from(this.domElement.querySelectorAll<FilterHost>(SECTIONS)).filter(
+      (section) => !PageStages.hides(section)
+    )
   }
 
   /**
@@ -1276,6 +1368,27 @@ type FilterHost = E.DOMElement & {
 
 /** The sections, which filter their items. */
 const SECTIONS = "epic-section"
+
+/** The stage button's texts, by the stage it ends. */
+const STAGE_TEXTS = {
+  overview: {
+    label: "acceptOverview",
+    tip: "acceptOverviewTip",
+    accepted: "acceptedOverview",
+    step: "stageOverview",
+    stepTip: "stageOverviewTip"
+  },
+  phases: {
+    label: "acceptPhases",
+    tip: "acceptPhasesTip",
+    accepted: "acceptedPhases",
+    step: "stagePhases",
+    stepTip: "stagePhasesTip"
+  }
+} as const
+
+/** The open questions:  what the stage button's tooltip counts (epic `epic-engine` P29). */
+const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"

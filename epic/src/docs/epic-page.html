@@ -456,6 +456,15 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>stage</code></td>
+                    <td><code>overview</code> · <code>phases</code> · <code>building</code></td>
+                    <td>
+                      How far planning has got, and so which sections show (epic <code>epic-engine</code> P29): see
+                      "8. Stages". Absent: <code>building</code>, so a page made before stages looks as it did.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>bedtime</code></td>
                     <td>text</td>
                     <td>
@@ -834,6 +843,84 @@
                       </epic-overview>
                       <epic-section id="epics" kind="epics"><epic-cards saga="epics"></epic-cards></epic-section>
                       <epic-section id="decisions" kind="questions"></epic-section>
+                      <epic-section id="todos" kind="todos"></epic-section>
+                      <epic-section id="log" kind="log">...</epic-section>
+                    </epic-page>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+          <ui-section id="8-stages" label="8. Stages" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="route"></ui-icon>
+            <p>
+              A page goes through three stages (epic <code>epic-engine</code> P29): the Overview is agreed first, then
+              the phases, then it's built. Its <code>stage</code> says which, and decides what the page shows.
+            </p>
+            <ui-table celled compact striped unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stage</th>
+                    <th>What shows</th>
+                    <th>The header's button</th>
+                    <th>An open phase's pills</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>overview</code></td>
+                    <td>the Overview, Questions, Todos</td>
+                    <td>Accept Overview</td>
+                    <td>(no phases show)</td>
+                  </tr>
+                  <tr>
+                    <td><code>phases</code></td>
+                    <td>the Phases too</td>
+                    <td>Accept Phases</td>
+                    <td>Looks good, Defer</td>
+                  </tr>
+                  <tr>
+                    <td><code>building</code>, or none</td>
+                    <td>everything</td>
+                    <td>Send (the paper plane)</td>
+                    <td>Revisit, Make Todo, Do Now</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Hiding is only a view: the file still holds every section, and the toolbar lists only what shows. The
+                sections are numbered as they show (<code>2. Questions</code> while the Overview is agreed).
+              </li>
+              <li>
+                The button sits where Send's paper plane does; the wand stays, so the countdown still sends answers by
+                itself. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
+              </li>
+              <li>
+                A press sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
+                page on a stage, then writes the phases (after the Overview) or starts building (after the phases).
+                Pressed, the button is outlined green until then.
+              </li>
+              <li>
+                Defer moves a phase after the others, still to do; Looks good says it stands as written. Both wait for
+                Send, as every pill does.
+              </li>
+              <li>
+                <code>epic create</code> starts a new epic in <code>overview</code>, a future one too;
+                <code>epic stage &lt;epic&gt; overview|phases|building</code> sets it by hand.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" styled>
+              <ui-title>A page agreeing its Overview · 7 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-page epic="seo" title="Search Engines" stage="overview">
+                      <epic-overview id="overview">...</epic-overview>
+                      <epic-section id="phases" kind="phases"></epic-section>
+                      <epic-section id="decisions" kind="questions">...</epic-section>
                       <epic-section id="todos" kind="todos"></epic-section>
                       <epic-section id="log" kind="log">...</epic-section>
                     </epic-page>

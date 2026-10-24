@@ -571,3 +571,48 @@ test("a failed test's issue on a split page:  its screenshot written into the pa
   expect(files.read(file).findItem("i1")!.querySelector("img")!.getAttribute("src")).toBe("tests/v1-20261007-1000.png")
   rmSync(join(root, "epics", "x", "parts"), { recursive: true, force: true })
 })
+
+// epic `epic-engine` P29:  the page header's stage button, and a phase's Defer while the phases are agreed
+test("apply:  a sent Accept Overview moves the page to the phases stage, logged;  one for a stage it's past is dropped", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.setStage("overview")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("stage", { action: "accept", stage: "overview" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.stage).toBe("phases")
+  expect(printed.join("\n")).toContain("STAGE  accepted overview:  stage phases, write the phases")
+  expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+  // sent twice:  the page has moved on, so it's dropped, nothing changed
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("stage", { action: "accept", stage: "overview" }, T2)
+    inbox.markSent(T3)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).stage).toBe("phases")
+  expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+})
+
+test("apply:  a phase's sent Defer moves it after the others, still to do;  its Looks good is noted", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  for (const name of ["One", "Two", "Three"]) plan.addPhase(name, { goal: `<ul><li>${name}</li></ul>` })
+  plan.setStage("phases")
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("p-one", { action: "defer" }, T1)
+    inbox.setMark("p-two", { action: "approve" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phases.map((phase) => `${phase.id} ${phase.status}`)).toEqual([
+    "p-two todo",
+    "p-three todo",
+    "p-one todo"
+  ])
+  expect(printed.join("\n")).toContain("P-ONE  deferred:  after the other phases, now P3, still to do")
+  expect(printed.join("\n")).toContain("P-TWO  approved")
+})

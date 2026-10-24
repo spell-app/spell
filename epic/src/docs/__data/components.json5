@@ -2154,6 +2154,16 @@
           "description": "A todo's review button (the x):  its name."
         },
         {
+          "key": "looksGood",
+          "text": "Looks good",
+          "description": "A phase's review button while the phases are agreed."
+        },
+        {
+          "key": "defer",
+          "text": "Defer",
+          "description": "A phase's review button while the phases are agreed:  its name."
+        },
+        {
           "key": "boxSkip",
           "text": "Skip this",
           "description": "Note box button (the x):  its name."
@@ -3161,6 +3171,16 @@
           "description": "A STANDING epic (epic `epic-workflow`):  open for good, a home that requests from other sessions keep adding phases to;  each phase merges into `main` on its own, and every phase done is NOT done."
         },
         {
+          "name": "stage",
+          "kind": "enum",
+          "values": [
+            "overview",
+            "phases",
+            "building"
+          ],
+          "description": "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, Questions and Todos only), `phases` (the Phases too), `building` (everything).  The header's Send group is the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
+        },
+        {
           "name": "saga",
           "kind": "string",
           "description": "The saga this epic serves, by id (`drawable-spell`;  epic `epic-workflow` P15):  one of `sagas/sagas.json5`'s, set by `epic saga set`.  Drawn in the meta lines, a link to its saga page;  absent:  no saga."
@@ -3240,7 +3260,7 @@
         },
         {
           "name": "send",
-          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
+          "description": "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did.  While the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases."
         },
         {
           "name": "git",
@@ -3491,6 +3511,76 @@
           "key": "sent",
           "text": "Sent:  waiting for Claude",
           "description": "Send, every mark and comment sent."
+        },
+        {
+          "key": "acceptOverview",
+          "text": "Accept Overview",
+          "description": "The stage button while the Overview is agreed (`stage=overview`, epic `epic-engine` P29)."
+        },
+        {
+          "key": "acceptPhases",
+          "text": "Accept Phases",
+          "description": "The stage button while the phases are agreed (`stage=phases`)."
+        },
+        {
+          "key": "acceptOverviewTip",
+          "text": "The Overview is agreed:  Claude writes the phases next",
+          "description": "The stage button's tooltip, Overview stage:  what a press does."
+        },
+        {
+          "key": "acceptPhasesTip",
+          "text": "The phases are agreed:  Claude starts building",
+          "description": "The stage button's tooltip, Phases stage:  what a press does."
+        },
+        {
+          "key": "acceptedOverview",
+          "text": "Overview accepted:  waiting for Claude to write the phases",
+          "description": "The stage button's tooltip once pressed, Overview stage."
+        },
+        {
+          "key": "acceptedPhases",
+          "text": "Phases accepted:  waiting for Claude to start building",
+          "description": "The stage button's tooltip once pressed, Phases stage."
+        },
+        {
+          "key": "stageOverview",
+          "text": "OVERVIEW",
+          "description": "The step label while the Overview is agreed (`stage=overview`), in place of a phase."
+        },
+        {
+          "key": "stagePhases",
+          "text": "PHASES",
+          "description": "The step label while the phases are agreed (`stage=phases`), in place of a phase."
+        },
+        {
+          "key": "stageOverviewTip",
+          "text": "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+          "description": "The step label's tooltip, Overview stage."
+        },
+        {
+          "key": "stagePhasesTip",
+          "text": "Agreeing the phases:  Looks good or Defer on each, then Accept Phases",
+          "description": "The step label's tooltip, Phases stage."
+        },
+        {
+          "key": "openQuestionsOne",
+          "text": "1 question open",
+          "description": "The stage button's tooltip:  what's open."
+        },
+        {
+          "key": "openQuestionsMany",
+          "text": "{count} questions open",
+          "description": "The stage button's tooltip:  what's open;  a reminder, never a lock."
+        },
+        {
+          "key": "nothingOpen",
+          "text": "no questions open",
+          "description": "The stage button's tooltip:  nothing open."
+        },
+        {
+          "key": "acceptSends",
+          "text": "sends {count} unsent with it",
+          "description": "The stage button's tooltip:  marks and comments a press sends along."
         },
         {
           "key": "sendIdle",
@@ -4999,6 +5089,16 @@
           "description": "A send on its way:  the plane spins, and a press does nothing."
         },
         {
+          "name": "accept",
+          "kind": "string",
+          "description": "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  The wand stays.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
+        },
+        {
+          "name": "accepted",
+          "kind": "boolean",
+          "description": "The stage button pressed:  outlined green, waiting for the session to move the page on.  Only with `accept`."
+        },
+        {
           "name": "manual",
           "kind": "boolean",
           "description": "No countdown:  only a press sends, and no wand is drawn.  For a page a COMMAND waits on (`<epic-run>`):  it carries on with exactly what was sent (Owen, 2026-10-23)."
@@ -5023,7 +5123,7 @@
         },
         {
           "name": "count",
-          "description": "The badge on the plane:  how many things a press sends."
+          "description": "The badge on the plane:  how many things a press sends;  none on the stage button."
         },
         {
           "name": "countdown",
@@ -5046,6 +5146,10 @@
         {
           "name": "waiting",
           "description": "Countdown mode is off and something isn't sent:  the plane is filled blue."
+        },
+        {
+          "name": "stage",
+          "description": "The plane's place holds the stage button (`accept`)."
         }
       ],
       "texts": [

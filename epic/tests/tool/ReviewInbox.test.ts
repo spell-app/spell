@@ -22,6 +22,22 @@ const T2 = "2026-10-04T15:01:00-04:00"
 const T3 = "2026-10-04T15:02:00-04:00"
 
 describe("ReviewInbox marks", () => {
+  // epic `epic-engine` P29
+  test("the stage button's mark:  `accept` with the stage it ends, under `stage`;  only while the page is in one", () => {
+    expect(ReviewInbox.toMark({ action: "accept", stage: "overview", note: "x" })).toEqual({
+      action: "accept",
+      stage: "overview"
+    })
+    expect(() => ReviewInbox.toMark({ action: "accept", stage: "building" })).toThrow(InboxError)
+    expect(ReviewInbox.toMark({ action: "defer" })).toEqual({ action: "defer" })
+    expect(ReviewInbox.toItemId("stage")).toBe("stage")
+    const page = (stage: string) => `<epic-page epic="x" title="X"${stage}><epic-item id="j1"></epic-item></epic-page>`
+    expect(ReviewInbox.itemIds(page(' stage="overview"')).has("stage")).toBe(true)
+    expect(ReviewInbox.itemIds(page(' stage="phases"')).has("stage")).toBe(true)
+    expect(ReviewInbox.itemIds(page(' stage="building"')).has("stage")).toBe(false)
+    expect(ReviewInbox.itemIds(page("")).has("stage")).toBe(false)
+  })
+
   test("set, replace, remove;  ids lower-cased", () => {
     const inbox = new ReviewInbox()
     expect(inbox.setMark("J3", { action: "approve", at: "ignored" }, T1)).toEqual({ action: "approve", at: T1 })

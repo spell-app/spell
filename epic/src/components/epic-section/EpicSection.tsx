@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
+import { PageStages } from "spell-epic/phases"
 import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
@@ -247,6 +248,17 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
   // ## Element hooks
   ////////////////
+
+  /**
+   * Hidden by its page's STAGE (`<epic-page stage>`, epic `epic-engine` P29):  a top-level section the stage doesn't
+   * show (`PageStages.hides()`), drawn as nothing (`:state(offstage)`);  still in the file, and the tool reads it.
+   * - read again on every layout change (the page's `layout`:  its `stage` changing too)
+   */
+  @E.cssState("offstage")
+  get isOffStage(): boolean {
+    void this.layout
+    return this.isConnected && PageStages.hides(this.domElement)
+  }
 
   /** Its title has tools:  the Phases toggles, or a state filter with chips. */
   @E.cssState("tools")
@@ -715,7 +727,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       const overview = EpicSection.placeOf(parent, NUMBERED_BLOCKS) || 1
       return `${overview}.${own}`
     }
-    return String(EpicSection.placeOf(this.domElement, NUMBERED_BLOCKS))
+    return String(EpicSection.placeOf(this.domElement, NUMBERED_BLOCKS, { shown: true }))
   }
 
   /** A kind that's counted:  items, or phases.  A method:  memos above call it as they're made. */
@@ -737,9 +749,15 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return { open, total: children.length, attention }
   }
 
-  /** `element`'s place, from 1, among its parent's children matching `selector`;  0 when it isn't one. */
-  private static placeOf(element: Element, selector: string): number {
-    const siblings = Array.from(element.parentElement?.querySelectorAll(selector) ?? [])
+  /**
+   * `element`'s place, from 1, among its parent's children matching `selector`;  0 when it isn't one.
+   * - `shown`:  among those its page's stage shows only (`PageStages.hides()`):  Questions is `2.` while the Overview
+   *   is agreed, not `3.` after a hidden Phases
+   */
+  private static placeOf(element: Element, selector: string, { shown = false } = {}): number {
+    const siblings = Array.from(element.parentElement?.querySelectorAll(selector) ?? []).filter(
+      (sibling) => !shown || !PageStages.hides(sibling)
+    )
     return siblings.indexOf(element) + 1
   }
 

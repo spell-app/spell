@@ -191,6 +191,16 @@ As `plan-doc.md`, "Ids":
   `list --json` carry it.  No migration step:  an epic with none simply names no saga.
 - `<epic-page standing>` (epic `epic-workflow`):  a STANDING epic, open for good;  each phase merges into `main` on its
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
+- `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
+  which sections the page shows (`PageStages`, `spell-epic/phases`).
+  - `overview`:  the Overview, Questions and Todos;  `phases`:  the Phases too;  `building`:  everything.
+  - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
+  - `create` writes `overview` (Q15:  new and future epics);  `stage <name> <stage>` sets it by hand, logged.
+  - The header's stage button (Accept Overview, Accept Phases) leaves the inbox mark `stage`,
+    `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
+    (`STAGE accepted overview:  stage phases, write the phases`).
+  - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
+    phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
 - Requests (epic `epic-workflow`):  what Owen sent the phase from other sessions, one labelled block per request.
   - Written by `epic file <epic>#P<N> <rN>` (the tool's `request <name> <N> <rN> --from "..." --file f`).
   - The block:  his words quoted, what the sender was looking at, when, a link to `requests/<rN>/request.md`, and

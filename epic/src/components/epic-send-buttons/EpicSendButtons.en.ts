@@ -49,6 +49,20 @@ export const epicSendButtonsVocabulary = {
     },
     { name: "busy", kind: "boolean", description: "A send on its way:  the plane spins, and a press does nothing." },
     {
+      name: "accept",
+      kind: "string",
+      description:
+        "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept " +
+        "Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  " +
+        "The wand stays.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
+    },
+    {
+      name: "accepted",
+      kind: "boolean",
+      description:
+        "The stage button pressed:  outlined green, waiting for the session to move the page on.  Only with `accept`."
+    },
+    {
       name: "manual",
       kind: "boolean",
       description:
@@ -72,7 +86,10 @@ export const epicSendButtonsVocabulary = {
       name: "send",
       description: "The paper plane, a `<button>`:  `data-state`, filled blue while it waits for a press."
     },
-    { name: "count", description: "The badge on the plane:  how many things a press sends." },
+    {
+      name: "count",
+      description: "The badge on the plane:  how many things a press sends;  none on the stage button."
+    },
     {
       name: "countdown",
       description: "The wand, a `<button aria-pressed>`:  countdown mode on (blue) or off (grey)."
@@ -86,7 +103,8 @@ export const epicSendButtonsVocabulary = {
   states: [
     { name: "countdown", description: "Countdown mode is on." },
     { name: "counting", description: "The countdown is running:  something waits, and the ring turns blue." },
-    { name: "waiting", description: "Countdown mode is off and something isn't sent:  the plane is filled blue." }
+    { name: "waiting", description: "Countdown mode is off and something isn't sent:  the plane is filled blue." },
+    { name: "stage", description: "The plane's place holds the stage button (`accept`)." }
   ],
   texts: [
     { key: "group", text: "Send", description: "The group's name, for a screen reader." },

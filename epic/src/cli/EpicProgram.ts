@@ -161,9 +161,18 @@ export class EpicProgram {
 
     this.page(
       epic.command("create"),
-      "make an epic page from the template;  --future:  an idea for later, not planned yet;  --saga:  the saga it serves",
+      "make an epic page from the template;  --future:  an idea for later, not planned yet;  --saga:  the saga it " +
+        "serves;  --stage overview:  it starts in the Overview stage (epic stage)",
       'epic create seo --title "SEO" --prompt "Make the docs findable"'
-    ).usage('<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>]')
+    ).usage(
+      '<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>] [--stage overview]'
+    )
+    this.page(
+      epic.command("stage"),
+      "set the page's stage, which decides what it shows:  overview (the Overview, Questions and Todos), phases (the " +
+        "Phases too) or building (everything);  a new epic starts in overview, a page with none reads as building",
+      "epic stage seo phases"
+    ).usage("<epic> overview | phases | building")
     this.page(
       epic.command("list"),
       "every epic:  in progress, future or done, where it runs, items not reviewed",

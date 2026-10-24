@@ -278,3 +278,29 @@ describe("PlanDocCommands rename:  a phase's or an item's title (epic `epic-work
     expect(readFileSync(file, "utf8")).toBe(skeleton)
   })
 })
+
+// epic `epic-engine` P29, Q15:  new epics start in the Overview stage;  `epic stage` sets it by hand
+describe("PlanDocCommands stage", () => {
+  test("create --stage overview starts a new epic in the Overview stage (opt-in until P33);  none:  building", async () => {
+    expect(FILES.read(file).stage).toBe("building")
+    // no docs home in the scratch checkout to list it on
+    vi.spyOn(FILES, "reindex").mockImplementation(() => undefined)
+    expect(await commands().run(["create", "fresh", "--title", "Fresh", "--stage", "overview"])).toBe(0)
+    const fresh = FILES.findDoc("fresh")
+    expect(readFileSync(fresh, "utf8")).toMatch(/<epic-page[^>]*\sstage="overview"/)
+    expect(FILES.read(fresh).stage).toBe("overview")
+  })
+
+  test("stage sets it, logged;  the same again changes nothing;  a word that isn't a stage is refused", async () => {
+    expect(await commands().run(["stage", "x", "phases"])).toBe(0)
+    expect(printed).toEqual(["x:  phases"])
+    expect(FILES.read(file).stage).toBe("phases")
+    expect(readFileSync(join(parts, "log.html"), "utf8")).toContain("stage: phases (was building)")
+    expect(await commands().run(["stage", "x", "phases"])).toBe(0)
+    expect(printed.at(-1)).toBe("already phases")
+    expect(await commands().run(["stage", "x", "later"])).toBe(1)
+    expect(warned.at(-1)).toBe('epic:  stage:  overview, phases, building, not "later"')
+    expect(await commands().run(["stage", "x", "building"])).toBe(0)
+    expect(FILES.read(file).stage).toBe("building")
+  })
+})

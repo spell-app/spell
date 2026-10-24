@@ -13,6 +13,10 @@
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);
   }
+  /* a section its page's stage hides (`<epic-page stage>`, epic `epic-engine` P29):  still in the file, drawn as nothing */
+  :host(:state(offstage)) {
+    display: none;
+  }
   :host([kind="overview-part"]) {
     --_epic-fold-band: var(--epic-band-row, transparent);
     --_epic-fold-gap: 14px;

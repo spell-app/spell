@@ -408,7 +408,18 @@ function spellUiResolver() {
         if (loaded.path === "lazy-chunk") return { contents: "export {}", loader: "js" }
         return { contents: "", loader: "js" }
       })
-      pluginBuild.onResolve({ filter: /^spell-ui(\/.*)?$/ }, ({ path }) => ({ path: uiDistPath(path) }))
+      // every file of UI's `dist/` HAS side effects (each family defines its tags as it's imported):  its
+      // `package.json`'s `sideEffects` names only its `src/` files, so esbuild dropped the families `dist/` files import
+      // by relative path, and their tags stayed pending (epic `epic-engine` P29)
+      pluginBuild.onResolve({ filter: /^spell-ui(\/.*)?$/ }, ({ path }) => ({
+        path: uiDistPath(path),
+        sideEffects: true
+      }))
+      pluginBuild.onResolve({ filter: /^\.\.?\// }, ({ path, importer, resolveDir }) => {
+        const file = resolve(resolveDir, path)
+        const inDist = importer.startsWith(join(UI_DIR, "dist")) && file.endsWith(".js") && existsSync(file)
+        return inDist ? { path: file, sideEffects: true } : undefined
+      })
       pluginBuild.onResolve({ filter: SOLID }, async ({ path, kind, pluginData }) => {
         if (pluginData?.fromUiRoot) return undefined
         const resolved = await pluginBuild.resolve(path, { kind, resolveDir: UI_DIR, pluginData: { fromUiRoot: true } })

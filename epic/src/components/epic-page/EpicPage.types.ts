@@ -59,13 +59,26 @@ export type StepLabel = {
   href?: string
 }
 
+/** The header's stage button (epic `epic-engine` P29):  Accept Overview or Accept Phases, in place of Send's plane. */
+export type StageButton = {
+  /** its words:  `Accept Overview` */
+  label: string
+  /** its tooltip:  what a press does, what's still open, what it sends with it;  or that it's accepted */
+  tip: string
+  /** pressed:  its mark is in the inbox, waiting for the session to move the page on */
+  accepted: boolean
+}
+
 /** The phase statuses:  under way, done, still to do. */
 export const ACTIVE = "active"
 export const DONE = "done"
 export const TODO = "todo"
 
-/** The attributes a step label or a number depends on:  a change bumps the page's layout. */
-export const LAYOUT_ATTRIBUTES = ["status", "state", "title", "kind", "commits"]
+/**
+ * The attributes a step label or a number depends on:  a change bumps the page's layout.
+ * - `stage`, the page's own (epic `epic-engine` P29):  which sections show, and a phase's review pills
+ */
+export const LAYOUT_ATTRIBUTES = ["status", "state", "title", "kind", "commits", "stage"]
 
 /** `localStorage` key prefix of the commits toggle, per page path. */
 export const COMMITS_KEY = "epic-commits:"

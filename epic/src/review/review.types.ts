@@ -117,8 +117,10 @@ export function isAirplane(): boolean {
  * - most items:  Approve, Revisit, Make Todo, then Do Now
  *   (`details`:  the inbox's name for an immediate request, kept from Add Details Now;  decision Q20)
  * - a todo (Owen, 2026-10-09):  `next` (the plane:  do it in the next phase), Revisit, `drop` (the x:  drop it)
+ * - an open phase while the phases are agreed (epic `epic-engine` P29):  Looks good (`approve`), `defer` (after the
+ *   others, still to do)
  */
-export const REVIEW_ACTIONS = ["approve", "revisit", "todo", "details", "next", "drop"] as const
+export const REVIEW_ACTIONS = ["approve", "revisit", "todo", "details", "next", "drop", "defer"] as const
 
 /** One of `REVIEW_ACTIONS`. */
 export type ReviewAction = (typeof REVIEW_ACTIONS)[number]
@@ -128,6 +130,12 @@ export type ReviewAction = (typeof REVIEW_ACTIONS)[number]
  * As `ReviewInbox`'s `SUMMARY_ID`:  a copy, since that module is node-only.
  */
 export const SUMMARY_ID = "summary"
+
+/**
+ * The page header's stage button's key in the inbox (Accept Overview, Accept Phases:  epic `epic-engine` P29).
+ * As `ReviewInbox`'s `STAGE_ID`:  a copy, since that module is node-only.
+ */
+export const STAGE_ID = "stage"
 
 /** What a new item from the page may be:  as `ReviewInbox`'s `NEW_KINDS` (a copy:  that module is node-only). */
 export const NEW_KINDS = ["todo", "question", "issue", "test"] as const

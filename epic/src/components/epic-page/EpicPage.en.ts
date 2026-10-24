@@ -1,10 +1,12 @@
 /**
  * Every name `<epic-page>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
- * - Pure data:  `import type` only (its toolbar's chips are `<epic-state-filter>`'s, with their texts).
+ * - Pure data:  `import type`, plus the stages (`PageStages`, node-safe);  its toolbar's chips are
+ *   `<epic-state-filter>`'s, with their texts.
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
 import type { EpicVocabulary } from "spell-epic/definitions"
+import { PageStages } from "spell-epic/phases"
 
 /****************
  * ### `<epic-page>`
@@ -70,6 +72,17 @@ export const epicPageVocabulary = {
       description:
         "A STANDING epic (epic `epic-workflow`):  open for good, a home that requests from other sessions keep " +
         "adding phases to;  each phase merges into `main` on its own, and every phase done is NOT done."
+    },
+    {
+      name: "stage",
+      kind: "enum",
+      values: PageStages.ALL,
+      description:
+        "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, " +
+        "Questions and Todos only), `phases` (the Phases too), `building` (everything).  The header's Send group is " +
+        "the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are " +
+        "Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages " +
+        "looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
     },
     {
       name: "saga",
@@ -173,7 +186,8 @@ export const epicPageVocabulary = {
         "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` " +
         "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
         "some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, " +
-        "what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did."
+        "what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did.  While " +
+        "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases."
     },
     { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
     {
@@ -306,6 +320,68 @@ export const epicPageVocabulary = {
       description: "Send, marks or comments unsent;  `what` counts them (`marksOne` ..., `2 marks, 1 comment`)."
     },
     { key: "sent", text: "Sent:  waiting for Claude", description: "Send, every mark and comment sent." },
+    {
+      key: "acceptOverview",
+      text: "Accept Overview",
+      description: "The stage button while the Overview is agreed (`stage=overview`, epic `epic-engine` P29)."
+    },
+    {
+      key: "acceptPhases",
+      text: "Accept Phases",
+      description: "The stage button while the phases are agreed (`stage=phases`)."
+    },
+    {
+      key: "acceptOverviewTip",
+      text: "The Overview is agreed:  Claude writes the phases next",
+      description: "The stage button's tooltip, Overview stage:  what a press does."
+    },
+    {
+      key: "acceptPhasesTip",
+      text: "The phases are agreed:  Claude starts building",
+      description: "The stage button's tooltip, Phases stage:  what a press does."
+    },
+    {
+      key: "acceptedOverview",
+      text: "Overview accepted:  waiting for Claude to write the phases",
+      description: "The stage button's tooltip once pressed, Overview stage."
+    },
+    {
+      key: "acceptedPhases",
+      text: "Phases accepted:  waiting for Claude to start building",
+      description: "The stage button's tooltip once pressed, Phases stage."
+    },
+    {
+      key: "stageOverview",
+      text: "OVERVIEW",
+      description: "The step label while the Overview is agreed (`stage=overview`), in place of a phase."
+    },
+    {
+      key: "stagePhases",
+      text: "PHASES",
+      description: "The step label while the phases are agreed (`stage=phases`), in place of a phase."
+    },
+    {
+      key: "stageOverviewTip",
+      text: "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+      description: "The step label's tooltip, Overview stage."
+    },
+    {
+      key: "stagePhasesTip",
+      text: "Agreeing the phases:  Looks good or Defer on each, then Accept Phases",
+      description: "The step label's tooltip, Phases stage."
+    },
+    { key: "openQuestionsOne", text: "1 question open", description: "The stage button's tooltip:  what's open." },
+    {
+      key: "openQuestionsMany",
+      text: "{count} questions open",
+      description: "The stage button's tooltip:  what's open;  a reminder, never a lock."
+    },
+    { key: "nothingOpen", text: "no questions open", description: "The stage button's tooltip:  nothing open." },
+    {
+      key: "acceptSends",
+      text: "sends {count} unsent with it",
+      description: "The stage button's tooltip:  marks and comments a press sends along."
+    },
     {
       key: "sendIdle",
       text: "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)",

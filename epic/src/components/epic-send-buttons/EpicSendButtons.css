@@ -3,6 +3,8 @@
  * - The plane's round end, a hairline, the wand's round end;  each a circle as tall as the pill.
  * - The pill's outline:  a grey hairline, and a blue one once sent (`state`);  never dashed (Owen, 2026-10-22:
  *   "Lose the dotted outline around both").
+ * - The STAGE BUTTON (`accept`, epic `epic-engine` P29):  in the plane's place, a check and its words, green;  the
+ *   pill outlined green once pressed (`accepted`).
  * - Countdown off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
  * - The wand FILLED light blue, its icon white, while countdown mode is on (`:state(countdown)`);  grey while off.
  * - While it counts, a very light grey ring round the wand turns blue, clockwise from the top, as the 2 minutes run
@@ -19,6 +21,7 @@
   :host {
     --_size: var(--epic-send-buttons-size, 28px);
     --_tint: var(--ui-blue, #2185d0);
+    --_green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
     --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
     display: inline-flex;
@@ -84,6 +87,25 @@
   }
   :host(:state(waiting)) .send:hover {
     background: color-mix(in oklab, var(--_tint) 85%, black);
+  }
+  /* the STAGE BUTTON in the plane's place (`accept`):  a check and its words, green (decided);  outlined green once
+     pressed (`accepted`), waiting for the session to move the page on */
+  .send.accept {
+    display: inline-flex;
+    gap: 5px;
+    width: auto;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    color: var(--_green);
+    font: 600 12px/1 var(--ui-font-family, system-ui, sans-serif);
+    white-space: nowrap;
+  }
+  .send.accept:hover {
+    background: color-mix(in oklab, var(--_green) 12%, transparent);
+    color: var(--_green);
+  }
+  .group[data-state="accepted"] {
+    border: 1.5px solid var(--_green);
   }
   .send[aria-busy="true"] {
     cursor: progress;

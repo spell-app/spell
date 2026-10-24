@@ -1,6 +1,7 @@
 import { SRV } from "spell/server"
 
 import { DataFile } from "spell-epic/data/DataFile"
+import { PageStages, type PageStage } from "spell-epic/phases"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 
@@ -45,6 +46,11 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/v3-20261019-1432.png`,
  *         from the epic page's folder (written by the review routes' `POST shot`)
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
+ *     - the page header's STAGE BUTTON (epic `epic-engine` P29), Accept Overview or Accept Phases:
+ *       `{ action: "accept", stage: "overview" }` under the key `stage` (`STAGE_ID`), while the page is in that stage
+ *       - sent at once with whatever else is unsent;  `epic inbox apply` moves the page on a stage
+ *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
+ *       the others, still to do
  *   - `drafts`:  `{ [id]: { action, note, at } }`, a note box's text as Owen types it (`setDraft()`),
  *     until the mark that uses it;  never sent or counted
  *   - `urgency`:  `{ [id]: { calm, at } }`, Owen's click on an open judgement call's or issue's id chip
@@ -789,6 +795,8 @@ export class ReviewInbox {
    * - with a pick:  `choices` too, when given:
    *   which of the item's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
+   * - `accept` (the page header's stage button, epic `epic-engine` P29):  `stage`, the stage it ends, one of
+   *   `ACCEPT_STAGES`
    * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
    *   `note` trimmed, kept only when there is one;  `shot` kept when given, a screenshot in the epic's `tests/`
    *   (`tests/v3-20261019-1432.png`:  `TEST_SHOT`)
@@ -815,6 +823,12 @@ export class ReviewInbox {
       return { action, when: when as RevisitWhen, note: note.trim(), pick: toLetter(pick), ...toChoices(choices) }
     }
     if (action === "pick") return { action, pick: toLetter(pick), ...toChoices(choices) }
+    if (action === "accept") {
+      const { stage } = mark as Record<string, unknown>
+      if (!(ACCEPT_STAGES as readonly unknown[]).includes(stage))
+        throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
+      return { action, stage: stage as PageStage }
+    }
     // Make Todo's note (epic `windows-and-review` P2:  its note box's button, until 2026-10-09):  why follow it up;
     // a todo's plane and x, and every note box's x (skip this), take the note box's words too (Owen, 2026-10-09)
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
@@ -826,11 +840,13 @@ export class ReviewInbox {
 
   /**
    * `id` as the inbox keys it:  lower-case, as the item's element id;  an `InboxError` when it isn't an item id.
-   * - also the summary's key, `summary`, and a new item's, `new1` (epic `airplane` P2)
+   * - also the summary's key, `summary`, and a new item's, `new1` (epic `airplane` P2);  the stage button's, `stage`
+   *   (`STAGE_ID`, epic `epic-engine` P29)
    */
   static toItemId(this: void, id: unknown): string {
     const key = typeof id === "string" ? id.toLowerCase() : ""
-    if (!ITEM_ID.test(key) && key !== SUMMARY_ID && !NEW_ID.test(key)) throw new InboxError(`not an item id:  ${id}`)
+    if (!ITEM_ID.test(key) && key !== SUMMARY_ID && key !== STAGE_ID && !NEW_ID.test(key))
+      throw new InboxError(`not an item id:  ${id}`)
     return key
   }
 
@@ -859,11 +875,17 @@ export class ReviewInbox {
    *   (Q14:  they take review notes too)
    * - every phase, `<epic-phase id>`, and the summary, `summary` while the doc has an `<epic-summary>`
    *   (epic `airplane` P2:  notes on them too)
+   * - the stage button's, `stage`, while `<epic-page stage>` is a stage one ends (`ACCEPT_STAGES`, epic `epic-engine` P29)
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
     const ids = new Set<string>()
-    for (const [tag, name] of html.matchAll(/<(epic-item|epic-section|epic-phase|epic-summary)\b[^>]*>/g)) {
+    for (const [tag, name] of html.matchAll(/<(epic-item|epic-section|epic-phase|epic-summary|epic-page)\b[^>]*>/g)) {
+      if (name === "epic-page") {
+        const stage = /\sstage="([^"]*)"/.exec(tag)?.[1]
+        if ((ACCEPT_STAGES as readonly string[]).includes(stage ?? "")) ids.add(STAGE_ID)
+        continue
+      }
       if (name === "epic-summary") {
         ids.add(SUMMARY_ID)
         continue
@@ -918,8 +940,9 @@ export type InboxMark = CheckedMark & { at: string }
  * - `choices`:  with a pick, which of the item's option card sets it's from, by position (I8);  none:  its own
  * - `kind`, `title`, `near`:  a new item's (`action: "new"`, epic `airplane` P2)
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
+ * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
  */
-export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: string } & PickFields &
+export type CheckedMark = { action: MarkAction; when?: RevisitWhen; note?: string; stage?: PageStage } & PickFields &
   NewItemFields &
   TestFields
 
@@ -1028,8 +1051,23 @@ export const INBOX_VERSION = 1
  * - `pick`:  an option card, by letter (`pick: "B"`), on any item (I8):  `choices` says which card set
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
  * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
+ * - `accept`:  the page header's stage button (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
+ * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
  */
-export const ACTIONS = ["approve", "todo", "next", "drop", "skip", "details", "revisit", "pick", "new", "test"] as const
+export const ACTIONS = [
+  "approve",
+  "todo",
+  "next",
+  "drop",
+  "skip",
+  "details",
+  "revisit",
+  "pick",
+  "new",
+  "test",
+  "accept",
+  "defer"
+] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
 
@@ -1051,6 +1089,15 @@ export type TestResult = (typeof TEST_RESULTS)[number]
 
 /** The summary's key in the inbox:  `<epic-summary>` has no id of its own (epic `airplane` P2). */
 export const SUMMARY_ID = "summary"
+
+/**
+ * The stage button's key in the inbox (epic `epic-engine` P29):  Accept Overview / Accept Phases is the PAGE's mark,
+ * not an item's;  markable while the page is in a stage that ends with it (`itemIds()`).
+ */
+export const STAGE_ID = "stage"
+
+/** The stages a stage button ends:  every stage but `building`. */
+export const ACCEPT_STAGES = PageStages.ALL.filter(PageStages.isPlanning)
 
 /** Actions an immediate request (`now`) may carry. */
 export const NOW_ACTIONS = ["details", "revisit"] as const

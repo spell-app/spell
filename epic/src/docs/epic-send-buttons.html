@@ -66,6 +66,8 @@
   <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
   <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
   <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+  <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
+  <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
 </p>
             <ui-accordion class="spell-code" styled>
               <ui-title>The example above · 5 lines</ui-title>
@@ -76,6 +78,8 @@
                       <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
                       <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
                       <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
+                      <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
+                      <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
                     </p>
                   </script></ui-code
                 >
@@ -133,6 +137,8 @@
                   <tr><td><code>send-tip</code></td><td>The plane's tooltip and name: what a press sends. Default <code>Send</code>.</td></tr>
                   <tr><td><code>count</code></td><td>How many things a press sends: a badge on the plane. None at 0.</td></tr>
                   <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
+                  <tr><td><code>accept</code></td><td>A STAGE BUTTON in the plane's place (epic <code>epic-engine</code> P29): a check and these words (<code>Accept Overview</code>), green. A press asks the owner as the plane's does; the wand stays. An epic page's header draws it while the page is in a stage.</td></tr>
+                  <tr><td><code>accepted</code></td><td>The stage button pressed: the pill outlined green, waiting for the session to move the page on.</td></tr>
                   <tr><td><code>manual</code></td><td>No countdown: only a press sends, and no wand is drawn. For a page a command waits on (<code>&lt;epic-run&gt;</code>).</td></tr>
                 </tbody>
               </table>

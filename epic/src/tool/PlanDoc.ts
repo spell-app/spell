@@ -9,7 +9,7 @@ import {
   type PageSectionKind
 } from "spell-epic/definitions"
 import { Markup, type MarkupContent } from "spell-epic/markup"
-import { PhaseIds } from "spell-epic/phases"
+import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
 
 import {
   CALM_ID,
@@ -61,7 +61,7 @@ import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
-import { SUMMARY_ID } from "./ReviewInbox"
+import { STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -120,6 +120,14 @@ export class PlanDoc extends PlanReader {
   /** A STANDING epic (epic `epic-workflow`):  `<epic-page standing>`, open for good;  every phase done is NOT done. */
   get standing(): boolean {
     return Boolean(this.document.querySelector("epic-page")?.hasAttribute("standing"))
+  }
+
+  /**
+   * The page's STAGE (epic `epic-engine` P29):  `<epic-page stage>`, `overview`, `phases` or `building`;
+   * a page with none is `building` (`PageStages.of()`).
+   */
+  get stage(): PageStage {
+    return PageStages.of(this.document.querySelector("epic-page"))
   }
 
   /** The saga this epic serves (epic `epic-workflow` P15):  `<epic-page saga>`, its id;  `null` when it names none. */
@@ -896,6 +904,15 @@ export class PlanDoc extends PlanReader {
    * the summary (`summary`), kind `summary`, its own text the title (epic `airplane` P2).
    */
   describeItem(id: string): ItemDescription | null {
+    if (String(id).toLowerCase() === STAGE_ID) {
+      const stage = this.stage
+      return {
+        id: STAGE_ID.toUpperCase(),
+        kind: "stage",
+        status: stage,
+        title: `Accept ${stage.charAt(0).toUpperCase()}${stage.slice(1)}`
+      }
+    }
     const part = this.reviewPart(id)
     if (!part) return super.describeItem(id)
     const { element, kind } = part
@@ -946,10 +963,14 @@ export class PlanDoc extends PlanReader {
    *   made, as `plan-doc add` makes one (`addFromPage()`)
    * - `test`, a test's answer from the page's test run (epic `epic-engine` P4:  `applyTest()`):
    *   passed closes it, failed files an issue, skip cancels it, not now defers it
+   * - `accept`, the page header's stage button (`stage`, epic `epic-engine` P29) (`applyAccept()`):  the page moves
+   *   on from the stage it ended, `overview` -> `phases` -> `building`;  dropped when the page has moved on already
+   * - `defer`, a phase's Defer while the phases are agreed (P29):  moved after the other phases, still to do
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
    */
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
+    if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
     const part = this.reviewPart(mark.id)
     if (part) {
       const result = this.applyToPart(part, mark)
@@ -1715,6 +1736,32 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * Put the page in `stage` (epic `epic-engine` P29):  `<epic-page stage>`, which decides what the page shows;
+   * returns whether it changed.
+   * - `building` is written too, not dropped:  a page that has been through its stages says so
+   * - SIDE EFFECT:  logs it (`stage:  phases (was overview)`)
+   */
+  setStage(stage: PageStage): boolean {
+    const was = this.stage
+    if (was === stage && this.page.hasAttribute("stage")) return false
+    Markup.set(this.page, { stage })
+    this.log(`stage:  ${stage} (was ${was})`)
+    return true
+  }
+
+  /**
+   * Phase `n` DEFERRED (its Defer pill while the phases are agreed, epic `epic-engine` P29):
+   * moved after every other phase, still to do;  its number changes, its id never.
+   * - returns its new number
+   */
+  deferPhase(n: number): number {
+    const phase = this.phase(n)
+    const last = this.phaseElements.at(-1)!
+    if (last !== phase) last.after(phase)
+    return this.phaseElements.length
+  }
+
+  /**
    * Name saga `saga` as the one this epic serves, or none (`null`):  `<epic-page saga="<id>">` (epic `epic-workflow`
    * P15);  returns whether it changed.
    * - which ids are sagas is the caller's to check (`Sagas`, `sagas/sagas.json5`):  this doc doesn't know the list
@@ -1962,9 +2009,33 @@ export class PlanDoc extends PlanReader {
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
+      case "defer": {
+        if (part.kind !== "phase") return { applied: false, left: `${part.label} (${part.what}):  only a phase defers` }
+        const n = this.deferPhase(this.phaseElements.indexOf(part.element) + 1)
+        return { applied: true, did: `deferred:  after the other phases, now P${n}, still to do` }
+      }
       default:
         return this.leftForClaude({ action, pick, when, note }, () => undefined)
     }
+  }
+
+  /**
+   * The page header's stage button, Accept Overview or Accept Phases (epic `epic-engine` P29):
+   * the page moves on from the stage the mark ended (`stage`) to the next (`PageStages.next()`).
+   * - the page in another stage by now (moved by hand, or the mark sent twice):  dropped (`gone`), nothing changed
+   * - logs it (`STAGE accepted overview:  stage phases, write the phases`):  what the session does next
+   */
+  private applyAccept({ stage }: PlanMark): MarkResult {
+    const now = this.stage
+    if (!PageStages.isStage(stage) || stage !== now)
+      return { applied: false, gone: true, left: `accepts ${stage}, but the page is in ${now}:  dropped` }
+    const next = PageStages.next(stage)
+    // its own log line below, not `setStage()`'s
+    Markup.set(this.page, { stage: next })
+    const then = next === "phases" ? "write the phases" : "start building"
+    const did = `accepted ${stage}:  stage ${next}, ${then}`
+    this.log(`${STAGE_ID.toUpperCase()} ${did}`)
+    return { applied: true, did }
   }
 
   /**

@@ -100,6 +100,7 @@ import {
 } from "./spell-doc-toolbar.js"
 import { readingTime } from "spell-epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell-epic/links"
+import { PageStages } from "spell-epic/phases"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
@@ -1616,11 +1617,13 @@ function outlineOf(main) {
   /**
    * SECTIONS:  every section, h3 and h4 in `main`, under the section it's in.
    * - not the headings in a plan item's earlier versions (`<epic-original>`):  earlier text, not the page's
+   * - not what an epic page's STAGE hides (`<epic-page stage>`, epic `epic-engine` P29;  `PageStages.hides()`):
+   *   the toolbar lists only what shows
    */
   function readSections() {
     const nodes = new Map()
     const elements = Array.from(main.querySelectorAll(`${SECTIONS}, h3, h4`)).filter(
-      (element) => !element.closest("epic-original")
+      (element) => !element.closest("epic-original") && !PageStages.hides(element)
     )
     for (const element of elements) {
       const node = nodeOf(element)

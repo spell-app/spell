@@ -50,7 +50,8 @@ export const epicReviewVocabulary = {
         "Whose:  `item` (Approve, Revisit, Make Todo, Do Now), `todo` (the plane, Revisit, the x;  its note box the " +
         "plane, Revisit Later, the x), `part` (an Overview sub-section, a phase, the summary:  no Approve);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
-        "Skip it), `closed` (Reopen)."
+        "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +
+        "Defer)."
     },
     {
       name: "label",
