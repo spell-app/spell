@@ -7,7 +7,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { pageServerRoot, settingsParts } from "spell/server/page/settings"
+import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
@@ -157,6 +157,8 @@ export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
  * - a component set's pages:  as served, `components/<set>/...` (`SETS`), never from their folder
  *   - Epic UI's:  `<spell-epic>/src/docs/epic-item.html` => `components/epics/epic-item.html` (`EPIC_UI_DOCS`)
  *   - App UI's, Brand's, Spell UI's:  `<checkout>/packages/app/docs/Chooser.html` => `components/app/Chooser.html`
+ * - a COMMAND RUN's folder, or a file in it (`<CONTENT>/pages/runs/<id>/run.json5`):  its page, `runs/<id>/`
+ *   (`runPagePath()`), which spell-epic's route module serves (`runRoutes.ts`):  the folder holds no page itself
  * - anything else:  from the checkout's root (`packages/brand/x.html`), which the page server serves at `/` too;
  *   a file outside it keeps its `../` path
  * - `/`-separated
@@ -165,6 +167,8 @@ export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
  */
 export function pagePath(file) {
   const path = resolve(file)
+  const run = runPagePath(path)
+  if (run) return run
   const inTemplates = insideOf(TEMPLATES, path) ?? insideOf(TEMPLATES, realOf(path))
   if (inTemplates !== undefined) return ["templates", ...(inTemplates ? inTemplates.split(sep) : [])].join("/")
   const inSet = SETS.pageFor(path) ?? SETS.pageFor(realOf(path), realOf)
@@ -172,6 +176,22 @@ export function pagePath(file) {
   const content = insideContent(path)
   return (content ?? relative(ROOT, path)).split(sep).join("/")
 }
+
+/**
+ * The page path of the COMMAND RUN whose folder `path` is, or is inside:  `runs/<id>/` (epic `epic-engine` P23);
+ * `undefined` for anything else.
+ * - a run's folder:  `<CONTENT>/pages/runs/<id>/` (the kit's `CommandRun`), served at `/runs/<id>/` by
+ *   spell-epic's route module (`runRoutes.ts`), from its template:  so `epic pages open <run folder>`, which the kit's
+ *   `CommandRun.show()` runs, opens the page
+ */
+export function runPagePath(path) {
+  const inside = insideContent(resolve(path))
+  const id = inside && RUN_FOLDER.exec(inside.split(sep).join("/"))?.[1]
+  return id ? `runs/${id}/` : undefined
+}
+
+/** A run's folder, or a file in it, from the content folder:  `pages/runs/<id>[/...]`. */
+const RUN_FOLDER = /^pages\/runs\/([a-z0-9-]+)(?:\/|$)/
 
 /** Absolute `path` from folder `dir` (`""` for the folder itself);  `undefined` outside it. */
 function insideOf(dir, path) {
@@ -530,6 +550,32 @@ export function serverUrl(base, file) {
 }
 
 /**
+ * Where a browser opens page `file`, for the tools that load pages headlessly (`check-spell.js`, `designer-shots.js`).
+ * - `file://`, unless the page needs a server:  its `<body data-spell-needs-server>`, or a component set's page
+ *   (its address, `/components/epics/x.html`:  it loads its site bundle from there)
+ * - `base`:  ANY page from that server, as it's shown there (`http://127.0.0.1:4848`)
+ * - else this checkout's page server, started if it's down (`ensurePageServer()`)
+ * - throws if it needs a server and none started, or the page is outside the content folder (no server has it)
+ */
+export function browserUrlFor(file, { base } = {}) {
+  const inSet = componentSetAddress(file)
+  const needsServer = inSet || /<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))
+  if (!base && !needsServer) return pathToFileURL(resolve(file)).href
+  const served = base ? { base: base.replace(/\/$/, "") } : ensurePageServer()
+  if (!inSet && pagePath(file).startsWith("../"))
+    throw new Error(`${file} is outside the content folder, ${CONTENT}, so no server has it`)
+  if (!served) throw new Error(`${file} needs the page server, and it didn't start`)
+  return inSet ? `${served.base}${inSet}` : serverUrl(served.base, file)
+}
+
+/** A component set's page `file` at its address (`/components/epics/x.html`);  `undefined` for any other page. */
+export function componentSetAddress(file) {
+  const path = relative(ROOT, resolve(file)).split(sep).join("/")
+  const set = componentSets(pageServerSettings(ROOT)).find((each) => path.startsWith(`${each.dir}/`))
+  return set && `${set.prefix}${path.slice(set.dir.length).replace(/\/index\.html$/, "/")}`
+}
+
+/**
  * Show `file` rendered in VS Code's doc preview.
  * - for `epic open <name>`, `epic phase`, `/spell-docs`
  * - starts this checkout's page server first (`ensurePageServer()`), so the page live-reloads
@@ -549,6 +595,8 @@ export function serverUrl(base, file) {
  * - the session is moving to a worktree's window (`/isolate`, `/epic`:  a pending handoff):
  *   shown THERE once it has moved, not in the window it's leaving
  * - no bridge (extension not reloaded, or not run from a VS Code window), or it failed:  the `vscode://` URI
+ * - a command run's folder (`runPagePath()`):  straight to the `vscode://` URI, with its page's URL:  the bridge shows
+   only a file, and a run's page is no file
  * - `open` can't fail (macOS):  without the extension, VS Code says it can't handle the URI
  * - `open` itself failed (not macOS):  falls back to Chrome
  * - async for the bridge's http request;  never rejects
@@ -558,12 +606,16 @@ export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
   const path = resolve(inContent(file))
   const served = ensurePageServer()
   const review = view === "review"
-  try {
-    const { window, later } = await Window.show(path, { hash, query, view: review ? "review" : undefined })
-    if (later) return console.log(`${path} shows in ${later} once this session moves there`)
-    return console.log(`opened ${path} in VS Code (window ${window.pid})`)
-  } catch (error) {
-    if (!/^no window/.test(error.message)) console.error(`${error.message}:  falling back to the vscode:// URI`)
+  // a command run's page is served from a template, not from a file the window bridge could show:  its URL
+  const isRun = !!runPagePath(path)
+  if (!isRun) {
+    try {
+      const { window, later } = await Window.show(path, { hash, query, view: review ? "review" : undefined })
+      if (later) return console.log(`${path} shows in ${later} once this session moves there`)
+      return console.log(`opened ${path} in VS Code (window ${window.pid})`)
+    } catch (error) {
+      if (!/^no window/.test(error.message)) console.error(`${error.message}:  falling back to the vscode:// URI`)
+    }
   }
   const url = served && `${serverUrl(served.base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
   const params = new URLSearchParams({ ...(url && { url }), file: path, ...(review && { view: "review" }) })

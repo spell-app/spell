@@ -89,6 +89,9 @@ export function addBlockAction(block, control, kind) {
     const buttons = document.createElement("span")
     buttons.className = "spell-block-buttons"
     row.append(buttons)
+    // a block slotted into an element (a docs example's description) takes its row with it:  unslotted, the row
+    // landed in the element's default slot, somewhere else entirely
+    if (block.slot) row.slot = block.slot
     block.before(row)
   }
   const buttons = row.firstElementChild

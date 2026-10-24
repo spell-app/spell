@@ -47,7 +47,14 @@ export const epicSendButtonsVocabulary = {
       kind: "number",
       description: "How many things a press would send, a small badge on the plane;  0 or none:  no badge."
     },
-    { name: "busy", kind: "boolean", description: "A send on its way:  the plane spins, and a press does nothing." }
+    { name: "busy", kind: "boolean", description: "A send on its way:  the plane spins, and a press does nothing." },
+    {
+      name: "manual",
+      kind: "boolean",
+      description:
+        "No countdown:  only a press sends, and no wand is drawn.  For a page a COMMAND waits on (`<epic-run>`):  it " +
+        "carries on with exactly what was sent (Owen, 2026-10-23)."
+    }
   ],
   events: [
     {

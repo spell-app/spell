@@ -1,0 +1,162 @@
+/*
+ * `<epic-run>` (`EpicRun.tsx`):  a run page's body, under the page's sticky header.
+ * - Who is waiting (a green dot while a command does), the command's line, its progress, then the table, then the
+ *   Send bar, stuck to the window's bottom so Send is always in reach on a long table.
+ * - The table is a grid:  the heads' row and every row (`<epic-run-row>`, its own sheet) are subgrids of it, so their
+ *   cells share its columns (`--_epic-run-cols`, set per instance from the run's columns).
+ * - NEVER stacked into cards (Owen's T52, "I hate it"):  too narrow for its columns' least widths (the phone), the
+ *   table scrolls sideways inside its own box, never the page.
+ * - Public tokens (`--epic-run-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-run.types, ui.components.epic-run.states;
+
+@layer ui.components.epic-run.types {
+  :host {
+    --_epic-run-rule: var(--epic-rule, var(--ui-border-color, light-dark(#d4d4d5, #4a4a52)));
+    --_epic-run-muted: var(--ui-text-muted, GrayText);
+    display: block;
+    margin: 0.75em 0 1em;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+
+  /* who is waiting:  a green dot while a command does */
+  .who {
+    margin: 0 0 0.5em;
+    color: var(--_epic-run-muted);
+    font-size: 0.9em;
+  }
+  .who code {
+    color: var(--ui-text-color, CanvasText);
+    font: 0.95em var(--ui-font-family-mono, ui-monospace, monospace);
+    overflow-wrap: anywhere;
+  }
+  .description {
+    margin: 0 0 0.75em;
+    line-height: 1.45;
+  }
+
+  /* progress:  the latest line, the rest folded */
+  .progress {
+    margin: 0 0 1em;
+    color: var(--_epic-run-muted);
+    font-size: 0.85em;
+  }
+  .progress p,
+  .progress ol {
+    margin: 0;
+  }
+  .progress ol {
+    padding-inline-start: 1.5em;
+    line-height: 1.5;
+  }
+  .progress summary {
+    width: fit-content;
+    cursor: pointer;
+  }
+  .time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* the table:  a grid, its heads and rows subgrids of it;  too narrow, it scrolls inside its own box */
+  .scroll {
+    overflow-x: auto;
+    border: 1px solid var(--_epic-run-rule);
+    border-radius: 8px;
+  }
+  .table {
+    display: grid;
+    grid-template-columns: var(--_epic-run-cols, 1fr 2fr);
+    min-width: min-content;
+  }
+  .head {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 4%, var(--ui-surface, Canvas));
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+  .head > span {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--_epic-run-rule);
+  }
+  .head > span + span {
+    border-left: 1px solid var(--_epic-run-rule);
+  }
+  /* a phone:  the answer's column first, so it's on screen without scrolling sideways (Owen, 2026-10-23) */
+  @media (max-width: 600px) {
+    .table {
+      grid-template-columns: var(--_epic-run-cols-narrow, 2fr 1fr);
+    }
+    .head > span:last-child {
+      order: -1;
+    }
+    .head > span + span {
+      border-left: 0;
+    }
+    .head > span:not(:last-child) {
+      border-left: 1px solid var(--_epic-run-rule);
+    }
+  }
+  /* the Send bar:  stuck to the window's bottom, on the page's own ground (Owen's T11), a rule above the content */
+  .bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-top: 0.75em;
+    padding: 8px 0;
+    border-top: 1px solid var(--_epic-run-rule);
+    background: var(--spell-bg, var(--ui-background, Canvas));
+  }
+  .bar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px 10px;
+  }
+  .state {
+    color: var(--_epic-run-muted);
+    font-size: 0.85em;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .saved {
+    color: var(--_epic-run-muted);
+    font-size: 0.8em;
+    font-variant-numeric: tabular-nums;
+  }
+  .send {
+    flex: none;
+  }
+  .error {
+    margin: 4px 0 0;
+    color: var(--ui-red-text, var(--ui-red, #db2828));
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: end;
+  }
+}
+
+@layer ui.components.epic-run.states {
+  /* a command waits:  a green dot before the line, as the details pages' Send draws it */
+  :host(:state(waiting)) .who {
+    color: var(--ui-text-color, CanvasText);
+  }
+  :host(:state(waiting)) .who::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--ui-green, #21ba45);
+    vertical-align: 1px;
+  }
+  :host(:state(sent)) .state {
+    color: var(--ui-green-text, #1a7f37);
+  }
+}

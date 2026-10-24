@@ -10,6 +10,7 @@
  *   `--vs`.
  * - `--hash=<id>`:  an id on the page to land on;  `--query=<query>`:  the page's query, `test=1` (`epic test`:  a
  *   test run, epic `epic-engine` P4)
+ * - `<page>` may be a command run's folder, `pages/runs/<id>` (epic `epic-engine` P23):  its page, `/runs/<id>/`
  * - `<page>` may be a SHORT ADDRESS (epic `epic-workflow` P15):  `SAGA:/drawable-spell` (the saga page),
  *   `SAGA:/drawable-spell/python-target#T1` (the epic page, landing on T1)
  *   - read by `spell-epic/links`, imported only then:  `epic pages open` runs this under `tsx`, while `epic open`
@@ -18,7 +19,7 @@
 import { existsSync, statSync } from "node:fs"
 import { basename, join } from "node:path"
 
-import { openInChrome, openInVSCode, pageFile } from "./pages.js"
+import { openInChrome, openInVSCode, pageFile, runPagePath } from "./pages.js"
 
 const args = process.argv.slice(2)
 const review = args.includes("--review")
@@ -50,8 +51,14 @@ async function addressed(address) {
   }
 }
 
-/** The file `page` names:  as is, plus `.html`, or a folder's own page (`<dir>/<dir>.html`);  `null` if none. */
+/**
+ * The file `page` names:  as is, plus `.html`, or a folder's own page (`<dir>/<dir>.html`);  `null` if none.
+ * - a command run's folder (`pages/runs/<id>/`, the kit's `CommandRun.show()`):  the folder itself, which the openers
+ *   show as its page, `/runs/<id>/` (`runPagePath()`)
+ */
 function findPage(page) {
+  const run = pageFile(page)
+  if (runPagePath(run) && existsSync(run)) return run
   for (const each of [page, `${page}.html`, join(page, `${basename(page)}.html`), join(page, "index.html")]) {
     const path = pageFile(each)
     if (existsSync(path) && statSync(path).isFile()) return path

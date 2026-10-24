@@ -145,6 +145,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
+    - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
+      - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
+        second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
+      - kept fresh by the run's files changing (`spell-server:file`) and every 30s, for the waiting state
+      - see "Run pages"
     - `ChoicesForm`, one per choice page:
       - the rows (`<epic-choice-row>`) register
       - the draft:  in `localStorage` at once, on the page server as he types and as the page goes away, a failed save
@@ -1194,6 +1199,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | details page | one question explained with a picture, answered on the page | `pages/details/`, `epics/<epic-id>/details/` | [details.html](../templates/details.html) |
 | review page | several calls to go through at once:  keep, change, talk over | same as details pages | [review.html](../templates/review.html) |
 | choice page | a table of names Claude recommends, typed over, then "Do it" | same, with `<slug>.rows.json5` | [syntax-choices.html](../templates/syntax-choices.html) |
+| run page | a command's review page:  a COMMAND (not Claude) asks, Owen answers each row, Send, and the command carries on (epic `epic-engine` P23) | `pages/runs/<run-id>/`, served at `/runs/<run-id>/` | [the tool's](tools/templates/run.html), served by [runRoutes.ts](tools/runRoutes.ts), never copied |
 | guide | explains a topic;  an epic's own write-up is "the epic's guide" | `guides/` | [durable.html](../templates/durable.html) |
 | cheatsheet | an API at a glance, as cards you filter | `guides/` | [cheatsheet.html](../templates/cheatsheet.html) |
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
@@ -1538,6 +1544,33 @@ Each kind of page has ONE name, written everywhere a person reads it.
       gone for good (a reload there brings back nothing);  saved as the draft file, the page shows it again
   - the answer:  `<slug>.answer.json5`, which `epic choices wait` exits with
 
+## Run pages
+
+- A COMMAND's review page (epic `epic-engine` P23):  a command, not Claude, stops to ask Owen, and carries on with his
+  answers.  The first:  the Spanish translator (`spell lang translate`), with the names it drafted.
+- Who does what (every arrow down):
+  - the kit's `SRV.CommandRun` (`spell/server/runs/`):  writes the run's folder, `pages/runs/<id>/` in the content
+    folder, waits for Send with a heartbeat, reads the answers back;  its files' shapes, the contract with this side:
+    `spell/server/runs/runs.types`
+    - `run.json5`:  what the command asks (title, columns, rows, progress, status);  only the command writes it
+    - `answers.json5`:  what Owen answered, per row, and `sent`;  only the route module writes it
+    - `waiting.json5`:  the command's heartbeat while it waits
+  - here:  the page's template ([run.html](tools/templates/run.html)), its elements (`<epic-run>`, `<epic-run-row>`),
+    and the route module that serves it and takes its answers ([runRoutes.ts](tools/runRoutes.ts))
+  - the command (the translator):  calls the kit's class, acts on the answers itself
+- The routes:
+  - `GET /runs/<id>/`:  the template, titled with the run's title, through the server's page hooks
+  - `GET /api/runs/<id>`:  `{ page, answers, waiting }`;  `waiting`:  the run `open` and its heartbeat fresh, from a
+    live process (`SRV.CommandRun.isWaiting()`)
+  - `POST /api/runs/<id>/answer { rowId, outcome, value, ticked }`, `POST /api/runs/<id>/send`:  `answers.json5`,
+    under its lock, all at once;  Send stamps `sent` afresh each time
+  - run id `[a-z0-9-]` only, a row of the run only, a known outcome:  else 400;  no such run:  404
+- `epic pages open <run folder> [--review]` opens its page (`pages.js` `runPagePath()`):  the kit's
+  `CommandRun.show()` runs it.
+- A row left alone has no entry in `answers.json5`:  the command reads it as its proposal.
+- No comments, no draft file:  every answer is saved as given.
+- `findPages()` never sees the runs:  `pages/runs/` holds no page, only data.
+
 ## Comments
 
 - Owen leaves a comment for Claude on any block of a docs page or epic page the page server serves
@@ -1826,7 +1859,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
     - an epic page's `parts/`
-    - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages
+    - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages,
+      run pages
     - `templates/`, the parked goal sets in `goals/` (thoughts), the Brand tab's own pages (`brand/`)
 - Claude's side, for docs pages ([comments.ts](tools/comments.ts), [GuideChanges.ts](tools/GuideChanges.ts)):
 

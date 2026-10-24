@@ -19,6 +19,7 @@ import {
   mkdtempSync,
   readFileSync,
   realpathSync,
+  renameSync,
   rmSync,
   writeFileSync
 } from "node:fs"
@@ -189,6 +190,38 @@ describe("the worktree hook, multi-repo", () => {
     expect(again.status, again.stderr).toBe(0)
     expect(again.stdout).toBe(join(WORKTREES, "demo"))
     expect(again.stderr).toMatch(/reusing/)
+  })
+
+  test("a child repo renamed on one side only (I81):  its checkouts still paired, by git", () => {
+    const demo = join(WORKTREES, "demo")
+    const brand = (checkouts: ReturnType<EpicConfig["repoCheckouts"]>) =>
+      checkouts.find((checkout) => checkout.repo === "spell-brand")
+    // the worktree's folder renamed (main had it first):  found among the main checkout's git worktrees
+    git(join(TOP, "spell-brand"), "worktree", "move", join(demo, "spell-brand"), join(demo, "spell-brand-new"))
+    try {
+      expect(brand(new EpicConfig(TOP).repoCheckouts("demo"))).toEqual({
+        repo: "spell-brand",
+        main: join(TOP, "spell-brand"),
+        worktree: join(demo, "spell-brand-new"),
+        top: false
+      })
+    } finally {
+      git(join(TOP, "spell-brand"), "worktree", "move", join(demo, "spell-brand-new"), join(demo, "spell-brand"))
+    }
+    // the main checkout's folder renamed (the worktree's still the old name):  found from the worktree's git folder
+    renameSync(join(TOP, "spell-brand"), join(TOP, "spell-brand-new"))
+    git(join(TOP, "spell-brand-new"), "worktree", "repair")
+    try {
+      expect(brand(new EpicConfig(TOP).repoCheckouts("demo"))).toEqual({
+        repo: "spell-brand",
+        main: join(TOP, "spell-brand-new"),
+        worktree: join(demo, "spell-brand"),
+        top: false
+      })
+    } finally {
+      renameSync(join(TOP, "spell-brand-new"), join(TOP, "spell-brand"))
+      git(join(TOP, "spell-brand"), "worktree", "repair")
+    }
   })
 
   test("an agent's worktree from a session in a child's folder of the epic:  named for the epic", () => {

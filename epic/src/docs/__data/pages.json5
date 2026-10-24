@@ -56,7 +56,9 @@
         "epic-send-buttons",
         "epic-choice-rows",
         "epic-choice-row",
-        "epic-choices-bar"
+        "epic-choices-bar",
+        "epic-run",
+        "epic-run-row"
       ]
     },
     {

@@ -1,0 +1,193 @@
+/*
+ * `<epic-run-row>` (`EpicRunRow.tsx`):  one row of a run page's table, drawn by `<epic-run>`.
+ * - Its host sits on the table's grid as a subgrid, its box out of the way (`display: contents`), so its cells share
+ *   the table's columns:  the command's, then the answer.
+ * - A text cell's first line sits on the box's first line:  its top padding is the box's border and padding more.
+ * - Answered differently from the proposal:  an orange box, an orange edge on the row.
+ * - Public tokens (`--epic-run-row-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-run-row.types, ui.components.epic-run-row.states;
+
+@layer ui.components.epic-run-row.types {
+  :host {
+    --_epic-run-rule: var(--epic-rule, var(--ui-border-color, light-dark(#d4d4d5, #4a4a52)));
+    --_epic-run-muted: var(--ui-text-muted, GrayText);
+    --_epic-run-changed: var(--ui-orange, #f2711c);
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  :host(:not(:last-child)) .cell {
+    border-bottom: 1px solid var(--_epic-run-rule);
+  }
+  .row-box {
+    display: contents;
+  }
+  .cell {
+    min-width: 0;
+    padding: 8px 10px;
+    /* not `anywhere`:  that lets a column shrink to a letter, and words break mid-way;  this keeps whole words */
+    overflow-wrap: break-word;
+    line-height: 1.4;
+  }
+  .cell + .cell {
+    border-left: 1px solid var(--_epic-run-rule);
+  }
+  /* the text cells' first line on the box's:  the box's 1px border and 4px padding more */
+  .cell:not(.answer) {
+    padding-top: calc(8px + 5px);
+  }
+  .answer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  /* a phone:  the answer first, as `<epic-run>`'s columns are (Owen, 2026-10-23:  "Answer first on phones") */
+  @media (max-width: 600px) {
+    .answer {
+      order: -1;
+    }
+    .cell + .cell {
+      border-left: 0;
+    }
+    .cell:not(.answer) {
+      border-left: 1px solid var(--_epic-run-rule);
+    }
+  }
+
+  /* the box:  growing with its text, the reset button beside it once it differs */
+  .field {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .box {
+    flex: 1 1 auto;
+    min-width: 0;
+    field-sizing: content;
+    resize: none;
+    overflow-wrap: anywhere;
+    padding: 4px 8px;
+    border: 1px solid var(--_epic-run-rule);
+    border-radius: 6px;
+    background: var(--ui-surface, Canvas);
+    color: var(--ui-text-color, CanvasText);
+    font: inherit;
+    line-height: 1.4;
+  }
+  .box:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -1px;
+  }
+  .reset {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--_epic-run-muted);
+    cursor: pointer;
+  }
+  .reset:is(:hover, :focus-visible) {
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 8%, transparent);
+    color: var(--ui-link, LinkText);
+  }
+  /* the tooltip is the button's own:  the pointer lands on it, not the icon */
+  .reset ui-icon {
+    pointer-events: none;
+  }
+
+  /* the pick:  small pills, the chosen one filled;  the native radio hidden, its focus on the pill */
+  .picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .pick {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 1px 10px;
+    border: 1px solid var(--_epic-run-rule);
+    border-radius: 999px;
+    color: var(--ui-text-color, CanvasText);
+    font-size: 0.85em;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease-out,
+      border-color 120ms ease-out;
+  }
+  .pick input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .pick:hover {
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 6%, transparent);
+  }
+  .pick:has(input:focus-visible) {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  /* the chosen pill:  raised and inked, as a segmented control's thumb;  no hue, since every colour means a state */
+  .pick:has(input:checked) {
+    border-color: color-mix(in oklab, var(--ui-text-color, CanvasText) 45%, transparent);
+    background: var(--ui-surface, Canvas);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+    font-weight: 600;
+  }
+  /* the proposal's pill:  dotted, so it reads as the starting point */
+  .pick.proposed:not(:has(input:checked)) {
+    border-style: dashed;
+  }
+
+  /* the tick box and its label */
+  .tick {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+  .tick input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+
+  /* the details:  folded, muted small print */
+  .details summary {
+    width: fit-content;
+    color: var(--_epic-run-muted);
+    font-size: 0.8em;
+    cursor: pointer;
+  }
+  .details ul {
+    margin: 4px 0 0;
+    padding-inline-start: 1.2em;
+    color: var(--_epic-run-muted);
+    font-size: 0.8em;
+    line-height: 1.4;
+  }
+}
+
+@layer ui.components.epic-run-row.states {
+  :host(:state(changed)) .box {
+    border-color: var(--_epic-run-changed);
+    background: var(--ui-orange-background, light-dark(#fff3e8, #3a2a1c));
+  }
+  :host(:state(changed)) .cell:first-child {
+    box-shadow: inset 3px 0 0 var(--_epic-run-changed);
+  }
+}

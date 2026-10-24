@@ -430,7 +430,11 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - `epic agents add` / `done`
    - Paste the cheat sheet below into their prompts,
      with "record caveats, issues and decisions in the epic page as you find them".
-4. Close the phase:  `epic phase <name>#P<N> done --done "<ul><li>...</li></ul>"`.
+4. A phase that changed a page or an element (a docs page, a component, the editor app):  the DESIGNER review first
+   ([the designer skill](../designer/SKILL.md);  epic `epic-engine` P24, Q12).
+   - It fixes the obvious things itself, and asks about the bigger ones with before / after pictures on a details page.
+   - Its fixes go in the phase's Done;  what it asks about waits on Owen, as calm issues.
+5. Close the phase:  `epic phase <name>#P<N> done --done "<ul><li>...</li></ul>"`.
    - It drops that phase's UPDATE markers, writes its Done field, and brings the doc forward.
    - Then `epic summary <name>`.
    - With the phase's items, this runs in a background `<name>-plan-doc` agent ("4. Fill the doc"),
@@ -480,7 +484,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).
-5. Reply:  a short bulleted list (done, issues, caveats, next), and the "complete.  Next is" line (see the top).
+6. Reply:  a short bulleted list (done, issues, caveats, next), and the "complete.  Next is" line (see the top).
    - THEN AskUserQuestion, so the user picks without copying anything.
      Options, most useful first:
      - "Start P<N+1> · <Name> (Recommended)"
@@ -490,7 +494,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
    - Questions the user must answer also go in the doc (`add <name>#Q`).
    - Once answered:  `decide <name>#Q3 "what was decided"`.
      Never `close`:  `decide` writes the answer INTO the question (D13 of `review-review`).
-6. Explain every question and every issue the user must weigh in on WITH EXAMPLES, in the doc,
+7. Explain every question and every issue the user must weigh in on WITH EXAMPLES, in the doc,
    so the user can decide from the doc alone (rules:  `plan-doc.md`, "Explaining a question or issue"):
    - define each coined word in plain language ("stacking", "nudge")
    - show the real code / markup it's about
@@ -942,7 +946,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Then:
      - a phase `active` with work under way:
        AskUserQuestion "Carry on with P<N> · <Name> (Recommended)" / "Stop here"
-     - else, as "5. Each phase", step 5:  "Start P<N> · <Name> (Recommended)", the top open issue, "Stop here"
+     - else, as "5. Each phase", step 6:  "Start P<N> · <Name> (Recommended)", the top open issue, "Stop here"
      - no phases yet (it hung while planning):  "3. Plan", from the prompt quoted in its Overview
      - a new window:  do all of this THIS turn, then end it (the move happens when it ends).
        The modal waits for the next turn, in the new window.
@@ -1052,7 +1056,7 @@ Owen adds a phase to the epic under way, from items it already has, or from scra
     5. `epic log <name> "P<n> added from <ids>:  <Name> (Owen)"`, `check`, `open`
 - When its report comes back:
   - the new phase's link pair (`epic pages link <doc> --hash p<n> --review`)
-  - and the next step, as "5. Each phase", step 5's modal ("Start P<n> · <Name>" among them)
+  - and the next step, as "5. Each phase", step 6's modal ("Start P<n> · <Name>" among them)
 
 ## 11. Start:  `/epic start <P1 | ids>`
 
@@ -1122,7 +1126,7 @@ A REQUEST is something Owen asked for in another session, sent here instead of d
 4. Its report back:
    - one line per request, with the phase's link pair:  `epic pages link <doc> --hash <phase id> --review`
      - its id (`p-retry-logic`) is in `epic summary <name> --json`
-   - then, when no phase is under way and bedtime mode is off:  "5. Each phase", step 5's modal,
+   - then, when no phase is under way and bedtime mode is off:  "5. Each phase", step 6's modal,
      "Start P<N> · <Name>" first
    - a phase under way:  no modal;  the new work waits its turn.
 - A request that needs no phase (already done, a duplicate):  `epic file <epic> r3 "<why>"`, and say so.

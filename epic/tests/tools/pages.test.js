@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url"
 import { expect, test } from "vite-plus/test"
 
 import { EPIC_UI } from "spell-epic/server/server.types.ts"
-import { EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath } from "spell-epic/tools/pages.js"
+import { CONTENT, EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath, runPagePath } from "spell-epic/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
 const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/tools/pages.js")
@@ -33,6 +33,15 @@ test("Epic UI's pages are the engine's `src/docs/`, named `components/epics/...`
   expect(EPIC_UI_DOCS).toBe(resolve(dirname(fileURLToPath(import.meta.url)), "../../src/docs"))
   expect(pagePath(join(EPIC_UI_DOCS, "epic-item.html"))).toBe(`${EPIC_UI.path}/epic-item.html`)
   expect(pageAt("components/epics/epic-item.html")).toBe(join(EPIC_UI_DOCS, "epic-item.html"))
+})
+
+// epic `epic-engine` P23:  a command run's folder holds no page;  the openers show its page, which the route serves
+test("a command run's folder, or a file in it, is its page, `runs/<id>/`;  nothing else is", () => {
+  const folder = join(CONTENT, "pages", "runs", "spell-lang-translate-20261023-1912")
+  expect(pagePath(folder)).toBe("runs/spell-lang-translate-20261023-1912/")
+  expect(runPagePath(join(folder, "run.json5"))).toBe("runs/spell-lang-translate-20261023-1912/")
+  expect(runPagePath(join(CONTENT, "pages", "runs"))).toBeUndefined()
+  expect(runPagePath(join(CONTENT, "pages", "details", "x.html"))).toBeUndefined()
 })
 
 // epic `epic-engine`:  every component set's pages are named by their address, App UI's and Brand's too, as the epic

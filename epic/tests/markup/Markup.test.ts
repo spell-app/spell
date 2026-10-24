@@ -110,6 +110,14 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     recommended: "this.isOpen"
   },
   "epic-choices-bar": {},
+  // a run page's (epic `epic-engine` P23)
+  "epic-run": { run: "spell-lang-translate-20261023-1912" },
+  "epic-run-row": {
+    row: '{"id":"task","cells":{"english":"Task"},"value":"Tarea"}',
+    columns: '[{"key":"english","label":"English"}]',
+    answer: '{"outcome":"typed","value":"Faena"}',
+    answerLabel: "Spanish"
+  },
   // the Epics page's (epic `epic-engine` P3)
   "epic-list": { sagas: "drawable-spell epics" },
   "epic-card": {

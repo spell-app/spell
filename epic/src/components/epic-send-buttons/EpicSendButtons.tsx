@@ -52,6 +52,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   @E.cssState("countdown")
   get isCountdownOn(): boolean {
     void this.version
+    if (this.manual) return false
     return this.countdown?.isOnHere ?? true
   }
 
@@ -59,7 +60,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   @E.cssState("counting")
   get isCounting(): boolean {
     void this.version
-    return !!this.countdown?.isRunning
+    return !this.manual && !!this.countdown?.isRunning
   }
 
   /** Countdown off, something not sent:  the plane is filled, waiting for a press. */
@@ -86,7 +87,8 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   @E.whileConnected
   protected followCountdown() {
     const countdown = this.countdown
-    if (!countdown) return undefined
+    // `manual`:  only a press sends;  the page's countdown never hears of this Send
+    if (!countdown || this.manual) return undefined
     const unsubscribe = countdown.subscribe(() => (this.version = countdown.version))
     const unfire = countdown.onFire(() => this.askToSend(true))
     countdown.setPending(this.isUnsent)
@@ -100,7 +102,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   /** `state` changed:  the countdown starts while something waits, and stops once nothing does. */
   @E.onChange("state")
   protected onStateChange() {
-    this.countdown?.setPending(this.isUnsent)
+    if (!this.manual) this.countdown?.setPending(this.isUnsent)
   }
 
   ////////////////
@@ -133,30 +135,32 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             </span>
           </Show>
         </button>
-        <button
-          type="button"
-          class={COUNTDOWN}
-          part={this.partForName("countdown")}
-          aria-pressed={this.isCountdownOn ? "true" : "false"}
-          aria-label={this.translationForKey("countdownName")}
-          title={this.countdownTip}
-          onClick={() => this.countdown?.toggle()}
-        >
-          <Show when={this.isCounting}>
-            <svg class={RING} part={this.partForName("ring")} viewBox="0 0 36 36" aria-hidden="true">
-              <circle class={TRACK} cx="18" cy="18" r="15.5" pathLength="100" />
-              <circle
-                class={ELAPSED}
-                cx="18"
-                cy="18"
-                r="15.5"
-                pathLength="100"
-                style={{ "stroke-dasharray": `${this.fractionElapsed * 100} 100` }}
-              />
-            </svg>
-          </Show>
-          <ui-icon name="wand magic sparkles" />
-        </button>
+        <Show when={!this.manual}>
+          <button
+            type="button"
+            class={COUNTDOWN}
+            part={this.partForName("countdown")}
+            aria-pressed={this.isCountdownOn ? "true" : "false"}
+            aria-label={this.translationForKey("countdownName")}
+            title={this.countdownTip}
+            onClick={() => this.countdown?.toggle()}
+          >
+            <Show when={this.isCounting}>
+              <svg class={RING} part={this.partForName("ring")} viewBox="0 0 36 36" aria-hidden="true">
+                <circle class={TRACK} cx="18" cy="18" r="15.5" pathLength="100" />
+                <circle
+                  class={ELAPSED}
+                  cx="18"
+                  cy="18"
+                  r="15.5"
+                  pathLength="100"
+                  style={{ "stroke-dasharray": `${this.fractionElapsed * 100} 100` }}
+                />
+              </svg>
+            </Show>
+            <ui-icon name="wand magic sparkles" />
+          </button>
+        </Show>
       </span>
     )
   }

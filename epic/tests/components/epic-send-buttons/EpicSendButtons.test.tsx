@@ -71,6 +71,15 @@ describe("<epic-send-buttons>", () => {
     expect(heard).toEqual([false])
   })
 
+  test("`manual` (a run page):  no wand, unsent waits filled for a press, the page's countdown never starts", async () => {
+    const countdown = adoptCountdown()
+    const group = await ElementFixture.render(`<epic-send-buttons state="unsent" manual></epic-send-buttons>`)
+    await ElementFixture.settle()
+    expect(part(group, "countdown")).toBeNull()
+    expect(group.matches(":state(waiting)")).toBe(true)
+    expect(countdown.isRunning).toBe(false)
+  })
+
   describe("the countdown", () => {
     beforeEach(() => vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "Date"] }))
     afterEach(() => vi.useRealTimers())
