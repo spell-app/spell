@@ -603,6 +603,33 @@ run.finish()
 - `wait()` returns at the time limit, with `timedOut`, rather than throwing.
 - Their shapes are one file, [runs.types.ts](src/server/runs/runs.types.ts):  the contract with the page side.
 
+Or the command runs on while its answers come in, and is steered from the page:
+each answer reaches it as it's given, the page shows its passes, and the effort picked there takes at the next one.
+
+```ts
+const run = SRV.CommandRun.open({ ...asked, effort: { choices: ["fast", "balanced", "best"], initial: "balanced" } })
+const answering = (async () => {
+  for await (const { rowId, answer } of run.answersAsTheyCome()) {   // until Send, or 4 hours
+    use(rowId, answer.value)
+    run.take(rowId)                                                  // the page shows the row taken
+  }
+})()
+for (const name of ["names", "lines"]) {
+  run.startPass(name, { total: rows.length })                        // stamped with run.effort, now
+  rows.forEach((row, done) => {
+    work(row, run.effort)
+    run.updatePass({ done: done + 1 })                               // written at most 4 times a second
+  })
+  run.endPass()
+}
+await answering
+run.finish()                                                         // or "stopped", "timed-out"
+```
+
+- `run.effort` is read fresh each time:  what was picked on the page, else the one it started with.
+- `updatePass()` is throttled, and `endPass()` always writes the last state.
+- `answersAsTheyCome()` gives a row again when its answer changes, and keeps the heartbeat while it runs.
+
 ### The content folder
 
 `contentFolderOf(root)` finds the shared content folder:  the guides, epic pages, sagas and the logs.

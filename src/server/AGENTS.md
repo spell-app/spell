@@ -112,6 +112,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
     - its files' shapes:  [runs.types.ts](runs/runs.types.ts), the contract with spell-epic's page and routes
     - it names no element and no child repo;  `show()` runs `epic` as a program, when there is one
+    - steering (P25):  the command runs on while Owen answers -- `answersAsTheyCome()` (each answer as he gives it,
+      on the same watcher and heartbeat as `wait()`), `take()`, passes as data (`startPass()` / `updatePass()`,
+      throttled / `endPass()`), and `effort`, read fresh before each pass
 - It's a LEAF of the kit:  node, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded when it's first
   called);  esbuild comes in as a hook;  of the kit, only util's json5 and the toolchain's format settings.
   - So anything node-side may import it:

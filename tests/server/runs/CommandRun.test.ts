@@ -1,6 +1,7 @@
 /**
  * Tests of `CommandRun`:  a command asking Owen on a page (epic `epic-engine` P23) -- its files in the content folder,
- * rows replaced with answers kept, progress lines, waiting for Send or the time limit, the heartbeat the page reads.
+ * rows replaced with answers kept, progress lines, waiting for Send or the time limit, the heartbeat the page reads;
+ * and steering (P25):  passes as data, the effort picked on the page, rows taken, answers as they come.
  * On a scratch content folder (`SPELL_SHARED_DIR`), with no child repo.
  */
 import { spawnSync } from "node:child_process"
@@ -8,7 +9,7 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 
@@ -41,15 +42,19 @@ const ROWS: SRV.RunRow[] = [
   }
 ]
 
-/** A new run of the translator, with `ROWS`. */
-function openRun(): SRV.CommandRun {
+/** The translator's efforts, starting at `balanced`. */
+const EFFORT: SRV.RunEffortChoice = { choices: ["fast", "balanced", "best"], initial: "balanced", label: "Effort" }
+
+/** A new run of the translator, with `ROWS` (or `rows`), and `effort` when given. */
+function openRun({ rows = ROWS, effort }: { rows?: SRV.RunRow[]; effort?: SRV.RunEffortChoice } = {}): SRV.CommandRun {
   return SRV.CommandRun.open({
     root,
     command: "spell parser translate todos --to es",
     title: "Names for todos, in Spanish",
     columns: [{ key: "english", label: "English" }],
     answerLabel: "Spanish",
-    rows: ROWS
+    rows,
+    effort
   })
 }
 
@@ -201,5 +206,175 @@ describe("CommandRun.show()", () => {
     process.env.PATH = ""
     const run = openRun()
     expect(await run.show()).toBe(run.path)
+  })
+})
+
+describe("CommandRun passes", () => {
+  test("records each pass with its facts, ms, the effort at its start, and running / done", async () => {
+    const run = openRun({ effort: EFFORT })
+    run.startPass("names", { total: 41 })
+    expect(run.page.passes).toEqual([
+      { name: "names", state: "running", total: 41, ms: 0, effort: "balanced", started: expect.any(String) }
+    ])
+    await after(30)
+    run.endPass({ done: 41, calls: 3 })
+    run.startPass("lines")
+    const [names, lines] = run.page.passes!
+    expect(names).toMatchObject({ name: "names", state: "done", done: 41, total: 41, calls: 3 })
+    expect(names.ms).toBeGreaterThanOrEqual(25)
+    expect(lines).toMatchObject({ name: "lines", state: "running", effort: "balanced" })
+    // finish() ends the pass still running
+    run.finish()
+    expect(run.page.passes![1].state).toBe("done")
+    expect(run.page.status).toBe("done")
+  })
+
+  test("throttles a tight loop's writes, and still ends with the final state", async () => {
+    const run = openRun()
+    run.startPass("lines", { total: 380 })
+    for (let done = 1; done <= 380; done++) run.updatePass({ done })
+    // held back:  the pass was written at its start, less than PASS_WRITE_MS ago
+    expect(run.page.passes![0].done).toBeUndefined()
+    // ... and written once the time is up, with the last state
+    await after(SRV.CommandRun.PASS_WRITE_MS + 50)
+    expect(run.page.passes![0]).toMatchObject({ done: 380, state: "running" })
+    run.updatePass({ done: 1, calls: 7 })
+    run.updatePass({ done: 2 })
+    run.endPass()
+    expect(run.page.passes![0]).toMatchObject({ done: 2, calls: 7, state: "done" })
+  })
+
+  test("updatePass() and endPass() with no pass running throw a TypeError", () => {
+    const run = openRun()
+    expect(() => run.updatePass({ done: 1 })).toThrow(TypeError)
+    expect(() => run.endPass()).toThrow(/startPass\(\) first/)
+  })
+})
+
+describe("CommandRun.effort and take()", () => {
+  test("effort:  the initial one, then what answers.effort picks, ignoring one not in the choices", () => {
+    expect(openRun().effort).toBeUndefined()
+    const run = openRun({ effort: EFFORT })
+    expect(run.page.effort).toEqual(EFFORT)
+    expect(run.effort).toBe("balanced")
+    answer(run, { rows: {}, effort: "best" })
+    expect(run.effort).toBe("best")
+    answer(run, { rows: {}, effort: "reckless" })
+    expect(run.effort).toBe("balanced")
+  })
+
+  test("take() marks rows taken, by row id, keeping the earlier ones", () => {
+    const run = openRun()
+    run.take("todo").take("list")
+    expect(Object.keys(run.page.taken!)).toEqual(["todo", "list"])
+    expect(Date.parse(run.page.taken!.todo)).not.toBeNaN()
+  })
+})
+
+describe("CommandRun.answersAsTheyCome()", () => {
+  test("yields each answer as it's written, a changed one again, and ends on Send;  heartbeat meanwhile", async () => {
+    const run = openRun()
+    const given: SRV.RunRowAnswer[] = []
+    const listening = (async () => {
+      const answers = run.answersAsTheyCome({ timeoutMs: 10_000 })
+      for (;;) {
+        const next = await answers.next()
+        if (next.done) return next.value
+        given.push(next.value)
+      }
+    })()
+    await after(50)
+    expect(SRV.CommandRun.isWaiting(run.folder)).toBe(true)
+    answer(run, { rows: { todo: ACCEPTED } })
+    await vi.waitFor(() => expect(given).toEqual([{ rowId: "todo", answer: ACCEPTED }]))
+    const typed: SRV.RunAnswer = { outcome: "typed", value: "Pendiente", at: "2026-10-23T19:02:00.000Z" }
+    answer(run, { rows: { todo: typed } })
+    await vi.waitFor(() => expect(given).toHaveLength(2))
+    expect(given[1]).toEqual({ rowId: "todo", answer: typed })
+    // the same again:  nothing new
+    answer(run, { rows: { todo: typed }, effort: "best" })
+    await after(100)
+    expect(given).toHaveLength(2)
+    // Send, with one more answer:  that one first, then the end
+    const list: SRV.RunAnswer = { outcome: "picked", value: "Listado", at: "2026-10-23T19:03:00.000Z" }
+    answer(run, { rows: { todo: typed, list }, sent: new Date().toISOString() })
+    expect(await listening).toBe("sent")
+    expect(given[2]).toEqual({ rowId: "list", answer: list })
+    expect(existsSync(join(run.folder, SRV.RUN_FILES.waiting))).toBe(false)
+  })
+
+  test("gives rows answered before it started first;  ends at its time limit, the heartbeat gone", async () => {
+    const run = openRun()
+    answer(run, { rows: { todo: ACCEPTED }, sent: "2026-01-01T00:00:00.000Z" })
+    const given: string[] = []
+    for await (const { rowId } of run.answersAsTheyCome({ timeoutMs: 150 })) given.push(rowId)
+    expect(given).toEqual(["todo"])
+    expect(existsSync(join(run.folder, SRV.RUN_FILES.waiting))).toBe(false)
+  })
+
+  test("ends quietly on an abort, on a break, and at finish()", async () => {
+    const run = openRun()
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(new Error("stop")), 50)
+    expect(await run.answersAsTheyCome({ signal: controller.signal }).next()).toEqual({ done: true, value: "aborted" })
+    expect(existsSync(join(run.folder, SRV.RUN_FILES.waiting))).toBe(false)
+
+    answer(run, { rows: { todo: ACCEPTED } })
+    for await (const _ of run.answersAsTheyCome()) break
+    expect(existsSync(join(run.folder, SRV.RUN_FILES.waiting))).toBe(false)
+
+    const answers = run.answersAsTheyCome()
+    await answers.next() // the todo row
+    setTimeout(() => run.finish("stopped"), 50)
+    expect(await answers.next()).toEqual({ done: true, value: "finished" })
+    expect(existsSync(join(run.folder, SRV.RUN_FILES.waiting))).toBe(false)
+  })
+})
+
+describe("Steering a run (the plan's verify, as a stand-in)", () => {
+  test("three timed passes over 20 rows:  answers arrive mid-run, and an effort switch takes at the next pass", async () => {
+    const rows = Array.from({ length: 20 }, (_, n) => ({
+      id: `row${n}`,
+      cells: { english: `Row ${n}` },
+      value: `R${n}`
+    }))
+    const run = openRun({ rows, effort: EFFORT })
+
+    // the command:  takes each answer as it comes, while its passes run
+    const taken: string[] = []
+    const listening = (async () => {
+      for await (const { rowId } of run.answersAsTheyCome({ timeoutMs: 10_000 })) {
+        taken.push(rowId)
+        run.take(rowId)
+      }
+    })()
+    const efforts: string[] = []
+    for (const name of ["names", "lines", "fix-ups"]) {
+      efforts.push(run.effort!)
+      run.startPass(name, { total: rows.length })
+      for (let done = 1; done <= rows.length; done++) {
+        await after(5)
+        run.updatePass({ done, calls: done })
+        // Owen, on the page:  answers two rows in the first pass, picks "best" in it too
+        if (name === "names" && done === 5) answer(run, { rows: { row0: ACCEPTED } })
+        if (name === "names" && done === 10) answer(run, { rows: { row0: ACCEPTED, row1: ACCEPTED }, effort: "best" })
+      }
+      run.endPass()
+    }
+    answer(run, { rows: { row0: ACCEPTED, row1: ACCEPTED }, effort: "best", sent: new Date().toISOString() })
+    await listening
+    run.finish()
+
+    expect(efforts).toEqual(["balanced", "best", "best"])
+    expect(taken).toEqual(["row0", "row1"])
+    const page = run.page
+    expect(Object.keys(page.taken!)).toEqual(["row0", "row1"])
+    expect(page.passes!.map(({ name, state, done, calls, effort }) => ({ name, state, done, calls, effort }))).toEqual([
+      { name: "names", state: "done", done: 20, calls: 20, effort: "balanced" },
+      { name: "lines", state: "done", done: 20, calls: 20, effort: "best" },
+      { name: "fix-ups", state: "done", done: 20, calls: 20, effort: "best" }
+    ])
+    expect(page.passes!.every((pass) => pass.ms! >= 90)).toBe(true)
+    expect(page.status).toBe("done")
   })
 })

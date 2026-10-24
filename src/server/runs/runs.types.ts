@@ -46,14 +46,30 @@ export type RunPage = {
   rows: RunRow[]
   /** progress lines, oldest first, as the command writes them */
   progress: RunProgress[]
+  /**
+   * the run's passes, as DATA, for the page's status card (epic `epic-engine` P25):  in order, the current one last
+   * - none:  the page shows only `progress`
+   */
+  passes?: RunPass[]
+  /**
+   * the effort Owen may pick on the page (P25), the translator's `--effort`:  the choices, and the one the command
+   * started with;  none:  no picker
+   */
+  effort?: RunEffortChoice
+  /** rows the command has taken (acted on), by row id:  when, ISO (P25);  the page marks them */
+  taken?: Record<string, string>
   /** `open` while the command can still take answers;  `done` once it read them;  `stopped` if it gave up */
   status: RunStatus
   /** when the command last wrote this file, ISO */
   updated: string
 }
 
-/** A run's state, as its page shows it. */
-export type RunStatus = "open" | "done" | "stopped"
+/**
+ * A run's state, as its page shows it.
+ * - `open`:  it can still take answers;  `done`:  it read them and finished;  `stopped`:  it gave up;
+ *   `timed-out`:  its wait ran out (P25)
+ */
+export type RunStatus = "open" | "done" | "stopped" | "timed-out"
 
 /** One column a row shows. */
 export type RunColumn = {
@@ -87,12 +103,43 @@ export type RunProgress = {
   text: string
 }
 
+/** One pass of a run, for the status card (P25):  `names:  41 drafted in 6 s`, `lines:  212 of 380`. */
+export type RunPass = {
+  /** its name:  `names`, `lines`, `fix-ups` */
+  name: string
+  /** `running` while it runs;  `done` once it's over */
+  state: "running" | "done"
+  /** how far:  `done` of `total` (`212` of `380`);  either may be missing */
+  done?: number
+  total?: number
+  /** the calls it made (to Claude, say) */
+  calls?: number
+  /** how long it took, or has taken so far, in ms */
+  ms?: number
+  /** the effort it ran at */
+  effort?: string
+  /** when it started, ISO */
+  started: string
+}
+
+/** The effort Owen may pick for a run (P25). */
+export type RunEffortChoice = {
+  /** the choices, in order:  `["fast", "balanced", "best"]` */
+  choices: string[]
+  /** the one the command started with */
+  initial: string
+  /** the picker's label:  `Effort` */
+  label?: string
+}
+
 /** What Owen answered:  `answers.json5`. */
 export type RunAnswers = {
   /** per row id, his answer, saved as he gives it (not only at Send) */
   rows: Record<string, RunAnswer>
   /** when he pressed Send, ISO;  none:  not yet */
   sent?: string
+  /** the effort he picked on the page (P25), one of `RunPage.effort.choices`;  none:  the command's `initial` */
+  effort?: string
 }
 
 /** One row's answer. */
@@ -127,7 +174,10 @@ export type RunWaiting = {
 ////////////////
 
 /** `CommandRun.open()`'s props:  what the page asks, and where. */
-export type RunOpenProps = Pick<RunPage, "command" | "title" | "description" | "columns" | "answerLabel" | "rows"> & {
+export type RunOpenProps = Pick<
+  RunPage,
+  "command" | "title" | "description" | "columns" | "answerLabel" | "rows" | "effort"
+> & {
   /** a folder of the checkout:  the run goes in its content folder (`contentFolderOf()`) */
   root: string
   /** the run's id, its folder's name;  default:  a slug of `command`, then the local time (`RunPage.id`) */
@@ -147,6 +197,32 @@ export type RunWaitResult = RunAnswers & {
   /** `true`:  the time limit came first, and `sent` is not this wait's */
   timedOut: boolean
 }
+
+/** `CommandRun.answersAsTheyCome()`'s props (P25). */
+export type RunAnswersProps = {
+  /** longest it listens, ms;  default `CommandRun.ANSWERS_TIMEOUT_MS` (4 hours) */
+  timeoutMs?: number
+  /** ends it early:  the loop just ends, `aborted` */
+  signal?: AbortSignal
+}
+
+/** One row's answer as `CommandRun.answersAsTheyCome()` gives it:  new, or changed since it last gave that row's. */
+export type RunRowAnswer = {
+  /** the row's id, as `RunRow.id` */
+  rowId: string
+  /** his answer now */
+  answer: RunAnswer
+}
+
+/**
+ * How `CommandRun.answersAsTheyCome()` ended, its generator's return value:
+ * - `sent`:  Owen pressed Send;  `timed-out`:  its time limit;  `aborted`:  its `signal`;
+ *   `finished`:  the command called `finish()`
+ */
+export type RunAnswersEnd = "sent" | "timed-out" | "aborted" | "finished"
+
+/** What `CommandRun.startPass()` / `updatePass()` / `endPass()` take:  how far a pass has got (P25). */
+export type RunPassFacts = Pick<RunPass, "done" | "total" | "calls">
 
 /**
  * Thrown by `CommandRun` when it can't find or make a run;  `kind` says why:
