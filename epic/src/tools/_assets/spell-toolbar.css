@@ -524,7 +524,8 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
   );
   background-image: var(--ui-bar-wallpaper, none);
   background-attachment: fixed;
-  backdrop-filter: var(--ui-bar-filter, none);
+  /* no blur over the wallpaper:  it's opaque, and the blur drew a seam where the strip meets the page header above */
+  backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: 0px;
