@@ -173,17 +173,6 @@
     outline: 2px solid var(--epic-accent);
     outline-offset: 2px;
   }
-  /* the reading chip (epic `epic-engine` J91):  a guide's, quiet and in the body's type, not the name's capitals */
-  .reading {
-    --ui-label-basic-color: var(--spell-muted, var(--ui-text-muted, GrayText));
-    --ui-label-basic-border: var(--spell-rule, var(--ui-border-color, #d4d4d5));
-    --ui-label-basic-background: transparent;
-    flex: none;
-    font-family: var(--spell-sans, var(--ui-font-family, sans-serif));
-    font-weight: 500;
-    letter-spacing: normal;
-    text-transform: none;
-  }
   /*
    * at the row's far right, in this order (Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle
    * is) (git icon, but bigger)";  then "Move [Send and Review Now] back to the page header, to the left of P11"):
@@ -580,10 +569,6 @@
     /* the h1 shares its row with the labels while they fit (no row of their own:  the stuck header stays short) */
     .heading {
       flex-basis: 100%;
-    }
-    /* no reading chip narrow:  the labels lie over the h1's end */
-    .reading {
-      display: none;
     }
     /* the labels stay at the row's right, over the h1's end:  the header's own ground under them, fading left */
     .status {
