@@ -13,8 +13,8 @@ That's the big switch, and you may never need it.
 Spell UI draws everything from CSS custom properties, the TOKENS,
 so theming is mostly setting a few of them:  say how your look differs from the default, and stop.
 
-What you can't do yet is offer people a theme menu on your own page, or make a theme from your own colours and fonts:
-both are 🌱 coming, at the end.
+You can also make a theme from your own colours, fonts and shapes, live, with `<ui-theme-editor>` (recipe 5).
+What you can't do yet is offer people a theme menu on your own page:  🌱 coming, at the end.
 
 <details>
 <summary>The markup in every panel, and how the pictures were taken</summary>
@@ -201,7 +201,7 @@ the last column is what a theme restyles on purpose.
 
 </details>
 
-## Four recipes
+## Five recipes
 
 ### 1. Sitewide defaults:  tokens on `:root`
 
@@ -346,11 +346,28 @@ the theming page on the docs site has the recipe step by step.
 
 </details>
 
-## 🌱 Coming:  picking and making themes
+### 5. Making a theme:  `<ui-theme-editor>`
+
+To make a look of your own, start from one of Spell UI's and change what you like:
+
+```html
+<ui-theme-editor></ui-theme-editor>
+```
+
+- Its inspector picks the primary, secondary and background colours, the heading and body fonts, the text size,
+  the corners, the depth and, on `fruity`, how much the glass shows through.
+- The whole page wears the theme as you change it, and a sample app shows it in light and dark side by side.
+- Copy CSS gives the theme as one stylesheet:  tokens on `:root`, in `@layer ui.app`.
+  Apply its base first (`UI.themes.apply("fruity")`), then the sheet, and the page looks as it did in the editor.
+- Use this theme keeps it in this browser.
+  The Spell editor wears it over its base, and any page can:  `SavedTheme.restore()`.
+- It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.
+- Its docs page, with the editor live:  `/components/ui/ui-theme-editor.html`.
+
+## 🌱 Coming:  picking themes, and themes per component
 
 - a theme picker for any page:  the docs site has one today, but as a docs-only element, `<ui-docs-themes>`
   (one palette button:  a theme, and Light, Dark or Auto, remembered for each viewer)
-- a way to make a theme from your own colours and fonts
 - theme files per component, so one page can mix looks family by family
 
 Today a page applies one theme at a time,

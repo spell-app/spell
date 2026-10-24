@@ -208,7 +208,7 @@ A rule like `.ui.card .header` on your page no longer reaches the header:  it's 
 
 Four doors are open on purpose, and a Fomantic project's pieces each go through one.
 [Spell UI's front page](README.md#your-css-stops-at-the-shadow-root--four-doors-let-it-in) shows the doors;
-[README-themes.md](README-themes.md#four-recipes) has the recipes.
+[README-themes.md](README-themes.md#five-recipes) has the recipes.
 
 | In your Fomantic project | In Spell UI |
 | --- | --- |

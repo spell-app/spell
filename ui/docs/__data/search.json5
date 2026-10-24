@@ -2812,6 +2812,23 @@
       ]
     },
     {
+      "path": "ui-theme-editor.html",
+      "title": "Theme Editor",
+      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
+      "tag": "ui-theme-editor",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-theme-editor","title":"Theme editor","parent":0},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-use-this-theme","title":"Use this theme","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-title.html",
       "title": "Title",
       "summary": "A title heads a step, an accordion panel or a search result.",

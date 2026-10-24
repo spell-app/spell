@@ -82,6 +82,7 @@
     "./dist/ui-code.js",
     "./dist/ui-include.js",
     "./dist/ui-tree-diagram.js",
+    "./dist/ui-theme-editor.js",
     "./src/tools/demo/**"
   ],
   "module": "./dist/index.js",
@@ -395,6 +396,11 @@
       "spell-ui-source": "./src/components/ui-toolbar/index.ts",
       "types": "./dist-types/src/components/ui-toolbar/index.d.ts",
       "default": "./src/components/ui-toolbar/index.ts"
+    },
+    "./components/ui-theme-editor": {
+      "spell-ui-source": "./src/components/ui-theme-editor/index.ts",
+      "types": "./dist-types/src/components/ui-theme-editor/index.d.ts",
+      "default": "./src/components/ui-theme-editor/index.ts"
     },
     "./components/ui-tree-diagram": {
       "spell-ui-source": "./src/components/ui-tree-diagram/index.ts",
@@ -807,6 +813,10 @@
       "./ui-tree-diagram": {
         "types": "./dist/components/ui-tree-diagram/index.d.ts",
         "import": "./dist/ui-tree-diagram.js"
+      },
+      "./ui-theme-editor": {
+        "types": "./dist/components/ui-theme-editor/index.d.ts",
+        "import": "./dist/ui-theme-editor.js"
       },
       "./styles": {
         "types": "./dist/styles/index.d.ts",

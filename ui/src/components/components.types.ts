@@ -1747,3 +1747,76 @@ export const SourceBodyStates = [
   { name: "loaded", description: "With `source`:  the file's body is in place." },
   { name: "error", description: "With `source`:  the file couldn't be loaded or shown." }
 ] as const
+
+////////////////
+// ## Theme editor
+////////////////
+
+/** The hues a theme editor's colours are picked from:  Spell UI's own, `primary` and `secondary` left out. */
+export const ThemeHues = [
+  "red",
+  "orange",
+  "yellow",
+  "olive",
+  "green",
+  "teal",
+  "blue",
+  "violet",
+  "purple",
+  "pink",
+  "brown",
+  "grey",
+  "black"
+] as const
+/** One of `ThemeHues`, e.g. `"pink"`. */
+export type ThemeHue = (typeof ThemeHues)[number]
+
+/** The fonts a theme editor offers, each already on people's computers (`ThemeSheet` has their stacks). */
+export const ThemeFonts = ["system", "rounded", "serif", "georgia", "humanist", "verdana", "mono"] as const
+/** One of `ThemeFonts`, e.g. `"rounded"`. */
+export type ThemeFont = (typeof ThemeFonts)[number]
+
+/** How rounded a theme's corners are, least first. */
+export const ThemeCorners = ["sharp", "soft", "round", "pill"] as const
+/** One of `ThemeCorners`. */
+export type ThemeCorner = (typeof ThemeCorners)[number]
+
+/** How far a theme's surfaces lift off the page, least first. */
+export const ThemeDepths = ["flat", "soft", "lifted"] as const
+/** One of `ThemeDepths`. */
+export type ThemeDepth = (typeof ThemeDepths)[number]
+
+/** How much of the page shows through a glass theme's surfaces (fruity's), most first. */
+export const ThemeGlasses = ["clear", "frosted", "solid"] as const
+/** One of `ThemeGlasses`. */
+export type ThemeGlass = (typeof ThemeGlasses)[number]
+
+/**
+ * A theme as `<ui-theme-editor>` makes it:  a base theme, and what's changed on it.
+ * - Its `value`, its `ui-change` and `ui-save` details, and what `SavedTheme` keeps in the browser.
+ * - Every choice but `name` and `base` is optional:  left out, the base theme's own stays.
+ */
+export type ThemeChoices = {
+  /** what people call it;  names its file, `themes/<name>.css` */
+  name: string
+  /** the `UI.themes` name it changes, e.g. `fruity` */
+  base: string
+  /** the main action colour */
+  primary?: ThemeHue
+  /** second-choice buttons, quieter highlights */
+  secondary?: ThemeHue
+  /** tints the page behind everything (and a glass theme's wallpaper) */
+  background?: ThemeHue
+  /** titles and headings */
+  headingFont?: ThemeFont
+  /** everything else */
+  bodyFont?: ThemeFont
+  /** everyday text, in px:  `--ui-font-size` */
+  textSize?: number
+  /** how rounded buttons, fields and cards are */
+  corners?: ThemeCorner
+  /** how far surfaces lift */
+  depth?: ThemeDepth
+  /** a glass theme's see-through:  fruity's only */
+  glass?: ThemeGlass
+}

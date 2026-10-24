@@ -36,6 +36,16 @@ const FOUNDATION = import.meta.glob<string>("/src/styles/*.css", { query: "?raw"
 const EXCEPTIONS: Record<string, Record<string, string>> = {
   "ui-search/UISearch.css": {
     "--ui-input-radius": "the search prompt is Fomantic's round input:  it sets the nested input's radius"
+  },
+  "ui-theme-editor/UIThemeEditor.css": {
+    "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",
+    "--ui-section-margin": "its preview and stylesheet sections sit in a column spaced by its gap",
+    "--ui-code-font-size": "its stylesheet is a long listing:  smaller code than a page's",
+    "--ui-code-line-height": "and tighter lines, with the smaller code",
+    "--ui-card-margin-block": "the sample app's parts are spaced by its gap",
+    "--ui-progress-margin": "the same",
+    "--ui-message-margin": "the same",
+    "--ui-message-icon-size": "the sample's message is one short line:  its icon sized to the text, not to a paragraph"
   }
 }
 

@@ -98,7 +98,8 @@ export const COMPONENTS = [
   "ui-include",
   "ui-code",
   "ui-markdown",
-  "ui-tree-diagram"
+  "ui-tree-diagram",
+  "ui-theme-editor"
 ] as const
 
 /**

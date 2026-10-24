@@ -1478,6 +1478,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-theme-editor": { folder: "ui-theme-editor", skeleton: { height: "30em" }, attributes: ["base", "value"] },
   "ui-title": { folder: "ui-parts", attributes: ["href"] },
   "ui-toast": {
     folder: "ui-toast",

@@ -26065,6 +26065,181 @@ export interface UITextareaJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UITextareaEventMap>>, keyof UITextareaAttributes>,
     UITextareaAttributes {}
 
+/** `<ui-theme-editor>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIThemeEditorEventMap {
+  /**
+   * `ui-change`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * - `event.detail`:  `{ value: ThemeChoices, css: string }`
+   */
+  "ui-change": CustomEvent<{ value: UIT.ThemeChoices; css: string }>
+  /**
+   * `ui-copy`:  Copy CSS put the stylesheet on the clipboard.
+   * - `event.detail`:  `{ css: string }`
+   */
+  "ui-copy": CustomEvent<{ css: string }>
+  /**
+   * `ui-save`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
+   */
+  "ui-save": CustomEvent<{ value?: UIT.ThemeChoices; css: string }>
+}
+
+/** `<ui-theme-editor>`'s own attributes, from its vocabulary. */
+export interface UIThemeEditorAttributes {
+  /**
+   * The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.
+   * - takes:  text
+   */
+  base?: string
+  /**
+   * `base`, as the DOM element's property.
+   * @deprecated write `base` -- `prop:` stays only for compiled spell
+   */
+  "prop:base"?: string
+  /**
+   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  value?: unknown
+  /**
+   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: unknown
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `ui-change`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * - `event.detail`:  `{ value: ThemeChoices, css: string }`
+   */
+  "on-ui-change"?: (event: UIThemeEditorEventMap["ui-change"]) => void
+  /**
+   * `ui-copy`:  Copy CSS put the stylesheet on the clipboard.
+   * - `event.detail`:  `{ css: string }`
+   */
+  "on-ui-copy"?: (event: UIThemeEditorEventMap["ui-copy"]) => void
+  /**
+   * `ui-save`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
+   */
+  "on-ui-save"?: (event: UIThemeEditorEventMap["ui-save"]) => void
+}
+
+/** `<ui-theme-editor>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIThemeEditorJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeEditorEventMap>>, keyof UIThemeEditorAttributes>,
+    UIThemeEditorAttributes {}
+
 /** `<ui-title>`'s own attributes, from its vocabulary. */
 export interface UITitleAttributes {
   /**
@@ -28565,6 +28740,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-textarea": UITextareaJSXAttributes
       /**
+       * `<ui-theme-editor>`:  A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.
+       * - also known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens
+       * - events:  `ui-change`, `ui-copy`, `ui-save`
+       */
+      "ui-theme-editor": UIThemeEditorJSXAttributes
+      /**
        * `<ui-title>`:  A title:  a step's, an accordion panel's, a search result's.
        * - also known as:  accordion title, summary, toggle header
        * - slots:
@@ -28782,6 +28963,7 @@ declare global {
     "ui-tabs": UIHTMLElement<UITabsEventMap>
     "ui-text": HTMLElement
     "ui-textarea": UIHTMLElement<UITextareaEventMap>
+    "ui-theme-editor": UIHTMLElement<UIThemeEditorEventMap>
     "ui-title": HTMLElement
     "ui-toast": UIHTMLElement<UIToastEventMap>
     "ui-toolbar": UIHTMLElement<UIToolbarEventMap>

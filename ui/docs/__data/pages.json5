@@ -502,6 +502,11 @@
       "summary": "A text is used to style some inline text with a simple color.",
       "status": "done"
     },
+    "ui-theme-editor": {
+      "title": "Theme Editor",
+      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
+      "status": "in-progress"
+    },
     "ui-toast": {
       "title": "Toast",
       "summary": "A toast allows users to receive a short, non-blocking notification.",

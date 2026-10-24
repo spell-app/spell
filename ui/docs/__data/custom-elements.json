@@ -28437,6 +28437,184 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-theme-editor/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIThemeEditor",
+          "tagName": "ui-theme-editor",
+          "customElement": true,
+          "summary": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.",
+          "description": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens.",
+          "attributes": [
+            {
+              "name": "base",
+              "description": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "base"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "description": "The theme to start with, as `ThemeChoices` (`{\"primary\": \"pink\", \"corners\": \"soft\"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-change",
+              "description": "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.",
+              "type": {
+                "text": "CustomEvent<{ value: ThemeChoices, css: string }>"
+              }
+            },
+            {
+              "name": "ui-copy",
+              "description": "Copy CSS put the stylesheet on the clipboard.",
+              "type": {
+                "text": "CustomEvent<{ css: string }>"
+              }
+            },
+            {
+              "name": "ui-save",
+              "description": "Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.",
+              "type": {
+                "text": "CustomEvent<{ value?: ThemeChoices, css: string }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "editor",
+              "description": "The whole editor:  the inspector beside the preview and the stylesheet."
+            },
+            {
+              "name": "inspector",
+              "description": "The inspector, a `<ui-panel>` of `<ui-property-editor>` fields."
+            },
+            {
+              "name": "preview",
+              "description": "The preview:  a sample app of real elements, in light and dark."
+            },
+            {
+              "name": "sheet",
+              "description": "The stylesheet section, with Copy CSS."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "saved",
+              "description": "The theme it shows is the one kept in this browser (Use this theme)."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-theme-editor-inspector-width",
+              "default": "320px"
+            },
+            {
+              "name": "--ui-theme-editor-gap",
+              "default": "1.5em"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIThemeEditor",
+          "declaration": {
+            "name": "UIThemeEditor",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-theme-editor",
+          "declaration": {
+            "name": "UIThemeEditor",
+            "module": "src/components/ui-theme-editor/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-toast/index.ts",
       "declarations": [
         {

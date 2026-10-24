@@ -194,8 +194,8 @@ your own stylesheet, left unlayered, beats all seven, so plain CSS overrides the
 
 Each component also has public tokens of its own, `--ui-<tag>-*`, listed on its docs page's Theming tab:
 `ui-button.wide { --ui-button-padding-inline: 3em; }`.
-The layers in order, dark mode and four recipes (sitewide defaults, one component's, a whole theme,
-the app stylesheet) are on [README-themes.md](README-themes.md#four-recipes).
+The layers in order, dark mode and five recipes (sitewide defaults, one component's, a whole theme,
+the app stylesheet, making a theme) are on [README-themes.md](README-themes.md#five-recipes).
 
 ## Thirty seconds, two ways
 
@@ -617,7 +617,7 @@ The rest is on the page that owns each one:
 | [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 62 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 npm</li></ul> |
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  eighteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
-| [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and 25 themes</li><li>four recipes, from tokens on `:root` to the app stylesheet</li><li>🌱 picking and making themes</li></ul> |
+| [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and 25 themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>🌱 a theme picker for any page</li></ul> |
 | [README-frameworks.md](README-frameworks.md) | <ul><li>the contract:  four rules every element keeps, and who decides the value</li><li>plain JavaScript, React 19, Vue 3 and Solid 2, each checked by a page that runs;  Svelte, Angular, Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today with an import map;  what the smoke pages prove, and what they don't</li></ul> |
 | [README-migrating.md](README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React:  your classes moved inside</li><li>a whole card, three ways;  every class word becomes an attribute</li><li>what changes under the words:  your CSS, jQuery calls, a few words</li><li>from Semantic UI React, no wrappers;  moving a page by hand;  🌱 the migration tool</li></ul> |
 | [README-site.md](README-site.md) | <ul><li>the docs site, 84 pages and 1,740 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |

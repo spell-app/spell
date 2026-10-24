@@ -202,7 +202,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-62 families, 104 tags;  2 families in progress.
+64 families, 106 tags;  3 families in progress.
 
 ### Elements
 
@@ -241,6 +241,7 @@ Pieces made of several kinds of part.
 | <img src="docs/images/components/ui-message.png" alt="Message, its first example" width="200" height="36"> | [Message](docs/ui-message.html) | `<ui-message>` | A message displays information that explains nearby content. | alert, callout, notice, banner |
 | <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) *(In progress)* | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
 | <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
+|  | [Toolbar](docs/ui-toolbar.html) | `<ui-toolbar>` | A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute. | toolbar, tool bar, scrolling tabs, overflow menu |
 
 ### Views
 
@@ -307,6 +308,7 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-panel.png" alt="Panel, its first example" width="169" height="96"> | [Panel](docs/ui-panel.html) | `<ui-panel>` | A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute. | inspector, property panel, properties, settings panel |
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can fold away and keep its title in view. | section, panel, collapsible, disclosure |
+|  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser. | theme editor, theme builder, theme creator, theme generator |
 
 <details>
 <summary>The docs site's own elements:  8 families, never in the library</summary>
