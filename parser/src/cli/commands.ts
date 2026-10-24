@@ -137,7 +137,9 @@ export default function languageCommands(spell: Command): void {
     .action((word: string, _options, command: Command) => language("explain", [word], command))
 
   // the language's own tools, under `spell parser`:  their work is here, not behind the hook -- but `translate`'s
-  const parser = spell.command("parser").description("tools for spell itself:  its language packs, translating a project")
+  const parser = spell
+    .command("parser")
+    .description("tools for spell itself:  its language packs, translating a project")
 
   const packs = parser
     .command("packs")
