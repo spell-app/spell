@@ -578,3 +578,18 @@ Sources, short names used below:
 - Look for:  a countdown, an auto-send or a timer on a page a running command waits on.
 - Owen:  "No countdown on run pages" (the command carries on with exactly what he sent)
 - Source:  epic `epic-engine` P23, 2026-10-23.
+
+#### T64 · A status card is the progress:  no log line repeating it
+- Look for:  a progress line (or a log) under a status card saying what the card already shows.
+- Owen:  "Fold them away" (the run page's progress lines, once it has a status card)
+- Source:  epic `epic-engine` P25, 2026-10-23.
+
+#### T65 · Only what's running gets a bar
+- Look for:  finished steps still drawing full progress bars, making a tall card of grey.
+- Owen:  "Drop it when done"
+- Source:  epic `epic-engine` P25, 2026-10-23.
+
+#### T66 · Running time ticks on its own, so slow never looks stuck
+- Look for:  an elapsed time that moves only when the work reports in.
+- Owen:  "Tick it on the page"
+- Source:  epic `epic-engine` P25, 2026-10-23.

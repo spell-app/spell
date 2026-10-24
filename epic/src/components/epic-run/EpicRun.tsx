@@ -31,7 +31,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *       once (`RunForm.pickEffort()`), and takes effect at the next pass
  *     - a line per pass:  its name, a small bar and `212 of 380`, its calls, its time;  the running one in full ink,
  *       the done ones muted
- *   - its progress:  the latest line, then every line, folded
+ *   - its progress:  the latest line, then every line, folded;  with passes, only the fold (the card is the progress)
  *   - the table:  the command's columns' heads and the answer's, then a row per thing to answer, `<epic-run-row>`,
  *     each given its row, the columns and Owen's answer so far
  *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send (no countdown:  `manual`;  a command carries on with exactly what was sent)
@@ -54,6 +54,18 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
 
   /** The form's `version`, as last heard:  every getter below reads it, so the page redraws on each change. */
   @E.state accessor version = 0
+
+  /** The page's clock, for a running pass's time:  set every second while one runs (`tickWhileRunning()`). */
+  @E.state accessor now = Date.now()
+
+  /** While connected:  the clock ticks every second while a pass runs in an open run;  returns the undo. */
+  @E.onChange("isConnected")
+  protected tickWhileRunning(isConnected: boolean) {
+    if (!isConnected || isServer) return undefined
+    return E.every(1, () => {
+      if (this.form?.status === "open" && this.passes.some((pass) => pass.state === "running")) this.now = Date.now()
+    })
+  }
 
   /** The run's rows;  none before it's read. */
   get rows(): RunRow[] {
@@ -268,14 +280,14 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
           {pass().name}
         </span>
         <span class={PASS_HOW_FAR}>
-          <Show when={pass().total}>
+          <Show when={pass().total && isRunning()}>
             <progress max={pass().total} value={pass().done ?? 0} aria-label={pass().name} />
           </Show>
           <span class={NUMBER}>{this.howFar(pass())}</span>
         </span>
         <span class={NUMBER}>{this.callsText(pass().calls)}</span>
         <span class={NUMBER}>
-          {this.timeText(pass().ms)}
+          {this.timeText(isRunning() ? this.runningMs(pass()) : pass().ms)}
           <Show when={pass().effort}>
             <span class={PASS_EFFORT}> {this.translationForKey("passEffort", { effort: pass().effort! })}</span>
           </Show>
@@ -296,6 +308,17 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return calls === 1 ? this.translationForKey("oneCall") : this.translationForKey("calls", { count: String(calls) })
   }
 
+  /**
+   * A running pass's time so far:  counted from its start by the page's clock (`now`), never less than the command
+   * last wrote, so a slow pass reads as slow, not stuck (Owen, 2026-10-23:  "Tick it on the page").
+   * - an ended run's:  as the command wrote it
+   */
+  private runningMs(pass: RunPass): number | undefined {
+    if (this.form?.status !== "open") return pass.ms
+    const started = Date.parse(pass.started)
+    return Number.isNaN(started) ? pass.ms : Math.max(pass.ms ?? 0, this.now - started)
+  }
+
   /** A pass's time:  `6 s`, `2 min 5 s`;  `""` for none said. */
   private timeText(ms: number | undefined): string {
     if (ms === undefined) return ""
@@ -304,12 +327,17 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return this.translationForKey("minutes", { minutes: String(Math.floor(total / 60)), seconds: String(total % 60) })
   }
 
-  /** The progress:  the latest line, then every line, folded. */
+  /**
+   * The progress:  the latest line, then every line, folded.
+   * - with passes, the status card IS the progress:  only the fold, closed (Owen, 2026-10-23:  "Fold them away")
+   */
   private progressBlock(): JSX.Element {
     return (
       <div class={PROGRESS} part={this.partForName("progress")}>
-        <p class={LATEST}>{this.progressLine(this.progress.at(-1)!)}</p>
-        <Show when={this.progress.length > 1}>
+        <Show when={!this.passes.length}>
+          <p class={LATEST}>{this.progressLine(this.progress.at(-1)!)}</p>
+        </Show>
+        <Show when={this.progress.length > 1 || this.passes.length}>
           <details>
             <summary>{this.translationForKey("progress", { count: String(this.progress.length) })}</summary>
             <ol>

@@ -179,17 +179,24 @@ describe("<epic-run>, <epic-run-row>", () => {
     expect(part(run, "status")).toBeNull()
   })
 
-  test("the status card draws a line per pass:  name, bar and how far, calls, time;  the running one marked;  axe", async () => {
+  test("the status card draws a line per pass:  name, how far, calls, time;  only the running one has a bar;  axe", async () => {
+    // the page's clock 10 s past what the command last wrote:  the running pass's time ticks on (Owen, 2026-10-23)
+    vi.useFakeTimers({ toFake: ["Date"] })
+    vi.setSystemTime(new Date("2026-10-23T19:14:15.000Z"))
     adoptForm(fakeRoutes({ page: STEERED }))
     const run = await drawRun()
     const lines = Array.from(part(run, "passes")!.querySelectorAll('[part~="pass"]'))
     const cells = (line: Element) => Array.from(line.children, (cell) => cell.textContent!.trim())
     expect(lines.map((line) => [line.classList.contains("running"), ...cells(line)])).toEqual([
       [false, "names", "3 of 3", "1 call", "6 s"],
-      [true, "lines", "212 of 380", "14 calls", "2 min 5 s at best"]
+      [true, "lines", "212 of 380", "14 calls", "2 min 15 s at best"]
     ])
+    expect(lines[0]!.querySelector("progress")).toBeNull()
     const bar = lines[1]!.querySelector("progress")!
     expect([bar.max, bar.value]).toEqual([380, 212])
+    // with passes, the progress lines are only their fold, closed (Owen:  "Fold them away")
+    expect(part(run, "progress")!.querySelector(".latest")).toBeNull()
+    vi.useRealTimers()
     await expectAccessible(run)
   })
 
