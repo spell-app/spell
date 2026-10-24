@@ -175,7 +175,6 @@
     "lightningcss": "^1.33.0",
     "linkedom": "^0.18.13",
     "lodash": "^4.17.21",
-    "node-storage-shim": "^2.0.1",
     "parse5": "^7.3.0",
     "query-string": "^6.12.1",
     "tsx": "4.20.3",

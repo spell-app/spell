@@ -59,7 +59,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Spell's own utilities, flattened into the `spell/util` barrel LAST:
   - lodash and string helpers
   - `Observable` / `Derivative` / `Loadable`, `Task` / `TaskList`
-  - `$fetch`, `Logger`, prefs, `assert` / `die`
+  - `$fetch`, `Logger`, `assert` / `die`
   - DOM helpers
 - The bottom of the spell chain:  every spell-family package may import it, and it imports nothing above it.
   - Formerly the package `spell-util`.
@@ -102,6 +102,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its files import each other as peers.
   - `spell/` imports it as `spell/util/reactive`, never through `spell/util`.
 - It's Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL first.
+
+## Kept values (`persist/`)
+
+- `spell/util/persist`:  values kept for people across visits (epic `prefs-and-undo`).
+  - Flattened into the `spell/util` barrel too.
+  - `PrefStore`:  one app's preferences, every key `<store>:<key>`, values as text people can read (`values.ts`).
+  - `PrefPlace`:  where a store keeps them;  `StoragePlace` over a web `Storage`, `MemoryStorage` for memory.
+- GENERIC, like the files beside `index.ts`:  nothing spell-specific, nothing imported from outside the folder.
+  - NOT in Spell UI's util barrel:  in its `core` bundle it cost every page 1.9 kB (`yarn measure`, 2026-10-24).
+    Spell UI's files that keep preferences import `spell/util/persist/PrefStore` by file.
+- Its files import each other as peers.
+- Its tests run in a real browser (project `util`):  they use the browser's own storage.
+- Every key a plain script also reads (a page's inline `<head>` script, the live-reload client) is written byte
+  for byte as before:  a store's name is the key's part before its first colon.
 
 ## Decorators
 
