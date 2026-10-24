@@ -108,6 +108,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
+  - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
+    its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
+    - its files' shapes:  [runs.types.ts](runs/runs.types.ts), the contract with spell-epic's page and routes
+    - it names no element and no child repo;  `show()` runs `epic` as a program, when there is one
 - It's a LEAF of the kit:  node, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded when it's first
   called);  esbuild comes in as a hook;  of the kit, only util's json5 and the toolchain's format settings.
   - So anything node-side may import it:

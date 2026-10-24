@@ -576,6 +576,33 @@ DataFile.write(file, answer)
   laid out as `JSON.stringify(value, null, 2)` would, all at once.
 - No lock of its own:  callers hold the `FileLock`.
 
+### Command runs:  a command that asks on a page
+
+A command can stop, show rows to answer on a page, wait for Send, and carry on with the answers.
+`CommandRun` (in `SRV`) is the command's side;  spell-epic draws the page and serves it at `/runs/<id>/`.
+
+```ts
+const run = SRV.CommandRun.open({
+  root, command: "spell parser translate todos --to es", title: "Names for todos, in Spanish",
+  columns: [{ key: "english", label: "English" }], answerLabel: "Spanish",
+  rows: [{ id: "todo", cells: { english: "Todo" }, value: "Tarea", alternatives: ["Pendiente"] }]
+})
+await run.show()                                         // the side bar, else a browser, else just the path
+run.progress("names:  41 drafted in 6 s")
+const answers = await run.wait({ timeoutMs: 30 * 60_000 })
+if (answers.timedOut) console.log(`no answer yet:  ${run.path}`)
+else for (const [id, { outcome, value, ticked }] of Object.entries(answers.rows)) use(id, outcome, value, ticked)
+run.finish()
+```
+
+- A run is a folder of the content folder, `pages/runs/<id>/`, with three files:
+  - `run.json5`:  what the command asks (its rows, its progress lines);  only the command writes it
+  - `answers.json5`:  the answers, per row id, saved as they're given;  only the page writes it
+  - `waiting.json5`:  a heartbeat while `wait()` runs, so the page says the command is waiting;  gone after
+- `setRows()` replaces the rows, and a row already answered keeps its answer:  answers are kept by row id.
+- `wait()` returns at the time limit, with `timedOut`, rather than throwing.
+- Their shapes are one file, [runs.types.ts](src/server/runs/runs.types.ts):  the contract with the page side.
+
 ### The content folder
 
 `contentFolderOf(root)` finds the shared content folder:  the guides, epic pages, sagas and the logs.
@@ -948,6 +975,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [site/](src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the favicon, the logo |
 | [test/](src/server/test/) | the test helpers |
 | [scripts/favicon.ts](scripts/favicon.ts) | `yarn favicon` |
+| [runs/](src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](src/server/runs/runs.types.ts)) |
 | [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
@@ -957,6 +985,7 @@ Tests (node), at the same paths under [tests/server/](tests/server/):
 [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts).
 - `Router`, `StaticHandler`, `WebServer`, `LiveReload`, `PidFile`, `FileOperations`
 - `checkout`, `mainServer`, `ports`, `proxy`, `safePath`, `webSocket`, `liveClient`
+- `runs/CommandRun`
 - `page/PageServer`, `page/BundleBuild`, `page/settings`, `page/prune`
 - `site/SiteHeader`, `site/site.types`, `site/siteTabs`
 - and the page-writing steps':  `Bundle`, `DataFile`, `Linker`, `format`
