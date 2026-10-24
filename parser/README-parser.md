@@ -451,7 +451,7 @@ spell parse $'a card is a thing\na card has a direction as either up or down\na 
     of: "Card", kind: "method", name: '"is face up"', returns: "choice",
   } */
   get isFaceUp() {
-    return this.direction == "up"
+    return this.direction === "up"
   }
 }
 export const card = new Card()

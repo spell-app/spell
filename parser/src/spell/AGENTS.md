@@ -63,7 +63,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - Other repos import these files by name, e.g. `spell-parser/spell/node/buildTsx`.
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell-parser/spell`'s barrel may import it (WWOD §8 › "Barrels").
-- `translate/` (epic `spanish` P24-P27):  writing a project in another language, names first, then rule by rule
+- `translate/` (epic `spanish` P24-P29):  writing a project in another language, names first, then rule by rule
   (`spell parser translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
   - `NamesGlossary`:  the language pack's shared glossary of names, `languages/<lang>/glossary.json5`:
     looked up before asking `claude`, each project's choices checked against it, grown by `--learn`
