@@ -511,6 +511,13 @@ Sources, short names used below:
   - "The expand button should be to the right of the bullhorn rather than in its own line"
 - Source:  spell-epic AGENTS, 2026-10-19 (epic `epic-engine` r4).
 
+#### T61 · On a phone, what you answer comes first
+- Look for:  a table you answer in (a run page, a choice page) whose answer column is off-screen at phone width, so a
+  sideways scroll comes before every answer.
+- Owen:  "Answer first on phones" (picked from the designer's question on P23's run page)
+- Source:  epic `epic-engine` P23, 2026-10-23.
+
+
 ### Colour
 
 #### T55 · Colours carry one meaning each
@@ -521,6 +528,12 @@ Sources, short names used below:
     orange, not ivory"
 - Source:  spell-epic AGENTS (epic `airplane` J22, comments, 2026-10-10);  the colour table there is his ruling
   (epic `epic-components` Q20, 2026-10-08):  red needs Owen, yellow open, blue working, green done, orange changed.
+
+#### T62 · Changed from what was proposed is orange, however it changed
+- Look for:  a picked alternative drawn one colour and a typed-over value another:  both are "changed", both orange.
+- Owen:  "Keep orange" (picked over green for a pick, on P23's run page)
+- Source:  epic `epic-engine` P23, 2026-10-23.
+
 
 ### Behaviour:  nothing that does nothing
 
@@ -560,3 +573,8 @@ Sources, short names used below:
 - Look for:  two toasts at once, overlapping each other or a bar's buttons.
 - Owen:  "crappy look and bad functionality when I press orange button at the top of the window"
 - Source:  epic `epic-engine` I78, 2026-10-23.
+
+#### T63 · Nothing sends by itself where a command is waiting
+- Look for:  a countdown, an auto-send or a timer on a page a running command waits on.
+- Owen:  "No countdown on run pages" (the command carries on with exactly what he sent)
+- Source:  epic `epic-engine` P23, 2026-10-23.

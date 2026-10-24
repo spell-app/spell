@@ -29,7 +29,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - its progress:  the latest line, then every line, folded
  *   - the table:  the command's columns' heads and the answer's, then a row per thing to answer, `<epic-run-row>`,
  *     each given its row, the columns and Owen's answer so far
- *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send and its countdown
+ *   - the Send bar, stuck to the window's bottom:  where the answers stand, the last save, Send (no countdown:  `manual`;  a command carries on with exactly what was sent)
  *     (`<epic-send-buttons>`, blue by the fill rule), and why a read, save or Send failed
  * - A row's answer (`epic-run-answer`) goes to the form, which saves it:  a keystroke half a second later, a pick or a
  *   tick at once.
@@ -112,9 +112,16 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return form ? [form.loadError, form.saveError, form.sendError].filter(Boolean) : []
   }
 
-  /** The table's columns, for its grid:  the command's, each its share, then the answer's, wider. */
+  /**
+   * The table's columns, for its grid:  the command's, each its share, then the answer's, wider;
+   * on a phone the answer's FIRST (`NARROW_COLUMNS_PROPERTY`, Owen, 2026-10-23:  "Answer first on phones").
+   */
   get tableStyle(): Record<string, string> {
-    return { [COLUMNS_PROPERTY]: `repeat(${this.runColumns.length}, minmax(min-content, 1fr)) minmax(14em, 2fr)` }
+    const commands = `repeat(${this.runColumns.length}, minmax(min-content, 1fr))`
+    return {
+      [COLUMNS_PROPERTY]: `${commands} minmax(14em, 2fr)`,
+      [NARROW_COLUMNS_PROPERTY]: `minmax(12em, 2fr) ${commands}`
+    }
   }
 
   /**
@@ -240,6 +247,7 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
             state={SEND_STATES_OF[this.fill]}
             busy={this.isSending() ? "" : undefined}
             send-tip={this.translationForKey("sendTip")}
+            manual=""
           />
         </div>
         <For each={this.errors} keyed={false}>
@@ -296,6 +304,9 @@ export interface EpicRun extends E.AttributeValues<typeof epicRunVocabulary> {}
 
 /** The table's grid columns, per instance:  set on it, read by its sheet. */
 const COLUMNS_PROPERTY = "--_epic-run-cols"
+
+/** The same on a phone, the answer's first:  the sheet swaps them under its narrow-screen rule. */
+const NARROW_COLUMNS_PROPERTY = "--_epic-run-cols-narrow"
 
 /** Classes of the shadow markup. */
 const WHO = "who"

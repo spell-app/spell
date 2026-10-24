@@ -46,6 +46,18 @@
     flex-direction: column;
     gap: 6px;
   }
+  /* a phone:  the answer first, as `<epic-run>`'s columns are (Owen, 2026-10-23:  "Answer first on phones") */
+  @media (max-width: 600px) {
+    .answer {
+      order: -1;
+    }
+    .cell + .cell {
+      border-left: 0;
+    }
+    .cell:not(.answer) {
+      border-left: 1px solid var(--_epic-run-rule);
+    }
+  }
 
   /* the box:  growing with its text, the reset button beside it once it differs */
   .field {

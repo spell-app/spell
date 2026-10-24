@@ -86,6 +86,21 @@
   .head > span + span {
     border-left: 1px solid var(--_epic-run-rule);
   }
+  /* a phone:  the answer's column first, so it's on screen without scrolling sideways (Owen, 2026-10-23) */
+  @media (max-width: 600px) {
+    .table {
+      grid-template-columns: var(--_epic-run-cols-narrow, 2fr 1fr);
+    }
+    .head > span:last-child {
+      order: -1;
+    }
+    .head > span + span {
+      border-left: 0;
+    }
+    .head > span:not(:last-child) {
+      border-left: 1px solid var(--_epic-run-rule);
+    }
+  }
   /* the Send bar:  stuck to the window's bottom, on the page's own ground (Owen's T11), a rule above the content */
   .bar {
     position: sticky;

@@ -4841,6 +4841,11 @@
           "name": "busy",
           "kind": "boolean",
           "description": "A send on its way:  the plane spins, and a press does nothing."
+        },
+        {
+          "name": "manual",
+          "kind": "boolean",
+          "description": "No countdown:  only a press sends, and no wand is drawn.  For a page a COMMAND waits on (`<epic-run>`):  it carries on with exactly what was sent (Owen, 2026-10-23)."
         }
       ],
       "slots": [],
