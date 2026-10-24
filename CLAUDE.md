@@ -53,10 +53,13 @@ if nothing is left for THIS session.
 - Open items may remain only if they're recorded elsewhere (the epic page, [the code-debt log](agents/CODE-DEBT.md) ...)
   and need no context from this session.
 - Otherwise leave the line out, and say what's keeping the tab open.
-- With the closing line, ALSO ask (AskUserQuestion) whether to run `/isolate done`
+- With the closing line, ALSO ask (AskUserQuestion) whether to finish the worktree
   when this session's worktree is still there (Owen, 2026-10-07).
-  - Or the worktrees it made and left:  `/isolate done`'s step 0 cleans those up.
-  - Options:  "Run `/isolate done`" (recommended) and "Leave it".
+  - Or the worktrees it made and left:  the finish's step 0 cleans those up.
+  - An EPIC's session (its worktree is an epic's) says `/epic done`, never `/isolate done` (Owen, 2026-10-24):
+    options "Run `/epic done`" (recommended) and "Leave it".
+  - Any other worktree:  "Run `/isolate done`" (recommended) and "Leave it".
+  - The same steps either way:  `/epic done` is `/isolate done`.
 - Leaving a worktree counts (`ExitWorktree`, keep or remove;  Owen, 2026-10-17, epic `epic-eject` r1):
   - the reply that says the session left ends with the line, on the same checks
   - kept, the worktree is still on disk:  ask the question above too
