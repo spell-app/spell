@@ -26,6 +26,8 @@ import type {
  * - Each answer is JSON of exactly the names asked for (`schemaFor()`):  the runner can't answer anything else.
  * - Each answer is checked readable by the other language's parser (`problemWith()`):
  *   those that aren't are asked for again, once, all together, saying why;  still unreadable, they're left out.
+ * - With `alternatives` (`spell translate --review`, epic `spanish` P31):  2 or 3 other choices for each type, name
+ *   and phrase, in the same calls, for a person to pick from on the review page (`alternativesFor()`).
  * - `claude` runs through `run`, injected:  the command's runs `claude -p`;  a test answers with a fake.
  * - Pure, but for `run`:  no files.  The command reads the glossaries and writes the dictionary.
  */
@@ -48,6 +50,15 @@ export class NamesPass {
   readonly calls: Array<{ stage: NamesStage; ms: number }> = []
   /** What went wrong, for the command to print:  `claude` failing, an answer that isn't JSON, names left out. */
   readonly notes: string[] = []
+  /** Whether each call asks for alternatives too:  see `alternativesFor()`. */
+  readonly askAlternatives: boolean
+  /**
+   * Called as each call returns, side by side ones too:  its stage, and how many names it asked for.
+   * - for a page's status card (`spell translate --review`, epic `spanish` P32)
+   */
+  readonly onAnswer?: (call: { stage: NamesStage; asked: number }) => void
+  /** The alternatives each answer gave, by `<kind>:<words>`, readable ones only:  see `alternativesFor()`. */
+  private readonly alternatives = new Map<string, Array<string | TranslatedType>>()
 
   constructor({
     names,
@@ -56,7 +67,9 @@ export class NamesPass {
     declarations,
     words,
     glossary,
-    shared
+    shared,
+    alternatives = false,
+    onAnswer
   }: {
     names: TranslationNames
     run: ClaudeRunner
@@ -65,6 +78,8 @@ export class NamesPass {
     words?: SP.SpellWordsData
     glossary?: string
     shared?: NamesData
+    alternatives?: boolean
+    onAnswer?: NamesPass["onAnswer"]
   }) {
     this.names = names
     this.run = run
@@ -73,6 +88,18 @@ export class NamesPass {
     this.words = words
     this.glossary = glossary
     this.shared = shared
+    this.askAlternatives = alternatives
+    this.onAnswer = onAnswer
+  }
+
+  /**
+   * The other choices Claude gave for `name`, besides its answer, when asked for (`alternatives`):
+   * readable ones only, never its answer again.
+   * - A type's as `{ name, gender }`;  a name's or phrase's as text.
+   * - None for a text or a comment:  they're sentences.
+   */
+  alternativesFor({ kind, words }: MissingName): Array<string | TranslatedType> {
+    return this.alternatives.get(`${kind}:${words}`) ?? []
   }
 
   /**
@@ -335,14 +362,18 @@ export class NamesPass {
       return {}
     } finally {
       this.calls.push({ stage, ms: performance.now() - started })
+      this.onAnswer?.({ stage, asked: wanted.length })
     }
-    const parsed = jsonIn(answer) as (Omit<NamesData, "genders"> & { genders?: unknown }) | undefined
+    const parsed = jsonIn(answer) as
+      | (Omit<NamesData, "genders"> & { genders?: unknown; alternatives?: Record<string, Record<string, unknown>> })
+      | undefined
     if (!parsed) {
       this.notes.push("claude's names aren't JSON:  left them TODO")
       return {}
     }
     // only what was asked for:  an answer may add a type again under its compiled name (`StockPile`)
     const asked = new Set(wanted.map(({ kind, words }) => `${kind}:${words}`))
+    if (this.askAlternatives) this.keepAlternatives(parsed.alternatives, wanted)
     const answered: NamesData = { ...parsed, genders: gendersIn(parsed.genders) }
     return Object.fromEntries(
       NAMES_KINDS.map((kind) => {
@@ -403,6 +434,13 @@ export class NamesPass {
       "- `texts`:  quoted text people see:  keep its spaces, punctuation and symbols;",
       "  a value's text (`red joker`) as the program says that value",
       "- `comments`:  the program's comments:  keep their code (in backticks) as the translated program says it",
+      ...(this.askAlternatives && alternativeKinds(wanted).length
+        ? [
+            "- `alternatives`:  for each type, name and phrase you fill in, 2 or 3 OTHER good choices, as readable",
+            "  as your first, for a person to pick from;  a type's as `{ name, gender }`, the rest as text",
+            "  (`alternatives` isn't in the JSON below:  its keys are the same as the sections'):"
+          ]
+        : []),
       "",
       ...(rejected.length
         ? ["## Your answers spell can't read:  try again", ...rejected.map((why) => `- ${why}`), ""]
@@ -458,12 +496,53 @@ export class NamesPass {
       ])
     )
     const gender = objectSchema({ word: STRING, gender: STRING })
-    return objectSchema({ ...properties, genders: { type: "array", items: gender } })
+    const alternatives = this.askAlternatives ? alternativeKinds(wanted) : []
+    if (!alternatives.length) return objectSchema({ ...properties, genders: { type: "array", items: gender } })
+    const choice = (kind: NamesKind) => (kind === "types" ? objectSchema({ name: STRING, gender: STRING }) : STRING)
+    const alternativesSchema = objectSchema(
+      Object.fromEntries(
+        alternatives.map((kind) => [
+          kind,
+          objectSchema(
+            Object.fromEntries(
+              wanted
+                .filter((name) => name.kind === kind)
+                .map(({ words }) => [words, { type: "array", items: choice(kind) }])
+            )
+          )
+        ])
+      )
+    )
+    return objectSchema({
+      ...properties,
+      genders: { type: "array", items: gender },
+      alternatives: alternativesSchema
+    })
   }
 
   ////////////////
   // ## Helpers
   ////////////////
+
+  /**
+   * Keep the alternatives an answer gave (`answered`, by section, then words) for each of `wanted`:
+   * each readable (`problemWith()`), each once.
+   * - SIDE EFFECT:  sets `alternatives`
+   */
+  private keepAlternatives(answered: Record<string, Record<string, unknown>> | undefined, wanted: MissingName[]): void {
+    for (const name of wanted) {
+      const given = answered?.[name.kind]?.[name.words]
+      if (!Array.isArray(given)) continue
+      const seen = new Set<string>()
+      const readable = given.filter((each: unknown) => {
+        const text = each && typeof each === "object" ? (each as TranslatedType).name : each
+        if (typeof text !== "string" || !text || seen.has(text) || this.problemWith(name, each)) return false
+        seen.add(text)
+        return true
+      }) as Array<string | TranslatedType>
+      if (readable.length) this.alternatives.set(`${name.kind}:${name.words}`, readable)
+    }
+  }
 
   /** Does the dictionary have `words` in section `kind` already, filled in -- in our own names, or an import's? */
   private has(kind: NamesKind, words: string, ownOnly = false): boolean {
@@ -551,6 +630,14 @@ function gendersIn(genders: unknown): Record<string, string> | undefined {
     )
   )
 }
+
+/** The sections of `wanted` that alternatives are asked for:  types, names, phrases;  never texts or comments. */
+function alternativeKinds(wanted: MissingName[]): NamesKind[] {
+  return ALTERNATIVE_KINDS.filter((kind) => wanted.some((name) => name.kind === kind))
+}
+
+/** The sections a name has alternatives in. */
+const ALTERNATIVE_KINDS: NamesKind[] = ["types", "names", "phrases"]
 
 /** Does `shared` (the glossary's names for a prompt) hold any? */
 function hasShared(shared: NamesData | undefined): shared is NamesData {

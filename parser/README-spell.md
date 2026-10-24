@@ -225,7 +225,7 @@ every later line can use the phrase, in this project and in any project that imp
 
 | Spell | Reads, after it | JavaScript |
 | --- | --- | --- |
-| `a card "is face up" if its direction is up` | `the card is face up`, `the card is not face up` | `get isFaceUp() { return this.direction == "up" }` |
+| `a card "is face up" if its direction is up` | `the card is face up`, `the card is not face up` | `get isFaceUp() { return this.direction === "up" }` |
 | `a card "is a (suit)" for its suits` | `the card is a spade`, `the card is a heart` ... | `isASuit(suit) { return this.suit === suit }` |
 | `a card "is the (rank) of (suits)" for its ranks and its suits` | `the card is the queen of spades` | `isTheRankOfSuits(rank, suit)` |
 
@@ -238,7 +238,7 @@ every later line can use the phrase, in this project and in any project that imp
   - It travels with its project's declarations too, to a project that imports it.
 
 **The edge, and it's a sharp one:**  a phrase in the other form doesn't fail;  it reads as something else.
-Against the card at the top, `the card is the queen of spades` compiles to `card == "spades".queen`:
+Against the card at the top, `the card is the queen of spades` compiles to `card === "spades".queen`:
 `spell lint` passes it, and only a test catches it,
 `` `the card is the queen of spades` should be `yes` but is actually `false` ``.
 

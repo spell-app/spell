@@ -151,7 +151,10 @@ export default function languageCommands(spell: Command): void {
     )
     .argument("[project]", PROJECT_ARG)
     .option("--to <lang>", "the language to write it in, e.g. es -- required")
-    .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
+    .option(
+      "--out <folder>",
+      "write it here, its dictionary and record too -- default beside it, named as the dictionary names the project"
+    )
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
     .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
     .option("--effort <tier>", "how much every pass spends on its answers:  fast, balanced or best -- default balanced")
@@ -164,6 +167,16 @@ export default function languageCommands(spell: Command): void {
     .option(
       "--learn",
       "translate nothing:  add the project's names to the language's shared glossary, for every project"
+    )
+    .option(
+      "--review",
+      "between the names and the lines, show the names it drafted on a page in the Review tab:  accept, type or pick " +
+        "each (used as you give it), tick it for every project, then Send;  the lines use your answers.  " +
+        "The page shows each pass, and picks the effort for the next"
+    )
+    .option(
+      "--review-timeout <time>",
+      "how long --review takes answers before going on without Send:  minutes, or 90s, 10m, 1h -- default 30"
     )
     .option(
       "--cold",

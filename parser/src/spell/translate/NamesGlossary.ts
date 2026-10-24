@@ -1,7 +1,7 @@
 import escapeRegExp from "lodash/escapeRegExp"
 
 import { TranslationNames } from "./TranslationNames"
-import type { GlossaryData, GlossaryEntry, MissingName, NamesData } from "./translate.types"
+import type { GlossaryData, GlossaryEntry, MissingName, NamesData, NamesKind } from "./translate.types"
 
 /**
  * A language pack's NAMES GLOSSARY (epic `spanish` P26):  the names people choose in spell programs, in the other
@@ -11,6 +11,7 @@ import type { GlossaryData, GlossaryEntry, MissingName, NamesData } from "./tran
  *   a name found here costs no call, and the same English name gets the same name in every project.
  * - A project's own dictionary may choose otherwise:  `differences()` says where, so drift shows up.
  * - `learn()` adds a project's names to it (`--learn`):  a better source wins, never a worse one (`SOURCE_RANKS`).
+ * - `addReviewed()` adds the names a person ticked "for every project" on the review page (`--review`).
  * - Its `genders`, by the other language's word (`imagen` => `feminine`), are beneath every project's dictionary,
  *   so an article agrees without a guess by the word's ending.
  * - Pure data:  reading and writing the file is the command's (`translateProject()`).
@@ -103,36 +104,70 @@ export class NamesGlossary {
   ////////////////
 
   /**
-   * Add `names`' types and names (a project's dictionary) to the glossary, as `learned:<projectName>`:
+   * Add `names`' types and names (a project's dictionary) to the glossary, as `learned:<projectName>`, or
+   * `reviewed:<projectName>` for each a person reviewed (`--review`):
    * how many it added or bettered, and each it kept because the glossary's own source is as good or better.
    * - A name with its gender, from the dictionary's types or `genders`.
-   * - Not its phrases, texts or comments:  those are the project's own;  a general phrase is added by hand.
+   * - Not its phrases, texts or comments:  those are the project's own;  a general phrase is added by hand,
+   *   or ticked "for every project" on the review page (`addReviewed()`).
    */
   learn(names: TranslationNames, projectName: string): { added: number; kept: string[] } {
-    const from = `learned:${projectName}`
     let added = 0
     const kept: string[] = []
-    const add = (words: string, entry: GlossaryEntry) => {
+    const add = (kind: NamesKind, words: string, entry: Omit<GlossaryEntry, "from">) => {
+      const from = `${names.isReviewed(kind, words) ? "reviewed" : "learned"}:${projectName}`
       const existing = this.data.names[words]
       if (existing?.name === entry.name) {
         if (!existing.gender && entry.gender) existing.gender = entry.gender
+        if (rankOf(from) > rankOf(existing.from)) existing.from = from
         return
       }
       if (existing && rankOf(existing.from) >= rankOf(from)) {
         kept.push(`\`${words}\`:  kept \`${existing.name}\` (${existing.from}), not \`${entry.name}\``)
         return
       }
-      this.data.names[words] = entry
+      this.data.names[words] = { ...entry, from }
       added++
     }
     for (const [words, type] of Object.entries(names.data.types)) {
-      if (isFilled(type.name)) add(words, withGender({ name: type.name, from }, type.gender))
+      if (isFilled(type.name)) add("types", words, withGender({ name: type.name }, type.gender))
     }
     for (const [words, name] of Object.entries(names.data.names)) {
-      if (isFilled(name)) add(words, withGender({ name, from }, names.data.genders[name]))
+      if (isFilled(name)) add("names", words, withGender({ name }, names.data.genders[name]))
     }
     for (const [word, gender] of Object.entries(names.data.genders)) this.data.genders[word] ??= gender
     return { added, kept }
+  }
+
+  /**
+   * Add each of `picked` as `names` has it now, as `reviewed`:  the names a person ticked "for every project" on the
+   * review page (`spell translate --review`, epic `spanish` P31).  How many it added or changed.
+   * - A person's choice:  it replaces whatever the glossary had, a reviewed one too.
+   * - Types and names into its `names`, with their gender;  phrases into its `phrases`;
+   *   never a text or a comment, which are each project's own.
+   */
+  addReviewed(names: TranslationNames, picked: MissingName[]): number {
+    let added = 0
+    const put = (section: Record<string, GlossaryEntry>, words: string, entry: GlossaryEntry) => {
+      const existing = section[words]
+      if (existing?.name === entry.name && existing.from === entry.from && existing.gender === entry.gender) return
+      section[words] = entry
+      added++
+    }
+    for (const { kind, words } of picked) {
+      if (kind === "types") {
+        const type = names.data.types[words]
+        if (type && isFilled(type.name))
+          put(this.data.names, words, withGender({ name: type.name, from: REVIEWED }, type.gender))
+      } else if (kind === "names") {
+        const name = names.data.names[words]
+        if (isFilled(name)) put(this.data.names, words, withGender({ name, from: REVIEWED }, names.data.genders[name]))
+      } else if (kind === "phrases") {
+        const phrase = names.data.phrases[words]
+        if (isFilled(phrase)) put(this.data.phrases, words, { name: phrase, from: REVIEWED })
+      }
+    }
+    return added
   }
 
   /** What it holds, for the file:  each section sorted, so a diff shows what changed. */
@@ -182,6 +217,9 @@ const SOURCE_RANKS: Array<[RegExp, number]> = [
   [/^drafted\b/, 1]
 ]
 
+/** Where a name a person ticked "for every project" came from (`addReviewed()`). */
+const REVIEWED = "reviewed"
+
 /** `from`'s rank in `SOURCE_RANKS`;  0 for one it doesn't know. */
 function rankOf(from: string): number {
   return SOURCE_RANKS.find(([source]) => source.test(from))?.[1] ?? 0
@@ -206,6 +244,6 @@ function isFilled(value: string | undefined): value is string {
 }
 
 /** `entry`, with `gender` if it has one. */
-function withGender(entry: GlossaryEntry, gender: string | undefined): GlossaryEntry {
+function withGender<Entry extends { name: string }>(entry: Entry, gender: string | undefined): Entry {
   return gender ? { ...entry, gender } : entry
 }

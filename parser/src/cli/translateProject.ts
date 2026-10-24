@@ -11,6 +11,11 @@
  * - Claude through the API when `ANTHROPIC_API_KEY` is set, else `claude -p` (`claudeRunnerFor()`, epic `spanish` P27);
  *   `--effort fast|balanced|best` says how much every pass spends, `--names-effort` and `--fix-ups-effort` one pass's
  *   (`askingFor()`):  the runner picks the model and effort for each (`CLAUDE_TIERS`).
+ * - `--review` (epic `spanish` P31):  between the names and the lines, the names drafted shown to a person on a page
+ *   in the Review tab (`NamesReview`, a command run), and the lines written with the answers;  without it, batch.
+ *   - steered (P32):  the page shows each pass as it runs (`startPass()` ...), its effort picker is read before the
+ *     names and the fix-ups (`steerPass()`), and each answer is taken as it's given;  the run ends `done`,
+ *     `timed-out` (no Send in time) or `stopped` (a failure, Ctrl-C)
  * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - `--cold` (epic `spanish` P29), for timing:  from nothing pre-calculated -- no shared glossary, no dictionary of
  *   the project's, no record, no seed -- and it writes only into `--out`.  Every report says which it started from.
@@ -19,7 +24,7 @@
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
  *   that lints and tests the translation.  So this file needs no project groups, only parsed files.
- * - Beside the project, two files of its own:
+ * - Beside the project, two files of its own -- in `--out` instead, when it's given (`translationPaths()`):
  *   - `<Project>.<lang>.names.json5`:  its names dictionary, for a person to review (`TranslationNames`)
  *   - `<Project>.<lang>.translated.json5`:  what each source line was when it was last translated, a hash per line,
  *     so `--update` re-translates only the lines changed since;  and each fix-up, so it's never asked for again
@@ -32,9 +37,17 @@ import { fileURLToPath } from "node:url"
 
 import { keepingCommentsIn, readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
+import type { SRV } from "spell/server"
 import { SP } from "spell-parser/spell"
 import type { TranslateOptions } from "spell-parser/cli"
 import { claudeRunnerFor, type ChosenRunner } from "spell-parser/cli/claudeRunners"
+import {
+  NamesReview,
+  openCommandRun,
+  reviewTimeoutMs,
+  type ReviewRun,
+  type ReviewRunOpener
+} from "spell-parser/cli/NamesReview"
 import { ElementNames } from "spell-parser/spell/translate/ElementNames"
 import { FixUps, type FixUpFile, type FixUpLine } from "spell-parser/spell/translate/FixUps"
 import { NamesGlossary } from "spell-parser/spell/translate/NamesGlossary"
@@ -55,6 +68,7 @@ import type {
   LineProblem,
   MissingName,
   NamesData,
+  NamesFile,
   NamesKind,
   SourceFile,
   TranslatedFile,
@@ -91,11 +105,12 @@ export type TranslateSource = {
 }
 
 /**
- * Where `translateProject()` reads the shared glossary, and whether it prints:
+ * Where `translateProject()` reads the shared glossary, whether it prints, and how it opens a review:
  * - `glossaryFile`:  the language pack's `glossary.json5` by default;  a test's own
  * - `print`:  `false` prints nothing -- `spell translate speedtest` prints a table of its own
+ * - `openRun`:  opens `--review`'s page -- the kit's `CommandRun.open()` by default (`openCommandRun()`);  a test's fake
  */
-export type TranslateSettings = { glossaryFile?: string; print?: boolean }
+export type TranslateSettings = { glossaryFile?: string; print?: boolean; openRun?: ReviewRunOpener }
 
 /**
  * What one translation did, in numbers:  what `translateProject()` prints, for a program to read
@@ -170,13 +185,15 @@ export async function translateProject(
  * `translateProject()`, and what it did in numbers (`TranslationResult`):  for `spell translate speedtest`.
  * - `--cold`:  nothing pre-calculated -- no shared glossary, no dictionary of the project's, no record --
  *   and its dictionary and record written only into `--out`, never beside the project.
+ * - `--review`:  takes a person's answers between the names and the lines (`NamesReview`), until Send or its time
+ *   limit;  that time is in no pass's.  Its run finishes `stopped` if this throws.
  * - Throws as `translateProject()` does.
  */
 export async function translationOf(
   source: TranslateSource,
   options: TranslateOptions,
   run?: ClaudeRunner,
-  { glossaryFile = glossaryFileFor(options.to), print = true }: TranslateSettings = {}
+  { glossaryFile = glossaryFileFor(options.to), print = true, openRun = openCommandRun }: TranslateSettings = {}
 ): Promise<TranslationResult> {
   const started = performance.now()
   const { from, to } = languagesOf(source, options)
@@ -185,13 +202,14 @@ export async function translationOf(
   const ai = options.ai !== false
   // quiet, for a table of runs:  nothing said about speeding it up either
   const chosen: ChosenRunner = run ? { run, via: "claude" } : claudeRunnerFor(process.env, { ai: ai && print })
-  // each pass's tier, checked before anything's asked
+  // each pass's tier, checked before anything's asked;  with --review, read again before each pass (`steerPass()`)
   const asking = { names: askingFor(options, "names"), fixUps: askingFor(options, "fixUps") }
-  const askFor = (pass: AskingPass) => withTier(chosen.run, asking[pass])
+  const askFor = (pass: AskingPass) => withTier(chosen.run, () => asking[pass])
+  const timeoutMs = options.review ? reviewTimeoutMs(options.reviewTimeout) : 0
 
   // what earlier runs and other projects worked out:  none of it, cold
   const paths = translationPaths(source, to, options)
-  const names = new TranslationNames(!cold && existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, {
+  const names = new TranslationNames(!cold && paths.namesFrom ? readJSON5File<NamesFile>(paths.namesFrom) : {}, {
     from,
     to
   })
@@ -227,68 +245,137 @@ export async function translationOf(
     declarations: source.declarations ?? [],
     words: source.words,
     glossary,
-    shared: shared.relevantTo(source.files.map((file) => file.contents).join("\n"))
+    shared: shared.relevantTo(source.files.map((file) => file.contents).join("\n")),
+    alternatives: !!options.review && ai,
+    // the page's status card:  each call's names done as it returns, side by side ones too
+    onAnswer: ({ stage, asked }) => {
+      if (stage !== "again") namesDone += asked
+      review?.run?.updatePass({ done: namesDone, calls: namesPass.calls.length })
+    }
   })
+  let namesDone = 0
   // what the glossary knows first:  no call for it
   const { filled: fromGlossary, rest: wanted } = shared.fill(
     names,
     namesPass.wanted(missingIn(translated.files, plans))
   )
-  const drafted = ai ? await namesPass.draft(wanted) : 0
-  timings.names = performance.now() - mark
+  const review =
+    options.review && wanted.length
+      ? await new NamesReview({
+          names,
+          pass: namesPass,
+          files: source.files,
+          opener: openRun,
+          root: source.folder,
+          projectName: source.projectName,
+          command: `spell translate ${source.projectName} --to ${to.lang} --review`,
+          timeoutMs,
+          ai,
+          // the page's picker starts at --effort:  a pass's own flag isn't the run's
+          effort: {
+            choices: TIERS,
+            initial: askingFor({ ...options, namesEffort: undefined }, "names").tier,
+            label: "Effort"
+          }
+        }).open(wanted.length)
+      : undefined
+  // from here on, a run that fails or is stopped says so on its page
+  const keepWatch = review?.finishOnInterrupt()
+  try {
+    if (review) asking.names = steerPass(review.run!, options, "names", { total: wanted.length })
+    const drafted = ai ? await namesPass.draft(wanted) : 0
+    review?.run!.endPass({ calls: namesPass.calls.length })
+    timings.names = performance.now() - mark
+    // a person's turn:  in no pass's time
+    if (review) await review.review(wanted, timings.names)
 
-  // 2. lines:  each written again with the dictionary
-  mark = performance.now()
-  const outName = projectNameIn(names, source.projectName)
-  outFolder = outFolderFor(source, names, options, record)
-  if (!record) plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
-  const elements = new ElementNames({
-    names,
-    ui: source.ui,
-    projectName: { ours: source.projectName, theirs: outName }
-  })
-  translated = translateAll(source, from, to, names, source.imports, elements)
-  names.markTodo(missingIn(translated.files, plans).filter(({ kind }) => kind !== "comments"))
-  const fixes = record?.fixes ?? []
-  const outputs = source.files.map((file, at) =>
-    outputFor(file, translated.files[at]!, plans[at]!, outputPathFor(file.path, names, to), fixes)
-  )
-  mkdirSync(outFolder, { recursive: true })
-  for (const output of outputs) writeFileSync(join(outFolder, output.path), output.lines.join("\n"))
-  writeManifest(source, outFolder, names, outName, outputs)
-  copyOtherFiles(source.folder, outFolder, elements)
-  timings.lines = performance.now() - mark
+    // 2. lines:  each written again with the dictionary, a person's answers in it
+    mark = performance.now()
+    const outName = projectNameIn(names, source.projectName)
+    outFolder = outFolderFor(source, names, options, record)
+    if (!record) plans = source.files.map((file, at) => linePlan(file, translated.files[at]!, record, outFolder))
+    const toWrite = plans.reduce((sum, plan) => sum + plan.changed, 0)
+    review?.run!.startPass("lines", { total: toWrite })
+    const elements = new ElementNames({
+      names,
+      ui: source.ui,
+      projectName: { ours: source.projectName, theirs: outName }
+    })
+    translated = translateAll(source, from, to, names, source.imports, elements)
+    names.markTodo(missingIn(translated.files, plans).filter(({ kind }) => kind !== "comments"))
+    const fixes = record?.fixes ?? []
+    const outputs = source.files.map((file, at) =>
+      outputFor(file, translated.files[at]!, plans[at]!, outputPathFor(file.path, names, to), fixes)
+    )
+    mkdirSync(outFolder, { recursive: true })
+    for (const output of outputs) writeFileSync(join(outFolder, output.path), output.lines.join("\n"))
+    writeManifest(source, outFolder, names, outName, outputs)
+    copyOtherFiles(source.folder, outFolder, elements)
+    review?.run!.endPass({ done: toWrite })
+    timings.lines = performance.now() - mark
 
-  // 3. fix-ups:  each line wrong in context, a round at a time, checked between
-  mark = performance.now()
-  const fixUps = new FixUps({ run: askFor("fixUps"), names, glossary })
-  const checked = await fixUp({ source, outputs, outFolder, fixUps, fixes, ai, shapes: new ShapeCheck() })
-  timings.fixUps = performance.now() - mark
+    // 3. fix-ups:  each line wrong in context, a round at a time, checked between
+    mark = performance.now()
+    if (review) asking.fixUps = steerPass(review.run!, options, "fixUps")
+    const fixUps = new FixUps({ run: askFor("fixUps"), names, glossary })
+    const checked = await fixUp({
+      source,
+      outputs,
+      outFolder,
+      fixUps,
+      fixes,
+      ai,
+      shapes: new ShapeCheck(),
+      onRound: review && ((facts) => review.run!.updatePass(facts))
+    })
+    review?.run!.endPass()
+    timings.fixUps = performance.now() - mark
 
-  writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toJSON(), null, 2)}\n`))
-  writeFileSync(paths.record, `${JSON.stringify(recordOf(source, outputs, to, outFolder, fixes), null, 2)}\n`)
-  timings.total = performance.now() - started
+    mkdirSync(dirname(paths.names), { recursive: true })
+    writeFileSync(paths.names, keepingCommentsIn(paths.names, `${JSON.stringify(names.toFile(), null, 2)}\n`))
+    // the names a person ticked "for every project":  never cold, which `checkCold()` refuses anyway
+    if (review?.ticked.length && !cold) {
+      shared.addReviewed(names, review.ticked)
+      writeFileSync(glossaryFile, keepingCommentsIn(glossaryFile, `${JSON.stringify(shared.toJSON(), null, 2)}\n`))
+    }
+    writeFileSync(paths.record, `${JSON.stringify(recordOf(source, outputs, to, outFolder, fixes), null, 2)}\n`)
+    timings.total = performance.now() - started
+    if (review) {
+      review.run!.progress(`done:  written to ${CLI.relativePath(outFolder)}`)
+      review.run!.finish(review.outcome.timedOut ? "timed-out" : "done")
+    }
 
-  return report({
-    source,
-    to,
-    outFolder,
-    translated,
-    outputs,
-    plans,
-    seeded,
-    drafted,
-    fromGlossary,
-    differences: shared.differences(names),
-    paths,
-    timings: timings as Required<Timings>,
-    checked,
-    calls: { names: namesPass.calls, fixUps: fixUps.durations, via: chosen.via },
-    notes: [...namesPass.notes, ...fixUps.notes],
-    lists,
-    agreement: source.reference && agreementOf(names, wanted, source.files, source.reference),
-    print
-  })
+    return report({
+      source,
+      to,
+      outFolder,
+      translated,
+      outputs,
+      plans,
+      seeded,
+      drafted,
+      fromGlossary,
+      differences: shared.differences(names),
+      paths,
+      timings: timings as Required<Timings>,
+      checked,
+      calls: { names: namesPass.calls, fixUps: fixUps.durations, via: chosen.via },
+      notes: [
+        ...namesPass.notes,
+        ...(review?.outcome.unreadable.map((why) => `review:  still unreadable, kept as drafted:  ${why}`) ?? []),
+        ...fixUps.notes
+      ],
+      lists,
+      agreement: source.reference && agreementOf(names, wanted, source.files, source.reference),
+      review: review?.summary ?? (options.review ? "review:  nothing drafted to review" : undefined),
+      print
+    })
+  } catch (error) {
+    review?.run!.finish("stopped")
+    throw error
+  } finally {
+    keepWatch?.()
+  }
 }
 
 /**
@@ -308,11 +395,12 @@ function languagesOf(source: TranslateSource, options: TranslateOptions): { from
 /**
  * `--cold` translates from nothing pre-calculated, and writes only where `--out` says, so it rules out:
  * - `--update`, `--seed` and `--learn`:  each reads or writes a list it mustn't
+ * - `--review`:  a person's answers are a list too, and a timing that waits for one times nothing
  * - no `--out`:  its dictionary and record would go beside the project
  * - throws `CliError` naming the flag
  */
 function checkCold(options: TranslateOptions): void {
-  for (const flag of ["update", "seed", "learn"] as const) {
+  for (const flag of ["update", "seed", "learn", "review"] as const) {
     if (options[flag]) throw new CLI.CliError(`--cold uses nothing pre-calculated:  drop --${flag}`)
   }
   if (!options.out) throw new CLI.CliError("--cold writes only where --out says:  pass --out <folder>")
@@ -490,7 +578,8 @@ async function fixUp({
   fixUps,
   fixes,
   ai,
-  shapes
+  shapes,
+  onRound
 }: {
   source: TranslateSource
   outputs: TranslationOutput[]
@@ -499,12 +588,17 @@ async function fixUp({
   fixes: RecordedFix[]
   ai: boolean
   shapes: ShapeCheck
+  /** after each round's check, and its fixes:  the lines wanted so far (`total`), fixed (`done`), calls */
+  onRound?: (facts: SRV.RunPassFacts) => void
 }): Promise<CheckResult> {
   const check = source.checker?.(outFolder)
   const byPath = new Map(outputs.map((output) => [output.path, output]))
   const files = new Map<string, FixUpFile>(outputs.map((output) => [output.path, output]))
   const pairs = new Map(outputs.map((output) => [output.file.path, output.path]))
   let result: CheckResult = { problems: [], checks: 0 }
+  const everWanted = new Set<string>()
+  const everFixed = new Set<string>()
+  const report = () => onRound?.({ total: everWanted.size, done: everFixed.size, calls: fixUps.durations.length })
   for (let round = 0; ; round++) {
     if (check) result = withShapes(await check(), round + 1, shapes, source.files, pairs)
     const wanted = new Map<string, FixUpLine>()
@@ -526,8 +620,12 @@ async function fixUp({
         if (!output.reused.has(index)) want(output.path, index, `may read in the wrong order:  ${why}`)
       }
     }
+    for (const key of wanted.keys()) everWanted.add(key)
+    report()
     if (!ai || !wanted.size || round >= MAX_ROUNDS) return result
     const fixed = await fixUps.round([...wanted.values()], files)
+    for (const { path, line } of fixed) everFixed.add(`${path}:${line}`)
+    report()
     if (!fixed.length) return result
     for (const { path, line, text } of fixed) {
       const output = byPath.get(path)!
@@ -596,13 +694,19 @@ type CheckResult = Awaited<ReturnType<TranslationChecker>> & {
 ////////////////
 
 /**
- * Where `source`'s dictionary and record live:  beside it, `<Project>.<lang>.names.json5`, `.translated.json5`;
- * with `--cold`, in `--out`, so the project is never written to.
+ * Where `source`'s dictionary and record are written:  beside it, `<Project>.<lang>.names.json5`, `.translated.json5`;
+ * with `--out`, in `--out`, so a translation written elsewhere never writes to the project (epic `spanish` J186).
+ * - `namesFrom`:  the dictionary to READ, if there is one:  `names`, else, with `--out`, the one beside the project
+ *   (a person's, or a run's without `--out`), read and never written;  `--cold` reads neither (`translationOf()`)
+ * - `--update` finds its record in the same place:  it passes the same `--out`, or none
  */
 function translationPaths(source: TranslateSource, to: SP.Language, options: TranslateOptions) {
-  const folder = options.cold && options.out ? resolve(options.out) : source.folder
-  const base = join(folder, `${source.projectName}.${to.lang}`)
-  return { names: `${base}.names.json5`, record: `${base}.translated.json5` }
+  const fileIn = (folder: string, suffix: string) => join(folder, `${source.projectName}.${to.lang}.${suffix}`)
+  const folder = options.out ? resolve(options.out) : source.folder
+  const names = fileIn(folder, "names.json5")
+  const beside = fileIn(source.folder, "names.json5")
+  const namesFrom = existsSync(names) ? names : existsSync(beside) ? beside : undefined
+  return { names, namesFrom, record: fileIn(folder, "translated.json5") }
 }
 
 /**
@@ -777,9 +881,35 @@ const TIERS: EffortTier[] = ["fast", "balanced", "best"]
  * `run`, asked as `asking` says:  the pass and its tier, for the runner to map to its own model and effort;
  * over the model and effort the pass itself names, which the tier replaces.
  */
-function withTier(run: ClaudeRunner, asking: ReturnType<typeof askingFor>): ClaudeRunner {
-  return (prompt, options) => run(prompt, { ...options, model: undefined, effort: undefined, ...asking })
+function withTier(run: ClaudeRunner, asking: () => ReturnType<typeof askingFor>): ClaudeRunner {
+  return (prompt, options) => run(prompt, { ...options, model: undefined, effort: undefined, ...asking() })
 }
+
+/**
+ * With `--review`, before a pass that asks Claude (epic `spanish` P32):  its tier, from the effort picked on the run's
+ * page NOW (`run.effort`), so a switch there takes at the next pass;  the pass started on the page's status card.
+ * - its own flag (`--names-effort`, `--fix-ups-effort`) still wins, and the page says so when it differs
+ * - throws `CliError` for a tier there isn't, as `askingFor()` does
+ * - SIDE EFFECT:  `run.startPass()`, and a progress line when a flag wins
+ */
+function steerPass(
+  run: ReviewRun,
+  options: TranslateOptions,
+  pass: AskingPass,
+  facts: SRV.RunPassFacts = {}
+): ReturnType<typeof askingFor> {
+  const picked = run.effort
+  const asking = askingFor({ ...options, effort: picked ?? options.effort }, pass)
+  const label = PASS_LABELS[pass]
+  run.startPass(label, { ...facts, effort: asking.tier })
+  const own = options[`${pass}Effort`]
+  if (own && picked && own !== picked)
+    run.progress(`${label}:  at ${own}, by --${label}-effort, not the page's ${picked}`)
+  return asking
+}
+
+/** Each pass that asks Claude, as the page and its flag name it:  `fix-ups`, `--fix-ups-effort`. */
+const PASS_LABELS: Record<AskingPass, string> = { names: "names", fixUps: "fix-ups" }
 
 /** The language pack's glossary, `languages/<lang>/GLOSSARY.md`, if it has one. */
 function glossaryFor(lang: string): string | undefined {
@@ -810,10 +940,10 @@ function learnFrom(
 ): number {
   if (options.cold) checkCold(options)
   const { from, to } = languagesOf(source, options)
-  const paths = translationPaths(source, to, options)
-  const names = new TranslationNames(existsSync(paths.names) ? readJSON5File<NamesData>(paths.names) : {}, { from, to })
+  const { namesFrom, names: namesPath } = translationPaths(source, to, options)
+  const names = new TranslationNames(namesFrom ? readJSON5File<NamesFile>(namesFrom) : {}, { from, to })
   const shared = new NamesGlossary(existsSync(glossaryFile) ? readJSON5File<GlossaryData>(glossaryFile) : {})
-  return learn(source, names, shared, paths.names, glossaryFile)
+  return learn(source, names, shared, namesFrom ?? namesPath, glossaryFile)
 }
 
 /**
@@ -870,6 +1000,8 @@ function report(done: {
   notes: string[]
   lists: TranslationLists
   agreement?: TranslationResult["agreement"]
+  /** `--review`'s line:  how it went (`NamesReview.summary`) */
+  review?: string
   print: boolean
 }): TranslationResult {
   const { source, to, outFolder, translated, outputs, plans, seeded, drafted, paths, timings, checked, calls } = done
@@ -889,6 +1021,7 @@ function report(done: {
       (drafted ? `, ${drafted} drafted by claude:  review them` : "")
   )
   out(`  pre-calculated:  ${listsLine(done.lists, to)}`)
+  if (done.review) out(`  ${done.review}`)
   const fixed = outputs.reduce(
     (sum, output) =>
       sum + output.lines.filter((line, at) => line !== output.translated.lines[at] && output.written.has(at)).length,

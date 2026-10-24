@@ -43,7 +43,8 @@ export type LanguageCommand = keyof LanguageCommands
 /**
  * `spell translate` flags (epic `spanish` P24).
  * - `to`:  the language to write the project in, by its code, e.g. `es`
- * - `out`:  the folder to write it to -- default beside it, named as the dictionary names the project
+ * - `out`:  the folder to write it to, its dictionary and record too -- default beside it, named as the dictionary
+ *   names the project
  * - `update`:  re-translate only the lines changed since the last run;  the rest stay as they are, hand edits too
  * - `ai`:  `false` (`--no-ai`) leaves each name the dictionary lacks as `TODO`, instead of asking `claude -p`
  * - `seed`:  a project translated by hand, whose names fill the dictionary first, e.g. `@spell/examples/Solitario`
@@ -55,6 +56,11 @@ export type LanguageCommand = keyof LanguageCommands
  *   `<model>[:<effort>]` (`claude-sonnet-5-5:medium`), over every tier
  * - `cold`:  for timing (epic `spanish` P29):  nothing pre-calculated -- no shared glossary, no dictionary of the
  *   project's, no record of fix-ups, no seed -- and nothing written but into `out`, which it needs
+ * - `review`:  between the names and the lines, show the names drafted on a page in the Review tab, take a person's
+ *   answers as they're given until Send, and write the lines with them (epic `spanish` P31, P32);  the page shows the
+ *   passes and picks the effort;  with `ai: false`, the names still missing, to type
+ * - `reviewTimeout`:  how long `review` takes answers before going on without Send:  minutes, or `90s`, `10m`, `1h` --
+ *   default 30 minutes
  */
 export type TranslateOptions = GlobalOptions & {
   to: string
@@ -68,6 +74,8 @@ export type TranslateOptions = GlobalOptions & {
   fixUpsEffort?: string
   model?: string
   cold?: boolean
+  review?: boolean
+  reviewTimeout?: string
 }
 
 /**

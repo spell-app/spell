@@ -132,6 +132,11 @@
   "spell": {
     "commands": "./src/cli/commands.ts"
   },
+  "spellPublish": {
+    "exclude": [
+      "py/core/experiments/**"
+    ]
+  },
   "spellTypes": [
     "tsconfig.json",
     "tsconfig.node.json"

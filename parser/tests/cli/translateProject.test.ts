@@ -6,14 +6,17 @@ import JSON5 from "json5"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
+import type { SRV } from "spell/server"
 import { parseSpellProject } from "spell-parser/spell/test"
 import { translateProject, translationOf, type TranslateSource } from "spell-parser/cli/translateProject"
 import type { TranslateOptions } from "spell-parser/cli"
+import type { ReviewRunOpener } from "spell-parser/cli/NamesReview"
 import type {
   ClaudeRunner,
   GlossaryData,
   LineProblem,
   NamesData,
+  NamesFile,
   SourceFile
 } from "spell-parser/spell/translate/translate.types"
 
@@ -50,6 +53,12 @@ const NAMES: NamesData = {
   phrases: { "card labels": "etiquetas de cartas" },
   texts: { " joker": " comodín", "red joker": "comodín rojo" },
   genders: { color: "masculine", etiqueta: "feminine" }
+}
+
+/** The other choices the fake `claude` gives, with `--review`:  the type's, and the label's. */
+const ALTERNATIVES = {
+  types: { card: [{ name: "naipe", gender: "masculine" }] },
+  names: { label: ["rótulo", "leyenda"] }
 }
 
 /** A glossary that knows the card's words, as another project chose them. */
@@ -92,8 +101,8 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     expect(claude.prompts[2]).toContain("may read in the wrong order")
     expect(written()[2]).toBe(`\t${FIXED}`)
     expect(written()[6]).toBe('\tsu etiqueta debería ser "comodín rojo"')
-    // the record keeps the fix, for --update
-    const record = JSON.parse(readFileSync(join(folder, "Cards", "Cards.es.translated.json5"), "utf8"))
+    // the record keeps the fix, for --update:  in --out, with the translation (J186)
+    const record = JSON.parse(readFileSync(join(folder, "Cartas", "Cards.es.translated.json5"), "utf8"))
     expect(record.fixes).toEqual([
       {
         path: "/Card.spell",
@@ -132,8 +141,7 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
       "fix-ups fixUps:best undefined:undefined"
     ])
     asked.length = 0
-    // cold again:  no dictionary from the run before;  no flags:  balanced
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    // cold again:  another --out has no dictionary from the run before (J186);  no flags:  balanced
     await translate(source(), { to: "es", out: join(folder, "Cartas2"), model: "sonnet:medium" }, run)
     expect(asked).toEqual([
       "types names:balanced sonnet:medium",
@@ -153,7 +161,8 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     const stubborn = fakeClaude(() => ({
       fixes: [{ file: "Carta.es.spell", line: 7, text: `su etiqueta debería ser "otra ${++tries}"` }]
     }))
-    await translate(source(), { to: "es", out: join(folder, "Cartas2") }, stubborn.run)
+    // the same --out:  its dictionary has every name now
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, stubborn.run)
     expect(stubborn.prompts.map(kindOf)).toEqual(["fix-ups", "fix-ups", "fix-ups"])
   })
 
@@ -216,23 +225,25 @@ describe("translateProject():  names, then lines, then fix-ups", () => {
     expect(claude.prompts[0]).not.toContain('"color": ""')
     expect(printed().find((line) => line.startsWith("  names:"))).toContain("5 from the glossary")
     // a person picks another word for `label`:  the next run says so
-    const namesFile = join(folder, "Cards", "Cards.es.names.json5")
+    const namesFile = join(folder, "Cartas", "Cards.es.names.json5")
     writeFileSync(namesFile, readFileSync(namesFile, "utf8").replace('"label": "etiqueta"', '"label": "rótulo"'))
     await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
     expect(printed()).toContain("    `label` is `rótulo` here, `etiqueta` in the glossary (reviewed)")
   })
 
   test("--learn:  the project's names into the glossary, nothing translated", async () => {
-    await translate(source(), { to: "es", out: join(folder, "Cartas") }, fakeClaude().run)
+    const out = join(folder, "Cartas")
+    await translate(source(), { to: "es", out }, fakeClaude().run)
     const claude = fakeClaude()
-    expect(await translate(source(), { to: "es", learn: true }, claude.run)).toBe(CLI.EXIT.OK)
+    // its dictionary is in --out (J186):  --learn finds it there
+    expect(await translate(source(), { to: "es", out, learn: true }, claude.run)).toBe(CLI.EXIT.OK)
     expect(claude.prompts).toEqual([])
     const glossary = JSON5.parse(readFileSync(join(folder, "glossary.json5"), "utf8")) as GlossaryData
     expect(glossary.names?.card).toEqual({ name: "carta", gender: "feminine", from: "learned:Cards" })
     expect(glossary.names?.label).toEqual({ name: "etiqueta", gender: "feminine", from: "learned:Cards" })
     // a project with no dictionary has nothing to learn
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
-    await expect(translate(source(), { to: "es", learn: true }, claude.run)).rejects.toThrow(/translate it first/)
+    rmSync(join(out, "Cards.es.names.json5"))
+    await expect(translate(source(), { to: "es", out, learn: true }, claude.run)).rejects.toThrow(/translate it first/)
   })
 
   test("the report says what it started from:  the glossary, the project's dictionary", async () => {
@@ -295,7 +306,7 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
     const warm = fakeClaude()
     await translate(seeded, { to: "es", out: join(folder, "Cartas") }, warm.run)
     expect(warm.prompts.map(kindOf)).not.toContain("types")
-    rmSync(join(folder, "Cards", "Cards.es.names.json5"))
+    rmSync(join(folder, "Cartas", "Cards.es.names.json5"))
     const cold = fakeClaude()
     await translate(seeded, { to: "es", out: join(folder, "Cold"), cold: true }, cold.run)
     expect(cold.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
@@ -338,6 +349,249 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
   })
 })
 
+describe("--out keeps what it writes (J186)", () => {
+  test("its dictionary and record go into --out;  a dictionary beside the project is read, never written", async () => {
+    // a person's dictionary, beside the project:  every name in it
+    const beside = join(folder, "Cards", "Cards.es.names.json5")
+    writeFileSync(beside, JSON.stringify(NAMES))
+    const out = join(folder, "Cartas")
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out }, claude.run)
+    expect(claude.prompts.map(kindOf)).toEqual(["fix-ups"])
+    expect(readdirSync(join(folder, "Cards")).sort()).toEqual([
+      "Card.spell",
+      "Cards.es.names.json5",
+      "__project.json5",
+      "styles.css"
+    ])
+    expect(readFileSync(beside, "utf8")).toBe(JSON.stringify(NAMES))
+    expect(readdirSync(out)).toEqual(expect.arrayContaining(["Cards.es.names.json5", "Cards.es.translated.json5"]))
+    // --update with the same --out finds its record there:  nothing asked again
+    const again = fakeClaude()
+    await translate(source(), { to: "es", out, update: true }, again.run)
+    expect(again.prompts).toEqual([])
+  })
+})
+
+describe("--review:  a person reviews the names drafted, between the names and the lines (P31, P32)", () => {
+  test("accepted, typed, picked and ticked:  the dictionary, the glossary and the lines use them", async () => {
+    const review = fakeRun([
+      answer("types:card", "accepted", "carta", true),
+      answer("names:label", "picked", "rótulo"),
+      answer("texts:red joker", "typed", "comodín colorado")
+    ])
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas"), review: true }, claude.run, false, review.open)
+    // the names pass asked for alternatives, in the same calls
+    expect(claude.prompts.map(kindOf)).toEqual(["types", "names", "fix-ups"])
+    expect(claude.prompts[1]).toContain("`alternatives`")
+    // one run, a row per name drafted, before any line was written
+    expect(review.opened).toHaveLength(1)
+    expect(review.opened[0]).toMatchObject({
+      title: "Names for Cards, in Spanish",
+      answerLabel: "Spanish",
+      effort: { choices: ["fast", "balanced", "best"], initial: "balanced" }
+    })
+    const label = review.rows.find((row) => row.id === "names:label")!
+    expect(label).toMatchObject({
+      value: "etiqueta",
+      alternatives: ["rótulo", "leyenda"],
+      tick: { label: "for every project" },
+      cells: { english: "label", kind: "name", from: "Claude", gender: "feminine" }
+    })
+    expect(label.cells.lines).toBe('Card.spell:3  - its "label" is its color + " joker"')
+    expect(review.rows.find((row) => row.id === "texts:red joker")!.tick).toBeUndefined()
+    // each answer taken as it came
+    expect(review.taken).toEqual(["types:card", "names:label", "texts:red joker"])
+    expect(review.finished).toEqual(["done"])
+    // the dictionary:  the answers, marked reviewed;  the rest as drafted
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("rótulo")
+    expect(names.names?.color).toBe("color")
+    expect(names.texts?.["red joker"]).toBe("comodín colorado")
+    expect(names.reviewed).toEqual({ names: ["label"], texts: ["red joker"], types: ["card"] })
+    // the glossary:  the ticked one, as reviewed
+    const glossary = JSON5.parse(readFileSync(join(folder, "glossary.json5"), "utf8")) as GlossaryData
+    expect(glossary.names).toEqual({ card: { name: "carta", gender: "feminine", from: "reviewed" } })
+    // the lines:  written with the answers
+    expect(written()[6]).toBe('\tsu rótulo debería ser "comodín colorado"')
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  1 accepted, 1 typed, 1 picked, 1 for every project, 5 left as drafted"
+    )
+  })
+
+  test("an answer spell can't read:  its row says why at once, before Send;  the person's next one goes in", async () => {
+    const review = fakeRun([
+      answer("names:label", "typed", "carta"),
+      // the page shows the row saying why, while the command still listens:  he types another
+      (rows) => {
+        expect(rows.find((row) => row.id === "names:label")).toMatchObject({
+          value: "etiqueta",
+          cells: { from: "not readable:  `carta`:  that's `card` already -- one word, one thing" }
+        })
+        return answer("names:label", "typed", "rótulo")
+      }
+    ])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    // one row id throughout;  taken only once readable;  shown as asked again
+    expect(review.taken).toEqual(["names:label"])
+    expect(review.rows.find((row) => row.id === "names:label")!.cells.from).toBe("Claude")
+    expect(review.progress).toContain("can't read `carta`:  that's `card` already -- one word, one thing:  try another")
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("rótulo")
+    expect(names.reviewed).toEqual({ names: ["label"] })
+  })
+
+  test("an answer still unreadable at Send:  kept as drafted, and noted", async () => {
+    const review = fakeRun([answer("names:label", "typed", "carta")])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    expect(review.taken).toEqual([])
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("etiqueta")
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  0 accepted, 0 typed, 0 picked, 7 left as drafted, 1 still unreadable, kept as drafted"
+    )
+  })
+
+  test("an answer changed after it was taken:  the new one, checked again;  cleared, the proposal again", async () => {
+    const review = fakeRun([
+      answer("names:label", "typed", "rótulo"),
+      answer("names:color", "typed", "tono"),
+      answer("names:label", "picked", "leyenda"),
+      answer("names:color", "typed", "")
+    ])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    expect(review.taken).toEqual(["names:label", "names:color", "names:label"])
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("leyenda")
+    expect(names.names?.color).toBe("color")
+    expect(names.reviewed).toEqual({ names: ["label"] })
+  })
+
+  test("no Send in time (J187):  the answers given by then count, the rest stay as drafted;  the run ends timed-out", async () => {
+    const review = fakeRun([answer("names:label", "typed", "rótulo")], { end: "timed-out" })
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true },
+      fakeClaude().run,
+      false,
+      review.open
+    )
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.names?.label).toBe("rótulo")
+    expect(names.names?.color).toBe("color")
+    expect(names.reviewed).toEqual({ names: ["label"] })
+    expect(written()[6]).toMatch(/^\tsu rótulo /)
+    expect(review.finished).toEqual(["timed-out"])
+    expect(printed()).toContain(
+      "  review:  /runs/test/:  no Send in time:  0 accepted, 1 typed, 0 picked, 7 left as drafted"
+    )
+  })
+
+  test("the passes on the page, in order;  the effort picked there takes at the next pass", async () => {
+    const asked: string[] = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      asked.push(`${kindOf(prompt)} ${options?.tier}`)
+      return claude.run(prompt, options)
+    }
+    // he switches to best while answering:  the names pass ran already, the fix-ups take it
+    const review = fakeRun([{ effort: "best" }, answer("names:label", "typed", "rótulo")])
+    await translate(
+      source(),
+      { to: "es", out: join(folder, "Cartas"), review: true, effort: "fast" },
+      run,
+      false,
+      review.open
+    )
+    expect(review.opened[0]!.effort).toMatchObject({ initial: "fast" })
+    expect(asked).toEqual(["types fast", "names fast", "fix-ups best"])
+    expect(review.passes).toEqual([
+      "start names at fast, total 8",
+      "update names, done 1, calls 1",
+      "update names, done 8, calls 2",
+      "end names, calls 2",
+      "start lines at best, total 8",
+      "end lines, done 8",
+      "start fix-ups at best",
+      "update fix-ups, done 0, total 2, calls 0",
+      "update fix-ups, done 1, total 2, calls 1",
+      "update fix-ups, done 1, total 2, calls 1",
+      "end fix-ups",
+      "finish done"
+    ])
+  })
+
+  test("a pass's own flag wins over the page's effort, and the page says so", async () => {
+    const asked: string[] = []
+    const claude = fakeClaude()
+    const run: ClaudeRunner = (prompt, options) => {
+      asked.push(`${kindOf(prompt)} ${options?.tier}`)
+      return claude.run(prompt, options)
+    }
+    const review = fakeRun([{ effort: "fast" }])
+    const options = { to: "es", out: join(folder, "Cartas"), review: true, namesEffort: "best", fixUpsEffort: "best" }
+    await translate(source(), options, run, false, review.open)
+    expect(review.opened[0]!.effort).toMatchObject({ initial: "balanced" })
+    expect(asked).toEqual(["types best", "names best", "fix-ups best"])
+    expect(review.passes).toContain("start names at best, total 8")
+    expect(review.passes).toContain("start fix-ups at best")
+    expect(review.progress).toContain("names:  at best, by --names-effort, not the page's balanced")
+    expect(review.progress).toContain("fix-ups:  at best, by --fix-ups-effort, not the page's fast")
+  })
+
+  test("a run that fails ends stopped, and the error goes on", async () => {
+    const review = fakeRun([])
+    const failing = { ...source(), checker: () => () => Promise.reject(new Error("the checker broke")) }
+    const options = { to: "es", out: join(folder, "Cartas"), review: true }
+    await expect(translate(failing, options, fakeClaude().run, false, review.open)).rejects.toThrow("the checker broke")
+    expect(review.finished).toEqual(["stopped"])
+  })
+
+  test("--no-ai:  the names still missing, to type;  a type's gender after it", async () => {
+    const review = fakeRun([answer("types:card", "typed", "naipe (m)")])
+    const claude = fakeClaude()
+    const options = { to: "es", out: join(folder, "Cartas"), review: true, ai: false }
+    // no checker:  the fake one reads the file as `Carta`
+    await translate({ ...source(), checker: undefined }, options, claude.run, false, review.open)
+    expect(claude.prompts).toEqual([])
+    const card = review.rows.find((row) => row.id === "types:card")!
+    expect(card).toMatchObject({ value: "", cells: { from: "missing (--no-ai)" } })
+    expect(card.alternatives).toBeUndefined()
+    const names = JSON5.parse(readFileSync(join(folder, "Cartas", "Cards.es.names.json5"), "utf8")) as NamesFile
+    expect(names.types?.card).toEqual({ name: "naipe", gender: "masculine" })
+    expect(readFileSync(join(folder, "Cartas", "Naipe.es.spell"), "utf8")).toMatch(/^un "naipe" es una cosa donde:/)
+  })
+
+  test("without --review no run opens, and nothing asks for alternatives;  --cold refuses it", async () => {
+    const review = fakeRun([])
+    const claude = fakeClaude()
+    await translate(source(), { to: "es", out: join(folder, "Cartas") }, claude.run, false, review.open)
+    expect(review.opened).toEqual([])
+    expect(claude.prompts[1]).not.toContain("`alternatives`")
+    const cold = { to: "es", out: join(folder, "Cold"), cold: true, review: true }
+    await expect(translate(source(), cold, claude.run, false, review.open)).rejects.toThrow("drop --review")
+  })
+})
+
 ////////////////
 // ## Helpers
 ////////////////
@@ -346,9 +600,90 @@ describe("--cold:  nothing pre-calculated, for timing (P29)", () => {
  * `translateProject()`, with the glossary in the temp folder:  none, unless a test writes one.
  * - `shapes`:  its checker hands back the translation's files, parsed, for the shape check.
  */
-function translate(source: TranslateSource, options: TranslateOptions, run: ClaudeRunner, shapes = false) {
+function translate(
+  source: TranslateSource,
+  options: TranslateOptions,
+  run: ClaudeRunner,
+  shapes = false,
+  openRun?: ReviewRunOpener
+) {
   if (shapes) source.checker = (out) => () => Promise.resolve({ problems: check(out), files: parsedIn(out) })
-  return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5") })
+  return translateProject(source, options, run, { glossaryFile: join(folder, "glossary.json5"), openRun })
+}
+
+/** One step of a fake run:  a row's answer, given;  or the effort picked on the page. */
+type RunStep = SRV.RunRowAnswer | { effort: string }
+
+/** `rowId`'s answer, given now. */
+function answer(rowId: string, outcome: SRV.RunOutcome, value: string, ticked?: boolean): SRV.RunRowAnswer {
+  return { rowId, answer: { outcome, value, ...(ticked ? { ticked } : {}), at: new Date().toISOString() } }
+}
+
+/**
+ * A fake steered run (`--review`), for `translate()`'s `openRun`:  its answers come one at a time
+ * (`answersAsTheyCome()`), each of `steps` in turn -- a step, or a function of the rows the page shows NOW giving one,
+ * so a test can answer what it sees;  then they end as `end` says (Send, by default).
+ * - Its effort:  the one it was opened with, until a step picks another.
+ * - It keeps what it was opened with, its rows as shown now, rows taken, progress lines, passes and how it finished.
+ */
+function fakeRun(
+  steps: Array<RunStep | ((rows: SRV.RunRow[]) => RunStep)>,
+  { end = "sent" }: { end?: SRV.RunAnswersEnd } = {}
+) {
+  const opened: SRV.RunOpenProps[] = []
+  const taken: string[] = []
+  const progress: string[] = []
+  const passes: string[] = []
+  const finished: string[] = []
+  const shown = { rows: [] as SRV.RunRow[] }
+  let picked: string | undefined
+  let pass = ""
+  const facts = (said: SRV.RunPassStart = {}) =>
+    (["done", "total", "calls"] as const)
+      .flatMap((key) => (said[key] === undefined ? [] : [`, ${key} ${said[key]}`]))
+      .join("")
+  const open: ReviewRunOpener = (props) => {
+    opened.push(props)
+    return {
+      show: () => Promise.resolve("/runs/test/"),
+      progress: (text) => progress.push(text),
+      setRows: (rows) => (shown.rows = rows),
+      async *answersAsTheyCome() {
+        for (const each of steps) {
+          await Promise.resolve()
+          const step = typeof each === "function" ? each(shown.rows) : each
+          if ("effort" in step) picked = step.effort
+          else yield step
+        }
+        return end
+      },
+      take: (...rowIds) => taken.push(...rowIds),
+      get effort() {
+        return picked ?? props.effort?.initial
+      },
+      startPass: (name, said = {}) => {
+        pass = name
+        passes.push(`start ${name} at ${said.effort ?? picked ?? props.effort?.initial}${facts(said)}`)
+      },
+      updatePass: (said) => passes.push(`update ${pass}${facts(said)}`),
+      endPass: (said) => passes.push(`end ${pass}${facts(said)}`),
+      finish: (status = "done") => {
+        passes.push(`finish ${status}`)
+        finished.push(status)
+      }
+    }
+  }
+  return {
+    open,
+    opened,
+    taken,
+    progress,
+    passes,
+    finished,
+    get rows() {
+      return shown.rows
+    }
+  }
 }
 
 /** The translation's file in `out`, parsed in a project of its own. */
@@ -398,7 +733,11 @@ function fakeClaude(answer: unknown = { fixes: [{ file: "Carta.es.spell", line: 
   const run: ClaudeRunner = (prompt) => {
     prompts.push(prompt)
     const reply =
-      kindOf(prompt) !== "fix-ups" ? NAMES : typeof answer === "function" ? (answer as () => unknown)() : answer
+      kindOf(prompt) !== "fix-ups"
+        ? { ...NAMES, alternatives: ALTERNATIVES }
+        : typeof answer === "function"
+          ? (answer as () => unknown)()
+          : answer
     return Promise.resolve(`\`\`\`json\n${JSON.stringify(reply)}\n\`\`\``)
   }
   return { run, prompts }

@@ -37,7 +37,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell translate` (epic `spanish` P24-P27) is half and half:
+- `spell translate` (epic `spanish` P24-P29) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation
@@ -54,6 +54,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `--model <model>[:<effort>]`, hidden, for experiments:  an exact model and effort for every call
   - the translating itself is spell's [translate/](../spell/translate/) (`NamesGlossary`, `NamesPass`, `Translator`,
     `ShapeCheck`, `FixUps`), on parsed files:  no node
+  - `--out` keeps everything the run writes, its dictionary and record too (epic `spanish` J186):
+    a dictionary beside the project is read, never written;  `--update` finds its record by the same `--out`
+  - `--review` (epic `spanish` P31, P32):  between the names and the lines, [NamesReview.ts](NamesReview.ts) shows the
+    names drafted on a page, a COMMAND RUN of the kit's (`SRV.CommandRun`, in the Review tab), STEERED:
+    - a row per name drafted, with Claude's alternatives (`NamesPass`, asked in the same calls with `--review`);
+      accepted, typed or picked, each answer is checked readable, marked reviewed in the dictionary
+      (`TranslationNames.reviewed`), and ticked ones go into the shared glossary (`NamesGlossary.addReviewed()`)
+    - each answer as it's given (`answersAsTheyCome()`), until Send or `--review-timeout`:  a good one into the
+      dictionary at once and `take()`n;  an unreadable one's row says why at once, on the same row id;
+      no Send in time, the answers given by then still count (J187)
+    - the run stays open through the three passes, drawn on its status card (`startPass()` ...);  the effort picked
+      there is read before the names and the fix-ups (`steerPass()`, in `translateProject.ts`), a pass's own flag
+      winning;  it finishes `done`, `timed-out`, or `stopped` (a throw, Ctrl-C:  `finishOnInterrupt()`)
+    - its run is injected (`TranslateSettings.openRun`):  `openCommandRun()` loads `spell/server` only then
   - `--cold` (epic `spanish` P29), for timing:  none of the lists earlier runs worked out -- the shared glossary,
     the project's dictionary, the record of fix-ups, a seed -- and nothing written but into `--out`
     - every report says which it started from (`pre-calculated:`, `TranslationLists`)
@@ -83,6 +97,10 @@ As WWOD §20, plus:
 - `spell translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
   its `--cold` too, each list ignored, in the same file;
+  its `--review`, with a fake steered run (answers as they come:  accepted, typed, picked, ticked, unreadable then fixed,
+  changed, timed out;  the effort switched between passes;  the passes in order;  done / timed-out / stopped),
+  and `--out`'s files (J186),
+  in the same file;
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
   the command end to end, spell-app's [cli.test.ts](../../../spell-app/tests/cli/cli.test.ts).
