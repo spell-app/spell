@@ -1,6 +1,6 @@
 {
   "name": "spell-epic",
-  "version": "0.1.0",
+  "version": "0.8.0",
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
@@ -334,11 +334,6 @@
     "node": ">=24.11"
   },
   "packageManager": "yarn@4.18.0",
-  "spellPack": {
-    "name": "epics",
-    "prefix": "epic-",
-    "dir": "src"
-  },
   "pageServer": {
     "routes": [
       "src/tools/detailsRoutes.ts",
@@ -371,6 +366,29 @@
     },
     "localCopies": {
       "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js": "/_epic/assets/highlight.min.js"
+    }
+  },
+  "spellPack": {
+    "name": "epics",
+    "prefix": "epic-",
+    "dir": "src"
+  },
+  "spellPublish": {
+    "exclude": [
+      "demo/**"
+    ],
+    "files": [
+      "templates",
+      "voices",
+      "skills",
+      "hooks",
+      "monitors",
+      ".claude-plugin",
+      "src/AGENTS.md",
+      "src/tool/PLAN-DOC.md"
+    ],
+    "bin": {
+      "epic": "cli/epicMain"
     }
   }
 }

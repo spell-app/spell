@@ -24,8 +24,8 @@ let port: number
 
 /** The run in the scratch content folder. */
 const RUN: RunPage = {
-  id: "spell-lang-translate-20261023-1912",
-  command: "spell lang translate todos --to es",
+  id: "spell-translate-20261023-1912",
+  command: "spell translate todos --to es",
   title: "Names for todos, in Spanish",
   columns: [
     { key: "english", label: "English" },

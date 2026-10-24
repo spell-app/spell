@@ -20,7 +20,7 @@ export const epicRunVocabulary = {
   description:
     "A run page's body (epic `epic-engine` P23):  a COMMAND stopped to ask Owen (the kit's `SRV.CommandRun`), and " +
     "waits for his answers.  It reads the run from the page server (`GET /api/runs/<id>`) and draws who is waiting " +
-    "(`spell lang translate todos --to es` is waiting, with a green dot;  nobody, once the run stopped, finished or " +
+    "(`spell translate todos --to es` is waiting, with a green dot;  nobody, once the run stopped, finished or " +
     "its heartbeat went stale), the command's progress lines, updated live, then a table:  the command's columns " +
     "and a row per thing to answer (`<epic-run-row>`).  Each answer is saved as he gives it;  Send, at the bottom, " +
     "says the answers are done, and the waiting command carries on with them.  Send again whenever he likes:  the " +
@@ -35,7 +35,7 @@ export const epicRunVocabulary = {
       kind: "string",
       required: true,
       description:
-        "The run's id:  its folder's name in the content folder's `pages/runs/` (`spell-lang-translate-20261023-1912`)."
+        "The run's id:  its folder's name in the content folder's `pages/runs/` (`spell-translate-20261023-1912`)."
     }
   ],
   events: [],
