@@ -508,16 +508,22 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
 }
 /*
  * while the tabs are stuck (`main.site-tabs-stuck`, set by the site;  through a pane's end too, as the panel leaves), a
- * STRIP behind the panel, out to the column's edges and over the gaps above and below it, in the stuck
+ * STRIP behind the panel, out to the side columns' cards and over the gaps above and below it, in the stuck
  * titles' colour (Owen:  "Don't show content underneath tabs when scrolling up"):  the page scrolling under it never
  * shows round the floating panel
  */
 .site-tabs-stuck ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::after {
   content: "";
   position: absolute;
+  /* out past the column, to the side columns' cards, as the section titles (the site's `--_site-band-start` / `-end`) */
   inset: calc(-1 * (var(--_panel-up) + var(--site-tabs-gap, 10px)))
-    calc(var(--site-tabs-band, 8px) - var(--site-tabs-inset, 0px) - var(--site-gutter, 3em))
-    calc(-1 * var(--site-tabs-gap, 10px));
+    calc(
+      var(--site-tabs-band, 8px) - var(--site-tabs-inset, 0px) - var(--site-gutter, 3em) - var(--_site-band-end, 0px)
+    )
+    calc(-1 * var(--site-tabs-gap, 10px))
+    calc(
+      var(--site-tabs-band, 8px) - var(--site-tabs-inset, 0px) - var(--site-gutter, 3em) - var(--_site-band-start, 0px)
+    );
   z-index: -2;
   /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`, Owen:  "so it doesn't
      have to go to white");  else the stuck titles' colour */
