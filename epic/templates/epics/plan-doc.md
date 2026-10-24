@@ -105,6 +105,17 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
   naming the branch and worktree; its prompt, decisions and review page stay. Its first phase (`add-phase`)
   plans it too
 
+The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got, so which sections show.
+
+- `overview`: only the Overview, Questions and Todos; `phases`: the Phases too; `building`, or none: everything. A
+  hidden section is still in the file: it's only a view
+- `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
+  `building`; `epic stage <name> overview|phases|building` sets it by hand
+- meanwhile the header's paper plane is the STAGE BUTTON, "Accept Overview", then "Accept Phases" (Q14): a press
+  sends what's unsent with an accept mark; `epic inbox apply` moves the page on a stage, and the session then
+  writes the phases, or starts building. Its tooltip counts the open questions: a reminder, never a lock
+- while `phases`, an open phase's pills are Looks good and Defer (later: after the other phases, still to do)
+
 While planning (no phase yet), the page shows a folded "Plan hung?" notice (P3 of `windows-and-review`), drawn, never
 written:
 
