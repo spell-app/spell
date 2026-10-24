@@ -1,6 +1,9 @@
 # Procedures:  Jakub Krehel's skills
 
 What each skill at https://jakub.kr/skills does, and how a `/designer` review could use it.
+
+- The skills themselves are installed in the kit, tracked:  `.agents/skills/<name>/SKILL.md` and its reference pages
+  (`skills-lock.json` beside them says which version).  Read one there when a procedure below needs its full text.
 - Read 2026-10-23, from https://github.com/jakubkrehel/skills (branch `main`) and https://github.com/jakubkrehel/make-interfaces-feel-better.
   - Short name below:  `G` = https://github.com/jakubkrehel/skills/blob/main/skills
 - Install:  `npx skills add jakubkrehel/skills`, or as a Claude Code plugin (`/plugin marketplace add jakubkrehel/skills`, `/plugin install interfaces@interfaces`).
