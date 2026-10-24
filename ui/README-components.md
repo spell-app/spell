@@ -358,8 +358,8 @@ Seven steps, run from `spell-ui/`;  four of them have a test that fails until th
 3. Make it a library entry:
    - `COMPONENTS` in [vite.config.ts](vite.config.ts)
    - in [package.json](package.json):  its barrel's own key in `exports` (`"./components/ui-<name>"`;
-     [the package exports test](tests/tools/PackageExports.test.ts) fails without it), its short published name in
-     `publishConfig.exports` (`"./ui-<name>"`), and its `dist/` file in `sideEffects`
+     [the package exports test](tests/tools/PackageExports.test.ts) fails without it);
+     its short published name, `spell-ui/ui-<name>`, comes from `"spellPublish": { "exports" }` by itself
    - re-export it from [the package's entry](src/index.ts)
 4. `yarn gen:root`:  the root's catalog of tag → family.
    [Its test](tests/components/ui-root/UIRoot.catalog.test.ts) fails while it's stale.

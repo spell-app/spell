@@ -6,8 +6,10 @@ import { dirname, join, normalize, relative, resolve } from "node:path"
 /****************
  * ### `DeclarationCheck`
  * Checks the built declarations (`dist/**.d.ts`, `vite.config.ts` `declarations()`) are what a consumer needs.
- * - Every `types` path in the PUBLISHED `exports` (and `types`) exists:  `package.json`'s `publishConfig`, which
- *   `yarn pack` writes over the source ones (epic `repo-split` P6);  the top-level fields when it has none.
+ * - The local library build only (`yarn build`, `yarn smoke`):  Spell UI's npm package is `spell publish`'s per-file
+ *   build, which checks its own `exports` (epic `repo-split` P19, J197).
+ * - Every `types` path in `package.json`'s `publishConfig` (`exports`, `types`), when it has one, exists:
+ *   it has none since P19, so the bundle's entries go unchecked.
  * - Every import / export STATEMENT is a bare package name, or a relative path that resolves INSIDE `dist/`:
  *   - no `#...` alias, which a consumer can't resolve
  *   - no `spell-ui/...`:  `dist/` names its own files relatively (the published `exports` name only the entries)
@@ -41,7 +43,8 @@ export class DeclarationCheck {
     const packageJson = JSON.parse(readFileSync(join(this.root, "package.json"), "utf8")) as Published & {
       publishConfig?: Published
     }
-    const published = packageJson.publishConfig?.exports ? packageJson.publishConfig : packageJson
+    const published = packageJson.publishConfig
+    if (!published?.exports) return []
     const paths = [
       published.types,
       ...Object.values(published.exports ?? {}).map((entry) => (typeof entry === "object" ? entry.types : undefined))
