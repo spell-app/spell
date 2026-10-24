@@ -332,7 +332,7 @@ Installing it, once per machine, after [setup](README.md#setup-from-zero):
 ```sh
 claude plugin marketplace add ~/www/spell/spell-epic --scope user
 claude plugin install spell-epic@spell-epic --scope user
-for skill in ~/www/spell/spell-epic/skills/*/; do ln -s "$skill" ~/.claude/skills/; done
+for skill in ~/www/spell/spell-epic/skills/*/; do ln -sfn "${skill%/}" ~/.claude/skills/"$(basename "$skill")"; done
 ln -s ~/www/spell/spell-epic/bin/epic ~/.local/bin/epic
 cache=~/.claude/plugins/cache/spell-epic/spell-epic/0.1.0 && rm -rf "$cache" && ln -s ~/www/spell/spell-epic "$cache"
 ```
@@ -342,6 +342,9 @@ cache=~/.claude/plugins/cache/spell-epic/spell-epic/0.1.0 && rm -rf "$cache" && 
    Claude Code COPIES the folder at install, and runs the plugin's hooks and monitor from the copy:  step 5.
 3. Links each skill into your own skills folder, so you type a bare `/epic`:
    a plugin's skills are otherwise named `/spell-epic:epic`.
+   - It replaces a link already there:  run it again after spell-epic moves, or gains a skill.
+     A link left pointing at an old place makes `/epic` find nothing:  from repo-split's move until 2026-10-24 every
+     link named `~/www/spell-app/spell-epic/`, gone, so `/epic done` reached no skill (epic `epic-engine` I82).
 4. Puts `epic` on your terminal's `PATH`, outside Claude Code.
 5. Swaps that copy for a link to spell-epic's folder, so the hooks and the inbox monitor run `main`'s code, as the
    skills and `epic` do.
