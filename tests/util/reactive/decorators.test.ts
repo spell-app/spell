@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, afterEach } from "vite-plus/test"
 
-import { Observable, derived, flushCells, observe, prop, state, thing } from "spell-kit/util"
+import { Observable, derived, flushCells, observe, prop, state, thing } from "spell/util"
 
 /**
  * The shared decorators beyond what `cells.test.ts` pins for `@prop` / `@derived` on an `Observable`:

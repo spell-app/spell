@@ -4,7 +4,7 @@ import { dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import type { SRV } from "spell-kit/server"
+import type { SRV } from "spell/server"
 
 import { contentFolderOf } from "./contentFolder"
 
@@ -34,7 +34,7 @@ import { contentFolderOf } from "./contentFolder"
  *   - `spell-ui/tools/SiteCheck.ts` resolves from `top`, and links as `../../../spell-ui/tools/SiteCheck.ts`.
  *   - `packages/<name>/...` (the old monorepo's spelling, in every page written before P8) is package
  *     package `<name>`'s folder, found through `top`'s `node_modules` (`spellPackagesIn()`):  `packages/ui/tools` is
- *     spell-ui's `tools/`, `packages/parser/src` spell-lang's `parser/src`.
+ *     spell-ui's `tools/`, `packages/parser/src` spell-parser's `parser/src`.
  *   - A file anywhere under `top` counts as inside the repo (`check()`);  its target is its path from `top`.
  *   - With no `yarn.lock` above the checkout, `top` is the checkout itself:  the monorepo layout, as before.
  * - SERVED folders (`served`, epic `epic-workflow` P10):  a folder the page server serves at another address.
@@ -609,9 +609,9 @@ function installRoot(root: string): string {
  * Each of our packages installed in `top`'s `node_modules`, its real folder by its old short name (the monorepo's
  * `packages/<name>/`, in old pages):
  * - a one-package repo (`ONE_PACKAGE_REPOS`) by its old name:  `ui` => `<top>/spell-ui`
- * - a package of several folders (`FOLDERS_OF`, epic `repo-split` P9 and P11:  the kit, spell-lang, spell-app), each
+ * - a package of several folders (`FOLDERS_OF`, epic `repo-split` P9 and P11:  the kit, spell-parser, spell-app), each
  *   folder by its old package's name:  `server` => `<kit>/src/server`, `spell-element` => `<kit>/src/element`,
- *   `parser` => `<spell-lang>/parser`
+ *   `parser` => `<spell-parser>/parser`
  *   - a folder at the package's root, or in its one `src/` (epic `repo-split` P14)
  */
 function spellPackagesIn(top: string): Map<string, string> {
@@ -647,7 +647,7 @@ const ONE_PACKAGE_REPOS: Readonly<Record<string, string>> = {
  * (`packages/<name>/` in old pages).
  */
 const FOLDERS_OF: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  "spell-kit": {
+  spell: {
     util: "util",
     toolchain: "toolchain",
     server: "server",
@@ -655,6 +655,6 @@ const FOLDERS_OF: Readonly<Record<string, Readonly<Record<string, string>>>> = {
     assembler: "server",
     "spell-element": "element"
   },
-  "spell-lang": { parser: "parser", markdown: "markdown", core: "core", py: "py", spell: "spell" },
+  "spell-parser": { parser: "parser", markdown: "markdown", core: "core", py: "py", spell: "spell" },
   "spell-app": { app: "app", spaces: "spaces", lsp: "lsp", cli: "cli", "page-server": "page-server" }
 }

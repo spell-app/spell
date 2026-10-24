@@ -2,7 +2,7 @@
 
 import solid, { type Options as SolidOptions } from "@solidjs/vite-plugin"
 
-import { standardDecorators } from "spell-kit/toolchain/decorators"
+import { standardDecorators } from "spell/toolchain/decorators"
 
 /****************
  * ### Element build settings

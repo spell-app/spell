@@ -66,7 +66,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     - The ONE exception:  a `constants.ts` at a package's root, for its string sentinels (WWOD §9 › "String
       sentinels over booleans for modes").
   - Group with `// ## Group Name` headers -- SEE:  WWOD §6 › "Group headers".
-  - MUST be runtime-light:  `import type` only, apart from the package's utilities (`spell-kit/util`, `spell-ui/util`).
+  - MUST be runtime-light:  `import type` only, apart from the package's utilities (`spell/util`, `spell-ui/util`).
     - Why:  a types file that imports VALUES from its folder's class files is a circular import.
   - Exception:  props types live in the defining file -- WWOD §9 › "Props types live with their class".
 
@@ -103,7 +103,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     better (`UI.icons.register()`, not a separate `iconRegistry.add()`), and the folder's import graph loses edges.
   - `ui`'s runtime services are classes on ONE per-page instance (`UI.keyboard` ...) -- SEE:  `packages/ui/AGENTS.md`
     "Overview" and "UI rules".
-  - NOT:  an object literal when no class owns the domain (`assert = { string, number, boolean }` in `spell-kit/util`:
+  - NOT:  an object literal when no class owns the domain (`assert = { string, number, boolean }` in `spell/util`:
     `agents/CODE-DEBT.md`) -- one shape for every service, and a class gains state, `@proto static` defaults
     (WWOD §12 › "@proto static defaults") or a subclass without its callers changing.
 
@@ -113,12 +113,12 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     - `export * from "./<folder>.types"` first, then leaf files base-classes-first
     - sub-folder barrels are flattened in:  `export * from "./rules"`
   - Barrels MUST NOT pull in optional sub-systems:  leave them OUT of the barrel, opted into by path --
-    `spell-kit/server/page/...`, `spell-kit/server/test/...`
+    `spell/server/page/...`, `spell/server/test/...`
     (SEE:  the kit's `src/server/AGENTS.md` "NOT in the barrel, opt-in by path").
-    - Only a sub-system that must register itself is a side-effect import:  `import "spell-lang/parser/rulex"`
+    - Only a sub-system that must register itself is a side-effect import:  `import "spell-parser/parser/rulex"`
       registers on `Parser.rulexParser`.
   - A barrel loads in EVERY environment its package targets (browser, node ...):
-    - node-only and side-effect files stay OUT of it, imported by path, e.g. `spell-lang/spell/node/...`
+    - node-only and side-effect files stay OUT of it, imported by path, e.g. `spell-parser/spell/node/...`
     - nothing it loads touches an environment global (`window`, `document`, `process` ...) at module-evaluation
       time
     - each package's `AGENTS.md` lists its own left-out files
@@ -127,13 +127,13 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
 
 - **ONE self-namespace per package:**
   - Each sub-system has ONE self-namespace, exported from its top barrel:  `export * as P from "."`
-    - each package's `AGENTS.md` lists its own, e.g. `P` ~== `spell-lang/parser`
+    - each package's `AGENTS.md` lists its own, e.g. `P` ~== `spell-parser/parser`
     - Exception:  namespace a file whose names would collide when flattened:
       `export * as render from "./renderAST"` + `export * as stringify from "./stringifyAST"`,
       which deliberately export the same names with different return types.
       - A code smell inside one package:  rename so the names don't collide instead, wherever you can.
     - Prefer a disambiguating affix over a namespace when the names allow it -- token and AST classes
-      are `WordToken` / `ASTLiteral` etc. and flatten straight into `spell-lang/parser`.
+      are `WordToken` / `ASTLiteral` etc. and flatten straight into `spell-parser/parser`.
     - NOTE:  `export *` through a circular barrel is riskier than a named re-export -- it must read the
       leaf's key list EAGERLY, so a mid-body leaf contributes nothing.  See `parser`'s `src/barrel.test.ts`.
   - Consumers:  SEE:  WWOD §4 › "ONE namespace per sub-system".
@@ -143,15 +143,15 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
 
 - **Promotion path:**  a helper generic enough to lose its feature vocabulary moves up, and is RENAMED on the way.
   - Where to:  the package's own util (`spell-ui/util` ...) while one package uses it;
-    `spell-kit/util` ONLY once 2+ packages do.
+    `spell/util` ONLY once 2+ packages do.
     SEE:  the kit's `src/util/AGENTS.md` "Overview" for what may land there (generic files vs `spell/`;
-    what lands in `spell-kit/util` lands in `ui`'s bundle).
+    what lands in `spell/util` lands in `ui`'s bundle).
   - Strip the feature word from the file, the exports AND every doc comment.
   - Barrel it through its new home's barrel, e.g. the kit's `src/util/index.ts`.
   - It MUST NOT import back down into the feature:  extraction NEVER makes a util module import from a feature
     layer.  Swap feature types for general ones, and where the only shared home would invert the dependency, a
     small private copy is CORRECT.
   - A promoted type may be RE-EXPORTED from the feature's types file so call sites keep their local vocabulary:
-    `export type { X } from "spell-kit/util"` -- from the barrel, never a deep path.
+    `export type { X } from "spell/util"` -- from the barrel, never a deep path.
   - Moving it is usually also a chance to fix it:  the general version can take a parameter the feature-shaped
     one never needed (a root to search, not always `document`).

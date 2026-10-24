@@ -9,7 +9,7 @@ Options:
   -V, --version                                 each repo's version
   -h, --help                                    display help for command
 
-spell-kit:
+spell:
   server                                        this checkout's page server:  docs, epic pages, the app's /api -- start all:  every web server
   bundle [options] [names...]                   build the bundles the page server serves, built on demand, never committed (Spell UI's site ...)
   commands [options] [verb]                     every yarn script, spell command and skill, against the commands page -- check exits 1 on a gap
@@ -17,7 +17,7 @@ spell-kit:
   pony [options] [words...]                     a pony in Spell's wizard hat, saying something -- yours, or one of its own
   help [command...]                             show help -- for one command, e.g. spell help compile, spell help server start
 
-spell-lang:
+spell-parser:
   compile [options] [projects...]               compile projects to <Project>.spell.js (and each *.editor.html to its <type-editor> module), or print a file's compiled javascript
   lint [options] [projects...]                  list errors, one per line as path:line:col, exiting 1 if there are any -- a project's editor pages (*.editor.html) too, against its types
   describe [options] [project] [name] [member]  what a file or project declares, as the Type Explorer shows it -- or all about ONE thing in it

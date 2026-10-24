@@ -5,7 +5,7 @@
  * - `spell --version`:  each repo's version, the kit's first.
  * - NOT in the barrel:  importing it runs the command line.
  */
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 // output piped into e.g. `head`, which closed it:  nothing more to say
 process.stdout.on("error", (error: NodeJS.ErrnoException) => error.code === "EPIPE" && process.exit(0))

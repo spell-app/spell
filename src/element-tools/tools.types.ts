@@ -4,7 +4,7 @@
  * - the component packs' reports and their error
  * - what the JSX help (`jsx-help/`) knows of an element, and its warnings' codes
  * - At the BOTTOM of the tools' import graph:  types, constants and one error class, nothing else,
- *   so every tool (and spell-app's `spell pack`, through `spell-kit/element-tools/tools.types`)
+ *   so every tool (and spell-app's `spell pack`, through `spell/element-tools/tools.types`)
  *   imports it without loading another.
  * - Spell UI's own tools keep their shapes in its `tools/tools.types.ts`.
  ****************/

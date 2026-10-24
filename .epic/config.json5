@@ -1,4 +1,4 @@
-// The kit's epic settings (the top repo, `spell-kit`, since epic `repo-split` P9):  where a session working HERE
+// The kit's epic settings (the top repo, `spell`, since epic `repo-split` P9):  where a session working HERE
 // (`~/www/spell`, every window's folder 1) keeps its epic things.
 // - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
 //   epic `epic-engine` P10 (spell-epic as a workspace of this install) and epic `repo-split` P9 (the multi-repo

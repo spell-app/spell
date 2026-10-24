@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
+import { SRV } from "spell/server"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
 /** A main checkout with a worktree in it, and one beside it. */
 const TOP = mkdtempSync(join(tmpdir(), "srv-checkout-"))

@@ -10,7 +10,7 @@
 // the finished layout (one `src/` per repo, imports by package name), so paths and commands count as kept.
 // `--head` compares with this checkout's git HEAD instead (the layout before repo-split P14).
 //
-// Example:  node docs/drafts/tools/readme-compare.mjs README-server.md spell-lang/README.md
+// Example:  node docs/drafts/tools/readme-compare.mjs README-server.md spell-parser/README.md
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"

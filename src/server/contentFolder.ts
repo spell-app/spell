@@ -22,7 +22,7 @@ import JSON5 from "json5"
  * - NEVER throws:  a config file it can't read names none
  * - Its position:  imports only node's own modules and `json5`, so plain `node` loads it by its own name (an entry
  *   of its own in the kit's `exports`).
- *   - `SRV.contentFolderOf()`, or by its own path (`spell-kit/server/contentFolder`):  that loads only this, so a
+ *   - `SRV.contentFolderOf()`, or by its own path (`spell/server/contentFolder`):  that loads only this, so a
  *     `spell` command that needs only this loads no linkedom.
  */
 export function contentFolderOf(root: string): string | undefined {

@@ -4,12 +4,12 @@ import { dirname, join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /**
  * A top repo as `spell` is (epic `repo-split` P8):  its install (`yarn.lock`, `node_modules/spell-ui` ...) over the
  * repos beside the checkout, `spell-app/`, which these tests link pages in.
- * - Spell UI's repo, `spell-ui/`, and a kit's `src/server/` folder (`spell-kit`, here in `spell-server/`):  what pages name,
+ * - Spell UI's repo, `spell-ui/`, and a kit's `src/server/` folder (`spell`, here in `spell-server/`):  what pages name,
  *   as `packages/ui/...`, `packages/server/...` (the old monorepo's spelling) or `spell-ui/...`.
  * - Made here:  a test never reads another repo's real files.
  */
@@ -37,7 +37,7 @@ for (const file of [
   put(file)
 mkdirSync(join(TOP, "node_modules"), { recursive: true })
 symlinkSync(join(TOP, "spell-ui"), join(TOP, "node_modules", "spell-ui"))
-symlinkSync(join(TOP, "spell-server"), join(TOP, "node_modules", "spell-kit"))
+symlinkSync(join(TOP, "spell-server"), join(TOP, "node_modules", "spell"))
 afterAll(() => rmSync(TOP, { recursive: true, force: true }))
 
 /** The checkout these tests link pages in:  spell-app, in the top repo. */

@@ -16,7 +16,7 @@
  */
 import type { Command } from "commander"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 export default function kitCommands(spell: Command): void {
   ////////////////
@@ -73,7 +73,7 @@ export default function kitCommands(spell: Command): void {
     .option("--stale", "only the bundles whose sources changed since their last build")
     .option("--json", "print the report as JSON")
     .action((names: string[], options: CLI.BundleOptions) =>
-      CLI.runCommand(async () => (await import("spell-kit/cli/commands/bundleCommand")).buildBundles(names, options))
+      CLI.runCommand(async () => (await import("spell/cli/commands/bundleCommand")).buildBundles(names, options))
     )
 
   bundle
@@ -82,7 +82,7 @@ export default function kitCommands(spell: Command): void {
     .argument("[names...]", "the bundles to check;  none:  every one")
     .option("--json", "print the report as JSON")
     .action((names: string[], options: CLI.BundleOptions) =>
-      CLI.runCommand(async () => (await import("spell-kit/cli/commands/bundleCommand")).checkBundles(names, options))
+      CLI.runCommand(async () => (await import("spell/cli/commands/bundleCommand")).checkBundles(names, options))
     )
 
   ////////////////
@@ -95,9 +95,7 @@ export default function kitCommands(spell: Command): void {
     .argument("[verb]", "list (default):  each command, ✓ if the page names it;  check:  only the gaps")
     .option("--json", "print every command, and the gaps, as JSON")
     .action((verb: string | undefined, options: CLI.CommandsOptions) =>
-      CLI.runCommand(async () =>
-        (await import("spell-kit/cli/commands/commandsCommand")).commandsCommand(verb, options)
-      )
+      CLI.runCommand(async () => (await import("spell/cli/commands/commandsCommand")).commandsCommand(verb, options))
     )
 
   spell
@@ -109,7 +107,7 @@ export default function kitCommands(spell: Command): void {
     .argument("[files...]", "more files to check, beyond the default set")
     .option("--json", "print the report as JSON")
     .action((verb: string | undefined, files: string[], options: CLI.WwodOptions) =>
-      CLI.runCommand(async () => (await import("spell-kit/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
+      CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
     )
 
   ////////////////
@@ -123,13 +121,13 @@ export default function kitCommands(spell: Command): void {
   readme
     .command("check")
     .description("links, anchors, captions and words of every README (yarn readme:check) -- exits 1 on a finding")
-    .argument("[pages...]", "only these pages, from the kit's root (spell-lang/README.md)")
+    .argument("[pages...]", "only these pages, from the kit's root (spell-parser/README.md)")
     .action((pages: string[]) => CLI.runCommand(() => CLI.runTool(README_CHECK, pages)))
 
   readme
     .command("test")
     .description("run every example a README prints with its Output fold, and compare -- exits 1 when one differs")
-    .argument("[pages...]", "only these pages, from the kit's root (spell-lang/README.md)")
+    .argument("[pages...]", "only these pages, from the kit's root (spell-parser/README.md)")
     .option("--list", "only list the examples, without running them")
     .action((pages: string[], options: { list?: boolean }) =>
       CLI.runCommand(() => CLI.runTool(README_TEST, [...pages, ...(options.list ? ["--list"] : [])]))
@@ -145,7 +143,7 @@ export default function kitCommands(spell: Command): void {
     .argument("[words...]", "what the pony says")
     .option("--gallop", "her legs gallop:  in place in a terminal, else one stride's frames")
     .action((words: string[], options: CLI.PonyOptions) =>
-      CLI.runCommand(async () => (await import("spell-kit/cli/commands/ponyCommand")).ponyCommand(words, options))
+      CLI.runCommand(async () => (await import("spell/cli/commands/ponyCommand")).ponyCommand(words, options))
     )
 }
 
@@ -166,7 +164,7 @@ const README_TEST: CLI.ToolSpec = { tool: "tools/readme-test.ts", cwd: "." }
 
 /** `serverCommand.ts`, loaded when a `spell server` verb runs. */
 function serverCommand() {
-  return import("spell-kit/cli/commands/serverCommand")
+  return import("spell/cli/commands/serverCommand")
 }
 
 /** `command`, taking the page server's own flags (`--root <dir>` ...) as they're typed:  handed on verbatim. */

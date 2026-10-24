@@ -155,7 +155,7 @@ describe("ReadmeCheck.checkLink():  links into another repo", () => {
 describe("ReadmeCheck.checkPage():  words for what repo-split deletes", () => {
   test("flags the run-time alias hook, spell-folders, the alias lint rules, packModuleKey and the old epic verbs", () => {
     const lines = [
-      "Run `tsx --import spell-kit/toolchain/aliases`.",
+      "Run `tsx --import spell/toolchain/aliases`.",
       "Then `spell-folders test`.",
       "Lint fails it:  `spell/no-cross-repo-alias`.",
       "The key comes from `packModuleKey()`.",
@@ -197,7 +197,7 @@ describe("ReadmeCheck.checkPage():  capital", () => {
 
   test("leaves identifiers, code, link targets, URLs, HTML and comments alone", () => {
     const lines = [
-      "The spell-lang repo, spell_core, @spell/core, spell.epics, a .spell file, owen@spell, #spell, ~/www/spell.",
+      "The spell-parser repo, spell_core, @spell/core, spell.epics, a .spell file, owen@spell, #spell, ~/www/spell.",
       "Spell reads English, as do spells and a misspelling.",
       "Run `spell serve`, or <code>spell serve</code>.",
       "```sh",

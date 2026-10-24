@@ -1,4 +1,4 @@
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * `spell pony [words...] [--gallop]`:  prints a pony in Spell's wizard hat, saying the words

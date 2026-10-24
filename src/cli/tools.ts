@@ -3,7 +3,7 @@ import { existsSync, realpathSync } from "node:fs"
 import { constants } from "node:os"
 import { join } from "node:path"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * Running another program from a command:  a repo's own tool script (`runTool()`), any program (`runChild()`), or

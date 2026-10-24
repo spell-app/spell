@@ -1,6 +1,6 @@
 /**
  * `tools/repos.ts`:  what the kit's yarn scripts run over the child repos (epic `repo-split` P7, Q17;  the top repo
- * became the kit, `spell-kit`, in P9).
+ * became the kit, `spell`, in P9).
  * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts <command>`, no build, no `tsx`.
  *   - So:  node's own modules and `json5` only, `import type` for types, no `enum` or parameter property.
  * - The repos, lowest first, and what each needs:  `repos.json5` beside `package.json`.
@@ -14,7 +14,7 @@
  * yarn pull                 # `git pull --ff-only` in every child repo there
  * yarn status               # each child repo's branch and changes;  a clean one in one line
  * yarn repos                # the list:  which are cloned, and what each needs
- * node tools/repos.ts links       # `node_modules/spell-kit`, a link to the kit, and each child repo's `agents`
+ * node tools/repos.ts links       # `node_modules/spell`, a link to the kit, and each child repo's `agents`
  *                                 # link:  what `yarn install` runs after (`postinstall`)
  * node tools/repos.ts link-kit    # the first of those alone
  * yarn ts | test | lint | review    # the kit's own (`kit:<script>`), then that script in every child repo there,
@@ -242,15 +242,18 @@ function links(): number {
 }
 
 /**
- * `node_modules/spell-kit`, a link to the kit itself (epic `repo-split` P9).
- * - The kit is a package, `spell-kit`, AND the install's root workspace, and yarn's node-modules linker links the root
- *   workspace nowhere:  without this, no child repo could import `spell-kit/util` ... (yarn's own self-references,
+ * `node_modules/spell`, a link to the kit itself (epic `repo-split` P9).
+ * - The kit is a package, `spell`, AND the install's root workspace, and yarn's node-modules linker links the root
+ *   workspace nowhere:  without this, no child repo could import `spell/util` ... (yarn's own self-references,
  *   `nmSelfReferences`, leave the root out too).
  * - Yarn leaves a link it didn't make alone on a quick install, and removes it on a full one:  so every install remakes
  *   it, if it's gone.
+ * - Removes the kit's link by its old name, `node_modules/spell-kit` (epic `repo-split` P17, Q54).
  */
 function linkKit(): number {
-  const link = join(TOP, "node_modules", "spell-kit")
+  const oldLink = join(TOP, "node_modules", "spell-kit")
+  if (isLink(oldLink) && readlinkSync(oldLink) === "..") rmSync(oldLink)
+  const link = join(TOP, "node_modules", "spell")
   if (existsSync(join(link, "package.json"))) return 0
   if (isLink(link)) rmSync(link)
   mkdirSync(join(TOP, "node_modules"), { recursive: true })
@@ -315,10 +318,10 @@ function runEverywhere(script: string): number {
   const results: Array<[string, string]> = []
   const kit = JSON.parse(readFileSync(join(TOP, "package.json"), "utf8")) as { scripts?: Record<string, string> }
   if (kit.scripts?.[`kit:${script}`]) {
-    console.log(`\n==================== spell-kit:  yarn kit:${script}\n`)
+    console.log(`\n==================== spell:  yarn kit:${script}\n`)
     const started = Date.now()
     const code = run("yarn", ["run", `kit:${script}`])
-    results.push(["spell-kit", `${code === 0 ? "passed" : "FAILED"}  (${Math.round((Date.now() - started) / 1000)}s)`])
+    results.push(["spell", `${code === 0 ? "passed" : "FAILED"}  (${Math.round((Date.now() - started) / 1000)}s)`])
   }
   for (const repo of repos().filter((each) => isCloned(each.name))) {
     const manifest = JSON.parse(readFileSync(join(TOP, repo.name, "package.json"), "utf8")) as {

@@ -2,7 +2,7 @@
  * Spell's own standard (TC39 2023-11) decorator, for HAND-WRITTEN `Observable`s:  `Thing` / `List` / `App`
  * subclasses, `SP.*`, the editor.
  * - `@thing` -- runs `create()` after every field initializer
- * - The reactive ones (`@prop`, `@state`, `@derived`) are shared, in `spell-kit/util/reactive`:  this file adds spell's own.
+ * - The reactive ones (`@prop`, `@state`, `@derived`) are shared, in `spell/util/reactive`:  this file adds spell's own.
  * - Here, not beside `@proto` in `../decorators.ts`:  `ui` re-exports that whole file, and this is spell-only.
  * - Compiled spell can't use decorators (it runs from a `blob:` URL, no transpile step), so whatever these do,
  *   compiled classes MUST get the same runtime shape without them.  See `guides/solid/solid-2.md`.
@@ -25,14 +25,15 @@ const THING_CLASS = Symbol("thingClass")
  * - Exactly once, however `@thing` classes nest:  whoever constructs checks `runsCreate()` first.
  * - The wrapper keeps the decorated class's `name`, so `Thing.type` and error messages are unchanged.
  */
-export function thing<C extends new (...args: any[]) => { create(): void }>(
+export function thing<C extends new (...args: any[]) => { create(props?: Record<string, unknown>): void }>(
   Base: C,
   _context: ClassDecoratorContext<C>
 ) {
   const Wrapped = class extends Base {
     constructor(...args: any[]) {
       super(...args)
-      if (runsCreate(Wrapped, new.target)) this.create()
+      // what it was made with, as `Thing` / `List` hand it on
+      if (runsCreate(Wrapped, new.target)) this.create(args[0] as Record<string, unknown> | undefined)
     }
   }
   Object.defineProperty(Wrapped, "name", { value: Base.name })

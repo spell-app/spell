@@ -1,7 +1,7 @@
 import { readFile, stat } from "node:fs/promises"
 import { parse } from "parse5"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /**
  * Edits pages IN PLACE, for the page server:  `/api/pages` (`PREFIX`).

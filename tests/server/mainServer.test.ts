@@ -3,9 +3,9 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { PageServer } from "spell-kit/server/page"
-import { fakeMainCheckout, fakeWorktree } from "spell-kit/server/test/checkouts"
+import { SRV } from "spell/server"
+import { PageServer } from "spell/server/page"
+import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
 describe("worktreePath()", () => {
   /** A main checkout and its worktree `seo`, as git leaves them. */

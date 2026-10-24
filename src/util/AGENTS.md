@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in the kit's `src/util/` (`spell-kit/util`).
+when working with code in the kit's `src/util/` (`spell/util`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the kit's layout, and the house style every repo shares.
@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- `src/util/` (`spell-kit/util`, from the kit and every other repo):
+- `src/util/` (`spell/util`, from the kit and every other repo):
   the small GENERIC helpers more than one package uses.
   - `decorators.ts`:
     - `@proto`:  the standard-decorator for class defaults
@@ -39,7 +39,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The tests:  a real browser (chromium) for the generic files;  node for `spell/`, `reactive/` and `node/`.
 - Barrel only, as WWOD §4 › "The barrel, from another sub-system" says, with ONE exception here:
   [ui's util barrel](../../spell-ui/src/util/index.ts) imports the generic files one by one
-  (`spell-kit/util/class` ...).
+  (`spell/util/class` ...).
   - Why:  so spell's utilities never reach `ui`'s bundles or published declarations.
   - `ui` keeps its own `util` barrel (`spell-ui/util`) for package-specific helpers.
 
@@ -48,7 +48,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Generic helpers that need node:  imported by deep path, NEVER through a barrel, so no browser code pulls them in.
 - [json5.ts](node/json5.ts):  JSON5 written with its comments kept, on json5-writer.
   - `json5Edited()`, `keepingComments()`, `readJSON5File()`
-  - `spell-kit/util/node/json5`.
+  - `spell/util/node/json5`.
   - The kit's node program checks it (`tsconfig.node.json`), not the browser-safe one.
   - Moved here from the assembler (epic `repo-split` P1):  util is the bottom of the stack,
     and ui's tools, app, brand, spaces, spell-epic and the server's `DataFile` use it.
@@ -56,7 +56,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Spell's utilities (`spell/`)
 
-- Spell's own utilities, flattened into the `spell-kit/util` barrel LAST:
+- Spell's own utilities, flattened into the `spell/util` barrel LAST:
   - lodash and string helpers
   - `Observable` / `Derivative` / `Loadable`, `Task` / `TaskList`
   - `$fetch`, `Logger`, prefs, `assert` / `die`
@@ -68,8 +68,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - and nothing in `ui` may import it
   - Its dependencies (lodash, `chalk`, `pluralize` ...) are the kit's `dependencies` (its root `package.json`).
     - `ui` bundles none of them:  `yarn measure` and `yarn smoke` (declarations) prove it.
-- Files in `spell/` import the generic helpers by deep path (`spell-kit/util/class`).
-  - NEVER the `spell-kit/util` barrel:  it re-exports this folder, so that's a cycle.
+- Files in `spell/` import the generic helpers by deep path (`spell/util/class`).
+  - NEVER the `spell/util` barrel:  it re-exports this folder, so that's a cycle.
 - NOTE: [ResponseErrors.ts](spell/ResponseErrors.ts) is deliberately NOT in [the folder's barrel](spell/index.ts):
   its header says why.
 - Spell's layer of reactivity:  `Observable`, and [spellDecorators.ts](spell/spellDecorators.ts) (`@thing`).
@@ -82,8 +82,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## The reactive engine (`reactive/`)
 
-- `spell-kit/util/reactive`:  the ONE reactive engine every reactive class shares (epic `output-targets` P10, Q20).
-  - Flattened into the `spell-kit/util` barrel too.
+- `spell/util/reactive`:  the ONE reactive engine every reactive class shares (epic `output-targets` P10, Q20).
+  - Flattened into the `spell/util` barrel too.
   - spell CELLS:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`
   - the records, [extend.ts](reactive/extend.ts):
     - `getProp` / `setProp`, `getState` / `setState`, `derive()`
@@ -100,7 +100,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - So Spell UI may import it file by file, once it moves onto spell cells
     (caveat C12 of `output-targets`;  epic `spell-element`, which that waited on, is in `main`).
 - Its files import each other as peers.
-  - `spell/` imports it as `spell-kit/util/reactive`, never through `spell-kit/util`.
+  - `spell/` imports it as `spell/util/reactive`, never through `spell/util`.
 - It's Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL first.
 
 ## Decorators
@@ -117,5 +117,5 @@ The barrel has no self-namespace:  helpers are imported by name.
 
 ## Imports
 
-As WWOD §4:  `spell-kit/util/...`, this folder's files too;  same-folder peers `./peer`.
+As WWOD §4:  `spell/util/...`, this folder's files too;  same-folder peers `./peer`.
 Files in THIS folder import each other as direct peers (`./class`).

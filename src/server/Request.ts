@@ -1,6 +1,6 @@
 import type { IncomingHttpHeaders, IncomingMessage } from "node:http"
 
-import type { Query, RouteParams } from "spell-kit/server"
+import type { Query, RouteParams } from "spell/server"
 
 /**
  * One incoming request:  the part of Express's `req` our handlers read, over node's `IncomingMessage`.

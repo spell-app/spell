@@ -1,4 +1,4 @@
-import { extend } from "spell-kit/util/reactive"
+import { extend } from "spell/util/reactive"
 
 /**
  * Base class to add `@derived`, `@derivedFrom`, `@override` functionality to class instances.

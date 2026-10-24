@@ -1,4 +1,4 @@
-# `spell-kit/toolchain`:  what every repo's checks share
+# `spell/toolchain`:  what every repo's checks share
 
 ```tsx
   /** The copy button:  the code to the clipboard, `ui-copy`, "Copied" for a moment. */
@@ -53,9 +53,9 @@ The catch:  no repo is checked on its own, outside the kit, so CI builds the kit
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
-  toolchain["spell-kit/toolchain<br/>lint and format settings · component rules<br/>decorator pre-pass · TypeScript settings · spell-types"]
+  toolchain["spell/toolchain<br/>lint and format settings · component rules<br/>decorator pre-pass · TypeScript settings · spell-types"]
   kit["the kit"] --> toolchain
-  lang["spell-lang"] --> toolchain
+  lang["spell-parser"] --> toolchain
   ui["spell-ui"] --> toolchain
   epic["spell-epic"] --> toolchain
   app["spell-app"] --> toolchain
@@ -130,12 +130,12 @@ the price is that its pins trail the standalone releases by a release or so.
 ESLint shares rules through `extends: ["some-config"]`, a name that resolves to a published package.
 Here a repo's `vite.config.ts` imports the settings like any other code,
 spreads them into its `lint` and `fmt` blocks, and adds its own.
-spell-lang's, whole but for the docstring on its export:
+spell-parser's, whole but for the docstring on its export:
 
 ```ts
 import { defineConfig } from "vite-plus"
 
-import { fmtConfig, packageLint } from "spell-kit/toolchain/lint"
+import { fmtConfig, packageLint } from "spell/toolchain/lint"
 
 /** Not linted or formatted by oxlint / oxfmt:  Python (ruff's). */
 const NOT_OURS = ["src/py/core/**", "tests/py/core/**"]
@@ -146,7 +146,7 @@ export default defineConfig({
 })
 ```
 
-`spell-kit/toolchain/lint` is [lint.ts](src/toolchain/lint.ts), read where it sits in the kit.
+`spell/toolchain/lint` is [lint.ts](src/toolchain/lint.ts), read where it sits in the kit.
 Every repo has one lint block like this one, in its root `vite.config.ts`, and here's what it holds:
 - **Formatting**, oxfmt's:  120 columns, 2 spaces, no semicolons, double quotes, no trailing commas,
   `package.json` keys sorted.
@@ -170,7 +170,7 @@ Every repo has one lint block like this one, in its root `vite.config.ts`, and h
 | Repo | Its lint block |
 | --- | --- |
 | the kit | `rootLint()`:  the shared rules, and React's on the folders `KIT_REACT_FOLDERS` names (`src/cli/`'s terminal screens, and util) |
-| spell-lang | `packageLint({ react: true })` |
+| spell-parser | `packageLint({ react: true })` |
 | spell-ui | `packageLint({ name: "ui" })`:  the component rules on its `src/components/` and `src/docs-components/` |
 | spell-epic | `packageLint()`, and `patternLintIn(["src/components"])` for the component rules |
 | spell-app | `packageLint({ react: true })`, and `patternLintIn(["src/app/components"])`:  React's rules everywhere, for the command line's terminal screens (Ink, React for terminals) |
@@ -221,7 +221,7 @@ and its message names the replacement.
 One more house rule runs on every file of every repo, not only components:  `spell/no-parent-import`
 ([lint.imports.ts](src/toolchain/lint.imports.ts)).
 It fails a `../` that climbs into a package's `src/`, and its message is the fix:
-`` `../util/string` climbs into spell-kit's `src/`:  import it by its package name, `spell-kit/util/string` ``.
+`` `../util/string` climbs into spell's `src/`:  import it by its package name, `spell/util/string` ``.
 A same-folder `./Peer` doesn't climb, and neither does a config reaching `../vite.config.ts`;  why the rule exists:
 [README-development.md](README-development.md#one-name-per-file-from-every-repo).
 
@@ -287,7 +287,7 @@ The kit's:
 
 ```json
 "./*": {
-  "spell-kit-source": ["./src/*.ts", "./src/*.tsx", "./src/*/index.ts", "./src/*/index.tsx", "./src/*"],
+  "spell-source": ["./src/*.ts", "./src/*.tsx", "./src/*/index.ts", "./src/*/index.tsx", "./src/*"],
   "types": ["./dist-types/src/*.d.ts", "./dist-types/src/*/index.d.ts"],
   "default": "./src/*"
 }
@@ -296,8 +296,8 @@ The kit's:
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  entry["spell-kit/element<br/>one exports entry"]
-  entry -- "spell-kit-source:<br/>the kit's own tsc" --> src["src/element/index.ts"]
+  entry["spell/element<br/>one exports entry"]
+  entry -- "spell-source:<br/>the kit's own tsc" --> src["src/element/index.ts"]
   entry -- "default:<br/>Vite, Vitest, tsx" --> src
   entry -- "types:<br/>every other repo's tsc" --> dts["dist-types/src/element/index.d.ts"]
   src -. "spell-types builds" .-> dts
@@ -309,7 +309,7 @@ flowchart LR
 
 _One name, three readers:  only another repo's type check reads declarations._
 
-The kit's own `tsc` takes `spell-kit-source` because its tsconfig asks for it, in `customConditions`;
+The kit's own `tsc` takes `spell-source` because its tsconfig asks for it, in `customConditions`;
 every repo has a condition of its own, named for its package (`spell-ui-source` ...),
 and Vite, Vitest and `tsx` add the `.ts` that `default` leaves off.
 How an import names a file in the first place:  [README-development.md](README-development.md).
@@ -323,7 +323,7 @@ spell-types --below    # first, the packages of the lower repos this repo uses, 
 spell-types --clean    # dist-types/ deleted first:  a full build
 ```
 
-- Three repos build them, because other repos import them:  the kit, spell-lang and spell-ui.
+- Three repos build them, because other repos import them:  the kit, spell-parser and spell-ui.
   spell-epic and spell-app build none, because nothing imports them:  their `yarn ts` runs a plain `tsc`.
 - Every child repo's `yarn ts` runs `spell-types --below` first, so the declarations it reads are never stale;
   a lower repo with nothing changed takes a second or two.
@@ -340,7 +340,7 @@ spell-types --clean    # dist-types/ deleted first:  a full build
 - With declaration maps, so "Go to Definition" lands in the source, not the `.d.ts`.
 - The settings it generates for each program sit in `dist-types/`, rewritten on every build:
   `.tsconfig.tsconfig.json`, `.tsconfig.node.tsconfig.json`.
-- `--below` finds the lower repos by the `workspace:` dependencies in each `package.json` (`spell-kit`,
+- `--below` finds the lower repos by the `workspace:` dependencies in each `package.json` (`spell`,
   `spell-ui` ...), through `node_modules`.
 
 </details>
@@ -359,7 +359,7 @@ The edges:
 | plain `node` | `spell-types`, the kit's glue tools | Node 24 strips the types itself, so this code writes only TypeScript that erases (no `enum`, no parameter properties) and writes `.ts` on its imports:  node adds no extension.  The bin imports its file by path, so it runs in any repo before anything is linked. |
 | `tsx` | what needs more:  decorators, JSX ([the `spell` command](README-cli.md), the page server) | every import is a package name plus a path under `src/`, which it finds through node's own package resolution, from any repo.  It reads one tsconfig for every file it runs:  where the kit starts it, the kit's node settings. |
 | Vite, Vitest | the browser code, the tests | the `default` condition;  `standardDecorators()` (below) |
-| esbuild, called directly | spell-epic's extension and docs bundle, Spell UI's bundle measure and static server, spell-lang's library test | `sourceNames()` ([sourceNames.ts](src/toolchain/sourceNames.ts)):  esbuild reads `exports` as node does, adding no extension and no folder `index`, so this plugin finds `spell-kit/server` as `src/server/index.ts` |
+| esbuild, called directly | spell-epic's extension and docs bundle, Spell UI's bundle measure and static server, spell-parser's library test | `sourceNames()` ([sourceNames.ts](src/toolchain/sourceNames.ts)):  esbuild reads `exports` as node does, adding no extension and no folder `index`, so this plugin finds `spell/server` as `src/server/index.ts` |
 
 </details>
 
@@ -380,7 +380,7 @@ plugins: [standardDecorators(), solid()],
 ```
 
 - First, before Solid's plugin:  both run early (`enforce: "pre"`), and Solid's compiler must see decorator-free code.
-- In every Vite and Vitest config that compiles decorated code:  the kit's tests, spell-lang's and spell-app's,
+- In every Vite and Vitest config that compiles decorated code:  the kit's tests, spell-parser's and spell-app's,
   the app's build, and `elementBaseConfig()`, which Spell UI's build and every component pack's start from.
 - Class names survive (`keepNames`):  a custom element's class is still `UIButton` in the browser,
   and Spell's rule classes still register under their names.
@@ -401,7 +401,7 @@ The edges:
 
 Everything above surfaces through five script names every repo answers to:
 `ts`, `lint`, `format`, `test`, and `review`, which runs the other four.
-Each is a line or two over these settings, so `yarn lint` means the same in spell-lang as in Spell UI,
+Each is a line or two over these settings, so `yarn lint` means the same in spell-parser as in Spell UI,
 and a rule changed here reaches every repo's next run.
 
 - The kit's own carry a prefix:  `yarn kit:ts` is `spell-types`, then its tests' `tsc`;
@@ -417,7 +417,7 @@ and a rule changed here reaches every repo's next run.
 <summary>The shared TypeScript settings, in words</summary>
 
 [tsconfig.base.json](src/toolchain/tsconfig.base.json), which every repo's programs extend:
-`"extends": "spell-kit/toolchain/tsconfig.base.json"` (the kit's own, by its path).
+`"extends": "spell/toolchain/tsconfig.base.json"` (the kit's own, by its path).
 
 - modern modules, resolved the way a bundler does;  `.ts` extensions allowed in imports;  JSON modules
 - strict, with unused locals reported (unused parameters aren't), and no switch fall-through
@@ -434,7 +434,7 @@ and a rule changed here reaches every repo's next run.
 <details>
 <summary>The global types and the version stamp</summary>
 
-- `spell-kit/toolchain/types` ([types/index.d.ts](src/toolchain/types/index.d.ts)), named in a program's `"types"`:
+- `spell/toolchain/types` ([types/index.d.ts](src/toolchain/types/index.d.ts)), named in a program's `"types"`:
   - `__PACKAGE_VERSION__`
   - `Class<T>`;  `AbstractClass<T>`, for `instanceof`, never `new`
   - `Prettify<T>`, which makes an editor's hover of a complex type readable
@@ -444,9 +444,9 @@ and a rule changed here reaches every repo's next run.
 - `packageVersion()` ([packageVersion.ts](src/toolchain/packageVersion.ts)), a Vite plugin, so a build knows its own
   version:  it defines `__PACKAGE_VERSION__` from the nearest `package.json` at or above the folder it's given
   (`packageVersion(import.meta.dirname)`).
-  - Code reads it as `PACKAGE_VERSION`, from `spell-kit/util`:  `"unknown"` when nothing defined it.
-  - Code `tsx` runs gets it from spell-lang's
-    [packageVersion.node.ts](https://github.com/spell-app/spell-lang/blob/main/src/spell/node/packageVersion.node.ts) instead.
+  - Code reads it as `PACKAGE_VERSION`, from `spell/util`:  `"unknown"` when nothing defined it.
+  - Code `tsx` runs gets it from spell-parser's
+    [packageVersion.node.ts](https://github.com/spell-app/spell-parser/blob/main/src/spell/node/packageVersion.node.ts) instead.
 
 </details>
 
@@ -455,15 +455,15 @@ and a rule changed here reaches every repo's next run.
 
 | File | Imported as | What it is |
 | --- | --- | --- |
-| [lint.ts](src/toolchain/lint.ts) | `spell-kit/toolchain/lint` | the lint and format settings:  `packageLint()`, `rootLint()`, `patternLintIn()`, `fmtConfig` |
-| [lint.patterns.ts](src/toolchain/lint.patterns.ts) | `spell-kit/toolchain/lint/patterns` | the six `spell-ui/*` component rules |
-| [lint.imports.ts](src/toolchain/lint.imports.ts) | `spell-kit/toolchain/lint/imports` | `spell/no-parent-import`, on every file |
-| [decorators.ts](src/toolchain/decorators.ts) | `spell-kit/toolchain/decorators` | `standardDecorators()`, the decorator pre-pass |
-| [packageVersion.ts](src/toolchain/packageVersion.ts) | `spell-kit/toolchain/packageVersion` | `packageVersion()`:  `__PACKAGE_VERSION__` |
-| [sourceNames.ts](src/toolchain/sourceNames.ts) | `spell-kit/toolchain/sourceNames` | `sourceNames()` for esbuild, and the lookups under it:  `sourceFileFor()`, `packageRootFor()`, `resolvedFile()` |
-| [declarations.ts](src/toolchain/declarations.ts), [bin/spell-types.ts](bin/spell-types.ts) | `spell-kit/toolchain/declarations`;  the bin `spell-types` | the declarations build |
-| [tsconfig.base.json](src/toolchain/tsconfig.base.json) | `spell-kit/toolchain/tsconfig.base.json` | the shared TypeScript settings |
-| [types/index.d.ts](src/toolchain/types/index.d.ts) | `spell-kit/toolchain/types` | the global types |
+| [lint.ts](src/toolchain/lint.ts) | `spell/toolchain/lint` | the lint and format settings:  `packageLint()`, `rootLint()`, `patternLintIn()`, `fmtConfig` |
+| [lint.patterns.ts](src/toolchain/lint.patterns.ts) | `spell/toolchain/lint/patterns` | the six `spell-ui/*` component rules |
+| [lint.imports.ts](src/toolchain/lint.imports.ts) | `spell/toolchain/lint/imports` | `spell/no-parent-import`, on every file |
+| [decorators.ts](src/toolchain/decorators.ts) | `spell/toolchain/decorators` | `standardDecorators()`, the decorator pre-pass |
+| [packageVersion.ts](src/toolchain/packageVersion.ts) | `spell/toolchain/packageVersion` | `packageVersion()`:  `__PACKAGE_VERSION__` |
+| [sourceNames.ts](src/toolchain/sourceNames.ts) | `spell/toolchain/sourceNames` | `sourceNames()` for esbuild, and the lookups under it:  `sourceFileFor()`, `packageRootFor()`, `resolvedFile()` |
+| [declarations.ts](src/toolchain/declarations.ts), [bin/spell-types.ts](bin/spell-types.ts) | `spell/toolchain/declarations`;  the bin `spell-types` | the declarations build |
+| [tsconfig.base.json](src/toolchain/tsconfig.base.json) | `spell/toolchain/tsconfig.base.json` | the shared TypeScript settings |
+| [types/index.d.ts](src/toolchain/types/index.d.ts) | `spell/toolchain/types` | the global types |
 | [AGENTS.md](src/toolchain/AGENTS.md) | | the rules for working on the toolchain |
 
 </details>

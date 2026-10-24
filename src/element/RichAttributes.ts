@@ -1,5 +1,5 @@
-import { camelCase } from "spell-kit/util/string"
-import type { E } from "spell-kit/element"
+import { camelCase } from "spell/util/string"
+import type { E } from "spell/element"
 
 /****************
  * ### `RichAttributes`

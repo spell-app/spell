@@ -8,7 +8,7 @@ import {
   forcedScheme,
   litTab,
   type SiteTab
-} from "spell-kit/server/site/site.types"
+} from "spell/server/site/site.types"
 
 /**
  * Tabs of a made-up site, as a page server's settings would name them (`"siteTabs"`):  the header names none itself.

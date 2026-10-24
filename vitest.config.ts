@@ -3,14 +3,14 @@ import { resolve } from "node:path"
 import { defineConfig, type TestProjectInlineConfiguration } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
-import { standardDecorators } from "spell-kit/toolchain/decorators"
-import { packageVersion } from "spell-kit/toolchain/packageVersion"
+import { standardDecorators } from "spell/toolchain/decorators"
+import { packageVersion } from "spell/toolchain/packageVersion"
 
 /**
  * The kit's tests:  ONE Vitest config, a project per folder of `src/` (epic `repo-split` P14), its tests in
  * `tests/<folder>/`, at the same paths as the code.
  * - `yarn kit:test` runs them all;  one folder's:  `yarn vp test run --project server`.
- * - No aliases:  the tests import the kit by its package name (`spell-kit/server`), which Vite finds through the
+ * - No aliases:  the tests import the kit by its package name (`spell/server`), which Vite finds through the
  *   kit's own `exports`.
  * - The browser projects (`util`, `element`):  a REAL browser, Vitest browser mode + Playwright, chromium.
  *   - `util`'s:  `dom.test.ts` needs shadow roots and a custom element registry, and `decorators.test.ts` proves

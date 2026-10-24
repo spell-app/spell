@@ -1,7 +1,7 @@
 # `agents/wwod` -- WWOD, "What Would Owen Do?"
 
 The house style for AI coding agents working in Spell's repos (Claude Code, Codex ...):  a hub and topic spokes.
-- Tracked in the kit, `spell-kit`, at `agents/wwod/` (epic `repo-split` P9):  edit it there.
+- Tracked in the kit, `spell`, at `agents/wwod/` (epic `repo-split` P9):  edit it there.
   - Every child repo links its `agents` to the kit's (`yarn clone` makes the links;  not spell-epic's), so every
     repo reads this one copy.
   - The content repo's copy, `spell.epics/agents/wwod/`, stays for the checkouts from before the split, until a later

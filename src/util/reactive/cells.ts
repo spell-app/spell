@@ -10,7 +10,7 @@
  *   `observe()`.  Derived values (`Derived`) are both reader and source.
  *
  * ONE context per page, on `globalThis`:  every copy of this module shares it.
- * - A page holds several copies:  the app's own `spell-kit/util`, plus each `spell-runtime.js` (one per `<spell-app>`, see
+ * - A page holds several copies:  the app's own `spell/util`, plus each `spell-runtime.js` (one per `<spell-app>`, see
  *   `packages/app/src/runner/spellRuntime.ts`).  A Solid computation reads cells of ALL of them, so they must share
  *   the "who's reading now" slot, the pending checks and the host's flush.
  * - Hence duck-typing across copies:  a source is `{ subs, version, refresh? }`, never checked with `instanceof`.
@@ -26,7 +26,7 @@
 const CONTEXT_VERSION = 1
 
 /** Key of the page's `CellsContext` on `globalThis`. */
-const CONTEXT_KEY = Symbol.for("spell-kit:cells")
+const CONTEXT_KEY = Symbol.for("spell:cells")
 
 /** The page's context, shared by every copy of this module -- see the header. */
 export const cellsContext: CellsContext = sharedContext()
@@ -215,7 +215,7 @@ function sharedContext(): CellsContext {
     if (existing.version !== CONTEXT_VERSION) {
       throw new Error(
         `spell cells:  this page already runs cells context v${existing.version}, this copy needs v${CONTEXT_VERSION} -- ` +
-          `two incompatible builds of spell-kit/util on one page.`
+          `two incompatible builds of spell/util on one page.`
       )
     }
     return existing

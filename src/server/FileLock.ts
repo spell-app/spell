@@ -1,6 +1,6 @@
 import { closeSync, openSync, rmSync, statSync } from "node:fs"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /**
  * A lock on one file, held as `<file>.lock`, so tools that write the same file take turns:

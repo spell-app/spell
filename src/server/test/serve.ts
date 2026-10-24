@@ -5,7 +5,7 @@
  */
 import { createServer, request as httpRequest, type Server } from "node:http"
 
-import { SRV, type Handler } from "spell-kit/server"
+import { SRV, type Handler } from "spell/server"
 
 /** A handler being served:  its base URL, and `close()`. */
 export type Served = { base: string; port: number; server: Server; close: () => Promise<void> }

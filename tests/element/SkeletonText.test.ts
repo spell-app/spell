@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SkeletonText } from "spell-kit/element/SkeletonText"
+import { SkeletonText } from "spell/element/SkeletonText"
 
 /**
  * Skeleton text <=> `SkeletonSpec`, the grammar every set's vocabularies write their skeletons in.

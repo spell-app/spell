@@ -7,7 +7,7 @@
  * - ONE set for every reactive class:  hand-written spell (`Thing`s, `SP.*`, the editor) and, once Spell UI is on
  *   spell cells, Spell UI's components.  Same names and options as Spell UI's `Reactive.ts`, so moving one is a change
  *   of import.
- * - Generic:  no lodash, no Solid, nothing spell-specific.  `spell-kit/util/spell` adds spell's own (`@thing`).
+ * - Generic:  no lodash, no Solid, nothing spell-specific.  `spell/util/spell` adds spell's own (`@thing`).
  * - NOTE: lowered by esbuild via `vite.decorators.ts`;  a decorator MUST start its line.
  */
 

@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import { PageServer, pageServerRoot, pageServerSettings } from "spell-kit/server/page"
-import { CLI } from "spell-kit/cli"
+import { SRV } from "spell/server"
+import { PageServer, pageServerRoot, pageServerSettings } from "spell/server/page"
+import { CLI } from "spell/cli"
 
 /**
  * `spell server ...`:  the kit's page server, and every web server of the kit.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import * as PONY from "spell-kit/cli/commands/ponyCommand"
+import * as PONY from "spell/cli/commands/ponyCommand"
 
 describe("ponyLines()", () => {
   it("puts the saying in a bubble as wide as it", () => {

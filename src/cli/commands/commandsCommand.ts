@@ -3,9 +3,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import { DataFile } from "spell-kit/server/DataFile"
-import { CLI } from "spell-kit/cli"
+import { contentFolderOf } from "spell/server/contentFolder"
+import { DataFile } from "spell/server/DataFile"
+import { CLI } from "spell/cli"
 
 /**
  * `spell commands [list|check]`:  every command the repos have, against the commands page.
@@ -72,7 +72,7 @@ function packageNames(root: string): Set<string> {
  * Each yarn package's `package.json` in kit `root`, as `[page name, absolute path]`:
  * - the kit's own, as `root`
  * - each child repo inside it (each `spell-<repo>` folder), by its package's name:  each repo is ONE package named after it since
- *   epic `repo-split` P11 (`spell-lang`, `spell-app` ...)
+ *   epic `repo-split` P11 (`spell-parser`, `spell-app` ...)
  * - Spell UI's site, `ui-site`
  * - only the ones that are there
  */

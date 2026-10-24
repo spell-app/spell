@@ -515,10 +515,10 @@ export const PACK_FOLDER = "__pack"
 const USAGE = "usage:  spell-pack build | check [<folder>]   (the pack's package;  default the current folder)"
 
 /**
- * Imports the page must share, never bundled:  spell-element (`spell-kit/element`), Spell UI, Solid, our other repos'
- * packages (`spell-lang`, `spell-app` ..., epic `repo-split` P11).
+ * Imports the page must share, never bundled:  spell-element (`spell/element`), Spell UI, Solid, our other repos'
+ * packages (`spell-parser`, `spell-app` ..., epic `repo-split` P11).
  */
-const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell-kit\/element(\/|$)/
+const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
 const PACK_FORMAT = "spell-pack 2"

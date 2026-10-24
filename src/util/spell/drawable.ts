@@ -7,7 +7,7 @@
  *   - the TypeScript writer (`P.TSWriter`, in `parser`, which can't import either) writes each type's element class
  */
 
-import { camelCase, kebabCase } from "spell-kit/util/string"
+import { camelCase, kebabCase } from "spell/util/string"
 
 /**
  * Tag of the element for class `className` in project `project`:

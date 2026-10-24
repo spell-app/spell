@@ -106,7 +106,7 @@ This spoke is house style on top.
   - Behaviour a subclass or instance overrides is NOT one:  "`@proto static` defaults" below.
 - **Debounced write-backs are `xSoon` members:**
   - e.g. `compileApp()` => `compileAppSoon()`:  the name says it's deferred and coalesced.
-  - Through `debounce()` from `spell-kit/util`.
+  - Through `debounce()` from `spell/util`.
 - **Derived reads are plain getters;  `@derived` only when worth it:**
   - `@derived get y()` / `this.derive(name, fn)` (`Observable`) ONLY for a pure getter doing real work (loops, list
     aggregates):  memoizing a cheap getter costs more than it saves.
@@ -117,7 +117,7 @@ This spoke is house style on top.
 - **A lazily made collaborator keeps its identity:  `this.derived(name, getter)`:**
   - `Derivative.derived()`:  made on first read, the SAME object after (not reactive), `clearDerived(name)` resets;
     e.g. `SpellFile.project`.  NOTE:  `derived()` (compute once) is not `derive()` (reactive memo).
-  - Outside a `Derivative`:  `@lazy get x()` (`spell-kit/util`), made on first read, the SAME value after;
+  - Outside a `Derivative`:  `@lazy get x()` (`spell/util`), made on first read, the SAME value after;
     `@once` for a method run once (a loader's promise);  `forget(object, "x")` resets either, e.g. in a
     `static reset()`.  Replaces a backing field plus `return (this.field ??= make())`
     (`packages/ui/src/docs-components/SiteData.ts`).
@@ -125,7 +125,7 @@ This spoke is house style on top.
 - **Literal getters say `as const`:**  a getter returning a fixed literal (a type name, an icon) narrows its type, so
   subclasses' literals stay distinct.
 - **Pref keys are `static SCREAMING_CASE`, with a paired getter / setter:**
-  - Over `getPref()` / `setPref()` (`spell-kit/util` `prefs.ts`;  `setPrefKey()` once per app, e.g. `editor.ts`'s
+  - Over `getPref()` / `setPref()` (`spell/util` `prefs.ts`;  `setPrefKey()` once per app, e.g. `editor.ts`'s
     `setPrefKey("spellEditor:")`).
 
     ```ts
@@ -143,7 +143,7 @@ This spoke is house style on top.
 
   - Today the editor keys by path instead, through overloaded get / set functions, e.g. `lastSelectionForFile(path)`
     reads, `lastSelectionForFile(path, selection)` writes (`packages/app/src/editor.ts`).
-  - In `ui` (no `spell-kit/util` prefs):  one key table and static read / write pairs, every access wrapped, e.g.
+  - In `ui` (no `spell/util` prefs):  one key table and static read / write pairs, every access wrapped, e.g.
     `NavPreferences` (`packages/ui/src/docs-components/ui-docs-nav/NavPreferences.ts`).
 - **Subclass for behaviour, spread for plain config:**
   - Behaviour that varies is a subclass overriding methods, its class-level defaults `@proto static` ("`@proto
@@ -171,7 +171,7 @@ This spoke is house style on top.
 - **Standard decorators only:**
   - Use STANDARD (TC39 2023-11) decorators, NEVER `experimentalDecorators` or legacy 3-arg decorators that mutate
     the property descriptor.  General-purpose ones live in `packages/util/src/decorators.ts` (`@proto`, `@lazy`,
-    `@once`:  import from `spell-kit/util`;  `ui` has `spell-ui/util`, which re-exports the generic ones).
+    `@once`:  import from `spell/util`;  `ui` has `spell-ui/util`, which re-exports the generic ones).
   - The reactive ones (`@prop`, `@state`, `@derived`) live in `packages/util/src/reactive/decorators.ts`;  spell's
     own `@thing` in `packages/util/src/spell/spellDecorators.ts`, for HAND-WRITTEN `Observable`s only.  SEE:  `guides/solid/solid-2.md` "Spell's decisions" ›
     "Decorators for HAND-WRITTEN classes".

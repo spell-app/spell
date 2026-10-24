@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type Server } from "node:http"
 import { relative, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell-kit/server"
+import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Guard } from "./Guard"
 import { toListener } from "./listener"
@@ -16,7 +16,7 @@ import { Router } from "./Router"
 import { HttpError } from "./server.types"
 import { StaticHandler } from "./StaticHandler"
 // Import directly:  the `site` barrel is browser code (`SiteHeader extends HTMLElement`)
-import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell-kit/server/site/favicon"
+import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell/server/site/favicon"
 
 /**
  * A local web server:  `node:http` + `Guard` + `Router` + `StaticHandler` (+ `LiveReload`), in that order.
@@ -219,7 +219,7 @@ export const LIVE_SCRIPT = `${SERVER_API}/live.js`
 export const FAVICON_PNG = "/favicon-32.png"
 
 /**
- * Spell's favicon (`spell-kit/server/site/favicon`, made by `yarn favicon`) by path:  content type and bytes.
+ * Spell's favicon (`spell/server/site/favicon`, made by `yarn favicon`) by path:  content type and bytes.
  * - the SVG for every browser that takes one, the PNG for those that don't, the touch icon for iOS home screens
  */
 export const FAVICONS: Record<string, { type: string; body: Buffer }> = {

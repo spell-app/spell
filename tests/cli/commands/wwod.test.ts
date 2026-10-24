@@ -3,7 +3,7 @@ import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { agentRulesLines, checkAgentRules } from "spell-kit/cli/commands/wwod"
+import { agentRulesLines, checkAgentRules } from "spell/cli/commands/wwod"
 
 /** A throwaway checkout:  a two-section WWOD, a root `AGENTS.md` citing it, a package and a skill. */
 const CHECKOUT = realpathSync(mkdtempSync(join(tmpdir(), "agents-")))

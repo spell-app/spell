@@ -1,14 +1,14 @@
 import chalk from "chalk"
 import { Command } from "commander"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * The `spell` program itself:  its global flags, every repo's commands under one roof, and `spell help`.
  * - Each repo adds its commands to a program of its own (`CommandList`);  `addRepoCommands()` then moves them into
  *   `spell`, by the clash rule (epic `repo-split` Q33):
  *   - a name only one repo has:  at the top level, `spell compile`
- *   - a name two or more repos have:  under EACH one's short name, `spell lang check` and `spell app check`;
+ *   - a name two or more repos have:  under EACH one's short name, `spell parser check` and `spell app check`;
  *     the bare word only says where they are
  * - `spell help` lists them grouped by repo, lowest first.
  */
@@ -50,7 +50,7 @@ export function addRepoCommands(
         program.addCommand(command.helpGroup(heading))
         continue
       }
-      // under the repo's own word:  `spell lang check`;  in its group when it has one already (`spell app ...`)
+      // under the repo's own word:  `spell parser check`;  in its group when it has one already (`spell app ...`)
       groupFor(program, byRepo, repo, heading).addCommand(command)
     }
   }
@@ -99,7 +99,7 @@ export function addHelp(program: Command): void {
     .command("help")
     .description("show help -- for one command, e.g. spell help compile, spell help server start")
     .argument("[command...]", "the command to show help for")
-    .helpGroup("spell-kit:")
+    .helpGroup("spell:")
     .action((names: string[]) => {
       let command: Command | undefined = program
       for (const name of names) command = command?.commands.find((each) => each.name() === name)

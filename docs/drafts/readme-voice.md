@@ -16,7 +16,7 @@ Files you work from, all in `docs/drafts/` of the kit (this checkout, `/Users/ow
 - [reference/epic-help-tree.txt](reference/epic-help-tree.txt):  every `epic` verb, with the renamed ones
 
 The FACT BASE for a page is its old version in the repo-split worktree, `/Users/owen/www/spell.worktrees/repo-split/`
-plus the page's own path (`README-server.md`, `spell-lang/README.md`):
+plus the page's own path (`README-server.md`, `spell-parser/README.md`):
 - it's the old-voice page, already moved to the finished layout (one `src/` per repo, imports by package name), by the
   session finishing repo-split
 - READ it, and the code beside it, in that worktree;  NEVER write there, and never run `yarn`, a build, a test or a
@@ -165,9 +165,9 @@ the same list, three times.
 ## 6. The rules that aren't taste
 
 - **"Spell" is capitalised in text, like any name.**  "Spell reads English", "write Spell", "a Spell program".
-  Lowercase `spell` appears only in code:  the command `spell`, the file extension `.spell`, `spell-lang`,
+  Lowercase `spell` appears only in code:  the command `spell`, the file extension `.spell`, `spell-parser`,
   `spell_core`, `@spell/core`, and fenced blocks.
-  In prose, a repo or package name goes in code font (`spell-lang`) or is link text.
+  In prose, a repo or package name goes in code font (`spell-parser`) or is link text.
   `yarn readme:check` flags the rest.
 - **spell-brand is not mentioned.**  It's an internal project.  No repo, no pack (`<brand-*>`), no theme, no brand
   pages, no "Brand UI", not in text, tables, diagrams or pasted output.
@@ -183,8 +183,8 @@ the same list, three times.
 - **The finished repo-split is the truth.**  The CLI is exactly [reference/cli-help-tree.txt](reference/cli-help-tree.txt):
   no `spell dev`, `spell lint` not `check`, `spell app serve`, `spell app create`, `spell ssr`, `spell icon`,
   `spell speedtest`, `spell bundle`, `spell server`, no `explore`.
-  Every repo's code is under ONE `src/` (`spell-kit/src/server/`, `spell-lang/src/parser/`);  every file is imported
-  by its package name plus its path under `src/`, no extension (`spell-kit/util/string`,
+  Every repo's code is under ONE `src/` (`spell/src/server/`, `spell-parser/src/parser/`);  every file is imported
+  by its package name plus its path under `src/`, no extension (`spell/util/string`,
   `spell-ui/components/ui-button`), from its own repo too:  no `$/`, no `#`, no `../`, no alias table.
   The assembler (`Linker`, `formatHTML()`, `Bundle`, `DataFile`) is part of the server:  `SRV.Linker`.
   Where the repo-split worktree's page and this checkout's differ in a path or a command, the worktree's is right.

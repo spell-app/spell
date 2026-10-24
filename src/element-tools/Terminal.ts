@@ -4,7 +4,7 @@
  * ### `Terminal`
  * Where tools and scripts print:  their command-line output, straight to `process.stdout` / `stderr`
  * (Spell UI's `AGENTS.md` "Logging";  the shape of spell-app's CLI, `CliSession.out()` / `err()`).
- * - The kit's (`spell-kit/element-tools/Terminal`, epic `repo-split` P10), for every repo's tools.
+ * - The kit's (`spell/element-tools/Terminal`, epic `repo-split` P10), for every repo's tools.
  * - NEVER `console.*` in a tool:  `console` is for a page's warnings (`Warnings`), and a test's spies.
  * - At the bottom of the tools' import graph:  node built-ins only, so any tool or script can import it.
  * - STATIC and instance-free on purpose:  a process has one stdout and one stderr.

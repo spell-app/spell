@@ -1,8 +1,8 @@
 import { createServer, request as httpRequest, type Server } from "node:http"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { ask } from "spell-kit/server/test/serve"
+import { SRV } from "spell/server"
+import { ask } from "spell/server/test/serve"
 
 describe("proxyTo() / proxyUpgrade()", () => {
   let target: Server

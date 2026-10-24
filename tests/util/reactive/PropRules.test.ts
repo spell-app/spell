@@ -9,7 +9,7 @@ import {
   ruleWarning,
   schemaOf,
   type PropRule
-} from "spell-kit/util"
+} from "spell/util"
 
 /**
  * PROP RULES:  what a prop's value must be, beyond its type (`PropRules.ts`, epic `property-editor` P9).

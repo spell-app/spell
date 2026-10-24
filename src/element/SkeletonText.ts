@@ -22,7 +22,7 @@ import type { SkeletonPart, SkeletonSpec } from "./vocabulary.types"
  *   vocabularies test parses every vocabulary, so a typo fails a test, not a page.
  * - Pure data, beside `vocabulary.types.ts` (types only).
  * - NOT in the barrel:  Spell UI's `core` re-exports it, and no page parses skeleton text, so it'd cost every page
- *   bytes for nothing.  Reached by path, `spell-kit/element/SkeletonText` (Spell UI's until epic `repo-split` P10).
+ *   bytes for nothing.  Reached by path, `spell/element/SkeletonText` (Spell UI's until epic `repo-split` P10).
  * - Static:  pure text work, no state.
  ****************/
 export class SkeletonText {

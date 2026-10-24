@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ElementDefinition, type ComponentVocabulary, type Dictionary } from "spell-kit/element"
+import { ElementDefinition, type ComponentVocabulary, type Dictionary } from "spell/element"
 
 /** A vocabulary whose tag has another prefix than `ui`. */
 const OWNER: ComponentVocabulary = {

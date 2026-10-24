@@ -3,8 +3,8 @@
  * - MUST stay runtime-light:  constants, `import type`, and re-exports of `settings.ts` (node built-ins and `json5`).
  * - Plain `node` loads this file by path (spell-epic's tools):  so its re-exports name `./settings.ts` in full.
  */
-import type { SRV, ServedFile, ServerInfo } from "spell-kit/server"
-import type { SiteTab } from "spell-kit/server/site/site.types"
+import type { SRV, ServedFile, ServerInfo } from "spell/server"
+import type { SiteTab } from "spell/server/site/site.types"
 
 /**
  * A ROUTE MODULE:  a file that adds routes to the page server, e.g. goals' buttons, the app's `/api`.
@@ -100,7 +100,7 @@ export type PageServerSettings = {
    * the bundles' folders:  built on demand, never committed (git-ignored);  none by default
    * - the page server builds the stale ones when it starts (`BundleBuild`),
    *   and a request for a file in one waits while that runs
-   * - THE list:  `spell-kit/server`'s `Bundle.all()` builds the bundles whose output folders it names
+   * - THE list:  `spell/server`'s `Bundle.all()` builds the bundles whose output folders it names
    */
   bundles?: string[]
   /**

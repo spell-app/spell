@@ -3,8 +3,8 @@
 import ts from "@typescript/typescript6"
 import { dirname, resolve } from "node:path"
 
-import { suggest } from "spell-kit/util/string"
-import { ELEMENT_HELP_CODES, type ElementDoc } from "spell-kit/element-tools/tools.types"
+import { suggest } from "spell/util/string"
+import { ELEMENT_HELP_CODES, type ElementDoc } from "spell/element-tools/tools.types"
 
 import type { ElementCatalog } from "./ElementCatalog"
 

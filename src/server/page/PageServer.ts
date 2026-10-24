@@ -3,8 +3,8 @@ import { existsSync, readdirSync, statSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { SRV, type ServedFile, type ServerInfo } from "spell-kit/server"
-import type { SiteTab } from "spell-kit/server/site/site.types"
+import { SRV, type ServedFile, type ServerInfo } from "spell/server"
+import type { SiteTab } from "spell/server/site/site.types"
 import {
   BundleBuild,
   COMPONENTS_PREFIX,
@@ -23,7 +23,7 @@ import {
   type PageServerSettings,
   type RouteContext,
   type RouteModule
-} from "spell-kit/server/page"
+} from "spell/server/page"
 
 /**
  * THE page server:  one per checkout (the main one, and each worktree), serving the whole repo on one port.

@@ -1,6 +1,6 @@
 /**
- * Barrel for `spell-kit/util/reactive`:  the reactive engine every reactive class shares.
- * - Flattened into `spell-kit/util` by `../index.ts`.
+ * Barrel for `spell/util/reactive`:  the reactive engine every reactive class shares.
+ * - Flattened into `spell/util` by `../index.ts`.
  * - Spell cells (`cells.ts`, `Cell`, `Derived`, `Reaction`):  who read what, and telling them when it changed.
  * - The records (`extend.ts`):  each object's props and state, read and written synchronously:
  *   `getProp()` / `setProp()`, `getState()` / `setState()`, `derive()`.
@@ -11,8 +11,8 @@
  * - GENERIC:  no lodash, no Solid, nothing spell-specific.
  *   - So any package may import it, Spell UI included:
  *     file by file, as `ui`'s `src/util/index.ts` imports util's other generic files.
- *   - Spell's own layer on top (`Observable`, `@thing`) is in `spell-kit/util/spell`.
- * - NOTE: its files import each other as peers, never through `spell-kit/util`, which re-exports this folder:  a cycle.
+ *   - Spell's own layer on top (`Observable`, `@thing`) is in `spell/util/spell`.
+ * - NOTE: its files import each other as peers, never through `spell/util`, which re-exports this folder:  a cycle.
  */
 
 export * from "./cells"

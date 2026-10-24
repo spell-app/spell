@@ -12,9 +12,9 @@ import {
   type DOMElementClass,
   type ElementSetup,
   type UIComponentClass
-} from "spell-kit/element"
-import { HotDefinitions } from "spell-kit/element/HotDefinitions"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+} from "spell/element"
+import { HotDefinitions } from "spell/element/HotDefinitions"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
  * Hot reload of elements (`HotDefinitions`):

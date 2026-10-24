@@ -2,7 +2,7 @@ import { spawn } from "node:child_process"
 import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
-import type { ServerInfo } from "spell-kit/server"
+import type { ServerInfo } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
 import { SERVER_API } from "./WebServer"

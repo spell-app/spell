@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { snakeCase } from "spell-kit/util"
+import { snakeCase } from "spell/util"
 
 describe("snakeCase()", () => {
   it("splits words as lodash does", () => {

@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 /**
  * Lint (oxlint) and format (oxfmt) settings every package of every repo shares, as `lint` / `fmt` blocks of
- * `vite.config.ts`:  `spell-kit/toolchain/lint` (spell-app's root `vite.lint.ts` until epic `repo-split` P6).
+ * `vite.config.ts`:  `spell/toolchain/lint` (spell-app's root `vite.lint.ts` until epic `repo-split` P6).
  * - Was `.oxlintrc.json`, `.oxlintrc.react.json` and `.oxfmtrc.json` at the repo root,
  *   before Vite+ (`vp lint`, `vp fmt`, `vp check`) folded them into `vite.config.ts`.
  * - Plain objects, spread by each repo's root `vite.config.ts` and each package's:
@@ -91,7 +91,7 @@ export const lintBase = {
     // ## Ours
     ////////////////
 
-    // A `../` import into a package's `src/`:  `spell-kit/util/string`, never `../util/string` (WWOD §4,
+    // A `../` import into a package's `src/`:  `spell/util/string`, never `../util/string` (WWOD §4,
     // "ONE name per file";  epic `repo-split` P14).
     // - HERE, not in an `overrides` entry:  it holds for every file, so the kit's block and every package's
     //   (`packageLint()`) get it with the rest of `lintBase`, and it's on in tests too (`testLint` leaves it).
@@ -156,7 +156,7 @@ export const rootLintIgnore = [
   "spaces/@spell",
   // its own yarn project, with its own tools
   "vscode",
-  // spell-lang's `spell`
+  // spell-parser's `spell`
   "spell/.venv",
   "spell/graphify-out",
   "spell/thoughts",
@@ -180,13 +180,13 @@ export const testLint = {
 /**
  * The folders of COMPONENT files, by package name (`ui` is spell-ui, `brand` spell-brand), each from the package's
  * folder:  `patternLint()` turns the `spell-ui/*` rules on there (`packageLint({ name })`).
- * - Every set's elements, all written on `spell-kit/element`, held to the same patterns, each in its package's
+ * - Every set's elements, all written on `spell/element`, held to the same patterns, each in its package's
  *   `src/components/`:  Spell UI's (and its docs site's widgets, `src/docs-components/`), the brand's.
  *   - The app's (`<spell-app>`, `<spell-editor>`) and the epics' are held to the same rules in their own repos
  *     (`patternLintIn()`).
  * - Not:
  *   - `app`'s `src/`:  WWOD §17's function components (Owen:  "other than app components")
- *   - the element core (`spell-kit/element`, and `ui`'s `src/elements/`):  the decorators and helpers themselves
+ *   - the element core (`spell/element`, and `ui`'s `src/elements/`):  the decorators and helpers themselves
  *   - tests (`testLint`)
  */
 export const PATTERN_FOLDERS: Record<string, string[]> = {

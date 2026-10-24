@@ -2,9 +2,9 @@ import { existsSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { describe, expect, it } from "vite-plus/test"
 
-import { contentFolderOf } from "spell-kit/server/contentFolder"
-import { CONTENT_SETTINGS, pageServerSettings } from "spell-kit/server/page/settings"
-import { litTab } from "spell-kit/server/site/site.types"
+import { contentFolderOf } from "spell/server/contentFolder"
+import { CONTENT_SETTINGS, pageServerSettings } from "spell/server/page/settings"
+import { litTab } from "spell/server/site/site.types"
 
 /** The kit:  its tests are in its `tests/`. */
 const KIT = resolve(import.meta.dirname, "../../..")

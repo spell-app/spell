@@ -1,7 +1,7 @@
 import { Command } from "commander"
 import { describe, expect, test } from "vite-plus/test"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /** A made-up repo, `spell-<short>`, at a made-up folder. */
 function repo(short: string): CLI.SpellRepo {
@@ -24,26 +24,26 @@ describe("addRepoCommands():  the clash rule (epic repo-split Q33)", () => {
   test("a name only one repo has:  at the top level, in its repo's help group", () => {
     const program = new Command("spell")
     const clashes = CLI.addRepoCommands(program, [
-      [repo("lang"), listOf("compile", "run")],
+      [repo("parser"), listOf("compile", "run")],
       [repo("app"), listOf("projects")]
     ])
     expect(clashes.size).toBe(0)
     expect(namesOf(program)).toEqual(["compile", "run", "projects"])
-    expect(program.commands[0]!.helpGroup()).toBe("spell-lang:")
+    expect(program.commands[0]!.helpGroup()).toBe("spell-parser:")
     expect(program.commands[2]!.helpGroup()).toBe("spell-app:")
   })
 
   test("a fake clash, two repos both naming check:  both go under their repo's names, the bare word says where", () => {
     const program = new Command("spell")
     const clashes = CLI.addRepoCommands(program, [
-      [repo("lang"), listOf("check", "compile")],
+      [repo("parser"), listOf("check", "compile")],
       [repo("app"), listOf("check")]
     ])
     expect([...clashes.keys()]).toEqual(["check"])
-    expect(clashes.get("check")!.map((each) => each.name)).toEqual(["spell-lang", "spell-app"])
-    const lang = program.commands.find((command) => command.name() === "lang")!
+    expect(clashes.get("check")!.map((each) => each.name)).toEqual(["spell-parser", "spell-app"])
+    const parser = program.commands.find((command) => command.name() === "parser")!
     const app = program.commands.find((command) => command.name() === "app")!
-    expect(namesOf(lang)).toEqual(["check"])
+    expect(namesOf(parser)).toEqual(["check"])
     expect(namesOf(app)).toEqual(["check"])
     // the bare word:  hidden, so help lists only the two
     const bare = program.commands.find((command) => command.name() === "check")!
@@ -54,7 +54,7 @@ describe("addRepoCommands():  the clash rule (epic repo-split Q33)", () => {
   test("a repo's own group by its short name takes its clashing commands (spell app ...)", () => {
     const program = new Command("spell")
     CLI.addRepoCommands(program, [
-      [repo("lang"), listOf("lint")],
+      [repo("parser"), listOf("lint")],
       [
         repo("app"),
         (spell) => {

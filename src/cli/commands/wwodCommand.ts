@@ -1,5 +1,5 @@
-import { CLI } from "spell-kit/cli"
-import { agentRulesLines, checkAgentRules } from "spell-kit/cli/commands/wwod"
+import { CLI } from "spell/cli"
+import { agentRulesLines, checkAgentRules } from "spell/cli/commands/wwod"
 
 /**
  * `spell wwod [check] [files...] [--json]`:  WWOD, the agents' rules (epic `wwod`).  The logic:  `wwod.ts`.

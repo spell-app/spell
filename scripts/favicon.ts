@@ -19,8 +19,8 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { chromium } from "playwright"
 
-import { LOGO_MARK } from "spell-kit/server/site/logoMark"
-import { packageRootFor } from "spell-kit/toolchain/sourceNames"
+import { LOGO_MARK } from "spell/server/site/logoMark"
+import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /** The kit's root:  this file is in its `scripts/`. */
 const KIT = fileURLToPath(new URL("..", import.meta.url))

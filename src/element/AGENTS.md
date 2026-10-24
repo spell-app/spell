@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in the kit's `src/element/` (`spell-kit/element`), and its tools and test helpers
+when working with code in the kit's `src/element/` (`spell/element`), and its tools and test helpers
 (`src/element-tools/`, `src/test-helpers/`).
 
 **READ the kit's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
@@ -17,13 +17,13 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   shadow events, hot reloading.
 - Its own repo, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
   merged into the kit with that history in P9.
-- Another repo imports it by its npm name, `spell-kit/element` (`spell-kit/element/timing` ...),
+- Another repo imports it by its npm name, `spell/element` (`spell/element/timing` ...),
   through the wildcard entry of the kit's `exports`.
 - The kit's own files import it by the same name (epic `repo-split` P14).
-  - Its pack-module key is that name too, `spell-kit/element`:
+  - Its pack-module key is that name too, `spell/element`:
     every page's component packs share it by that name at run time (`SpellUI.packModules`).
     - It was `$/spell-element` until epic `repo-split` P14 (Q45).
-- It may use:  util's generic files (`spell-kit/util/class` ...) and the toolchain, both the kit's.
+- It may use:  util's generic files (`spell/util/class` ...) and the toolchain, both the kit's.
   - Every arrow points DOWN:  nothing in the kit or below it may import a child repo.
 - Its tests:  in the kit's [tests/element/](../../tests/element/) (below, "Overview").
 
@@ -39,7 +39,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - spell-epic followed the rename (epic `repo-split` T6);  the stand-in under the old name went in P6.
   - Its place in the layout:
     the epic's spaces page, [4.3 and 7.4](../../spell.epics/epics/people-and-orgs/details/spaces-package.html#spell-solid).
-- What's in it, imported as `spell-kit/element`, namespace `E`:
+- What's in it, imported as `spell/element`, namespace `E`:
   - [UIComponent](UIComponent.tsx), the COMPONENT base:  one instance per element, its `render()` returns JSX
   - [DOMElement](DOMElement.ts), the DOM element base:  attributes, properties, the upgrade, shown or hidden
   - [ElementDefinition](ElementDefinition.ts):  a vocabulary => the DOM element's attributes, events, slots
@@ -60,16 +60,16 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `afterSolidUpdate()`, `beforeNextPaint()`
     - `soon()`, `after()`, `every()`
   - [SkeletonText](SkeletonText.ts):  a vocabulary's skeleton, written as one line of text, parsed in node
-    - NOT in the barrel:  reached by path, `spell-kit/element/SkeletonText`
+    - NOT in the barrel:  reached by path, `spell/element/SkeletonText`
     - Spell UI's (`src/vocabulary/`) until epic `repo-split` P10
   - [SpellSolid](SpellSolid.ts):  the settings a set's runtime hands it as it loads (below)
   - the types:
     - [elements.types.ts](elements.types.ts):  `ElementSetup`, `AttributeValues`, the settings
     - [vocabulary.types.ts](vocabulary.types.ts):  `ComponentVocabulary`, `Dictionary`:  every set's schema
-- What's in [`src/element-tools/`](../element-tools/), node only, imported as `spell-kit/element-tools/<Name>`:
+- What's in [`src/element-tools/`](../element-tools/), node only, imported as `spell/element-tools/<Name>`:
   the tools every set's builds and scripts share.
   - Spell UI's own `tools/` until epic `repo-split` P10;
-    then `element/tools/` (`spell-kit/element/tools/...`) until P14 (J94).
+    then `element/tools/` (`spell/element/tools/...`) until P14 (J94).
   - [ComponentPack](../element-tools/ComponentPack.ts):  a component pack's build, and whether it's current
     - its shapes and its error:  [tools.types.ts](../element-tools/tools.types.ts)
   - [packModules](../element-tools/packModules.ts):  the modules a pack shares with the page (`PACK_MODULES`)
@@ -90,7 +90,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
       the tags of a package and its dependencies, from their Custom Elements Manifests
     - Who shows them:  spell-app's VS Code extension (its `vscode/src/ElementsHelp.ts`), which bundles both
     - [test/jsxFixture](../element-tools/jsx-help/test/jsxFixture.ts):  their tests' package on disk
-      (`writeJsxFixture()`), the kit's and the extension's (`spell-kit/element-tools/jsx-help/test/jsxFixture`)
+      (`writeJsxFixture()`), the kit's and the extension's (`spell/element-tools/jsx-help/test/jsxFixture`)
   - Their tests:  the kit's [tests/element-tools/](../../tests/element-tools/).
   - Node code:  the kit's node program checks them ([tsconfig.node.json](../../tsconfig.node.json)), its Vitest
     project `element-tools` runs their tests.
@@ -118,9 +118,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     nor do the kit's dependencies.
     - Their setup file, [TestSettings](../test-helpers/TestSettings.ts), installs stand-in settings:
       English names, the shared attributes, no styles, every animation over at once.
-    - Their helpers are the kit's own, in [`src/test-helpers/`](../test-helpers/) (`spell-kit/test-helpers/...`).
+    - Their helpers are the kit's own, in [`src/test-helpers/`](../test-helpers/) (`spell/test-helpers/...`).
 - The TEST HELPERS every set's tests use, in [`src/test-helpers/`](../test-helpers/) (epic `repo-split` P10, Q39):
-  `spell-kit/test-helpers/<Name>`, from the kit and every other repo.
+  `spell/test-helpers/<Name>`, from the kit and every other repo.
   - [`Fixture`](../test-helpers/Fixture.ts):  render HTML into the live document, removed when the test ends
   - [`ElementFixture`](../test-helpers/ElementFixture.ts):  render, wait for every element's `ready`, `flush()`;
     `breakRender()`, a forced render failure
@@ -140,31 +140,31 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
 
 As WWOD §4, plus:
 
-- `src/element/` imports ONLY Solid, and util's generic files, one by one, never the `spell-kit/util` barrel:
-  - `spell-kit/util/class`, `decorators`, `dom`, `string`, `util.types`
+- `src/element/` imports ONLY Solid, and util's generic files, one by one, never the `spell/util` barrel:
+  - `spell/util/class`, `decorators`, `dom`, `string`, `util.types`
   - NEVER Spell UI, or any other package:  every set's elements are written on it, Spell UI's included.
   - The barrel re-exports those util files,
     so a component file reads them through `E` too (`@E.proto`).
 - Its files import each other through `E`, as Spell UI's element core does
   (ui's AGENTS.md, "Imports in component files"):
-  - `import { E } from "spell-kit/element"`;  the barrel itself says `export * as E from "."`
+  - `import { E } from "spell/element"`;  the barrel itself says `export * as E from "."`
   - Except what a file reads while it EVALUATES (a base class, a decorator, a static initializer):
     that comes from its own file, under `// Import directly to avoid circular import`.
 - Who imports it:
   - Spell UI:  its `spell-ui/core` entry re-exports ALL of it, so Spell UI's `E` holds every name this `E` does.
     Spell UI's own component files keep importing `spell-ui/core`.
-  - Every pack's element files, `import { E } from "spell-kit/element"` (another repo's, so by its npm name):
+  - Every pack's element files, `import { E } from "spell/element"` (another repo's, so by its npm name):
     - `epics`, `brand`, and `app`'s `components/`
     - A file that also uses Spell UI's own pieces takes `E` from `spell-ui/core` instead:
       the same names, and Spell UI's on top.
       Those pieces:  `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
 - Leaves other code imports on their own (everything in `src/` has a name;  these are the ones meant for it):
-  - `spell-kit/element/elements.types` and `spell-kit/element/vocabulary.types`:
+  - `spell/element/elements.types` and `spell/element/vocabulary.types`:
     - where a set adds its names (below)
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
-  - `spell-kit/element/timing`:  Spell UI's util barrel re-exports it
-  - `spell-kit/element/SkeletonText`:  node code that parses skeletons
-  - `spell-kit/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path
+  - `spell/element/timing`:  Spell UI's util barrel re-exports it
+  - `spell/element/SkeletonText`:  node code that parses skeletons
+  - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path
 - The element tools and the `spell-pack` bin are node only:
   they may import node built-ins, Vite and `tsx` too, and never run in a page.
 
@@ -190,7 +190,7 @@ As WWOD §4, plus:
     - Still waiting after 5s:  a console warning.
   - Reading `SpellSolid.settings` before any are installed throws, naming what to import.
 - A set adds the NAMES `src/element/`'s types check against by augmenting its interfaces
-  (`declare module "spell-kit/element/elements.types"` ...):
+  (`declare module "spell/element/elements.types"` ...):
   - `ElementAnimations` (`elementSetup.animation`):  Spell UI adds Fomantic's, in its `components.types.ts`
   - `ValueSetValues`, `KindValueSets` and `TopicNames` (a vocabulary's `values` and `topics`):  Spell UI's `ValueSets`
     - `ValueSetValues` holds each set's values, and `KindValueSets` each kind's default set (`size` => `sizes`),
@@ -224,10 +224,10 @@ the family ATTACHES it when it arrives.
     - Spell UI's built `core.js`
     - the docs bundle, the site bundles
     - the app's `spell-solid.js`
-  - A component pack leaves `spell-kit/element` external, as it leaves Solid and `spell-ui/core`.
+  - A component pack leaves `spell/element` external, as it leaves Solid and `spell-ui/core`.
     - The list:  `PACK_MODULES`, in [the pack modules](../element-tools/packModules.ts).
     - It reads it from the page:
-      `SpellUI.packModules["spell-kit/element"]` is Spell UI's core module, which carries all of it.
+      `SpellUI.packModules["spell/element"]` is Spell UI's core module, which carries all of it.
   - The app's element bundles likewise take it from `spell-solid-shared.js`
     ([the app's shared build](../../spell-app/app/vite.shared.ts)).
 

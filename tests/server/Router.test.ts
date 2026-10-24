@@ -1,8 +1,8 @@
 import JSON5 from "json5"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
-import { ask, serveHandler, type Served } from "spell-kit/server/test/serve"
+import { SRV } from "spell/server"
+import { ask, serveHandler, type Served } from "spell/server/test/serve"
 
 describe("compilePattern()", () => {
   it("matches `:name` to one segment, decoded", () => {

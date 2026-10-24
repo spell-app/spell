@@ -6,7 +6,7 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
  * `spell`:  an oxlint plugin for the repos' own import rule, in every file of every repo
  * (WWOD §4, "ONE name per file";  epic `repo-split` P14, Q47).
  * - Every repo's code is under ONE `src/`, and every import of it is its package name plus its path under `src/`
- *   (`spell-kit/util/string`, `spell-ui/components/ui-button/UIButton`), inside its own repo too.
+ *   (`spell/util/string`, `spell-ui/components/ui-button/UIButton`), inside its own repo too.
  * - Unlike `spell-ui/*` (`lint.patterns.ts`), which holds component files to Spell UI's patterns,
  *   this holds for EVERY file:  on in `lintBase` (`lint.ts`).
  * - Replaced `no-cross-package-import` and `no-cross-repo-alias` (P14), which knew each repo's layout and alias table.
@@ -21,7 +21,7 @@ const VI_CALLS = new Set(["mock", "doMock", "unmock", "doUnmock", "importActual"
 
 /**
  * A relative import that climbs (`../`) into a package's `src/`:  `import { kebabCase } from "../util/string"`, from
- * the kit's `src/element/`;  its fix is the package name, `spell-kit/util/string`.
+ * the kit's `src/element/`;  its fix is the package name, `spell/util/string`.
  * - Any repo, any file:  inside one package too, and from a test or a config into `src/`.
  * - Same-folder peers stay relative (`./Peer`):  they don't climb.
  * - A climb to a file OUTSIDE `src/` is fine:  a config (`../vite.config.ts`), a glue tool (`../../tools/x.ts`), a
@@ -88,7 +88,7 @@ function moduleVisitor(check: (node: ESTree.Node, path: string) => void) {
 /**
  * The import name of file `path` (absolute, from a module path:  maybe without its extension), when it's in a
  * package's `src/`:  the package and `<package>/<path under src/>`, its extension and a trailing `/index` dropped
- * (`spell-kit/util/string`, `spell-kit/element`).
+ * (`spell/util/string`, `spell/element`).
  * - The package:  the nearest folder up with a `package.json` that has a `name`.
  * - `undefined`:  not under a package's `src/`.
  */

@@ -3,10 +3,10 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 // the leaf, not the `site` barrel:  that's browser code (`SiteHeader extends HTMLElement`)
-import { FAVICON_SVG } from "spell-kit/server/site/favicon"
-import { ask } from "spell-kit/server/test/serve"
+import { FAVICON_SVG } from "spell/server/site/favicon"
+import { ask } from "spell/server/test/serve"
 
 describe("WebServer's favicon", () => {
   const root = mkdtempSync(join(tmpdir(), "srv-web-"))

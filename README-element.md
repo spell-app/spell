@@ -1,9 +1,9 @@
-# `spell-kit/element`:  custom elements on Solid 2
+# `spell/element`:  custom elements on Solid 2
 
 ```tsx
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { epicQuestionVocabulary } from "./EpicQuestion.en"
 
@@ -71,7 +71,7 @@ It isn't a wrapper around a framework's component, either.
 `<epic-question>` is a real custom element, a node the page holds the way it holds a `<video>`:
 the browser upgrades every one on the page the moment the class is defined, the ones already there included.
 
-This is the kit's element framework, `spell-kit/element` (namespace `E`), and every set of elements in Spell is
+This is the kit's element framework, `spell/element` (namespace `E`), and every set of elements in Spell is
 written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-app>` and `<spell-editor>`,
 and the element a Spell program draws each drawable thing in, like `<solitaire-card>`.
 Its build tools and the test helpers every set's tests use sit beside it, on this page too.
@@ -474,7 +474,7 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   So a pack leaves the shared modules out, and borrows the page's copies, by their npm names:
 
   ```ts
-  PACK_MODULES = ["solid-js", "@solidjs/web", "spell-kit/element", "spell-ui/core", "spell-ui/forms"]
+  PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell-ui/core", "spell-ui/forms"]
   ```
 
   - The page offers them under those same names, in `SpellUI.packModules`;
@@ -482,7 +482,7 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   - Any other Spell UI or Solid import fails the pack's build, rather than ship a second copy.
 
 - A pack's elements extend the page's one `UIComponent`:
-  `spell-kit/element` on the page is Spell UI's core, which carries all of this framework.
+  `spell/element` on the page is Spell UI's core, which carries all of this framework.
 - A pack that fails or times out is logged, and the root still gets ready.
 
 The check, run in spell-epic, when the pack is current:
@@ -595,7 +595,7 @@ Playwright's Chromium, installed once in [Setup from zero](README.md#setup-from-
 | `A11y` | axe on a live element (`expectAccessible()`), and WCAG contrast |
 | `Viewport` | resize the test's frame for one test |
 
-- Import them by name:  `spell-kit/test-helpers/<Name>`, from any repo.
+- Import them by name:  `spell/test-helpers/<Name>`, from any repo.
 - The helpers know only the DOM, Solid and this framework;  one that needs Spell UI stays in Spell UI.
 - The framework's own tests run with no Spell UI on the page:
   on stand-in settings (`TestSettings`:  English names, no styles, every animation instant).
@@ -617,7 +617,7 @@ These close the gap, for every set, in node:
 | `HotElements` | the Vite plugin for hot reload in `yarn dev` |
 | `DevServer`, `Terminal`, `NodePackage` | a package's Vite dev server from node;  where tools print;  finding an installed package |
 
-- Import them by name:  `spell-kit/element-tools/<Name>`.
+- Import them by name:  `spell/element-tools/<Name>`.
 - `spell-pack` is a bin of the kit:  spell-epic's `yarn pack:build` and `pack:check` run it, from its own folder.
 
 ## The elements help:  slots, parts and dashed attributes in JSX
@@ -675,7 +675,7 @@ How it works:
 - Spell UI's core re-exports this whole framework, plus its own pieces:
   `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
   So a Spell UI family imports `E` from `spell-ui/core`.
-- A pack's element files import `E` from `spell-kit/element`, as `<epic-question>` does,
+- A pack's element files import `E` from `spell/element`, as `<epic-question>` does,
   or from `spell-ui/core` when they use Spell UI's own pieces, as `<epic-sort>` does:
   the same names, and Spell UI's on top.
 
@@ -783,7 +783,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
 
 - Its own entries, besides the barrel:
-  `spell-kit/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
+  `spell/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
   `/timing`, `/SkeletonText`, `/HotDefinitions`.
 - It may use only Solid and util's generic files, one by one (and the toolchain, for its configs):
   its barrel test pins that, and every export.

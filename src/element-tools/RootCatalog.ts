@@ -1,5 +1,5 @@
-import { SkeletonText } from "spell-kit/element/SkeletonText.ts"
-import type { SkeletonSpec } from "spell-kit/element/vocabulary.types"
+import { SkeletonText } from "spell/element/SkeletonText.ts"
+import type { SkeletonSpec } from "spell/element/vocabulary.types"
 
 import { VocabularyFiles } from "./VocabularyFiles.ts"
 

@@ -1,4 +1,4 @@
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 /****************
  * ### `SpellSolid`
@@ -42,7 +42,7 @@ export class SpellSolid {
     void E.after(WAIT_WARNING_SECONDS, () => {
       if (!SpellSolid.waiting.length) return
       console.warn(
-        `[spell-kit/element] SpellSolid:  ${SpellSolid.waiting.length} element(s) wait to be defined, and no ` +
+        `[spell/element] SpellSolid:  ${SpellSolid.waiting.length} element(s) wait to be defined, and no ` +
           "settings are installed;  load a component set's runtime (Spell UI's `spell-ui/core`)"
       )
     })

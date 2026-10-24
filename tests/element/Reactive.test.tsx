@@ -2,8 +2,8 @@ import { createEffect, createRoot, flush } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
 import { describe, expect, it } from "vite-plus/test"
 
-import { E, type ComponentVocabulary, type Dictionary, type DOMElement, type UIComponentClass } from "spell-kit/element"
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { E, type ComponentVocabulary, type Dictionary, type DOMElement, type UIComponentClass } from "spell/element"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
  * The reactive members (`Reactive`):  `@state` and `@derived` on any class, then the component side --

@@ -12,7 +12,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /** The kit:  its tests are in its `tests/`. */
 const KIT = join(import.meta.dirname, "../..")

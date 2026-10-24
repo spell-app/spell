@@ -5,7 +5,7 @@
  *     (`liveClientScript()`), so tests can call them too
  */
 // types only:  erased, so the served function stays self-contained
-import type { SiteTab } from "spell-kit/server/site/site.types"
+import type { SiteTab } from "spell/server/site/site.types"
 
 /**
  * What a served page knows about its server:  `window.SPELL_SERVER`, injected before `</head>`.
@@ -1031,7 +1031,7 @@ type LiveWindow = Window & {
  */
 export function liveClientScript(): string {
   return [
-    "// spell server:  live reload and page edits (spell-kit/src/server/liveClient.ts)",
+    "// spell server:  live reload and page edits (spell/src/server/liveClient.ts)",
     "var __name = (fn) => fn;",
     forVsCode.toString(),
     liveAction.toString(),

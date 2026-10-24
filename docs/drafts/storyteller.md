@@ -44,24 +44,24 @@ Not all of Maya's afternoon runs yet, so here is the honest version:
   AI that writes beside you, then teaches you, is the direction, not a feature yet
   (🌱 [spell-app's README](spell-app/README.md), "AI in the editor").
 
-This repo is THE KIT, `spell-kit`:  the root every other Spell repo is cloned into, and the code they all stand on.
+This repo is THE KIT, `spell`:  the root every other Spell repo is cloned into, and the code they all stand on.
 If you've used React and a compiler, you have what you need to find your way around.
 The next four sections follow Maya's afternoon down through the layers;  then it's your turn.
 
 ## The sentences are the program
 
 Maya's three lines weren't notes about the game, sitting on top of the real code.
-They were the code, and [spell-lang](spell-lang/README.md) is what turns them into a program.
+They were the code, and [spell-parser](spell-parser/README.md) is what turns them into a program.
 
 - Her first line taught spell a word:  once a program says `a card is a thing`,
   "card" is a type for every line after it.
 - Underneath is a rule-based parser with no grammar file and no generator:
-  each rule is a class, its pattern written in [Rulex](spell-lang/README-rulex.md),
+  each rule is a class, its pattern written in [Rulex](spell-parser/README-rulex.md),
   which reads like a regular expression over words and other rules.
   Spell's own rules sit on it, and so does a second language, GitHub-flavoured Markdown.
 - One language, many targets:  English in;  JavaScript, TypeScript and Python out today,
   each written the way a person would write it, and run on a small runtime of spell's own.
-- How spell reads one line, and what it turns that line into:  [README-spell.md](spell-lang/README-spell.md).
+- How spell reads one line, and what it turns that line into:  [README-spell.md](spell-parser/README-spell.md).
 
 ## The editor kept her game going
 
@@ -111,7 +111,7 @@ More:  [README-agents.md](README-agents.md).
 Follow Maya's afternoon all the way down and you've crossed six git repos, each ONE npm package named after it.
 The kit is checked out first;  the other five are cloned INSIDE it, and all six share one install.
 
-![The six Spell repos stacked by what they use:  spell-app on top, spell-brand and spell-epic on spell-ui, spell-lang and spell-ui on the kit, whose folders are util, toolchain, server, element and cli](docs/images/six-repos.svg)
+![The six Spell repos stacked by what they use:  spell-app on top, spell-brand and spell-epic on spell-ui, spell-parser and spell-ui on the kit, whose folders are util, toolchain, server, element and cli](docs/images/six-repos.svg)
 
 _Every arrow points down:  a repo uses only what's below it._
 
@@ -121,8 +121,8 @@ _Every arrow points down:  a repo uses only what's below it._
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
-  kit["spell-kit<br/>util · toolchain · server · element · cli"]
-  lang["spell-lang<br/>the language"] --> kit
+  kit["spell<br/>util · toolchain · server · element · cli"]
+  lang["spell-parser<br/>the language"] --> kit
   ui["spell-ui<br/>the ui-* elements"] --> kit
   brand["spell-brand<br/>the brand"] --> ui
   epic["spell-epic<br/>epics and sagas"] --> ui
@@ -140,8 +140,8 @@ flowchart BT
 
 | Repo | What it is | Its README |
 | --- | --- | --- |
-| spell-kit | the bottom of every repo:  shared helpers, the toolchain, the page server, the element framework, the command line's base;  and the one install | this page |
-| spell-lang | the language:  a rule-based parser, spell's rules, the runtime compiled spell runs on, and its writers for JavaScript, TypeScript and Python | [spell-lang/README.md](spell-lang/README.md) |
+| spell | the bottom of every repo:  shared helpers, the toolchain, the page server, the element framework, the command line's base;  and the one install | this page |
+| spell-parser | the language:  a rule-based parser, spell's rules, the runtime compiled spell runs on, and its writers for JavaScript, TypeScript and Python | [spell-parser/README.md](spell-parser/README.md) |
 | spell-ui | Spell UI:  web components for any page or framework, loaded on demand | [spell-ui/README.md](spell-ui/README.md) |
 | spell-brand | the brand's theme, pack and assets;  being reworked | -- |
 | spell-epic | epics and sagas:  plan on a page, build in a worktree, review on the page;  a Claude Code plugin | [spell-epic/README.md](spell-epic/README.md) |
@@ -177,7 +177,7 @@ Every command below runs from the folder it names;  what it prints when it worke
 3. Clone the kit, and install.
 
    ```sh
-   git clone git@github.com:spell-app/spell-kit.git ~/www/spell
+   git clone git@github.com:spell-app/spell.git ~/www/spell
    cd ~/www/spell
    yarn install          # the kit's own packages:  no child repos yet
    # ...
@@ -220,11 +220,11 @@ Every command below runs from the folder it names;  what it prints when it worke
 
    ```sh
    yarn repos
-   # ✓ spell-lang     -
+   # ✓ spell-parser     -
    # ✓ spell-ui       -
    # ✓ spell-brand    spell-ui
    # ✓ spell-epic     spell-ui
-   # ✓ spell-app      spell-lang, spell-brand, spell-ui, spell-epic (runs)
+   # ✓ spell-app      spell-parser, spell-brand, spell-ui, spell-epic (runs)
    ```
 
 7. Put `spell` on your PATH, for the command line:  [the command line's page, "Setting it up"](README-cli.md#setting-it-up).
@@ -237,7 +237,7 @@ Clone only what you're working on;  `yarn clone` brings what it needs too, and t
 
 ```sh
 yarn clone spell-ui      # spell-ui alone
-yarn clone spell-app     # spell-app, and spell-lang, spell-brand, spell-ui, spell-epic
+yarn clone spell-app     # spell-app, and spell-parser, spell-brand, spell-ui, spell-epic
 ```
 
 - `yarn clone` clones over SSH, and over HTTPS (GitHub's login, `gh auth setup-git`) when SSH is refused.
@@ -259,13 +259,13 @@ yarn clone spell-app     # spell-app, and spell-lang, spell-brand, spell-ui, spe
 <summary>Where everything ends up, and what's not cloned</summary>
 
 ```text
-~/www/spell/                    the kit (git repo spell-kit):  util/ toolchain/ server/ element/ cli/ tests/ tools/ agents/
-~/www/spell/spell-lang/         each child repo:  its own git repo, git-ignored by the kit
+~/www/spell/                    the kit (git repo spell):  util/ toolchain/ server/ element/ cli/ tests/ tools/ agents/
+~/www/spell/spell-parser/         each child repo:  its own git repo, git-ignored by the kit
 ~/www/spell/spell-ui/
 ~/www/spell/spell-brand/
 ~/www/spell/spell-epic/
 ~/www/spell/spell-app/
-~/www/spell/node_modules/       the ONE install:  node_modules/spell-kit links to the kit, each spell-* is a workspace
+~/www/spell/node_modules/       the ONE install:  node_modules/spell links to the kit, each spell-* is a workspace
 ~/www/spell/dist-types/         built declarations, for the type checks (git-ignored)
 ~/www/spell/spell.epics/        the content folder:  guides, epic pages, sagas, the logs (yours, local only)
 ~/www/spell/spell.spaces/       your own spell projects:  a plain folder
@@ -289,7 +289,7 @@ Each of these runs as soon as setup is done, and walks back over a piece of Maya
 What it printed on a real run is under it.
 
 **See what spell heard.**
-Read how spell understands a line ([spell-lang's README-spell.md](spell-lang/README-spell.md)):
+Read how spell understands a line ([spell-parser's README-spell.md](spell-parser/README-spell.md)):
 its match tree, then the JavaScript it compiles to.
 
 ```sh
@@ -326,7 +326,7 @@ spell run @spell/examples/fizzbuzz --no-browser
 ```
 
 **Same English, another language.**
-Compile that program to Python, and print it ([spell-lang's README-targets.md](spell-lang/README-targets.md)):
+Compile that program to Python, and print it ([spell-parser's README-targets.md](spell-parser/README-targets.md)):
 
 ```sh
 spell compile @spell/examples/fizzbuzz --target py --stdout
@@ -384,19 +384,19 @@ yarn dev
 ## Under all of it:  the kit's own folders
 
 Every layer of Maya's afternoon stands on the kit:
-ONE npm package, `spell-kit`, made of five folders of code, each its own TypeScript program, each with a page.
+ONE npm package, `spell`, made of five folders of code, each its own TypeScript program, each with a page.
 
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
-| [util/](util/) | `spell-kit/util` | the helpers every repo shares:  standard decorators, class, string and DOM helpers, the reactive engine, spell's own utilities, node-only JSON5 | [README-util.md](README-util.md) |
-| [toolchain/](toolchain/) | `spell-kit/toolchain/...` | what every repo's checks share:  the lint and format rules, the decorator pre-pass, declarations, `spell-folders` | [README-toolchain.md](README-toolchain.md) |
-| [server/](server/) | `spell-kit/server` | the page server:  every page on one port, live reload, editing in place, and the steps a tool runs to write a page | [README-server.md](README-server.md) |
-| [element/](element/) | `spell-kit/element` | the element framework every set of web components is written on;  its build tools and test helpers | [README-element.md](README-element.md) |
-| `cli/` | `spell-kit/cli` | the `spell` command line's base:  arguments, help, finding each repo's commands | [README-cli.md](README-cli.md) |
+| [util/](util/) | `spell/util` | the helpers every repo shares:  standard decorators, class, string and DOM helpers, the reactive engine, spell's own utilities, node-only JSON5 | [README-util.md](README-util.md) |
+| [toolchain/](toolchain/) | `spell/toolchain/...` | what every repo's checks share:  the lint and format rules, the decorator pre-pass, declarations, `spell-folders` | [README-toolchain.md](README-toolchain.md) |
+| [server/](server/) | `spell/server` | the page server:  every page on one port, live reload, editing in place, and the steps a tool runs to write a page | [README-server.md](README-server.md) |
+| [element/](element/) | `spell/element` | the element framework every set of web components is written on;  its build tools and test helpers | [README-element.md](README-element.md) |
+| `cli/` | `spell/cli` | the `spell` command line's base:  arguments, help, finding each repo's commands | [README-cli.md](README-cli.md) |
 
 And the glue that makes six repos one checkout:
 - the ONE install:  `yarn install` runs here, never in a child repo,
-  and links the `spell-kit` package in `node_modules` to the kit itself
+  and links the `spell` package in `node_modules` to the kit itself
 - the list of child repos, lowest first, with what each needs:  [repos.json5](repos.json5)
 - [the commands over them](tools/repos.ts):  `clone`, `pull`, `status`, `repos`, and the checks over every repo
 
@@ -404,7 +404,7 @@ And the glue that makes six repos one checkout:
 <summary>Until repo-split P13 and P14 land</summary>
 
 - The page-writing steps (links, formatting, bundles built on demand, data files) are their own folder today,
-  [assembler/](assembler/), imported as `spell-kit/assembler`:  [README-server.md](README-server.md) covers them.
+  [assembler/](assembler/), imported as `spell/assembler`:  [README-server.md](README-server.md) covers them.
 - The `spell` command line lives in spell-app's `cli/` folder, not the kit's.
 - Inside a repo, files import each other by short alias names from the repo's alias table;
   other repos already import by package name.
@@ -416,7 +416,7 @@ And the glue that makes six repos one checkout:
 
 | File | What it is |
 | --- | --- |
-| [package.json](package.json) | the ONE package `spell-kit`:  its `exports`;  `"workspaces": ["spell-*"]`, every child repo;  `"spellTypes"` and `"spellFolders"`, its folders;  the `resolutions` (one Solid);  the scripts |
+| [package.json](package.json) | the ONE package `spell`:  its `exports`;  `"workspaces": ["spell-*"]`, every child repo;  `"spellTypes"` and `"spellFolders"`, its folders;  the `resolutions` (one Solid);  the scripts |
 | [tsconfig.base.json](tsconfig.base.json) | the kit's TypeScript settings, which every folder's extends |
 | [vite.config.ts](vite.config.ts) | the kit's lint and format settings, what `vp check` and the editor read |
 | `yarn.lock`, [.yarnrc.yml](.yarnrc.yml), `.yarn/releases/` | the one lockfile;  the one catalog of tool versions;  the yarn release |
@@ -433,7 +433,7 @@ And the folders git ignores here:
 
 | Folder | What it is |
 | --- | --- |
-| `spell-lang/`, `spell-ui/`, `spell-brand/`, `spell-epic/`, `spell-app/` | the child repos |
+| `spell-parser/`, `spell-ui/`, `spell-brand/`, `spell-epic/`, `spell-app/` | the child repos |
 | `spell.epics/` | the content folder:  its own git repo, local only |
 | `spell.spaces/` | your own projects |
 | `dist-types/` | the kit's built declarations, for the repos above it |
@@ -481,7 +481,7 @@ yarn review           # the kit's finishing pass, then every repo's
 - The kit's checks one at a time:
   `yarn kit:ts`, `kit:test`, `kit:lint`, `kit:lint:fix`, `kit:format`, `kit:format:check`.
 - In a child repo, its own scripts:  `cd spell-ui && yarn test`.
-  One folder of a repo with several (spell-lang, spell-app):  `cd spell-lang && yarn spell-folders test core`.
+  One folder of a repo with several (spell-parser, spell-app):  `cd spell-parser && yarn spell-folders test core`.
 - Tests live in [tests/](tests/), a folder per code folder, at the same paths as the code they test:
   [Router.test.ts](tests/server/src/Router.test.ts) tests the server's [Router.ts](server/src/Router.ts).
 - A change across two repos is two commits, one in each, and two pull requests, the lower repo's first.
@@ -497,7 +497,7 @@ yarn review           # the kit's finishing pass, then every repo's
 
 | Script | What |
 | --- | --- |
-| `yarn install` | the ONE install;  its `postinstall` links `node_modules/spell-kit` and each child repo's `agents` |
+| `yarn install` | the ONE install;  its `postinstall` links `node_modules/spell` and each child repo's `agents` |
 | `yarn clone [repo ...]` | clone what's missing (and what it needs), then one install |
 | `yarn pull` | `git pull --ff-only` in every cloned child repo |
 | `yarn status` | each child repo's branch, ahead / behind, and up to 12 changed files |
@@ -547,7 +547,7 @@ A repo's `README.md` is its front page;  the `README-<topic>.md` pages beside it
 | Repo | Pages |
 | --- | --- |
 | the kit | [README.md](README.md) (this page) · [README-util.md](README-util.md) · [README-toolchain.md](README-toolchain.md) · [README-server.md](README-server.md) · [README-element.md](README-element.md) · [README-cli.md](README-cli.md) · [README-development.md](README-development.md) · [README-vscode.md](README-vscode.md) · [README-agents.md](README-agents.md) |
-| spell-lang | [README.md](spell-lang/README.md) · [README-parser.md](spell-lang/README-parser.md) · [README-rulex.md](spell-lang/README-rulex.md) · [README-markdown.md](spell-lang/README-markdown.md) · [README-spell.md](spell-lang/README-spell.md) · [README-core.md](spell-lang/README-core.md) · [README-targets.md](spell-lang/README-targets.md) |
+| spell-parser | [README.md](spell-parser/README.md) · [README-parser.md](spell-parser/README-parser.md) · [README-rulex.md](spell-parser/README-rulex.md) · [README-markdown.md](spell-parser/README-markdown.md) · [README-spell.md](spell-parser/README-spell.md) · [README-core.md](spell-parser/README-core.md) · [README-targets.md](spell-parser/README-targets.md) |
 | spell-ui | [README.md](spell-ui/README.md) · [README-components.md](spell-ui/README-components.md) · [README-migrating.md](spell-ui/README-migrating.md) · [README-runtime.md](spell-ui/README-runtime.md) · [README-themes.md](spell-ui/README-themes.md) · [README-frameworks.md](spell-ui/README-frameworks.md) · [README-site.md](spell-ui/README-site.md) |
 | spell-epic | [README.md](spell-epic/README.md) · [README-pages.md](spell-epic/README-pages.md) · [README-skills.md](spell-epic/README-skills.md) · [README-cli.md](spell-epic/README-cli.md) · [README-vscode.md](spell-epic/README-vscode.md) · [README-adopting.md](spell-epic/README-adopting.md) |
 | spell-app | [README.md](spell-app/README.md) · [README-app.md](spell-app/README-app.md) · [README-spaces.md](spell-app/README-spaces.md) · [README-examples.md](spell-app/README-examples.md) · [README-lsp.md](spell-app/README-lsp.md) · [README-page-server.md](spell-app/README-page-server.md) |
@@ -579,7 +579,7 @@ A repo's `README.md` is its front page;  the `README-<topic>.md` pages beside it
 - [AGENTS.md](AGENTS.md):  the rules for working on the kit and across repos
 - [README-development.md](README-development.md):  working on Spell day to day
 - [README-cli.md](README-cli.md):  every command
-- [spell-lang](spell-lang/README.md), [spell-ui](spell-ui/README.md), [spell-epic](spell-epic/README.md),
+- [spell-parser](spell-parser/README.md), [spell-ui](spell-ui/README.md), [spell-epic](spell-epic/README.md),
   [spell-app](spell-app/README.md):  the child repos' front pages
 - Also beside it:
   [README-agents.md](README-agents.md) · [README-element.md](README-element.md) ·

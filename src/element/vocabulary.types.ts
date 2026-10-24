@@ -344,7 +344,7 @@ export type SkeletonPart =
  * The topics a component may be filed under:  a set's runtime adds them by augmenting this interface,
  * so a vocabulary's `topics` are checked against them.
  * - Spell UI's are `ValueSets.topics` (`spell-ui/vocabulary`):
- *   `declare module "spell-kit/element/vocabulary.types" { interface TopicNames extends Record<..., true> {} }`
+ *   `declare module "spell/element/vocabulary.types" { interface TopicNames extends Record<..., true> {} }`
  */
 export interface TopicNames {}
 
@@ -373,7 +373,7 @@ export type ComponentTopic = NamesOf<TopicNames>
  * - `booleans` -- spellings the boolean converter understands, so a translation can map `sí` => `yes`
  * - `topics` -- what a component is filed under (a vocabulary's `topics`), so a translation maps them once
  * - The sets are the RUNTIME's:  Spell UI adds them by augmenting this interface,
- *   `declare module "spell-kit/element/vocabulary.types" { interface ValueSetValues extends ... {} }`.
+ *   `declare module "spell/element/vocabulary.types" { interface ValueSetValues extends ... {} }`.
  *   - So a vocabulary's `values: "hues"` is checked against the names,
  *   - and an attribute of that set reads as its values (`this.size`:  `"mini" | ... | "massive"`;  `SpecValue`).
  */
@@ -569,7 +569,7 @@ export type EnumOptions = {
  * - `value`:  its setting as text, `"3"`, `"1..5"`, `"/^\d+$/"`
  * - `prompt`:  what to say when it's broken, in place of the rule's own words
  * - What a spell type's rules compile to, e.g. `- its title must not be empty` (epic `property-editor` P9):
- *   `spell-kit/util`'s `PropRule` has the same shape.
+ *   `spell/util`'s `PropRule` has the same shape.
  */
 export type RuleSpec = {
   type: string

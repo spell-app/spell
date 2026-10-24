@@ -1,4 +1,4 @@
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 /****************
  * ### `OwnerContext`

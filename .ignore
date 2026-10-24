@@ -1,5 +1,5 @@
 # Read by VS Code's Quick Open and Find in Files, and by ripgrep (`rg`), never by git:  it wins over `.gitignore`.
 # - Shows every child repo's files, which `.gitignore` hides from git here (`/spell-*/`):
-#   with it, Cmd+P in a kit window found no file of spell-app, spell-lang, spell-ui ... (Owen, 2026-10-23, `Card.spell`)
+#   with it, Cmd+P in a kit window found no file of spell-app, spell-parser, spell-ui ... (Owen, 2026-10-23, `Card.spell`)
 # - Each child repo's own `.gitignore` still applies inside it.
 !/spell-*/

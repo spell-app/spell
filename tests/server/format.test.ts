@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 /** A page on one line, as a tool builds it before formatting. */
 const SQUASHED =

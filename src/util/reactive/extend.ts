@@ -1,4 +1,4 @@
-import { hasOwnProp } from "spell-kit/util/class"
+import { hasOwnProp } from "spell/util/class"
 
 import { isTrackingCells } from "./cells"
 import { Cell } from "./Cell"
@@ -130,6 +130,14 @@ export function storeProp(target: any, property: string, value: unknown): boolea
   extended[PROP_CELLS]?.get(property)?.changed()
   if (added) extended[KEYS]?.changed()
   return true
+}
+
+/**
+ * Prop `property` of `target` as stored, UNTRACKED:  `undefined` if it's unset, never its default.
+ * - For a write that keeps the value it replaces, e.g. core's `startWhile()` putting it back after.
+ */
+export function peekProp<T>(target: any, property: string): T | undefined {
+  return extendedFor(target)[PROPS].get(property) as T | undefined
 }
 
 /** Delete prop `property` of `target`:  it leaves `keysOf()`, and a later set appends it.  Returns whether it was set. */

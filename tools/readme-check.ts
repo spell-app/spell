@@ -23,7 +23,7 @@ import { dirname, join, relative, resolve } from "node:path"
  * - Links are checked against the disk:  the file, and its heading (GitHub's slugs) for a `#anchor`.
  * - Words are checked too:  the stale and banned names, and the house's rules about Spell's own name:
  *   - `brand`:  spell-brand is internal, so no page names it, in code spans, links and Mermaid blocks too
- *   - `capital`:  "Spell" is capitalised in prose;  a lowercase `spell` is for code and names (`spell-lang`)
+ *   - `capital`:  "Spell" is capitalised in prose;  a lowercase `spell` is for code and names (`spell-parser`)
  * - A See also lists curated links, not a line of every page beside it (`siblings`).
  * - spell-brand's README is left out:  it stays outside the set of pages (epic `readme`, the map).
  ****************/
@@ -44,14 +44,14 @@ export class ReadmeCheck {
     example: "a deleted example project",
     "deleted-readme": "the path of an in-folder README that was folded into a page and deleted",
     brand: "the word brand in any form, anywhere (code, links, Mermaid too):  spell-brand is internal, so leave it out",
-    capital: "a lowercase `spell` in prose:  write Spell;  lowercase is for code, paths and names like `spell-lang`",
+    capital: "a lowercase `spell` in prose:  write Spell;  lowercase is for code, paths and names like `spell-parser`",
     siblings: "a See also line that opens `Also beside it`:  a See also lists curated links, not every sibling",
     output:
       "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it"
   } as const
 
   /** the repos whose root pages are checked, from the kit's root (`.` is the kit) */
-  static readonly REPOS = [".", "spell-lang", "spell-ui", "spell-epic", "spell-app"]
+  static readonly REPOS = [".", "spell-parser", "spell-ui", "spell-epic", "spell-app"]
 
   /** the kit's root:  this file is in its `tools/` */
   readonly root: string
@@ -154,7 +154,7 @@ export class ReadmeCheck {
     const ours = OUR_GITHUB.exec(target)
     if (ours) {
       const [, repo, rest] = ours
-      const folder = repo === "spell-kit" ? "." : repo
+      const folder = repo === "spell" ? "." : repo
       if (!ReadmeCheck.REPOS.includes(folder)) return
       if (!existsSync(join(this.root, folder))) return
       const [inRepo, anchor] = splitAnchor(rest)
@@ -176,7 +176,7 @@ export class ReadmeCheck {
     }
     if (file && !viaGitHub && this.repoOf(resolved) !== this.repoOf(path)) {
       const repo = this.repoOf(resolved)
-      const name = repo === "." ? "spell-kit" : repo
+      const name = repo === "." ? "spell" : repo
       const inRepo = relative(join(this.root, repo), resolved)
       add(line, "cross-repo", `${target}:  write https://github.com/spell-app/${name}/blob/main/${inRepo}`)
       return
@@ -281,7 +281,7 @@ const BRAND = /(?<![a-z\d])(?<!fa\d+-)(?:brand(?!(?:-|\s+)new(?![a-z\d]))|brands
 /**
  * a lowercase `spell` standing as a word:  prose writes the name `Spell`
  * - not an identifier:  a `spell` touching `-`, `_`, `/`, `@` or `#`, after a `.`, or before a `.` and a letter
- *   (`spell-lang`, `spell_core`, `@spell/core`, `.spell`, `spell.epics`)
+ *   (`spell-parser`, `spell_core`, `@spell/core`, `.spell`, `spell.epics`)
  */
 const LOWERCASE_SPELL = /(?<![\w@#/.-])spell(?![\w@#/-]|\.[A-Za-z])/g
 
@@ -434,7 +434,8 @@ function proseOf(lines: string[]): string {
         fence = opening[1]
         return ""
       }
-      return line.replace(/(`+)[^`]*?\1/g, (code) => " ".repeat(code.length))
+      // an inline code span:  a run of backticks, closed by a run just as long (`` `x` `` holds single ones)
+      return line.replace(/(?<!`)(`+)(?!`)(.*?[^`])\1(?!`)/g, (code) => " ".repeat(code.length))
     })
     .join("\n")
 }

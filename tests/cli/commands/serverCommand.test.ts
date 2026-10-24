@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { serverLines } from "spell-kit/cli/commands/serverCommand"
+import { serverLines } from "spell/cli/commands/serverCommand"
 
 describe("serverLines()", () => {
   test("one aligned line per server:  name, port, URL, what, state", () => {

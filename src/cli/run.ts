@@ -1,7 +1,7 @@
 import chalk from "chalk"
 import { relative } from "node:path"
 
-import { CLI } from "spell-kit/cli"
+import { CLI } from "spell/cli"
 
 /**
  * Run `work`, then exit with the code it resolves to:  every command's action ends here.
@@ -18,10 +18,15 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
     process.stderr.write(`${chalk.red(isCliError ? error.message : ((error as Error)?.stack ?? String(error)))}\n`)
     exitCode = isCliError ? error.exitCode : CLI.EXIT.ERRORS
   }
-  // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short
-  await new Promise<void>((done) => process.stdout.write("", () => done()))
+  // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short -- but never wait long for it:
+  // on CI a command printed all of its answer, then never exited (epic `repo-split` I73)
+  const drained = new Promise<void>((done) => process.stdout.write("", () => done()))
+  await Promise.race([drained, new Promise<void>((done) => setTimeout(done, DRAIN_WAIT_MS))])
   process.exit(exitCode)
 }
+
+/** How long `runCommand()` waits for stdout to drain before it exits anyway. */
+const DRAIN_WAIT_MS = 2000
 
 /**
  * Everything on the command line after `words`, as typed:  `rawArgsAfter("design")` of `spell design build --out x`

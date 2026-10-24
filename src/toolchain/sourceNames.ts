@@ -8,23 +8,23 @@ import type { Plugin } from "esbuild"
 /****************
  * ### `sourceNames()`
  * An esbuild plugin finding our packages' names as their SOURCE files, the way Vite and `tsx` do:
- * `spell-kit/server` => the kit's `src/server/index.ts`, `spell-epic/config/RealPath` => spell-epic's
+ * `spell/server` => the kit's `src/server/index.ts`, `spell-epic/config/RealPath` => spell-epic's
  * `src/config/RealPath.ts`.
  *
  * ```ts
- * import { sourceNames } from "spell-kit/toolchain/sourceNames"
+ * import { sourceNames } from "spell/toolchain/sourceNames"
  * await build({ entryPoints: [entry], bundle: true, plugins: [sourceNames()] })
  * ```
  *
  * - Why:  esbuild reads `package.json`'s `exports` as node does:  no extension added to `./src/*`, no folder's
  *   `index.ts` (epic `repo-split` I50).
- *   So by itself it can't find `spell-ui/runtime/runtime.types`, or `spell-kit/server` (a folder).
+ *   So by itself it can't find `spell-ui/runtime/runtime.types`, or `spell/server` (a folder).
  * - Tries `<name>.ts`, `<name>.tsx`, `<name>/index.ts`, `<name>/index.tsx`, then the name as written, under the
  *   package's `src/`;  the package's own name alone is its `src/index.ts`.
  * - A name it can't find is left to esbuild's own resolver.
- * - `packages`:  which names, default every Spell repo's (`spell-kit`, `spell-ui` ...).
+ * - `packages`:  which names, default every Spell repo's (`spell`, `spell-ui` ...).
  * - Used by every direct esbuild build:  spell-epic's extension and docs bundle, Spell UI's bundle measure and static
- *   server, the brand's design bundle, spell-lang's library test.
+ *   server, the brand's design bundle, spell-parser's library test.
  * - Node's modules only (esbuild's type erased):  plain `node` loads it, types stripped.
  ****************/
 export function sourceNames(packages: RegExp = SPELL_PACKAGES): Plugin {
@@ -80,7 +80,7 @@ export function packageRootFor(pkg: string, from: string = import.meta.filename)
 }
 
 /**
- * The file `specifier` names (`spell-kit/server/page/cli.ts`), by its real path, as node's resolver finds it from
+ * The file `specifier` names (`spell/server/page/cli.ts`), by its real path, as node's resolver finds it from
  * `from` (a file or folder);  `undefined`:  not found.  NEVER throws.
  */
 export function resolvedFile(specifier: string, from: string = import.meta.filename): string | undefined {
@@ -93,7 +93,7 @@ export function resolvedFile(specifier: string, from: string = import.meta.filen
 }
 
 /** Every Spell repo's package name, and the names under it:  `sourceNames()`' default. */
-const SPELL_PACKAGES = /^spell-(?:kit|lang|ui|brand|epic|app)(?:\/.*)?$/
+const SPELL_PACKAGES = /^spell(?:-(?:parser|ui|brand|epic|app))?(?:\/.*)?$/
 
 /** A package name, scoped or not (1), and the path after it (2). */
 const PACKAGE_NAME = /^((?:@[^/]+\/)?[^/]+)(?:\/(.+))?$/

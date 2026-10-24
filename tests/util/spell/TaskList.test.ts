@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { Task, TaskList } from "spell-kit/util"
+import { Task, TaskList } from "spell/util"
 
 describe("TaskList.forEach", () => {
   test("reads a `list` function when it RUNS, so an earlier task can fill it", async () => {

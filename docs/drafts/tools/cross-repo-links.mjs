@@ -9,14 +9,14 @@ import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 
 const KIT = resolve(import.meta.dirname, "../../..")
-const CHILDREN = ["spell-lang", "spell-ui", "spell-epic", "spell-app"]
+const CHILDREN = ["spell-parser", "spell-ui", "spell-epic", "spell-app"]
 const write = process.argv.includes("--write")
 
 /** the repo a path belongs to:  [GitHub name, its folder] */
 function repoOf(path) {
   const rel = relative(KIT, path)
   const first = rel.split(sep)[0]
-  return CHILDREN.includes(first) ? [first, join(KIT, first)] : ["spell-kit", KIT]
+  return CHILDREN.includes(first) ? [first, join(KIT, first)] : ["spell", KIT]
 }
 
 const pages = []
