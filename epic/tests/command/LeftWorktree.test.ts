@@ -34,6 +34,7 @@ describe("the left-worktree hook (epic-eject P10, r1)", () => {
     expect(context).toMatch(/no uncommitted or unmerged work, no background task or agent running/)
     expect(context).toMatch(/say what keeps the tab open/)
     expect(context).toMatch(/skills\/isolate\/SKILL\.md/)
+    expect(context).toMatch(/Run `\/epic done`.* in an epic.s session/)
     expect(context).toMatch(/Run `\/isolate done`/)
   })
 
