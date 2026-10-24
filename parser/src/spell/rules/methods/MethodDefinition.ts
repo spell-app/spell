@@ -496,7 +496,7 @@ export class MethodDefinition<
       asAnimation?: P.Match
     }
     const signature = this.getSignature(match)!
-    const { methodName = "", args, props, instanceType, asPostfixExpression } = signature
+    const { methodName = "", args, props, instanceType, instanceTypeName, asPostfixExpression } = signature
     // what it declared is said by its `/*! SPELL: DECLARES` comment -- see `SP.SpellDeclarations.commentFor()`
     const output: Array<P.ASTStatement | P.ASTExpression | P.ASTComment | P.ASTBlankLine> = []
 
@@ -545,6 +545,8 @@ export class MethodDefinition<
     }
 
     if (instanceType) {
+      // its class:  the type's own name, e.g. `TicTacToe` for `tic tac toe`, which `typeCase()` alone can't say
+      const typeName = instanceTypeName ?? P.typeCase(instanceType)
       // a value kind's phrase:  its static method, given the value -- see `MethodSignatureData.valueKindOf`
       if (asPostfixExpression && signature.valueKindOf) {
         const value = new P.ASTVariableExpression(match, { name: instanceType })
@@ -560,7 +562,7 @@ export class MethodDefinition<
         // console.warn("APE:", method)
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: P.typeCase(instanceType),
+            type: typeName,
             property: methodName,
             get: method
           })
@@ -568,7 +570,7 @@ export class MethodDefinition<
       } else {
         output.push(
           new P.ASTPropertyDefinition(match, {
-            type: P.typeCase(instanceType),
+            type: typeName,
             property: methodName,
             method
           })

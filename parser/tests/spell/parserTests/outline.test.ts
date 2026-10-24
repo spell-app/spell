@@ -306,6 +306,19 @@ describe("outline style", () => {
       expect(compiled).toContain('on("card-click"')
       expect(compiled.match(/trigger\("card-click"/g)).toHaveLength(2)
     })
+
+    test('a type\'s phrase:  `- it "is over" if ...` on `tic tac toe` is a getter of `TicTacToe` (epic `debut` P8)', () => {
+      const compiled = compile([
+        "tic tac toe is an app where:",
+        '\t- its "winner" is text',
+        '\t- it "is over" if its winner is not ""',
+        'a "big thing" is a thing',
+        'a big thing "is done" if it is a big thing'
+      ])
+      expect(compiled).toMatch(/export class TicTacToe extends App \{[^]*get isOver\(\)/)
+      expect(compiled).toMatch(/export class BigThing extends Thing \{[^]*get isDone\(\)/)
+      expect(compiled).not.toContain("prototype")
+    })
   })
 
   describe("methods before their definitions (P22)", () => {

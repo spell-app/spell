@@ -40,6 +40,11 @@ export type MethodSignatureData = {
   /** Type to add an instance method to, set by `processSignature()`. */
   instanceType: string | undefined
   /**
+   * The class of `instanceType`, when its words alone can't say it, e.g. `TicTacToe` for a phrase on `tic tac toe`.
+   * - Set by `QuotedTypeExpression.processSignature()`, from the type it matched;  else `P.typeCase(instanceType)`.
+   */
+  instanceTypeName?: string
+  /**
    * `true` when the definition compiles to a postfix expression (e.g. `card.isABug`) instead of a callable method.
    * - Set by `MethodDefinition.processSignature()` / `QuotedTypeExpression.processSignature()`.
    */

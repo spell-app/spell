@@ -146,6 +146,8 @@ export class QuotedTypeExpression extends MethodDefinition<"type|signature|body?
     scope: P.Scope
   ): MethodSignatureData {
     signature.instanceType = QuotedTypeExpression.instanceTypeOf(groups.type)
+    // its class by name, e.g. `TicTacToe`:  `typeCase()` of the words would say `Tictactoe`
+    if (groups.type.value) signature.instanceTypeName = `${groups.type.value}`
     if (signature.args.length === 0) {
       signature.asPostfixExpression = true
       // a value kind's phrase:  its static method -- see `MethodSignatureData.valueKindOf`
