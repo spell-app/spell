@@ -143,9 +143,10 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - In `src/`, with the rest of Spell UI's code
     (epic `repo-split` P14;  at the package's top from epic `people-and-orgs` P18 until then).
     - Imported as `spell-ui/components/ui-button` (the family's barrel), `spell-ui/components/ui-button/UIButton` ...
-    - Published under the short names too (`publishConfig`, Q47), beside the long ones:
+    - Published under the short names too (Q47), beside the long ones:
       - `spell-ui/ui-button` and `spell-ui/components/ui-button`
-      - `dist/components/ui-<name>/` (`declarations()` in [vite.config.ts](vite.config.ts))
+      - the short names:  `"spellPublish": { "exports" }` in [package.json](package.json), which the kit's
+        `spell publish` reads (epic `repo-split` P19)
     - Each family's barrel has its own key in `package.json`'s `exports`:  a new family adds one
       (the package exports test, [PackageExports.test.ts](./tests/tools/PackageExports.test.ts), checks).
   - Every FILE in it is named for its COMPONENT, as any class file is named for its class (`UIButton.css`).
@@ -1257,12 +1258,15 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
     - `spell-ui/test-helpers/setup.ts` (a browser test project's `setupFiles`)
   - NOT the generic test helpers, the pack tooling or `SkeletonText`:  the kit's since epic `repo-split` P10
     (`spell/test-helpers/...`, `spell/element-tools/...`, `spell/element/SkeletonText`).
-  - The PUBLISHED shape, `dist/`, stays explicit:  `publishConfig`'s `exports` (and `main`, `types`).
-    `yarn pack` and `yarn npm publish` write it over the source one, and `yarn smoke`'s declaration check reads it.
-    - `spell-ui`, `/core`, `/forms`, `/api`, `/styles`, `/icons/*`, and every family by its SHORT name,
-      `spell-ui/ui-button` (Q47), and its long one, `spell-ui/components/ui-button`.
+  - The PUBLISHED package is the kit's `spell publish` build (epic `repo-split` P19, J197), not `yarn build`:
+    - one JavaScript file per source file, so every name in `src/` resolves from npm too, by the same name
+    - `spell/*` stays an import, never a copy:  a page loads one `DOMElement` (C22)
+    - what ships:  `"spellPublish"` in [package.json](package.json) (`tools/`, `cli/`, `test-helpers/` and the
+      examples left out;  the icon packs as they are;  the short names `spell-ui/ui-button`)
+    - `yarn build` (the Vite library bundle in `dist/`), `yarn smoke` and `yarn measure` stay, for local checks:
+      that bundle is published by nothing, and still holds its own copy of the kit's element code.
     - An import map's names are the published ones (`DIST_IMPORTS`, `PropertyEditorPages`' `spell-ui/ui-property-editor`).
-- The kit's `util` and `element` ship inside `dist/`:
+- The kit's `util` and `element` ship inside the local bundle's `dist/` (not the npm package, above):
   `declarations()` in [vite.config.ts](vite.config.ts) maps their npm names to their source,
   and rewrites them, and Spell UI's own names, as relative paths.
 
