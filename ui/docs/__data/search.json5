@@ -142,7 +142,8 @@
         {"id":"spell-ui-s-own-markdown","title":"Markdown","parent":59},
         {"id":"spell-ui-s-own-panel","title":"Panel","parent":59},
         {"id":"spell-ui-s-own-root","title":"Root","parent":59},
-        {"id":"spell-ui-s-own-section","title":"Section","parent":59}
+        {"id":"spell-ui-s-own-section","title":"Section","parent":59},
+        {"id":"spell-ui-s-own-theme-editor","title":"Theme Editor","parent":59}
       ]
     },
     {
