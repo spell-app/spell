@@ -570,7 +570,8 @@ each language pack registers every rule again, with its own words.
 
 - It asks Claude through the Claude API when `ANTHROPIC_API_KEY` is set, and through `claude -p` otherwise.
   - The API is faster:  a `claude -p` call spends about 2 s starting, so without a key it says so, once, at the start.
-  - On Solitaire, cold, through `claude -p`:  31-41 s in all, the names 22-31 s, the fix-ups 9-10 s, in 7 or 8 calls.
+  - On Solitaire through `claude -p`, from the shared glossary alone:  31-41 s in all, the names 22-31 s,
+    the fix-ups 9-10 s, in 7 or 8 calls;  with `--cold`, nothing pre-calculated, about 52 s.
   - Either way each answer can only be JSON of the shape asked for, and the language's glossary rides in the
     system prompt, which the API caches across the calls.
   - `--effort fast|balanced|best` says how much each pass spends on its answers, `balanced` unless asked;
