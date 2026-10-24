@@ -117,15 +117,15 @@
     rotate: 90deg;
   }
 
-  /* the id chip:  a pill in its state's colour, its text centred both ways */
+  /* the id chip:  a pill in its state's colour, its text centred both ways:  trimmed to the capitals' height, equal
+     room above and below (centring the line box left the letters high:  epic `epic-engine` I86) */
   .chip {
-    display: inline-flex;
+    display: inline-block;
     box-sizing: border-box;
-    align-items: center;
-    justify-content: center;
     min-width: 3.1em;
-    height: var(--_epic-chip-height);
-    padding: 0 0.6em;
+    padding: calc((var(--_epic-chip-height) - 1cap) / 2) 0.6em;
+    text-align: center;
+    text-box: trim-both cap alphabetic;
     border-radius: 999px;
     background: var(--_epic-state);
     color: var(--_epic-state-on);

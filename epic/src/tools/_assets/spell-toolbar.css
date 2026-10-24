@@ -135,17 +135,23 @@
 .spell-toolbar > ui-item::part(icon) {
   flex: none;
 }
+/* the number centred both ways:  its text trimmed to the capitals' height (`text-box`), the room above and below it
+   equal, so 18px tall whatever the font's own spacing;  and NO min-height:  Spell UI's round label sets 2em, which drew
+   a 16px badge 20px tall, its number high (epic `epic-engine` I86) */
 .spell-toolbar-count::part(label) {
+  --_badge: 18px;
   box-sizing: border-box;
-  min-width: 18px;
-  height: 18px;
+  min-width: var(--_badge);
+  height: auto;
+  min-height: 0;
   margin: 0;
-  padding: 0 5px;
+  padding: calc((var(--_badge) - 1cap) / 2) 5px;
   border: 0;
   border-radius: 999px;
-  font: 700 11px/18px var(--spell-sans);
+  font: 700 11px/1 var(--spell-sans);
   font-variant-numeric: tabular-nums;
   text-align: center;
+  text-box: trim-both cap alphabetic;
 }
 .spell-toolbar-count + .spell-toolbar-count::part(label) {
   margin-inline-start: -3px;
@@ -177,10 +183,8 @@
   top: calc(8px + var(--_badge) / 3 - var(--_badge));
   left: calc(50% + 7px - var(--_badge) / 3);
   min-width: var(--_badge);
-  height: var(--_badge);
-  padding: 0 4px;
+  padding: calc((var(--_badge) - 1cap) / 2) 4px;
   font-size: 10px;
-  line-height: var(--_badge);
 }
 /* both kinds:  the orange one after the red, overlapping it a little */
 .spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count + .spell-toolbar-count::part(label) {

@@ -21,14 +21,16 @@
   .chip {
     --_chip: var(--ui-grey, #767676);
     --_chip-on: var(--ui-grey-on, #fff);
-    display: inline-grid;
+    /* the count centred both ways:  trimmed to the capitals' height, equal room above and below, 18px in all
+       (epic `epic-engine` I86) */
+    display: inline-block;
     flex: none;
-    place-items: center;
     box-sizing: border-box;
     min-width: 22px;
-    height: 18px;
-    padding: 0 5px;
+    padding: calc((18px - 3px - 1cap) / 2) 5px;
     border: 1.5px solid var(--_chip);
+    text-align: center;
+    text-box: trim-both cap alphabetic;
     border-radius: 999px;
     background: transparent;
     color: var(--epic-ink, var(--ui-text-color));
