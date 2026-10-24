@@ -547,6 +547,11 @@ ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
   max-width: 100%;
   margin-inline: auto;
 }
+/* ... the lower band's room for its two concave curves inside the top band kept, however long its row (it scrolls):
+   this rule's `100%` took it away (Owen, 2026-10-23, a picture of the band jutting past the top one) */
+ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled.spell-toolbar-segmented {
+  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+}
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
   justify-content: center;
 }
