@@ -338,6 +338,12 @@ cache=~/.claude/plugins/cache/spell-epic/spell-epic/0.1.0 && rm -rf "$cache" && 
 ```
 
 1. Adds spell-epic's folder as a marketplace of one, for the whole machine.
+   - Claude Code keeps that folder's path in two files:  `~/.claude/settings.json` (`extraKnownMarketplaces`) and
+     `~/.claude/plugins/known_marketplaces.json`.  When spell-epic moves, point both at the new folder:
+     `claude plugin list` then says "Read from" it.
+   - Left at an old folder, every hook fails ("Plugin directory does not exist"):  nothing moves a session, shared
+     content isn't committed, the prompt hook titles nothing.  From repo-split's move until 2026-10-24 both named
+     `~/www/spell-app/spell-epic/` (epic `epic-engine` I84).
 2. Installs the plugin from it.
    Claude Code COPIES the folder at install, and runs the plugin's hooks and monitor from the copy:  step 5.
 3. Links each skill into your own skills folder, so you type a bare `/epic`:
