@@ -611,6 +611,25 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Our code for target `name` (`ts/solid`, `py` ...), written now from the files as last compiled:
+   * what an editor shows of a target the project file doesn't list, without compiling to it.
+   * - Read only:  nothing is saved, and our compiled javascript, declarations and words stay as they were.
+   * - Call after `compile()`:  a file never compiled yet writes as empty.
+   * - throws if there's no such target (`SP.targetFor()`), or its writer can't write our code
+   */
+  codeFor(name: string): string {
+    const target = SP.targetFor(name)
+    const files = [...this.sourceImportFiles, ...this.activeImports]
+    const parts = files.map((file) => (file.AST instanceof P.ASTStatementGroup ? file.AST : file.compiled))
+    return this.scope!.parser!.inPlay(() => {
+      const marked = SpellProject.combineCompiled(parts, target.writer, this.importHeader(target.writer), this.scope, {
+        listsStartAt: this.contents?.listsStartAt
+      })
+      return SP.SpellDeclarations.stripComments(marked)
+    })
+  }
+
+  /**
    * A project's files' code as ONE module, in order, the writer's `fileSeparator` between each.
    * - Each `part` is a `.spell` file's AST, or code as is, e.g. a `.css` file's.
    * - Each class gets its members from EVERY file -- see `SP.hoistClassMembers()`:
