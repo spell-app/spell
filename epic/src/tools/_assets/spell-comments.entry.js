@@ -60,6 +60,9 @@ const SECTIONS_TOP = "--site-sections-top"
 /** How long a jump's landing takes the site (`SiteSections.go()`:  the root ready, the unfold, two frames), ms. */
 const LANDING_MS = 350
 
+/** Where a section becomes the current one, as a share of the window's height:  Spell UI's toc's `READING_LINE`. */
+const READING_LINE = 0.2
+
 /** A toolbar click's section stays marked until the page has scrolled to it and been still this long, ms. */
 const GLIDE_QUIET_MS = 200
 
@@ -238,7 +241,11 @@ function sectionLabel(section) {
  *   on it would leave the one above marked (Owen, 2026-10-23:  "Not showing Themes as selected when I click it")
  */
 function currentSection(main, sections) {
-  const line = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
+  // the "On this page" list's reading line (Spell UI's `TocIndex.current()`:  the page's scroll padding and a fifth of
+  // the window), never above the stuck titles:  the two said different sections (the designer, T58)
+  const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
+  const stuck = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
+  const line = Math.max(stuck, padding + innerHeight * READING_LINE)
   const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 2
   let current
   for (const section of sections) {
