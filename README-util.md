@@ -220,7 +220,13 @@ prefs.set("width", 250)      //                          spell-site:width  = 250
   - A string that would read back as something else is quoted:  the text `"1"` is kept as `"1"`, the number as `1`.
 - A declared pref's default is its `default`, else its first choice, else its type's:  `0`, `""` or `false`.
 - Where it keeps them is its place's business:  `local` (the default), `session` (per tab), `memory`
-  (servers, tests), or a `StoragePlace` over a storage you hand it.
+  (servers, tests), or a place you hand it:
+  - `DatabasePlace.shared`:  the browser's database (IndexedDB), for big values and values that aren't text.
+    A `Blob`, a `Date` or a file handle comes back as it went in;
+    `update()` reads, changes and saves in one transaction, so two tabs never read the same value.
+  - `ServerPlace.shared`:  the page server, which keeps each store in the person's space
+    ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)), so it follows them to every browser.
+  - a `StoragePlace` over a storage you hand it (a test's).
 - The edges:
   - It never throws when storage fails.
     Blocked storage (a private window) keeps values in memory for the visit, and says so once;
@@ -520,7 +526,7 @@ And when you're in there:
 | [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [persist/](src/util/persist/) | values kept across visits:  `PrefStore`, `PrefPlace` and `StoragePlace` (where it keeps them), `MemoryStorage`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` |
+| [persist/](src/util/persist/) | values kept across visits:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
 | [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `drawable`, `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |

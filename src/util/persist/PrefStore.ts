@@ -11,8 +11,11 @@ import { choicesOf, defaultFor, isAllowed } from "./values"
  *   - e.g. `new PrefStore("spell-site")` keeps `scheme` at `spell-site:scheme`
  *   - So two apps on one site never share a value, and `forgetAll()` forgets only its own.
  * - It always asks the same way;  WHERE it keeps them is its place's business (`PrefStoreOptions.place`):
- *   the browser's storage unless it says otherwise.
- * - Values are text people and plain scripts can read:  `dark`, `1`, `{"open":true}` (`textForValue()`).
+ *   - the browser's storage, unless it says otherwise
+ *   - per tab, or memory, by name (`session`, `memory`)
+ *   - the browser's database or the page server, waited on (`DatabasePlace.shared`, `ServerPlace.shared`)
+ * - In the browser's storage, values are text people and plain scripts can read:  `dark`, `1`, `{"open":true}`
+ *   (`textForValue()`);  the browser's database keeps them as they are, a server as JSON.
  * - A pref may be declared, with its type, choices and default (`declare()`):
  *   `get()` then answers its default while nothing's kept, and refuses to keep what it doesn't allow.
  * - Quick (`get()`, `set()` ...) and waited on (`load()`, `save()`, `update()`):
@@ -114,14 +117,17 @@ export class PrefStore {
     return this.place.keys(this.name).filter((key) => key.startsWith(prefix))
   }
 
-  /** Forget every key that starts with `prefix`. */
-  forgetUnder(prefix: string): void {
-    this.place.removeUnder(this.name, prefix)
+  /**
+   * Forget every key that starts with `prefix`.
+   * - A quick place has forgotten them when it returns;  the promise says when a waited-on one has.
+   */
+  forgetUnder(prefix: string): Promise<void> {
+    return this.place.removeUnder(this.name, prefix)
   }
 
-  /** Forget every key it keeps, and no other store's. */
-  forgetAll(): void {
-    this.forgetUnder("")
+  /** Forget every key it keeps, and no other store's:  as `forgetUnder("")`. */
+  forgetAll(): Promise<void> {
+    return this.forgetUnder("")
   }
 
   /**
@@ -159,12 +165,21 @@ export class PrefStore {
 
   /**
    * Read, change and save `key`'s value as one step:  `change` gets the value (`load()`'s), and answers the new one.
-   * - One at a time for each key:  two updates never read the same value.
+   * - One at a time for each key in this page;  the browser's database also keeps other tabs out, in one transaction.
    * - Returns the new value.
+   * - throws `TypeError` for a new value its declaration doesn't allow:  nothing is saved
    */
   update<T>(key: string, change: (value: T) => T): Promise<T> {
+    this.checkKey("update", key)
     const before = this.updating.get(key) ?? Promise.resolve()
-    const after = before.then(async () => this.save(key, change((await this.load(key)) as T)))
+    const after = before.then(
+      async () =>
+        (await this.place.update(this.name, key, (kept) => {
+          const value = change(this.keptOrDefault("update", key, kept, undefined) as T)
+          this.checkWrite("update", key, value)
+          return value
+        })) as T
+    )
     const settled = after.then(
       () => undefined,
       () => undefined

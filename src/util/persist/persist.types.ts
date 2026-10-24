@@ -2,6 +2,7 @@
  * Types for `spell/util/persist`:  keeping values for people, across visits -- see `PrefStore`.
  * - Generic, like every file of this folder:  nothing spell-specific, so Spell UI uses it too.
  * - Types only, apart from the place names:  the folder's other files import it, never the reverse.
+ * - The page server's side of `ServerPlace`'s protocol (spell-app's spaces) imports its types too.
  */
 
 ////////////////
@@ -42,4 +43,47 @@ export type ValueInfo = {
   oneOf?: readonly unknown[] | (() => readonly unknown[])
   /** Its value while nothing's kept:  wins over the first choice and the type's default. */
   default?: unknown
+}
+
+////////////////
+// ## The server's protocol
+////////////////
+
+/*
+ * What `ServerPlace` asks the page server, under its URL (`/api/prefs` by default);  spell-app's spaces answer it.
+ * - `GET  <url>/load?store=<store>&key=<key>`:  a `PrefLoadAnswer`
+ * - `POST <url>/save`, a `PrefSaveRequest`:  a `PrefLoadAnswer`, the value saved
+ * - `GET  <url>/keys?store=<store>&under=<prefix>`:  a `PrefKeysAnswer`
+ * - `POST <url>/forget`, a `PrefForgetRequest`:  a `PrefKeysAnswer`, the keys left
+ * - A mistake (a store name that can't be one):  400, with the error's message.
+ */
+
+/** A store's value under a key:  `value` left out when nothing's kept. */
+export type PrefLoadAnswer = {
+  /** The value kept, as JSON. */
+  value?: unknown
+}
+
+/** Save `value` under `key` for `store`;  `value` left out forgets the key. */
+export type PrefSaveRequest = {
+  /** The store's name, e.g. `spellEditor` or `@owen/solitaire`. */
+  store: string
+  /** The pref's key, e.g. `mode`. */
+  key: string
+  /** The value to keep, as JSON. */
+  value?: unknown
+}
+
+/** A store's keys, without its name. */
+export type PrefKeysAnswer = {
+  /** The keys, e.g. `["layout/left", "mode"]`. */
+  keys: string[]
+}
+
+/** Forget every key of `store` that starts with `under`:  every key, for `""`. */
+export type PrefForgetRequest = {
+  /** The store's name. */
+  store: string
+  /** The keys' shared start, e.g. `layout/`. */
+  under: string
 }

@@ -5,8 +5,8 @@ import { MemoryStorage, PrefPlace, PrefStore, StoragePlace, type StorageLike } f
 /** Every store a test made on the browser's storage, forgotten after it. */
 const made: PrefStore[] = []
 
-afterEach(() => {
-  for (const store of made.splice(0)) store.forgetAll()
+afterEach(async () => {
+  await Promise.all(made.splice(0).map((store) => store.forgetAll()))
   vi.restoreAllMocks()
 })
 
@@ -64,7 +64,8 @@ describe("PrefStore", () => {
     const other = store("PrefStore-test-app2")
     site.set("theme", "dark")
     expect(other.get("theme")).toBeUndefined()
-    other.forgetAll()
+    // a quick place has forgotten them when it returns:  no wait
+    void other.forgetAll()
     expect(site.get("theme")).toBe("dark")
   })
 
@@ -132,7 +133,7 @@ describe("PrefStore.keysUnder() / forgetUnder() / forgetAll() / rename()", () =>
     prefs.set("theme", "dark")
     expect(prefs.keysUnder("layout/").sort()).toEqual(["layout/left", "layout/right"])
     expect(prefs.keysUnder().sort()).toEqual(["layout/left", "layout/right", "theme"])
-    prefs.forgetUnder("layout/")
+    void prefs.forgetUnder("layout/")
     expect(prefs.keysUnder()).toEqual(["theme"])
   })
 
@@ -140,7 +141,7 @@ describe("PrefStore.keysUnder() / forgetUnder() / forgetAll() / rename()", () =>
     localStorage.setItem("PrefStore-test-neighbour:theme", "dark")
     const prefs = store("PrefStore-test-all")
     prefs.set("a", 1)
-    prefs.forgetAll()
+    void prefs.forgetAll()
     expect(prefs.keysUnder()).toEqual([])
     expect(localStorage.getItem("PrefStore-test-neighbour:theme")).toBe("dark")
     localStorage.removeItem("PrefStore-test-neighbour:theme")

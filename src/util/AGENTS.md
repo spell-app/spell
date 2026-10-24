@@ -108,7 +108,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - `spell/util/persist`:  values kept for people across visits (epic `prefs-and-undo`).
   - Flattened into the `spell/util` barrel too.
   - `PrefStore`:  one app's preferences, every key `<store>:<key>`, values as text people can read (`values.ts`).
-  - `PrefPlace`:  where a store keeps them;  `StoragePlace` over a web `Storage`, `MemoryStorage` for memory.
+  - `PrefPlace`:  where a store keeps them.
+    - quick:  `StoragePlace` over a web `Storage`, `MemoryStorage` for memory
+    - waited on (`WaitedOnPlace`):  `DatabasePlace`, the browser's IndexedDB;  `ServerPlace`, the page server's `/api/prefs`
+      (spell-app's spaces answer it, in the person's space;  the protocol's types are `persist.types.ts`'s)
 - GENERIC, like the files beside `index.ts`:  nothing spell-specific, nothing imported from outside the folder.
   - NOT in Spell UI's util barrel:  in its `core` bundle it cost every page 1.9 kB (`yarn measure`, 2026-10-24).
     Spell UI's files that keep preferences import `spell/util/persist/PrefStore` by file.
