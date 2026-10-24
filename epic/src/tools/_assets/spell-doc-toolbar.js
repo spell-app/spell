@@ -30,8 +30,7 @@ const MIN_TITLE_PX = 50
  *   details page's questions, `<epic-ask>`);  else its `<ui-icon>`;  else its number (`2.`);  else its access letter,
  *   shown only while the titles are hidden (`spell-toolbar-icons`)
  * - the title without its number (`2. Markup` is `Markup`), unless it's an item's
- * - its ACCESS LETTER (Owen, 2026-10-23, epic `debut`:  "the `T` in types could be bold underline black"):
- *   unique on the toolbar (`accessLetters()`), drawn IN its title (bold, underlined, the text's colour);
+ * - its ACCESS LETTER:  unique on the toolbar (`accessLetters()`), drawn IN its title (bold, the text's colour);
  *   pressing it jumps there as a click does (`wireAccessLetters()`)
  */
 export function titledItems(groups, badgesOf) {
@@ -108,8 +107,7 @@ function titleWithKey(title, letter) {
  * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
  *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-toolbar.css`)
  * - `segmented`:  the toolbar under a page's tabs (Spell UI's components pages) is a SEGMENTED menu, as the tabs are:
- *   the same pills, and the same sliding key as the section read changes (Owen, 2026-10-23:  "Secondary tabs need to
- *   be pills like top tabs")
+ *   the same pills, and the same sliding key as the section being read changes
  * - the current item scrolled into view, on a row scrolled sideways (`scrollIntoRow()`)
  * - SIDE EFFECT:  removes the toolbar built before (`removeToolbar()`), keeping what was added to its row
  */
@@ -137,8 +135,8 @@ export function toolbarMenu(items, { titled, segmented = false }) {
 }
 
 /**
- * A titled toolbar's ACCESS LETTERS (Owen, 2026-10-23, epic `debut`):  a letter pressed on its own jumps to the item
- * whose `data-key` it is, as clicking it does (the link inside the item is clicked).
+ * A titled toolbar's ACCESS LETTERS:  a letter pressed on its own jumps to the item whose `data-key` it is,
+ * as clicking it does (the link inside the item is clicked).
  * - once per page:  it finds the toolbar showing at the time, so a toolbar built again needs nothing
  * - left alone:  any modifier (Cmd / Ctrl + K is the jump dialog), a key held down, typing (a field, an editable box),
  *   an open dialog, a focused control that takes keys of its own (a menu, a dropdown, a live example), `/` (the site's
@@ -163,19 +161,18 @@ function wireAccessLetters() {
   })
 }
 
-/** The page's access letters are listened for (`wireAccessLetters()`). */
+/** Whether the page listens for access letters yet (`wireAccessLetters()`):  once per page. */
 let accessLettersWired = false
 
 /**
- * A titled toolbar's KEY TIPS (Owen, 2026-10-23, epic `debut`:  "have pretty tooltip which says 'Type <T> to jump to
- * this section'"):  under the pointer or the keyboard's focus, an item with an access letter shows
+ * A titled toolbar's KEY TIPS:  under the pointer or the keyboard's focus, an item with an access letter shows
  * "Type T to jump to this section", the letter as a key cap.
  * - ONE tip per page (`.spell-toolbar-tip`), a `popover` in the top layer:  the toolbar's row scrolls sideways, which
  *   would clip a tip inside it
  * - placed under the item, centred on it, kept inside the window;  gone at once as the pointer leaves, focus moves on,
  *   the page scrolls or the item is clicked
- * - under the pointer only after a second of resting on the item (Owen, 2026-10-23:  "should wait 1 second before
- *   displaying");  the keyboard's focus shows it at once
+ * - under the pointer only after a second of resting on the item (`TIP_DELAY_MS`);
+ *   the keyboard's focus shows it at once
  * - the item's accessible name says the same (`aria-keyshortcuts`):  the tip is for the eye only (`aria-hidden`)
  */
 function wireKeyTips(toolbar) {

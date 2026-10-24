@@ -165,10 +165,9 @@ function drawToolbar(sections, { signal }) {
     .then(() => nextFrames(2))
     .then(remeasure)
   let scheduled = false
-  // a clicked item is the current one at once, and stays so while the page glides to its section:  following the
-  // scroll meanwhile flipped the mark through every section passed (Owen, 2026-10-23, epic `debut`:  "When these
-  // buttons are pressed, they flip back and forth while the page is scrolling");  held until the scroll has been
-  // still for `GLIDE_QUIET_MS`, `GLIDE_MAX_MS` at most
+  // a clicked item is the current one at once, and stays so while the page glides to its section,
+  // until the scroll has been still for `GLIDE_QUIET_MS` (`GLIDE_MAX_MS` at most):
+  // following the scroll meanwhile flipped the mark through every section passed
   let held = undefined
   let quiet = 0
   let heldSince = 0
@@ -236,13 +235,14 @@ function sectionLabel(section) {
 }
 
 /**
- * The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first.
- * - at the page's end, the last one showing on screen:  a short last section can't scroll up to the line, so a click
- *   on it would leave the one above marked (Owen, 2026-10-23:  "Not showing Themes as selected when I click it")
+ * The last of `sections` whose top has reached the reading line;  none above the first.
+ * - the line:  the "On this page" list's, never above the line the site sticks its titles at
+ * - at the page's end, the last one showing on screen:
+ *   a short last section can't scroll up to the line, so a click on it would leave the one above marked
  */
 function currentSection(main, sections) {
-  // the "On this page" list's reading line (Spell UI's `TocIndex.current()`:  the page's scroll padding and a fifth of
-  // the window), never above the stuck titles:  the two said different sections (the designer, T58)
+  // the "On this page" list's reading line (Spell UI's `TocIndex.current()`:  the page's scroll padding and a fifth
+  // of the window), so the toolbar and that list mark the same section
   const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
   const stuck = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
   const line = Math.max(stuck, padding + innerHeight * READING_LINE)
@@ -258,9 +258,9 @@ function currentSection(main, sections) {
 }
 
 /**
- * A click on a section's button GLIDES there (Owen, 2026-10-23:  "Clicking secondary tab jumps the entire page rather
- * than tabs gliding up"):  the browser's own jump to `#id` is stopped, the address set without a scroll, and the
- * site's landing told by the `hashchange` it listens for (`SiteSections`:  a smooth scroll, the stuck bars put)
+ * A click on a section's button GLIDES there, rather than the whole page jumping.
+ * - the browser's own jump to `#id` is stopped, and the address set without a scroll
+ * - then a `hashchange` tells the site to land there (`SiteSections`:  a smooth scroll, the stuck bars put)
  * - a click with a modifier (a new tab, a new window) is left to the browser
  */
 function glideTo(event) {

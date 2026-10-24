@@ -115,8 +115,10 @@
   height: var(--spell-block-head);
 }
 /*
- * a docs EXAMPLE's (`<ui-docs-example>`):  left of its code button, which holds that corner (28px wide, 0.8em in), level
- * with it;  over it, the two covered each other (the designer, C53)
+ * a docs EXAMPLE's (`<ui-docs-example>`), and a block's in its demo (not slotted into its description):
+ * left of the example's code button, level with it
+ * - the code button holds that corner:  28px wide, 0.8em in
+ * - on top of it, the two covered each other
  */
 :is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-docs-example) > .spell-block-buttons,
 :is(.spell-doc-main, .site-main) ui-docs-example > .spell-block-actions:not([slot]) > .spell-block-buttons {

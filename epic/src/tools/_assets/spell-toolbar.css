@@ -249,9 +249,11 @@ ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
   display: none;
 }
 /*
- * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, the text's own colour, no underline (Owen,
- * 2026-10-23:  "Lose underline under T");  the key tip under the item says what it does (`wireKeyTips()`).  The item's
- * letter mark (a section with no icon) only while the titles are hidden, so the letter never shows twice.
+ * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, the text's own colour, no underline
+ * (Owen, 2026-10-23:  "Lose underline under T")
+ * - the key tip under the item says what it does (`wireKeyTips()`)
+ * - the item's letter mark (a section with no icon) shows only while the titles are hidden (below),
+ *   so the letter never shows twice
  */
 .spell-toolbar-key {
   font-weight: 700;
@@ -434,7 +436,8 @@ ui-sticky.spell-site-toolbar::part(sticky) {
  *   panel's colour and blur, its padding round the track (`--site-tabs-band`), its bottom corners round
  * - in the column, not out to its edges:  the panel floats, its margin below (`--site-tabs-gap`)
  * - it sticks right under the tabs' track (`SiteSections`), so the two halves meet with no seam
- * - the track fills the panel's width, its buttons sharing it, each title centred;  too many, it scrolls
+ * - the track only as wide as its buttons, centred under the tabs, each title centred in its button;
+ *   too many, it scrolls
  */
 ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
   margin-block: 0 var(--site-tabs-gap, 10px);
@@ -548,14 +551,16 @@ ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
   max-width: 100%;
   margin-inline: auto;
 }
-/* ... the lower band's room for its two concave curves inside the top band kept, however long its row (it scrolls):
-   this rule's `100%` took it away (Owen, 2026-10-23, a picture of the band jutting past the top one) */
-/* its `‹` / `›` keys:  a light fill shows nothing on this near-white track, so a faint shade in light (the designer, T24) */
-ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-segmented {
-  --ui-toolbar-button-background: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.12));
-}
+/*
+ * ... but the segmented one keeps the lower band's room for its two concave curves inside the top band,
+ * however long its row (it scrolls):  the rule above's `100%` would let the band jut past the top one
+ */
 ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled.spell-toolbar-segmented {
   max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+}
+/* its `‹` / `›` keys:  a light fill shows nothing on this near-white track, so a faint shade in light */
+ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-segmented {
+  --ui-toolbar-button-background: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.12));
 }
 ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
   justify-content: center;
