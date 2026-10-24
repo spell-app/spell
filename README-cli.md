@@ -564,7 +564,8 @@ each language pack registers every rule again, with its own words.
     - On Solitaire and todos, more thought made no better names, only slower ones, so today `fast` and `balanced`
       ask the same, and `best` thinks harder only over the fix-ups.
 
-- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review.
+- The names land in a dictionary beside the project, `<Project>.<lang>.names.json5`, for a person to review;
+  with `--out`, in that folder instead, with everything else the run writes (below).
 - The shared glossary is the language's own, `languages/<lang>/glossary.json5` in spell-parser:
   card games' words and common ones, each with its gender and where it came from.
 - Its work is spell-app's (it finds the project the app's way), then `spell-parser`'s `translateProject.ts`.
@@ -572,6 +573,7 @@ each language pack registers every rule again, with its own words.
 | Command | What it does |
 | --- | --- |
 | `spell translate [project] --to es` | writes the project beside it, named as its dictionary names it (`Solitaire` => `Solitario`), one line for each of its lines;  exits 1 if any line still needs a person, fails lint, a test, or the shape check |
+| `spell translate [project] --to es --review` | the same, but between the names and the lines it shows the names it drafted on a page, waits for Send, and writes the lines with the answers (below, "Reviewing the names") |
 | `spell translate [project] --to es --learn` | translates nothing:  adds the project's reviewed names to the shared glossary, for every project after it |
 | `spell translate speedtest [projects...] --to es` | times translating them, run after run, each on a scratch copy it deletes after:  a table of min, median and max (below, "Timing it") |
 
@@ -585,7 +587,8 @@ each language pack registers every rule again, with its own words.
 | `--effort <tier>` | how much every pass spends on its answers:  `fast`, `balanced` (the default) or `best` |
 | `--names-effort <tier>`, `--fix-ups-effort <tier>` | one pass's, over `--effort` |
 | `--seed <project>` | fills the dictionary first from a translation a person made, e.g. `@spell/examples/Solitario` |
-| `--out <folder>` | writes it there instead |
+| `--out <folder>` | writes it there instead, its dictionary and record too:  nothing is written beside the project.  A dictionary already beside it is read, never written;  `--update` passes the same `--out` to find its record |
+| `--review-timeout <time>` | how long `--review` waits for Send:  minutes (`30`, the default), or `90s`, `10m`, `1h` |
 | `--cold` | for timing:  starts from nothing worked out before (below, "Timing it");  needs `--out` |
 
 - It says how long each pass took, and each call to Claude:
@@ -611,6 +614,27 @@ each language pack registers every rule again, with its own words.
   the other language's grammar reads them as the import declares them.
 
 </details>
+
+#### Reviewing the names
+
+Batch by default, so CI never waits:  with `--review`, a person sees every name before a line is written with it.
+- After the names pass, a page opens in the side bar's Review tab (else a browser):
+  a row per name Claude drafted, never the glossary's or the dictionary's.
+  - Each row:  the English, the gender, the kind (type, name, phrase, text, comment), where it came from,
+    and the first line that uses it;  the other lines fold under it.
+  - Accept the proposal, type over it, or pick one of the 2 or 3 alternatives Claude gave in the same calls
+    (types, names and phrases;  a text or a comment has none).
+  - Tick "for every project" and the name goes into the shared glossary too, as `reviewed`.
+- Then Send:  the lines are written with the answers, and each goes in the dictionary marked `reviewed`,
+  so `--update` never asks again, and `--learn` ranks it above a seed's.
+- A typed or picked answer is checked as a drafted name is.
+  One Spell can't read (`carta` for `label`, when `card` is `carta`) comes back as a row of its own, saying why;
+  still unreadable, the proposal stays and the report says so.
+- A type's gender:  its proposal's, the alternative's, or say it after the name, `naipe (m)`.
+- No Send in time (`--review-timeout`, 30 minutes):  every proposal is kept as drafted, and the report says so.
+- With `--no-ai`, its rows are the names still missing, to type.
+- `--cold` refuses it:  a timing that waits for a person times nothing.
+- The page is a command run of the kit's page server, at `/runs/<id>/`.
 
 #### Timing it
 
