@@ -52,12 +52,16 @@ import {
  *   - why:  VS Code's side bar (Electron 38 and up, on macOS) shows a `title` only on the element under the
  *     pointer, not on its parent (electron/electron#49843;  epic `epic-engine` I43)
  * - `docked`:  a compact row in place, not a fixed bar, inside the page's own chrome
- * - `no-tools`:  no edit button and no "open in VS Code" link (the Spell UI site's chrome, where they did nothing)
  *   (the Spell UI site's side column and top bar)
  *   - no light / dark button (the page has its own)
  *   - no room kept on the page (`--spell-site-header-height` is 0)
- * - Parts, for a page that docks it:  `bar` (the row), `nav` (its links;  the Spell UI site's top bar keeps them on one
- *   line, scrolling sideways), `brand` (the hat;  that bar hides it where its own brand shows the hat)
+ * - `no-tools`:  no edit button and no "open in VS Code" link,
+ *   for a page whose own chrome has no use for them (the Spell UI site's)
+ *   - edit mode stays off there too (`readEdit()`)
+ * - Parts, for a page that docks it:
+ *   - `bar`:  the row
+ *   - `nav`:  its links;  the Spell UI site's top bar keeps them on one line, scrolling sideways
+ *   - `brand`:  the hat;  that bar hides it where its own brand already shows the hat
  * - Re-draws on `spell-site:page` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
@@ -328,8 +332,8 @@ export function serverConfig(): ServerConfig | undefined {
 
 /**
  * Whether edit mode is on in this tab.
- * - never on a page whose header hides the tools (`no-tools`):  its switch is gone, so it couldn't be turned off
- *   there (Owen, 2026-10-23, on an "edit #examples-content-divider" pill stuck over a Spell UI page)
+ * - never on a page whose header hides the tools (`no-tools`):
+ *   its switch is gone there, so edit mode, once on, could never be turned off
  */
 export function readEdit(): boolean {
   if (document.querySelector(`${SiteHeader.tag}[no-tools]`)) return false
