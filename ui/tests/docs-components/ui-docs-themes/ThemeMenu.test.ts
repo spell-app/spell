@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { DOCS_PLAIN_THEME, type SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 
 import { ThemeMenu } from "spell-ui/docs-components/ui-docs-themes/ThemeMenu"
-import { CLASSIC, FRUITY, SPELL, SPELL_BRAND } from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
+import { CLASSIC, FRUITY, SPELL, SPELL_BRAND, STUDIO } from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
 
 describe("new ThemeMenu()", () => {
   test("no data:  every theme under its sheet name;  an unknown `for` tag filters nothing", () => {
@@ -27,6 +27,7 @@ describe("ThemeMenu.entries", () => {
       SPELL,
       SPELL_BRAND,
       FRUITY,
+      STUDIO,
       DOCS_PLAIN_THEME,
       CLASSIC,
       "divider",

@@ -1,12 +1,12 @@
 import type { E } from "spell-ui/core"
 import { DOCS_PLAIN_THEME, type SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-import { CLASSIC, FRUITY, SPELL, SPELL_BRAND, type DocsThemesText } from "./UIDocsThemes.types"
+import { CLASSIC, FRUITY, SPELL, SPELL_BRAND, STUDIO, type DocsThemesText } from "./UIDocsThemes.types"
 
 /****************
  * ### `ThemeMenu`
  * What `<ui-docs-themes>`' dropdown lists, and its text:  plain data, no Solid, which tests drive directly.
- * - Entries:  Spell (our own theme, the docs' default), Spell Brand and Fruity (our own too),
+ * - Entries:  Spell (our own theme, the docs' default), Spell Brand, Fruity and Studio (our own too),
  *   Plain (our own look, no theme:  `DOCS_PLAIN_THEME`), Classic,
  *   then a `Fomantic themes` header over every Fomantic theme (`UI.themes.names`, A-Z by title).
  * - `forTag`:  only the Fomantic themes whose `SiteTheme.families` hold that tag's family;  Spell,
@@ -49,6 +49,7 @@ export class ThemeMenu {
       { value: SPELL, text: this.titleFor(SPELL), description: text("spellDescription") },
       { value: SPELL_BRAND, text: this.titleFor(SPELL_BRAND), description: text("spellBrandDescription") },
       { value: FRUITY, text: this.titleFor(FRUITY), description: text("fruityDescription") },
+      { value: STUDIO, text: this.titleFor(STUDIO), description: text("studioDescription") },
       { value: DOCS_PLAIN_THEME, text: text("default"), description: text("defaultDescription") },
       { value: CLASSIC, text: this.titleFor(CLASSIC), description: text("classicDescription") },
       { type: "divider", text: "" },

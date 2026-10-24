@@ -18,6 +18,7 @@ import {
   FRUITY,
   SPELL,
   SPELL_BRAND,
+  STUDIO,
   type DocsThemesChange
 } from "spell-ui/docs-components/ui-docs-themes/UIDocsThemes.types"
 
@@ -243,19 +244,20 @@ describe("<ui-docs-themes> markup", () => {
 })
 
 describe("<ui-docs-themes> overlay", () => {
-  it("lists Spell (checked), Spell Brand, Fruity, Plain, Classic, then every Fomantic theme titled from the site data", async () => {
+  it("lists Spell (checked), Spell Brand, Fruity, Studio, Plain, Classic, then every Fomantic theme titled from the site data", async () => {
     const host = await render(`<ui-docs-themes></ui-docs-themes>`)
     const list = rows(host)
-    expect(list.slice(0, 5)).toEqual([
+    expect(list.slice(0, 6)).toEqual([
       [SPELL, "Spell"],
       [SPELL_BRAND, "Spell Brand"],
       [FRUITY, "Fruity"],
+      [STUDIO, "Studio"],
       [DOCS_PLAIN_THEME, "Plain"],
       ["classic", "Classic"]
     ])
     expect(
       list
-        .slice(5)
+        .slice(6)
         .map(([value]) => value)
         .sort()
     ).toEqual([...UI.themes.names].sort())
@@ -447,7 +449,7 @@ describe("<ui-docs-themes> dropdown (show=theme)", () => {
     const buttons = data.themes.filter((theme) => theme.families.includes("ui-button")).map((theme) => theme.name)
     const host = await render(`<ui-docs-themes for="ui-button" show="theme"></ui-docs-themes>`)
     const listed = dropdownRows(host)
-      .slice(5)
+      .slice(6)
       .map(([value]) => value)
     expect(listed.sort()).toEqual(buttons.filter((name) => UI.themes.names.includes(name)).sort())
     expect(listed).toContain("github")

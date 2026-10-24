@@ -1,0 +1,119 @@
+/*
+ * Studio theme:  a code studio in Shades of Purple's colours, as a `spell-ui` theme, `@layer ui.theme`.
+ * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.  Applied like one, ON TOP
+ *   of `classic.css`, so every classic token it replaces is restated here.
+ * - The Studio look of the Spell editor (epic `debut`):  its boards on the "Spell editor facelift" Design canvas are
+ *   where every value below comes from.
+ * - What makes it Studio:
+ *   - flat panels joined by hairlines, no glass, no wallpaper
+ *   - dark:  Shades of Purple's own navy (`#1E1E3F` page, `#2D2B55` panels) and its yellow accent, `#FAD000`
+ *   - light:  pale lavender panels, a deep violet accent, `#6A2BC2`
+ *   - the system font, 8px controls and 12px panels
+ * - Tokens only, so far:  the families keep classic's shapes (epic `debut` P4:  built to the board, no polish round).
+ * - NO font files ship:  every face is the platform's own.
+ */
+
+@layer ui.theme {
+  :root {
+    /*******************************
+         Primitives (the Studio board)
+    *******************************/
+
+    --studio-page: light-dark(#e9e5ff, #1e1e3f);
+    --studio-panel: light-dark(#f6f4ff, #2d2b55);
+    --studio-inset: light-dark(#ece8ff, #262650);
+    --studio-code: light-dark(#fbfaff, #2d2b55);
+    --studio-border: light-dark(#d3ccf5, #3e3b78);
+    --studio-accent: light-dark(#6a2bc2, #fad000);
+    --studio-on-accent: light-dark(#ffffff, #1e1e3f);
+    --studio-accent-wash: light-dark(rgb(106 43 194 / 0.12), rgb(250 208 0 / 0.14));
+
+    /*******************************
+                 Type
+    *******************************/
+
+    --ui-font-size: 15px;
+    --ui-font-family:
+      system-ui, -apple-system, "Segoe UI", "Noto Sans", Cantarell, Ubuntu, "Helvetica Neue", Arial, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    --ui-font-family-heading: var(--ui-font-family);
+    --ui-font-family-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    /*******************************
+                 Shape
+    *******************************/
+
+    --ui-radius-s: 6px;
+    --ui-radius-m: 8px;
+    --ui-radius-l: 12px;
+    --ui-button-radius: var(--ui-radius-m);
+    --ui-input-radius: var(--ui-radius-m);
+    --ui-dropdown-radius: var(--ui-radius-m);
+    --ui-menu-radius: var(--ui-radius-m);
+    --ui-card-radius: var(--ui-radius-l);
+    --ui-segment-radius: var(--ui-radius-l);
+    --ui-popup-radius: var(--ui-radius-m);
+    --ui-modal-radius: var(--ui-radius-l);
+
+    /*******************************
+            Ink, text, surfaces
+    *******************************/
+
+    --ui-text-color: light-dark(#2d2b55, #e3dfff);
+    --ui-text-dark: light-dark(#1e1e3f, #ffffff);
+    --ui-text-muted: light-dark(#565196, #a9a3e0);
+    --ui-text-light: light-dark(#6c67a8, #8f89cc);
+
+    --ui-background: var(--studio-page);
+    --ui-surface: var(--studio-panel);
+    --ui-surface-muted: var(--studio-inset);
+    --ui-surface-strong: var(--studio-code);
+    --ui-highlight: var(--studio-accent-wash);
+
+    --ui-border-color: var(--studio-border);
+    --ui-border-color-internal: var(--studio-border);
+    --ui-border-color-strong: light-dark(#bdb3ee, #514d96);
+
+    --ui-code-background: var(--studio-inset);
+
+    /* Primary:  the accent, yellow in dark (ink text on it), violet in light */
+    --ui-primary: var(--studio-accent);
+    --ui-primary-inverted: var(--studio-accent);
+    --ui-primary-on: var(--studio-on-accent);
+    --ui-primary-inverted-on: var(--studio-on-accent);
+    --ui-primary-text: var(--studio-accent);
+    --ui-primary-background: var(--studio-accent-wash);
+
+    --ui-link: light-dark(#6a2bc2, #9effff);
+    --ui-link-hover: light-dark(#4f1f94, #c9ffff);
+    --ui-focus-color: var(--studio-accent);
+
+    /*******************************
+                Shadows
+    *******************************/
+
+    /* flat:  panels are joined by hairlines;  only what floats casts one */
+    --ui-shadow-ink: light-dark(rgb(45 43 85), rgb(0 0 0));
+    --ui-shadow-subtle: none;
+    --ui-shadow-raised: 0 1px 2px light-dark(rgb(45 43 85 / 0.08), rgb(0 0 0 / 0.3));
+
+    /*******************************
+              Components
+    *******************************/
+
+    --ui-input-background: var(--studio-inset);
+    --ui-input-border-color: var(--studio-border);
+    --ui-menu-active-background: var(--studio-accent-wash);
+    --ui-menu-active-color: var(--ui-text-color);
+    --ui-menu-segmented-background: var(--studio-inset);
+    --ui-menu-segmented-radius: var(--ui-radius-m);
+    --ui-menu-segmented-item-radius: var(--ui-radius-s);
+    --ui-menu-segmented-active-background: var(--studio-accent);
+    --ui-menu-segmented-active-color: var(--studio-on-accent);
+  }
+
+  /* page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+}

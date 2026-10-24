@@ -52,5 +52,8 @@ export const SPELL_BRAND = "spell-brand"
 /** The `UI.themes` name of Fruity:  our own theme too, macOS today in translucent glass (epic `debut`). */
 export const FRUITY = "fruity"
 
+/** The `UI.themes` name of Studio:  our own theme too, a code studio in Shades of Purple's colours (epic `debut`). */
+export const STUDIO = "studio"
+
 /** The `UI.themes` name of Classic, the base every Fomantic theme sits on (`UI.themes.base`). */
 export const CLASSIC = "classic"

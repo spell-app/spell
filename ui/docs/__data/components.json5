@@ -28472,6 +28472,11 @@
           "description": "Under `Fruity` in the list."
         },
         {
+          "key": "studioDescription",
+          "text": "Shades of Purple, flat",
+          "description": "Under `Studio` in the list."
+        },
+        {
           "key": "classicDescription",
           "text": "Fomantic's look",
           "description": "Under `Classic` in the list."
@@ -40056,6 +40061,22 @@
         "ui-progress"
       ],
       "global": false
+    },
+    {
+      "name": "studio",
+      "title": "Studio",
+      "families": [
+        "ui-button",
+        "ui-card",
+        "ui-code",
+        "ui-dropdown",
+        "ui-input",
+        "ui-menu",
+        "ui-modal",
+        "ui-popup",
+        "ui-segment"
+      ],
+      "global": true
     },
     {
       "name": "systemfont",

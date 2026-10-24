@@ -114,6 +114,7 @@ export const docsThemesVocabulary = {
       description: "Under `Spell Brand` in the list:  the theme the brand pages converge on."
     },
     { key: "fruityDescription", text: "macOS today, in glass", description: "Under `Fruity` in the list." },
+    { key: "studioDescription", text: "Shades of Purple, flat", description: "Under `Studio` in the list." },
     { key: "classicDescription", text: "Fomantic's look", description: "Under `Classic` in the list." },
     { key: "fomanticThemes", text: "Fomantic themes", description: "List header above Fomantic's themes." },
     { key: "toDark", text: "Switch to dark", description: "The light / dark button's name, while the page is light." },

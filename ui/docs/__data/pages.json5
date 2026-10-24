@@ -604,6 +604,9 @@
     "striped": {
       "title": "Striped"
     },
+    "studio": {
+      "title": "Studio"
+    },
     "systemfont": {
       "title": "System font"
     },

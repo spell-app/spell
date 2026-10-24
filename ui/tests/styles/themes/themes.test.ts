@@ -622,7 +622,7 @@ describe("spell.css", () => {
     await UI.load()
     expect(UI.themes).toMatchObject({
       sheets: expect.arrayContaining(["spell"]),
-      own: ["spell", "spell-brand", "fruity"],
+      own: ["spell", "spell-brand", "fruity", "studio"],
       names: expect.not.arrayContaining(["spell"])
     })
   })
@@ -683,6 +683,23 @@ describe("spell-brand.css", () => {
     await vi.waitFor(() => expect(getComputedStyle(box, "::before").backgroundColor).toBe("rgb(101, 80, 202)"))
     expect(getComputedStyle(box, "::before").borderTopLeftRadius).toBe("50%")
     expect(getComputedStyle(box, "::after").backgroundColor).toMatch(/^(rgb\(255, 255, 255\)|oklch\(1 0 0\))$/) // white
+  })
+})
+
+describe("studio.css", () => {
+  it("is our own theme:  a sheet, listed in `own`, not among the Fomantic names", async () => {
+    await UI.load()
+    expect(UI.themes.sheets).toContain("studio")
+    expect(UI.themes.own).toContain("studio")
+    expect(UI.themes.names).not.toContain("studio")
+  })
+
+  it("the accent:  Shades of Purple's yellow in dark, a deep violet in light", async () => {
+    await T3.use("studio")
+    document.documentElement.classList.add("ui-dark")
+    onTestFinished(() => document.documentElement.classList.remove("ui-dark"))
+    await vi.waitFor(() => expect(T3.color("--ui-background")).toBe("rgb(30, 30, 63)")) // #1E1E3F
+    expect(T3.color("--ui-primary")).toBe("rgb(250, 208, 0)") // #FAD000
   })
 })
 
