@@ -26,6 +26,7 @@
  * | `--ui-tabs-pane-margin`    | the shown pane's margin (public)        | attached, vertical   |
  * | `--ui-tabs-menu-margin`    | the tab list's block margin (public, `0`:  the pane margin spaces the set) | -- |
  * | `--_ui-tabs-pane-flex`     | the shown pane's `flex` (switch)        | vertical             |
+ * | `--_ui-tabs-pane-min-width` | the narrowest a pane gets beside the list before going under it (switch) | vertical |
  *
  * - The tab list is a menu:  every `--ui-menu-*` token reaches it, from the tab set or above:
  *   its height `--ui-menu-min-height`, its labels' `--ui-menu-font-family`,
@@ -135,7 +136,7 @@
   /* A pane of a tab set:  its share of a vertical row (the DOM element is the flex item), and the set's spacing. */
   :host(:state(in-tabs)) {
     flex: var(--_ui-tabs-pane-flex);
-    min-width: 0;
+    min-width: var(--_ui-tabs-pane-min-width, 0);
   }
   /*
    * The set's colour words (`color`, and `secondary`, which the colour sheet also reads as a hue) are the TABS':
@@ -165,13 +166,23 @@
   }
 
   /* Vertical:  the tab list in a column beside the panes, which share the rest of the row. */
+  /*
+   * Too narrow for a pane of 12em beside the tab list, the panes go UNDER it, full width (the designer, C4:  the pane
+   * squeezed to a quarter of the row broke "Biography" inside the word)
+   */
   .ui.vertical.tabs {
     --_ui-tabs-pane-margin: 0;
     --_ui-tabs-pane-flex: 1 1 0%;
+    --_ui-tabs-pane-min-width: 12em;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: stretch;
   }
   .ui.vertical.tabs > .ui.menu {
+    /* its tabs' width, never the row's:  once the row may wrap, a menu of stretching tabs would take all of it */
+    flex: none;
+    width: max-content;
+    max-width: 100%;
     margin: 0;
   }
   /*
@@ -186,6 +197,15 @@
     .ui.vertical.tabs > .ui.menu > .item {
       --_ui-menu-item-width: stretch;
     }
+  }
+
+  /*
+   * The plain tab list (no other look) as wide as its tabs:  across the whole row it ended in an empty cell after a
+   * divider, which read as a missing tab (the designer, T9 / T56)
+   */
+  .ui.tabs > .ui.menu:not(.fluid, .tabular, .secondary, .text, .vertical, .pointing) {
+    width: fit-content;
+    max-width: 100%;
   }
 
   /* Inverted:  the dark scheme for the panes' slot too. */
@@ -216,7 +236,8 @@
   .ui.tab.loading {
     position: relative;
     display: block;
-    min-height: 15.625em;
+    /* room for the spinner and a line or two, not a tall blank box (Fomantic's 250px;  the designer, T1 / T4) */
+    min-height: 5em;
     overflow: hidden;
   }
   .ui.tab.loading > *,

@@ -65,14 +65,13 @@
                 <ui-docs-example>
                   <p slot="description">A basic tab.</p>
                   <ui-message slot="description" state="info" size="small"
-                    >Two tags:  <code>&lt;ui-tab&gt;</code> is the pane (Fomantic's .ui.tab), and
-                    <code>&lt;ui-tabs&gt;</code> draws the tab menu from its panes' labels. A pane is hidden until it's
-                    the selected one;  see the Usage tab.</ui-message
+                    >Two tags:  each <code>&lt;ui-tab&gt;</code> is a pane of content, and
+                    <code>&lt;ui-tabs&gt;</code> draws the row of tabs from its panes' labels. A pane is hidden until
+                    it's the selected one;  see the Usage tab.</ui-message
                   >
                   <ui-tabs tabular attached aria-label="Tab demo">
                     <ui-tab label="Tab">
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
+                      <p>The pane:  whatever you put inside the <code>&lt;ui-tab&gt;</code> shows here.</p>
                     </ui-tab>
                   </ui-tabs>
                 </ui-docs-example>
@@ -107,9 +106,18 @@
               </ui-section>
 
               <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
-                <ui-docs-example
-                  description='The tabs can be a segmented control:  `appearance="segmented"`, the selected tab filled with the primary colour (or `color`).  `appearance` takes the menu&apos;s looks;  the booleans above are its aliases.'
-                >
+                <ui-docs-example>
+                  <p slot="description">
+                    The tabs can be a segmented control:  one rounded bar, the selected tab filled with colour.
+                  </p>
+                  <ul slot="description">
+                    <li><code>appearance="segmented"</code> turns it on.</li>
+                    <li>The fill is the primary colour, or the tabs' <code>color</code>.</li>
+                    <li>
+                      <code>appearance</code> takes every look the menu has;  the words in the examples above
+                      (<code>pointing</code>, <code>text</code> ...) are short forms of it.
+                    </li>
+                  </ul>
                   <ui-tabs appearance="segmented" aria-label="Segmented demo">
                     <ui-tab label="Examples">Examples pane</ui-tab>
                     <ui-tab label="Usage">Usage pane</ui-tab>
@@ -122,13 +130,12 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A tab can be activated, and visible on the page:  `selected` (alias `active`)."
+                  description="The active tab is the selected one:  its pane shows, and the others stay hidden.  Mark it `selected` (alias `active`)."
                 >
                   <ui-tabs tabular attached aria-label="Active demo">
-                    <ui-tab label="Tab" selected>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                    </ui-tab>
+                    <ui-tab label="First"><p>First pane:  hidden, since its tab isn't selected.</p></ui-tab>
+                    <ui-tab label="Second" selected><p>Second pane:  showing, because its tab is selected.</p></ui-tab>
+                    <ui-tab label="Third"><p>Third pane:  hidden, until you pick its tab.</p></ui-tab>
                   </ui-tabs>
                 </ui-docs-example>
               </ui-section>
@@ -137,8 +144,7 @@
                 <ui-docs-example description="A tab can display a loading indicator.">
                   <ui-tabs tabular attached aria-label="Loading demo">
                     <ui-tab label="Tab" loading>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
+                      <p>The pane:  hidden under the spinner while it loads.</p>
                     </ui-tab>
                   </ui-tabs>
                 </ui-docs-example>
@@ -161,18 +167,9 @@
               <ui-section id="examples-variations-centered-item" label="Centered Item" sticky collapsible dividing>
                 <ui-docs-example description="A tab can have center aligned items.">
                   <ui-tabs tabular attached aria-label="Centered demo">
-                    <ui-tab label="One">
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                    </ui-tab>
-                    <ui-tab label="Two">
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                    </ui-tab>
-                    <ui-tab label="Three">
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
-                    </ui-tab>
+                    <ui-tab label="One"><p>First pane:  the One tab's content.</p></ui-tab>
+                    <ui-tab label="Two"><p>Second pane:  the Two tab's content.</p></ui-tab>
+                    <ui-tab label="Three"><p>Third pane:  the Three tab's content.</p></ui-tab>
                   </ui-tabs>
                 </ui-docs-example>
               </ui-section>
@@ -231,9 +228,14 @@
               </ui-section>
 
               <ui-section id="examples-variations-alignment" label="Alignment" sticky collapsible dividing>
-                <ui-docs-example
-                  description='`alignment` places the tabs:  `left`, `center` or `right` packs them at that end;  `fluid` makes them fill the row.  A segmented tab list moves as a whole.'
-                >
+                <ui-docs-example>
+                  <p slot="description">
+                    <code>alignment</code> places the tabs in their row.  A segmented tab list moves as a whole.
+                  </p>
+                  <ul slot="description">
+                    <li><code>left</code>, <code>center</code> or <code>right</code>:  packed at that end</li>
+                    <li><code>fluid</code>:  the tabs fill the row</li>
+                  </ul>
                   <ui-tabs appearance="segmented" alignment="center" aria-label="Centered demo, segmented">
                     <ui-tab label="Day">Today's numbers</ui-tab>
                     <ui-tab label="Week">This week's numbers</ui-tab>
@@ -243,9 +245,19 @@
               </ui-section>
 
               <ui-section id="examples-variations-equal" label="Equal" sticky collapsible dividing>
-                <ui-docs-example
-                  description='`equal` makes every tab the same width, from the tabs themselves:  each as wide as the widest, or, with `alignment="fluid"`, an equal share of the row (Fomantic&apos;s `four item` tab menu, without the count).  This site&apos;s own tabs are `appearance="segmented" alignment="fluid" equal`.'
-                >
+                <ui-docs-example>
+                  <p slot="description">
+                    <code>equal</code> makes every tab the same width, worked out from the tabs themselves:  no count
+                    of tabs to keep up to date.
+                  </p>
+                  <ul slot="description">
+                    <li>On its own:  each tab as wide as the widest one.</li>
+                    <li>With <code>alignment="fluid"</code>:  each tab an equal share of the row.</li>
+                    <li>
+                      This site's own tabs (Examples, Usage ...) use both, as a segmented control:
+                      <code>appearance="segmented" alignment="fluid" equal</code>.
+                    </li>
+                  </ul>
                   <ui-tabs appearance="segmented" equal aria-label="Equal demo">
                     <ui-tab label="Bio">Biography</ui-tab>
                     <ui-tab label="Photos and videos">Pictures</ui-tab>
@@ -326,9 +338,9 @@
                     one's pane.
                   </p>
                   <ui-message slot="description" size="small" class="site-not-ported"
-                    >Not ported: Fomantic's <code>context</code> / <code>childrenOnly</code> settings. A tab set only
-                    ever owns its own <code>&lt;ui-tab&gt;</code> children, so groups can't contaminate each
-                    other.</ui-message
+                    >Not ported:  settings to limit a tab group to one part of the page (<code>context</code>,
+                    <code>childrenOnly</code>) -- a tab set only ever owns its own <code>&lt;ui-tab&gt;</code> children,
+                    so groups never mix.</ui-message
                   >
                   <ui-tabs secondary aria-label="Group one">
                     <ui-tab label="First">
@@ -408,14 +420,15 @@
                     <code>ui-show</code> and fill the pane when <code>event.detail.first</code> is true (see Usage).
                   </p>
                   <ui-message slot="description" size="small" class="site-not-ported"
-                    >Not ported: Fomantic's auto / apiSettings / cache loading. A fetch is a few lines in a
+                    >Not ported:  settings that fetch a pane's content from a URL and cache it (<code>auto</code>,
+                    <code>apiSettings</code>, <code>cache</code>) -- a fetch is a few lines in a
                     <code>ui-show</code> listener, and the pane's <code>loading</code> shows the spinner
                     meanwhile.</ui-message
                   >
                   <ui-tabs pointing secondary aria-label="Lazy demo">
                     <ui-tab label="First">
                       <ui-header level="3">Tab One</ui-header>
-                      <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
+                      <p>In the page from the start:  this pane isn't <code>lazy</code>.</p>
                     </ui-tab>
                     <ui-tab label="Second" lazy>
                       <template>
@@ -433,8 +446,8 @@
                 </ui-docs-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
-                >Not ported: Evaluating Scripts in HTML (<code>evaluateScripts</code>) -- panes load no remote HTML,
-                so there are no scripts to evaluate.</ui-message
+                >Not ported:  running the scripts in a pane's fetched HTML (<code>evaluateScripts</code>) -- panes
+                load no remote HTML, so there are no scripts to run.</ui-message
               >
             </ui-section>
 
@@ -457,8 +470,9 @@
                 </script>
               </ui-code>
               <ui-message size="small" class="site-not-ported"
-                >Not ported: HTML5 state history (<code>historyType: 'state'</code>, <code>path</code>). It needs a
-                server route for every tab:  <code>history</code> uses the hash only.</ui-message
+                >Not ported:  a real URL path per tab, instead of the hash (<code>historyType: 'state'</code>,
+                <code>path</code>) -- it needs a server route for every tab, so <code>history</code> uses the hash
+                only.</ui-message
               >
             </ui-section>
           </ui-tab>
@@ -468,9 +482,13 @@
             <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Two tags, in Fomantic's own words: its `.ui.tab` is the PANE, so `<ui-tab>` is a pane, and the tabs
-                  you click are the items of a menu that `<ui-tabs>` draws from its panes' `label` and `icon`. One
-                  element per tab keeps a label with its content, with nothing to pair up.
+                  Two tags:
+
+                  - `<ui-tab>` is a PANE:  the content that shows when its tab is picked.
+                  - `<ui-tabs>` holds the panes, and draws the tabs you click as a menu,
+                    from each pane's `label` and `icon`.
+
+                  One element per tab keeps a label with its content, with nothing to pair up.
 
                   - The tab menu is styled by the menu's own sheet, so its look words are the menu's: `tabular`,
                     `pointing`, `secondary`, `text`, `vertical`, `fluid`, `compact`, `inverted`, `size`, `color`.
@@ -534,7 +552,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   A `<ui-tab>` outside a `<ui-tabs>` is a plain pane, shown only while it's `selected`: switch it
-                  from your own buttons (Fomantic's `$.tab('change tab', path)`).
+                  from your own buttons.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -655,7 +673,7 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  No Fomantic theme restyles tabs themselves; the themes that restyle menus and segments reach the tab
+                  No theme restyles tabs themselves; the themes that restyle menus and segments reach the tab
                   menu and the panes through those sheets. The one in the header applies a theme to the whole site.
                 </script>
               </ui-markdown>

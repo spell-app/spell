@@ -694,6 +694,10 @@
     --_ui-menu-active-weight: var(--ui-font-weight-bold);
     --_ui-menu-active-margin: 0 0 -1px;
     --_ui-menu-active-radius: var(--ui-radius) var(--ui-radius) 0 0;
+    /* the first and last tabs too:  the menu's own end corners (`0` here) left them square while the others were round
+       (Owen, 2026-10-23, epic `debut`:  "This one is round, the rest are square") */
+    --_ui-menu-active-first-radius: var(--_ui-menu-active-radius);
+    --_ui-menu-active-last-radius: var(--_ui-menu-active-radius);
     border-bottom: 1px solid var(--ui-border-color-strong);
     border-radius: 0;
     box-shadow: none;

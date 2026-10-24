@@ -190,6 +190,25 @@
     margin: 0;
   }
   /*
+   * room for the code button over the corner, so the demo's first line never runs under it (the designer, T50 / C26:
+   * "Like", "Forks 1,048", "Next" did, on a phone):  a float as wide and tall as the button's corner, first in the
+   * demo, which the first line's buttons and words wrap round;  the rest of the demo keeps the frame's whole width
+   * (padding down the whole demo left its right side three times its left:  the designer, T3)
+   * - the button is 28px wide and about 1.35em tall, its inset in from the frame's edge;  the demo's content starts
+   *   the frame's padding (1em, 0.75em) in
+   */
+  .toggle-room {
+    float: inline-end;
+    width: var(--_ui-docs-example-toggle-room);
+    height: calc(var(--_ui-docs-example-toggle-inset) - 0.75em + 1.35em);
+  }
+  .ui.bare.example .toggle-room {
+    display: none;
+  }
+  .ui.example {
+    --_ui-docs-example-toggle-room: calc(28px + var(--_ui-docs-example-toggle-inset) - 1em + 0.4em);
+  }
+  /*
    * the frame is the glass:  the demo and the code inside it blur nothing again (a theme's segment glass did, a shade
    * off the frame round it;  Owen, 2026-10-23:  "Lose whatever is causing background color shift under code")
    */
@@ -315,6 +334,15 @@
   @media (--ui-mobile) {
     [part~="demo"]::part(segment) {
       overflow-x: auto;
+    }
+    /*
+     * ... but not for a few px:  an example drawn a pixel or two past its box (a fluid tabular menu is 2px wider, so
+     * its tabs' borders meet) scrolled sideways for nothing (Owen, 2026-10-23:  "this has slight horizontal scroll,
+     * doesn't need it");  a little padding, out into the frame's own, takes it in
+     */
+    :host(:not(:state(code-shown))) .ui.example:not(.bare) [part~="demo"]::part(segment) {
+      margin-inline: -8px;
+      padding-inline: 8px;
     }
   }
 }

@@ -167,7 +167,8 @@
      * tabs, 50% ("make tab surround 50% opaque")
      */
     --ui-bar-rest-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
-    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.9), rgb(30 28 38 / 0.9));
+    /* stuck, 75% (Owen, 2026-10-23:  "less opacity when sticky";  90% before) */
+    --ui-bar-title-background: light-dark(rgb(255 255 255 / 0.75), rgb(30 28 38 / 0.75));
     --ui-bar-panel-background: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
     --ui-bar-rest-filter: var(--fruity-blur);
     /*
@@ -177,8 +178,19 @@
      */
     --ui-bar-wallpaper: var(--fruity-wallpaper);
     /* a toolbar's ‹ / › keys:  a faint white disc, so they read as buttons (Owen:  "20% white opacity so it's clear what it is") */
-    --ui-toolbar-button-background: rgb(255 255 255 / 0.2);
+    --ui-toolbar-button-background: light-dark(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.12));
+    /* the "or" between two buttons:  an opaque disc, the buttons meeting under it (the designer, C16:  glass let the
+       green button show through its text, and a notch of wallpaper round it) */
+    --ui-button-or-background: light-dark(#ffffff, #2c2a36);
+    --ui-button-or-color: var(--ui-text-muted);
+    --ui-button-or-gap: 0px;
+    /* a text menu's chosen item (text tabs):  semibold as well as coloured, never colour alone (the designer, C17) */
+    --ui-menu-text-active-weight: 600;
     --ui-bar-wallpaper-color: var(--ui-background);
+    /* nothing to blur under an opaque wallpaper:  a blur there drew seams where two such bars meet */
+    --ui-bar-wallpaper-filter: none;
+    /* ... and the white over it on a stuck section title:  the 50% it has in place */
+    --ui-bar-wallpaper-tint: light-dark(rgb(255 255 255 / 0.5), rgb(30 28 38 / 0.5));
     /* a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look */
     --ui-bar-tracked: 1;
     --ui-bar-track: light-dark(#e9e9ee, #3a3846);
@@ -370,7 +382,12 @@
     /* Docs examples (`<ui-docs-example>`):  a glass frame;  the open demo a very light white, not pure white */
     --ui-docs-example-frame-background: light-dark(rgb(255 255 255 / 0.35), rgb(30 28 38 / 0.35));
     --ui-docs-example-frame-border: 1px solid var(--fruity-edge);
-    --ui-docs-example-frame-filter: var(--fruity-blur);
+    /*
+     * no blur:  a frame entering at the window's bottom edge blurred in the dark beyond it, and blinked dark as it
+     * scrolled in (Owen, 2026-10-23:  "These blink dark when scrolled at the bottom of the page");  over the smooth
+     * wallpaper the blur showed nothing anyway, so only the saturation stays
+     */
+    --ui-docs-example-frame-filter: saturate(1.7);
     --ui-docs-example-demo-background: light-dark(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.05));
     --ui-docs-example-toggle-background: light-dark(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.18));
 

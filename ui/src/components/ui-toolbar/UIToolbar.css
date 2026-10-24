@@ -81,8 +81,48 @@
     display: none;
   }
 
-  /* the two buttons:  quiet round keys */
+  /*
+   * the two buttons:  quiet round keys OVER the row's ends (anchored to the menu's box), taking no room in it:  room
+   * kept for a hidden `‹` left the row's start further in than its end (the designer, T3);  the row fades out under
+   * a key while there's more that way, and a key's press stops on a whole item (scroll snap:  it stopped mid-label,
+   * C6)
+   */
+  .ui.toolbar {
+    position: relative;
+  }
+  .ui.toolbar > .ui.menu {
+    anchor-name: --ui-toolbar-menu;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--_ui-toolbar-button-size);
+    --_toolbar-fade-start: 0px;
+    --_toolbar-fade-end: 0px;
+    --_toolbar-fade: 0px;
+    /* clear under a key, then fading in over 1em */
+    mask-image: linear-gradient(
+      to right,
+      transparent var(--_toolbar-fade-start),
+      #000 calc(var(--_toolbar-fade-start) + var(--_toolbar-fade)),
+      #000 calc(100% - var(--_toolbar-fade-end) - var(--_toolbar-fade)),
+      transparent calc(100% - var(--_toolbar-fade-end))
+    );
+  }
+  .ui.toolbar > .ui.menu ::slotted(*) {
+    scroll-snap-align: start;
+  }
+  .ui.toolbar:has(> .scroll.start[data-can]) > .ui.menu {
+    --_toolbar-fade-start: var(--_ui-toolbar-button-size);
+    --_toolbar-fade: 1em;
+  }
+  .ui.toolbar:has(> .scroll.end[data-can]) > .ui.menu {
+    --_toolbar-fade-end: var(--_ui-toolbar-button-size);
+    --_toolbar-fade: 1em;
+  }
   .ui.toolbar > .scroll {
+    position: absolute;
+    position-anchor: --ui-toolbar-menu;
+    top: anchor(center);
+    translate: 0 -50%;
+    z-index: 1;
     display: inline-grid;
     flex: none;
     place-items: center;
@@ -97,6 +137,12 @@
     background: var(--_ui-toolbar-button-background);
     cursor: pointer;
   }
+  .ui.toolbar > .scroll.start {
+    left: anchor(left);
+  }
+  .ui.toolbar > .scroll.end {
+    right: anchor(right);
+  }
   .ui.toolbar > .scroll > svg {
     width: 0.875em;
     height: 0.875em;
@@ -110,7 +156,7 @@
   .ui.toolbar > .scroll[hidden] {
     display: none;
   }
-  /* at that end already:  hidden, its room kept */
+  /* at that end already:  hidden (it takes no room in the row) */
   .ui.toolbar > .scroll:not([data-can]) {
     visibility: hidden;
   }
