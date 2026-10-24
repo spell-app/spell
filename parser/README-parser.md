@@ -723,10 +723,10 @@ Spanish is the worked example:  its own syntax strings, registered on Spell's SA
   in [src/spell/languages/](src/spell/languages/), and a file picks its language by its name, `Carta.es.spell`.
   - A type's words are Spell's vocabulary, handed to the parser:  each pack brings its own.
 - A third language is a third file per folder, and a pack.
-  `spell parser packs check` compares each pack against English, module by module, and says what it still lacks:
+  `spell translate check` compares each pack against English, module by module, and says what it still lacks:
 
   ```sh
-  spell parser packs check
+  spell translate check
   ```
 
   <details>

@@ -13,7 +13,7 @@ import {
 } from "spell-parser/spell/languages/packs"
 
 /**
- * The language packs' check and fix (epic `spanish` P7):  `spell parser packs check|fix`.
+ * The language packs' check and fix (epic `spanish` P7):  `spell translate check|fix`.
  * - The real packs, read from disk:  Spanish is complete.
  * - The rest on strings:  a small made-up module, English and Spanish.
  */
@@ -145,7 +145,7 @@ asyncEs.addRule(Pause, {
   test("a translator's answer replaces the stub, marked for review", () => {
     const fix = fixPackModule(SOURCE, "es", () => 'asyncEs.addRule(Pause, { syntax: "pausar {number:expression}" })')
     expect(fix.text).toContain(
-      '// AI draft:  review -- translated by `spell parser packs fix --ai`\nasyncEs.addRule(Pause, { syntax: "pausar'
+      '// AI draft:  review -- translated by `spell translate fix --ai`\nasyncEs.addRule(Pause, { syntax: "pausar'
     )
     expect(fix.stubs[0]!.isTranslated).toBe(true)
   })

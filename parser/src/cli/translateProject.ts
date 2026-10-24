@@ -1,5 +1,5 @@
 /**
- * `spell parser translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24-P26), in three passes:
+ * `spell translate <project> --to es`'s work, once the project is parsed (epic `spanish` P24-P26), in three passes:
  * 1. NAMES:  every name the project's people chose, into its names dictionary:  its types, properties, values and
  *    methods (its declarations), its texts and comments
  *    - first from the language pack's shared glossary (`NamesGlossary`):  no call for a name another project chose
@@ -14,7 +14,7 @@
  * - `--learn`, instead:  the project's dictionary added to the shared glossary, for every project after it.
  * - `--cold` (epic `spanish` P29), for timing:  from nothing pre-calculated -- no shared glossary, no dictionary of
  *   the project's, no record, no seed -- and it writes only into `--out`.  Every report says which it started from.
- * - `translationOf()`:  the same, and what it did in numbers (`TranslationResult`), for `spell parser translate-time`
+ * - `translationOf()`:  the same, and what it did in numbers (`TranslationResult`), for `spell translate speedtest`
  *   (`translateTimes.ts`).
  * - spell-app's `translateCommand` finds and parses the project, the app's way (an address, a folder), and hands it here
  *   with what only the app can give:  its declarations, the projects it imports, Spell UI's names, and the checker
@@ -73,7 +73,7 @@ export type TranslateSource = {
   /** A translation of it a person made, parsed, in the same order:  `--seed`. */
   seed?: SourceFile[]
   /**
-   * A translation of it a person made, parsed, to COMPARE with (`spell parser translate-time`, epic `spanish` P29):
+   * A translation of it a person made, parsed, to COMPARE with (`spell translate speedtest`, epic `spanish` P29):
    * how many of the names Claude drafted are the person's too (`TranslationResult.agreement`).
    * - Never a name taken from it:  that's `seed`.
    */
@@ -93,13 +93,13 @@ export type TranslateSource = {
 /**
  * Where `translateProject()` reads the shared glossary, and whether it prints:
  * - `glossaryFile`:  the language pack's `glossary.json5` by default;  a test's own
- * - `print`:  `false` prints nothing -- `spell parser translate-time` prints a table of its own
+ * - `print`:  `false` prints nothing -- `spell translate speedtest` prints a table of its own
  */
 export type TranslateSettings = { glossaryFile?: string; print?: boolean }
 
 /**
  * What one translation did, in numbers:  what `translateProject()` prints, for a program to read
- * (`spell parser translate-time`, epic `spanish` P29).
+ * (`spell translate speedtest`, epic `spanish` P29).
  */
 export type TranslationResult = {
   /** `EXIT.ERRORS` if any line still needs a person, fails lint, a test, or the shape check;  else `EXIT.OK`. */
@@ -167,7 +167,7 @@ export async function translateProject(
 }
 
 /**
- * `translateProject()`, and what it did in numbers (`TranslationResult`):  for `spell parser translate-time`.
+ * `translateProject()`, and what it did in numbers (`TranslationResult`):  for `spell translate speedtest`.
  * - `--cold`:  nothing pre-calculated -- no shared glossary, no dictionary of the project's, no record --
  *   and its dictionary and record written only into `--out`, never beside the project.
  * - Throws as `translateProject()` does.

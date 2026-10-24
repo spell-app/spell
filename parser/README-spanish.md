@@ -324,11 +324,11 @@ src/spell/rules/<module>/
 ### Keeping the two in step
 
 A new English rule must never leave Spanish behind without anyone noticing.
-`spell parser packs check` compares each pack with English, module by module:
+`spell translate check` compares each pack with English, module by module:
 a rule missing, out of order, or with no syntax or tests, and the word tables.
 
 ```sh
-spell parser packs check es
+spell translate check es
 ```
 
 <details>
@@ -341,7 +341,7 @@ Spanish (es):  complete, 19 modules
 </details>
 
 - It exits 1 on anything missing, and runs in spell-parser's tests too.
-- `spell parser packs fix es` writes a stub for each missing registration, the English copied and marked to translate;
+- `spell translate fix es` writes a stub for each missing registration, the English copied and marked to translate;
   `--ai` asks Claude to draft each one, marked for review.
 - A difference on purpose is marked in the pack's file, `// packs: ok -- why`, so the check passes.
 - Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).

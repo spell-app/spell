@@ -1,5 +1,5 @@
 /**
- * `spell parser translate-time`'s work (epic `spanish` P29):  how long `spell parser translate` takes, and how well it does,
+ * `spell translate speedtest`'s work (epic `spanish` P29):  how long `spell translate` takes, and how well it does,
  * run after run, on scratch copies of projects -- never the projects themselves.
  * - Each run:
  *   1. copies the project to a fresh scratch folder, without its own dictionary and record
@@ -12,7 +12,7 @@
  *   4. deletes the scratch folder, even when the run throws
  * - Then a table for each project, mode and tier:  the min, median and max over its runs;  `--json` writes it all.
  * - spell-app's `translateTimeCommand` finds the projects and does each translation (`TranslateRun`), the app's way,
- *   as `spell parser translate` does:  this file only copies, times, tabulates and cleans up.
+ *   as `spell translate` does:  this file only copies, times, tabulates and cleans up.
  * - Loaded only when it runs (`commands.ts` reaches it through the hook).
  */
 import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"

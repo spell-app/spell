@@ -18,7 +18,7 @@ import type { DeclarationStatement, ImportedProject, MissingName, SourceFile, Tr
 
 /**
  * Writes a spell project in another human language, rule by rule (epic `spanish` P24):
- * `spell parser translate <project> --to es`.
+ * `spell translate <project> --to es`.
  * - Each line's statement is written back with the SAME rule's syntax in the other language
  *   -- its registration in `<module>.<lang>.ts` -- its slots filled with its children, translated the same way.
  * - The names a project's people chose come from its names dictionary (`TranslationNames`).

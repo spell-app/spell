@@ -12,7 +12,7 @@ import {
 } from "spell-parser/cli/claudeRunners"
 
 /**
- * The two ways `spell parser translate` asks Claude (epic `spanish` P27):  the Claude API, straight, and `claude -p`.
+ * The two ways `spell translate` asks Claude (epic `spanish` P27):  the Claude API, straight, and `claude -p`.
  * - The API's `fetch` is a fake:  it keeps each request, and answers from a list.
  */
 

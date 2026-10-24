@@ -18,7 +18,7 @@ import type {
 } from "spell-parser/spell/translate/translate.types"
 
 /**
- * `spell parser translate`'s three passes end to end (epic `spanish` P25):  names, lines, fix-ups --
+ * `spell translate`'s three passes end to end (epic `spanish` P25):  names, lines, fix-ups --
  * on a small project written to a temp folder, with a fake `claude` and a fake checker.
  * - The fake checker fails the test line while the joker's name is in English word order, as a real test run would.
  * - spell-app's `cli.test.ts` runs the real command;  this one pins the loop:  what's asked, what's fixed, what's kept.
