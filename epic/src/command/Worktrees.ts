@@ -198,7 +198,7 @@ export class Worktrees {
     const busy = this.sessions.live(this.main).find((session) => RealPath.isIn(session.cwd, from))
     if (busy)
       throw new EpicCommandError(
-        `a session works in ${name} (pid ${busy.pid}):  it moves at its /isolate done, not now`
+        `a session works in ${name} (pid ${busy.pid}):  it moves at its /epic done, not now`
       )
     const window = config.worktreeWindowFile(name)
     const report: MoveReport = { name, from, to, links: [], sessionFolder: null, window: existsSync(window) }

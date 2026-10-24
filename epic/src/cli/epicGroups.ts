@@ -251,7 +251,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<name> | --idle [--dry-run] [--json]",
       description:
         "move a worktree from the old place (.claude/worktrees) beside the repo, its shared links and session " +
-        "folder made again;  --idle:  every one no session works in (a busy one stays until its /isolate done)",
+        "folder made again;  --idle:  every one no session works in (a busy one stays until its /epic done)",
       example: "epic worktree move --idle --dry-run"
     },
     {

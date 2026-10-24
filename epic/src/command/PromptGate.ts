@@ -149,7 +149,7 @@ export class PromptGate {
           name,
           text,
           `You're in worktree \`${other}\`:  \`/${skill}\` there would nest one worktree's work in another.  ` +
-            `\`/isolate done\` first, or run \`/${skill} ${name}\` from a package's window ` +
+            `\`/epic done\` there first, or run \`/${skill} ${name}\` from a package's window ` +
             `(\`<pkg>.code-workspace\`, in \`epic config windowsFolder\`)` +
             (text ? ":  it picks the text up." : ".")
         )

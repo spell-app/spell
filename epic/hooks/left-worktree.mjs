@@ -36,7 +36,8 @@ try {
             "open." +
             (kept
               ? "  The worktree is still on disk:  with the line, also ask (AskUserQuestion) whether to run " +
-                '`/isolate done`:  "Run `/isolate done`" (Recommended) / "Leave it".'
+                'it:  "Run `/epic done`" (Recommended) / "Leave it" in an epic\'s session (Owen, 2026-10-24), else ' +
+                '"Run `/isolate done`" (Recommended) / "Leave it".'
               : "")
         }
       })

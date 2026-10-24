@@ -80,7 +80,7 @@ Owen runs several epics at once:  one screen saying where each stands.
      - a `stalled` one:  `/wtf <name>`, or `/epic <name>` in a new session to pick it up
      - questions or judgement calls waiting:  its session (`/session <id>`), or `/wtf <name>?` to answer here
      - many items not reviewed:  `/epic review <name>`
-     - `unmerged`:  `/isolate done` in its session, or `/worktrees` to merge it
+     - `unmerged`:  `/epic done` in its session, or `/worktrees` to merge it
      - parked:  `/unpark <name>`
    - then "Done, but still waiting on you":
      each `done` epic with open questions, judgement calls or tests, one line each

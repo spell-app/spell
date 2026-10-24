@@ -77,8 +77,8 @@ describe("Worktrees.move()", () => {
     expect(existsSync(join(OLD, "idle"))).toBe(true)
   })
 
-  test("a busy worktree stays put until its /isolate done", () => {
-    expect(() => worktrees.move("busy")).toThrow(/a session works in busy .*moves at its \/isolate done/)
+  test("a busy worktree stays put until its /epic done", () => {
+    expect(() => worktrees.move("busy")).toThrow(/a session works in busy .*moves at its \/epic done/)
   })
 
   test("the move:  git knows the new place, its shared links work again, its session folder is linked", () => {

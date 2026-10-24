@@ -89,6 +89,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request Owen sent from another session.
     Go to "12. Request" (epic `epic-workflow`).
   - `done`:  `/epic done` is `/isolate done`, word for word.
+    - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (Owen,
+      2026-10-24):  the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
     Follow [the isolate skill](../isolate/SKILL.md)'s "Finish", and skip everything else here.
     - The same steps "6. Doc Review" ends with.
 - `<name>` is the first word of `$ARGUMENTS`, or a quoted phrase (`"Docs Index"`).
@@ -480,7 +482,7 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
             - more than three is somebody's work:  `add <name>#I`, as above
        3. The changelog, if the repo keeps one:
           the epic's entry, under "3. Merged into main", gets the phase's bullets.
-     - Never `/isolate done`:  the worktree, the window and the session stay, for the next request.
+     - Never `/epic done`:  the worktree, the window and the session stay, for the next request.
      - In bedtime mode, nothing merges:  `add <name>#T "merge P<n>"`, as `/bedtime` says.
      - `epic update <name> --standing [on|off]` makes an epic standing, or not;
        the docs' home page, `/epics` and its step label then never call it done (STANDING, when every phase is).

@@ -47,7 +47,7 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
      - the window:  `epic window which` prints a `workspace` under an `ongoing/` folder
        (`$(epic config windowsFolder)/ongoing/`, or the old `workspaces/ongoing/`)
      - `<other>` isn't `<name>`:  stop, saying so in one line
-       ("`/isolate done` first, or start from a package window").
+       ("`/epic done` there first, or start from a package window";  `/isolate done` for a worktree no epic owns).
    - ANOTHER REPO's epic (epic `epic-engine` I47):  `epic list --json` gives `<name>` a `repo`
      (its page says it's worked in another repo:  `epic-engine` typed in spell-app's window).
      - Stop:  no rename, no `EnterWorktree`.
@@ -406,8 +406,9 @@ A reply that closes out the session's work ends with a line of its own, `*You ca
   - Open items may remain only if they're recorded elsewhere (the epic page, the code-debt log ...)
     and need no context from this session.
 - Otherwise leave the line out, and say what keeps the tab open.
-- With the line, ALSO ask (AskUserQuestion) whether to run `/isolate done`, when either is still on disk:
+- With the line, ALSO ask (AskUserQuestion) whether to finish, when either is still on disk:
   - this session's worktree (left with `keep`)
   - worktrees it made and left:  its step 0 cleans those up
-  - Options:  "Run `/isolate done`" (Recommended) and "Leave it".
+  - Options:  "Run `/epic done`" (Recommended) and "Leave it", in an EPIC's session (its worktree is an epic's;
+    Owen, 2026-10-24:  an epic's prompts say `/epic done`, never `/isolate done`);  "Run `/isolate done`" otherwise.
 - A repo's own `CLAUDE.md` may say the same:  spell-app's does.
