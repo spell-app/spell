@@ -2,7 +2,7 @@
 
 The Spanish pack's words:  whoever translates a rule into Spanish, a person or an AI, uses THESE words,
 so the grammar reads as one language.
-- `spell parser packs fix es --ai` hands this page to `claude` with each rule it translates.
+- `spell translate fix es --ai` hands this page to `claude` with each rule it translates.
 - A new word chosen for a rule belongs here too.
 
 Where a keyword has a written accent, the syntax accepts it WITHOUT the accent too (Owen's pick):

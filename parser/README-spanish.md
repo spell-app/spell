@@ -28,7 +28,7 @@ The names stay the author's, accents and all:  `esUnaFigura`, `dirección`, `cla
 The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, line for line, cards and all, and it deals, plays and passes the same six tests.
-A person wrote it;  `spell parser translate` writes a first draft of one for any English project
+A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
 
 ![The Spell editor in Spanish:  Carta.es.spell on the left;  on the right Solitario dealt, its menu reading Solitario Klondike, Puntos, Jugar solo, Trampa, Depurar;  the panes titled Aplicación and Salida en JavaScript](docs/images/spanish/solitario-editor.png)
@@ -219,7 +219,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | Spell UI | every component has a Spanish tag:  `<es-boton>`, `<es-menu>`, `<es-cuadricula columnas="7">` |
 | drawing | a Spanish drawable gets its tag from its Spanish names, `<solitario-carta>` |
 | the editor | its menus and panes, on a Spanish page;  colouring, completion and hover in each file's language |
-| translating | `spell parser translate <project> --to es`:  an English project written again in Spanish (below) |
+| translating | `spell translate <project> --to es`:  an English project written again in Spanish (below) |
 
 ### A wrong article is a warning
 
@@ -327,11 +327,11 @@ src/spell/rules/<module>/
 ### Keeping the two in step
 
 A new English rule must never leave Spanish behind without anyone noticing.
-`spell parser packs check` compares each pack with English, module by module:
+`spell translate check` compares each pack with English, module by module:
 a rule missing, out of order, or with no syntax or tests, and the word tables.
 
 ```sh
-spell parser packs check es
+spell translate check es
 ```
 
 <details>
@@ -344,14 +344,14 @@ Spanish (es):  complete, 19 modules
 </details>
 
 - It exits 1 on anything missing, and runs in spell-parser's tests too.
-- `spell parser packs fix es` writes a stub for each missing registration, the English copied and marked to translate;
+- `spell translate fix es` writes a stub for each missing registration, the English copied and marked to translate;
   `--ai` asks Claude to draft each one, marked for review.
 - A difference on purpose is marked in the pack's file, `// packs: ok -- why`, so the check passes.
 - Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
 
 ## Translating a project
 
-`spell parser translate` writes an English project again in Spanish, as a project of its own beside it.
+`spell translate` writes an English project again in Spanish, as a project of its own beside it.
 Solitaire comes out linted clean and passing its six tests, with no person in the loop, in under a minute:
 about 52 seconds from nothing at all, 31-41 from the shared glossary of names.
 
@@ -371,7 +371,7 @@ Without Claude (`--no-ai`), the lines are still written, and each name the dicti
 Here with `--cold` too, which starts from no glossary and writes only into `--out`:
 
 ```sh
-spell parser translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es
+spell translate @spell/examples/fizzbuzz --to es --no-ai --cold --out /tmp/fizzbuzz-es
 ```
 
 <details>
@@ -402,7 +402,7 @@ fizzbuzz in Spanish:  /tmp/fizzbuzz-es  (1 files, ...)
 - With Claude, the same command fills the names in and fixes the lines;
   through the Claude API when `ANTHROPIC_API_KEY` is set, else through `claude -p`, a little slower.
 - `--update` re-translates only the English lines changed since the last run:  hand edits to the Spanish stay.
-- `--effort fast|balanced|best` says how much Claude spends;  `spell parser translate-time` times whole runs.
+- `--effort fast|balanced|best` says how much Claude spends;  `spell translate speedtest` times whole runs.
 - Every option, and what it leaves for a person:
   [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project).
 
@@ -461,6 +461,6 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - [README-parser](README-parser.md#spell-in-another-human-language):  one rule's code in both languages, and how a third starts
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
 - [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
-- [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project):  `spell parser translate` and `translate-time`, every option
+- [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
 - [Spell UI's runtime page](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
 - [spell-parser's README](README.md):  the language, its pipeline, and every page of the repo

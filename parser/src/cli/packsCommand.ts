@@ -1,5 +1,5 @@
 /**
- * `spell parser packs check|fix`:  is a language pack complete, against English?
+ * `spell translate check|fix`:  is a language pack complete, against English?
  * - `fix` writes stubs for what it lacks (epic `spanish` P7).
  * - The checking and the stub writing are `spell-parser/spell/languages/packs` (node-free, on text);
  *   this file reads and writes the rule files, asks `claude` for drafts, and prints.
@@ -27,7 +27,7 @@ import {
 } from "spell-parser/spell/languages/packs"
 
 /**
- * `spell parser packs check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.
+ * `spell translate check [lang]`:  print what each language's pack lacks, per file;  1 if anything does.
  * - `lang`:  one language, e.g. `es`;  none:  every pack but English
  */
 export async function checkPacks(lang: string | undefined, options: PacksOptions = {}): Promise<number> {
@@ -42,7 +42,7 @@ export async function checkPacks(lang: string | undefined, options: PacksOptions
 }
 
 /**
- * `spell parser packs fix [lang] [--ai]`:  write a stub into `<module>.<lang>.ts` for each registration it lacks, then
+ * `spell translate fix [lang] [--ai]`:  write a stub into `<module>.<lang>.ts` for each registration it lacks, then
  * print the list to review.
  * - Each stub is English's, marked `// TODO: translate` -- see `fixPackModule()`.
  * - `--ai`:  ask `claude -p` for each one in the language, marked `// AI draft:  review` instead;
@@ -71,7 +71,7 @@ export async function fixPacks(lang: string | undefined, options: PacksOptions =
   }
   CLI.out("\nTo review:")
   for (const line of review) CLI.out(`  ${line}`)
-  CLI.out("\nThen:  spell parser packs check, and the module's rule tests (yarn spell:test:rules).")
+  CLI.out("\nThen:  spell translate check, and the module's rule tests (yarn spell:test:rules).")
   return CLI.EXIT.OK
 }
 
@@ -163,7 +163,7 @@ function printReport(report: PackReport, language: SP.Language): void {
   CLI.out(
     report.isComplete
       ? `${language.name} (${report.lang}):  complete, ${modules} modules`
-      : `${language.name} (${report.lang}):  INCOMPLETE -- spell parser packs fix ${report.lang} writes stubs for what's missing`
+      : `${language.name} (${report.lang}):  INCOMPLETE -- spell translate fix ${report.lang} writes stubs for what's missing`
   )
 }
 

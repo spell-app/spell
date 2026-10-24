@@ -13,7 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest
-  parser packs check  parser packs fix  parser translate  parser translate-time
+  translate  translate check  translate fix  translate speedtest
   ```
 
   - Owen's names (epic `repo-split` P13):
@@ -32,12 +32,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Why:  every one finds projects the app's way:
     addresses like `@spell/examples/solitaire`, groups, the editor's language service.
   - Without spell-app, each says "clone spell-app" and exits 2 (`CLI.needHook()`).
-- `spell parser packs check|fix` (epic `spanish` P7) are the exception:
+- `spell translate check|fix` (epic `spanish` P7) are the exception:
   their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only spell-parser's own rule files.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
-- `spell parser translate` (epic `spanish` P24-P29) is half and half:
+- `spell translate` (epic `spanish` P24-P29) is half and half:
   - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation
@@ -59,7 +59,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - every report says which it started from (`pre-calculated:`, `TranslationLists`)
   - `translationOf()`:  the same translation, returning what it did in numbers (`TranslationResult`), printing
     nothing with `print: false`;  `translateProject()` is it, returning only the exit code
-- `spell parser translate-time` (epic `spanish` P29) times it the same way, half and half:
+- `spell translate speedtest` (epic `spanish` P29) times it the same way, half and half:
   - spell-app's `translateTimeCommand` finds the projects (default Solitaire and todos-form-based) and the
     examples' twins a person translated (Solitaire's Solitario), and translates each run's copy, a session of its own
   - [translateTimes.ts](translateTimes.ts), here, copies each project to a scratch folder (without its own lists),
@@ -79,8 +79,8 @@ As WWOD §20, plus:
 - In the repo's [tests/cli/](../../tests/cli/):  the command list's names and help.
 - The commands themselves run end to end in [spell-app's tests](../../../spell-app/tests/cli/cli.test.ts):
   their work is spell-app's.
-- `spell parser packs`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
-- `spell parser translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
+- `spell translate check|fix`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
+- `spell translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
   its `--cold` too, each list ignored, in the same file;
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);

@@ -11,7 +11,7 @@
  *   and a missing one is a line of code to write.
  *   - So it sees `<parser>.addRule(<Rule>, { ... })` calls, wherever they are:
  *     a loop's registrations count once, as written.
- * - Node-free:  the `spell parser packs` commands (`spell-parser/cli/packsCommand`) read the files and print.
+ * - Node-free:  the `spell translate check|fix` commands (`spell-parser/cli/packsCommand`) read the files and print.
  * - Imported by path, `spell-parser/spell/languages/packs`:  the barrel leaves it out, as only the commands need it.
  */
 import { SP } from "spell-parser/spell"
@@ -172,7 +172,7 @@ export function checkWords(english: SP.Language, other: SP.Language): WordProble
  * - Where:  after the registration English has before it, so ties break the same way;
  *   the first goes before the file's first registration.
  * - The imports a stub needs (its rule class, a constant) are added from English's.
- * - `translate`:  turns a stub into this language, e.g. by asking an AI (`spell parser packs fix --ai`);
+ * - `translate`:  turns a stub into this language, e.g. by asking an AI (`spell translate fix --ai`);
  *   it returns the registration to write instead, or `undefined` to keep the stub.
  * - A module with no file yet gets one:  a header, its parser, then every stub.
  *   NOTE: the language's `parser.ts` must then import it -- the fix doesn't.
@@ -217,10 +217,10 @@ export function fixPackModule(source: PackModuleSource, lang: string, translate?
 }
 
 /** Above a stub copied from English, untranslated. */
-export const TODO_MARKER = "// TODO: translate -- copied from English by `spell parser packs fix`"
+export const TODO_MARKER = "// TODO: translate -- copied from English by `spell translate fix`"
 
 /** Above a registration an AI translated, for a person to check. */
-export const AI_MARKER = "// AI draft:  review -- translated by `spell parser packs fix --ai`"
+export const AI_MARKER = "// AI draft:  review -- translated by `spell translate fix --ai`"
 
 /** `text` with each of `stubs` in its place:  after its anchor's statement, else before the first registration. */
 function insertStubs(text: string, stubs: PackStub[], registrations: PackRegistration[]): string {
@@ -274,7 +274,7 @@ function newModuleFile(module: string, lang: string, parser: string): string {
   return [
     "/**",
     ` * The \`${module}\` rules in language \`${lang}\`:  each rule's syntax and its tests (epic \`spanish\` P7).`,
-    ` * - Written by \`spell parser packs fix\`:  translate each \`TODO\`, then import it into the language's \`parser.ts\`.`,
+    ` * - Written by \`spell translate fix\`:  translate each \`TODO\`, then import it into the language's \`parser.ts\`.`,
     " */",
     'import { SpellParser } from "spell-parser/spell/SpellParser"',
     "",

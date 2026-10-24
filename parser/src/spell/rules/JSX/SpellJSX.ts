@@ -18,8 +18,9 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *     text, a number or yes / no keeps its plain name (`ProgramWriter.mayHoldObject()`).
  * - A dotted tag, `<UI.Form>`, is an error:  `P.ASTJSXElement.tagError()`.
  * - An element with an `onClick` looks clickable by itself (epic `outline-spell` P28):
- *   a pointer cursor, and its text can't be selected -- `style="cursor:pointer;user-select:none"`,
- *   unless it says its own `style`.  So every target writes it the same:  see `clickableAttrs()`.
+ *   a pointer cursor, and its text can't be selected.
+ *   - `style="cursor:pointer;user-select:none"`, unless it says its own `style`.
+ *   - Every target writes it the same:  see `clickableAttrs()`.
  * - Spell's own words become the web's as the AST is built, so both writers write the web's:
  *   - `<children/>` => `h("slot")`
  *   - `<children name="header"/>` => `h("slot", { name: "header" })`

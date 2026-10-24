@@ -83,10 +83,13 @@ export function startPage({ modules, state, send }: PageSpec): Page {
 }
 
 /**
- * How a page runs its lists' drag handlers:  in the program, by their Python names (`core.remote`).
- * - `core.runHandler(pile, "whenCardDroppedOn", [card])` => `{ "call": "when_card_dropped_on", "on": "Pile#..." }`
- * - `core.startWhile()` / `endWhile()` => `start_while` / `end_while` on the list, naming its handler:
- *   `{ "call": "start_while", "on": "Pile#...", "args": ["while_card_dragged_over", "Card#..."] }`
+ * How a page runs what it does to the program:  in the program, by their Python names (`core.remote`).
+ * - A list's drag handlers and its reorder (`core.moveBefore()`, as `move_before`):
+ *   - `core.runHandler(pile, "whenCardDroppedOn", [card])` => `{ "call": "when_card_dropped_on", "on": "Pile#..." }`
+ *   - `core.startWhile()` / `endWhile()` => `start_while` / `end_while` on the list, naming its handler:
+ *     `{ "call": "start_while", "on": "Pile#...", "args": ["while_card_dragged_over", "Card#..."] }`
+ * - A property the page set on a thing, e.g. a form's:  `set_prop`, naming the property.
+ * - An event, e.g. `card-drop`:  `sendTrigger()`.
  */
 const REMOTE: RemoteProgram = {
   run: (owner, method, args) => sendCall(snakeCase(method), args, owner as Thing),

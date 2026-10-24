@@ -647,8 +647,8 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   }
 
   /**
-   * Move `items` here, before `before` -- at our end with none:  a page reordering us as people drag (epic `outline-spell`
-   * P30, `core.moveBefore()`).
+   * Move `items` here, before `before` -- at our end with none.
+   * - What a page calls as people drag to reorder us (epic `outline-spell` P30, `core.moveBefore()`).
    * - Ours already:  they just change places, in the order given.
    * - Another list's:  only those it lets go and we take, as `moveHere()`;  the rest stay where they are.
    * - `before` one of `items`:  the next of ours after it that isn't.

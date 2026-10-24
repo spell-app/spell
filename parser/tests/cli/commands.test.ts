@@ -8,7 +8,7 @@ describe("the language's spell commands (epic repo-split P13)", () => {
   languageCommands(spell)
   const names = spell.commands.map((command) => command.name())
 
-  test("Owen's names:  lint (was check), speedtest (was speed);  no explore;  lang for the language's own tools", () => {
+  test("Owen's names:  lint (was check), speedtest (was speed);  no explore;  translate for translating and the packs", () => {
     expect(names).toEqual([
       "compile",
       "lint",
@@ -21,18 +21,17 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "parse",
       "repl",
       "explain",
-      "parser"
+      "translate"
     ])
   })
 
-  test("the language packs' tools:  spell parser packs check, spell parser packs fix (epic spanish P7)", () => {
-    const packs = spell.commands.find((command) => command.name() === "parser")!.commands[0]!
-    expect([packs.name(), ...packs.commands.map((command) => command.name())]).toEqual(["packs", "check", "fix"])
+  test("the language packs' tools:  spell translate check, spell translate fix (epic spanish P7)", () => {
+    const translate = spell.commands.find((command) => command.name() === "translate")!
+    expect(translate.commands.map((command) => command.name())).toEqual(["check", "fix", "speedtest"])
   })
 
-  test("translating a project:  spell parser translate --to (epic spanish P24)", () => {
-    const translate = spell.commands.find((command) => command.name() === "parser")!.commands[1]!
-    expect(translate.name()).toBe("translate")
+  test("translating a project:  spell translate --to (epic spanish P24)", () => {
+    const translate = spell.commands.find((command) => command.name() === "translate")!
     expect(translate.options.map((option) => option.long)).toEqual([
       "--to",
       "--out",
@@ -41,16 +40,16 @@ describe("the language's spell commands (epic repo-split P13)", () => {
       "--effort",
       "--names-effort",
       "--fix-ups-effort",
-      "--model",
       "--seed",
       "--learn",
-      "--cold"
+      "--cold",
+      "--model"
     ])
   })
 
-  test("timing it:  spell parser translate-time (epic spanish P29)", () => {
-    const time = spell.commands.find((command) => command.name() === "parser")!.commands[2]!
-    expect(time.name()).toBe("translate-time")
+  test("timing it:  spell translate speedtest (epic spanish P29)", () => {
+    const time = spell.commands.find((command) => command.name() === "translate")!.commands[2]!
+    expect(time.name()).toBe("speedtest")
     expect(time.options.map((option) => option.long)).toEqual([
       "--to",
       "--runs",

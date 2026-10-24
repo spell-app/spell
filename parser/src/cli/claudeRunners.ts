@@ -1,5 +1,5 @@
 /**
- * The two ways `spell parser translate` asks Claude (epic `spanish` P27), each a `ClaudeRunner`:
+ * The two ways `spell translate` asks Claude (epic `spanish` P27), each a `ClaudeRunner`:
  * - `claudeApiRunner()`:  the Claude API, straight, one `fetch` a call -- when `ANTHROPIC_API_KEY` is set
  * - `runClaude()`:  `claude -p`, signed in as the person -- otherwise
  * - `claudeRunnerFor()` picks one, and when it's `claude -p`, says how to make it faster.

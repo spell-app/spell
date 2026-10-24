@@ -412,8 +412,8 @@ You've just used four of them.
 The kit's `spell` takes fifteen commands from this repo:
 `compile`, `lint`, `watch` and `format` build a program;  `run` and `test` run it;
 `parse`, `repl`, `explain` and `describe` show what Spell made of it;  `speedtest` times the parser;
-`parser packs check` and `parser packs fix` check the language packs against English;
-`parser translate` writes a project in another language, and `parser translate-time` times it.
+`translate` writes a project in another language, `translate check` and `translate fix` check the language packs against English,
+and `translate speedtest` times a translation.
 [commands.ts](src/cli/commands.ts) lists them, and spell-parser's `package.json` names that file,
 `"spell": { "commands" }`.
 What each does, every option, with examples:
@@ -426,7 +426,7 @@ The names live here, and each command hands its work to spell-app's `language` h
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
-- `spell parser packs check` / `fix` are the exception:
+- `spell translate check` / `fix` are the exception:
   they need no project, so their work is here, in [packsCommand.ts](src/cli/packsCommand.ts).
 
 <details>
@@ -436,10 +436,10 @@ The names live here, and each command hands its work to spell-app's `language` h
 | --- | --- |
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
-| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell parser packs check` and `fix`:  what each language pack lacks against English, and stubs for it |
-| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell parser translate`'s work once spell-app has parsed the project:  its three passes, its dictionary, its files |
+| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell translate check` and `fix`:  what each language pack lacks against English, and stubs for it |
+| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell translate`'s work once spell-app has parsed the project:  its three passes, its dictionary, its files |
 | [cli/claudeRunners.ts](src/cli/claudeRunners.ts) | how the translator asks Claude:  the Claude API with `ANTHROPIC_API_KEY` set, else `claude -p`;  `--effort`'s tiers |
-| [cli/translateTimes.ts](src/cli/translateTimes.ts) | `spell parser translate-time`:  scratch copies, runs, and the table |
+| [cli/translateTimes.ts](src/cli/translateTimes.ts) | `spell translate speedtest`:  scratch copies, runs, and the table |
 | [cli/index.ts](src/cli/index.ts) | `spell-parser/cli`:  the types, for spell-app |
 
 </details>
@@ -532,7 +532,7 @@ from Solitario, the Solitaire example in Spanish, line for line._
 - Names keep their Spanish, accents and all:  `"es una figura"` compiles to `get esUnaFigura()`.
 - One project may mix languages, each file read by its own rules.
 - The parser, a test's lines, Spell UI's tags and the editor all speak it;  a wrong article is a warning.
-- `spell parser translate` writes an English project again in Spanish:  names first, then each line by its own rule,
+- `spell translate` writes an English project again in Spanish:  names first, then each line by its own rule,
   then Claude fixes what fails lint, a test, or compiles to a different program.
 - **Not yet:**  docs that teach Spanish Spell, and a third language (below).
 - Solitario's tests, the commands to try, pictures of the editor, and every edge:
@@ -548,7 +548,7 @@ Each says where it stands.
 Norwegian and Portuguese are next, with help from friends;  neither is started.
 Each is a pack of its own, beside English's and Spanish's in [src/spell/languages/](src/spell/languages/),
 and a third file per folder of rules:  words, not code.
-`spell parser packs check` then lists what it still lacks against English
+`spell translate check` then lists what it still lacks against English
 ([how a language starts](README-parser.md#spell-in-another-human-language)).
 
 ### Two more targets, and mixins

@@ -610,8 +610,8 @@ tests/spell/rules/<module>/
 3. Register it in the module's `<module>.en.ts`:  `<module>.addRule(...)`, once per syntax, each with its tests.
    Its place there is its registration order, which breaks ties.
 4. Register it in `<module>.es.ts` too, with its Spanish syntax, in the same place.
-   `spell parser packs check` lists what the Spanish lacks against the English;
-   `spell parser packs fix` writes a stub for each, the English copied and marked to translate.
+   `spell translate check` lists what the Spanish lacks against the English;
+   `spell translate fix` writes a stub for each, the English copied and marked to translate.
 5. `yarn spell:test:rules`, then `yarn spell:test:rules:bless` once the output is right, and read the diff.
 6. `yarn spell:gen:syntax`:  the syntax table's test fails until you do.
 7. A built-in type's member (`the length of the name`) is data, not a rule (below, "The built-in types"):
@@ -691,7 +691,7 @@ what goes on the class and what on the match, and why `getAST()` must never touc
 A rule's class takes any language's syntax, which is why `addRule()` takes only `{ syntax, tests }`:
 English's are in each module's `<module>.en.ts`, Spanish's in its `<module>.es.ts`
 ([how a language is added](README-parser.md#spell-in-another-human-language)).
-Spanish has all of English's:  `spell parser packs check` says `Spanish (es):  complete, 19 modules`.
+Spanish has all of English's:  `spell translate check` says `Spanish (es):  complete, 19 modules`.
 A file in Spanish says so in its name, `Carta.es.spell`, as Solitario's do;  a plain `.spell` is English,
 and one project may mix them, each file read by its own language's rules.
 
