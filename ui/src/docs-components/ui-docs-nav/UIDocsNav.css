@@ -159,9 +159,10 @@
     background: var(--_ui-docs-nav-header-background);
   }
   /*
-   * once the list scrolls under the band, a shadow under it (Owen, 2026-10-23, epic `debut`:  "sticky headers like this
-   * need a shadow when sticky so you can see where content is cut off cleanly"):  it comes in over the list's first
-   * 16px of scrolling (a scroll-driven animation;  without one, none)
+   * once the list scrolls under the band, a shadow under it, so the cut reads cleanly
+   * (Owen, 2026-10-23:  "sticky headers like this need a shadow when sticky")
+   * - it comes in over the list's first 16px of scrolling
+   * - a scroll-driven animation:  a browser without them shows none
    */
   @supports (animation-timeline: scroll()) {
     .masthead {
@@ -182,8 +183,8 @@
     flex-direction: column;
     gap: 0.5em;
   }
-  /* the site search takes the band's width (the brand's pill, its shortcut hint), the view switch beside it on the same
-     line (Owen, 2026-10-23:  "Search / sort buttons on the same line") */
+  /* the site search takes the band's width (the brand's pill, its shortcut hint),
+     the view switch beside it on the same line (Owen, 2026-10-23:  "Search / sort buttons on the same line") */
   .tools {
     display: flex;
     flex-wrap: nowrap;
@@ -205,8 +206,8 @@
 
   /* ## Bands:  a group's is the brand's sub-head band (a tint, a hairline above, bold caps);  a click folds it. */
   /*
-   * a group's band sticks at the list's top while its rows scroll under it (Owen, 2026-10-23, epic `debut`:  ""Get
-   * Started", "Components" etc headers sticky"):  each the next one's to push away, as its group ends
+   * a group's band ("Get Started", "Components" ...) sticks at the list's top while its rows scroll under it
+   * - as its group ends, the next group's band pushes it away
    */
   .heading {
     margin: 0;

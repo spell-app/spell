@@ -14,8 +14,8 @@ import exampleCSS from "./UIDocsExample.css?inline"
  * A header and description, its own children LIVE, and their source in a code pane the code button shows and hides.
  *
  * - Its shadow DOM:  `<section class="ui [bare] [variation] example" part="example">` holding
- *   - the header row (`<ui-header>`), when there's a header;  then the description:  both on the page, outside
- *     the frame (Owen, 2026-10-23, epic `debut`:  "Text for the example should be OUTSIDE the ring")
+ *   - the header row (`<ui-header>`), when there's a header;  then the description
+ *     - both on the page, outside the frame (Owen, 2026-10-23:  "Text for the example should be OUTSIDE the ring")
  *   - `<div class="frame">`:
  *     - the code `<ui-button part="toggle">`, over the frame's top right corner
  *     - `<ui-segment part="demo">` around the default slot (the live example:  the element's own children)
@@ -61,8 +61,9 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   accessor isCodeOpen = false
 
   /**
-   * The code pane is drawn:  open, or still rolling closed (Owen, 2026-10-23, epic `debut`:  "code examples need to roll
-   * closed as well");  the open card's look stays until it has.
+   * The code pane is drawn:  open, or still rolling closed.
+   * - The open card's look stays until it has rolled away
+   *   (Owen, 2026-10-23:  "code examples need to roll closed as well").
    */
   @E.cssState("code-shown")
   @E.state

@@ -3,8 +3,8 @@
  * The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Built ON the menu's:  the same attributes, events, slots, states and owned parts,
  *   so an attribute the menu gains reaches the toolbar with no change here.
- * - Its own:  the `toolbar` box around the menu, the two scroll buttons (`scroll-start`, `scroll-end`) and their
- *   names.
+ * - Its own:  the `toolbar` box around the menu,
+ *   the two scroll buttons (`scroll-start`, `scroll-end`) and their names.
  * - Its slots, a bar's layout:  `icon`, `title`, `center` and `right` around the items (the default slot).
  * - The same noun (`menu`):  its items draw as a menu's, and `UIMenu.css` styles it.
  */

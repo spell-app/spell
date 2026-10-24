@@ -3,8 +3,9 @@
  * with `ThemeSheet` (a theme's choices as a stylesheet) and `SavedTheme` (the theme kept in the browser).
  * - SIDE EFFECT:  importing it defines the tag, and the families its shadow DOM is built of:
  *   the inspector's (panel, property editor, input, select, item, slider, menu, button)
- *   and the preview's (card, parts, checkbox, label, message, progress, icon, section, code).
- *   A `<ui-root>` only loads what's in the page's light DOM, so a family built of other widgets imports them itself.
+ *   and the preview's (card, parts, checkbox, label, message, progress, icon, section, code)
+ *   - Why:  a `<ui-root>` only loads what's in the page's light DOM,
+ *     so a family built of other widgets imports them itself.
  * - The hook for the Spell editor's theme menu:  `SavedTheme.restore()` (`SavedTheme`'s header).
  * - Also the library's `spell-ui/ui-theme-editor` entry.
  */

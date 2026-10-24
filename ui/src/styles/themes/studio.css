@@ -1,15 +1,17 @@
 /*
  * Studio theme:  a code studio in Shades of Purple's colours, as a `spell-ui` theme, `@layer ui.theme`.
- * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.  Applied like one, ON TOP
- *   of `classic.css`, so every classic token it replaces is restated here.
- * - The Studio look of the Spell editor (epic `debut`):  its boards on the "Spell editor facelift" Design canvas are
- *   where every value below comes from.
+ * - OUR OWN theme, not a Fomantic port:  listed in `Themes.own`, apart from `Themes.names`.
+ *   Applied like one, ON TOP of `classic.css`,
+ *   so every classic token it replaces is restated here.
+ * - The Studio look of the Spell editor (epic `debut`):
+ *   every value below comes from its boards on the "Spell editor facelift" Design canvas.
  * - What makes it Studio:
  *   - flat panels joined by hairlines, no glass, no wallpaper
  *   - dark:  Shades of Purple's own navy (`#1E1E3F` page, `#2D2B55` panels) and its yellow accent, `#FAD000`
  *   - light:  pale lavender panels, a deep violet accent, `#6A2BC2`
  *   - the system font, 8px controls and 12px panels
- * - Tokens only, so far:  the families keep classic's shapes (epic `debut` P4:  built to the board, no polish round).
+ * - Tokens only, so far:  the families keep classic's shapes.
+ *   It's built to the board, with no round of polish yet.
  * - NO font files ship:  every face is the platform's own.
  */
 

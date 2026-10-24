@@ -11,9 +11,10 @@ import type { E } from "spell-ui/core"
 
 /****************
  * ### `docsThemesVocabulary`
- * The names of `<ui-docs-themes>`, the docs site's look controls:  a palette button opening a small overlay with
- * Light | Dark | Auto and the theme list;  or, on a components page, a theme dropdown;  or a sun / moon button
- * alone.  Remembered per viewer.
+ * The names of `<ui-docs-themes>`, the docs site's look controls, remembered per viewer:
+ * - a palette button opening a small overlay with Light | Dark | Auto and the theme list
+ * - or, on a components page, a theme dropdown
+ * - or a sun / moon button alone
  ****************/
 export const docsThemesVocabulary = {
   tag: "ui-docs-themes",

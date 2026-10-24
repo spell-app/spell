@@ -694,8 +694,8 @@
     --_ui-menu-active-weight: var(--ui-font-weight-bold);
     --_ui-menu-active-margin: 0 0 -1px;
     --_ui-menu-active-radius: var(--ui-radius) var(--ui-radius) 0 0;
-    /* the first and last tabs too:  the menu's own end corners (`0` here) left them square while the others were round
-       (Owen, 2026-10-23, epic `debut`:  "This one is round, the rest are square") */
+    /* the first and last tabs too:
+       the menu's own end corners (`0` here) left them square while the others were round */
     --_ui-menu-active-first-radius: var(--_ui-menu-active-radius);
     --_ui-menu-active-last-radius: var(--_ui-menu-active-radius);
     border-bottom: 1px solid var(--ui-border-color-strong);
@@ -950,8 +950,8 @@
    *   - options:  `--ui-menu-segmented-item-padding`, `-item-color`, `-item-radius` (a middle option's corners,
    *     `0`;  the end ones fit the track's, inside its border and padding)
    *   - thumb:  `--ui-menu-segmented-active-background`, `-active-hover-background`,
-   *     `-active-color` (also its focus ring), `-active-shadow` (`none`);  `--ui-menu-thumb-duration`, how long it
-   *     slides (`200ms`)
+   *     `-active-color` (also its focus ring), `-active-shadow` (`none`);
+   *     `--ui-menu-thumb-duration`, how long it slides (`200ms`)
    */
   .ui.segmented.menu {
     --_ui-menu-segmented-background: var(--ui-menu-segmented-background, var(--ui-surface));
@@ -1355,8 +1355,8 @@
 
 @layer ui.components.menu.states {
   /*
-   * Hover / pressed:  links and buttons (every item of a `link` menu in static markup);  a menu's own button items too
-   * (`<ui-tabs>`' tabs:  Owen, 2026-10-23, epic `debut`:  "Top tabs should get darkening hover like second level")
+   * Hover / pressed:  links and buttons (every item of a `link` menu in static markup)
+   * - a menu's own button items too:  `<ui-tabs>`' tabs darken under the pointer, as its link items do
    */
   :host(:state(in-menu)) > :is(a, button).item:hover,
   .ui.menu :is(a.item, button.item, .link.item):hover,

@@ -6,10 +6,12 @@
  *   `<section class="ui [bare] [variation] example" part="example">`, holding:
  *   - `<div class="heading">`:  the `<ui-header part="header">` (only when there is a header)
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
- *   - `<div class="frame">`:  the `<ui-button part="toggle">` over its top right corner, the `<ui-segment
- *     part="demo">` around the default slot, and while open the `<ui-segment part="code">` holding the
- *     `<ui-code part="source">`
- *   - the header and description sit on the page, outside the frame;  the frame holds only the example and its code
+ *   - `<div class="frame">`:
+ *     - the `<ui-button part="toggle">`, over its top right corner
+ *     - the `<ui-segment part="demo">`, around the default slot
+ *     - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
+ *   - the header and description sit on the page, outside the frame:
+ *     the frame holds only the example and its code
  * - The frame and the code are the widgets' own look:
  *   - closed, the demo segment is `basic` and unpadded (Fomantic shows the live markup bare)
  *   - open, it's `attached="top"` and the code pane `attached="bottom"`
@@ -45,8 +47,8 @@
       light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))
     );
     /*
-     * Space from the frame's top and right edges to the code button, the same both ways:  about what centres it beside
-     * one line of text (Owen, 2026-10-23:  ""code" button should look centered vertically here";  0.5em before)
+     * Space from the frame's top and right edges to the code button, the same both ways:
+     * about what centres it beside one line of text.
      */
     --_ui-docs-example-toggle-inset: var(--ui-docs-example-toggle-inset, 0.8em);
     /* Space between the header, description and example. */
@@ -100,9 +102,11 @@
   }
 
   /*
-   * The frame's box, and the code button over its top right corner (Owen, 2026-10-23, epic `debut`:  "When no text
-   * between, overlay show code over the example, so no whitespace above the example inside the frame"):  the same
-   * inset from the top and the right edge in every case, a whiter fill than the frame so it stands out on it
+   * The frame's box, and the code button over its top right corner:
+   * - the same inset from the top and the right edge in every case
+   * - a whiter fill than the frame, so it stands out on it
+   * - over the example, so there's no empty space above the example inside the frame
+   *   (Owen, 2026-10-23:  "overlay show code over the example, so no whitespace above the example inside the frame")
    */
   .frame {
     position: relative;
@@ -167,15 +171,15 @@
   }
 
   /*
-   * THE FRAME (Owen, 2026-10-23, epic `debut`:  "Example panes bleed into the text, need some framing.  Something
-   * closer to glass framing when expanded"):  every example but a `bare` one sits in a faint card, open or not
+   * THE FRAME:  every example but a `bare` one sits in a faint card, open or not,
+   * so it never bleeds into the text round it (Owen, 2026-10-23:  "Example panes bleed into the text, need some framing")
    * - a hairline, rounded, a little padding, the theme's glass behind it (fruity's blur)
    * - round the example and its code only:  its header and description stay on the page above it
    * - closed, the demo starts at the frame's top padding, the code button over its corner
    * - open:  the demo a very light tint, no box of its own;  the code under it plain, with no frame of its own
    *   ("Don't need secondary frame around the HTML inside panel ... just visual noise")
-   * - the segments' look set on their boxes (`::part(segment)`), NOT through `--ui-segment-*` tokens, which would
-   *   inherit into every segment the example shows
+   * - the segments' look is set on their boxes (`::part(segment)`), NOT through `--ui-segment-*` tokens:
+   *   those would inherit into every segment the example shows
    */
   .ui.example:not(.bare) > .frame {
     padding: var(--_ui-docs-example-frame-padding);
@@ -185,17 +189,19 @@
     box-shadow: var(--_ui-docs-example-frame-shadow);
     backdrop-filter: var(--_ui-docs-example-frame-filter);
   }
-  /* the demo flush with the frame's padding, open or closed:  as much room above it as below (Owen, 2026-10-23) */
+  /* the demo flush with the frame's padding, open or closed:  as much room above it as below */
   .ui.example:not(.bare) [part~="demo"]::part(segment) {
     margin: 0;
   }
   /*
-   * room for the code button over the corner, so the demo's first line never runs under it (the designer, T50 / C26:
-   * "Like", "Forks 1,048", "Next" did, on a phone):  a float as wide and tall as the button's corner, first in the
-   * demo, which the first line's buttons and words wrap round;  the rest of the demo keeps the frame's whole width
-   * (padding down the whole demo left its right side three times its left:  the designer, T3)
-   * - the button is 28px wide and about 1.35em tall, its inset in from the frame's edge;  the demo's content starts
-   *   the frame's padding (1em, 0.75em) in
+   * Room for the code button over the corner, so the demo's first line never runs under it
+   * (on a phone, the Button page's "Like", "Forks 1,048" and "Next" did):
+   * - a float as wide and tall as the button's corner, first in the demo:
+   *   the first line's buttons and words wrap round it
+   * - the rest of the demo keeps the frame's whole width
+   *   (padding down the whole demo left its right side three times its left)
+   * - the button is 28px wide and about 1.35em tall, its inset in from the frame's edge;
+   *   the demo's content starts the frame's padding (1em, 0.75em) in
    */
   .toggle-room {
     float: inline-end;
@@ -209,20 +215,22 @@
     --_ui-docs-example-toggle-room: calc(28px + var(--_ui-docs-example-toggle-inset) - 1em + 0.4em);
   }
   /*
-   * the frame is the glass:  the demo and the code inside it blur nothing again (a theme's segment glass did, a shade
-   * off the frame round it;  Owen, 2026-10-23:  "Lose whatever is causing background color shift under code")
+   * The frame is the glass:  the demo and the code inside it blur nothing again.
+   * - A theme's segment glass did, a shade off the frame round it
+   *   (Owen, 2026-10-23:  "Lose whatever is causing background color shift under code").
    */
   .ui.example:not(.bare) :is([part~="demo"], [part~="code"])::part(segment) {
     backdrop-filter: none;
   }
   /*
-   * OPEN, as Owen's picture (2026-10-23, epic `debut`:  "show it like it is a panel behind the example which rolls open
-   * from the top.  The example shadow should be over the code content.  Code button should look depressed when the panel
-   * is open";  then, on a first try that boxed the demo inside the frame, "This is not what I wanted"):
+   * OPEN:  the code is a panel behind the example, rolling open from under it
+   * (Owen, 2026-10-23:  "show it like it is a panel behind the example which rolls open from the top")
    * - ONE card:  the demo its top band, out to the frame's edges, as it sits closed;  the code under it, edge to edge
+   *   (NOT the demo boxed inside the frame:  tried first, and turned down)
    * - the demo over the code, casting its shadow down onto it
-   * - the code a shade deeper, rolling open from under the demo, and closed again (its height from 0 and back;  at once
-   *   where the browser can't ease to `auto`);  its long lines scroll sideways, never cut off
+   * - the code a shade deeper, rolling open from under the demo, and closed again
+   *   (its height from 0 and back;  at once where the browser can't ease to `auto`)
+   * - the code's long lines scroll sideways, never cut off
    * - closing, the card keeps this look (`:state(code-shown)`) until the code has rolled away
    * - the code button pressed in
    */
@@ -236,8 +244,8 @@
     margin: 0;
     padding: var(--_ui-docs-example-frame-padding);
     border: none;
-    /* its bottom corners round, the frame's:  a card over the code (Owen, 2026-10-23:  "The example should keep its
-       rounding on the bottom when opened, like the picture I pasted last") */
+    /* its bottom corners round, the frame's:  a card over the code
+       (Owen, 2026-10-23:  "The example should keep its rounding on the bottom when opened") */
     border-radius: 0 0 var(--_ui-docs-example-frame-radius) var(--_ui-docs-example-frame-radius);
     background: var(--_ui-docs-example-demo-background);
     box-shadow:
@@ -289,15 +297,15 @@
   }
 
   /*
-   * The code's copy button:  an icon, no border (Owen:  "Change "Copy" to copy icon, no border").  `<ui-code>`'s
-   * button keeps its words ("Copy", "Copied") as its accessible name;  they're hidden, and its icon is painted
-   * through a mask in the text's colour (two sheets;  a check once it has copied)
+   * The code's copy button:  an icon, no border (Owen:  "Change "Copy" to copy icon, no border").
+   * - `<ui-code>`'s button keeps its words ("Copy", "Copied") as its accessible name, hidden.
+   * - Its icon is painted through a mask in the text's colour:  two sheets, a check once it has copied.
    */
   [part~="source"]::part(copy) {
     /*
-     * centred under the code button (Owen, 2026-10-23:  "Line up the copy button center with the code button center"):
-     * the same width (28px) and right edge;  the code's box ends the frame's padding in from the frame's edge, the
-     * button its inset, 1px further out (measured;  in px, as the copy button's own font size is 0)
+     * centred under the code button:  the same width (28px) and right edge
+     * - the code's box ends the frame's padding in from the frame's edge;  the button, its inset
+     * - so 1px further out (measured;  in px, as the copy button's own font size is 0)
      */
     inset-inline-end: -1px;
     box-sizing: border-box;
@@ -336,9 +344,9 @@
       overflow-x: auto;
     }
     /*
-     * ... but not for a few px:  an example drawn a pixel or two past its box (a fluid tabular menu is 2px wider, so
-     * its tabs' borders meet) scrolled sideways for nothing (Owen, 2026-10-23:  "this has slight horizontal scroll,
-     * doesn't need it");  a little padding, out into the frame's own, takes it in
+     * ... but not for a few px:  a little padding, out into the frame's own, takes them in.
+     * - An example drawn a pixel or two past its box scrolled sideways for nothing
+     *   (a fluid tabular menu is 2px wider, so its tabs' borders meet).
      */
     :host(:not(:state(code-shown))) .ui.example:not(.bare) [part~="demo"]::part(segment) {
       margin-inline: -8px;

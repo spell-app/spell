@@ -6,11 +6,12 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
  * The theme a viewer made and chose to USE (`<ui-theme-editor>`'s Use this theme):  kept in this browser,
  * and put back on any page that asks.
  *
- * - The hook for the Spell editor (epic `debut`):
- *   - `follow(theme)`, each time its theme changes:  the kept sheet goes on while that theme is its base
- *     (the editor's `EditorTheme`;  so picking another look takes it off)
+ * - How the Spell editor uses it (its `EditorTheme`):
+ *   - `follow(theme)`, each time its theme changes:  the kept sheet goes on while that theme is its base,
+ *     so picking another look takes it off
  *   - `restore()` puts the kept base on too;  `has` says whether one is kept, for a menu entry
- *   - by its file, `spell-ui/components/ui-theme-editor/SavedTheme`:  the family's barrel would load the editor too
+ *   - imported by its file, `spell-ui/components/ui-theme-editor/SavedTheme`:
+ *     the family's barrel would load the editor too
  * - Kept in `localStorage` under `STORAGE_KEY`:  the choices AND the stylesheet's text,
  *   so a page restores it without the editor's texts or code (`ThemeSheet`).
  *   - Every access in try/catch:  a private window or blocked storage just keeps nothing.

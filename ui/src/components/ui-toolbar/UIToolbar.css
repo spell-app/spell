@@ -1,9 +1,10 @@
 /*
  * `<ui-toolbar>`:  a menu whose items scroll sideways, with a `‹` / `›` button at each end.
- * - Adopted after `UIMenu.css`, which draws the menu and its items as for `<ui-menu>`:  this sheet only lays out the
- *   box around them (`.ui.toolbar`), keeps the items on one line, and draws the two buttons.
- * - The menu's own box scrolls, its scrollbar hidden;  a button not shown (nothing more that way) keeps its room
- *   (`visibility`), so the items don't jump as it comes and goes.
+ * - Adopted after `UIMenu.css`, which draws the menu and its items as for `<ui-menu>`.
+ *   This sheet only lays out the box around them (`.ui.toolbar`), keeps the items on one line,
+ *   and draws the two buttons.
+ * - The menu's own box scrolls, its scrollbar hidden.
+ * - The buttons sit over the row's ends, taking no room in it:  the items never move as one comes and goes.
  * - Tokens (public, never declared here:  read through private aliases):
  *
  * | Token | What | Default |
@@ -82,10 +83,10 @@
   }
 
   /*
-   * the two buttons:  quiet round keys OVER the row's ends (anchored to the menu's box), taking no room in it:  room
-   * kept for a hidden `‹` left the row's start further in than its end (the designer, T3);  the row fades out under
-   * a key while there's more that way, and a key's press stops on a whole item (scroll snap:  it stopped mid-label,
-   * C6)
+   * the two buttons:  quiet round keys OVER the row's ends (anchored to the menu's box), taking no room in it
+   * - room kept for a hidden `‹` left the row's start further in than its end
+   * - the row fades out under a key while there's more that way
+   * - a key's press stops on a whole item (scroll snap):  without it, it could stop mid-label
    */
   .ui.toolbar {
     position: relative;

@@ -57,7 +57,7 @@ describe("<ui-toolbar>", () => {
     expect(new Set(tops).size).toBe(1)
     expect(isShown(on)).toBe(true)
     expect(isShown(back)).toBe(false)
-    // its room is kept:  the menu starts after it
+    // hidden, not removed:  it waits over the row's start, taking no room in it
     expect(getComputedStyle(back).display).not.toBe("none")
   })
 

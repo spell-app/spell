@@ -9,9 +9,10 @@ import { CLASSIC, FRUITY, SPELL, SPELL_BRAND, STUDIO, type DocsThemesText } from
  * - Entries:  Spell (our own theme, the docs' default), Spell Brand, Fruity and Studio (our own too),
  *   Plain (our own look, no theme:  `DOCS_PLAIN_THEME`), Classic,
  *   then a `Fomantic themes` header over every Fomantic theme (`UI.themes.names`, A-Z by title).
- * - `forTag`:  only the Fomantic themes whose `SiteTheme.families` hold that tag's family;  Spell,
- *   Plain and Classic stay.  Until the site data arrives (or if it can't, or doesn't know the tag),
- *   the list is unfiltered;  titles fall back to the sheet name.
+ * - `forTag`:  only the Fomantic themes whose `SiteTheme.families` hold that tag's family;
+ *   our own themes, Plain and Classic stay.
+ *   - Until the site data arrives (or if it can't, or doesn't know the tag), the list is unfiltered;
+ *     titles fall back to the sheet name.
  * - One per state of its inputs:  the element remakes it when the data or `for` changes.
  ****************/
 export class ThemeMenu {

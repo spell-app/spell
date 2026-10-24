@@ -30,11 +30,13 @@ import toolbarCSS from "./UIToolbar.css?inline"
  * - Its items never wrap:  when they don't fit, the menu's box scrolls sideways (`:state(overflowing)`),
  *   its scrollbar hidden.
  * - A `‹` / `›` button shows at each end while there's more to scroll that way.
- *   - A click scrolls by most of the box's width, smoothly (at once with reduced motion).
- *   - Neither shows when everything fits;  the one at an end it has reached keeps its room, hidden.
+ *   - Each sits OVER its end of the row, taking no room in it;  the row fades out under it.
+ *   - A click scrolls by most of the box's width, smoothly (at once with reduced motion),
+ *     and stops on a whole item.
+ *   - Neither shows when everything fits;  the one at an end the row has reached is hidden.
  *   - Out of the Tab order:  the items themselves are what a keyboard reaches, and focusing one scrolls it in.
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
- * - A BAR's slots around the items (Owen, 2026-10-23, epic `debut`):
+ * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
  * - NOTE: left-to-right only, for now:  in a right-to-left page `scrollLeft` counts the other way.

@@ -2,7 +2,7 @@
 <!--
   The Spell UI site's LAYOUT:  every page's chrome, written ONCE.  A page's own file holds only its `<head>` and
   `<main id="main" class="site-main">`;  the site bundle wraps that `main` in this file's `<body>` on first load
-  (`packages/ui/site/_src/SiteShell.ts`), and from then on the router (`packages/ui/site/_src/SiteRouter.ts`) swaps
+  (`site/_src/SiteShell.ts`), and from then on the router (`site/_src/SiteRouter.ts`) swaps
   only the `main`, through a `<ui-include select="main#main">` in `.site-content`, while everything here stays on
   screen.
   - Relative URLs here are against THIS file (`_parts/`):  the shell makes them absolute as it mounts, so they hold
@@ -27,13 +27,15 @@
         the comments, `/_epic/assets/spell-comments.js`, which draws them with this pack's elements -->
       <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
       <!--
-        Top bar:  while the right column is hidden (narrower than 1200px);  wide screens have none (Owen:  "lose the
-        top bar entirely") until the page's title scrolls away.  The menu button and the brand only below 992px, where
-        the nav panel moves into the flyout.
-        A `<ui-toolbar>`'s bar slots:  `icon` the menu button, `title` the brand, its items the site's links (they scroll
-        sideways with `‹` / `›` when the bar is too narrow), `right` search
-        and the look controls (at the right edge, whatever shows before them).
-        Under it, the page header's title line sticks for the whole page (`SiteSections.splitSubtitle()`).
+        Top bar:  only while the right column is hidden (narrower than 1200px);
+        wide screens have none (Owen:  "lose the top bar entirely").
+        - The menu button and the brand only below 992px, where the nav panel moves into the flyout.
+        - A `<ui-toolbar>`'s bar slots:
+          - `icon`:  the menu button
+          - `title`:  the brand
+          - its items:  the site's links (they scroll sideways with `‹` / `›` when the bar is too narrow)
+          - `right`:  search and the look controls (at the right edge, whatever shows before them)
+        - Under it, the page header's title line sticks for the whole page (`SiteSections.splitSubtitle()`).
       -->
       <ui-toolbar class="site-topbar" aria-label="Site">
         <ui-button
@@ -62,9 +64,10 @@
       </ui-toolbar>
 
       <!--
-        Narrower than 992px:  the nav panel lives in this flyout (the top bar's menu button opens it);  the flyout itself
-        is clear, so the panel reads as a card over the dimmed page.  Its brand is the top bar's (the hat, "Spell UI"), and the
-        site's own links stay in the top bar (Owen, 2026-10-23:  "Don't need to duplicate Guides/etc in this sidebar").
+        Narrower than 992px:  the nav panel lives in this flyout (the top bar's menu button opens it).
+        - The flyout itself is clear, so the panel reads as a card over the page (modeless:  no dimmer).
+        - Its brand is the top bar's (the hat, "Spell UI").
+        - The site's own links stay in the top bar (Owen, 2026-10-23:  "Don't need to duplicate Guides/etc in this sidebar").
       -->
       <ui-flyout id="site-nav-flyout" position="left" closable modeless class="site-nav-flyout" aria-label="Components">
         <ui-docs-nav aria-label="Components (menu)">

@@ -8,10 +8,11 @@ import { FOLDS_KEY } from "./site.types"
  * The page side of the site's nested `<ui-section>`s (written into the pages by `yarn site:sections`):
  * where their titles stick, the reader's folds, and LANDING on a `#hash`.
  * - ONE per page (`SiteSections.instance`), following whichever `main` the router shows (`show()`).
- * - Sticky:  the tabs' bar sticks at the top of the page column (`site.css`, "Sections and tabs").
- *   - Every top-level section's title sticks just below it:  its `offset` (px) is set here,
- *     from the bar's measured height and `--site-top` (resolved through a hidden probe).
- *     Again whenever the bar or the window resizes.
+ * - Sticky:  the page header's title line sticks under the top bar, and the tabs' bar under it
+ *   (`site.css`, "The page header" and "Sections and tabs").
+ *   - Every top-level section's title sticks just below them:  its `offset` (px) is set here,
+ *     from their measured heights and `--site-top` (resolved through a hidden probe).
+ *     Again whenever the bar, the title line or the window resizes.
  *   - Nested titles stack below their parents' (the element does that).
  *   - The same line goes on `main` as `--site-sections-top`,
  *     for the browser's own anchor scrolling (`scroll-margin-top`).
@@ -74,13 +75,14 @@ export class SiteSections {
   }
 
   /**
-   * Keep the stuck tabs and their section toolbar ONE panel as the page scrolls (Owen, 2026-10-23:  "Don't show content
-   * underneath tabs when scrolling up"):
-   * - `main` gets `site-tabs-stuck` while the tabs' bar is stuck at its line:  the strip round the panel shows then
-   *   (`site.css` for tabs alone, spell-toolbar.css under a toolbar)
-   * - at a pane's end its toolbar stops sticking first (its pane ends before the tabs' box does):  the tabs follow it up,
-   *   `--site-tabs-leave` (px), so the two leave together, never the track alone over the page
-   * - once a frame at most, while the page scrolls
+   * Keep the stuck tabs and their section toolbar ONE panel as the page scrolls,
+   * so no content shows under the tabs (Owen, 2026-10-23:  "Don't show content underneath tabs when scrolling up").
+   * - `main` gets `site-tabs-stuck` while the tabs' bar is stuck at its line:
+   *   the strip round the panel shows then (`site.css` for tabs alone, spell-toolbar.css under a toolbar)
+   * - `main` gets `site-head-stuck` once the page has scrolled at all:  the page header's title line tightens
+   * - At a pane's end, its toolbar stops sticking first (its pane ends before the tabs' box does).
+   *   The tabs follow it up by `--site-tabs-leave` (px), so the two leave together, never the track alone over the page.
+   * - Once a frame at most, while the page scrolls.
    */
   private markTabsStuck(): void {
     if (this.isMarkingStuck) return
@@ -141,9 +143,10 @@ export class SiteSections {
   }
 
   /**
-   * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bar:
-   * `--site-top`, plus the masthead's title line (its height on `main` as `--site-head-height`), plus the tabs' bar and
-   * its band above and below when the page has tabs.
+   * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bars:
+   * - `--site-top`
+   * - plus the masthead's title line (its height on `main` as `--site-head-height`)
+   * - plus, when the page has tabs, the tabs' bar and its band above and below
    */
   private measure(): void {
     const main = this.main
@@ -166,8 +169,9 @@ export class SiteSections {
     const track = `${Math.round(trackHeight)}px`
     if (main.style.getPropertyValue(TABS_TRACK) !== track) main.style.setProperty(TABS_TRACK, track)
     let top = bar ? trackBottom + band + gap : siteTop
-    // a page's own sticky bar:  the section toolbar under the tabs is the panel's lower half, stuck right under the
-    // track;  another (the kitchen sink's theme picker) below the panel;  the titles below either
+    // a page's own sticky bar:
+    // the section toolbar under the tabs is the panel's lower half, stuck right under the track;
+    // another (the kitchen sink's theme picker) sticks below the panel;  the titles below either
     const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
     if (pageBar) {
       const isJoined = !!bar && pageBar.matches(JOINED_BAR)
@@ -184,13 +188,15 @@ export class SiteSections {
   }
 
   /**
-   * The masthead's TITLE LINE sticks under the top bar, and the rest of the page scrolls under it (Owen, 2026-10-23,
-   * epic `debut`:  "leave just the top header line, content goes below it";  before, the title moved into the top bar
-   * once it scrolled away):  the title, its icon buttons, Send and the bullhorn stay;  the subhead scrolls on.
-   * - The subhead is written inside the title (`<ui-header level="1">Title <ui-header>Subhead</ui-header>`):  this takes
-   *   it out, into a paragraph right after the masthead (`.site-subtitle`), so the masthead holds the line alone and
-   *   sticks for the whole page (`site.css`, "The page header")
-   * - its words as written (links, code ...) move, not a copy;  `data-spell-added`, as the runtime's own boxes are
+   * Move the subhead out of the masthead, so only its TITLE LINE sticks under the top bar
+   * (Owen, 2026-10-23:  "leave just the top header line, content goes below it").
+   * - What stays stuck:  the title, its icon buttons, Send and the bullhorn.
+   *   The subhead scrolls on with the page.
+   * - The subhead is written inside the title (`<ui-header level="1">Title <ui-header>Subhead</ui-header>`).
+   *   This moves it into a paragraph right after the masthead (`.site-subtitle`),
+   *   so the masthead holds the line alone, and sticks for the whole page (`site.css`, "The page header").
+   * - Its words as written (links, code ...) move, not a copy.
+   *   The paragraph is marked `data-spell-added`, as the runtime's own boxes are.
    * - SIDE EFFECT:  `main`'s DOM;  once per page (a page shown again is a fresh `main`)
    */
   private static splitSubtitle(main: HTMLElement): void {
@@ -390,8 +396,8 @@ export class SiteSections {
   }
 
   /**
-   * The page header's box, whose title line sticks (`splitSubtitle()`):  its segment's, as the element itself has none
-   * and the tools laid over it (Send) may reach past it.
+   * The page header's box, whose title line sticks (`splitSubtitle()`):  its segment's.
+   * - The element itself has none, and the tools laid over it (Send) may reach past it.
    */
   private static headOf(main: HTMLElement): HTMLElement | undefined {
     return main.querySelector(MASTHEAD)?.shadowRoot?.querySelector<HTMLElement>('[part~="segment"]') ?? undefined
@@ -527,10 +533,10 @@ const MASTHEAD_SUBHEAD = ".site-masthead .site-title > ui-header"
 /** The paragraph the subhead's words move into (`site.css`). */
 const SUBTITLE_CLASS = "site-subtitle"
 
-/** `main`'s custom property:  the masthead's stuck height, px, the sticky lines below it start under (`measure()`). */
+/** `main`'s custom property:  the masthead's stuck height, px;  the sticky lines below start under it (`measure()`). */
 const HEAD_HEIGHT = "--site-head-height"
 
-/** `main`'s class while the page has scrolled, its header's title line stuck and tighter (`markTabsStuck()`, `site.css`). */
+/** `main`'s class once the page has scrolled:  its header's title line stuck and tighter (`markTabsStuck()`, `site.css`). */
 const HEAD_STUCK = "site-head-stuck"
 
 /** `main`'s class while the tabs' bar is stuck (`markTabsStuck()`). */

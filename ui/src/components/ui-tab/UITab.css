@@ -167,8 +167,8 @@
 
   /* Vertical:  the tab list in a column beside the panes, which share the rest of the row. */
   /*
-   * Too narrow for a pane of 12em beside the tab list, the panes go UNDER it, full width (the designer, C4:  the pane
-   * squeezed to a quarter of the row broke "Biography" inside the word)
+   * Too narrow for a pane of 12em beside the tab list, the panes go UNDER it, full width
+   * - squeezed to a quarter of the row, a pane broke words like "Biography" in the middle
    */
   .ui.vertical.tabs {
     --_ui-tabs-pane-margin: 0;
@@ -200,8 +200,8 @@
   }
 
   /*
-   * The plain tab list (no other look) as wide as its tabs:  across the whole row it ended in an empty cell after a
-   * divider, which read as a missing tab (the designer, T9 / T56)
+   * The plain tab list (no other look) as wide as its tabs
+   * - across the whole row, it ended in an empty cell after a divider, which read as a missing tab
    */
   .ui.tabs > .ui.menu:not(.fluid, .tabular, .secondary, .text, .vertical, .pointing) {
     width: fit-content;
@@ -236,7 +236,7 @@
   .ui.tab.loading {
     position: relative;
     display: block;
-    /* room for the spinner and a line or two, not a tall blank box (Fomantic's 250px;  the designer, T1 / T4) */
+    /* room for the spinner and a line or two, not a tall blank box (Fomantic's 250px) */
     min-height: 5em;
     overflow: hidden;
   }

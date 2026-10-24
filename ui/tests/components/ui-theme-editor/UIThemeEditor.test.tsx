@@ -55,8 +55,9 @@ describe("<ui-theme-editor> starting", () => {
     // the page's own token sheets, as a real page has:  else each shadow root keeps its default colours
     Sheets.adopt(foundationCSS)
     const host = await editor()
-    // NOTE:  axe over the light sample only:  in a test page the dark sample's label reads its own shadow root's
-    // default colours (white on #3faff3), where a served page shows fruity's (the designer's shots, epic `debut` P6)
+    // NOTE:  axe over the light sample only:
+    // in a test page, the dark sample's label reads its own shadow root's default colours (white on #3faff3),
+    // where a served page shows fruity's (checked by eye on screenshots)
     inner(host, ".sample.ui-dark").hidden = true
     await vi.waitFor(() => expect(token("--fruity-glass")).not.toBe(""))
     expect(host.theme).toEqual({ name: "My theme", base: "fruity" })

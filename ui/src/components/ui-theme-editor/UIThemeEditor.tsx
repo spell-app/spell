@@ -45,19 +45,22 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
  *     - colours:  a row of swatches, a radio group (`role="radiogroup"`), the base's own first
  *     - fonts:  `<ui-select>`s, each font shown in itself;  text size:  a `<ui-slider>`
  *     - corners, depth, glass:  segmented `<ui-menu>`s
- *   - the PREVIEW (`part="preview"`):  a sample app of real elements (card, checkboxes, field, buttons, label,
- *     toggle, message, progress), once light and once dark (`ui-light` / `ui-dark`);  Both, Light or Dark
+ *   - the PREVIEW (`part="preview"`):  a sample app of real elements, once light and once dark (`ui-light` / `ui-dark`)
+ *     - card, checkboxes, field, buttons, label, toggle, message, progress
+ *     - Both, Light or Dark picks which it shows
  *   - the SHEET (`part="sheet"`):  the theme as a stylesheet in `<ui-code>`, its file name, and Copy CSS
  * - The theme is `ThemeSheet`'s:  its base theme, and tokens on `:root` for every choice made.
  *   - Applied to the WHOLE PAGE while the editor is connected (`ThemeSheet.applyToPage()`):
  *     tokens set on one element don't reach the tokens the page works out at `:root`
- *     (`--ui-primary-hover` is computed where `--ui-primary` is declared), so only a page-wide sheet is exact.
- *   - SIDE EFFECT:  the page wears the edited theme;  on disconnect its theme and the edits sheet go back to
- *     what they were.
+ *     (`--ui-primary-hover` is computed where `--ui-primary` is declared),
+ *     so only a page-wide sheet is exact.
+ *   - SIDE EFFECT:  the page wears the edited theme;
+ *     on disconnect, its theme and the edits sheet go back to what they were.
  * - It starts from (`theme`):  `value`, else the theme kept in this browser (`SavedTheme`),
  *   else `base` as it is, else the page's theme, else `fruity`.
- * - Use this theme keeps it in this browser (`SavedTheme.save()`):  the Spell editor, and any page that calls
- *   `SavedTheme.restore()`, starts in it.  `:state(saved)` while the theme shown is the one kept.
+ * - Use this theme keeps it in this browser (`SavedTheme.save()`):
+ *   the Spell editor, and any page that calls `SavedTheme.restore()`, starts in it.
+ *   - `:state(saved)` while the theme shown is the one kept.
  * - Events:  `ui-change` on every choice, `ui-copy` from Copy CSS, `ui-save` from Use this theme / Stop using.
  *   - The events of the elements it's built of stop at its shadow root:  their `ui-change`'s detail isn't ours.
  * - Its families (panel, property editor, select, slider, menu, card ...) are imported by its barrel.

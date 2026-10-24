@@ -340,8 +340,9 @@
 }
 
 /*
- * `compact`:  the theme dropdown as an icon-only palette button, the quiet round icon button of a masthead's row:  no
- * caret, no fill until hovered;  the dropdown's box is a button (`UIButton.css`), so it takes the button's tokens
+ * `compact`:  the theme dropdown as an icon-only palette button,
+ * the quiet round icon button of a masthead's row:  no caret, no fill until hovered
+ * - The dropdown's box is a button (`UIButton.css`), so it takes the button's tokens.
  */
 @layer ui.components.docs-themes.variations {
   [part~="theme"].compact {

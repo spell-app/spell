@@ -4,8 +4,8 @@
  *   (a container query on the host, so it fits a side panel as well as a page).
  * - `.inspector`:  a `<ui-panel>` (its own look:  the brand's compact inspector), around a `<ui-property-editor>`.
  * - `.swatches`:  the colour rows, small round swatches as macOS's accent colours;  the base's own a ring of hues.
- * - `.sample`:  the preview's sample app, once per scheme (`ui-light` / `ui-dark` on it), on the page's own
- *   background and wallpaper (`--ui-bar-wallpaper`, a glass theme's), so glass shows as it will.
+ * - `.sample`:  the preview's sample app, once per scheme (`ui-light` / `ui-dark` on it),
+ *   on the page's own background and wallpaper (`--ui-bar-wallpaper`, a glass theme's), so glass shows as it will.
  * - Every colour, font and radius here is a token:  the editor wears the theme it edits.
  * - Public tokens (`--ui-theme-editor-*`) are read through private aliases.
  */

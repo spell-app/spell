@@ -138,7 +138,7 @@ describe("UITab.css examples", () => {
   it("shows a loading pane with a spinner", async () => {
     const root = await example("states")
     const loading = root.querySelector<HTMLElement>(".ui.loading.tab")!
-    // room for the spinner and a line or two (Fomantic's 250px was a tall blank box:  epic `debut`, the designer)
+    // room for the spinner and a line or two:  Fomantic's 250px was a tall blank box
     expect(getComputedStyle(loading).minHeight).toBe("80px")
     expect(getComputedStyle(loading, "::after").animationName).toBe("ui-tab-spin")
     expect(getComputedStyle(loading.querySelector("p")!).visibility).toBe("hidden")

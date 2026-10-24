@@ -32,8 +32,8 @@ import themesCSS from "./UIDocsThemes.css?inline"
  *     - `<button part="palette">` opens `<ui-popup part="overlay" open-on="click">`, a small panel with
  *       - Light | Dark | Auto, a segmented control (`role=radiogroup` of `radio`s, `part="schemes"`):
  *         the scheme the viewer CHOSE, Auto while it follows the OS
- *       - the theme list (`role=menu` of `menuitemradio`s:  Spell, Spell Brand, Fruity, Plain, Classic, then
- *         Fomantic's;  the chosen one checked)
+ *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
+ *         Spell, Spell Brand, Fruity, Studio, Plain, Classic, then Fomantic's
  *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
  *       button stood beside it, and the overlay had a "Match system" switch.
@@ -390,8 +390,8 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
 
   /**
    * The theme `<ui-dropdown>` (`show="theme"`).
-   * - `compact`:  an icon-only palette button, its text (`3 themes`) its tooltip and name (Owen, 2026-10-23, epic
-   *   `debut`:  "'1 theme' button should be palette icon")
+   * - `compact`:  an icon-only palette button, its text (`3 themes`) its tooltip and name
+   *   (Owen, 2026-10-23:  "'1 theme' button should be palette icon")
    */
   private dropdown(): JSX.Element {
     const label = () => this.themeMenu.labelFor(this.look.theme)

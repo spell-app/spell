@@ -29883,7 +29883,7 @@
         {
           "name": "--ui-breadcrumb-divider-spacing",
           "default": "0.4em",
-          "description": "each side of a divider: half what the old margin plus the markup's space between sections came to, so it sits midway (Owen, 2026-10-23: \"Spacing on either side of the divider should be the same\")",
+          "description": "Space each side of a divider, the same either side.",
           "type": "length"
         },
         {
@@ -31244,7 +31244,7 @@
         {
           "name": "--ui-docs-example-toggle-inset",
           "default": "0.8em",
-          "description": "Space from the frame's top and right edges to the code button, the same both ways: about what centres it beside one line of text (Owen, 2026-10-23: \"\"code\" button should look centered vertically here\"; 0.5em before)",
+          "description": "Space from the frame's top and right edges to the code button, the same both ways: about what centres it beside one line of text.",
           "type": "length"
         },
         {

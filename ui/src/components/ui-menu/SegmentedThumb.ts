@@ -2,13 +2,14 @@ import { E } from "spell-ui/core"
 
 /****************
  * ### `SegmentedThumb`
- * The sliding THUMB of a segmented menu (`appearance="segmented"`):  the chosen option's fill, drawn ONCE under the
- * options and moved to the chosen one, as Apple's segmented control slides.
- * - Plain DOM, no Solid:  `<ui-menu>` (its items draw their boxes in their own shadow roots) and `<ui-tabs>` (its tab
- *   buttons are in its own) both use it, each handing it the track and a way to find the chosen option's box.
- * - It writes the chosen box's place on the track as private custom properties (`--_menu-thumb-x`, `-y`, `-width`,
- *   `-height`, `-radius`) and the `thumbed` class;  `UIMenu.css` draws the thumb from them (the track's `::before`)
- *   and clears the chosen option's own fill.
+ * The sliding THUMB of a segmented menu (`appearance="segmented"`):  the chosen option's fill,
+ * drawn ONCE under the options and moved to the chosen one, as Apple's segmented control slides.
+ * - Plain DOM, no Solid:  `<ui-menu>` and `<ui-tabs>` both use it,
+ *   each handing it the track and a way to find the chosen option's box.
+ *   - `<ui-menu>`'s items draw their boxes in their own shadow roots;  `<ui-tabs>`' tab buttons are in its own.
+ * - It writes the chosen box's place on the track as private custom properties and the `thumbed` class:
+ *   `--_menu-thumb-x`, `-y`, `-width`, `-height`, `-radius`.
+ *   - `UIMenu.css` draws the thumb from them (the track's `::before`), and clears the chosen option's own fill.
  * - `moving`, from the frame after the first place:  the thumb slides between choices, never in from nowhere.
  * - Follows sizes while started:  a `ResizeObserver` on the track and the chosen box (fonts loading, a wrap).
  * - No chosen option:  no thumb (`thumbed` off), and the options draw as before.

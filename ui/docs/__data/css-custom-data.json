@@ -215,7 +215,7 @@
       "name": "--ui-breadcrumb-divider-spacing",
       "description": {
         "kind": "markdown",
-        "value": "each side of a divider: half what the old margin plus the markup's space between sections came to, so it sits midway (Owen, 2026-10-23: \"Spacing on either side of the divider should be the same\")\n\n`<ui-breadcrumb>`'s token.  Default:  `0.4em`"
+        "value": "Space each side of a divider, the same either side.\n\n`<ui-breadcrumb>`'s token.  Default:  `0.4em`"
       }
     },
     {

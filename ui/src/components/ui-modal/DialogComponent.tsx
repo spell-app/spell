@@ -9,8 +9,8 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  * The base of the components behind `<ui-modal>` and `<ui-flyout>`:
  * everything they do, on a shadow `<dialog class="ui … <noun>" part="<rootPart>">` shown with `showModal()`.
  * The browser gives it the focus trap, the `inert` page, the top layer and the `::backdrop` (the dimmer).
- * A subclass may be MODELESS (`isModeless`:  `<ui-flyout modeless>`):  `show()`, the page left usable, a click on it
- * closing it as it lands.
+ * A subclass may be MODELESS (`isModeless`:  `<ui-flyout modeless>`):  `show()`, the page left usable;
+ * a click on the page closes the dialog, and still lands where it went.
  *
  * - A subclass adds only its names and looks:
  *   `vocabulary`, `elementSetup.styleSheets` (and `animation`), `rootPart`, `overlayKind`, `shownClass`.
@@ -69,9 +69,10 @@ export abstract class DialogComponent<
   declare overlayKind: E.OverlayKind
 
   /**
-   * Hook:  shown without blocking the page (`show()`, not `showModal()`):  no `::backdrop`, no scroll lock, no
-   * focus trap;  a click on the page lands, and closes it (light dismiss, `closedby="any"`).
-   * Default `false`;  `<ui-flyout modeless>`.
+   * Hook:  shown without blocking the page (`show()`, not `showModal()`).
+   * - No `::backdrop`, no scroll lock, no focus trap.
+   * - A click on the page lands, and closes it (light dismiss, `closedby="any"`).
+   * - Default `false`;  `<ui-flyout modeless>`.
    */
   protected get isModeless(): boolean {
     return false
@@ -185,9 +186,10 @@ export abstract class DialogComponent<
 
   /**
    * `showModal()` (`show()` when `isModeless`) and register with `UI.overlays`;  nothing when already open.
-   * - Modeless:  the overlay entry isn't `modal` (no scroll lock), and a click on the page LIGHT-DISMISSES it
-   *   (`any`, the default) through the overlay entry, never the browser's:  the click still lands where it went,
-   *   the page stays usable;  its opener (`commandfor`) and a click inside don't count.
+   * - Modeless:  the overlay entry isn't `modal` (no scroll lock), and the page stays usable.
+   *   - A click on the page LIGHT-DISMISSES it (`any`, the default), through the overlay entry, never the browser's:
+   *     the click still lands where it went.
+   *   - Its opener (`commandfor`) and a click inside don't count.
    * - `closedby` is applied here:
    *   natively when supported (the browser's light dismiss), else by the overlay entry's outside-click handling.
    * - A `<dialog>` that other keyframes animated out (`hidden` on it) shows again first.
