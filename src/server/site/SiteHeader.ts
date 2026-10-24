@@ -28,10 +28,10 @@ import {
  *   - served by the page server:  they're absolute, and server-only tabs (`serverOnly`) turn on
  * - Brand:  the hat mark (`LOGO_MARK`), a link to the home page (`SITE_HOME`), which lights no tab.
  * - Also shows:
- *   - no breadcrumb (Owen, 2026-10-10:  "We don't need the breadcrumb in the spell doc toolbar"):  the lit tab says
- *     where the page is, the page's own title what it is
- *   - narrow (720px or less:  VS Code's side bar, a phone):  the tabs scroll sideways;  the pages' own eyebrow
- *     crumbs hide at that width
+ *   - no breadcrumb (Owen, 2026-10-10:  "We don't need the breadcrumb in the spell doc toolbar"):
+ *     the lit tab says where the page is, the page's own title what it is
+ *   - narrow (720px or less:  VS Code's side bar, a phone):  the tabs scroll sideways;
+ *     the pages' own eyebrow crumbs hide at that width
  *   - the checkout serving it:  `⎇ <worktree or branch>` (served pages only)
  *   - "open in VS Code":  a `vscode://file/...` link to the page's source
  *   - edit mode (pages the page server serves):  hover a section, edit its source in place -- `<spell-section-editor>`
@@ -214,8 +214,8 @@ export class SiteHeader extends HTMLElement {
     // framed (VS Code's side bar):  no "open in VS Code" (a framed page can't follow a `vscode://` link) and no edit
     // mode -- they did nothing there (Owen, 2026-10-08);  a browser tab keeps both
     const framed = window.self !== window.top
-    // `no-tools`:  a page whose chrome has no use for them (the Spell UI site's, Owen 2026-10-23:  "they don't do
-    // anything anyway")
+    // `no-tools`:  a page whose chrome has no use for them
+    // (the Spell UI site's, Owen 2026-10-23:  "they don't do anything anyway")
     const noTools = this.hasAttribute("no-tools")
     const file = framed || noTools ? undefined : this.sourceFile
     const vscode = file
