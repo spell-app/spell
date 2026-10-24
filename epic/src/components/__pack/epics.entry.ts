@@ -40,6 +40,8 @@ SpellUI.registerPack({
       import("../epic-prompt"),
       import("../epic-question"),
       import("../epic-review"),
+      import("../epic-run"),
+      import("../epic-run-row"),
       import("../epic-section"),
       import("../epic-send"),
       import("../epic-send-buttons"),

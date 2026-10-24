@@ -453,6 +453,18 @@ _A choice page:  the boxes start with the recommendation;  "Do it" sends the tab
 - Your boxes are saved as you type, on the page server and in the browser.
 - If the page server is gone for good, Copy my answers puts everything you typed on the clipboard.
 
+### Run pages
+
+A RUN PAGE is a command's review page:  a command, not the agent, stops to ask you, and carries on with your answers.
+The first is the Spanish translator, with the names it drafted.
+
+- The command opens a run through the kit's `SRV.CommandRun`;  the page is `/runs/<id>/`.
+- Its header says which command is waiting, with a green dot, or that nobody is.
+- Its progress lines show as the command writes them, with no reload.
+- A row per thing to answer:  the command's columns, then its proposal in a box you type over,
+  a pick of its alternatives when it has any, and its tick box (`Use for every project`).
+- Each answer is saved as you give it;  Send, at the bottom, wakes the waiting command.
+
 ### Guides
 
 A GUIDE is what an epic leaves behind for a reader coming to it cold:
@@ -610,7 +622,7 @@ Adding a new element:
 | [src/definitions/](src/definitions/) | the ONE description of every element:  its vocabulary as data, and the children it takes |
 | [src/markup/](src/markup/) | reads, writes and checks an epic page's `<epic-*>` markup through the definitions, in node and the browser |
 | [src/review/](src/review/) | the page's two server clients:  the review inbox's (marks, polling, note-draft backups) and the running agents' (the "Agents running" panel), each through one link that keeps its token fresh |
-| [src/answers/](src/answers/) | the pages you answer on:  a details page's answer, gathered from its questions and text boxes;  a choice page's boxes, the draft and "Do it" |
+| [src/answers/](src/answers/) | the pages you answer on:  a details page's answer, gathered from its questions and text boxes;  a choice page's boxes, the draft and "Do it";  a run page's answers, saved row by row, and Send |
 | [src/links/](src/links/) | short addresses (`SAGA:/<saga>/<epic>#<id>`) and `<epic-link>`'s attributes as a page and an id;  what a page holds to land on;  pure, for the elements, the docs runtime and the tool |
 | [src/tool/](src/tool/) | the epic tool behind `epic`'s page verbs, node only, not in the pack;  [PLAN-DOC.md](src/tool/PLAN-DOC.md), the rules for a page's data;  [the template](src/tool/templates/plan.html) a new epic page starts from |
 | [src/docs/](src/docs/) | Epic UI, the elements' docs pages, served at `/components/epics/`:  an index, a page per tag, the layout and the data |

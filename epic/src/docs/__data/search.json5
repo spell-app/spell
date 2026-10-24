@@ -1439,6 +1439,75 @@
       ]
     },
     {
+      "path": "epic-run-row.html",
+      "title": "<epic-run-row>",
+      "summary": "The <epic-run-row> element: one row of a run page: the command's columns, then Owen's answer.",
+      "tag": "epic-run-row",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "events",
+          "title": "Events",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-run.html",
+      "title": "<epic-run>",
+      "summary": "The <epic-run> element: a run page's body: a command asks, Owen answers each row, Send.",
+      "tag": "epic-run",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-section.html",
       "title": "<epic-section>",
       "summary": "The <epic-section> element: one section of an epic page (Phases, Questions ... Log), an Overview sub-section, or a report.",

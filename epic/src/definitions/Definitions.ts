@@ -37,6 +37,8 @@ import { epicSectionVocabulary } from "spell-epic/components/epic-section/EpicSe
 import { epicSendVocabulary } from "spell-epic/components/epic-send/EpicSend.en"
 import { epicSendButtonsVocabulary } from "spell-epic/components/epic-send-buttons/EpicSendButtons.en"
 import { epicHiddenNoteVocabulary } from "spell-epic/components/epic-state-filter/EpicHiddenNote.en"
+import { epicRunVocabulary } from "spell-epic/components/epic-run/EpicRun.en"
+import { epicRunRowVocabulary } from "spell-epic/components/epic-run-row/EpicRunRow.en"
 import { epicStateFilterVocabulary } from "spell-epic/components/epic-state-filter/EpicStateFilter.en"
 import { epicStatusVocabulary } from "spell-epic/components/epic-status/EpicStatus.en"
 import { epicSummaryVocabulary } from "spell-epic/components/epic-summary/EpicSummary.en"
@@ -98,6 +100,10 @@ export class Definitions {
     "epic-choice-rows": epicChoiceRowsVocabulary,
     "epic-choice-row": epicChoiceRowVocabulary,
     "epic-choices-bar": epicChoicesBarVocabulary,
+    // a run page, a command's review page (epic `epic-engine` P23):  `<epic-run>` once a page, from its template;
+    // its rows drawn in its shadow root
+    "epic-run": epicRunVocabulary,
+    "epic-run-row": epicRunRowVocabulary,
     // the Epics page's list, its cards and its sort buttons (epic `epic-engine` P3)
     "epic-list": epicListVocabulary,
     "epic-card": epicCardVocabulary,
