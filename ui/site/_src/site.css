@@ -496,7 +496,8 @@
   }
   /* the subhead, out of the title (`SiteSections.splitSubtitle()`):  in the column, under the title line, as it was */
   .site-subtitle {
-    margin: 0 var(--site-gutter);
+    /* the gutter in the page's ems, not this larger text's:  its left edge the title's (the designer:  T19) */
+    margin: 0 calc(var(--site-gutter) / 1.34);
     /* 8px more under it (Owen:  "8px additional space below breadcrumb and subhead") */
     padding-block-end: calc(0.25em + 8px);
     font-family: var(--ui-font-family-heading);
@@ -611,7 +612,38 @@
     max-height: calc(100dvh - var(--site-top));
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 1.5em 1.5em 2em 0;
+    /* clear of the content's title bands, which run out to the column's edge (the designer:  T5, C66) */
+    padding: 1.5em 1.5em 2em 16px;
+  }
+  /*
+   * its site links:  ONE row that scrolls with `‹` / `›`, as the top bar's (the designer, T33 "Bars don't wrap":  they
+   * wrapped onto four rows in the column's width)
+   */
+  .site-aside-bar {
+    width: 100%;
+  }
+  .site-aside-bar::part(menu) {
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .site-aside-links {
+    flex: none;
+  }
+  .site-aside-links::part(bar),
+  .site-aside-links::part(nav) {
+    flex-wrap: nowrap;
+  }
+  /* its palette a plain icon, as every other (the designer:  T22) */
+  .site-aside-themes::part(palette) {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .site-aside-themes::part(palette):hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
   }
   /* its header:  the docked site header over the look controls, a rule below them */
   .site-aside-head {
@@ -781,6 +813,15 @@
    */
   ui-docs-example:has(> ui-breadcrumb) {
     --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
+  }
+
+  /* an example's buttons that wrap keep apart, row from row (the designer, C53:  their rows touched) */
+  ui-docs-example > :is(ui-button, ui-buttons, ui-label) {
+    margin-block: 0.25em;
+  }
+  /* a message given as an example's description runs the frame's width, as every other message does (the designer:  C66) */
+  ui-docs-example:has(> ui-message[slot="description"])::part(description) {
+    max-width: none;
   }
 
   .site-main ui-section[id] {

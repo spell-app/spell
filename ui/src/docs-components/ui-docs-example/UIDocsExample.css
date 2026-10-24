@@ -188,6 +188,12 @@
   /* the demo flush with the frame's padding, open or closed:  as much room above it as below (Owen, 2026-10-23) */
   .ui.example:not(.bare) [part~="demo"]::part(segment) {
     margin: 0;
+    /* room for the code button over the corner, so the demo's last button never runs under it (the designer, T50 /
+       C26:  "Like", "Forks 1,048", "Next" did, on a phone);  the button is 28px, its inset in from the frame's edge */
+    padding-inline-end: var(--_ui-docs-example-toggle-room);
+  }
+  .ui.example {
+    --_ui-docs-example-toggle-room: calc(28px + var(--_ui-docs-example-toggle-inset) - 1em + 0.4em);
   }
   /*
    * the frame is the glass:  the demo and the code inside it blur nothing again (a theme's segment glass did, a shade
@@ -216,6 +222,8 @@
     z-index: 1;
     margin: 0;
     padding: var(--_ui-docs-example-frame-padding);
+    /* the code button's room again, from the frame's edge now (the demo runs out to it) */
+    padding-inline-end: calc(1em + var(--_ui-docs-example-toggle-room));
     border: none;
     /* its bottom corners round, the frame's:  a card over the code (Owen, 2026-10-23:  "The example should keep its
        rounding on the bottom when opened, like the picture I pasted last") */
@@ -323,7 +331,7 @@
      */
     :host(:not(:state(code-shown))) .ui.example:not(.bare) [part~="demo"]::part(segment) {
       margin-inline: -8px;
-      padding-inline: 8px;
+      padding-inline: 8px calc(8px + var(--_ui-docs-example-toggle-room));
     }
   }
 }

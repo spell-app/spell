@@ -178,7 +178,12 @@
      */
     --ui-bar-wallpaper: var(--fruity-wallpaper);
     /* a toolbar's ‹ / › keys:  a faint white disc, so they read as buttons (Owen:  "20% white opacity so it's clear what it is") */
-    --ui-toolbar-button-background: rgb(255 255 255 / 0.2);
+    --ui-toolbar-button-background: light-dark(rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.12));
+    /* the "or" between two buttons:  an opaque disc, the buttons meeting under it (the designer, C16:  glass let the
+       green button show through its text, and a notch of wallpaper round it) */
+    --ui-button-or-background: light-dark(#ffffff, #2c2a36);
+    --ui-button-or-color: var(--ui-text-muted);
+    --ui-button-or-gap: 0px;
     --ui-bar-wallpaper-color: var(--ui-background);
     /* nothing to blur under an opaque wallpaper:  a blur there drew seams where two such bars meet */
     --ui-bar-wallpaper-filter: none;
