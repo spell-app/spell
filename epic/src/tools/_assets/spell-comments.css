@@ -118,7 +118,8 @@
  * a docs EXAMPLE's (`<ui-docs-example>`):  left of its code button, which holds that corner (28px wide, 0.8em in), level
  * with it;  over it, the two covered each other (the designer, C53)
  */
-:is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-docs-example) > .spell-block-buttons {
+:is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-docs-example) > .spell-block-buttons,
+:is(.spell-doc-main, .site-main) ui-docs-example > .spell-block-actions:not([slot]) > .spell-block-buttons {
   top: calc(var(--spell-block-gap, 0px) + 0.8em - 1px);
   right: calc(0.8em + 28px + 4px);
 }
