@@ -22,7 +22,10 @@ export const epicStatusVocabulary = {
     "reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a " +
     "summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only " +
     "recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The " +
-    "heading and the date at its right are drawn;  the reading and the summary are its children.",
+    "heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a " +
+    "LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 " +
+    "→ Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before Owen's first reply) " +
+    "first in the item's details, above the Choices.",
   attributes: [
     {
       name: "state",
@@ -70,13 +73,20 @@ export const epicStatusVocabulary = {
     { name: "who", description: "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`." },
     { name: "date", description: "The heading's right:  `done-at`, else `at`, as `10/8/26 14:34`;  never wraps." },
     { name: "body", description: "The reading." },
-    { name: "summary", description: "The summary, under the reading;  not drawn without one." }
+    { name: "summary", description: "The summary, under the reading;  not drawn without one.  A line's text." },
+    { name: "steps", description: "A line's steps:  `Noted 10/24/26 15:21 → Done 15:25`, each its state and when." },
+    { name: "earlier", description: "A drive-by's line:  `your earlier comment`, after its steps." }
   ],
   states: [
     { name: "underway", description: "`state=underway`." },
     { name: "done", description: "`state=done`." },
     { name: "noted", description: "`state=noted`." },
-    { name: "open", description: "Unfolded:  it starts so (page state, never written)." }
+    { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
+    { name: "line", description: "In an item:  drawn as a line, not a card." },
+    { name: "merged", description: "A line's earlier card, drawn in by the run's last one:  hidden." },
+    { name: "drive-by", description: "Taken before Owen's first reply on the item:  its line above the Choices." },
+    { name: "in-thread", description: "Its line in the item's thread's brown block, after the replies." },
+    { name: "thread-end", description: "Last in the thread's block:  its bottom corners rounded." }
   ],
   texts: [
     { key: "foldTip", text: "Fold this status card", description: "Tooltip of its fold button while open." },
@@ -85,6 +95,14 @@ export const epicStatusVocabulary = {
     { key: "underway", text: "Claude • Underway", description: "The heading while Claude is on it." },
     { key: "done", text: "Claude • Done", description: "The heading once work was done." },
     { key: "noted", text: "Claude • Noted", description: "The heading once Claude recorded what Owen chose." },
+    { key: "stepUnderway", text: "Underway", description: "A line's step while Claude is on it." },
+    { key: "stepDone", text: "Done", description: "A line's step once work was done." },
+    { key: "stepNoted", text: "Noted", description: "A line's step once Claude recorded what Owen chose." },
+    {
+      key: "earlier",
+      text: "your earlier comment",
+      description: "After a drive-by's steps:  it's about a comment Owen made before answering."
+    },
     {
       key: "started",
       text: "taken {date}",

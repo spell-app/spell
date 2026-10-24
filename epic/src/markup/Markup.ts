@@ -112,7 +112,9 @@ export class Markup {
     if (!vocabulary || vocabulary.childOrder !== "listed" || slotted) return this.append(parent, node)
     const specs = MarkupCheck.childSpecs(vocabulary, parent).filter((spec) => !spec.slot)
     // a `flow` element the model also lists by name (`<epic-choices>` in an item) takes that place, not prose's
-    const named = (child: Node) => specs.findIndex((spec) => spec.tag !== FLOW && MarkupCheck.matches(spec, child))
+    // a tag the model lists twice (`<epic-reply>` in an item:  Owen's note asking for More Details, before it, and the
+    // replies after it) takes its LAST place:  the first is placed by hand (`PlanDoc.keepNote()`)
+    const named = (child: Node) => specs.findLastIndex((spec) => spec.tag !== FLOW && MarkupCheck.matches(spec, child))
     const rank = (child: Node) => {
       const own = named(child)
       return own >= 0 ? own : specs.findIndex((spec) => MarkupCheck.matches(spec, child))

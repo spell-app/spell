@@ -18,7 +18,8 @@ export const epicAnswerVocabulary = {
   ui: false,
   description:
     "An answered question's answer card, after its question and Choices:  titled `Answer · <title>`, or " +
-    "`D7 · <title>` when it keeps an old decision's id.",
+    "`D7 · <title>` when it keeps an old decision's id.  Not drawn when its item's Choices already say " +
+    '"Chosen:  X" (its body, if any, opens the item\'s thread).',
   attributes: [
     {
       name: "id",
@@ -50,7 +51,19 @@ export const epicAnswerVocabulary = {
     { name: "title", description: "The title." },
     { name: "body", description: "The answer, and why;  not drawn when empty;  hidden (`until-found`) while folded." }
   ],
-  states: [{ name: "open", description: "Unfolded:  it starts so (page state, never written)." }],
+  states: [
+    { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
+    {
+      name: "redundant",
+      description:
+        "Its item's Choices say what was chosen (`<epic-choices chosen>`):  no band;  the body alone, in the " +
+        "item's thread, or nothing without one."
+    },
+    { name: "unneeded", description: "Redundant, with no body:  not drawn." },
+    { name: "in-thread", description: "Redundant, with a body:  first in its item's thread's brown block." },
+    { name: "thread-start", description: "First in the thread's block." },
+    { name: "thread-end", description: "Last in the thread's block." }
+  ],
   texts: [
     { key: "foldTip", text: "Fold the answer", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Unfold the answer", description: "Tooltip of its fold button while folded." },

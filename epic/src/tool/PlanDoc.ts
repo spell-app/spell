@@ -1328,6 +1328,9 @@ export class PlanDoc extends PlanReader {
    * Keep Owen's note -- `mark.note`, a mark Claude took and is clearing (`inbox done | clear`) -- in item `id`, as his
    * own reply:  `<epic-reply from="Owen" at="2026-10-06 10:42" re="revisit soon"><p>note</p></epic-reply>`.
    * - placed before the first reply dated at or after the note (Claude's answer to it), else after the replies
+   * - a note asking for MORE DETAILS (Add Details, revisit now) whose answer is the item's last card, its More Details
+   *   (`<epic-more>`, no reply after it):  placed just BEFORE that card, as it came first;  the item draws it folded
+   *   (Owen, 2026-10-24, epic `epic-engine` P27:  "my comment should be ABOVE your 'MORE DETAILS'")
    * - a reply from Owen with the same time and note already there:  nothing (`done` after `clear`, a retry)
    * - an Overview sub-section's (Q14):  the same words as a paragraph at its end (a section holds prose only)
    * - a phase's (epic `airplane` P2):  the same reply, in the phase, under its Updated lines (its content model);
@@ -1347,7 +1350,9 @@ export class PlanDoc extends PlanReader {
     const reply = this.make("epic-reply", { from: "Owen", at: stamp, re: how }, `${said}${image}`)
     if (host.localName === "epic-summary") reply.setAttribute("slot", NOTES_SLOT)
     const next = replies.find((each) => (each.getAttribute("at") ?? "") >= stamp)
-    if (next) next.before(reply)
+    const answeredBy = PlanDoc.moreAnswering(host, action, when)
+    if (answeredBy) answeredBy.before(reply)
+    else if (next) next.before(reply)
     else Markup.place(host, reply)
     if (host.localName === "epic-item") this.stamp(host)
 
@@ -1998,6 +2003,19 @@ export class PlanDoc extends PlanReader {
     if (!part && !item) return PlanMarkup.text(id.toUpperCase())
     const link = part?.link ?? item!.id
     return `<a href="#${link}">${PlanMarkup.text(part?.label ?? item!.id.toUpperCase())}</a>`
+  }
+
+  /**
+   * The More Details card a request's note asks for:  for Add Details or revisit now, `host`'s `<epic-more>` when
+   * no reply follows it (Claude's answer to the request, just written);  else `undefined`.
+   */
+  private static moreAnswering(host: Element, action: string, when: string | undefined): Element | undefined {
+    if (action !== "details" && !(action === "revisit" && when === "now")) return undefined
+    const more = host.querySelector(`:scope > ${MORE_TAG}`)
+    if (!more) return undefined
+    for (let next = more.nextElementSibling; next; next = next.nextElementSibling)
+      if (next.localName === "epic-reply" && !next.hasAttribute("slot")) return undefined
+    return more
   }
 
   /** What's left for Claude:  revisits (with or without a pick), Add Details, and actions there are none of. */

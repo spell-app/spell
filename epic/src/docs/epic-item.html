@@ -908,6 +908,27 @@ holding its id (Q7).  Its colour says where the item stands."
                   labelled <code>Original question</code>; an item with More Details labels its text
                   <code>Original reply</code>.
                 </li>
+                <li>
+                  The talk after its question (epic <code>epic-engine</code> P27, Owen's layout A):
+                  <ul>
+                    <li>
+                      Owen's and Claude's replies are ONE brown block, the THREAD, in the order said; Claude's status
+                      cards are ONE line (<code>✓ Noted 15:21 → Done 15:25 · what Claude did</code>), last in it.
+                    </li>
+                    <li>
+                      A status taken before Owen's first reply (a DRIVE-BY, about an earlier comment of his) is a line
+                      first in its details, above the Choices.
+                    </li>
+                    <li>No Answer strip when its Choices already say "Chosen: X".</li>
+                    <li>Claude's newest reply: an orange edge and <code>NEW</code> until Owen has seen it.</li>
+                    <li>
+                      Worked out by the item from its light children (<code
+                        title="spell-epic/src/components/epic-item/AnswerThread.ts"
+                        >AnswerThread</code
+                      >): the page's markup is unchanged.
+                    </li>
+                  </ul>
+                </li>
                 <li><code>open</code> is page state: the tool never writes it, so a doc always opens folded.</li>
               </ul>
             </ui-section>

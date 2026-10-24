@@ -315,6 +315,26 @@
                       <td><code>open</code></td>
                       <td>Unfolded: it starts so (page state, never written).</td>
                     </tr>
+                    <tr>
+                      <td><code>redundant</code></td>
+                      <td>Its item's Choices already say what was chosen (<code>&lt;epic-choices chosen&gt;</code>): no band.</td>
+                    </tr>
+                    <tr>
+                      <td><code>unneeded</code></td>
+                      <td>Redundant, with no body: not drawn at all.</td>
+                    </tr>
+                    <tr>
+                      <td><code>in-thread</code></td>
+                      <td>Redundant, with a body: the body alone, first in its item's thread.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-start</code></td>
+                      <td>First in the thread's block.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-end</code></td>
+                      <td>Last in the thread's block.</td>
+                    </tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -343,6 +363,11 @@
                 old decision's id.
               </li>
               <li>With no body, only the band shows, and it doesn't fold.</li>
+              <li>
+                In an item whose Choices already say "Chosen: X", it isn't needed (Owen, 2026-10-24: "the answer block
+                is not necessary"): no band; its body, if any, opens the item's thread; with none, it isn't drawn.
+                An answer with no Choices (an issue's, a judgement call's) keeps its card.
+              </li>
             </ul>
             <p>
               It folds by its heading band: a click anywhere on the band (but on a link or a button in it) folds or

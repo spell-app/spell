@@ -34,3 +34,74 @@
     border-top: 1px solid var(--_epic-card-rule);
   }
 }
+
+/*
+ * IN AN ITEM:  a LINE, not a card (epic `epic-engine` P27, Owen's layout A):
+ * `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`, in its state's colours, a tint of them, one row that wraps.
+ * - a run's earlier cards hide (`merged`);  a drive-by's line goes first in the item's details (`order`)
+ * - in the thread:  on its brown ground, last, the block's bottom corners on its host
+ */
+@layer ui.components.epic-status.line;
+
+@layer ui.components.epic-status.line {
+  :host(:state(merged)) {
+    display: none;
+  }
+  :host(:state(drive-by)) {
+    order: -1;
+    margin-top: 0;
+    margin-bottom: var(--epic-part-gap, 8px);
+  }
+  :host(:state(in-thread)) {
+    --_epic-thread-fill: var(
+      --epic-thread-fill,
+      color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2))
+    );
+    margin-top: 0;
+    padding: 3px 6px;
+    background: var(--_epic-thread-fill);
+  }
+  :host(:state(thread-end)) {
+    padding-bottom: 6px;
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+  .status.line {
+    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 35%, transparent);
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--_epic-card-accent) 8%, var(--ui-surface, Canvas));
+    font-size: 0.9em;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  /* noted:  recorded, nothing built:  outlined, on the page's ground (the fill rule) */
+  .status.line.noted {
+    background: var(--ui-surface, Canvas);
+  }
+  .mark,
+  .steps,
+  .earlier {
+    /* the accent, deepened toward the ink:  readable on the tint in both schemes */
+    color: color-mix(in oklab, var(--_epic-card-accent) 70%, var(--_epic-card-ink));
+    font-weight: 600;
+  }
+  .mark {
+    margin-inline-end: 4px;
+  }
+  .steps .date {
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+  .earlier {
+    font-weight: 400;
+    font-style: italic;
+  }
+  .reading.empty {
+    display: none;
+  }
+  .text ::slotted(*) {
+    display: inline;
+    margin: 0;
+  }
+}

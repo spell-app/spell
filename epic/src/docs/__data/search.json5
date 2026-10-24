@@ -1758,6 +1758,10 @@
           "title": "1. Example"
         },
         {
+          "id": "1b-answered",
+          "title": "1b. On an answered item"
+        },
+        {
           "id": "2-markup",
           "title": "2. Markup"
         },
@@ -1772,17 +1776,17 @@
         {
           "id": "epic-status-slots",
           "title": "Slots",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "epic-status-parts",
           "title": "Parts",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "epic-status-states",
           "title": "States",
-          "parent": 3
+          "parent": 4
         },
         {
           "id": "5-how-it-looks",

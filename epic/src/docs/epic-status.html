@@ -119,6 +119,37 @@
             </epic-item>
           </ui-section>
 
+          <ui-section id="1b-answered" label="1b. On an answered item" sticky collapsible dividing collapsed>
+            <ui-icon slot="icon" name="comments"></ui-icon>
+            <p>
+              Live: an answered question. A drive-by first (taken before Owen's reply), the Choices with no Answer strip,
+              then the thread:  Owen's reply, Claude's (NEW until seen), and the Noted / Done line last.
+            </p>
+            <epic-item id="q16" title="What are the tags called?" status="decided" state="recent" answered open>
+              <epic-status slot="status" state="done" at="2026-10-24 14:02" done-at="2026-10-24 14:05"
+                ><p>Added the alias example to the question.</p></epic-status
+              >
+              <epic-status slot="status" state="noted" at="2026-10-24 15:21" done-at="2026-10-24 15:25"
+                ><p>Recording your tag model.</p></epic-status
+              >
+              <epic-status slot="status" state="done" at="2026-10-24 15:25" done-at="2026-10-24 15:25"
+                ><p>Recording your tag model.</p>
+                <p slot="summary">recorded template= and your tag model</p></epic-status
+              >
+              <epic-question><p>One tag per kind of template:  what are they called?</p></epic-question>
+              <epic-choices chosen="A"
+                ><epic-option letter="A" title="template=, as Owen wrote it" recommended
+                  ><p>Matches his card.</p></epic-option
+                ><epic-option letter="B" title="is="><p>Reads like code spell.</p></epic-option></epic-choices
+              >
+              <epic-answer title="template=, as Owen wrote it"></epic-answer>
+              <epic-reply from="Owen" at="2026-10-24 14:46" re="revisit soon"
+                ><p>&lt;spell-thing&gt; creates a "class" ...</p></epic-reply
+              >
+              <epic-reply from="Claude" at="2026-10-24 15:34"><p>Recorded:  here is the model in one table.</p></epic-reply>
+            </epic-item>
+          </ui-section>
+
           <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing collapsed>
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
@@ -307,7 +338,15 @@
                     </tr>
                     <tr>
                       <td><code>summary</code></td>
-                      <td>The summary, under the reading; not drawn without one.</td>
+                      <td>The summary, under the reading; not drawn without one. A line's text.</td>
+                    </tr>
+                    <tr>
+                      <td><code>steps</code></td>
+                      <td>A line's steps: <code>Noted 10/24/26 15:21 → Done 15:25</code>, each its state and when.</td>
+                    </tr>
+                    <tr>
+                      <td><code>earlier</code></td>
+                      <td>A drive-by's line: <code>your earlier comment</code>, after its steps.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -336,8 +375,32 @@
                       <td><code>state=done</code>.</td>
                     </tr>
                     <tr>
+                      <td><code>noted</code></td>
+                      <td><code>state=noted</code>.</td>
+                    </tr>
+                    <tr>
                       <td><code>open</code></td>
                       <td>Unfolded: it starts so (page state, never written).</td>
+                    </tr>
+                    <tr>
+                      <td><code>line</code></td>
+                      <td>In an item: drawn as a line, not a card.</td>
+                    </tr>
+                    <tr>
+                      <td><code>merged</code></td>
+                      <td>A line's earlier card, drawn in by the run's last one: hidden.</td>
+                    </tr>
+                    <tr>
+                      <td><code>drive-by</code></td>
+                      <td>Taken before Owen's first reply on the item: its line above the Choices.</td>
+                    </tr>
+                    <tr>
+                      <td><code>in-thread</code></td>
+                      <td>Its line in the item's thread's brown block, after the replies.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-end</code></td>
+                      <td>Last in the thread's block: its bottom corners rounded.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -371,6 +434,21 @@
               </li>
               <li>Its border is stronger than a reply's, so it stands out from the reply cards around it.</li>
               <li>The reading first; the summary under it, across a rule, only when there is one.</li>
+            </ul>
+            <p><b>In an item</b> (epic <code>epic-engine</code> P27, Owen's layout A), a LINE, not a card:</p>
+            <ul>
+              <li>
+                <code>✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did</code>: a run of cards about one task is
+                ONE line, drawn by its last card; the others hide. A card continues the one before it when it was taken
+                the minute that one finished.
+              </li>
+              <li>What Claude did: the last card's summary, else its reading.</li>
+              <li>
+                Last in the item's thread, after Claude's reply, on its brown ground. A DRIVE-BY's line (a card taken
+                before Owen's first reply, about a comment he made before answering) goes first in the item's details,
+                above the Choices, with <i>your earlier comment</i> after its steps.
+              </li>
+              <li>Outside an item (an Overview sub-section), the card above.</li>
             </ul>
             <p>
               It folds by its heading band: a click anywhere on the band (but on a link or a button in it) folds or

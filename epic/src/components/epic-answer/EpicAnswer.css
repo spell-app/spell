@@ -26,8 +26,64 @@
     display: block;
     margin-top: var(--epic-part-gap, 8px);
   }
-  :host([hidden]) {
+  :host([hidden]),
+  :host(:state(unneeded)) {
     display: none;
+  }
+
+  /*
+   * The THREAD (epic `epic-engine` P27, Owen's layout A):  an item's replies, a redundant answer's body and its
+   * status lines are ONE brown block, in the order said.  Each card in it carries the block's ground and padding,
+   * no gap between them;  the first rounds the top, the last the bottom (`AnswerThread`'s places, as `:state()`s).
+   * - its ground:  `--epic-thread-fill`, which the item's details set (inherited through the slot), else the same mix
+   */
+  :host(:state(in-thread)) {
+    --_epic-thread-fill: var(
+      --epic-thread-fill,
+      color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2))
+    );
+    margin-top: 0;
+    padding: 3px 6px;
+    background: var(--_epic-thread-fill);
+  }
+  :host(:state(thread-start)) {
+    margin-top: var(--epic-part-gap, 8px);
+    padding-top: 6px;
+    border-start-start-radius: 12px;
+    border-start-end-radius: 12px;
+  }
+  :host(:state(thread-end)) {
+    padding-bottom: 6px;
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+  /* a redundant answer's body, in the thread:  Owen's words on the block's ground, no card of their own */
+  :host(:state(redundant)) .answer {
+    border-color: transparent;
+    background: transparent;
+  }
+  :host(:state(redundant)) .body {
+    padding: 2px 4px;
+  }
+
+  /* Claude's newest reply, not seen yet:  an orange edge (changed since you looked), and NEW in its band */
+  .reply.new {
+    border-inline-start: 3px solid var(--ui-orange, #f2711c);
+  }
+  .reply.new .who {
+    flex: 0 1 auto;
+  }
+  .new-tag {
+    flex: none;
+    align-self: center;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: var(--ui-orange, #f2711c);
+    color: var(--ui-orange-on, #fff);
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
   }
 
   /* the band and rule mix the fill and accent ON the card box, where `.reply` / `.more` set theirs */

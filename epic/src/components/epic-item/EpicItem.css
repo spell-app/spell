@@ -261,10 +261,32 @@
   }
 
   /* ## The details:  smaller type and tighter spacing than the page's prose, under the id chip */
+  /*
+   * a COLUMN (epic `epic-engine` P27):  the light details in their own block (`.flow`, where prose margins collapse),
+   * so a drive-by's status line can go first, above the Choices (its `order`)
+   * - `--epic-thread-fill`:  the ground of its thread's brown block, read by its cards (`AnswerThread`):  a shade
+   *   deeper than Owen's ivory cards, so his reply still reads as a card on it
+   */
   .details {
+    --epic-thread-fill: color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2));
+    display: flex;
+    flex-direction: column;
     padding: 6px 6px 10px var(--_epic-item-indent);
     font-size: 0.9em;
     line-height: 1.45;
+  }
+  .flow {
+    min-width: 0;
+  }
+  /* Owen's marked note, in the thread after the replies:  on the block's ground */
+  .details > .in-thread {
+    padding: 3px 6px;
+    background: var(--epic-thread-fill);
+  }
+  .details > .thread-end {
+    padding-bottom: 6px;
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
   }
   .details[hidden] {
     display: none;
@@ -281,7 +303,7 @@
   }
   /* folded:  no height, its words still findable;  its inline padding stays, so nothing shifts sideways as it folds */
   .details[hidden="until-found"] {
-    display: block;
+    display: flex;
     content-visibility: hidden;
     block-size: 0;
     padding-block: 0;

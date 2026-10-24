@@ -49,7 +49,7 @@
         "resolution",
         "verdict"
       ],
-      "description": "An answered question's answer card, after its question and Choices:  titled `Answer · <title>`, or `D7 · <title>` when it keeps an old decision's id.",
+      "description": "An answered question's answer card, after its question and Choices:  titled `Answer · <title>`, or `D7 · <title>` when it keeps an old decision's id.  Not drawn when its item's Choices already say \"Chosen:  X\" (its body, if any, opens the item's thread).",
       "noun": "answer",
       "attributes": [
         {
@@ -106,6 +106,26 @@
         {
           "name": "open",
           "description": "Unfolded:  it starts so (page state, never written)."
+        },
+        {
+          "name": "redundant",
+          "description": "Its item's Choices say what was chosen (`<epic-choices chosen>`):  no band;  the body alone, in the item's thread, or nothing without one."
+        },
+        {
+          "name": "unneeded",
+          "description": "Redundant, with no body:  not drawn."
+        },
+        {
+          "name": "in-thread",
+          "description": "Redundant, with a body:  first in its item's thread's brown block."
+        },
+        {
+          "name": "thread-start",
+          "description": "First in the thread's block."
+        },
+        {
+          "name": "thread-end",
+          "description": "Last in the thread's block."
         }
       ],
       "texts": [
@@ -4018,7 +4038,7 @@
         "response",
         "note"
       ],
-      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.",
+      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until Owen has seen it.",
       "noun": "reply",
       "attributes": [
         {
@@ -4062,6 +4082,10 @@
           "description": "The heading's left:  `<from> · re: <re>`;  wraps within itself."
         },
         {
+          "name": "new",
+          "description": "`NEW`, after `who`, on Claude's newest reply in an item until Owen has seen it (orange)."
+        },
+        {
           "name": "date",
           "description": "The heading's right:  `at`, `10/6/26 23:55`, on the top line;  never wraps."
         },
@@ -4074,6 +4098,22 @@
         {
           "name": "open",
           "description": "Unfolded:  it starts so (page state, never written)."
+        },
+        {
+          "name": "in-thread",
+          "description": "In its item's thread:  one of its brown block (`AnswerThread`)."
+        },
+        {
+          "name": "thread-start",
+          "description": "First in the thread's block:  its top corners rounded."
+        },
+        {
+          "name": "thread-end",
+          "description": "Last in the thread's block:  its bottom corners rounded."
+        },
+        {
+          "name": "new",
+          "description": "Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser:  an orange edge and `NEW`.  Seen once on screen for 1.2s."
         }
       ],
       "texts": [
@@ -4091,6 +4131,16 @@
           "key": "re",
           "text": "re: {re}",
           "description": "What the reply is about, in its heading."
+        },
+        {
+          "key": "new",
+          "text": "NEW",
+          "description": "The tag on Claude's newest reply, until Owen has seen it."
+        },
+        {
+          "key": "newTip",
+          "text": "Claude's newest reply:  new since you looked",
+          "description": "The NEW tag's tooltip."
         }
       ]
     },
@@ -5256,7 +5306,7 @@
         "task",
         "work"
       ],
-      "description": "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The heading and the date at its right are drawn;  the reading and the summary are its children.",
+      "description": "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before Owen's first reply) first in the item's details, above the Choices.",
       "noun": "status",
       "attributes": [
         {
@@ -5318,7 +5368,15 @@
         },
         {
           "name": "summary",
-          "description": "The summary, under the reading;  not drawn without one."
+          "description": "The summary, under the reading;  not drawn without one.  A line's text."
+        },
+        {
+          "name": "steps",
+          "description": "A line's steps:  `Noted 10/24/26 15:21 → Done 15:25`, each its state and when."
+        },
+        {
+          "name": "earlier",
+          "description": "A drive-by's line:  `your earlier comment`, after its steps."
         }
       ],
       "states": [
@@ -5337,6 +5395,26 @@
         {
           "name": "open",
           "description": "Unfolded:  it starts so (page state, never written)."
+        },
+        {
+          "name": "line",
+          "description": "In an item:  drawn as a line, not a card."
+        },
+        {
+          "name": "merged",
+          "description": "A line's earlier card, drawn in by the run's last one:  hidden."
+        },
+        {
+          "name": "drive-by",
+          "description": "Taken before Owen's first reply on the item:  its line above the Choices."
+        },
+        {
+          "name": "in-thread",
+          "description": "Its line in the item's thread's brown block, after the replies."
+        },
+        {
+          "name": "thread-end",
+          "description": "Last in the thread's block:  its bottom corners rounded."
         }
       ],
       "texts": [
@@ -5364,6 +5442,26 @@
           "key": "noted",
           "text": "Claude • Noted",
           "description": "The heading once Claude recorded what Owen chose."
+        },
+        {
+          "key": "stepUnderway",
+          "text": "Underway",
+          "description": "A line's step while Claude is on it."
+        },
+        {
+          "key": "stepDone",
+          "text": "Done",
+          "description": "A line's step once work was done."
+        },
+        {
+          "key": "stepNoted",
+          "text": "Noted",
+          "description": "A line's step once Claude recorded what Owen chose."
+        },
+        {
+          "key": "earlier",
+          "text": "your earlier comment",
+          "description": "After a drive-by's steps:  it's about a comment Owen made before answering."
         },
         {
           "key": "started",

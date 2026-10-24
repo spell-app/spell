@@ -593,3 +593,12 @@ Sources, short names used below:
 - Look for:  an elapsed time that moves only when the work reports in.
 - Owen:  "Tick it on the page"
 - Source:  epic `epic-engine` P25, 2026-10-23.
+
+#### T67 · Status follows what it's about;  an orange edge says "read this"
+- Look for:  "Noted" and "Done" cards trailing at the bottom, cut off from the words they answer;  an "Answer" strip
+  repeating what the Choices line says;  nothing marking the newest reply.
+- Owen:
+  - "I don't like how your 'noted' and 'done' are disconnected from my input and at the bottom"
+  - "the 'answer' block is not necessary -- you show the answer in the collapsed `choices` block"
+  - "I like the orange border meaning 'pay attention to this'"
+- Source:  epic `epic-engine` P27, 2026-10-24 (layout A on its answer layout page).

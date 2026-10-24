@@ -297,6 +297,22 @@
                       <td><code>open</code></td>
                       <td>Unfolded: it starts so (page state, never written).</td>
                     </tr>
+                    <tr>
+                      <td><code>in-thread</code></td>
+                      <td>In its item's thread: one of its brown block, with the item's other replies and its status lines.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-start</code></td>
+                      <td>First in the thread's block: its top corners rounded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>thread-end</code></td>
+                      <td>Last in the thread's block: its bottom corners rounded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>new</code></td>
+                      <td>Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser: an orange edge and <code>NEW</code>. Seen once on screen for 1.2s.</td>
+                    </tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -327,6 +343,19 @@
                 The band: <code>Claude · re: as built (Doc Review)</code> on the left, free to wrap; the date (<code
                   >10/6/26 23:55</code
                 >) on the right of the top line, never wrapping.
+              </li>
+              <li>
+                In an item, every reply is part of ONE brown block, the item's THREAD, in the order said, with Claude's
+                status line last (epic <code>epic-engine</code> P27).
+              </li>
+              <li>
+                Claude's newest reply, with none of Owen's after it, has an orange edge and a small
+                <ui-label size="mini" color="orange">NEW</ui-label> in its band until Owen has seen it: on screen for
+                1.2 seconds, remembered in this browser (orange: changed since you looked).
+              </li>
+              <li>
+                Owen's note asking for More Details sits just ABOVE Claude's More Details card, which answers it, and
+                starts FOLDED to its band: it came first (Owen, 2026-10-24).
               </li>
             </ul>
             <p>

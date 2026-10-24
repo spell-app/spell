@@ -26,6 +26,10 @@ export const DATED = "dated"
 export const WHO = "who"
 export const DATE = "date"
 
+/** Claude's newest reply, not seen yet (`<epic-reply>`):  its card's class word, and its NEW tag's class. */
+export const NEW = "new"
+export const NEW_TAG = "new-tag"
+
 ////////////////
 // ## Ids inside the shadow roots:  what a card's fold button names and controls (`fold.button()`)
 ////////////////

@@ -14,6 +14,7 @@ import {
   type ReviewShows
 } from "spell-epic/components/epic-review/EpicReview.types"
 
+import { AnswerThread } from "./AnswerThread"
 import { epicItemVocabulary } from "./EpicItem.en"
 import { CONTROLS, FOLDING_CARDS, Fold, foldAllUnder } from "./Fold"
 import {
@@ -45,6 +46,7 @@ import {
   STATE_TIP_KEYS,
   STATUS_SLOT,
   STATUS_STATES,
+  THREAD_ATTRIBUTES,
   TITLE,
   TODO_ID,
   TOGGLE,
@@ -266,6 +268,29 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     () => !!this.source || this.slots.hasContent("") || this.slots.hasContent(this.slotForName(STATUS_SLOT))
   )
 
+  /**
+   * A fresh token whenever its light DOM changes in a way its thread reads:  children come and go (a part loads),
+   * a Choices is chosen, a reply's or a status card's times, state or slot change.
+   * - its value is nothing:  `thread()` reads it to follow the change
+   */
+  @E.watches({ childList: true, subtree: true, attributes: true, attributeFilter: THREAD_ATTRIBUTES })
+  get threadChange(): object {
+    return {}
+  }
+
+  /** Shows Owen's marked note in its details, after the replies (the review's `said` note). */
+  readonly saidShows = createMemo(() => this.reviewState.reviewing() && this.hasDetails() && !!this.reviewState.noted())
+
+  /**
+   * How it draws the talk after its question (epic `epic-engine` P27):  the thread, the status lines, a drive-by's,
+   * whether the answer card is needed, Claude's newest reply (`AnswerThread`).
+   * - its cards read their part of it (`ItemLink`)
+   */
+  readonly thread = createMemo(() => {
+    void this.threadChange
+    return AnswerThread.of(this.domElement, { said: this.saidShows() })
+  })
+
   /** Unfolded. */
   readonly isOpen = createMemo(() => !!this.isMarkedOpen && this.hasDetails())
 
@@ -456,7 +481,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               {this.textLabel()}
             </div>
           </Show>
-          <slot />
+          {/* the light details in a block of their own:  the details are a column, so a drive-by's status line
+              can go first (its `order`), and the prose's margins still collapse in here */}
+          <div class={FLOW}>
+            <slot />
+          </div>
           {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
               it ("under my input", Owen, 2026-10-08, P13), then the box */}
           <Show when={this.reviewState.reviewing() && this.hasDetails()}>{this.saidNote()}</Show>
@@ -601,7 +630,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     )
   }
 
-  /** A marked note, its box closed:  just above the note box;  nothing without one. */
+  /**
+   * A marked note, its box closed:  just above the note box;  nothing without one.
+   * - in the item's thread, after its replies:  on the block's ground (`in-thread`;  `thread-end` when no status
+   *   line follows it)
+   */
   private saidNote(): JSX.Element {
     return <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
   }
@@ -625,6 +658,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         tip={this.reviewTip()}
         under-line={shows === "note" && !this.hasDetails() ? "" : undefined}
         part={this.partForName(part)}
+        class={
+          shows === "said" ? { [IN_THREAD]: !!this.thread().said, [THREAD_END]: !!this.thread().said?.end } : undefined
+        }
       />
     )
   }
@@ -848,6 +884,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}
+
+/** Class names inside the shadow root:  the light details' block;  the said note's place in the thread. */
+const FLOW = "flow"
+const IN_THREAD = "in-thread"
+const THREAD_END = "thread-end"
 
 /** `EpicItem.scanChildren()`'s answer. */
 type ChildScan = {

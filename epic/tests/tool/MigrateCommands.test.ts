@@ -189,6 +189,7 @@ describe("migrate:  the runner", () => {
     expect(await commands().run(["migrate", "--list"])).toBe(0)
     expect(printed.map((line) => line.split(/\s+/).slice(0, 3).join(" "))).toEqual([
       "epic 2026-10-11 links-agree",
+      "epic 2026-10-24 more-requests-first",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/)
     ])

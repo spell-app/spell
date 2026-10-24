@@ -347,6 +347,12 @@ export const epicItemVocabulary = {
         '(`<epic-field label="Where">`), Net effect, code, asides, notes.'
     },
     { tag: "epic-answer", max: 1, description: "An answered question's answer." },
+    {
+      tag: "epic-reply",
+      description:
+        "Owen's note asking for More Details, kept right before the card that answers it (epic `epic-engine` P27):  " +
+        "drawn folded."
+    },
     { tag: "epic-more", max: 1, description: "More Details, added after its text." },
     { tag: "epic-reply", description: "Replies, oldest first." },
     {

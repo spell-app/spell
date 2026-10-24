@@ -160,3 +160,6 @@ export type ChipMark = {
 
 /** A todo's id:  `t3`. */
 export const TODO_ID = /^t\d+$/i
+
+/** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */
+export const THREAD_ATTRIBUTES = ["chosen", "at", "done-at", "state", "from", "slot"]

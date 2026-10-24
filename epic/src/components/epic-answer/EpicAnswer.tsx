@@ -5,6 +5,8 @@ import { E } from "spell/element"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
+// the item it's in, for whether its Choices say it already:  the file, not `epic-item`'s barrel
+import { ItemLink } from "spell-epic/components/epic-item/ItemLink"
 
 import { epicAnswerVocabulary } from "./EpicAnswer.en"
 import { BODY, BODY_ID, EMPTY, HEADER, HEADING_SEPARATOR, LABEL_ID, TITLE_ID } from "./EpicAnswer.types"
@@ -24,6 +26,11 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  * - Folds by its band, the chevron first (Owen, 2026-10-08:  everything in a section box folds).
  *   - open to start with;  page state, never written
  *   - folded, the answer is `hidden="until-found"`
+ * - REDUNDANT in an item whose Choices say "Chosen: X" already (`<epic-choices chosen>`;  epic `epic-engine` P27,
+ *   Owen:  "the answer block is not necessary"):  no band
+ *   - with a body (the why):  the body alone, first in the item's thread's brown block
+ *   - without one:  not drawn at all
+ *   - an answer with no chosen option (an issue's, a call's) keeps its card:  nothing else says it
  ****************/
 export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
   @E.proto static vocabulary = epicAnswerVocabulary
@@ -42,6 +49,45 @@ export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
   @E.cssState("open")
   get isOpen(): boolean {
     return this.fold.isOpen()
+  }
+
+  /** The item it's in:  its thread. */
+  readonly link = new ItemLink(this.domElement)
+
+  /** Its item's Choices say what was chosen:  no band;  not drawn without a body. */
+  @E.cssState("redundant")
+  get isRedundant(): boolean {
+    return !!this.link.thread()?.chosen
+  }
+
+  /** Redundant with no body:  nothing to draw. */
+  @E.cssState("unneeded")
+  get isUnneeded(): boolean {
+    return this.isRedundant && !this.hasBody
+  }
+
+  /** In its item's thread (redundant, with a body):  one of the brown block. */
+  @E.cssState("in-thread")
+  get isInThread(): boolean {
+    return !!this.link.thread()?.placeOf(this.domElement)
+  }
+
+  /** First in the thread's block. */
+  @E.cssState("thread-start")
+  get startsThread(): boolean {
+    return !!this.link.thread()?.placeOf(this.domElement)?.start
+  }
+
+  /** Last in the thread's block. */
+  @E.cssState("thread-end")
+  get endsThread(): boolean {
+    return !!this.link.thread()?.placeOf(this.domElement)?.end
+  }
+
+  /** Follow the item it's in, while connected. */
+  @E.whileConnected
+  protected followItem() {
+    return this.link.connect()
   }
 
   /** Has it an answer to fold (not just its heading)? */
@@ -63,7 +109,12 @@ export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
-        <div ref={this.fold.heading} class={[HEADER, { [FOLDS]: this.hasBody }]} part={this.partForName("header")}>
+        <div
+          ref={this.fold.heading}
+          class={[HEADER, { [FOLDS]: this.hasBody }]}
+          part={this.partForName("header")}
+          hidden={this.isRedundant}
+        >
           <Show when={this.hasBody}>
             {this.fold.button({
               controls: BODY_ID,
@@ -87,7 +138,7 @@ export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
           id={BODY_ID}
           class={[BODY, { [EMPTY]: !this.hasBody }]}
           part={this.partForName("body")}
-          hidden={this.fold.hidden()}
+          hidden={this.isRedundant ? undefined : this.fold.hidden()}
         >
           <slot />
         </div>

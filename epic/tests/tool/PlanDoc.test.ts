@@ -1769,6 +1769,21 @@ describe("PlanDoc review inbox", () => {
     expect(kids(el(plan, "q1"))).toEqual(["epic-question", "epic-choices", "epic-answer", "epic-more"])
     expect(problems(plan)).toEqual([])
   })
+
+  test("Owen's note asking for More Details is kept ABOVE Claude's card, which answers it (epic `epic-engine` P27);  a later revisit after it", () => {
+    const plan = freshPlan()
+    plan.addItem("judgement", "a call", { details: "<p>the call</p>" })
+    plan.addMore("j1", "<p>more about it</p>")
+    plan.keepNote("j1", { note: "need more detail", action: "revisit", when: "now", at: "2026-10-01T09:10:00" })
+    expect(kids(el(plan, "j1"))).toEqual(["p", "epic-reply", "epic-more"])
+    plan.keepNote("j1", { note: "and why?", action: "revisit", when: "soon", at: "2026-10-01T09:30:00" })
+    expect(kids(el(plan, "j1"))).toEqual(["p", "epic-reply", "epic-more", "epic-reply"])
+    plan.addItem("issue", "it breaks", { details: "<p>what breaks</p>" })
+    plan.addMore("i1", "<p>more</p>")
+    plan.keepNote("i1", { note: "details please", action: "details", at: "2026-10-01T09:10:00" })
+    expect(kids(el(plan, "i1"))).toEqual(["p", "epic-reply", "epic-more"])
+    expect(problems(plan)).toEqual([])
+  })
 })
 
 describe("PlanDoc status cards (P13)", () => {

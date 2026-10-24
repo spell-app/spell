@@ -1,4 +1,5 @@
 import { LinksAgree } from "./LinksAgree"
+import { MoreRequestsFirst } from "./MoreRequestsFirst"
 import type { Migration, MigrationContext } from "./migrations.types"
 
 /****************
@@ -22,7 +23,7 @@ import type { Migration, MigrationContext } from "./migrations.types"
  ****************/
 export class Migrations {
   /** Every step, in the order they run:  oldest first. */
-  static readonly all: readonly Migration[] = [new LinksAgree()]
+  static readonly all: readonly Migration[] = [new LinksAgree(), new MoreRequestsFirst()]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */
   static get everyEdit(): readonly Migration[] {
