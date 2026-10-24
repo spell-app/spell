@@ -426,7 +426,7 @@ The names live here, and each command hands its work to spell-app's `language` h
   or the "which project?" prompt, with the build folder under spell-app's `build/`
 - it asks the editor's language service, so the command line sees what an editor sees
 - without spell-app, each command stops, says to clone it (`yarn clone spell-app`), and exits 2
-- `spell parser packs check` / `fix` are the exception:
+- `spell translate check` / `fix` are the exception:
   they need no project, so their work is here, in [packsCommand.ts](src/cli/packsCommand.ts).
 
 <details>
@@ -436,8 +436,8 @@ The names live here, and each command hands its work to spell-app's `language` h
 | --- | --- |
 | [cli/commands.ts](src/cli/commands.ts) | the list the kit's `spell` loads:  each command's name, arguments, flags and help |
 | [cli/cli.types.ts](src/cli/cli.types.ts) | `LanguageCommands`, the `language` hook's shape;  each command's flags |
-| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell parser packs check` and `fix`:  what each language pack lacks against English, and stubs for it |
-| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell parser translate`'s work once spell-app has parsed the project:  its dictionary, `claude -p`, its files |
+| [cli/packsCommand.ts](src/cli/packsCommand.ts) | `spell translate check` and `fix`:  what each language pack lacks against English, and stubs for it |
+| [cli/translateProject.ts](src/cli/translateProject.ts) | `spell translate`'s work once spell-app has parsed the project:  its dictionary, `claude -p`, its files |
 | [cli/index.ts](src/cli/index.ts) | `spell-parser/cli`:  the types, for spell-app |
 
 </details>
@@ -544,7 +544,7 @@ Each says where it stands.
 Norwegian and Portuguese are next, with help from friends;  neither is started.
 Each is a pack of its own, beside English's and Spanish's in [src/spell/languages/](src/spell/languages/),
 and a third file per folder of rules:  words, not code.
-`spell parser packs check` then lists what it still lacks against English
+`spell translate check` then lists what it still lacks against English
 ([how a language starts](README-parser.md#spell-in-another-human-language)).
 
 ### Two more targets, and mixins

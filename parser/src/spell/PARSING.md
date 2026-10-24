@@ -664,7 +664,7 @@ A kind that says so is saved in a file of its own.
   - A key in the language pack's `parserMessages` ([English's](languages/en/parserMessages.ts),
     [Spanish's](languages/es/parserMessages.ts)), read with `SP.Language.of(scope).parserMessage(key, params)`.
   - Its examples are the language's spell:  `poner X a una nueva lista de texto`.
-  - A key a pack lacks reads English;  `spell parser packs check` reports it.
+  - A key a pack lacks reads English;  `spell translate check` reports it.
   - Rule code never writes a sentence of its own:  `noEnglishInRules.test.ts` checks.
 - Refused statements:  a `parse()` which understood a statement, but mustn't take it.
   - It returns `SpellStatement.refuse(match, message)`.

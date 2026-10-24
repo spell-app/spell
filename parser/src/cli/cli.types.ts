@@ -41,7 +41,7 @@ export type LanguageCommand = keyof LanguageCommands
 ////////////////
 
 /**
- * `spell parser translate` flags (epic `spanish` P24).
+ * `spell translate` flags (epic `spanish` P24).
  * - `to`:  the language to write the project in, by its code, e.g. `es`
  * - `out`:  the folder to write it to -- default beside it, named as the dictionary names the project
  * - `update`:  re-translate only the lines changed since the last run;  the rest stay as they are, hand edits too
@@ -71,7 +71,7 @@ export type TranslateOptions = GlobalOptions & {
 }
 
 /**
- * `spell parser translate-time` flags (epic `spanish` P29):  timing `spell parser translate`, on scratch copies.
+ * `spell translate speedtest` flags (epic `spanish` P29):  timing `spell translate`, on scratch copies.
  * - `to`:  the language, e.g. `es`
  * - `runs`:  how many runs of each project, mode and tier -- default 1
  * - `effort`:  the tiers to compare, comma-separated, e.g. `fast,balanced` -- default `balanced`
@@ -218,7 +218,7 @@ export type ExplainOptions = GlobalOptions & {
 }
 
 /**
- * `spell parser packs check|fix` flags (epic `spanish` P7).
+ * `spell translate check|fix` flags (epic `spanish` P7).
  * - `json`:  `check` prints its report as JSON
  * - `ai`:  `fix` asks `claude -p` to translate each stub, rather than leaving it in English
  */

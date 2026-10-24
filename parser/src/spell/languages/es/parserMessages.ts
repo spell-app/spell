@@ -2,7 +2,7 @@
  * What the parser says to the person WRITING a program, in Spanish (epic `spanish` P17):
  * its warnings, its parse errors, why a rule refused a line, and the long forms editors show as "Reads as".
  * - Each key is one of English's, `PARSER_MESSAGES` (`languages/en/parserMessages.ts`):  see it for where each shows.
- *   A key left out reads English;  `spell parser packs check es` reports it.
+ *   A key left out reads English;  `spell translate check es` reports it.
  * - Its examples are Spanish spell, in the glossary's words (`GLOSSARY.md`):
  *   `poner X a una nueva lista de texto`, `una carta es una cosa`.
  * - Where English writes `a {type}`, Spanish writes `{aType}`:  the code picks `un` or `una` by the type's gender.

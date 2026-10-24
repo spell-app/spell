@@ -10,7 +10,7 @@ import type { SourceFile } from "./translate.types"
 
 /**
  * Fills a names dictionary from a translation a PERSON made (epic `spanish` P24):
- * `spell parser translate Solitaire --to es --seed Solitario`, so the hand-made Solitario's names are reused.
+ * `spell translate Solitaire --to es --seed Solitario`, so the hand-made Solitario's names are reused.
  * - Reads the two projects side by side, file by file (each with the one it lines up with best), line by line:
  *   the lines lined up by what each is (a comment, a blank, a statement of which rule), so a line one has and the
  *   other doesn't (a comment split in two) only skips itself.

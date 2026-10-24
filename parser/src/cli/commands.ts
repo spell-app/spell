@@ -1,15 +1,15 @@
 /**
  * The language's `spell` commands (spell-parser's `package.json`'s `"spell": { "commands" }`, epic `repo-split` Q33):
  * compile, lint, run, test, watch, format, describe, explain, parse, repl, speedtest;
- * and `spell parser packs check|fix`, for the language packs (epic `spanish` P7);
- * and `spell parser translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
- * finds projects the app's way, then `translateProject.ts`;  `spell parser translate-time` times it (P29,
+ * and `spell translate check|fix`, for the language packs (epic `spanish` P7);
+ * and `spell translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
+ * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way.
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
  *   - Moving the work down here, command by command, is epic `repo-split`'s open issue (P13).
- *   - `spell parser packs` is the exception:  it needs no project, so its work is here, `packsCommand.ts`.
+ *   - `spell translate check|fix` is the exception:  it needs no project, so its work is here, `packsCommand.ts`.
  * - Loads fast:  nothing of spell until a command runs.
  * - NOTE: `spell commands` reads this file's TEXT, for each `spell.command(...)` call:
  *   keep each command's name a literal at its call.
@@ -136,32 +136,12 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print what was found as JSON")
     .action((word: string, _options, command: Command) => language("explain", [word], command))
 
-  // the language's own tools, under `spell parser`:  their work is here, not behind the hook -- but `translate`'s
-  const parser = spell.command("parser").description("tools for spell itself:  its language packs, translating a project")
-
-  const packs = parser
-    .command("packs")
-    .description("is each language pack complete, against English?  check, or fix with stubs to translate")
-
-  packs
-    .command("check")
-    .description("list what a language pack lacks, per rule file -- exits 1 if anything")
-    .argument("[lang]", "one language, e.g. es -- default every pack but English")
-    .option("--json", "print the report as JSON")
-    .action((lang: string | undefined, _options, command: Command) =>
-      CLI.runCommand(async () => (await import("./packsCommand")).checkPacks(lang, command.optsWithGlobals()))
-    )
-
-  packs
-    .command("fix")
-    .description("write a stub for each missing registration, English copied and marked TODO:  translate")
-    .argument("[lang]", "one language, e.g. es -- default every pack but English")
-    .option("--ai", "ask claude -p to translate each stub, marked AI draft:  review")
-    .action((lang: string | undefined, _options, command: Command) =>
-      CLI.runCommand(async () => (await import("./packsCommand")).fixPacks(lang, command.optsWithGlobals()))
-    )
-
-  parser
+  // translating, under `spell translate`:  a project (the command itself), and the language packs' tools -- their
+  // work is here, not behind the hook, but `translate`'s and `speedtest`'s project finding (epic `repo-split` P18)
+  // - `--to` is checked by each action, not `requiredOption()`:  commander checks a parent's required options for
+  //   its subcommands too, and the parent takes `--to` / `--effort` wherever they are, so `speedtest` reads them
+  //   through `optsWithGlobals()`
+  const translate = spell
     .command("translate")
     .description(
       "write a project in another language:  its names first (<Project>.<lang>.names.json5:  the shared glossary's, " +
@@ -170,15 +150,13 @@ export default function languageCommands(spell: Command): void {
         "exits 1 if any line still needs a person"
     )
     .argument("[project]", PROJECT_ARG)
-    .requiredOption("--to <lang>", "the language to write it in, e.g. es")
+    .option("--to <lang>", "the language to write it in, e.g. es -- required")
     .option("--out <folder>", "write it here -- default beside it, named as the dictionary names the project")
     .option("--update", "re-translate only the lines changed since the last run;  the rest stay, hand edits too")
     .option("--no-ai", "never ask Claude:  each name the dictionary lacks stays TODO, and no line is fixed up")
     .option("--effort <tier>", "how much every pass spends on its answers:  fast, balanced or best -- default balanced")
     .option("--names-effort <tier>", "the names pass's own:  fast, balanced or best")
     .option("--fix-ups-effort <tier>", "the fix-ups' own:  fast, balanced or best")
-    // for experiments:  an exact model and effort, in the runner's own terms, over every tier
-    .addOption(parser.createOption("--model <model>", "an exact model[:effort] for every call").hideHelp())
     .option(
       "--seed <project>",
       "fill the dictionary first from a translation a person made, e.g. @spell/examples/Solitario"
@@ -194,18 +172,40 @@ export default function languageCommands(spell: Command): void {
     )
     .addHelpText("after", PROJECT_HELP)
     .action((project: string | undefined, _options, command: Command) =>
-      language("translate", listOf(project), command)
+      language("translate", listOf(project), command, { needsTo: true })
+    )
+  // for experiments:  an exact model and effort, in the runner's own terms, over every tier
+  translate.addOption(translate.createOption("--model <model>", "an exact model[:effort] for every call").hideHelp())
+
+  translate
+    .command("check")
+    .description(
+      "is each language pack complete, against English?  list what one lacks, per rule file -- exits 1 if anything"
+    )
+    .argument("[lang]", "one language, e.g. es -- default every pack but English")
+    .option("--json", "print the report as JSON")
+    .action((lang: string | undefined, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./packsCommand")).checkPacks(lang, command.optsWithGlobals()))
     )
 
-  parser
-    .command("translate-time")
+  translate
+    .command("fix")
+    .description("write a stub for each registration a language pack lacks, English copied and marked TODO:  translate")
+    .argument("[lang]", "one language, e.g. es -- default every pack but English")
+    .option("--ai", "ask claude -p to translate each stub, marked AI draft:  review")
+    .action((lang: string | undefined, _options, command: Command) =>
+      CLI.runCommand(async () => (await import("./packsCommand")).fixPacks(lang, command.optsWithGlobals()))
+    )
+
+  translate
+    .command("speedtest")
     .description(
-      "time spell parser translate:  each run on a scratch copy of the project, deleted after -- a table of each pass's " +
+      "time spell translate:  each run on a scratch copy of the project, deleted after -- a table of each pass's " +
         "time, calls, problems left, lint, tests, shape and how many names agree with a person's translation, " +
         "min, median and max over the runs"
     )
     .argument("[projects...]", `${PROJECTS_ARG} -- default Solitaire and todos-form-based`)
-    .requiredOption("--to <lang>", "the language to write them in, e.g. es")
+    .option("--to <lang>", "the language to write them in, e.g. es -- required")
     .option("--runs <count>", "runs of each project, mode and tier -- default 1", (value) => Number(value))
     .option("--effort <tiers>", "the tiers to compare, e.g. fast,balanced -- default balanced")
     .option(
@@ -216,15 +216,24 @@ export default function languageCommands(spell: Command): void {
     .option("--reference <project>", "a person's translation of the one project, to compare names with")
     .option("--json <file>", "write every run, and the table, to this file too")
     .addHelpText("after", PROJECT_HELP)
-    .action((projects: string[], _options, command: Command) => language("translateTime", projects, command))
+    .action((projects: string[], _options, command: Command) =>
+      language("translateTime", projects, command, { needsTo: true })
+    )
 }
 
 /**
  * Run language command `name` for `args`, with `command`'s flags and the program's (`--all`, `--verbose`), through
  * the `"language"` hook;  then exit with its code.
+ * - `needsTo`:  throws `CliError` without `--to` (`spell translate`, `spell translate speedtest`)
  */
-function language(name: LanguageCommand, args: string[], command: Command): Promise<never> {
+function language(
+  name: LanguageCommand,
+  args: string[],
+  command: Command,
+  { needsTo = false }: { needsTo?: boolean } = {}
+): Promise<never> {
   return CLI.runCommand(async () => {
+    if (needsTo && !command.optsWithGlobals().to) throw new CLI.CliError("which language?  --to <lang>, e.g. --to es")
     const commands = await CLI.needHook<LanguageCommands>("language", `spell ${name}:  ${NO_HOOK}`)
     return commands[name](args, command.optsWithGlobals())
   })

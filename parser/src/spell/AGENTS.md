@@ -64,7 +64,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell-parser/spell`'s barrel may import it (WWOD §8 › "Barrels").
 - `translate/` (epic `spanish` P24-P27):  writing a project in another language, names first, then rule by rule
-  (`spell parser translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
+  (`spell translate`, its work in [the cli's translateProject.ts](../cli/translateProject.ts)).
   - `NamesGlossary`:  the language pack's shared glossary of names, `languages/<lang>/glossary.json5`:
     looked up before asking `claude`, each project's choices checked against it, grown by `--learn`
     - spell as a corpus of programs (Owen, 2026-10-23):  the same English name, the same name in every project
@@ -395,7 +395,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
     - When two rules tie on `priority` and length, the one registered FIRST wins (`Choice.getBestMatch()`).
     - [The rules' own index](rules/index.ts) loads each module's `.en.ts`, then assembles `spellParser`.
     - Another language's `<module>.<lang>.ts` registers the same classes, in the same order.
-    - `spell parser packs check` says what a language's files lack against English;  `fix` writes stubs to translate
+    - `spell translate check` says what a language's files lack against English;  `fix` writes stubs to translate
       ([packs.ts](languages/packs.ts), imported by path:  the barrel leaves it out).
   - `index.ts`:  `export * from` each file.
     - `./<module>.parser` first, then `./<module>.shared`, then the rule files.

@@ -1,9 +1,9 @@
 // The Spanish NAMES GLOSSARY:  the names people choose in spell programs, in Spanish, shared by every project
 // (epic `spanish` P26).
-// - `spell parser translate <project> --to es` looks each name up here FIRST:  a name found here costs no `claude` call,
+// - `spell translate <project> --to es` looks each name up here FIRST:  a name found here costs no `claude` call,
 //   and the same English name gets the same Spanish name in every project.
 //   - A project's own dictionary, `<Project>.es.names.json5`, may choose otherwise:  the run says so.
-// - `spell parser translate <project> --to es --learn` adds a project's names (its types and names) to it.
+// - `spell translate <project> --to es --learn` adds a project's names (its types and names) to it.
 // - Not spell's own words:  those are the pack's rules, and `GLOSSARY.md` beside this file.
 // - Read by node only (`translateProject()`):  nothing imports it, so it never ships to a browser.
 //

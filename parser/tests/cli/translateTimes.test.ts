@@ -10,7 +10,7 @@ import type { TranslationResult } from "spell-parser/cli/translateProject"
 import { editOneLine, timeTranslations, type TimingReport } from "spell-parser/cli/translateTimes"
 
 /**
- * `spell parser translate-time`'s work (epic `spanish` P29), with a fake translation:
+ * `spell translate speedtest`'s work (epic `spanish` P29), with a fake translation:
  * the scratch copies made and removed, what each run is asked, the table and the JSON -- and the removal when a run
  * throws.  The real translations are `translateProject.test.ts`'s.
  */
