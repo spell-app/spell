@@ -234,8 +234,8 @@ describe("generatorsFor()", () => {
     ])
   })
 
-  test("a repo that's ONE package (spell-lang, the kit):  run in its part's folder at the root, else at the root", () => {
-    // spell-lang's layout:  `markdown/` at its root, its tests in `tests/markdown/`;  no `packages/`
+  test("a repo that's ONE package (spell-parser, the kit):  run in its part's folder at the root, else at the root", () => {
+    // spell-parser's layout:  `markdown/` at its root, its tests in `tests/markdown/`;  no `packages/`
     const root = join(TEMP, "one-package")
     mkdirSync(join(root, "markdown"), { recursive: true })
     const steps = MainMerge.generatorsFor(

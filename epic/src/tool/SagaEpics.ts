@@ -3,7 +3,7 @@ import { join } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-// Import directly:  the `spell-kit/server/site` barrel is browser code (the site header);  this file imports nothing
+// Import directly:  the `spell/server/site` barrel is browser code (the site header);  this file imports nothing
 import { URGENT_SELECTOR } from "spell-epic/list/EpicState"
 import { FAVORITES_FILE, eventTimesIn, favoritesIn, isoLocal, lastWorked } from "spell-epic/list/EpicCards"
 

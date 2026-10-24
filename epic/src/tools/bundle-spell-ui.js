@@ -60,7 +60,7 @@ import { fileURLToPath } from "node:url"
 import { Script } from "node:vm"
 import { gzipSync } from "node:zlib"
 
-import { sourceNames } from "spell-kit/toolchain/sourceNames"
+import { sourceNames } from "spell/toolchain/sourceNames"
 
 import { packageDir } from "./packageDir.ts"
 
@@ -74,8 +74,8 @@ const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
  *   `ShadowEvents`, and a `<ui-button>`'s page `onClick` ran twice (epic `epic-engine` I18:  Do Now called itself off)
  */
 const UI_DIR = realPath(resolve(process.env.SPELL_UI_DIR ?? packageDir("spell-ui") ?? "spell-ui (not installed)"))
-/** spell-element, the `spell-kit/element` package, by its real path:  its source must never be bundled. */
-const ELEMENT_DIR = packageDir("spell-kit/element")
+/** spell-element, the `spell/element` package, by its real path:  its source must never be bundled. */
+const ELEMENT_DIR = packageDir("spell/element")
 const ASSETS = join(DOCS, "tools/_assets")
 
 const args = process.argv.slice(2)

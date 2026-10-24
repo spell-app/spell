@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import "spell-ui/components/ui-icon"
 import "spell-epic/components/epic-page-note-head"

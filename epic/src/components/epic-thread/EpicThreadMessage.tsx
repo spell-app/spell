@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { ThreadFacts } from "spell-epic/comments"
 

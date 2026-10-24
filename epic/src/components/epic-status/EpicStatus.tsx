@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { PlanDates } from "spell-epic/dates"
 // the card's shape and its dated band are the answer family's:  one card, its fills per element

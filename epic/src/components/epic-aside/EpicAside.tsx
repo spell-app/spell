@@ -1,4 +1,4 @@
-import { E } from "spell-kit/element"
+import { E } from "spell/element"
 
 import { epicAsideVocabulary } from "./EpicAside.en"
 import { EpicPanel } from "./EpicPanel"

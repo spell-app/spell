@@ -1,5 +1,5 @@
 /**
- * Side bar links, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`), listed in the repo root's
+ * Side bar links, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`), listed in the repo root's
  * `package.json` `"pageServer": { "routes": [...] }`.
  * - Why:  the Claude panel in VS Code follows only http(s) and file links;  a `vscode://...doc-preview` link does
  *   nothing there.  So the link Claude gives goes through the page server, which asks the VS Code window to show the
@@ -21,8 +21,8 @@
 import { spawn } from "node:child_process"
 import { sep } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 import { Window } from "spell-epic/window.mjs"
 import { openUrlInChrome } from "./pages.js"

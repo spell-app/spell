@@ -10,7 +10,7 @@ import { Git } from "./Git"
 /**
  * A Vitest snapshot file:  its test is `<dir>/../<name>` less `.snap`.
  * - Under `tests/<package>/`, where each package's tests live (epic `people-and-orgs` P10;  in every repo since epic
- *   `repo-split`:  `tests/markdown/` in spell-lang, `tests/util/` in the kit);
+ *   `repo-split`:  `tests/markdown/` in spell-parser, `tests/util/` in the kit);
  *   or under `packages/`, for a branch from before that move.
  */
 const SNAPSHOTS = ["tests/*/**/__snapshots__/*.snap", "packages/*/**/__snapshots__/*.snap"]
@@ -315,7 +315,7 @@ export class MainMerge {
    * - `packages/<name>`:  a repo laid out as spell-app was, one workspace per folder of `packages/` (and left out
    *   `root`)
    * - `<name>`:  a repo that's ONE package, its parts folders at its root (epic `repo-split` P9 and P11:  the kit's
-   *   `util/`, spell-lang's `markdown/`, spell-app's `lsp/`), when there's no `packages/<name>` but a `<name>`
+   *   `util/`, spell-parser's `markdown/`, spell-app's `lsp/`), when there's no `packages/<name>` but a `<name>`
    * - `.`, the repo's root, when neither is there
    */
   static packageFolder(name: string, root?: string): string {

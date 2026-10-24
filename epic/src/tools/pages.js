@@ -7,13 +7,13 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell-kit/server/page/settings"
+import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
 
 import { ComponentSetFolders } from "./ComponentSetFolders.ts"
-import { packageDir } from "./packageDir.ts"
+import { firstPackageDir, KIT_PACKAGES } from "./packageDir.ts"
 
 /** `src/tools`:  the docs scripts, `_assets`, the goals tooling. */
 export const TOOLS = dirname(fileURLToPath(import.meta.url))
@@ -404,7 +404,7 @@ export function formattedAlready(files) {
 /**
  * How to run `doc-links.js` with `args` as a child `node`, for `spawnSync(command, args, { env })`.
  * - under `tsx`, with this package's `tsconfig.json`, from whatever folder it runs in:  every repo's files by their
- *   package names (`spell-kit/server`, epic `repo-split` P14)
+ *   package names (`spell/server`, epic `repo-split` P14)
  * - the one way the tools run it (`tidy()`, `update.js`, goals' check, its own test)
  */
 export function docLinksRun(args) {
@@ -421,14 +421,14 @@ export function docLinksRun(args) {
  */
 const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
 
-/** The kit's page server command line (`spell-kit/server`'s), from the kit's root:  `ensurePageServer()` runs it. */
+/** The kit's page server command line (`spell/server`'s), from the kit's root:  `ensurePageServer()` runs it. */
 const PAGE_SERVER_CLI = "src/server/page/cli.ts"
 
 /**
  * This checkout's page server (`spell server`), started in the background if it isn't running.
  * - returns `{ base, port }`, or `undefined` if it can't start (the caller falls back to `file://`)
  * - runs the kit's page server command line (`PAGE_SERVER_CLI`) `start` under `tsx`, with the kit's node settings:  the
- *   kit this checkout's install resolves (`packageDir()`, epic `epic-engine` P10)
+ *   kit this checkout's install resolves, by either name (`firstPackageDir()`, epic `epic-engine` P10, `repo-split` P17)
  *   - for the page server's root (`pageServerRoot()`):  in a kit, the kit, from any folder of it (epic `repo-split` P16)
  * - a checkout whose page server settings have no part (`settingsParts()`:  no `"pageServer"` in any installed repo's
  *   `package.json`, as in a repo `epic init` set up), or that resolves no server package:  the machine's epic server
@@ -438,7 +438,7 @@ const PAGE_SERVER_CLI = "src/server/page/cli.ts"
  */
 export function ensurePageServer() {
   if (process.env.SPELL_NO_SERVER) return undefined
-  const kit = settingsParts(ROOT).length > 0 && packageDir("spell-kit", ROOT)
+  const kit = settingsParts(ROOT).length > 0 && firstPackageDir(KIT_PACKAGES, ROOT)
   const cli = kit && join(kit, PAGE_SERVER_CLI)
   if (!cli || !existsSync(cli)) return ensureEpicServer()
   const run = spawnSync(process.execPath, ["--import", "tsx", cli, "start", "--root", pageServerRoot(ROOT)], {

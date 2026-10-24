@@ -918,7 +918,7 @@ const squashed = new WeakMap()
 
 /**
  * An edit to this page's file updates it IN PLACE, instead of reloading it (epic page `review-review`, D10).
- * - `liveClient()` (`spell-kit/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
+ * - `liveClient()` (`spell/server`, `packages/server/src/liveClient.ts`) fetches the new version when the file changes,
  *   and fires a cancelable `spell-server:change` on `window`, `detail` `{ path, html, etag, reload() }`:
  *   taking it (`preventDefault()`) stops its reload
  * - the patch compares the page's source as it LOADED (fetched once, `SPELL_SERVER.readPage()`, trusted only when

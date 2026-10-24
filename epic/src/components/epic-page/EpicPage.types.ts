@@ -8,7 +8,7 @@
 
 import type { JSX } from "@solidjs/web"
 
-import type { E } from "spell-kit/element"
+import type { E } from "spell/element"
 import type {} from "spell-ui/jsx"
 
 import type { epicPageVocabulary } from "./EpicPage.en"

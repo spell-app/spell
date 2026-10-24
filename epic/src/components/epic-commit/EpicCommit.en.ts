@@ -34,7 +34,7 @@ export const epicCommitVocabulary = {
       format: "url",
       description:
         "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit " +
-        "(`https://github.com/spell-app/spell-lang`)."
+        "(`https://github.com/spell-app/spell-parser`)."
     }
   ],
   events: [],

@@ -84,7 +84,7 @@ export class Hub {
       throw new EpicCommandError("no repos to serve yet:  epic repo add <checkout>")
     const [{ EpicServer }, { SRV }] = await Promise.all([
       import("spell-epic/server/EpicServer"),
-      import("spell-kit/server")
+      import("spell/server")
     ])
     try {
       return await EpicServer.ensure(this.home, port)
@@ -98,7 +98,7 @@ export class Hub {
   private async serve(port: number): Promise<number> {
     const [{ EpicServer }, { SRV }] = await Promise.all([
       import("spell-epic/server/EpicServer"),
-      import("spell-kit/server")
+      import("spell/server")
     ])
     const server = await new EpicServer({ home: this.home }).start({ port })
     const repos = server.repos.map((repo) => `${repo.name}${repo.isDefault ? " (at /)" : ""}`).join(", ")
@@ -109,7 +109,7 @@ export class Hub {
 
   /** The server's pid file, `<home>/server.json`. */
   private async pidFile() {
-    const { SRV } = await import("spell-kit/server")
+    const { SRV } = await import("spell/server")
     return new SRV.PidFile(this.home, PID_FILE)
   }
 }

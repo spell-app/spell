@@ -8,12 +8,12 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - The house style is Spell's, WWOD:  **READ it FIRST**, from the kit around this repo:
   [WWOD](../agents/wwod/WWOD.md).
   - No `agents/` link at the root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as agent types.
-- spell-epic is a child repo of the kit `spell-kit`, and a workspace of its ONE install (`yarn install` in the kit;
-  epic `epic-engine` P10):  the other repos' packages (`spell-ui`, `spell-kit/server` ...) are `workspace:*`
+- spell-epic is a child repo of the kit `spell`, and a workspace of its ONE install (`yarn install` in the kit;
+  epic `epic-engine` P10):  the other repos' packages (`spell-ui`, `spell/server` ...) are `workspace:*`
   dependencies, imported by their package names (WWOD §4), never by a path into a sibling repo.
   - `tsc` reads their built declarations (`dist-types/`):  `yarn ts` builds them first (`spell-types --below`).
   - A tool finding one on disk asks Node's resolver ([packageDir.ts](src/tools/packageDir.ts), on the kit's
-    `spell-kit/toolchain/sourceNames`).
+    `spell/toolchain/sourceNames`).
   - Their source runs here as it is, by those names:  `tsx` (`bin/epic`, the `tsx` scripts), Vite and Vitest.
 - spell-epic is ONE package, `spell-epic` (epic `epic-eject` J14), laid out as a plain JS repo:
   - `src/`:  the code, the elements and the docs tools included;  its rules:  [src/AGENTS.md](src/AGENTS.md)
@@ -76,11 +76,11 @@ As WWOD §4, plus these.
     repo through `node_modules` (the kit's page server loads the route modules), finds a file without its
     extension but not a folder's `index`.
   - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
-    (`spell-kit/toolchain/sourceNames`) finds our packages' names as their source files.
+    (`spell/toolchain/sourceNames`) finds our packages' names as their source files.
 - PLAIN `node` writes the extension, as it needs it (the `"./*.ts"` key):  `spell-epic/config/EpicConfig.ts`,
   `spell-epic/window.mjs`, `spell-epic/tools/pages.js`.
   - Plain node runs the hooks, the window script, and the docs tools' `.js` scripts (`details.js`, `update.js` ...):
     every file they load, of ours, imports this way, and of the kit's only its explicitly exported files
-    (`spell-kit/server/checkout`, `spell-kit/server/DataFile` ...).
+    (`spell/server/checkout`, `spell/server/DataFile` ...).
 - A page's pack modules (`spell-ui.entry.js`'s `packModules`) are keyed by the import names themselves
-  (`spell-kit/element`, `spell-ui/core`;  epic `repo-split` P14, Q45):  what a pack's build leaves external.
+  (`spell/element`, `spell-ui/core`;  epic `repo-split` P14, Q45):  what a pack's build leaves external.

@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, statSync } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { SRV, type Handler, type ServedFile } from "spell-kit/server"
+import { SRV, type Handler, type ServedFile } from "spell/server"
 import {
   componentSets,
   PageEditor,
@@ -10,9 +10,9 @@ import {
   repoSettings,
   type PageConfig,
   type RouteModule
-} from "spell-kit/server/page"
-import type { SiteTab } from "spell-kit/server/site/site.types"
-import { resolvedFile } from "spell-kit/toolchain/sourceNames"
+} from "spell/server/page"
+import type { SiteTab } from "spell/server/site/site.types"
+import { resolvedFile } from "spell/toolchain/sourceNames"
 
 import type { ContentRouteContext } from "spell-epic/list/runningRoutes"
 
@@ -424,7 +424,7 @@ export class EpicServer {
 
   /**
    * Build the default repo's bundles whose sources changed since their last build, in the background, with that
-   * checkout's OWN build:  the `BundleBuild` of the kit its install resolves (`spell-kit/server/page`;  `spell bundle
+   * checkout's OWN build:  the `BundleBuild` of the kit its install resolves (`spell/server/page`;  `spell bundle
    * --stale`, with its own CLI;  epic `epic-engine` P8, r8), loaded from the checkout, so the build is that
    * checkout's code, not this one's (spell-app's `page-server` held it until epic `repo-split` P16).
    * - the bundles:  that checkout's settings' `"bundles"`, Spell UI's site bundle among them, which every component
@@ -616,16 +616,13 @@ export const ROUTE_MODULES: readonly string[] = repoSettings(ENGINE_ROOT)?.route
  * - ALL of spell-epic's code, `src/` (epic `epic-eject` I11):  the route modules import far beyond their own folders
  *   (`config/`, `data/`, `links/`, `review/`, the elements' definitions ...), so watching only theirs and this one
  *   missed a change to the rest
- * - the server package's, `spell-kit/server` (the kit's `src/server/`), where Node's resolver finds it (`packageDir()`)
+ * - the server package's, `spell/server` (the kit's `src/server/`), where Node's resolver finds it (`packageDir()`)
  *   - not the default repo's own kit (`buildBundles()`):  a change there needs a restart
  */
-export const SOURCES = [
-  join(ENGINE_ROOT, "src"),
-  ...[packageDir("spell-kit/server")].filter((dir) => dir !== undefined)
-]
+export const SOURCES = [join(ENGINE_ROOT, "src"), ...[packageDir("spell/server")].filter((dir) => dir !== undefined)]
 
 /** The package holding the default repo's own bundle build (`BundleBuild`):  its kit's page server, from its checkout. */
-const PAGE_SERVER = "spell-kit/server/page"
+const PAGE_SERVER = "spell/server/page"
 
 /** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
@@ -645,7 +642,7 @@ const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
  */
 const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
-/** What the epic server uses of a checkout's `BundleBuild` (`spell-kit/server/page`'s, loaded at run time). */
+/** What the epic server uses of a checkout's `BundleBuild` (`spell/server/page`'s, loaded at run time). */
 type BundleBuilder = { readonly wait: Handler; start(): unknown; stop(): void }
 
 /** `BundleBuild` itself:  `new BundleBuild({ root })`. */

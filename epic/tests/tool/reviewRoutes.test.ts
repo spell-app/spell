@@ -12,8 +12,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { PageServer } from "spell-kit/server/page"
-import { ask } from "spell-kit/server/test/serve"
+import { PageServer } from "spell/server/page"
+import { ask } from "spell/server/test/serve"
 
 import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 import reviewRoutes from "spell-epic/tool/reviewRoutes"

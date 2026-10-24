@@ -5,7 +5,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { NotesError, PageNotes, htmlOf } from "spell-epic/tools/PageNotes.js"
 

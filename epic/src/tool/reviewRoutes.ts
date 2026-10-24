@@ -1,5 +1,5 @@
 /**
- * Epic pages' review marks, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`), listed in the repo
+ * Epic pages' review marks, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`), listed in the repo
  * root's `package.json` `"pageServer": { "routes": [...] }`.
  * - Owen marks an epic page's items ON the page (the elements' review controls, `spell-epic/review`):
  *   approve, todo, details, revisit, pick an option card, an id chip's urgency.
@@ -63,8 +63,8 @@
  */
 import { readFileSync } from "node:fs"
 
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 
 import { SAGA_PREFIX } from "spell-epic/review/review.types"
 

@@ -3,8 +3,8 @@ import { constants } from "node:os"
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 
-import { settingsParts } from "spell-kit/server/page/settings"
-import { packageDir, tsxImports } from "spell-epic/tools/packageDir"
+import { settingsParts } from "spell/server/page/settings"
+import { firstPackageDir, KIT_PACKAGES, tsxImports } from "spell-epic/tools/packageDir"
 
 import { EXIT, type ToolSpec } from "./command.types"
 import { planDocArgs } from "./epicArgs"
@@ -22,8 +22,8 @@ import { Sessions } from "./Sessions"
  *   - Its DATA stays the caller's:  the nearest checkout from the current folder (`Git.nearestCheckout()`),
  *     handed to the tool as `EPIC_CHECKOUT` (the docs tools' `pages.js` and the window script read it as their root).
  *   - The exceptions:  the tools that SERVE their checkout, whose code is that checkout's:
- *     - the page server, the `spell-kit/server` its install resolves (`package`)
- *     - `serve`, every web server:  the kit's `spell` its install resolves (`spell-kit/cli`)
+ *     - the page server, the `spell/server` its install resolves (`package`)
+ *     - `serve`, every web server:  the kit's `spell` its install resolves (`spell/cli`)
  * - All `static`:  no state;  `codeRoot` is the one seam, a test's fake checkout of tools.
  ****************/
 export class EpicTools {
@@ -46,7 +46,7 @@ export class EpicTools {
     const data = Git.nearestCheckout({ marker: spec.package ? CHECKOUT_MARKER : spec.tool, from: cwd })
     const code = EpicTools.codeOf(spec, data, codeRoot)
     if (!code) {
-      process.stderr.write(`epic:  ${data} doesn't install ${spec.package}, so has no ${name} to run\n`)
+      process.stderr.write(`epic:  ${data} doesn't install ${spec.package?.join(" or ")}, so has no ${name} to run\n`)
       return Promise.resolve(EXIT.ERRORS)
     }
     const toolCwd = spec.cwd && (existsSync(join(data, spec.cwd)) ? join(data, spec.cwd) : join(code, spec.cwd))
@@ -68,7 +68,7 @@ export class EpicTools {
    * - else `codeRoot`, the running `epic`'s checkout
    */
   static codeOf(spec: ToolSpec, data: string, codeRoot = Git.CODE_ROOT): string | undefined {
-    if (spec.package) return packageDir(spec.package, data)
+    if (spec.package) return firstPackageDir(spec.package, data)
     return spec.code === "caller" ? data : codeRoot
   }
 
@@ -165,7 +165,7 @@ export class EpicTools {
    * - `notes`, `comments`:  page notes and comments on docs pages, in the caller's folder (`--file` is from there)
    * - `window`:  the VS Code windows (`src/window.mjs`);
    *   plain `node`, so it runs in a worktree before its `yarn install`
-   * - `server`:  the caller's checkout's page server (`spell-kit/server`'s command line, the kit's
+   * - `server`:  the caller's checkout's page server (`spell/server`'s command line, the kit's
    *   `src/server/page/cli.ts`, under the kit's node settings)
    * - `serve`:  every web server, `epic server start --all`:  the kit's `spell` its install resolves, which
    *   `EpicProgram` runs as `spell server start all` (spell-app's own `scripts/serve.mjs` until epic `repo-split` P13)
@@ -183,8 +183,8 @@ export class EpicTools {
     notes: { tool: "src/tools/notes.ts", tsx: "tsconfig.json" },
     comments: { tool: "src/tools/comments.ts", tsx: "tsconfig.json" },
     window: { tool: "src/window.mjs" },
-    server: { package: "spell-kit", tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" },
-    serve: { package: "spell-kit", tool: "bin/spell.mjs" },
+    server: { package: KIT_PACKAGES, tool: "src/server/page/cli.ts", tsx: "tsconfig.node.json" },
+    serve: { package: KIT_PACKAGES, tool: "bin/spell.mjs" },
     "pages update": { tool: "src/tools/update.js", cwd: "." },
     "pages index": { tool: "src/tools/index.js", cwd: "." },
     "pages create": { tool: "src/tools/new-page.js", cwd: "." },
@@ -198,7 +198,7 @@ export class EpicTools {
 
   /**
    * Whether the caller's checkout has a page server of its own (`TOOLS.server`), as `pages.js`' `ensurePageServer()`
-   * finds one:  its install resolves `spell-kit/server`, and the page server's settings have a part
+   * finds one:  its install resolves `spell/server`, and the page server's settings have a part
    * (`settingsParts()`:  in a kit, the kit's and every installed repo's `"pageServer"`;  else the checkout's own).
    * - in a kit:  from any folder of it, the kit's page server (epic `repo-split` P16)
    * - a repo `epic init` set up has none:  `epic server` is the machine's epic server there (`epic hub`)

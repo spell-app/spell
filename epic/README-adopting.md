@@ -97,14 +97,14 @@ beside the main checkout rather than inside it.
 
 You need Claude Code, VS Code, git and Node 24.11 or later.
 And a Spell checkout:  today `spell-epic` installs only inside one.
-- [Setup from zero](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero), on the kit's front page, makes it.
+- [Setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page, makes it.
 - `yarn clone spell-epic` brings `spell-epic` and the repos it needs.
 - The commands below assume the checkout is at `~/www/spell`.
 
 ### 1. The plugin, and `epic` on your PATH
 
 Four commands, once per machine, the same as for Spell's own repos:
-[the kit's README-agents.md](https://github.com/spell-app/spell-kit/blob/main/README-agents.md#the-epic-plugin) lists them and says what each does.
+[the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) lists them and says what each does.
 - They install the plugin for the whole machine, straight from `spell-epic`'s folder.
 - They link its skills in, for a bare `/epic`.
 - They put `epic` on your terminal's `PATH`.
@@ -278,7 +278,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by [`Epi
   - and where and how it runs:  the `cwd`, and the command to `run` there
   - read from each checkout, so a branch that adds a generated file lists it, and its own merge knows it
 - Two real ones to copy from:
-  - the kit's [.epic/config.json5](https://github.com/spell-app/spell-kit/blob/main/.epic/config.json5),
+  - the kit's [.epic/config.json5](https://github.com/spell-app/spell/blob/main/.epic/config.json5),
     multi-repo, with no folders linked in
   - `spell-epic`'s own, [.epic/config.json5](.epic/config.json5)
 

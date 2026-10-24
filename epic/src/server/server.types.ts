@@ -63,7 +63,7 @@ export const ENGINE_ROUTES = {
 /**
  * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
  * by both page servers, not by an engine route:
- * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `spell-kit/server/page`;
+ * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `spell/server/page`;
  *   its `dir` `spell-epic/src/docs`)
  * - the epic server, the same way (`EpicServer`'s `epicUiMounts()`, epic `epic-eject` I21)
  * - `name`:  what prose calls it
@@ -83,7 +83,7 @@ export const EPIC_UI = { name: "Epic UI", path: "components/epics", dir: "src/do
  * - who swaps the one for the other:  the epic server as it serves a page (`EpicServer`'s `localHighlight()`),
  *   `epic airplane` / `epic pages offline --fix` in the files (`offline.ts`);  the kit's page server, by spell-epic's
  *   part of its settings (`"localCopies"` in spell-epic's `package.json`:  the same two URLs, kept in step by hand)
- * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `spell-kit/server/page`
+ * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `spell/server/page`
  */
 export const HIGHLIGHT_JS = {
   cdn: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js",

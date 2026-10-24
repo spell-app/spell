@@ -11,7 +11,7 @@
  *   - then `spell-ui:lazy`, pointing `<ui-code>` / `<ui-markdown>`'s engine loaders at their lazy scripts (before
  *     any element highlights:  that waits for `UI.load()`), and the source elements' saver (`spell-ui-sources.js`)
  *   - then the page runtime, with every tag defined
- *   - then the site header (`spell-kit/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
+ *   - then the site header (`spell/server/site`):  `defineSite()` runs once every import has, so `<spell-site-header>`
  *     upgrades -- and sets `--spell-site-header-height` -- before the runtime first measures its sticky offsets
  *     (the runtime waits for the `ui-*` definitions first)
  * - Every import is a package name:  Spell UI's from its built `dist/` (`spellUiResolver()`), spell-epic's as their
@@ -49,7 +49,7 @@ import * as uiMarkdown from "spell-ui/components/ui-markdown"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
-import { defineSite } from "spell-kit/server/site"
+import { defineSite } from "spell/server/site"
 
 export { UI }
 export { registerPack } from "spell-ui"
@@ -57,8 +57,8 @@ export { registerPack } from "spell-ui"
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.
  * - The keys are the import names themselves, as every repo's source writes them (epic `repo-split` P14, Q45):
- *   the kit's `PACK_MODULES` (`spell-kit/element-tools/packModules`) and spell-app's shared-Solid builds read them.
- * - `spell-kit/element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
+ *   the kit's `PACK_MODULES` (`spell/element-tools/packModules`) and spell-app's shared-Solid builds read them.
+ * - `spell/element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
  *   (`spell-ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
  * - `spell-ui/components/ui-root` is for `<spell-app>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
  *   spell-app's `app/vite.solid.config.ts`), not for packs:  `<spell-app>` is a root, a subclass of `UIRoot`.
@@ -73,7 +73,7 @@ export const packModules = Object.freeze({
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
-  "spell-kit/element": uiCore,
+  "spell/element": uiCore,
   "spell-ui/core": uiCore,
   "spell-ui/forms": uiForms,
   "spell-ui/components/ui-root": uiRoot,

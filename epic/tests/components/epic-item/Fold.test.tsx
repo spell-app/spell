@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ElementFixture } from "spell-kit/test-helpers/ElementFixture"
+import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 import { expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
-import { expectAccessible } from "spell-kit/test-helpers/A11y"
+import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell-epic/components/epic-answer"
 import "spell-epic/components/epic-status"

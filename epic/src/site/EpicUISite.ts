@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { parseHTML } from "linkedom"
 
-import { readJSON5File } from "spell-kit/util/node/json5"
+import { readJSON5File } from "spell/util/node/json5"
 import { SiteSearchBuilder } from "spell-ui/tools/SiteSearchBuilder"
 import type {
   SiteAttribute,

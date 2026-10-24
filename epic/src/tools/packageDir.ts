@@ -1,7 +1,7 @@
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { packageRootFor } from "spell-kit/toolchain/sourceNames"
+import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /****************
  * ### `packageDir()`
@@ -10,7 +10,7 @@ import { packageRootFor } from "spell-kit/toolchain/sourceNames"
  *
  * ```js
  * packageDir("spell-ui")                       // => "/Users/owen/www/spell/spell-ui"
- * packageDir("spell-kit/server")               // => "/Users/owen/www/spell/src/server"
+ * packageDir("spell/server")                   // => "/Users/owen/www/spell/src/server"
  * packageDir("spell-app", checkout)            // => "<checkout>/spell-app", from that checkout's install
  * ```
  *
@@ -18,10 +18,10 @@ import { packageRootFor } from "spell-kit/toolchain/sourceNames"
  *   found as node finds them.
  * - `from`:  a file or folder to resolve from (default this file, so spell-epic's own dependencies);  a folder:  as if
  *   from a file in it.
- * - Found by the kit's `packageRootFor()` (`spell-kit/toolchain/sourceNames`):
+ * - Found by the kit's `packageRootFor()` (`spell/toolchain/sourceNames`):
  *   by the package's `package.json` entry (every repo's `exports` names it);  a package without one, by its `"."`
  *   entry, resolved, then up to the `package.json` named `name`.
- * - A package's sub-path (`packageDir("spell-kit/server")`):  that folder under the package's `src/`, where the name
+ * - A package's sub-path (`packageDir("spell/server")`):  that folder under the package's `src/`, where the name
  *   points (every repo's code is one `src/`, its names the paths under it:  epic `repo-split` P14).
  * - `undefined` when it can't be found:  not installed, or neither entry.
  * - Node's modules only:  plain `node` loads it (`bundle-spell-ui.js`), types stripped.
@@ -44,4 +44,20 @@ export function packageDir(name: string, from: string = import.meta.filename): s
 export function tsxImports(from: string = import.meta.filename): string[] {
   const tsx = packageDir("tsx", from)
   return tsx ? ["--import", pathToFileURL(join(tsx, "dist", "loader.mjs")).href] : []
+}
+
+/** The kit's package names, newest first:  `spell` since epic `repo-split` P17 (Q54), `spell-kit` in a checkout from before. */
+export const KIT_PACKAGES = ["spell", "spell-kit"]
+
+/**
+ * The folder of the first of `names` installed, as `packageDir()` finds it from `from`;  `undefined`:  none is.
+ * - The kit by either name, `firstPackageDir(KIT_PACKAGES, checkout)`:  the main checkout's tools run against every
+ *   worktree, and one cut before the rename installs `spell-kit`.
+ */
+export function firstPackageDir(names: string[], from?: string): string | undefined {
+  for (const name of names) {
+    const dir = packageDir(name, from)
+    if (dir) return dir
+  }
+  return undefined
 }

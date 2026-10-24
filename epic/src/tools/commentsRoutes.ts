@@ -1,5 +1,5 @@
 /**
- * Comments on docs pages and epic pages, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`),
+ * Comments on docs pages and epic pages, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`),
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }` (epic `airplane`, P11).
  * - A COMMENT:  what Owen writes on one block of a page, from the bullhorn beside it, or on text he selected there.
  *   - selected text:  ⌘ I, or the floating bullhorn
@@ -76,8 +76,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import { COMPONENTS_PREFIX, type RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import { COMPONENTS_PREFIX, type RouteModule } from "spell/server/page"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import {

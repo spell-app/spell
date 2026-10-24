@@ -60,6 +60,12 @@ const SECTIONS_TOP = "--site-sections-top"
 /** How long a jump's landing takes the site (`SiteSections.go()`:  the root ready, the unfold, two frames), ms. */
 const LANDING_MS = 350
 
+/** A toolbar click's section stays marked until the page has scrolled to it and been still this long, ms. */
+const GLIDE_QUIET_MS = 200
+
+/** ... and no longer than this after the click, ms, whatever the scroll does. */
+const GLIDE_MAX_MS = 2000
+
 /** The sheets:  beside this script, wherever it's served from. */
 const SHEETS = ["spell-comments.css", "spell-toolbar.css"].map(
   (name) => new URL(name, document.currentScript?.src ?? location.href).href
@@ -141,12 +147,14 @@ function drawToolbar(sections, { signal }) {
   }))
   const toolbar = toolbarMenu(
     titledItems(groups, () => []),
-    { titled: true }
+    // under a page's tabs:  pills as the tabs are
+    { titled: true, segmented: !!sections[0].closest("ui-tabs") }
   )
   for (const old of document.querySelectorAll(`.${PAGE_BAR_CLASS}.spell-site-toolbar`)) old.remove()
   const bar = el("ui-sticky", { class: `${PAGE_BAR_CLASS} spell-site-toolbar`, "data-spell-added": true }, toolbar)
   const article = sections[0].parentElement
   article.prepend(bar)
+  toolbar.addEventListener("click", glideTo, { signal })
   keepFitted(toolbar, { signal })
   // the site re-measures its sticky lines on a resize:  now the bar is in, and once it has drawn
   const remeasure = () => !signal.aborted && dispatchEvent(new Event("resize"))
@@ -154,7 +162,35 @@ function drawToolbar(sections, { signal }) {
     .then(() => nextFrames(2))
     .then(remeasure)
   let scheduled = false
+  // a clicked item is the current one at once, and stays so while the page glides to its section:  following the
+  // scroll meanwhile flipped the mark through every section passed (Owen, 2026-10-23, epic `debut`:  "When these
+  // buttons are pressed, they flip back and forth while the page is scrolling");  held until the scroll has been
+  // still for `GLIDE_QUIET_MS`, `GLIDE_MAX_MS` at most
+  let held = undefined
+  let quiet = 0
+  let heldSince = 0
+  const release = () => {
+    held = undefined
+    follow()
+  }
+  const holdQuiet = () => {
+    clearTimeout(quiet)
+    quiet = setTimeout(release, Math.max(0, Math.min(GLIDE_QUIET_MS, heldSince + GLIDE_MAX_MS - Date.now())))
+  }
+  toolbar.addEventListener(
+    "click",
+    (event) => {
+      const item = event.composedPath().find((node) => node.localName === "ui-item" && node.hasAttribute("data-rail"))
+      if (!item) return
+      held = item.dataset.rail
+      heldSince = Date.now()
+      markCurrent(toolbar, held)
+      holdQuiet()
+    },
+    { signal }
+  )
   const follow = () => {
+    if (held !== undefined) return holdQuiet()
     if (scheduled) return
     scheduled = true
     requestAnimationFrame(() => {
@@ -163,6 +199,7 @@ function drawToolbar(sections, { signal }) {
         markCurrent(toolbar, currentSection(document.querySelector(PAGE_MAIN), sections)?.id ?? sections[0].id)
     })
   }
+  signal.addEventListener("abort", () => clearTimeout(quiet), { once: true })
   addEventListener("scroll", follow, { passive: true, signal })
   addEventListener("resize", follow, { passive: true, signal })
   follow()
@@ -195,17 +232,40 @@ function sectionLabel(section) {
   return slotted?.textContent.replace(/\s+/g, " ").trim() ?? section.id
 }
 
-/** The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first. */
+/**
+ * The last of `sections` whose top has reached the line the site sticks its titles at;  none above the first.
+ * - at the page's end, the last one showing on screen:  a short last section can't scroll up to the line, so a click
+ *   on it would leave the one above marked (Owen, 2026-10-23:  "Not showing Themes as selected when I click it")
+ */
 function currentSection(main, sections) {
   const line = (parseFloat(main.style.getPropertyValue(SECTIONS_TOP)) || 0) + 4
+  const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 2
   let current
   for (const section of sections) {
     const box = section.getBoundingClientRect()
     if (!box.height && !box.width) continue
-    if (box.top > line) break
+    if (box.top > (atEnd ? innerHeight - 1 : line)) break
     current = section
   }
   return current
+}
+
+/**
+ * A click on a section's button GLIDES there (Owen, 2026-10-23:  "Clicking secondary tab jumps the entire page rather
+ * than tabs gliding up"):  the browser's own jump to `#id` is stopped, the address set without a scroll, and the
+ * site's landing told by the `hashchange` it listens for (`SiteSections`:  a smooth scroll, the stuck bars put)
+ * - a click with a modifier (a new tab, a new window) is left to the browser
+ */
+function glideTo(event) {
+  if (event.defaultPrevented || event.button !== 0) return
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  const item = event.composedPath().find((node) => node.localName === "ui-item" && node.hasAttribute("data-rail"))
+  const hash = item?.getAttribute("href")
+  if (!hash?.startsWith("#")) return
+  event.preventDefault()
+  const oldURL = location.href
+  history.pushState(history.state, "", hash)
+  dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: location.href }))
 }
 
 /**

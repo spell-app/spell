@@ -18,7 +18,7 @@
  *   3. the file's page server (`spell server`, a `.spell-server.json` at its root):  in a kit, the kit's, for a file of
  *      any repo in it (`pageServerRoot()`, epic `repo-split` P16);  else its checkout's
  *   4. else a server of our own, in-process, on `127.0.0.1`, one per root, for as long as the extension runs:
- *      the same `spell-kit/server` `WebServer`, with live reload and the engine's routes, but no route modules
+ *      the same `spell/server` `WebServer`, with live reload and the engine's routes, but no route modules
  *   - NEVER starts a page server itself:  a GUI VS Code may have no `node` / `yarn` on its PATH.
  *     The scripts that open docs start one first (`epic hub ensure`, `pages.js` `ensurePageServer()`).
  * - Served from the ROOT, not the doc's folder:  docs link to source files all over the repo.
@@ -32,10 +32,10 @@ import { dirname, join, resolve, sep } from "path"
 import * as vscode from "vscode"
 
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
-import { mainServerUrl } from "spell-kit/server/mainServer"
-import { pageServerRoot } from "spell-kit/server/page/settings"
-import { PidFile } from "spell-kit/server/PidFile"
-import { WebServer } from "spell-kit/server/WebServer"
+import { mainServerUrl } from "spell/server/mainServer"
+import { pageServerRoot } from "spell/server/page/settings"
+import { PidFile } from "spell/server/PidFile"
+import { WebServer } from "spell/server/WebServer"
 
 import { RepoList } from "spell-epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell-epic/server/server.types"

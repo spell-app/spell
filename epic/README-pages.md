@@ -565,7 +565,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 ```
 
 - Spell UI's docs bundle, `/_epic/assets/spell-ui.js`, defines `<ui-root>`, which adds the pack's script.
-- The pack carries none of the shared code:  it takes `solid-js`, `@solidjs/web`, `spell-kit/element`,
+- The pack carries none of the shared code:  it takes `solid-js`, `@solidjs/web`, `spell/element`,
   `spell-ui/core` and `spell-ui/forms` from the bundle, by those names, so a page has ONE Solid.
 - Both addresses are the engine's routes, served by the epic server and the kit's page server alike.
 - So a page needs one of those servers to draw at all, and the part files and review controls need it too.
@@ -574,13 +574,13 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 ### Working on the elements
 
 The elements are written exactly like Spell UI's own families,
-on [the kit's element framework](https://github.com/spell-app/spell-kit/blob/main/README-element.md) and Spell UI's core.
+on [the kit's element framework](https://github.com/spell-app/spell/blob/main/README-element.md) and Spell UI's core.
 
 If you find yourself writing a second copy of any of these, stop and reuse:
 
 - the pack's build, catalog and staleness check:  the kit's `spell-pack`
 - reading a vocabulary's tag and skeleton:  the kit's root catalog
-- the element authoring API:  `spell-kit/element`, and Spell UI's `spell-ui/core`
+- the element authoring API:  `spell/element`, and Spell UI's `spell-ui/core`
 
 Adding a new element:
 
@@ -627,13 +627,13 @@ Adding a new element:
 - [README-skills.md](README-skills.md):  `/epic review`, `/details` and the other skills that open these pages
 - [README-cli.md](README-cli.md):  `epic inbox`, `epic test` and every other verb that writes a page
 - [README-vscode.md](README-vscode.md):  the Review tab the pages show in, and how a session reaches its window
-- [The kit's README-element.md](https://github.com/spell-app/spell-kit/blob/main/README-element.md):  how packs and elements work, before you write an `epic-*` one
+- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how packs and elements work, before you write an `epic-*` one
 
 <details>
 <summary>More in the docs site</summary>
 
 In the content folder, so only where `spell.epics` sits beside the repos
-([the kit's setup](https://github.com/spell-app/spell-kit/blob/main/README.md#setup-from-zero) says where), served by `spell server start`:
+([the kit's setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says where), served by `spell server start`:
 
 - "Epic Pages":  `/guides/plan-docs/plan-docs.html`, every part of the page, every colour and button
 - "Reviewing an Epic Page":  `/guides/epic-components/review.html`

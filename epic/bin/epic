@@ -5,7 +5,7 @@
  * - On the `PATH` of every Claude Code session while the spell-epic plugin is on:  Claude Code puts a plugin's
  *   `bin/` there.  In a terminal:  link it onto your `PATH` (the README's "Install").
  * - `tsx` with spell-epic's `tsconfig.json`:  every repo's files by their package names (`spell-epic/tool/PlanDoc`,
- *   `spell-kit/server`;  epic `repo-split` P14), the other repos' packages workspaces of the top `spell` install, run as
+ *   `spell/server`;  epic `repo-split` P14), the other repos' packages workspaces of the top `spell` install, run as
  *   source.
  * - Runs `src/cli/epicMain.ts`, the lean entry:  it loads no spell, so a call starts in a fraction
  *   of a second.

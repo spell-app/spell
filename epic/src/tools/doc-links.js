@@ -6,14 +6,14 @@
  *   yarn tsx tools/doc-links.js <folder>/<doc>.html ...           -- add links (idempotent)
  *   yarn tsx tools/doc-links.js --check <folder>/<doc>.html ...   -- verify, exit 1 on problems
  *   ... --root <checkout> ...                                     -- links resolve in that checkout, not this one
- * - This file is the command line, on files, of `spell-kit/server`'s `Linker` (epic `epic-components`, P7).
+ * - This file is the command line, on files, of `spell/server`'s `Linker` (epic `epic-components`, P7).
  *   - the rules live there:  what becomes a link, how a link gets its target, what `--check` verifies
  *   - shared with the `epic` tool (`src/tool/`)
  * - `--root`:  for a copy of the pages beside a copy of the code (a dry run of `relocate.js relink`, say)
  *   - version control's ignores are that checkout's, so it should be a git repo with the repo's `.gitignore`
  * - A page in the CONTENT folder links as served under the checkout that serves it (`contentLinker`, epic
  *   `epic-engine` I22):  this one, or spell-app's for spell-epic's own epics
- * - Runs under `tsx`:  `spell-kit/server`'s files import each other without extensions, which plain `node` can't load.
+ * - Runs under `tsx`:  `spell/server`'s files import each other without extensions, which plain `node` can't load.
  *   - the tools that run it (`update.js`, `pages.js` `tidy()`, goals' check) go through `pages.js` `docLinksRun()`
  * - A component set's pages link as from their SERVED address,
  *   so their links hold at `/worktrees/<w>/components/epics/` too.
@@ -28,7 +28,7 @@ import { readFileSync, realpathSync, writeFileSync } from "node:fs"
 import { basename, dirname, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 import { RepoList } from "spell-epic/server/RepoList"
 import { EpicTargets } from "spell-epic/tool/EpicTargets"
 import { ServedFolders } from "spell-epic/tool/ServedFolders"

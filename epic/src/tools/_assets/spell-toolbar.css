@@ -60,7 +60,7 @@
  * - the pointer lands on the item's link, which carries its tooltip (`titleInside()`):  everything inside it lets the
  *   pointer through ("TOOLTIPS that show")
  */
-ui-menu.spell-toolbar {
+:is(ui-menu, ui-toolbar).spell-toolbar {
   --ui-menu-secondary-inline-margin: 0;
   --ui-menu-secondary-item-margin: 0;
   --ui-menu-secondary-item-padding: 0 7px;
@@ -79,7 +79,25 @@ ui-menu.spell-toolbar {
   flex: 1 1 auto;
   min-width: 0;
 }
-ui-menu.spell-toolbar::part(menu) {
+/*
+ * A TITLED toolbar takes a theme's BAR look when it has one (the `--ui-bar-*` tokens;  fruity's:  a grey track hugging
+ * the buttons, the current one a raised white key, as its tab bars);  without them, the ivory pills above
+ */
+:is(ui-menu, ui-toolbar).spell-toolbar-titled {
+  --ui-menu-secondary-item-padding: var(--ui-bar-item-padding, 0 7px);
+  --ui-menu-secondary-item-radius: var(--ui-bar-item-radius, 999px);
+  --ui-menu-secondary-hover-background: var(--ui-bar-hover-background, var(--spell-rail-hover));
+  --ui-menu-secondary-active-background: var(--ui-bar-active-background, var(--spell-rail-selected));
+  --ui-menu-active-shadow: var(--ui-bar-active-shadow, none);
+}
+:is(ui-menu, ui-toolbar).spell-toolbar-titled:not(.spell-toolbar-segmented)::part(menu) {
+  width: var(--ui-bar-track-width, auto);
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--ui-bar-track, none);
+  border-radius: var(--ui-bar-track-radius, 0);
+}
+:is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-segmented)::part(menu) {
   display: flex;
   gap: 1px;
   min-height: 0;
@@ -141,7 +159,7 @@ ui-menu.spell-toolbar::part(menu) {
   color: var(--spell-state-replied-on);
 }
 /* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
-ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
+:is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
   gap: 6px;
 }
 .spell-toolbar:not(.spell-toolbar-titled) > ui-item::part(item) {
@@ -199,13 +217,22 @@ ui-menu.spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
 
 /* ## A titled toolbar's buttons (a guide's, Epic UI's):  each its mark and its title */
 /* the first button's mark lines up with the column's text (a button's own padding:  7px) */
-ui-menu.spell-toolbar-titled::part(menu) {
-  padding: 3px calc(var(--_out, 16px) - 7px);
+/* a theme's track (`--ui-bar-tracked: 1`):  it sits in the column, inside the band, a little padding round the keys */
+:is(ui-menu, ui-toolbar).spell-toolbar-titled:not(.spell-toolbar-segmented)::part(menu) {
+  margin: calc(5px * var(--ui-bar-tracked, 0)) calc(var(--_out, 16px) * var(--ui-bar-tracked, 0));
+  padding: var(--ui-bar-track-padding, 3px calc(var(--_out, 16px) - 7px));
 }
 .spell-toolbar-titled > ui-item::part(item) {
   flex: 0 1 auto;
   min-width: 0;
   gap: 10px;
+}
+/* a `<ui-toolbar>` scrolls instead:  every title whole, the `‹` / `›` buttons showing what's past either end */
+ui-toolbar.spell-toolbar-titled > ui-item::part(item) {
+  flex: none;
+}
+ui-toolbar.spell-toolbar-titled .spell-toolbar-label {
+  overflow: visible;
 }
 /* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
 .spell-toolbar-icons > ui-item::part(item) {
@@ -219,6 +246,58 @@ ui-menu.spell-toolbar-titled::part(menu) {
   text-overflow: ellipsis;
 }
 .spell-toolbar-icons .spell-toolbar-label {
+  display: none;
+}
+/*
+ * the ACCESS LETTER (`wireAccessLetters()`):  in the title, bold, the text's own colour, no underline (Owen,
+ * 2026-10-23:  "Lose underline under T");  the key tip under the item says what it does (`wireKeyTips()`).  The item's
+ * letter mark (a section with no icon) only while the titles are hidden, so the letter never shows twice.
+ */
+.spell-toolbar-key {
+  font-weight: 700;
+  color: var(--ui-text-dark, currentColor);
+  text-decoration: none;
+}
+/*
+ * the KEY TIP (`wireKeyTips()`):  a pill of DARK GLASS under the item, in both schemes, its letter a key cap (Owen,
+ * 2026-10-23:  "Doesn't match theme, should be dark glass pill");  a theme's glass (`--ui-bar-tip-background`,
+ * `--ui-bar-tip-filter`), else a plain dark pill
+ */
+.spell-toolbar-tip {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: var(--ui-radius-pill, 9999px);
+  background: var(--ui-bar-tip-background, rgb(29 29 31 / 0.92));
+  backdrop-filter: var(--ui-bar-tip-filter, none);
+  color: #fff;
+  font: 500 12px/1.3 var(--spell-sans);
+  white-space: nowrap;
+  /* a faint light ring, so the dark glass shows on a dark page too */
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    0 4px 14px rgb(0 0 0 / 0.18);
+  pointer-events: none;
+}
+.spell-toolbar-tip kbd {
+  display: inline-block;
+  background: rgb(255 255 255 / 0.16);
+  color: inherit;
+  min-width: 1.3em;
+  margin-inline: 2px;
+  padding: 0 4px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 6px;
+  font: 700 11px/1.4 var(--spell-sans);
+  text-align: center;
+}
+.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item > b.spell-toolbar-letter {
+  display: none;
+}
+/* its icon box too, while the letter mark is all it would hold:  else the title sits off centre in its button */
+.spell-toolbar-titled:not(.spell-toolbar-icons) > ui-item:has(> b.spell-toolbar-letter)::part(icon) {
   display: none;
 }
 .spell-toolbar > ui-item > b[slot="icon"] {
@@ -329,7 +408,7 @@ ui-sticky.spell-site-toolbar::part(sticky) {
   z-index: calc(var(--ui-z-sticky, 10) + 1);
   margin-block: 0 1.5em;
 }
-.spell-site-toolbar > ui-menu.spell-toolbar {
+.spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
   --_out: var(--site-gutter, 3em);
   margin-inline: calc(-1 * var(--_out));
   background: var(--spell-rail-fill);
@@ -338,8 +417,158 @@ ui-sticky.spell-site-toolbar::part(sticky) {
     0 1px 0 var(--spell-rail-edge);
   backdrop-filter: var(--ui-bar-filter, none);
 }
+/* a `<ui-toolbar>`'s own box fills the band (the menu's host has a box of its own already) */
+.spell-site-toolbar > ui-toolbar.spell-toolbar {
+  display: block;
+}
 @media (max-width: 991.98px) {
-  .spell-site-toolbar > ui-menu.spell-toolbar {
+  .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
     --_out: 1em;
   }
+}
+/*
+ * UNDER A PAGE'S TABS (a components page's Examples / Usage / API / Theming;  Owen, 2026-10-23, epic `debut`:  "would
+ * look cool if these two tab bars were shown in a single glass surround, with a little bit of padding between them"):
+ * the toolbar is the lower half of ONE panel with the tabs.
+ * - the site draws the panel's top round the tabs (`site.css`, "Sections and tabs");  this bar draws the rest:  the
+ *   panel's colour and blur, its padding round the track (`--site-tabs-band`), its bottom corners round
+ * - in the column, not out to its edges:  the panel floats, its margin below (`--site-tabs-gap`)
+ * - it sticks right under the tabs' track (`SiteSections`), so the two halves meet with no seam
+ * - the track fills the panel's width, its buttons sharing it, each title centred;  too many, it scrolls
+ */
+ui-tabs ui-sticky.spell-site-toolbar::part(sticky) {
+  margin-block: 0 var(--site-tabs-gap, 10px);
+  /* as wide as the tabs' half:  its band out past the column, the track in it */
+  margin-inline: calc(var(--site-tabs-inset, 0px) - var(--site-tabs-band, 8px));
+  /* the gap between the rows above the track;  the toolbar's own box draws the band round it (below) */
+  padding: var(--site-tabs-band, 8px) var(--site-tabs-band, 8px) 0;
+  /* the panel is drawn behind it (`::before`) and by the toolbar, so this box only places the track */
+  --_panel-up: calc(var(--site-tabs-track, 34px) + var(--site-tabs-band, 8px));
+  --_panel-glass: var(--ui-bar-panel-background, var(--ui-bar-background, var(--spell-rail-fill)));
+}
+/*
+ * ONE panel, shaped like a T (Owen, 2026-10-23:  "doesn't look like one bar (notches)";  "make tab surround 50% opaque";
+ * then, with a picture, a glass surround that HUGS each row):  a theme's panel glass (`--ui-bar-panel-background`),
+ * blurring what's behind it, `--site-tabs-band` of it round each row's track
+ * - the TOP band:  this box, behind the tabs' track (reaching up by `--site-tabs-track`, measured by `SiteSections`),
+ *   as wide as the panel, its ends fully round;  its lower edge is the gap between the two rows
+ * - the LOWER band:  the section toolbar's own box (below), only as wide as its track, its bottom corners round, and
+ *   two concave curves where it meets the top band, so the outline has no square corner
+ * - the two never overlap:  see-through glass laid twice would show a darker seam
+ */
+ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--_panel-up)) 0 auto;
+  height: calc(var(--_panel-up) + var(--site-tabs-band, 8px));
+  z-index: -1;
+  border-radius: var(--ui-radius-pill, 9999px);
+  background: var(--_panel-glass);
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
+  position: relative;
+  box-sizing: border-box;
+  /* room for its two concave curves inside the top band, however long its row:  it scrolls instead */
+  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+  padding: 0 var(--site-tabs-band, 8px) var(--site-tabs-band, 8px);
+  /* round the track's ends:  half its height (24px) and the band */
+  border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
+  background: var(--_panel-glass);
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+/* the concave curves where the lower band meets the top band:  a band's width of glass outside a quarter circle */
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before,
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: var(--site-tabs-band, 8px);
+  height: var(--site-tabs-band, 8px);
+  pointer-events: none;
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::before {
+  right: 100%;
+  background: radial-gradient(
+    circle at 0 100%,
+    transparent calc(var(--site-tabs-band, 8px) - 0.5px),
+    var(--_panel-glass) var(--site-tabs-band, 8px)
+  );
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::after {
+  left: 100%;
+  background: radial-gradient(
+    circle at 100% 100%,
+    transparent calc(var(--site-tabs-band, 8px) - 0.5px),
+    var(--_panel-glass) var(--site-tabs-band, 8px)
+  );
+}
+/*
+ * while the tabs are stuck (`main.site-tabs-stuck`, set by the site;  through a pane's end too, as the panel leaves), a
+ * STRIP behind the panel, out to the column's edges and over the gaps above and below it, in the stuck
+ * titles' colour (Owen:  "Don't show content underneath tabs when scrolling up"):  the page scrolling under it never
+ * shows round the floating panel
+ */
+.site-tabs-stuck ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * (var(--_panel-up) + var(--site-tabs-gap, 10px)))
+    calc(var(--site-tabs-band, 8px) - var(--site-tabs-inset, 0px) - var(--site-gutter, 3em))
+    calc(-1 * var(--site-tabs-gap, 10px));
+  z-index: -2;
+  /* a theme's wallpaper, fixed as the page's is, so it reads as the page (`--ui-bar-wallpaper`, Owen:  "so it doesn't
+     have to go to white");  else the stuck titles' colour */
+  background-color: var(
+    --ui-bar-wallpaper-color,
+    var(--ui-section-sticky-background, var(--ui-bar-background, var(--spell-rail-fill)))
+  );
+  background-image: var(--ui-bar-wallpaper, none);
+  background-attachment: fixed;
+  backdrop-filter: var(--ui-bar-filter, none);
+}
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar {
+  --_out: 0px;
+  margin-inline: 0;
+  box-shadow: none;
+}
+/* no band of its own, but the segmented tabs' lower band of the panel (above) */
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-segmented) {
+  background: none;
+  backdrop-filter: none;
+}
+/* the track as wide as its buttons, centred under the tabs (Owen:  "second tab group doesn't need to be full width") */
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled::part(menu) {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+/* ... the lower band's room for its two concave curves inside the top band kept, however long its row (it scrolls):
+   this rule's `100%` took it away (Owen, 2026-10-23, a picture of the band jutting past the top one) */
+ui-tabs .spell-site-toolbar > ui-toolbar.spell-toolbar-titled.spell-toolbar-segmented {
+  max-width: calc(100% - 2 * var(--site-tabs-band, 8px));
+}
+ui-tabs .spell-site-toolbar > :is(ui-menu, ui-toolbar).spell-toolbar-titled > ui-item::part(item) {
+  justify-content: center;
+}
+/*
+ * the SECOND row of tabs:  no taller than the tabs above it (Owen:  "Second level tabs are taller than the top set")
+ * - a size smaller than the top row's, the same line height as its buttons (`1`), and its own height:  every toolbar
+ *   button is 30px tall (above), the tabs' 27px
+ * - its border, a theme's (`--ui-bar-subtabs-border`;  fruity's:  none yet), else the segmented menu's own
+ */
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
+  --ui-menu-segmented-border: var(--ui-bar-subtabs-border);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented::part(menu) {
+  font-size: calc(var(--ui-font-size, 16px) * 0.9333);
+}
+ui-tabs .spell-site-toolbar > .spell-toolbar-segmented > ui-item::part(item) {
+  /* its own height, as a tab's:  not the toolbar's fixed 30px button */
+  height: auto;
+  line-height: 1;
 }

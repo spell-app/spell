@@ -1,5 +1,5 @@
 /**
- * The Epics page's writes, on the page server:  a ROUTE MODULE (`spell-kit/server/page`'s `RouteModule`).
+ * The Epics page's writes, on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`).
  * - listed in the repo root's `package.json`, `"pageServer": { "routes": [...] }`
  *
  * NEW EPIC (epic `airplane` P7):
@@ -58,8 +58,8 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { SRV } from "spell-kit/server"
-import type { RouteModule } from "spell-kit/server/page"
+import { SRV } from "spell/server"
+import type { RouteModule } from "spell/server/page"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import { FAVORITES_FILE, favoritesIn } from "spell-epic/list/EpicCards"

@@ -7,8 +7,8 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
-import { PageServer } from "spell-kit/server/page"
-import { ask } from "spell-kit/server/test/serve"
+import { PageServer } from "spell/server/page"
+import { ask } from "spell/server/test/serve"
 
 import { AskListeners } from "spell-epic/tools/AskListeners"
 import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "spell-epic/tools/detailsRoutes"

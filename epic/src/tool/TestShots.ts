@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path"
 
-import { SRV } from "spell-kit/server"
+import { SRV } from "spell/server"
 
 import { InboxError } from "./ReviewInbox"
 
@@ -12,7 +12,7 @@ import { InboxError } from "./ReviewInbox"
  *   - beside the screenshots Claude takes for a test's Example (`tests/v3.png`, `epic add <epic>#V --example`)
  * - read by the review routes' `POST shot` (`reviewRoutes.ts`):  the mark then carries its path (`shot`)
  * - Light on purpose:  the review routes load it, and they never load the epic tool's doc code (`PlanDoc`).
- *   Imports only `spell-kit/server` and `ReviewInbox`'s error.
+ *   Imports only `spell/server` and `ReviewInbox`'s error.
  ****************/
 export class TestShots {
   /**

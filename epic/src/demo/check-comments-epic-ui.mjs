@@ -79,7 +79,7 @@ const { DemoServer } = await import("./DemoServer.ts")
 const { GuideInbox } = await import("spell-epic/tool/GuideInbox.ts")
 const { RepoList } = await import("spell-epic/server/RepoList.ts")
 const { packageDir } = await import("spell-epic/tools/packageDir.ts")
-const { componentSets, pageServerSettings } = await import("spell-kit/server/page/settings")
+const { componentSets, pageServerSettings } = await import("spell/server/page/settings")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)
@@ -401,7 +401,7 @@ async function checkToolbar(page, name, held) {
   const bar = await page.evaluate(() => {
     const article = document.querySelector("main .site-article")
     const sections = [...article.querySelectorAll(":scope > ui-section[id]")].map((each) => each.id)
-    const toolbar = article.querySelector(":scope > ui-sticky.site-sticky-bar > ui-menu.spell-toolbar")
+    const toolbar = article.querySelector(":scope > ui-sticky.site-sticky-bar > :is(ui-menu, ui-toolbar).spell-toolbar")
     const items = [...(toolbar?.querySelectorAll(":scope > [data-rail]") ?? [])].map((each) => each.dataset.rail)
     const bullhorn = toolbar?.querySelector(":scope > .spell-toolbar-waiting")
     return {
