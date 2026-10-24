@@ -212,7 +212,7 @@ The session MUST stay titled `🚧 <name>` while its work is under way.
 
 A STANDING epic merges each phase into `main` at once, and never leaves its worktree:  NOT "Finish" below.
 - It's marked `<epic-page standing>` (epic `epic-workflow`).
-- The steps:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 4 ("A STANDING epic").
+- The steps:  [the epic skill](../epic/SKILL.md), "5. Each phase", step 5 ("A STANDING epic").
 - In short:
   1. `merge-main`, if `main` moved
   2. `epic merge <name>`, from the worktree:  it moves the MAIN checkout's `main`
@@ -350,7 +350,7 @@ A STANDING epic merges each phase into `main` at once, and never leaves its work
    Now in the main checkout:
    - `epic merge <name>`:  it checks the main checkout is on `main`, with nothing uncommitted (another session may be
      working there), then fast-forwards.
-     - Stray files there:  as the epic skill's "5. Each phase", step 4 says (a snapshot moved aside by itself;  a few
+     - Stray files there:  as the epic skill's "5. Each phase", step 5 says (a snapshot moved aside by itself;  a few
        others only once Owen says so, `--ditch`).
      - Refused (`main` moved since step 2, somebody's work there):  say so, and don't merge.
      - A multi-repo top:  `epic merge <name>` in the main TOP checkout.

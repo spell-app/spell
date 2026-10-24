@@ -41,27 +41,14 @@
  * - prints a JSON summary on stdout (last thing written), problems on stderr
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
  */
-import { existsSync, mkdtempSync, mkdirSync, readFileSync } from "node:fs"
+import { mkdtempSync, mkdirSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join, relative, resolve, sep } from "node:path"
-import { pathToFileURL } from "node:url"
+import { join } from "node:path"
 
 import { chromium } from "playwright"
 
-// By its package entry (epic `repo-split` P6), its types stripped by `node` itself:  this tool runs under plain `node`,
-// which finds only an explicit entry or a name with its `.ts`
-import { componentSets, pageServerSettings } from "spell/server/page/settings"
-import { engineFileFor } from "spell-epic/server/engineLinks.ts"
-import { CONTENT, PACKAGE, ROOT, ensurePageServer, pageFile, pagePath, serverUrl } from "./pages.js"
-
-/**
- * Elements the page's packs define, as `ui-*` (Spell UI) and `epic-*` (the `epics` pack, epic pages):
- * a tag that looks like one of theirs must be defined and draw into a shadow root.
- */
-const PACK_TAG = /^(ui|epic)-/
-
-/** The engine whose routes a `file://` page's `/_epic/...` requests are answered from:  this checkout. */
-const ENGINE = PACKAGE
+import { PACK_TAG, openPage, settle } from "./browserPage.js"
+import { browserUrlFor, pageFile } from "./pages.js"
 
 /** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
 const NAV = ".spell-toolbar"
@@ -164,26 +151,14 @@ process.exit(problems.length ? 1 : 0)
  * - a server that won't start is a problem, and `file://` is used
  */
 function pageUrl(file) {
-  const local = pathToFileURL(resolve(file)).href
-  const inSet = setAddress(file)
-  // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
-  if (!baseArg && !inSet && !/<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))) return local
-  const served = baseArg ? { base: baseArg.replace(/\/$/, "") } : ensurePageServer()
-  // a page outside the content folder has no address there (`../x.html`):  say so, not what a 404 page breaks
-  if (served && !inSet && pagePath(file).startsWith("../")) {
-    console.error(`${file} is outside the content folder, ${CONTENT}, so no server has it`)
+  try {
+    // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
+    return browserUrlFor(file, { base: baseArg })
+  } catch (error) {
+    // outside the content folder, or no server:  say so, not what a 404 page breaks
+    console.error(error.message)
     process.exit(2)
   }
-  if (served) return inSet ? `${served.base}${inSet}` : serverUrl(served.base, file)
-  problem("page needs the page server, and it didn't start")
-  return local
-}
-
-/** A component set's page `file` at its address (`/components/epics/x.html`);  `undefined` for any other page. */
-function setAddress(file) {
-  const path = relative(ROOT, resolve(file)).split(sep).join("/")
-  const set = componentSets(pageServerSettings(ROOT)).find((each) => path.startsWith(`${each.dir}/`))
-  return set && `${set.prefix}${path.slice(set.dir.length).replace(/\/index\.html$/, "/")}`
 }
 
 /**
@@ -195,46 +170,15 @@ function problem(text) {
   seen.set(line, (seen.get(line) ?? 0) + 1)
 }
 
-/** A page at `viewport`, collecting errors as problems, once every pack tag in it is defined (or 10s passed). */
+/** A page of the browser at `url`, at `viewport`, settled;  a server's error page ends the run (exit 1). */
 async function open(viewport) {
-  const page = await browser.newPage({ viewport })
-  const label = `${viewport.width}px`
-  page.on("pageerror", (error) => problem(`page error (${label}):  ${error}`))
-  page.on("console", (message) => message.type() === "error" && problem(`console (${label}):  ${message.text()}`))
-  // a page from `file://` loading the engine's routes (`/_epic/...`):  answered from this engine's folders
-  await page.route(/^file:\/\/\/_epic\//, (route) => {
-    const file = engineFileFor(new URL(route.request().url()).pathname, ENGINE)
-    return file && existsSync(file) ? route.fulfill({ path: file }) : route.fulfill({ status: 404 })
-  })
-  const response = await page.goto(url)
-  // a server's error page (a 404) has none of the page's shape:  every check would fail on it, or throw
-  if (response && !response.ok()) {
-    console.error(`${url}:  ${response.status()} ${response.statusText()}`)
+  try {
+    return await openPage(browser, url, { viewport, onProblem: problem })
+  } catch (error) {
+    console.error(error.message)
     await browser.close()
     process.exit(1)
   }
-  await settle(page)
-  return page
-}
-
-/**
- * Wait until every pack tag on `page` is defined and not pending (or 10s passed), then a second for the runtime.
- * - Pending:  a root defines its catalog's tags before their families load (`:state(pending)`, epic `solid-17` P7).
- */
-async function settle(page) {
-  await page
-    .waitForFunction(
-      (pattern) =>
-        [...document.querySelectorAll("*")].every(
-          (el) =>
-            !new RegExp(pattern).test(el.localName) ||
-            (customElements.get(el.localName) && !el.matches(":state(pending)"))
-        ),
-      PACK_TAG.source,
-      { timeout: 10000 }
-    )
-    .catch(() => {})
-  await page.waitForTimeout(1000)
 }
 
 /**

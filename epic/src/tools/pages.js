@@ -7,7 +7,7 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { pageServerRoot, settingsParts } from "spell/server/page/settings"
+import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
@@ -527,6 +527,32 @@ export function atDepth(html, depth) {
  */
 export function serverUrl(base, file) {
   return `${base}/${pagePath(file).split("/").map(encodeURIComponent).join("/")}`
+}
+
+/**
+ * Where a browser opens page `file`, for the tools that load pages headlessly (`check-spell.js`, `designer-shots.js`).
+ * - `file://`, unless the page needs a server:  its `<body data-spell-needs-server>`, or a component set's page
+ *   (its address, `/components/epics/x.html`:  it loads its site bundle from there)
+ * - `base`:  ANY page from that server, as it's shown there (`http://127.0.0.1:4848`)
+ * - else this checkout's page server, started if it's down (`ensurePageServer()`)
+ * - throws if it needs a server and none started, or the page is outside the content folder (no server has it)
+ */
+export function browserUrlFor(file, { base } = {}) {
+  const inSet = componentSetAddress(file)
+  const needsServer = inSet || /<body\b[^>]*\bdata-spell-needs-server\b/.test(readFileSync(file, "utf8"))
+  if (!base && !needsServer) return pathToFileURL(resolve(file)).href
+  const served = base ? { base: base.replace(/\/$/, "") } : ensurePageServer()
+  if (!inSet && pagePath(file).startsWith("../"))
+    throw new Error(`${file} is outside the content folder, ${CONTENT}, so no server has it`)
+  if (!served) throw new Error(`${file} needs the page server, and it didn't start`)
+  return inSet ? `${served.base}${inSet}` : serverUrl(served.base, file)
+}
+
+/** A component set's page `file` at its address (`/components/epics/x.html`);  `undefined` for any other page. */
+export function componentSetAddress(file) {
+  const path = relative(ROOT, resolve(file)).split(sep).join("/")
+  const set = componentSets(pageServerSettings(ROOT)).find((each) => path.startsWith(`${each.dir}/`))
+  return set && `${set.prefix}${path.slice(set.dir.length).replace(/\/index\.html$/, "/")}`
 }
 
 /**

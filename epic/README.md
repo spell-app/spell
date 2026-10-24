@@ -370,7 +370,8 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | Folder | What's in it |
 | --- | --- |
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder);  Claude Code installs a copy of it, which the kit's install steps link back to this folder |
-| [skills/](skills/) | the eighteen skills, a `SKILL.md` each |
+| [skills/](skills/) | the nineteen skills, a `SKILL.md` each |
+| [designer/](designer/) | the design review's rules:  [the owner's taste](designer/designer.md), his own asks quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
 | [hooks/](hooks/) | `hooks.json` and the nine scripts it runs |
 | [monitors/](monitors/) | `monitors.json`:  the one monitor Claude Code runs beside each session, `listen.mjs` (`InboxPoller`), which keeps an epic's session listening to its epic page;  a small poller that runs `epic session listen` for a moment as the page's inbox changes |
 | [bin/epic](bin/epic) | the `epic` command:  its program in [src/cli/](src/cli/), the work its verbs do in [src/command/](src/command/) |
@@ -437,7 +438,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | --- | --- |
 | [README.md](README.md) | <ul><li>this page:  a decision made and kept, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  nine sections whose ids never change</li><li>a review round, comments and test runs;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
-| [README-skills.md](README-skills.md) | <ul><li>eighteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
+| [README-skills.md](README-skills.md) | <ul><li>nineteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
 | [README-adopting.md](README-adopting.md) | <ul><li>epics in your own repo:  three steps and an extension</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine</li><li>what's still Spell-shaped</li></ul> |
