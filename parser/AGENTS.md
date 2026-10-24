@@ -12,7 +12,9 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in th
   - `py`:  Python's writers, and `spell_core`, a uv project
   - `spell`:  the language
   - `cli`:  the language's `spell` commands
-- It may use:  the kit:  util's helpers (by package name, `spell/util`) and the toolchain.
+- It may use:  the kit:  util's helpers (by package name, `spell/util`) and the toolchain;
+  and, in `cli` only, the kit's command line (`spell/cli`) and its server's command runs (`spell/server`, loaded only
+  by `spell translate --review`).
   - Every arrow points DOWN:  no repo below this one may import it.
 - It lives inside the kit `spell`, at `~/www/spell/spell-parser/`:
   - the kit holds the ONE install for every repo (no `yarn.lock` here)

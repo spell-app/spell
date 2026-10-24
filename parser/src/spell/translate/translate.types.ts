@@ -28,6 +28,14 @@ export type NamesData = {
 }
 
 /**
+ * A names dictionary's FILE, `<Project>.<lang>.names.json5`:  its sections (`NamesData`), and which of its names a
+ * person reviewed (`spell translate --review`, epic `spanish` P31).
+ * - `reviewed`:  by section, the words of each name a person accepted, typed or picked on the review page;
+ *   the rest were drafted, seeded or written by hand
+ */
+export type NamesFile = NamesData & { reviewed?: Partial<Record<NamesKind, string[]>> }
+
+/**
  * What a language pack's names glossary holds, `languages/<lang>/glossary.json5` (epic `spanish` P26):
  * the names people choose, shared by every project -- see `NamesGlossary`.
  */

@@ -104,6 +104,37 @@ describe("NamesGlossary:  names every project shares", () => {
     expect(Object.keys(glossary.toJSON().names)).toEqual([...Object.keys(glossary.data.names)].sort())
   })
 
+  test("--review:  a name a person reviewed is learned as reviewed, over a seed's;  a ticked one goes in at once", () => {
+    const glossary = new NamesGlossary(GLOSSARY)
+    const names = namesWith({
+      types: { card: { name: "naipe", gender: "masculine" } },
+      names: { rank: "rango", suit: "palo" },
+      phrases: { "turn it over": "darle la vuelta a eso" },
+      texts: { hello: "hola" },
+      genders: { palo: "masculine" }
+    })
+    names.markReviewed({ kind: "types", words: "card" })
+    names.markReviewed({ kind: "names", words: "rank" })
+    const { added, kept } = glossary.learn(names, "Juego")
+    expect(kept).toEqual([])
+    expect(added).toBe(2)
+    expect(glossary.data.names.card).toEqual({ name: "naipe", gender: "masculine", from: "reviewed:Juego" })
+    // the same word as the seed's:  its source bettered, its gender kept
+    expect(glossary.data.names.rank).toEqual({ name: "rango", gender: "masculine", from: "reviewed:Juego" })
+    expect(glossary.data.names.suit?.from).toBe("learned:Juego")
+    // ticked "for every project":  a phrase too, never a text
+    const ticked = new NamesGlossary(GLOSSARY)
+    const count = ticked.addReviewed(names, [
+      { kind: "names", words: "suit" },
+      { kind: "phrases", words: "turn it over" },
+      { kind: "texts", words: "hello" }
+    ])
+    expect(count).toBe(2)
+    expect(ticked.data.names.suit).toEqual({ name: "palo", gender: "masculine", from: "reviewed" })
+    expect(ticked.data.phrases["turn it over"]).toEqual({ name: "darle la vuelta a eso", from: "reviewed" })
+    expect(names.toFile().reviewed).toEqual({ names: ["rank"], types: ["card"] })
+  })
+
   test("Spanish's glossary reads, every entry says where it came from, and Owen's Solitario choices are in it", () => {
     const file = fileURLToPath(import.meta.resolve("spell-parser/spell/languages/es/glossary.json5"))
     const data = JSON5.parse(readFileSync(file, "utf8")) as GlossaryData

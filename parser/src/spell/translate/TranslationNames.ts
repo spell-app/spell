@@ -1,6 +1,13 @@
 import { P } from "spell-parser/parser"
 import type { SP } from "spell-parser/spell"
-import type { DeclarationStatement, MissingName, NamesData, NamesKind, TranslatedType } from "./translate.types"
+import type {
+  DeclarationStatement,
+  MissingName,
+  NamesData,
+  NamesFile,
+  NamesKind,
+  TranslatedType
+} from "./translate.types"
 
 /**
  * A project's NAMES DICTIONARY for one other language:  what each name its people chose says there
@@ -27,8 +34,13 @@ export class TranslationNames {
   missing: MissingName[] = []
   /** The names of the projects it imports, looked up after our own:  see `addImported()`. */
   readonly imported: Required<NamesData> = emptyNames()
+  /**
+   * The names a person reviewed (`spell translate --review`, epic `spanish` P31), `<kind>:<words>`:
+   * the file's `reviewed` (`NamesFile`).
+   */
+  readonly reviewed = new Set<string>()
 
-  constructor(data: NamesData, { from, to }: { from: SP.Language; to: SP.Language }) {
+  constructor(data: NamesFile, { from, to }: { from: SP.Language; to: SP.Language }) {
     this.from = from
     this.to = to
     this.data = {
@@ -38,6 +50,9 @@ export class TranslationNames {
       texts: { ...data.texts },
       comments: { ...data.comments },
       genders: { ...data.genders }
+    }
+    for (const [kind, words] of Object.entries(data.reviewed ?? {})) {
+      for (const each of words ?? []) this.reviewed.add(`${kind}:${each}`)
     }
   }
 
@@ -222,6 +237,16 @@ export class TranslationNames {
     return added
   }
 
+  /** Note `name` as reviewed by a person:  the file says so (`toFile()`), and `--learn` ranks it `reviewed`. */
+  markReviewed({ kind, words }: MissingName): void {
+    this.reviewed.add(`${kind}:${words}`)
+  }
+
+  /** Did a person review `words` of section `kind` (`markReviewed()`)? */
+  isReviewed(kind: NamesKind, words: string): boolean {
+    return this.reviewed.has(`${kind}:${words}`)
+  }
+
   /** `missing` since the last call, each once, and empty it. */
   takeMissing(): MissingName[] {
     const seen = new Set<string>()
@@ -247,6 +272,20 @@ export class TranslationNames {
       comments: sorted(this.data.comments),
       genders: sorted(this.data.genders)
     }
+  }
+
+  /**
+   * What we hold, for the FILE:  `toJSON()`, and the names a person reviewed, by section (`NamesFile`).
+   * - `toJSON()` alone is for a prompt:  which were reviewed is nothing to Claude.
+   */
+  toFile(): NamesFile {
+    const reviewed: Partial<Record<NamesKind, string[]>> = {}
+    for (const key of [...this.reviewed].sort((a, b) => a.localeCompare(b))) {
+      const at = key.indexOf(":")
+      const kind = key.slice(0, at) as NamesKind
+      ;(reviewed[kind] ??= []).push(key.slice(at + 1))
+    }
+    return { ...this.toJSON(), ...(this.reviewed.size ? { reviewed } : {}) }
   }
 
   ////////////////
