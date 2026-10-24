@@ -199,10 +199,13 @@ ui-button[title]::part(icon) {
  * the bullhorn floating beside selected text (in `body`, outside `main`):  a `<ui-button circular basic size="mini">`
  * (`iconButton()`), lifted off the page by a shadow
  */
+/* its ground and shadow on the round button itself (`::part(button)`):  on the element around it they drew a second
+   circle, a little bigger, round the button's own ring (epic `epic-engine` I87) */
 .spell-comment-float {
   position: fixed;
   z-index: 1000;
-  border-radius: 999px;
+}
+.spell-comment-float::part(button) {
   background: var(--spell-bg);
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
 }
