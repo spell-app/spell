@@ -233,10 +233,11 @@ export type ProjectImportRef = {
 export type ProjectList = ProjectListEntry[]
 
 /**
- * One project of a group's list:  `{ path: "@spell/examples/TaskList", title: "Task List" }`.
+ * One project of a group's list:  `{ path: "@spell/examples/TaskList", title: "Task List", description: "..." }`.
  * - `title` only when its project file has one (decision Q45):  else `SpellProject.title` makes it from the name.
+ * - `description` only when its project file has one:  what it shows, for the editor's landing page cards.
  */
-export type ProjectListEntry = { path: string; title?: string }
+export type ProjectListEntry = { path: string; title?: string; description?: string }
 
 /** List of project addresses, e.g. `owen@spell/errors`:  a `ProjectList`'s paths. */
 export type ProjectPathList = string[]
