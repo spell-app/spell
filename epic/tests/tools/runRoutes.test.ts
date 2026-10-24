@@ -1,8 +1,8 @@
 /**
  * Tests of the run pages' route module on a real page server, over HTTP, in a scratch content folder holding one run:
- * its page, its answers saved row by row, Send, the waiting state, and what it refuses.
+ * its page, its answers saved row by row, its effort, Send, the waiting state, and what it refuses.
  */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
@@ -37,6 +37,7 @@ const RUN: RunPage = {
     { id: "done", cells: { english: "done", gender: "" }, value: "hecho", tick: { label: "Use for every project" } }
   ],
   progress: [{ at: "2026-10-23T19:12:00.000Z", text: "names:  2 drafted in 1 s" }],
+  effort: { choices: ["fast", "balanced", "best"], initial: "balanced" },
   status: "open",
   updated: "2026-10-23T19:12:00.000Z"
 }
@@ -147,6 +148,37 @@ describe("runRoutes", () => {
     const again = JSON.parse((await post(`/api/runs/${RUN.id}/send`)).text) as { answers: RunAnswers }
     expect(again.answers.sent! > first.answers.sent!).toBe(true)
     expect(Object.keys(written()!.rows)).toEqual(["task", "done"])
+  })
+
+  test("POST effort saves the picked effort into answers.json5, keeping the rows and `sent`", async () => {
+    const before = written()!
+    const reply = await post(`/api/runs/${RUN.id}/effort`, { effort: "best" })
+    expect(reply.status).toBe(200)
+    expect(written()).toEqual({ ...before, effort: "best" })
+    expect((JSON.parse(reply.text) as { answers: RunAnswers }).answers.effort).toBe("best")
+  })
+
+  test("POST effort refuses an effort the run doesn't offer, a missing one, and a run with no picker (400)", async () => {
+    expect((await post(`/api/runs/${RUN.id}/effort`, { effort: "max" })).status).toBe(400)
+    expect((await post(`/api/runs/${RUN.id}/effort`, {})).status).toBe(400)
+    const { effort: _effort, ...plain } = RUN
+    const other = { ...plain, id: "no-effort" }
+    mkdirSync(join(root, "pages", "runs", other.id), { recursive: true })
+    DataFile.write(join(root, "pages", "runs", other.id, "run.json5"), other)
+    expect((await post(`/api/runs/${other.id}/effort`, { effort: "fast" })).status).toBe(400)
+    expect(written()!.effort).toBe("best")
+  })
+
+  test("POST effort waits for answers.json5's lock:  written only once the holder lets go", async () => {
+    const lock = join(folder(), "answers.json5.lock")
+    writeFileSync(lock, "")
+    const saving = post(`/api/runs/${RUN.id}/effort`, { effort: "fast" })
+    await new Promise((done) => setTimeout(done, 200))
+    expect(written()!.effort).toBe("best")
+    rmSync(lock)
+    expect((await saving).status).toBe(200)
+    expect(written()!.effort).toBe("fast")
+    expect(existsSync(lock)).toBe(false)
   })
 
   test("waiting:  a fresh heartbeat from a live process;  NOT a stale one, a gone process, or a run that's done", async () => {

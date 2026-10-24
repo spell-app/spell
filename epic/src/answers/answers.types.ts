@@ -82,7 +82,10 @@ export const CHOICES_KEY_PREFIX = "spell-choices-draft:"
  */
 export const SAVED_CHOICES_PAGE = /\/details\/[^/]+\.html$/
 
-/** A run page's routes (`runRoutes.ts`, epic `epic-engine` P23):  `<api>/<run id>`, its `/answer` and `/send`. */
+/**
+ * A run page's routes (`runRoutes.ts`, epic `epic-engine` P23):  `<api>/<run id>`,
+ * its `/answer`, `/effort` (P25) and `/send`.
+ */
 export const RUNS_API = "/api/runs"
 
 /** How long after Owen stops typing in a run page's row its answer is saved, in ms;  a pick or a tick at once. */

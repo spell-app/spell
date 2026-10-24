@@ -5,6 +5,8 @@ import { E } from "spell-ui/core"
 
 import type { RunAnswer, RunColumn, RunOutcome, RunRow } from "spell/server/runs/runs.types"
 
+import { PlanDates } from "spell-epic/dates"
+
 import { epicRunRowVocabulary } from "./EpicRunRow.en"
 import { RUN_ANSWER, type RunAnswerDetail } from "./EpicRunRow.types"
 
@@ -23,6 +25,8 @@ import runRowCSS from "./EpicRunRow.css?inline"
  *     holds is filled, so typing an alternative picks it too
  *   - the tick box, with the command's own label (`row.tick`)
  *   - its details, folded:  a line each (`row.details`)
+ * - Taken by the command (`taken`, epic `epic-engine` P25):  a quiet `taken` mark beside the box, its time the
+ *   tooltip;  his answer newer than that, an orange note under the box ("changed after the run took it").
  * - It draws what it's given and says what Owen did (`epic-run-answer`):  `<epic-run>` keeps and saves it.
  *   - the outcome comes from the value:  the proposal is `accepted`, an alternative `picked`, anything else `typed`
  ****************/
@@ -80,6 +84,19 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
     return !!this.runAnswer
   }
 
+  /** The command took the row (acted on it). */
+  @E.cssState("taken")
+  get isTaken(): boolean {
+    return !!this.taken
+  }
+
+  /** Owen's answer is newer than the command's taking of the row:  it may or may not pick the change up. */
+  @E.cssState("changed-after-taken")
+  get isChangedAfterTaken(): boolean {
+    const at = this.runAnswer?.at
+    return !!this.taken && !!at && at > this.taken
+  }
+
   /** How `value` answers the row:  the proposal, one of the alternatives, or typed. */
   outcomeOf(value: string): RunOutcome {
     if (value === this.runRow.value) return "accepted"
@@ -102,6 +119,15 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
         </For>
         <div class={[CELL, ANSWER]} part={this.partForName("answer")} role="cell">
           {this.field()}
+          <Show when={this.isChangedAfterTaken}>
+            <p
+              class={CHANGED_AFTER_TAKEN}
+              part={this.partForName("changed-after-taken")}
+              title={this.translationForKey("changedAfterTakenTip")}
+            >
+              {this.translationForKey("changedAfterTaken")}
+            </p>
+          </Show>
           <Show when={this.choices.length}>{this.picks()}</Show>
           <Show when={this.runRow.tick}>{this.tick()}</Show>
           <Show when={this.runRow.details?.length}>{this.details()}</Show>
@@ -139,6 +165,16 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
           >
             <ui-icon name="clock rotate left" />
           </button>
+        </Show>
+        <Show when={this.taken}>
+          <span
+            class={TAKEN}
+            part={this.partForName("taken")}
+            title={this.translationForKey("takenTip", { time: PlanDates.clock(new Date(this.taken!)) })}
+          >
+            <ui-icon name="check" />
+            {this.translationForKey("taken")}
+          </span>
         </Show>
       </div>
     )
@@ -265,6 +301,8 @@ const PICKS = "picks"
 const PICK = "pick"
 const TICK = "tick"
 const DETAILS = "details"
+const TAKEN = "taken"
+const CHANGED_AFTER_TAKEN = "changed-after-taken"
 
 /** The pick's radios' group:  one per row, each row its own shadow root. */
 const PICK_GROUP = "pick"

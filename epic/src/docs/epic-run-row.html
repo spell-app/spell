@@ -74,6 +74,13 @@
               answer-label="Spanish"
               row='{"id":"done","cells":{"english":"done","gender":""},"value":"hecho","tick":{"label":"Use for every project"},"details":["line 3:  the task is done","line 9:  mark it done"]}'
             ></epic-run-row>
+            <epic-run-row
+              columns='[{"key":"english","label":"English"},{"key":"gender","label":"Gender"}]'
+              answer-label="Spanish"
+              row='{"id":"todo","cells":{"english":"Todo","gender":"m"},"value":"Pendiente"}'
+              taken="2026-10-23T19:12:00.000Z"
+              answer='{"outcome":"typed","value":"Por hacer","at":"2026-10-23T19:13:00.000Z"}'
+            ></epic-run-row>
             <p class="meta">
               Live: the real element, drawn by the epics pack this page loads. Outside a run page nothing saves.
             </p>
@@ -139,6 +146,15 @@
                     <td>The answer column's name: the box's name for a screen reader.</td>
                     <td>no</td>
                   </tr>
+                  <tr>
+                    <td><code>taken</code></td>
+                    <td>a time, ISO</td>
+                    <td>
+                      When the command took the row (acted on it; epic <code>epic-engine</code> P25). An answer saved
+                      after it shows the orange note.
+                    </td>
+                    <td>no</td>
+                  </tr>
                 </tbody>
               </table>
             </ui-table>
@@ -171,6 +187,11 @@
               <li>Its cells on the table's columns; the answer cell holds the box, the pick, the tick box, the details.</li>
               <li>The pick: small pills, the proposal's dashed until chosen; the chosen one raised and inked, as a segmented control's thumb.</li>
               <li>Answered differently from the proposal: an orange box, an orange edge, and a round button back.</li>
+              <li>Taken by the command: a quiet check and <code>taken</code> beside the box, the time in its tooltip.</li>
+              <li>
+                Changed after it was taken: an orange note under the box, <code>changed after the run took it</code>;
+                the command may still pick the change up.
+              </li>
               
             </ul>
           </ui-section>

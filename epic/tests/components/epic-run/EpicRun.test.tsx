@@ -42,16 +42,41 @@ const RUN: RunPage = {
   updated: "2026-10-23T19:12:02.000Z"
 }
 
-/** The run's routes, as `fetch`:  the run (`waiting` as given), each answer and Send echoed back. */
-function fakeRoutes({ waiting = true, page = RUN }: { waiting?: boolean; page?: RunPage } = {}) {
-  let answers: RunAnswers = { rows: {} }
+/** The run, steered (P25):  two passes, the second running, an effort to pick, `task` taken. */
+const STEERED: RunPage = {
+  ...RUN,
+  passes: [
+    { name: "names", state: "done", done: 3, total: 3, calls: 1, ms: 6_000, started: "2026-10-23T19:11:50.000Z" },
+    {
+      name: "lines",
+      state: "running",
+      done: 212,
+      total: 380,
+      calls: 14,
+      ms: 125_000,
+      effort: "best",
+      started: "2026-10-23T19:12:00.000Z"
+    }
+  ],
+  effort: { choices: ["fast", "balanced", "best"], initial: "balanced" },
+  taken: { task: "2026-10-23T19:12:30.000Z" }
+}
+
+/** The run's routes, as `fetch`:  the run (`waiting` as given), each answer, effort and Send echoed back. */
+function fakeRoutes({
+  waiting = true,
+  page = RUN,
+  answers: given = { rows: {} }
+}: { waiting?: boolean; page?: RunPage; answers?: RunAnswers } = {}) {
+  let answers: RunAnswers = given
   return vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
     if (!init?.method) return Response.json({ page, answers, waiting })
     const body = JSON.parse(init.body as string) as Record<string, unknown>
     if (url.endsWith("/answer")) {
       const { rowId, ...answer } = body
       answers = { ...answers, rows: { ...answers.rows, [rowId as string]: answer as never } }
-    } else answers = { ...answers, sent: new Date().toISOString() }
+    } else if (url.endsWith("/effort")) answers = { ...answers, effort: body.effort as string }
+    else answers = { ...answers, sent: new Date().toISOString() }
     return Response.json({ ok: true, answers, waiting })
   })
 }
@@ -145,6 +170,68 @@ describe("<epic-run>, <epic-run-row>", () => {
     expect(part(finished, "who")!.textContent).toBe("The command finished:  nobody is waiting")
   })
 
+  test("a run that ran out of time says so, with no green dot;  no passes and no effort:  no status card", async () => {
+    adoptForm(fakeRoutes({ page: { ...RUN, status: "timed-out" } }))
+    const run = await drawRun()
+    expect(run.matches(":state(waiting)")).toBe(false)
+    expect(run.matches(":state(ended)")).toBe(true)
+    expect(part(run, "who")!.textContent).toBe("The command's wait ran out:  nobody is waiting")
+    expect(part(run, "status")).toBeNull()
+  })
+
+  test("the status card draws a line per pass:  name, bar and how far, calls, time;  the running one marked;  axe", async () => {
+    adoptForm(fakeRoutes({ page: STEERED }))
+    const run = await drawRun()
+    const lines = Array.from(part(run, "passes")!.querySelectorAll('[part~="pass"]'))
+    const cells = (line: Element) => Array.from(line.children, (cell) => cell.textContent!.trim())
+    expect(lines.map((line) => [line.classList.contains("running"), ...cells(line)])).toEqual([
+      [false, "names", "3 of 3", "1 call", "6 s"],
+      [true, "lines", "212 of 380", "14 calls", "2 min 5 s at best"]
+    ])
+    const bar = lines[1]!.querySelector("progress")!
+    expect([bar.max, bar.value]).toEqual([380, 212])
+    await expectAccessible(run)
+  })
+
+  test("the effort picker:  the run's effort chosen;  a pick saves at once, and takes effect at the next pass", async () => {
+    const { fetch } = adoptForm(fakeRoutes({ page: STEERED }))
+    const run = await drawRun()
+    const picker = part(run, "effort")!
+    const radios = Array.from(picker.querySelectorAll("input"))
+    expect(radios.map((radio) => [radio.value, radio.checked])).toEqual([
+      ["fast", false],
+      ["balanced", true],
+      ["best", false]
+    ])
+    expect(part(run, "effort-note")!.textContent).toBe("takes effect at the next pass")
+    radios[2]!.click()
+    await vi.waitFor(() => expect(posts(fetch)).toEqual([["/api/runs/demo/effort", { effort: "best" }]]))
+    await ElementFixture.settle()
+    expect(radios[2]!.checked).toBe(true)
+    expect(RunForm.forPage(RUN.id).effort).toBe("best")
+  })
+
+  test("a taken row has its quiet mark;  changed after it was taken, the orange note", async () => {
+    const answers: RunAnswers = {
+      rows: { todo: { outcome: "typed", value: "Por hacer", at: "2026-10-23T19:12:10.000Z" } }
+    }
+    const page = { ...STEERED, taken: { task: "2026-10-23T19:12:30.000Z", todo: "2026-10-23T19:12:20.000Z" } }
+    adoptForm(fakeRoutes({ page, answers }))
+    const run = await drawRun()
+    const [task, done, todo] = rows(run) as [Element, Element, Element]
+    expect(task.matches(":state(taken)")).toBe(true)
+    expect(part(task, "taken")!.textContent).toBe("taken")
+    expect(part(task, "taken")!.title).toMatch(/^The run took this at \d\d:\d\d$/)
+    expect(part(done, "taken")).toBeNull()
+    // answered BEFORE it was taken:  no note
+    expect(todo.matches(":state(changed-after-taken)")).toBe(false)
+    // answered after:  the note
+    part(task, "picks")!.querySelectorAll("input")[1]!.click()
+    await ElementFixture.settle()
+    expect(task.matches(":state(changed-after-taken)")).toBe(true)
+    expect(part(task, "changed-after-taken")!.textContent).toBe("changed after the run took it")
+  })
+
   test("typing saves the row half a second after the last keystroke:  `typed`, orange, with its reset", async () => {
     const { fetch } = adoptForm()
     const run = await drawRun()
@@ -228,5 +315,18 @@ describe("<epic-run>, <epic-run-row>", () => {
     await vi.waitFor(() => expect(RunForm.forPage(RUN.id).page?.progress).toHaveLength(3))
     await ElementFixture.settle()
     expect(part(run, "progress")!.querySelector(".latest")!.textContent).toContain("still waiting")
+  })
+
+  test("a run's file changing redraws its passes and taken rows too", async () => {
+    const routes = fakeRoutes()
+    adoptForm(routes)
+    const run = await drawRun()
+    expect(part(run, "status")).toBeNull()
+    routes.mockImplementation(async () => Response.json({ page: STEERED, answers: { rows: {} }, waiting: true }))
+    dispatchEvent(new CustomEvent("spell-server:file", { detail: { path: "/pages/runs/demo/run.json5" } }))
+    await vi.waitFor(() => expect(RunForm.forPage(RUN.id).passes).toHaveLength(2))
+    await ElementFixture.settle()
+    expect(part(run, "passes")!.querySelectorAll('[part~="pass"]')).toHaveLength(2)
+    expect(part(rows(run)[0]!, "taken")).not.toBeNull()
   })
 })

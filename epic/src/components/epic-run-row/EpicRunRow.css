@@ -4,6 +4,7 @@
  *   the table's columns:  the command's, then the answer.
  * - A text cell's first line sits on the box's first line:  its top padding is the box's border and padding more.
  * - Answered differently from the proposal:  an orange box, an orange edge on the row.
+ * - Taken by the command (P25):  a quiet check and "taken" beside the box;  changed after that, an orange note under it.
  * - Public tokens (`--epic-run-row-*`) are never declared here:  read through private aliases.
  */
 
@@ -105,6 +106,30 @@
     pointer-events: none;
   }
 
+  /* taken by the command:  quiet, muted small print beside the box, on its first line */
+  .taken {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 2px;
+    /* the box's first line high (its 1.4 line, 1px border and 4px padding, in this 0.8em text):  centred on it */
+    min-height: calc(1.75em + 10px);
+    color: var(--_epic-run-muted);
+    font-size: 0.8em;
+    cursor: default;
+  }
+  .taken ui-icon {
+    pointer-events: none;
+  }
+  /* changed after the run took it:  orange, as every "changed" is (Owen's T62) */
+  .changed-after-taken {
+    margin: 0;
+    color: var(--ui-orange-text, var(--_epic-run-changed));
+    font-size: 0.8em;
+    font-weight: 600;
+    text-wrap: pretty;
+  }
+
   /* the pick:  small pills, the chosen one filled;  the native radio hidden, its focus on the pill */
   .picks {
     display: flex;
@@ -189,5 +214,14 @@
   }
   :host(:state(changed)) .cell:first-child {
     box-shadow: inset 3px 0 0 var(--_epic-run-changed);
+  }
+  /* a phone:  the edge on the answer, which comes first there, not mid-row */
+  @media (max-width: 600px) {
+    :host(:state(changed)) .cell:first-child {
+      box-shadow: none;
+    }
+    :host(:state(changed)) .answer {
+      box-shadow: inset 3px 0 0 var(--_epic-run-changed);
+    }
   }
 }

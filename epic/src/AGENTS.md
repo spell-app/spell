@@ -1564,9 +1564,18 @@ Each kind of page has ONE name, written everywhere a person reads it.
     live process (`SRV.CommandRun.isWaiting()`)
   - `POST /api/runs/<id>/answer { rowId, outcome, value, ticked }`, `POST /api/runs/<id>/send`:  `answers.json5`,
     under its lock, all at once;  Send stamps `sent` afresh each time
+  - `POST /api/runs/<id>/effort { effort }` (epic `epic-engine` P25):  `answers.json5`'s `effort`, the same way;
+    400 for a run that offers none, or an effort not in its `effort.choices`
   - run id `[a-z0-9-]` only, a row of the run only, a known outcome:  else 400;  no such run:  404
 - `epic pages open <run folder> [--review]` opens its page (`pages.js` `runPagePath()`):  the kit's
   `CommandRun.show()` runs it.
+- Steering (P25):  the command keeps going while Owen answers, and the page shows it live, from `run.json5`:
+  - `passes`:  the status card, a line per pass (name, bar and `212 of 380`, calls, time)
+  - `effort`:  the picker;  Owen's pick is saved at once, and the command reads it before its next pass
+  - `taken`:  a row the command acted on is marked `taken`;  changed after that, an orange note
+    ("changed after the run took it"):  the command is handed it again, and may pick it up
+  - `status`:  `done`, `stopped` or `timed-out` says how it ended, in the waiting line
+  - the page picks a run back up when reopened:  all its state is in the files
 - A row left alone has no entry in `answers.json5`:  the command reads it as its proposal.
 - No comments, no draft file:  every answer is saved as given.
 - `findPages()` never sees the runs:  `pages/runs/` holds no page, only data.

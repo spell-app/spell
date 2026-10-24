@@ -22,7 +22,9 @@ export const epicRunRowVocabulary = {
     "of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, " +
     "with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says " +
     "so (`epic-run-answer`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at " +
-    "once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.",
+    "once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  " +
+    "A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the " +
+    "tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
   attributes: [
     {
       name: "row",
@@ -45,7 +47,14 @@ export const epicRunRowVocabulary = {
         "Owen's answer so far (`RunAnswer`:  `outcome`, `value`, `ticked`), as saved;  none:  the proposal, and the " +
         "tick box as the command set it."
     },
-    { name: "answer-label", kind: "string", description: "The answer column's name (`Spanish`):  the box's name." }
+    { name: "answer-label", kind: "string", description: "The answer column's name (`Spanish`):  the box's name." },
+    {
+      name: "taken",
+      kind: "string",
+      description:
+        "When the command took the row (acted on it), ISO (`RunPage.taken`, P25);  none:  not taken yet.  An answer " +
+        "saved after it is `changed-after-taken`."
+    }
   ],
   events: [
     {
@@ -71,11 +80,24 @@ export const epicRunRowVocabulary = {
     },
     { name: "pick", description: "One pill of the pick." },
     { name: "tick", description: "The tick box and its label." },
-    { name: "details", description: "Its details, folded:  a line each." }
+    { name: "details", description: "Its details, folded:  a line each." },
+    {
+      name: "taken",
+      description: "The quiet `taken` mark beside the box:  a check and the word, its time the tooltip."
+    },
+    {
+      name: "changed-after-taken",
+      description: "The orange note under the box:  the answer changed after the command took the row."
+    }
   ],
   states: [
     { name: "changed", description: "The answer isn't the proposal:  orange." },
-    { name: "answered", description: "Owen answered it (anything saved, the proposal included)." }
+    { name: "answered", description: "Owen answered it (anything saved, the proposal included)." },
+    { name: "taken", description: "The command took the row (acted on it)." },
+    {
+      name: "changed-after-taken",
+      description: "Owen's answer is newer than the command's taking of it:  the orange note shows."
+    }
   ],
   texts: [
     { key: "boxLabel", text: "{label} for {first}", description: "The box's name, for a screen reader." },
@@ -83,7 +105,19 @@ export const epicRunRowVocabulary = {
     { key: "resetTip", text: "Back to {value}", description: "The reset button's tooltip." },
     { key: "picks", text: "Pick one", description: "The pick's name, for a screen reader." },
     { key: "proposed", text: "proposed", description: "The proposal's pill's tooltip." },
-    { key: "details", text: "Details · {count}", description: "The details' fold:  how many lines." }
+    { key: "details", text: "Details · {count}", description: "The details' fold:  how many lines." },
+    { key: "taken", text: "taken", description: "The taken mark's word." },
+    { key: "takenTip", text: "The run took this at {time}", description: "The taken mark's tooltip." },
+    {
+      key: "changedAfterTaken",
+      text: "changed after the run took it",
+      description: "The orange note on a row changed after it was taken."
+    },
+    {
+      key: "changedAfterTakenTip",
+      text: "The command may pick the change up if it can",
+      description: "The orange note's tooltip."
+    }
   ],
   children: []
 } as const satisfies EpicVocabulary

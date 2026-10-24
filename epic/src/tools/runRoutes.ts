@@ -17,6 +17,10 @@
  * - `POST /api/runs/<id>/answer` `{ rowId, outcome, value, ticked }` -- one row's answer, saved as Owen gives it
  *   (half a second after he stops typing), into `answers.json5`;  answers `{ ok, answers }`
  *   - `ticked` only for a row with a tick box;  else dropped
+ * - `POST /api/runs/<id>/effort` `{ effort }` -- the run's effort, picked on the page (epic `epic-engine` P25), into
+ *   `answers.json5` (`effort`);  answers `{ ok, answers }`
+ *   - one of the run's `effort.choices`;  a run that offers no effort, or an effort it doesn't offer:  400
+ *   - the command reads it before its next pass
  * - `POST /api/runs/<id>/send` -- Send:  stamps `sent` in `answers.json5`;  answers `{ ok, answers, waiting }`
  *   - the waiting command (`CommandRun.wait()`) wakes on it
  *   - a row left alone has no entry:  the command reads it as its own proposal (`CommandRun.unanswered()`)
@@ -91,6 +95,11 @@ const runRoutes: RouteModule = {
       const answers = await runs.saveAnswer(id, toAnswer(page, request.body))
       reply.json({ ok: true, answers })
     })
+    api.post("/:runId/effort", async (request, reply) => {
+      const id = request.params.runId!
+      const answers = await runs.saveEffort(id, toEffort(runs.pageOf(id), request.body))
+      reply.json({ ok: true, answers })
+    })
     api.post("/:runId/send", async (request, reply) => {
       const id = request.params.runId!
       runs.pageOf(id)
@@ -159,6 +168,14 @@ export class RunFolders {
   }
 
   /**
+   * Save the run's effort, `effort`, into run `id`'s `answers.json5`;  return the answers as written.
+   * - SIDE EFFECT:  writes the file, under its lock;  the command reads it before its next pass
+   */
+  async saveEffort(id: unknown, effort: string): Promise<RunAnswers> {
+    return this.change(id, (answers) => ({ ...answers, effort }))
+  }
+
+  /**
    * Send:  stamp `sent` (now) in run `id`'s `answers.json5`;  return the answers as written.
    * - SIDE EFFECT:  writes the file, under its lock;  the waiting command wakes on it
    */
@@ -213,6 +230,18 @@ function toAnswer(page: RunPage, body: unknown): RunAnswer & { rowId: string } {
   }
   if (row.tick) answer.ticked = ticked ?? !!row.tick.checked
   return answer
+}
+
+/**
+ * The effort from a request's body, `{ effort }`, checked against run `page`.
+ * - 400:  the run offers no effort, or not this one
+ */
+function toEffort(page: RunPage, body: unknown): string {
+  const { effort } = (body ?? {}) as Record<string, unknown>
+  if (!page.effort) throw new SRV.HttpError(400, `run ${page.id} offers no effort to pick`)
+  if (typeof effort !== "string" || !page.effort.choices.includes(effort))
+    throw new SRV.HttpError(400, `not an effort of run ${page.id}:  ${String(effort)}`)
+  return effort
 }
 
 /** What `GET /api/runs/<id>` answers:  the run as its page draws it. */

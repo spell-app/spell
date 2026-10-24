@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  072f504c1b1a3f73
+// sources:  f21b5718776319e3
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -39,7 +39,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
-  "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label"]},
+  "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
   "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","manual"]},

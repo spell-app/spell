@@ -1,6 +1,7 @@
 /*
  * `<epic-run>` (`EpicRun.tsx`):  a run page's body, under the page's sticky header.
- * - Who is waiting (a green dot while a command does), the command's line, its progress, then the table, then the
+ * - Who is waiting (a green dot while a command does), the command's line, the status card (P25:  the effort
+ *   picker, a line per pass), its progress, then the table, then the
  *   Send bar, stuck to the window's bottom so Send is always in reach on a long table.
  * - The table is a grid:  the heads' row and every row (`<epic-run-row>`, its own sheet) are subgrids of it, so their
  *   cells share its columns (`--_epic-run-cols`, set per instance from the run's columns).
@@ -36,6 +37,161 @@
   .description {
     margin: 0 0 0.75em;
     line-height: 1.45;
+  }
+
+  /* the status card (P25):  a quiet box, the effort picker on top, then a line per pass on a shared grid */
+  .status {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 1em;
+    padding: 8px 12px;
+    border: 1px solid var(--_epic-run-rule);
+    border-radius: 8px;
+    font-size: 0.9em;
+  }
+  .effort {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+  }
+  .effort-label {
+    font-weight: 600;
+  }
+  .effort-note {
+    color: var(--_epic-run-muted);
+    font-size: 0.9em;
+  }
+  /* the segmented control:  a pill track, the chosen one a raised thumb (as the rows' picks);  native radios hidden */
+  .segments {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 7%, transparent);
+  }
+  .segment {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 120ms ease-out;
+  }
+  .segment input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+  .segment:hover:not(:has(input:checked, input:disabled)) {
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 6%, transparent);
+  }
+  .segment:has(input:focus-visible) {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  .segment:has(input:checked) {
+    background: var(--ui-surface, Canvas);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.14);
+    font-weight: 600;
+  }
+  .segment:has(input:disabled) {
+    color: var(--_epic-run-muted);
+    cursor: default;
+  }
+
+  /* the passes:  one grid, each line a subgrid, so names, bars, calls and times line up */
+  .passes {
+    display: grid;
+    grid-template-columns: max-content minmax(6em, 1fr) max-content max-content;
+    gap: 4px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pass {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+    color: var(--_epic-run-muted);
+  }
+  .pass.running {
+    color: var(--ui-text-color, CanvasText);
+  }
+  .pass-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .pass-name ui-icon {
+    color: var(--ui-green-text, var(--ui-green, #21ba45));
+  }
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    border-radius: 50%;
+    background: var(--ui-blue, #2185d0);
+  }
+  .pass-how-far {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pass-how-far progress {
+    flex: 1 1 auto;
+    min-width: 3em;
+    height: 6px;
+    border: 0;
+    border-radius: 999px;
+    appearance: none;
+    background: color-mix(in oklab, var(--ui-text-color, CanvasText) 10%, transparent);
+    overflow: hidden;
+  }
+  .pass-how-far progress::-webkit-progress-bar {
+    background: transparent;
+  }
+  .pass-how-far progress::-webkit-progress-value {
+    border-radius: 999px;
+    background: var(--_epic-run-bar);
+  }
+  .pass-how-far progress::-moz-progress-bar {
+    border-radius: 999px;
+    background: var(--_epic-run-bar);
+  }
+  .pass {
+    --_epic-run-bar: color-mix(in oklab, var(--ui-text-color, CanvasText) 35%, transparent);
+  }
+  .pass.running {
+    --_epic-run-bar: var(--ui-blue, #2185d0);
+  }
+  .number {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .pass-how-far .number {
+    flex: none;
+  }
+  .pass-effort {
+    color: var(--_epic-run-muted);
+  }
+  /* a phone:  the bar takes its own line under the name;  calls and time after the count */
+  @media (max-width: 600px) {
+    .passes {
+      grid-template-columns: max-content max-content max-content;
+      column-gap: 10px;
+    }
+    .pass-how-far {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
   }
 
   /* progress:  the latest line, the rest folded */

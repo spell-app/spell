@@ -71,7 +71,14 @@
             <ul>
               <li>
                 the page's title (the run's), then who is waiting: <code>spell lang translate todos --to es</code> is
-                waiting, with a green dot; or why nobody is (it finished, it stopped, it isn't running)
+                waiting, with a green dot; or why nobody is (it finished, it stopped, its wait ran out, it isn't
+                running)
+              </li>
+              <li>
+                the status card (epic <code>epic-engine</code> P25), when the command writes passes or offers an
+                effort: the effort picker (<code>fast | balanced | best</code>, saved at once, taking effect at the next
+                pass), then a line per pass, with its name, a small bar and <code>212 of 380</code>, its calls and its
+                time
               </li>
               <li>the command's line about what it asks, and its latest progress line; every line, folded</li>
               <li>
@@ -146,6 +153,11 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>Who is waiting: muted; the command in mono, a green dot before it while it waits.</li>
+              <li>
+                The status card: a quiet rounded box. The effort a pill track, the chosen one a raised thumb; disabled
+                once the run is over. The passes on one grid: the running one in full ink with a blue dot and bar, the
+                done ones muted with a green check.
+              </li>
               <li>The table: a grid in a rounded box, its heads on a faint band; the answer's column the widest.</li>
               <li>Too narrow for its columns (a phone): the table scrolls sideways inside its own box, never stacked.</li>
               <li>
