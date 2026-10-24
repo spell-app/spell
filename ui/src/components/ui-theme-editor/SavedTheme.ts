@@ -3,8 +3,8 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
 
 /****************
  * ### `SavedTheme`
- * The theme a viewer made and chose to USE (`<ui-theme-editor>`'s Use this theme):  kept in this browser,
- * and put back on any page that asks.
+ * The theme a viewer made and chose to USE (`<ui-theme-editor>`'s Use this theme):
+ * kept in this browser, and put back on any page that asks.
  *
  * - How the Spell editor uses it (its `EditorTheme`):
  *   - `follow(theme)`, each time its theme changes:  the kept sheet goes on while that theme is its base,

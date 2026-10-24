@@ -6,9 +6,10 @@ import { CLASSIC, FRUITY, SPELL, SPELL_BRAND, STUDIO, type DocsThemesText } from
 /****************
  * ### `ThemeMenu`
  * What `<ui-docs-themes>`' dropdown lists, and its text:  plain data, no Solid, which tests drive directly.
- * - Entries:  Spell (our own theme, the docs' default), Spell Brand, Fruity and Studio (our own too),
- *   Plain (our own look, no theme:  `DOCS_PLAIN_THEME`), Classic,
- *   then a `Fomantic themes` header over every Fomantic theme (`UI.themes.names`, A-Z by title).
+ * - Entries:
+ *   - Spell (our own theme, the docs' default), Spell Brand, Fruity and Studio (our own too)
+ *   - Plain (our own look, no theme:  `DOCS_PLAIN_THEME`), Classic
+ *   - then a `Fomantic themes` header over every Fomantic theme (`UI.themes.names`, A-Z by title).
  * - `forTag`:  only the Fomantic themes whose `SiteTheme.families` hold that tag's family;
  *   our own themes, Plain and Classic stay.
  *   - Until the site data arrives (or if it can't, or doesn't know the tag), the list is unfiltered;
@@ -66,8 +67,8 @@ export class ThemeMenu {
   }
 
   /**
-   * The dropdown's text for chosen theme `theme` (`undefined`:  our own look):  `GitHub theme`;  with `forTag`,
-   * while the chosen theme isn't one of the family's, how many are (`3 themes`, `1 theme`),
+   * The dropdown's text for chosen theme `theme` (`undefined`:  our own look):  `GitHub theme`;
+   * with `forTag`, while the chosen theme isn't one of the family's, how many are (`3 themes`, `1 theme`),
    * as Fomantic's per-page dropdown says.
    * - A family no Fomantic theme touches shows the chosen look, never `0 themes`.
    */

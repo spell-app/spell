@@ -27,8 +27,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *
  * - It IS a `<ui-menu>` (it extends `UIMenu`):  the same attributes, items, events, `segmented` thumb and menubar.
  *   - Its vocabulary is built on the menu's (`UIToolbar.en.ts`).
- * - Its items never wrap:  when they don't fit, the menu's box scrolls sideways (`:state(overflowing)`),
- *   its scrollbar hidden.
+ * - Its items never wrap:
+ *   when they don't fit, the menu's box scrolls sideways (`:state(overflowing)`), its scrollbar hidden.
  * - A `‹` / `›` button shows at each end while there's more to scroll that way.
  *   - Each sits OVER its end of the row, taking no room in it;  the row fades out under it.
  *   - A click scrolls by most of the box's width, smoothly (at once with reduced motion),

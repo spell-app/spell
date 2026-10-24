@@ -2,8 +2,8 @@ import { E } from "spell-ui/core"
 
 /****************
  * ### `SegmentedThumb`
- * The sliding THUMB of a segmented menu (`appearance="segmented"`):  the chosen option's fill,
- * drawn ONCE under the options and moved to the chosen one, as Apple's segmented control slides.
+ * The sliding THUMB of a segmented menu (`appearance="segmented"`):
+ * the chosen option's fill, drawn ONCE under the options and moved to the chosen one, as Apple's segmented control slides.
  * - Plain DOM, no Solid:  `<ui-menu>` and `<ui-tabs>` both use it,
  *   each handing it the track and a way to find the chosen option's box.
  *   - `<ui-menu>`'s items draw their boxes in their own shadow roots;  `<ui-tabs>`' tab buttons are in its own.
