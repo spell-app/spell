@@ -1264,6 +1264,9 @@ ui-accordion.spell-aside::part(content) {
 .spell-toolbar.spell-toolbar-titled {
   --_out: var(--spell-doc-pad-inline, 16px);
   flex: 1 0 calc(100% + 2 * var(--_out));
+  /* wider than its row on purpose (edge to edge):  `<ui-toolbar>`'s own cap (`max-width: 100%`) kept it in the
+     column, so it shared the title's row and covered the page's Send (epic `epic-engine` I85) */
+  max-width: none;
   margin-inline: calc(-1 * var(--_out));
   /* the band's own rule, as the epic page's:  the page's rule is all but white on the ivory */
   box-shadow: 0 1px 0 var(--spell-rail-edge);
