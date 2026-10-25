@@ -34361,7 +34361,12 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
+      "slots": [
+        {
+          "name": "end",
+          "description": "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+        }
+      ],
       "events": [
         {
           "name": "ui-changed",

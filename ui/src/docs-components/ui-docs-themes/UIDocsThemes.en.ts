@@ -71,7 +71,14 @@ export const docsThemesVocabulary = {
         "is stored and while its sheets load."
     }
   ],
-  slots: [],
+  slots: [
+    {
+      name: "end",
+      description:
+        "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, " +
+        "e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+    }
+  ],
   parts: [
     { name: "controls", description: "The wrapper around the controls." },
     {

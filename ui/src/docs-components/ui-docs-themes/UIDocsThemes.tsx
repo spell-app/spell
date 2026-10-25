@@ -34,6 +34,7 @@ import themesCSS from "./UIDocsThemes.css?inline"
  *         the scheme the viewer CHOSE, Auto while it follows the OS
  *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
  *         Spell, Spell Brand, Fruity, Studio, Plain, Classic, then Fomantic's
+ *       - the `end` slot's rows, the page's own, under a divider (the Spell editor's "Edit theme...")
  *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
  *       button stood beside it, and the overlay had a "Match system" switch.
@@ -293,6 +294,7 @@ export class UIDocsThemes extends E.UIComponent<DocsThemesVocabulary> {
             >
               <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
             </div>
+            <slot name={this.slotForName("end")} />
           </div>
         </ui-popup>
         <ui-popup
