@@ -363,6 +363,8 @@ export class PlanDocFiles {
       if (!ran.length || dryRun) return done
       plan.log(`migrated:  ${ran.join(", ")}`)
       plan.updateStates()
+      // a step may renumber phases (`whole-phase-numbers`):  the Overview's total names them by number
+      plan.updateEstimate()
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
         throw new PlanDocError(

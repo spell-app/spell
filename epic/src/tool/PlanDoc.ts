@@ -634,7 +634,10 @@ export class PlanDoc extends PlanReader {
    */
   migrate(): string[] {
     const ran = Migrations.run(this.document, { now: this.now }, undefined, Migrations.everyEdit)
-    if (ran.length) this.log(`migrated:  ${ran.join(", ")}`)
+    if (!ran.length) return ran
+    this.log(`migrated:  ${ran.join(", ")}`)
+    // a step may renumber phases (`whole-phase-numbers`):  the Overview's total names them by number
+    this.updateEstimate()
     return ran
   }
 

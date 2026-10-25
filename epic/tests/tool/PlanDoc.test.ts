@@ -331,6 +331,19 @@ describe("PlanDoc phases", () => {
     ])
   })
 
+  test("an old decimal phase, made whole by the next edit's migration:  the Overview's total names the new numbers", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { estimate: "1h" })
+    plan.addPhase("Late")
+    plan.addPhase("Two")
+    Markup.set<"epic-phase">(el(plan, "p-late"), { number: "1.1" })
+    plan.updateEstimate()
+    expect(plan.overview.getAttribute("estimate")).toBe("1h in all, 1h left (P1.1, P2 not estimated)")
+    expect(plan.migrate()).toEqual(["whole-phase-numbers"])
+    expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual(["P1 One", "P2 Late", "P3 Two"])
+    expect(plan.overview.getAttribute("estimate")).toBe("1h in all, 1h left (P2, P3 not estimated)")
+  })
+
   test("--before refuses a started phase, or one that isn't there, changing nothing", () => {
     const plan = freshPlan()
     for (const name of ["One", "Two"]) plan.addPhase(name)
