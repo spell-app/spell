@@ -90,7 +90,9 @@ def test_a_slice_is_a_scratch_list_of_the_same_class() -> None:
     part = shoe[1:3]
     assert type(part) is Shoe
     assert list(part) == ["b", "c"]
-    assert part.name is None
+    # its name isn't copied:  unset, so it reads as text's default (epic `prefs-and-undo` P7)
+    assert part.name == ""
+    assert "name" not in part.to_json()
     assert list(shoe[::-1]) == ["d", "c", "b", "a"]
     assert list(shoe) == ["a", "b", "c", "d"]
 
@@ -203,9 +205,10 @@ def test_an_id_as_a_things_none_until_read_then_a_property_before_its_items() ->
     assert Deck(id="spare-deck").id == "spare-deck"
 
 
-def test_a_name_built_in_none_until_given_then_a_property() -> None:
+def test_a_name_built_in_empty_until_given_then_a_property() -> None:
     pile = List(["a"])
-    assert pile.name is None
+    # unset:  text's default, NOT stored (epic `prefs-and-undo` P7)
+    assert pile.name == ""
     assert pile.to_json() == {"$type": "List", "$items": ["a"]}
     assert List(name="stock").name == "stock"
     pile.name = "discards"

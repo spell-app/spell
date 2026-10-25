@@ -50,6 +50,9 @@ TYPE_KEY = "$type"
 ITEMS_KEY = "$items"
 # Defaults that would be ONE object shared by every instance:  `init=list` makes one each.
 SHARED_DEFAULTS = (list, dict, set)
+# Each type's default, for a property that names no default and no choices (epic `prefs-and-undo` P7):
+# the JavaScript core's `defaultFor()` (`spell/util/persist/values`).
+TYPE_DEFAULTS: dict[str, object] = {"number": 0, "text": "", "choice": False}
 # Characters a made-up id's random part is written in:  base 36, lower case.
 ID_ALPHABET = string.digits + string.ascii_lowercase
 # How many random characters a made-up id ends with.
@@ -106,6 +109,8 @@ def prop(
       or a function giving them, for a list on a class defined after this one:  `lambda: Deck.SUITS`.
     - `default`:  its value while it's unset.
       - NOT stored, so `to_json()` leaves it out
+      - none:  its first choice (`one_of`), else its type's:  `number` 0, `text` "", `choice` False;
+        a class's type has none (`Prop.default_value()`)
     - `init`:  makes its value the first time it's read, once per thing, e.g. `init=Deck`.
       - stored, so `to_json()` writes it
     - `item_type`:  the class a LIST property holds, or its name, e.g. `"Task"` for `as a new list of tasks`.
@@ -182,10 +187,23 @@ class Prop:
             return props[self.name]
         value = self.first_value(instance)
         if value is None:
-            return self.default
+            return self.default_value()
         props[self.name] = value
         note_change(instance)
         return value
+
+    def default_value(self) -> object:
+        """Its value while unset:  its `default`, else its first choice (`one_of`), else its type's.
+
+        - The types':  `number` 0, `text` "", `choice` False;  any other type (a class's) has none:  `None`.
+        - The JavaScript core's rule (`defaultFor()`), so a program reads the same in both.
+        """
+        if self.default is not None:
+            return self.default
+        choices = self._one_of() if callable(self._one_of) else self._one_of
+        if choices:
+            return choices[0]
+        return TYPE_DEFAULTS.get(self.type) if self.type else None
 
     def first_value(self, instance: "SpellObject") -> object:
         """What it's set to the first time it's read on `instance`, unset:  `init()`'s value, or `None` for none.

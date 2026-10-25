@@ -451,16 +451,17 @@ describe("JSON (output-targets Q49)", () => {
     expect(pile.filter(() => true).id).not.toBe(pile.id)
   })
 
-  test("its `name` (epic `spanish` P15):  built in, nothing until given, then a prop like any, settable and tracked", () => {
+  test("its `name` (epic `spanish` P15):  built in, empty until given, then a prop like any, settable and tracked", () => {
     const pile = new Pile({}).append(ranked("A"))
-    expect(pile.name).toBeUndefined()
+    // unset:  text's default, NOT stored (epic `prefs-and-undo` P7)
+    expect(pile.name).toBe("")
     expect(Object.keys(pile.toJSON())).toEqual(["$type", "$items"])
     expect(new Pile({ name: "stock" }).name).toBe("stock")
     const seen: Array<string | undefined> = []
     const stop = observe(() => seen.push(pile.name))
     pile.name = "discards"
     stop()
-    expect(seen).toEqual([undefined, "discards"])
+    expect(seen).toEqual(["", "discards"])
     expect(pile.keys()).toEqual(["name"])
     expect(JSON.parse(JSON.stringify(pile))).toEqual({
       $type: "Pile",

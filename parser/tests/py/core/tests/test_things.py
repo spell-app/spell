@@ -57,7 +57,8 @@ def test_keyword_properties_then_create_once() -> None:
     assert (card.rank, card.suit, card.direction) == ("queen", "spades", "up")
     assert card.created == 1
     assert card.rank_when_created == "queen"
-    assert ThingCard().rank is None
+    # unset:  its first choice (epic `prefs-and-undo` P7)
+    assert ThingCard().rank == "ace"
 
 
 class TurnedDeck(List):
@@ -98,6 +99,20 @@ def test_a_default_is_read_but_not_stored() -> None:
     assert card.name == ""
     assert card.to_json() == {"$type": "ThingCard"}
     assert Player().score == 0
+
+
+def test_an_unset_property_reads_as_its_first_choice_else_its_types_default() -> None:
+    class TypedThing(Thing):
+        count = prop(type="number")
+        title = prop(type="text")
+        done = prop(type="choice")
+        scheme = prop(one_of=["light", "dark"], default="dark")
+        owner = prop(type="Player")
+
+    card, typed = ThingCard(), TypedThing()
+    assert (card.rank, card.direction) == ("ace", "up")
+    assert (typed.count, typed.title, typed.done, typed.scheme, typed.owner) == (0, "", False, "dark", None)
+    assert typed.to_json() == {"$type": "TypedThing"}
 
 
 def test_init_makes_a_value_once_per_thing_and_stores_it() -> None:
