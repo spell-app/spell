@@ -305,6 +305,54 @@ describe("DOMElement old names", () => {
     warn.mockRestore()
   })
 
+  test("an old name's values map onto the new ones;  other text passes as it is", async () => {
+    const { tag } = definedTag("old-values", [
+      attribute("attach", "enum", {
+        values: ["both", "top", "bottom"],
+        replaces: [{ from: "attached", value: "both", values: { up: "top" } }]
+      })
+    ])
+    const host = await renderTag(tag, "attached")
+    expect(host.attach).toBe("both")
+    host.setAttribute("attached", "up")
+    expect(host.attach).toBe("top")
+    host.setAttribute("attached", "bottom")
+    expect(host.attach).toBe("bottom")
+    host.removeAttribute("attached")
+    expect(host.attach).toBe(undefined)
+  })
+
+  test("on an attribute of several words, each old switch adds and removes its own", async () => {
+    const { tag } = definedTag("old-words", [
+      attribute("look", "multiple", {
+        values: ["basic", "very-basic", "circular"],
+        replaces: [
+          { from: "basic", value: "basic", values: { very: "very-basic" } },
+          { from: "circular", value: "circular" }
+        ]
+      })
+    ])
+    const host = await renderTag(tag, "basic circular")
+    expect(host.look).toBe("basic circular")
+    host.setAttribute("basic", "very")
+    expect(host.look).toBe("circular very-basic")
+    host.removeAttribute("circular")
+    expect(host.look).toBe("very-basic")
+  })
+
+  test("an old switch named like a new attribute is the old one written bare, the new one with text", async () => {
+    const { tag } = definedTag("old-same-name", [
+      attribute("look", "multiple", { values: ["link"], replaces: [{ from: "link", value: "link" }] }),
+      attribute("link", "string")
+    ])
+    const host = await renderTag(tag, "link")
+    expect([host.look, host.link]).toEqual(["link", undefined])
+    host.setAttribute("link", "help.html")
+    expect(host.link).toBe("help.html")
+    host.removeAttribute("link")
+    expect([host.look, host.link]).toEqual([undefined, undefined])
+  })
+
   test("observes the old names, beside the attributes", () => {
     const { Class } = definedTag("old-observed", [COLOR])
     expect((Class as unknown as { observedAttributes: string[] }).observedAttributes).toEqual(

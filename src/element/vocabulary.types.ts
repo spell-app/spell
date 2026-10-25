@@ -121,6 +121,15 @@ export type AttributeSpec = {
    * - Its translated name, if the dictionary still has one (`primario`), is read too.
    */
   replaces?: readonly AttributeReplacement[]
+  /**
+   * The class words a value draws, where they aren't the value itself (epic `ui-gaps` P4):
+   * `{ md: "padded", lg: "very padded", none: "fitted" }` on `padding`;  `""` draws none.
+   * - Fomantic's classes stay as they are:  only the words a page writes change.
+   * - On an attribute that takes several words (`kind: "multiple"`), each word is looked up on its own,
+   *   and draws ALONE:  so a several-word look (`appearance`) takes a `classes` map, even `{}`;
+   *   without one, each word is drawn with the attribute's key after it (`mobile only`, the grid's way).
+   */
+  classes?: Readonly<Record<string, string>>
   /** What it does, for docs and the custom-elements manifest:  written for developers. */
   description: string
 
@@ -197,9 +206,16 @@ export type AttributeGroup = (typeof ATTRIBUTE_GROUPS)[number]
 /**
  * One old name an attribute replaces (`AttributeSpec.replaces`).
  * - text:  an old name for the same value (`"href"` on `link`)
- * - `{ from, value }`:  an old switch, which stands for `value` (`{ from: "primary", value: "primary" }` on `color`)
+ * - `{ from, value, values }`:  an old switch, or an old name whose values change:
+ *   - `value`:  what the old name stands for written bare (`{ from: "primary", value: "primary" }` on `color`)
+ *   - `values`:  old text => new value (`{ from: "basic", value: "basic", values: { very: "very-basic" } }`)
+ *   - neither said for a text:  the old text, as it is (`text-align="center"` => `align="center"`)
+ * - On an attribute that takes several words (`kind: "multiple"`), each old switch adds or removes its own word:
+ *   `<ui-button basic circular>` => `appearance="basic circular"`.
  */
-export type AttributeReplacement = string | { readonly from: string; readonly value: string }
+export type AttributeReplacement =
+  | string
+  | { readonly from: string; readonly value?: string; readonly values?: Readonly<Record<string, string>> }
 
 /**
  * What a value IS, as a form edits it.
