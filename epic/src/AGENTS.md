@@ -232,14 +232,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `contentOf()` never falls back to the checkout itself silently when the file NAMES a content folder:  it says so
       - `epic window init` drops a worktree window's folder that's gone (the old content folder) and adds the one in
         force (`withContentFolder()`, [window.mjs](./window.mjs))
-    - `RealPath` (epic `epic-engine` I59):  every compare of checkout, worktree, content-folder and session paths,
-      links followed on BOTH sides
+    - `RealPath` (epic `epic-engine` I59), the kit's since epic `coherence` P7 (`spell/server/RealPath`):  every
+      compare of checkout, worktree, content-folder and session paths, links followed on BOTH sides
       - `of()`:  the real path;  a missing one, its nearest folder that's there, real, then the rest as given
       - `same()`, `isIn()`, `from()`:  equal, inside, the path inside
       - who:  `EpicConfig` (`main`, `worktreeNameOf()`), `Worktrees` (`named()`, `idle()`, `remove()`,
         `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
         `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)
-      - plain `node` loads it by path:  node's own modules only
+      - plain `node` loads it by its own name:  node's own modules only
     - node only, NOT in the `spell-epic` barrel (`spell-epic/config/EpicConfig`)
       - plain `node` loads it by path too, before a worktree's `yarn install`:
         the hooks ([hooks/](../hooks/)) and the window script ([window.mjs](./window.mjs))
@@ -354,10 +354,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the window script's worktree commands say it too when the hook can't run, since then the prompt hook can't
           either
       - plain `node` loads it by path
-    - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
+    - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
+      (`CODE_ROOT`);  `mustGit()`, a git run whose failure is the verb's own error
+      - running git is the kit's `Git` (`spell/server/Git`), a checkout's main checkout without a git run its
+        `checkoutOf()` (`spell/server/checkout`):  spell-epic's own `Git` until epic `coherence` P7
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
       - the `epic` on the `PATH` is the main checkout's
-      - the caller's checkout:  `Git.nearestCheckout()`
+      - the caller's checkout:  `EpicCheckout.nearest()`
       - the tools get it as `EPIC_CHECKOUT`, which [pages.js](tools/pages.js) and the window script take as their root
     - `epicArgs.ts`:  `epic <verb> <epic>#<id>` turned into the `epic` tool's own order (`planDocArgs()`)
     - this folder NEVER imports the kit's `spell` program, and loads no spell
@@ -1192,8 +1195,8 @@ In `tools/`:
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
   - Code colors:  highlight.js (`highlight.min.js`, in `_assets/`), committed so pages load offline.
-    - Older pages still name cdnjs:  the page servers swap that tag for the local copy (`HIGHLIGHT_JS` in
-      `server.types.ts`;  the epic server's `localHighlight()`, spell-app's in its `src/page-server/`).
+    - Older pages still name cdnjs:  the page servers swap that tag for the local copy, by spell-epic's settings'
+      `"localCopies"` (the kit's `withLocalCopies()`;  `HIGHLIGHT_JS` in `server.types.ts` names the same two URLs).
 - Headings:
   - One `h1`.
   - A numbered top-level `<ui-section>` per major section (`label="2. Read-after-write"`), each with a stable `id`.

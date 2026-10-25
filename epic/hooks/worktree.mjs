@@ -95,6 +95,7 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
+import { Git } from "spell/server/Git"
 import { CheckoutPatches } from "spell-epic/command/CheckoutPatches.ts"
 import { CheckoutServers } from "spell-epic/command/CheckoutServers.ts"
 import { EpicRepo } from "spell-epic/config/EpicRepo.ts"
@@ -117,14 +118,18 @@ const OWNED_AGENT = /^(.+)-agent-[0-9a-f]+$/
  * ### `Worktree`
  ****************/
 class Worktree {
-  /** `git <args>` in `cwd`;  its trimmed stdout.  Git's own stderr goes to ours. */
+  /**
+   * `git <args>` in `cwd`;  its trimmed stdout.
+   * - throws a `GitError` with git's own words when it fails
+   * - no time limit:  `worktree add` checks out a whole tree
+   */
   static git(cwd, ...args) {
-    return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", 2] }).trim()
+    return Git.mustRun(args, cwd, { timeout: 0 })
   }
 
-  /** The main checkout's folder, from anywhere inside it or one of its worktrees. */
+  /** The main checkout's folder, from anywhere inside it or one of its worktrees;  `cwd` itself outside git. */
   static root(cwd) {
-    return dirname(Worktree.git(cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"))
+    return Git.mainRoot(cwd)
   }
 
   /**

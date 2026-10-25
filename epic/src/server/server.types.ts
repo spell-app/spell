@@ -80,9 +80,9 @@ export const EPIC_UI = { name: "Epic UI", path: "components/epics", dir: "src/do
  * - `cdn`:  the tag older pages still carry, a plain blocking `<script>`:  a hanging network (plane wifi asking to
  *   pay first) held the page's own scripts up behind it, and the page showed raw markup for tens of seconds
  * - `local`:  the same file (11.9.0), at the engine's assets route
- * - who swaps the one for the other:  the epic server as it serves a page (`EpicServer`'s `localHighlight()`),
- *   `epic airplane` / `epic pages offline --fix` in the files (`offline.ts`);  the kit's page server, by spell-epic's
- *   part of its settings (`"localCopies"` in spell-epic's `package.json`:  the same two URLs, kept in step by hand)
+ * - who swaps the one for the other:  `epic airplane` / `epic pages offline --fix` in the files (`offline.ts`);  both
+ *   page servers as they serve a page, by spell-epic's part of the settings (`"localCopies"` in spell-epic's
+ *   `package.json`:  the same two URLs, kept in step by hand;  the kit's `withLocalCopies()`)
  * - the engine's own since epic `epic-engine` P8 (r8):  it was spell-app's `HIGHLIGHT_JS` in `spell/server/page`
  */
 export const HIGHLIGHT_JS = {

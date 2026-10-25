@@ -8,6 +8,9 @@ import {
   PageEditor,
   pageServerSettings,
   repoSettings,
+  SET_ASSETS,
+  UNWATCHED,
+  withLocalCopies,
   type PageConfig,
   type RouteModule
 } from "spell/server/page"
@@ -24,7 +27,6 @@ import {
   DEFAULT_EPIC_PORT,
   ENGINE_ROUTES,
   EPIC_UI,
-  HIGHLIGHT_JS,
   HOME_ENV,
   legacyEnginePath,
   LOG_FILE,
@@ -138,6 +140,12 @@ export class EpicServer {
    */
   private readonly siteTabs?: readonly SiteTab[]
 
+  /**
+   * CDN URLs pages load, each with its local copy's URL, as the kit's page server swaps them (`withLocalCopies()`):
+   * the engine's own settings' `"localCopies"` (highlight.js, `HIGHLIGHT_JS`), then the default repo's merged ones
+   */
+  private readonly localCopies: Record<string, string>
+
   /** the default repo's bundles' build, once `start()` has begun it (`buildBundles()`) */
   private bundles?: BundleBuilder
 
@@ -163,7 +171,9 @@ export class EpicServer {
     this.defaultRepo = this.repos.find((repo) => repo.isDefault) ?? this.repos[0]
     this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
     this.routeMounts = this.repoRouteMounts()
-    this.siteTabs = this.defaultRepo && pageServerSettings(this.defaultRepo.checkout).siteTabs
+    const settings = this.defaultRepo && pageServerSettings(this.defaultRepo.checkout)
+    this.siteTabs = settings?.siteTabs
+    this.localCopies = { ...repoSettings(this.engine)?.localCopies, ...settings?.localCopies }
     this.pidFile = new SRV.PidFile(this.home, PID_FILE)
     this.info = {
       pid: process.pid,
@@ -179,7 +189,7 @@ export class EpicServer {
       token,
       live: true,
       mounts: this.mounts(),
-      html: [localHighlight],
+      html: [(page) => withLocalCopies(page, this.localCopies)],
       configure: (served) => this.pageConfig(served)
     })
     // a page not migrated to the engine routes:  its old asset and pack paths from THIS engine
@@ -576,11 +586,6 @@ export class EpicServer {
   }
 }
 
-/** `html`, its cdnjs highlight.js tag pointing at the engine's copy:  pages load offline (`HIGHLIGHT_JS`). */
-export function localHighlight(html: string): string {
-  return html.replaceAll(HIGHLIGHT_JS.cdn, HIGHLIGHT_JS.local)
-}
-
 /**
  * The epic server on `port`, as it answers `/api/server` (`EpicServerInfo`), any home's;  `undefined`:  nothing
  * there, or something that isn't an epic server.  NEVER throws.
@@ -627,20 +632,11 @@ const PAGE_SERVER = "spell/server/page"
 /** Spell UI's site bundle, in its package (`spell-ui`):  Epic UI's when the default repo's settings name none. */
 const SPELL_UI_ASSETS = "site/_assets"
 
-/** A component set's site bundle, under its address:  `/components/epics/_assets/site.js`. */
-const SET_ASSETS = "_assets"
-
 /** A repo's home page, in its content folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"
 
 /** Folders page edits may write when a repo's `package.json` names none:  the shared content areas. */
 const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]
-
-/**
- * Paths in a content folder live reload never reports, as spell-app's page server skips them:
- * a guide's `scripts/` and `experiments/` (but an experiment's built `*.bundle.js`, which its guide loads).
- */
-const UNWATCHED = /(^|\/)scripts\/|(^|\/)experiments\/(?!(.*\/)?[^/]+\.bundle\.js$)/
 
 /** What the epic server uses of a checkout's `BundleBuild` (`spell/server/page`'s, loaded at run time). */
 type BundleBuilder = { readonly wait: Handler; start(): unknown; stop(): void }

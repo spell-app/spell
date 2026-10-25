@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
-import { Git } from "spell-epic/command/Git"
+import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { PageStages } from "spell-epic/phases"
 

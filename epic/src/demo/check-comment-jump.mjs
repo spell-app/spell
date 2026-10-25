@@ -29,7 +29,7 @@
  * - re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -50,8 +50,9 @@ if (!process.env.CHECK_JUMP_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes } = await import("./demoPages.mjs")
 const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
 const { pageFile } = await import("spell-epic/tools/pages.js")
 
@@ -78,7 +79,7 @@ cpSync(join(source, `${epic}.plan.html`), join(CONTENT, "epics", epic, `${epic}.
 if (existsSync(join(source, "parts"))) cpSync(join(source, "parts"), join(CONTENT, "epics", epic, "parts"), { recursive: true })
 const served = await DemoServer.start({ content: CONTENT })
 const problems = []
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 
 await checkPage("guide", `${served.base}/${guide}`, () =>
   [...document.querySelectorAll("main > ui-section[id], main ui-section[id]")].map((each) => each.id)
@@ -105,13 +106,14 @@ function check(what, ok, extra = "") {
  * answered the first and the third (`answered`:  which of the three);  every POST to the page server's API aborted.
  */
 async function stubbedPage(url, anchors, answered = [true, false, true]) {
-  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } })
-  if (bundle) {
-    const code = readFileSync(resolve(bundle))
-    await page.route("**/_epic/assets/spell-ui.js", (route) => route.fulfill({ body: code, contentType: "text/javascript" }))
-  }
-  page.errors = []
-  page.on("pageerror", (error) => page.errors.push(String(error)))
+  const errors = []
+  const page = await BrowserPage.newPage(browser, {
+    viewport: { width: 1200, height: 900 },
+    consoleTypes: [],
+    onProblem: (text) => errors.push(text),
+    routes: bundleRoutes(bundle)
+  })
+  page.errors = errors
   await page.route("**/api/**", (route) => (route.request().method() === "POST" ? route.abort() : route.fallback()))
   await page.route("**/api/docs/comments?*", async (route) => {
     const ids = (await page.evaluate(anchors)).slice(0, 3)

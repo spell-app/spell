@@ -75,8 +75,9 @@ if (!process.env.CHECK_TEST_RUN_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes, logInto } = await import("./demoPages.mjs")
 const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
 const JSON5 = (await import("json5")).default
@@ -116,7 +117,7 @@ const pagePath = `/epics/${SAMPLE}/${SAMPLE}.plan.html`
 const url = `${server.base}${pagePath}`
 summary.url = url
 
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 try {
   await exampleShot()
   await walk()
@@ -141,10 +142,8 @@ if (problems.length) {
 ////////////////
 
 async function walk() {
-  const context = await newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })
-  await context.addInitScript(HELPERS)
-  const page = await context.newPage()
-  const logs = watchLogs(page)
+  const logs = []
+  const page = await newPage({ width: 390, height: 844 }, { context: { deviceScaleFactor: 2 }, logs })
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" })
   await open(page, url)
 
@@ -341,7 +340,7 @@ async function walk() {
   await page.screenshot({ path: join(out, "run-failed-line.png") })
   summary.logs = logs
   if (logs.length) problems.push(`page errors:  ${logs.join(" | ")}`)
-  await context.close()
+  await page.close()
 }
 
 /**
@@ -383,9 +382,7 @@ async function exampleShot() {
 async function looks() {
   for (const width of [390, 1200])
     for (const scheme of ["light", "dark"]) {
-      const context = await newContext({ viewport: { width, height: 900 }, deviceScaleFactor: 2 })
-      await context.addInitScript(HELPERS)
-      const page = await context.newPage()
+      const page = await newPage({ width, height: 900 }, { context: { deviceScaleFactor: 2 } })
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" })
       await open(page, `${url}?test=1#v2`)
       await waitForCard(page, "v2")
@@ -393,15 +390,13 @@ async function looks() {
       const wide = await page.evaluate(() => document.documentElement.scrollWidth)
       if (wide > width) problems.push(`${width}px ${scheme}:  the page is ${wide}px wide`)
       await page.screenshot({ path: join(out, `run-${width}-${scheme}.png`) })
-      await context.close()
+      await page.close()
     }
 }
 
 /** A run across every epic (`?test=1&all=1`):  the summary leads to the next epic with open tests, in test mode. */
 async function acrossEpics() {
-  const context = await newContext({ viewport: { width: 390, height: 844 } })
-  await context.addInitScript(HELPERS)
-  const page = await context.newPage()
+  const page = await newPage({ width: 390, height: 844 })
   await open(page, `${url}?test=1&all=1`)
   // every test but v4 answered:  it starts there
   await waitForCard(page, "v4")
@@ -421,7 +416,7 @@ async function acrossEpics() {
   await waitForCard(page, "v1")
   expect("the next epic, in test mode", pick(await page.evaluate(() => cardFacts()), ["at", "id"]), { at: "1 of 2", id: "V1" })
   await leaveSends(page)
-  await context.close()
+  await page.close()
 }
 
 /**
@@ -461,14 +456,23 @@ async function leaveSends(page) {
 // ## Helpers
 ////////////////
 
-/** A browser context with `options`;  with `--bundle`, that file served as the docs bundle (`spell-ui.js`). */
-async function newContext(options) {
-  const context = await browser.newContext(options)
-  if (bundle) {
-    const script = readFileSync(resolve(bundle))
-    await context.route("**/spell-ui.js", (route) => route.fulfill({ body: script, contentType: "text/javascript" }))
-  }
-  return context
+/**
+ * A new page at `viewport`, with the page-side helpers (`HELPERS`);  with `--bundle`, that file served as the docs
+ * bundle (`spell-ui.js`).
+ * - `context`:  Playwright's other options (`deviceScaleFactor`)
+ * - `logs`:  its errors pushed there, as they come;  a missing file says which (`response`)
+ */
+async function newPage(viewport, { context, logs } = {}) {
+  const page = await BrowserPage.newPage(browser, {
+    viewport,
+    context,
+    routes: bundleRoutes(bundle),
+    ...(logs && { ignore: /Failed to load resource/, onProblem: logInto(logs) })
+  })
+  if (logs)
+    page.on("response", (response) => response.status() >= 400 && logs.push(`${response.status()}:  ${response.url()}`))
+  await page.addInitScript(HELPERS)
+  return page
 }
 
 /** Page-side helpers, on every load:  the run, its parts, facts about its card. */
@@ -612,18 +616,6 @@ function pick(object, keys) {
 function expect(what, actual, wanted) {
   if (JSON.stringify(actual) !== JSON.stringify(wanted))
     problems.push(`${what}:  ${JSON.stringify(actual)}, wanted ${JSON.stringify(wanted)}`)
-}
-
-/** The page's errors, as they come. */
-function watchLogs(page) {
-  const logs = []
-  page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
-  page.on("console", (message) => {
-    // a missing file says which below (`response`)
-    if (message.type() === "error" && !/Failed to load resource/.test(message.text())) logs.push(`console:  ${message.text()}`)
-  })
-  page.on("response", (response) => response.status() >= 400 && logs.push(`${response.status()}:  ${response.url()}`))
-  return logs
 }
 
 /**

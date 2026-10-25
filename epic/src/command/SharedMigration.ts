@@ -12,12 +12,13 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, relative } from "node:path"
-
 import { fileURLToPath } from "node:url"
 
-import { RealPath } from "spell-epic/config/RealPath"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 
 import { EpicCommandError, type FoldReport, type MigrateReport, type SharedConfig } from "./command.types"
+import { EpicCheckout } from "./EpicCheckout"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
 
@@ -74,12 +75,12 @@ export class SharedMigration {
   run({ dryRun = false }: { dryRun?: boolean } = {}): MigrateReport {
     const { worktree } = this
     const config = { ...this.config, links: CUTOVER_LINKS }
-    const branch = git(worktree, "branch", "--show-current")
+    const branch = EpicCheckout.mustGit(["branch", "--show-current"], worktree)
     const report: MigrateReport = { worktree, branch, folds: [], conflicts: [], done: false }
     refuseUnless(worktree, branch, config)
     const importSha = importCommit(config)
-    const base = git(worktree, "merge-base", "HEAD", importSha)
-    if (!gitOk(worktree, "cat-file", "-e", `${base}:packages/docs/tools/relocate.js`)) {
+    const base = EpicCheckout.mustGit(["merge-base", "HEAD", importSha], worktree)
+    if (!Git.run(["cat-file", "-e", `${base}:packages/docs/tools/relocate.js`], worktree).ok) {
       throw new EpicCommandError(
         `${branch} branched before the docs moved (P2):  merge ${importSha} into it first (its session, or \`git merge ${importSha}\`), then migrate`
       )
@@ -95,10 +96,10 @@ export class SharedMigration {
     const before = otherChanges(worktree, config)
     for (const each of report.folds) apply(each, worktree, config)
     if (report.folds.some((each) => each.action === "rebuild")) rebuildDocsIndex(config)
-    git(config.dir, "add", "-A")
-    if (git(config.dir, "status", "--porcelain")) {
-      const message = `Migrate ${relative(config.main, worktree)} (branch ${branch} ${git(worktree, "rev-parse", "--short", "HEAD")})`
-      git(config.dir, "-c", "commit.gpgsign=false", "commit", "-q", "-m", message)
+    EpicCheckout.mustGit(["add", "-A"], config.dir)
+    if (EpicCheckout.mustGit(["status", "--porcelain"], config.dir)) {
+      const message = `Migrate ${relative(config.main, worktree)} (branch ${branch} ${EpicCheckout.mustGit(["rev-parse", "--short", "HEAD"], worktree)})`
+      EpicCheckout.mustGit(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message], config.dir)
     }
     untrackOnBranch(worktree, branch, config)
     for (const path of config.links) rmSync(join(worktree, path), { recursive: true, force: true })
@@ -194,7 +195,8 @@ function unionMerge(ours: string, base: string, theirs: string): string {
     writeFileSync(a, ours)
     writeFileSync(b, base)
     writeFileSync(c, theirs)
-    return spawnSync("git", ["merge-file", "--union", "-p", a, b, c], { encoding: "utf8" }).stdout
+    // exits with the number of conflicts:  its output is the merge either way
+    return Git.run(["merge-file", "--union", "-p", a, b, c], temp, { trim: false }).out
   } finally {
     rmSync(temp, { recursive: true, force: true })
   }
@@ -210,24 +212,27 @@ function unionMerge(ours: string, base: string, theirs: string): string {
  * - Other staged and unstaged work stays as it was.
  */
 function untrackOnBranch(worktree: string, branch: string, config: SharedConfig): void {
-  const head = git(worktree, "rev-parse", "HEAD")
+  const head = EpicCheckout.mustGit(["rev-parse", "HEAD"], worktree)
   const index = join(mkdtempSync(join(tmpdir(), "shared-index-")), "index")
   const env = { ...process.env, GIT_INDEX_FILE: index }
   try {
-    gitWith(env, worktree, "read-tree", "HEAD")
-    gitWith(env, worktree, "rm", "-r", "--cached", "-q", "--ignore-unmatch", "--", ...config.links)
+    EpicCheckout.mustGit(["read-tree", "HEAD"], worktree, { env })
+    EpicCheckout.mustGit(["rm", "-r", "--cached", "-q", "--ignore-unmatch", "--", ...config.links], worktree, { env })
     const oldIgnore = show(worktree, "HEAD", ".gitignore") ?? ""
     const newIgnore = withSharedBlock(oldIgnore, config)
-    const blob = gitInput(worktree, newIgnore, "hash-object", "-w", "--stdin")
-    gitWith(env, worktree, "update-index", "--add", "--cacheinfo", `100644,${blob},.gitignore`)
-    const tree = gitWith(env, worktree, "write-tree")
+    const blob = EpicCheckout.mustGit(["hash-object", "-w", "--stdin"], worktree, { input: newIgnore })
+    EpicCheckout.mustGit(["update-index", "--add", "--cacheinfo", `100644,${blob},.gitignore`], worktree, { env })
+    const tree = EpicCheckout.mustGit(["write-tree"], worktree, { env })
     const message = `Migrate ${branch} to shared content:  untrack ${config.links.join(", ")}`
-    const commit = git(worktree, "-c", "commit.gpgsign=false", "commit-tree", tree, "-p", head, "-m", message)
-    git(worktree, "update-ref", `refs/heads/${branch}`, commit, head)
+    const commit = EpicCheckout.mustGit(
+      ["-c", "commit.gpgsign=false", "commit-tree", tree, "-p", head, "-m", message],
+      worktree
+    )
+    EpicCheckout.mustGit(["update-ref", `refs/heads/${branch}`, commit, head], worktree)
     // the worktree's own index and .gitignore follow the new HEAD;
     // `-f`:  its entries no longer match HEAD, and their content is in the shared repo already
-    git(worktree, "rm", "-r", "--cached", "-f", "-q", "--ignore-unmatch", "--", ...config.links)
-    git(worktree, "update-index", "--add", "--cacheinfo", `100644,${blob},.gitignore`)
+    EpicCheckout.mustGit(["rm", "-r", "--cached", "-f", "-q", "--ignore-unmatch", "--", ...config.links], worktree)
+    EpicCheckout.mustGit(["update-index", "--add", "--cacheinfo", `100644,${blob},.gitignore`], worktree)
     if (readOrNull(join(worktree, ".gitignore")) === oldIgnore) writeFileSync(join(worktree, ".gitignore"), newIgnore)
   } finally {
     rmSync(dirname(index), { recursive: true, force: true })
@@ -252,7 +257,7 @@ function refuseUnless(worktree: string, branch: string, config: SharedConfig): v
     throw new EpicCommandError(`no shared repo at ${config.dir}:  cut over first`)
   if (!branch) throw new EpicCommandError(`${worktree} isn't on a branch`)
   for (const marker of ["MERGE_HEAD", "rebase-merge", "rebase-apply", "CHERRY_PICK_HEAD"]) {
-    if (existsSync(git(worktree, "rev-parse", "--path-format=absolute", "--git-path", marker))) {
+    if (existsSync(EpicCheckout.mustGit(["rev-parse", "--path-format=absolute", "--git-path", marker], worktree))) {
       throw new EpicCommandError(`${worktree} is mid-${marker.toLowerCase().replace(/_head$/, "")}:  finish it first`)
     }
   }
@@ -264,7 +269,8 @@ function refuseUnless(worktree: string, branch: string, config: SharedConfig): v
 
 /** The spell-app commit the shared repo was imported from:  its first commit is `Import from spell-app <sha>`. */
 function importCommit(config: SharedConfig): string {
-  const first = git(config.dir, "log", "--reverse", "--format=%s", "--max-parents=0").split("\n")[0] ?? ""
+  const first =
+    EpicCheckout.mustGit(["log", "--reverse", "--format=%s", "--max-parents=0"], config.dir).split("\n")[0] ?? ""
   const sha = /^Import from spell-app ([0-9a-f]+)/.exec(first)?.[1]
   if (!sha) throw new EpicCommandError(`the shared repo's first commit isn't an import ("${first}")`)
   return sha
@@ -272,7 +278,7 @@ function importCommit(config: SharedConfig): string {
 
 /** Files under `path` in commit `rev` of `worktree`'s repo, repo-relative. */
 function treeFiles(worktree: string, rev: string, path: string): string[] {
-  return git(worktree, "ls-tree", "-r", "--name-only", rev, "--", path).split("\n").filter(Boolean)
+  return EpicCheckout.mustGit(["ls-tree", "-r", "--name-only", rev, "--", path], worktree).split("\n").filter(Boolean)
 }
 
 /** Files under `path` on disk in `worktree` (a real folder:  a link is already migrated), repo-relative. */
@@ -297,8 +303,8 @@ function lstatIsLink(path: string): boolean {
 
 /** `rev:file` as text, or `null` when it isn't there. */
 function show(worktree: string, rev: string, file: string): string | null {
-  const run = spawnSync("git", ["show", `${rev}:${file}`], { cwd: worktree, encoding: "utf8", maxBuffer: 64 << 20 })
-  return run.status === 0 ? run.stdout : null
+  const run = Git.run(["show", `${rev}:${file}`], worktree, { trim: false })
+  return run.ok ? run.out : null
 }
 
 /** A file's text, or `null` when it's missing. */
@@ -312,38 +318,11 @@ function readOrNull(file: string): string | null {
  */
 function otherChanges(worktree: string, config: SharedConfig): string {
   // untrimmed:  a status line starts with a space when only the working tree changed
-  const run = spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], { cwd: worktree, encoding: "utf8" })
-  return (run.stdout ?? "")
-    .split("\n")
+  return Git.run(["status", "--porcelain", "--untracked-files=all"], worktree, { trim: false })
+    .out.split("\n")
     .filter((line) => {
       const path = line.slice(3).replace(/^.* -> /, "")
       return line && path !== ".gitignore" && !config.links.some((link) => path === link || path.startsWith(`${link}/`))
     })
     .join("\n")
-}
-
-/** `git <args>` in `cwd`, trimmed stdout;  throws an `EpicCommandError` on failure. */
-function git(cwd: string, ...args: string[]): string {
-  return gitWith(process.env, cwd, ...args)
-}
-
-/** `git()` with environment `env` (`GIT_INDEX_FILE`:  a temp index). */
-function gitWith(env: NodeJS.ProcessEnv, cwd: string, ...args: string[]): string {
-  const run = spawnSync("git", args, { cwd, encoding: "utf8", env, maxBuffer: 64 << 20 })
-  if (run.status !== 0)
-    throw new EpicCommandError(`git ${args.join(" ")} failed in ${cwd}:  ${(run.stderr ?? "").trim()}`)
-  return (run.stdout ?? "").trim()
-}
-
-/** Whether `git <args>` in `cwd` succeeds. */
-function gitOk(cwd: string, ...args: string[]): boolean {
-  return spawnSync("git", args, { cwd, stdio: "ignore" }).status === 0
-}
-
-/** `git <args>` in `cwd` with `input` on stdin;  trimmed stdout. */
-function gitInput(cwd: string, input: string, ...args: string[]): string {
-  const run = spawnSync("git", args, { cwd, input, encoding: "utf8" })
-  if (run.status !== 0)
-    throw new EpicCommandError(`git ${args.join(" ")} failed in ${cwd}:  ${(run.stderr ?? "").trim()}`)
-  return run.stdout.trim()
 }

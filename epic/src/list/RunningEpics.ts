@@ -3,11 +3,11 @@ import { homedir } from "node:os"
 import { basename, dirname, join, relative, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RealPath } from "spell-epic/config/RealPath"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
 import { DataFile } from "spell-epic/data/DataFile"
-import type { SRV } from "spell/server"
+import { SRV } from "spell/server"
 
 import { planDocIn } from "spell-epic/tools/pages.js"
 import {
@@ -293,7 +293,7 @@ export class RunningEpics {
       if (!file.endsWith(".json")) continue
       try {
         const record = JSON.parse(readFileSync(join(folder, file), "utf8")) as SessionRecord
-        if (typeof record.pid !== "number" || !isAlive(record.pid)) continue
+        if (typeof record.pid !== "number" || !SRV.isProcessAlive(record.pid)) continue
         sessions.push({
           pid: record.pid,
           sessionId: record.sessionId ?? "",
@@ -402,16 +402,6 @@ function remark(card: string, { running, favorite }: { running: boolean; favorit
     .join("")
   // a function:  a `$` in a value is text, never a replacement pattern
   return card.replace(/^<epic-card\b[^>]*>/, () => `<epic-card${open}>`)
-}
-
-/** Whether process `pid` is alive:  signal 0 checks without sending anything;  `EPERM`:  alive, not ours. */
-function isAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
 }
 
 /**

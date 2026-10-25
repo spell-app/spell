@@ -219,9 +219,6 @@ export function bareTitle(title: string): string {
 // ## Worktrees and parked work
 ////////////////
 
-/** What `Git.run()` returns. */
-export type GitResult = { ok: boolean; out: string; err: string; code: number }
-
 /**
  * The checkout holding a folder -- `Worktrees.checkoutOf()`.
  * - `label`:  `main checkout` or `worktree <name>`;  outside git, `root` is `undefined` and `label` `(not in git)`

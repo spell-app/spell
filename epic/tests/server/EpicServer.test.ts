@@ -15,7 +15,7 @@ import { componentSets, type ComponentSetSetting } from "spell/server/page"
 import type { SiteTab } from "spell/server/site/site.types"
 import { ask } from "spell/server/test/serve"
 
-import { EpicServer, ROUTE_MODULES, SOURCES, localHighlight } from "spell-epic/server/EpicServer"
+import { EpicServer, ROUTE_MODULES, SOURCES } from "spell-epic/server/EpicServer"
 import { RepoList } from "spell-epic/server/RepoList"
 
 /** This checkout:  the engine served. */
@@ -238,7 +238,6 @@ describe("EpicServer", () => {
   test("highlight.js from the engine, not cdnjs:  pages load offline", async () => {
     const html = (await ask(port, "GET", "/epics/seo/seo.plan.html")).text
     expect(html).toContain('<script src="/_epic/assets/highlight.min.js"></script>')
-    expect(localHighlight("x")).toBe("x")
   })
 
   test("route modules get the default repo's checkout;  `fileFor()` resolves a URL path as it's served", () => {
@@ -255,8 +254,8 @@ describe("EpicServer", () => {
     for (const path of ROUTE_MODULES) expect(existsSync(join(ENGINE, path)), path).toBe(true)
   })
 
-  // epic `repo-split` P16:  the kit's page server swaps the CDN's highlight.js by spell-epic's settings, the epic server
-  // by `HIGHLIGHT_JS`:  the same two URLs
+  // epic `repo-split` P16:  the kit's page server and the epic server swap the CDN's highlight.js by spell-epic's settings,
+  // `epic pages offline --fix` by `HIGHLIGHT_JS`:  the same two URLs
   test("its highlight.js swap is the one its settings give the kit's page server (`localCopies`)", async () => {
     const { readFileSync } = await import("node:fs")
     const { HIGHLIGHT_JS } = await import("spell-epic/server/server.types")

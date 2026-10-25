@@ -1,9 +1,10 @@
 import chalk from "chalk"
 import { Command } from "commander"
 
+import { Git } from "spell/server/Git"
+import { EpicCheckout } from "spell-epic/command/EpicCheckout"
 import { EXIT, EpicCommandError } from "spell-epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell-epic/command/EpicTools"
-import { Git } from "spell-epic/command/Git"
 import { Hub } from "spell-epic/command/Hub"
 import { LinesOfCode } from "spell-epic/command/LinesOfCode"
 import { Parking } from "spell-epic/command/Parking"
@@ -47,7 +48,7 @@ import { GROUP_VERBS, type GroupName } from "./epicGroups"
  *   - every verb's help has its usage, what it does and an example (`epic close --help`)
  *   - an unknown verb exits 1, listing them;  a usage error exits 2 (`EXIT`)
  * - ONE copy of the code:  every verb runs THIS checkout's code, whichever checkout calls it.
- *   - the data is the caller's (`Git.nearestCheckout()`)
+ *   - the data is the caller's (`EpicCheckout.nearest()`)
  *   - `epic --version` says which code runs
  * - Owen's names (epic `repo-split` P13, his command-names page):  `create`, `lint`, `inbox watch | ignore <epic>`,
  *   `window should-stay`, `window reload`, `ask | choices | saga | pages create`, `summarize`, `status` (taking
@@ -708,7 +709,7 @@ export class EpicProgram {
     const [key] = args.filter((arg) => !arg.startsWith("--"))
     let values: Record<string, string | boolean | number>
     try {
-      values = EpicConfig.of(Git.nearestCheckout({ marker: ".git" })).values()
+      values = EpicConfig.of(EpicCheckout.nearest({ marker: ".git" })).values()
     } catch (error) {
       throw new EpicCommandError((error as Error).message, EXIT.ERRORS)
     }
@@ -741,7 +742,7 @@ export class EpicProgram {
     const [named] = args.filter((arg, at) => !arg.startsWith("--") && (forAt === -1 || at !== forAt + 1))
     let config: EpicConfig
     try {
-      config = EpicConfig.of(Git.nearestCheckout({ marker: ".git" }))
+      config = EpicConfig.of(EpicCheckout.nearest({ marker: ".git" }))
     } catch (error) {
       throw new EpicCommandError((error as Error).message, EXIT.ERRORS)
     }
@@ -778,9 +779,9 @@ export class EpicProgram {
    * - static:  this code's checkout, whoever calls
    */
   static version(): string {
-    const sha = Git.run(["rev-parse", "--short", "HEAD"], Git.CODE_ROOT).out || "?"
-    const branch = Git.run(["branch", "--show-current"], Git.CODE_ROOT).out || "detached"
-    return `epic ${sha} (${branch}) ${Git.CODE_ROOT}`
+    const sha = Git.run(["rev-parse", "--short", "HEAD"], EpicCheckout.CODE_ROOT).out || "?"
+    const branch = Git.run(["branch", "--show-current"], EpicCheckout.CODE_ROOT).out || "detached"
+    return `epic ${sha} (${branch}) ${EpicCheckout.CODE_ROOT}`
   }
 }
 

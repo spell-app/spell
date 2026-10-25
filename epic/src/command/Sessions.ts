@@ -14,8 +14,10 @@ import { homedir } from "node:os"
 import { basename, join, relative } from "node:path"
 
 import { clockTime, localDate } from "spell/util/time"
+import { SRV } from "spell/server"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RealPath } from "spell-epic/config/RealPath"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
 import { epicStateFor } from "spell-epic/list/EpicState"
 
@@ -35,7 +37,6 @@ import {
   type TranscriptFacts,
   type VerbArgs
 } from "./command.types"
-import { Git } from "./Git"
 import { Stock } from "./Stock"
 import { TranscriptIndex } from "./TranscriptIndex"
 import { Worktrees } from "./Worktrees"
@@ -372,7 +373,7 @@ export class Sessions {
     for (const name of readdirSync(folder).sort()) {
       if (!name.endsWith(".json")) continue
       const record = readJSON(join(folder, name)) as Partial<RunningSession>
-      if (typeof record.pid === "number" && record.sessionId && isAlive(record.pid)) {
+      if (typeof record.pid === "number" && record.sessionId && SRV.isProcessAlive(record.pid)) {
         found.set(record.sessionId, record as RunningSession)
       }
     }
@@ -804,17 +805,6 @@ const HARNESS_MESSAGES = ["Base directory for this skill:", "Another Claude sess
 /** Write `text` to stdout, on its own line. */
 function out(text: string): void {
   process.stdout.write(text.endsWith("\n") ? text : `${text}\n`)
-}
-
-/** Whether process `pid` exists:  signal 0 checks without sending anything. */
-function isAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    // EPERM:  it exists, it's just not ours
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
 }
 
 /** An `AskUserQuestion` in transcript text `tail` with no answer after it:  its first question, minutes ago. */
