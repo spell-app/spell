@@ -107,7 +107,7 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
 
 The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got, so which sections show.
 
-- `overview`: only the Overview, Questions and Caveats; `phases`: the Phases too; `building`, or none: everything. A
+- `overview`: only the Overview, Questions and Caveats; `phases`: the Phases and Issues too; `building`, or none: everything. A
   hidden section is still in the file: it's only a view
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand

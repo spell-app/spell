@@ -133,7 +133,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
- *   - `overview`:  only the Overview, Questions and Todos show;  `phases`:  the Phases too;  `building` (or none):
+ *   - `overview`:  only the Overview, Questions and Caveats show;  `phases`:  the Phases and Issues too;  `building` (or none):
  *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
  *     what shows (`spell-doc-runtime.js` reads the same rule)
  *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON

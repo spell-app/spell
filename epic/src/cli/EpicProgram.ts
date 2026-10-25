@@ -170,7 +170,7 @@ export class EpicProgram {
     this.page(
       epic.command("stage"),
       "set the page's stage, which decides what it shows:  overview (the Overview, Questions and Todos), phases (the " +
-        "Phases too) or building (everything);  a new epic starts in overview, a page with none reads as building",
+        "Phases and Issues too) or building (everything);  a new epic starts in overview, a page with none reads as building",
       "epic stage seo phases"
     ).usage("<epic> overview | phases | building")
     this.page(

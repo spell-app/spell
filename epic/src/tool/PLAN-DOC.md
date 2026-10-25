@@ -205,7 +205,7 @@ As `plan-doc.md`, "Ids":
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
 - `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
   which sections the page shows (`PageStages`, `spell-epic/phases`).
-  - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases too;  `building`:  everything.
+  - `overview`:  the Overview, Questions and Caveats;  `phases`:  the Phases and Issues too;  `building`:  everything.
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
