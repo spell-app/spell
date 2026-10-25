@@ -935,10 +935,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Return `SpellFile` / `SpellCSSFile` objects for our `active` imports -- the ones we parse + compile.
    * - Returns `[]` if we're not loaded or index is malformed.
    * - NOTE: skips anything we can't compile, e.g. an active `.js` import, which has no `parse()`.
+   * - A spellx twin an editor shows stands in its `.spell` twin's place:  see `showForm()`.
    */
   /*@memoizeForProp("contents")*/
   get activeImports(): SP.CompilableSpellFile[] {
-    return this.derivedFrom(
+    const listed = this.derivedFrom(
       "activeImports",
       () => {
         const { manifest } = this
@@ -949,7 +950,40 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       },
       [this.contents]
     )
+    if (!this.shownTwins.size) return listed
+    return listed.map((file) => this.shownTwins.get(file.path) ?? file)
   }
+
+  /**
+   * Parse and compile `file` in the form an editor shows it (epic `elemental-spell` C50).
+   * - A spellx twin left out of our imports, `Card.spellx` beside an imported `Card.spell` (J95), takes its
+   *   `.spell` twin's place:  so it parses, with its own errors, hover and colours, and compiles once, not twice.
+   *   - Its source map then points at its own lines.
+   * - Showing the `.spell` file again puts it back.
+   * - Any other file changes nothing.
+   * - Returns whether the files we parse changed:  then `parse()` or `compile()` again.
+   * - Our project file never changes:  the twin stays out of its imports.
+   */
+  showForm(file: SP.AnySpellFile): boolean {
+    if (!(file instanceof SP.SpellFile) || file.project !== this) return false
+    const spellPath = file.form === "spellx" ? file.path.slice(0, -1) : file.path
+    const shown = this.shownTwins.get(spellPath)
+    if (file.form === "spell") {
+      if (!shown) return false
+      this.shownTwins.delete(spellPath)
+    } else {
+      if (shown === file || !this.activeImports.some((it) => it.path === spellPath)) return false
+      this.shownTwins.set(spellPath, file)
+    }
+    this.incremental = undefined
+    return true
+  }
+
+  /**
+   * Spellx twins parsed in their `.spell` twin's place, by that `.spell` file's path:  see `showForm()`.
+   * - NOTE: plain field, not state:  `showForm()` says when to parse again.
+   */
+  private shownTwins = new Map<string, SP.SpellFile>()
 
   /**
    * Spell files we parse:  our active `.spell` imports, in order -- see `activeImports`.
