@@ -230,14 +230,35 @@
     position-anchor: var(--_ui-dropdown-anchor, --ui-dropdown);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
+    /* below or above, whichever has more room:  capped to it (`max-height`), the menu always fits */
+    position-try-order: most-block-size;
     inset: auto;
     min-width: anchor-size(width);
     margin: var(--_ui-dropdown-menu-offset) 0;
+    /*
+     * Never taller than the room beside its root:  `100%` is that room (its `position-area`), less its offset from
+     * the root and as much again from the window's edge;  a longer list scrolls.  No sub-menus to clip (above).
+     */
+    max-height: calc(100% - 2 * var(--_ui-dropdown-menu-offset));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     opacity: 0;
     transition-property: opacity, display, overlay;
     transition-duration: var(--_ui-dropdown-duration);
     transition-timing-function: var(--ui-ease);
     transition-behavior: allow-discrete;
+  }
+  /* more below:  the menu's colour fading up over its last 8px, not a hard edge (Owen);  all in view, it sits
+     over the menu's own bottom edge */
+  .ui.dropdown > .menu[popover]::after {
+    content: "";
+    position: sticky;
+    inset-block-end: 0;
+    display: block;
+    height: 8px;
+    margin-block-start: -8px;
+    pointer-events: none;
+    background: linear-gradient(to top, var(--_ui-dropdown-menu-background), transparent);
   }
   .ui.dropdown > .menu > * {
     white-space: nowrap;

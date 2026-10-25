@@ -73,6 +73,11 @@ export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: st
     root: "fieldset[role=radiogroup][part~=rating] label[part~=icon]:not(.icon)"
   },
   {
+    family: "ui-icon-picker",
+    html: `<ui-icon-picker value="bell" aria-label="Fallback icon"></ui-icon-picker>`,
+    root: "input[type=text][part~=field]"
+  },
+  {
     family: "ui-slider",
     html: `<ui-slider value="4" aria-label="Fallback slider"></ui-slider>`,
     root: "input[type=range][part~=thumb]"

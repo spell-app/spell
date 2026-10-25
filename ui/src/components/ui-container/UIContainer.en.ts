@@ -20,28 +20,32 @@ export const containerVocabulary = {
   noun: "container",
   description: "A container limits content to a maximum width.",
   attributes: [
-    { name: "text", kind: "keyOnly", description: "A narrower reading column with larger type." },
-    { name: "fluid", kind: "keyOnly", description: "Always the full width of the page." },
-    { name: "wide", kind: "keyOnly", description: "A fifth wider than the default container." },
+    { name: "text", group: "name", kind: "keyOnly", description: "A narrower reading column with larger type." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Always the full width of the page." },
+    { name: "wide", group: "layout", kind: "keyOnly", description: "A fifth wider than the default container." },
     {
       name: "grid",
+      group: "layout",
       kind: "keyOnly",
       description: "Holds a grid:  widened by the grid's gutters so its columns line up with other containers."
     },
     {
       name: "relaxed",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: "With `grid`:  room for a `relaxed` (or `very` relaxed) grid's wider gutters."
     },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: "alignments",
       description: "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation)."
     },
     {
       name: "scrolling",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["short", "very short", "long", "very long"],
       description:
@@ -49,7 +53,12 @@ export const containerVocabulary = {
         "tokens:  `--ui-container-scrolling-height` (mobile, 15em), `--ui-container-scrolling-height-tablet` " +
         "(18em), `-computer` (24em), `-widescreen` (30em)."
     },
-    { name: "resizable", kind: "keyOnly", description: "With `scrolling`:  people can drag its height." }
+    {
+      name: "resizable",
+      group: "behaviour",
+      kind: "keyOnly",
+      description: "With `scrolling`:  people can drag its height."
+    }
   ],
   events: [],
   slots: [{ name: "", description: "Content." }],

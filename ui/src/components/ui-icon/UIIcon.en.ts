@@ -26,16 +26,19 @@ export const iconVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Size relative to the surrounding text, `mini` (0.4em) ... `massive` (8em)."
     },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of the glyph;  with `inverted` `circular` / `bordered`, the disc."
     },
     {
       name: "name",
+      group: "name",
       kind: "string",
       description:
         "Icon name in the page's packs:  `circle check`, `bell outline`, `lucide:bell` (one pack).  " +
@@ -43,37 +46,57 @@ export const iconVocabulary = {
     },
     {
       name: "outline",
+      group: "appearance",
       kind: "boolean",
       description: "Appends ` outline` to `name`:  Fomantic's `bell outline icon` spelling.  No class of its own."
     },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description:
         "Accessible name:  makes the icon an image (`role=img`, `aria-label`).  Without it the icon is decorative " +
         "and hidden from assistive technology."
     },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and inert." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds;  fills a `circular` / `bordered` icon." },
-    { name: "loading", kind: "keyOnly", description: "Spins, e.g. a `spinner` or `circle-notch` glyph." },
-    { name: "fitted", kind: "keyOnly", description: "No gap after the glyph and no extra width." },
-    { name: "link", kind: "keyOnly", description: "Clickable look:  dimmed until hovered, pointer cursor." },
-    { name: "circular", kind: "keyOnly", description: "Inside a circular ring." },
-    { name: "bordered", kind: "keyOnly", description: "Inside a square ring." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds;  fills a `circular` / `bordered` icon."
+    },
+    {
+      name: "loading",
+      group: "states",
+      kind: "keyOnly",
+      description: "Spins, e.g. a `spinner` or `circle-notch` glyph."
+    },
+    { name: "fitted", group: "layout", kind: "keyOnly", description: "No gap after the glyph and no extra width." },
+    {
+      name: "link",
+      group: "link",
+      kind: "keyOnly",
+      description: "Clickable look:  dimmed until hovered, pointer cursor."
+    },
+    { name: "circular", group: "appearance", kind: "keyOnly", description: "Inside a circular ring." },
+    { name: "bordered", group: "appearance", kind: "keyOnly", description: "Inside a square ring." },
     {
       name: "flipped",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["horizontally", "vertically"],
       description: "Mirrored:  `flipped` / `horizontally`, or `vertically`."
     },
     {
       name: "rotated",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["clockwise", "counterclockwise", "halfway"],
       description: "Turned a quarter:  `rotated` / `clockwise`, `counterclockwise`, or `halfway` (180°)."
     },
     {
       name: "corner",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["top left", "top right", "bottom left", "bottom right"],
       description: "Inside `<ui-icons>`:  a small badge on a corner of the group;  bare `corner` is bottom right."

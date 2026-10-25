@@ -639,6 +639,13 @@
    * - the panel round them keeps the space (`--site-tabs-gap`)
    * - the section toolbar first in a pane is the panel's lower half, so it must meet the tabs' track
    */
+  /*
+   * the tabs' track is the panel itself:  an unselected tab shows the panel's own fill, only the selected one its thumb
+   * (Owen, 2026-10-25:  "non-selected tab to show bg color";  a theme's segmented track, fruity's grey, before)
+   */
+  .site-tabs::part(menu) {
+    --ui-menu-segmented-background: transparent;
+  }
   .site-tabs > ui-tab::part(tab) {
     margin-block-start: 0;
     padding-inline: 0;
@@ -743,12 +750,16 @@
    */
   .site-main ui-section[sticky]::part(title) {
     /*
-     * out to the side columns' cards, the page's full width;  the title's words stay where they were
-     * (Owen:  "Headers should go the full width of the page, leaving the content where it is")
+     * a rounded bar with a slight shadow, as an epic page's phases, stuck or not (Owen, 2026-10-25:  "rounded w/shadows
+     * like in epic page, add horizontal margins, more for each heading level";  "don't go back to bleed when sticky")
+     * - in from the band's edges by `--_site-title-inset`, its words where they were:  the padding gives back the margin
      */
-    margin-inline: calc(-1 * (var(--site-gutter) + var(--_site-band-start)))
-      calc(-1 * (var(--site-gutter) + var(--_site-band-end)));
-    padding-inline: calc(var(--site-gutter) + var(--_site-band-start)) calc(var(--site-gutter) + var(--_site-band-end));
+    margin-inline: calc(var(--_site-title-inset) - var(--site-gutter) - var(--_site-band-start))
+      calc(var(--_site-title-inset) - var(--site-gutter) - var(--_site-band-end));
+    padding-inline: calc(var(--site-gutter) + var(--_site-band-start) - var(--_site-title-inset))
+      calc(var(--site-gutter) + var(--_site-band-end) - var(--_site-title-inset));
+    border-radius: var(--ui-radius-m, 8px);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
     padding-block: 0.4em;
     /*
      * stuck:  a theme's wallpaper, fixed as the page's is, under its white tint
@@ -765,9 +776,52 @@
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    background-color: var(--ui-bar-rest-background, transparent);
-    background-image: none;
+    /*
+     * its fill laid over the page's own ground (a theme's wallpaper, fixed as the page's is):  it looks see-through,
+     * but hides what scrolls under it while its section's end pushes it up, not yet stuck (Owen, 2026-10-25:  "Need
+     * more opacity on "Read only"")
+     * - a theme with no bar fill of its own:  a faint tint, so the bar's shape reads
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-background));
+    background-image:
+      linear-gradient(
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent)),
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent))
+      ),
+      var(--ui-bar-wallpaper, none);
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
+  }
+  /*
+   * a section's first nested title tucks under its parent's, square at its top;  the parent's stays round
+   * (Owen, 2026-10-25:  "top header should have round bottom");  so does any nested title while stuck under it
+   * ("should NOT be rounded on top when stuck")
+   */
+  .site-main ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(title),
+  .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+  /* each heading level a step further in */
+  .site-main ui-section[sticky] {
+    --_site-title-inset: 12px;
+  }
+  .site-main ui-section[sticky] ui-section[sticky] {
+    --_site-title-inset: 28px;
+  }
+  .site-main ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+    --_site-title-inset: 44px;
+  }
+  /* phones:  the gutter is narrow, so smaller steps */
+  @media (--ui-mobile) {
+    .site-main ui-section[sticky] {
+      --_site-title-inset: 4px;
+    }
+    .site-main ui-section[sticky] ui-section[sticky] {
+      --_site-title-inset: 8px;
+    }
+    .site-main ui-section[sticky] ui-section[sticky] ui-section[sticky] {
+      --_site-title-inset: 12px;
+    }
   }
   /*
    * a section's first nested title sits right under its own, open:  no gap
@@ -788,15 +842,6 @@
   .site-main ui-section[sticky][collapsed]::part(section),
   .site-main ui-section[sticky][collapsed] + ui-section[sticky]::part(section) {
     margin-block: 0;
-  }
-  /*
-   * a NESTED title (an example under its section) stacks under its parent's:
-   * a hairline above it, so the two read as two bars
-   * - the same white as its parent's, not a deeper fill
-   *   (Owen, 2026-10-23:  ""Breadcrumb" subheader should read as white rather than grey")
-   */
-  .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
-    box-shadow: inset 0 1px 0 var(--ui-border-color);
   }
   .site-tabs::part(menu) {
     position: sticky;

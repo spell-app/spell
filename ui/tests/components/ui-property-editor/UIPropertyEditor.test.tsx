@@ -78,6 +78,8 @@ describe("<ui-property-editor> schema", () => {
       "md",
       "lg"
     ])
+    // no default:  it reads "none"
+    expect(control(host, "size").getAttribute("placeholder")).toBe("none")
     expect(control(host, "dark").localName).toBe("ui-checkbox")
   })
 
@@ -99,6 +101,18 @@ describe("<ui-property-editor> schema", () => {
     customElements.define("x-later-task", class extends HTMLElement {})
     await settle(host)
     expect(control(host, "done").localName).toBe("ui-checkbox")
+  })
+
+  it("a tag's attribute of a kind with a value set offers that set:  `size` the sizes, `color` the hues", async () => {
+    const host = await ElementFixture.render<Editor>(
+      `<ui-property-editor schema="ui-button"><ui-property name="size"></ui-property><ui-property name="color"></ui-property></ui-property-editor>`
+    )
+    host.value = {}
+    await settle(host)
+    const values = (name: string) =>
+      [...control(host, name).querySelectorAll("ui-item")].map((item) => item.getAttribute("value"))
+    expect(values("size")).toContain("large")
+    expect(values("color")).toContain("violet")
   })
 
   it("keeps the author's layout:  only the properties written, in groups;  `as` picks the control", async () => {

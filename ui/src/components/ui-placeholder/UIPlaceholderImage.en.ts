@@ -21,9 +21,10 @@ export const placeholderImageVocabulary = {
   ui: false,
   description: "The skeleton of an image:  a block of fixed height, or of a fixed aspect ratio.",
   attributes: [
-    { name: "square", kind: "keyOnly", description: "A 1:1 block as wide as its container." },
+    { name: "square", group: "appearance", kind: "keyOnly", description: "A 1:1 block as wide as its container." },
     {
       name: "rectangular",
+      group: "content",
       kind: "keyOnly",
       description: "A 4:3 block as wide as its container;  wins over `square` if both are set."
     }

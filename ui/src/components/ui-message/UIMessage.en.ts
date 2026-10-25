@@ -26,42 +26,63 @@ export const messageVocabulary = {
   noun: "message",
   description: "A message displays information that explains nearby content.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue:  a tinted surface, border and text." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue:  a tinted surface, border and text." },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: ["positive", "negative", "error", "info", "success", "warning"],
       description: "Consequence, tinting it like a colour."
     },
-    { name: "floating", kind: "keyOnly", description: "Lifted off the page with a shadow." },
-    { name: "compact", kind: "keyOnly", description: "Only as wide as its content." },
-    { name: "centered", kind: "keyOnly", description: "Centres its text (and its icon with the content)." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme;  a coloured one keeps its hue in the text." },
+    { name: "floating", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
+    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its content." },
+    {
+      name: "centered",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Centres its text (and its icon with the content)."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The dark scheme;  a coloured one keeps its hue in the text."
+    },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "Joined edge to edge with the segment or form below;  `bottom` joins the one above."
     },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: ["center", "right"],
       description: "Aligns its text `center` or `right`."
     },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       description: "Icon name, shown large beside the content;  the root gets the `icon` class."
     },
     {
       name: "header",
+      group: "name",
       kind: "string",
       description: "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version."
     },
     {
       name: "dismissible",
+      group: "behaviour",
       kind: "boolean",
       description: "Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message."
     }

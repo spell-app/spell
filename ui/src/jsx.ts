@@ -1284,6 +1284,7 @@ export interface UIButtonAttributes {
   /**
    * Size, `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   * - default:  `medium`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
@@ -9817,6 +9818,210 @@ export interface UIIconAttributes {
 export interface UIIconJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIIconAttributes>, UIIconAttributes {}
 
+/** `<ui-icon-picker>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIIconPickerEventMap {
+  /**
+   * `ui-change`:  An icon was picked (`""` for none).  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+}
+
+/** `<ui-icon-picker>`'s own attributes, from its vocabulary. */
+export interface UIIconPickerAttributes {
+  /**
+   * The chosen icon's name (`star`, `address book`);  empty for none.  Attribute:  the starting (and reset) value;  property:  the live value.
+   * - takes:  text
+   */
+  value?: string
+  /**
+   * `value`, as the DOM element's property.
+   * @deprecated write `value` -- `prop:` stays only for compiled spell
+   */
+  "prop:value"?: string
+  /**
+   * Form field name.
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * What the field says while no icon is chosen;  default:  "none".
+   * - takes:  text
+   */
+  placeholder?: string
+  /**
+   * `placeholder`, as the DOM element's property.
+   * @deprecated write `placeholder` -- `prop:` stays only for compiled spell
+   */
+  "prop:placeholder"?: string
+  /**
+   * Size, `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * Takes the full width of its container.
+   * - takes:  flag (present / absent)
+   */
+  fluid?: boolean | ""
+  /**
+   * `fluid`, as the DOM element's property.
+   * @deprecated write `fluid` -- `prop:` stays only for compiled spell
+   */
+  "prop:fluid"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, not focusable, left out of the form.
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Shows its icon but can't be changed:  never opens;  still focusable and submitted.
+   * - takes:  flag (present / absent)
+   */
+  readonly?: boolean | ""
+  /**
+   * `readonly`, as the DOM element's property.
+   * @deprecated write `readonly` -- `prop:` stays only for compiled spell
+   */
+  "prop:readOnly"?: boolean | ""
+  /**
+   * Form validation:  an icon must be chosen;  no "none" choice in the grid.
+   * - takes:  flag (present / absent)
+   */
+  required?: boolean | ""
+  /**
+   * `required`, as the DOM element's property.
+   * @deprecated write `required` -- `prop:` stays only for compiled spell
+   */
+  "prop:required"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `ui-change`:  An icon was picked (`""` for none).  A handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "on-ui-change"?: (event: UIIconPickerEventMap["ui-change"]) => void
+}
+
+/** `<ui-icon-picker>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIIconPickerJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIIconPickerEventMap>>, keyof UIIconPickerAttributes>,
+    UIIconPickerAttributes {}
+
 /** `<ui-icons>`'s own attributes, from its vocabulary. */
 export interface UIIconsAttributes {
   /**
@@ -16230,7 +16435,7 @@ export interface UIPopupAttributes {
    */
   "prop:hoverable"?: boolean | ""
   /**
-   * `hover`:  ms before it shows.
+   * `hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).
    * - takes:  number
    * - default:  `50`
    */
@@ -28275,6 +28480,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-icon": UIIconJSXAttributes
       /**
+       * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
+       * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
+       * - events:  `ui-change`
+       */
+      "ui-icon-picker": UIIconPickerJSXAttributes
+      /**
        * `<ui-icons>`:  Several icons can be used together as a group.
        * - also known as:  icon group, stacked icons, icon stack
        * - slots:
@@ -28904,6 +29115,7 @@ declare global {
     "ui-grid": HTMLElement
     "ui-header": HTMLElement
     "ui-icon": HTMLElement
+    "ui-icon-picker": UIHTMLElement<UIIconPickerEventMap>
     "ui-icons": HTMLElement
     "ui-image": HTMLElement
     "ui-images": HTMLElement

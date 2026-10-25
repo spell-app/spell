@@ -19,35 +19,50 @@ export const nagVocabulary = {
   noun: "nag",
   description: "A nag is a persistent message that stays until dismissed, and can remember the dismissal.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue:  a filled bar in that colour." },
-    { name: "inverted", kind: "keyOnly", description: "Light instead of dark;  a coloured one takes its tint." },
-    { name: "fixed", kind: "keyOnly", description: "Fixed to the viewport edge, over the page." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue:  a filled bar in that colour." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Light instead of dark;  a coloured one takes its tint."
+    },
+    { name: "fixed", group: "layout", kind: "keyOnly", description: "Fixed to the viewport edge, over the page." },
     {
       name: "overlay",
+      group: "appearance",
       kind: "keyOnly",
       description: "Over the page content at its edge (absolute), instead of pushing it down."
     },
-    { name: "bottom", kind: "keyOnly", description: "At the bottom edge instead of the top." },
+    { name: "bottom", group: "appearance", kind: "keyOnly", description: "At the bottom edge instead of the top." },
     {
       name: "closable",
+      group: "behaviour",
       kind: "boolean",
       default: true,
       description: 'Shows the close icon;  `closable="false"` for a nag only script (or `display-time`) closes.'
     },
     {
       name: "key",
+      group: "behaviour",
       kind: "string",
       description: "Remembers the dismissal under this name, in `storage`;  without one nothing is stored."
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       default: "dismiss",
       description: "What a dismissal stores;  a stored `key` with another value doesn't count."
     },
     {
       name: "storage",
+      group: "behaviour",
       kind: "enum",
       values: ["local", "session", "cookie"],
       default: "cookie",
@@ -55,21 +70,29 @@ export const nagVocabulary = {
     },
     {
       name: "expires",
+      group: "advanced",
       kind: "number",
       default: 30,
       description: "Days a dismissal lasts (`local` and `cookie`);  `0` never expires."
     },
-    { name: "persist", kind: "boolean", description: "Shows even when dismissed before (stores nothing new either)." },
+    {
+      name: "persist",
+      group: "advanced",
+      kind: "boolean",
+      description: "Shows even when dismissed before (stores nothing new either)."
+    },
     {
       name: "display-time",
+      group: "behaviour",
       kind: "number",
       description: "Milliseconds before it hides itself (not a dismissal:  nothing is stored);  absent / `0`:  stays."
     },
-    { name: "path", kind: "string", default: "/", description: "Cookie `path`." },
-    { name: "domain", kind: "string", description: "Cookie `domain`." },
-    { name: "secure", kind: "boolean", description: "Cookie `secure`." },
+    { name: "path", group: "advanced", kind: "string", default: "/", description: "Cookie `path`." },
+    { name: "domain", group: "advanced", kind: "string", description: "Cookie `domain`." },
+    { name: "secure", group: "advanced", kind: "boolean", description: "Cookie `secure`." },
     {
       name: "samesite",
+      group: "advanced",
       kind: "enum",
       values: ["lax", "strict", "none"],
       property: "sameSite",

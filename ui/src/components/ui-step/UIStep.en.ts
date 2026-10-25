@@ -31,28 +31,46 @@ export const stepVocabulary = {
   attributes: [
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Circular steps:  hue of this step's ring and line, whatever its state."
     },
     {
       name: "selected",
+      group: "states",
       kind: "keyOnly",
       key: "active",
       description:
         'The CURRENT step (`aria-current="step"`).  Alias:  `active`.  NOTE: Fomantic\'s word for it is `active`.'
     },
-    { name: "completed", kind: "keyOnly", description: "Done:  its icon (or number) becomes a check." },
-    { name: "disabled", kind: "keyOnly", description: "Not available yet:  dimmed, and a link step isn't followed." },
+    {
+      name: "completed",
+      group: "states",
+      kind: "keyOnly",
+      description: "Done:  its icon (or number) becomes a check."
+    },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Not available yet:  dimmed, and a link step isn't followed."
+    },
     {
       name: "link",
+      group: "link",
       kind: "keyOnly",
       description: "Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`."
     },
-    { name: "href", kind: "string", description: "Renders a link (`<a>`) styled as a step." },
-    { name: "target", kind: "string", description: "Link target, with `href`." },
-    { name: "icon", kind: "icon", description: "Icon name, before the content." },
-    { name: "header", kind: "string", description: "Shorthand for the title (Fomantic's `.title`)." },
-    { name: "description", kind: "string", description: "Shorthand for the description under the title." }
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a step." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
+    { name: "icon", group: "content", kind: "icon", description: "Icon name, before the content." },
+    { name: "header", group: "name", kind: "string", description: "Shorthand for the title (Fomantic's `.title`)." },
+    {
+      name: "description",
+      group: "content",
+      kind: "string",
+      description: "Shorthand for the description under the title."
+    }
   ],
   events: [],
   slots: [

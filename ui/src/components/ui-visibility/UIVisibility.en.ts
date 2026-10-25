@@ -21,28 +21,38 @@ export const visibilityVocabulary = {
   attributes: [
     {
       name: "once",
+      group: "appearance",
       kind: "boolean",
       default: true,
       description: 'Each event fires at most once (Fomantic\'s default);  `once="false"`:  each time it turns true.'
     },
     {
       name: "continuous",
+      group: "appearance",
       kind: "boolean",
       description: "Events fire at every check while their condition holds (each crossing, not every scrolled pixel)."
     },
     {
       name: "offset",
+      group: "layout",
       kind: "number",
       default: 0,
       description: "Pixels below the viewport top that count as the screen top, e.g. under a fixed menu."
     },
     {
       name: "type",
+      group: "appearance",
       kind: "enum",
       values: ["image"],
       description: "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`)."
     },
-    { name: "duration", kind: "number", default: 1000, description: '`type="image"`:  that animation\'s ms.' }
+    {
+      name: "duration",
+      group: "behaviour",
+      kind: "number",
+      default: 1000,
+      description: '`type="image"`:  that animation\'s ms.'
+    }
   ],
   events: [
     { name: "ui-visible", detail: "VisibilityCalculations", description: "Some of it came on screen (`onOnScreen`)." },

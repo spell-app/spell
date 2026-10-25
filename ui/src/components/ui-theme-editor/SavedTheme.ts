@@ -1,3 +1,5 @@
+// Import directly:  in `core`'s util barrel it cost every page 1.9 kB
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI, type UIT } from "spell-ui/core"
 import { EDITS_SHEET } from "./UIThemeEditor.types"
 
@@ -14,7 +16,7 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
  *     the family's barrel would load the editor too
  * - Kept in `localStorage` under `STORAGE_KEY`:  the choices AND the stylesheet's text,
  *   so a page restores it without the editor's texts or code (`ThemeSheet`).
- *   - Every access in try/catch:  a private window or blocked storage just keeps nothing.
+ *   - Through `PrefStore`:  a private window or blocked storage keeps it for this page only.
  * - Restoring applies the base theme (`UI.themes.apply()`) and then the sheet, on the page:
  *   the same two steps `ThemeSheet.applyToPage()` takes, so it looks as it did in the editor.
  * - Static:  one kept theme per browser.
@@ -41,20 +43,12 @@ export class SavedTheme {
    */
   static save(choices: UIT.ThemeChoices, css: string): void {
     const kept: KeptTheme = { choices, css }
-    try {
-      globalThis.localStorage?.setItem(STORAGE_KEY, JSON.stringify(kept))
-    } catch {
-      // private window / blocked storage:  nothing kept
-    }
+    PrefStore.setAt(STORAGE_KEY, kept)
   }
 
   /** Forget the kept theme.  NEVER throws. */
   static forget(): void {
-    try {
-      globalThis.localStorage?.removeItem(STORAGE_KEY)
-    } catch {
-      // blocked storage:  nothing was kept
-    }
+    PrefStore.setAt(STORAGE_KEY, undefined)
   }
 
   /**
@@ -90,15 +84,9 @@ export class SavedTheme {
 
   /** What's kept, if it reads as a theme;  anything else is `undefined`. */
   private static read(): KeptTheme | undefined {
-    try {
-      const text = globalThis.localStorage?.getItem(STORAGE_KEY)
-      if (!text) return undefined
-      const kept = JSON.parse(text) as Partial<KeptTheme>
-      const isKept = typeof kept.css === "string" && typeof kept.choices?.base === "string"
-      return isKept ? (kept as KeptTheme) : undefined
-    } catch {
-      return undefined
-    }
+    const kept = PrefStore.getAt(STORAGE_KEY) as Partial<KeptTheme> | undefined
+    const isKept = typeof kept?.css === "string" && typeof kept.choices?.base === "string"
+    return isKept ? (kept as KeptTheme) : undefined
   }
 }
 

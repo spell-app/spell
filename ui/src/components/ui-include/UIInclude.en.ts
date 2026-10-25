@@ -26,6 +26,7 @@ export const includeVocabulary = {
     ...UIT.SourceAttributes,
     {
       name: "select",
+      group: "appearance",
       kind: "string",
       description:
         "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  " +
@@ -33,6 +34,7 @@ export const includeVocabulary = {
     },
     {
       name: "page-styles",
+      group: "advanced",
       kind: "boolean",
       property: "pageStyles",
       description:

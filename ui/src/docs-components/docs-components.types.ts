@@ -190,7 +190,7 @@ export type SiteProp = {
 
 /** One place a component is drawn:  the component (or page) that draws it, and its file. */
 export type SiteUse = {
-  /** e.g. `RunnerPane`, `<spell-app>` */
+  /** e.g. `RunnerPane`, `<spell-viewer>` */
   readonly name: string
   /** from the repo root, e.g. `packages/app/src/runner/RunnerPane.tsx` */
   readonly file: string

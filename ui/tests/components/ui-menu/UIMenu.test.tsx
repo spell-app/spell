@@ -217,6 +217,17 @@ describe("<ui-menu> semantics", () => {
     expect([second!.marginTop, second!.marginBottom]).toEqual(["16px", "0px"])
   })
 
+  it("a nested SEGMENTED menu is no sub-menu:  a control of its own, with its own look (the editor's modes)", async () => {
+    const { host } = await menu(
+      "",
+      `<ui-item><ui-menu appearance="segmented"><ui-item selected>A</ui-item><ui-item>B</ui-item></ui-menu></ui-item>`
+    )
+    const segmented = host.querySelector<DOMElement>("ui-menu")!
+    expect(segmented.matches(":state(in-menu)")).toBe(false)
+    const root = segmented.shadowRoot!.querySelector<HTMLElement>("[part~=menu]")!
+    expect(root.classList.contains("segmented")).toBe(true)
+  })
+
   it("renders a nested <ui-menu> as a sub-menu:  no `ui`, its position, its items owned", async () => {
     const { host } = await menu(
       "",

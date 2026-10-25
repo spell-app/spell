@@ -34,14 +34,21 @@ export const menuVocabulary = {
   noun: "menu",
   description: "A menu displays grouped navigation actions.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of the active item;  with `inverted`, the menu's fill;  `segmented`, the selected item's fill."
     },
     {
       name: "appearance",
+      group: "appearance",
       kind: "valueOnly",
       values: UIT.MenuAppearances,
       description:
@@ -54,6 +61,7 @@ export const menuVocabulary = {
     },
     {
       name: "position",
+      group: "layout",
       kind: "valueOnly",
       values: ["left", "right", "center"],
       description:
@@ -62,11 +70,13 @@ export const menuVocabulary = {
     },
     {
       name: "secondary",
+      group: "appearance",
       kind: "keyOnly",
       description: 'De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.'
     },
     {
       name: "pointing",
+      group: "layout",
       kind: "keyOnly",
       description:
         "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of " +
@@ -74,58 +84,86 @@ export const menuVocabulary = {
     },
     {
       name: "tabular",
+      group: "layout",
       kind: "keyOnly",
       description: 'Looks like tabs (Fomantic 2.9\'s `tabbed`).  Alias of `appearance="tabular"`.'
     },
-    { name: "text", kind: "keyOnly", description: 'Plain text items, no box.  Alias of `appearance="text"`.' },
-    { name: "vertical", kind: "keyOnly", description: "Items stacked top to bottom." },
-    { name: "pagination", kind: "keyOnly", description: "Page links:  compact, centred items." },
-    { name: "icon", kind: "keyOnly", description: "Icon-only items." },
+    {
+      name: "text",
+      group: "name",
+      kind: "keyOnly",
+      description: 'Plain text items, no box.  Alias of `appearance="text"`.'
+    },
+    { name: "vertical", group: "layout", kind: "keyOnly", description: "Items stacked top to bottom." },
+    { name: "pagination", group: "appearance", kind: "keyOnly", description: "Page links:  compact, centred items." },
+    { name: "icon", group: "content", kind: "keyOnly", description: "Icon-only items." },
     {
       name: "labeled",
+      group: "appearance",
       kind: "keyOnly",
       key: "labeled icon",
       description: "Labeled icon items:  a large icon above each item's text."
     },
-    { name: "link", kind: "keyOnly", description: "Every item is interactive:  a `<button>` with the link hover." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "stackable", kind: "keyOnly", description: "Stacks its items on mobile." },
-    { name: "centered", kind: "keyOnly", description: "Centred in its container, items centred." },
-    { name: "borderless", kind: "keyOnly", description: "No dividers between items." },
-    { name: "compact", kind: "keyOnly", description: "Only as wide as its items." },
-    { name: "wrapping", kind: "keyOnly", description: "Items wrap onto more lines when they don't fit." },
-    { name: "wrapped", kind: "keyOnly", description: "With `wrapping`:  square corners where the lines meet." },
+    {
+      name: "link",
+      group: "link",
+      kind: "keyOnly",
+      description: "Every item is interactive:  a `<button>` with the link hover."
+    },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    { name: "stackable", group: "layout", kind: "keyOnly", description: "Stacks its items on mobile." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container, items centred." },
+    { name: "borderless", group: "appearance", kind: "keyOnly", description: "No dividers between items." },
+    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its items." },
+    {
+      name: "wrapping",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Items wrap onto more lines when they don't fit."
+    },
+    {
+      name: "wrapped",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "With `wrapping`:  square corners where the lines meet."
+    },
     {
       name: "inverted",
+      group: "appearance",
       kind: "keyOnly",
       description: "The dark scheme;  with `color`, filled with the colour."
     },
     {
       name: "floated",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
       description: "Floats beside the content;  `right` floats right."
     },
     {
       name: "fitted",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["horizontally", "vertically"],
       description: "No item padding;  `horizontally` / `vertically` keep the other axis' padding."
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle."
     },
     {
       name: "fixed",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom", "left", "right"],
       description: "Fixed to an edge of the viewport."
     },
     {
       name: "alignment",
+      group: "layout",
       kind: "valueAndKey",
       key: "aligned",
       values: UIT.ItemAlignments,
@@ -135,6 +173,7 @@ export const menuVocabulary = {
     },
     {
       name: "equal",
+      group: "layout",
       kind: "keyOnly",
       description:
         'Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an ' +
@@ -142,6 +181,7 @@ export const menuVocabulary = {
     },
     {
       name: "items",
+      group: "content",
       kind: "width",
       widthClass: "item",
       canEqual: true,
@@ -151,6 +191,7 @@ export const menuVocabulary = {
     },
     {
       name: "interactive",
+      group: "behaviour",
       kind: "boolean",
       description:
         "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a " +

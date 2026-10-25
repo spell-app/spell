@@ -40,16 +40,19 @@ export const sectionVocabulary = {
   attributes: [
     {
       name: "label",
+      group: "name",
       kind: "string",
       description: 'Title text;  a slotted `slot="label"` is the rich version (code, links).'
     },
     {
       name: "hint",
+      group: "form",
       kind: "string",
       description: 'Smaller text under the title;  scrolls away with the content, never sticks.  Or `slot="hint"`.'
     },
     {
       name: "level",
+      group: "appearance",
       kind: "enum",
       values: ["1", "2", "3", "4", "5", "6"],
       description:
@@ -58,16 +61,19 @@ export const sectionVocabulary = {
     },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       description: 'Icon name, before the title;  a slotted `slot="icon"` (a `<ui-icon>`, anything) replaces it.'
     },
     {
       name: "badge",
+      group: "content",
       kind: "string",
       description: 'A small pill after the title, e.g. a count (`3/7`);  `slot="badge"` is the rich version.'
     },
     {
       name: "description",
+      group: "content",
       kind: "string",
       description:
         "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button " +
@@ -76,6 +82,7 @@ export const sectionVocabulary = {
     },
     {
       name: "collapsible",
+      group: "behaviour",
       kind: "boolean",
       description:
         "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside " +
@@ -83,6 +90,7 @@ export const sectionVocabulary = {
     },
     {
       name: "collapsed",
+      group: "states",
       kind: "boolean",
       description:
         "Folded:  only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto " +
@@ -90,6 +98,7 @@ export const sectionVocabulary = {
     },
     {
       name: "fold-icon",
+      group: "appearance",
       kind: "enum",
       values: ["start", "end"],
       description:
@@ -98,6 +107,7 @@ export const sectionVocabulary = {
     },
     {
       name: "sticky",
+      group: "behaviour",
       kind: "keyOnly",
       description:
         "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below " +
@@ -105,62 +115,80 @@ export const sectionVocabulary = {
     },
     {
       name: "offset",
+      group: "layout",
       kind: "number",
       default: 0,
       description:
         "With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's " +
         "height);  nested sections work theirs out."
     },
-    { name: "color", kind: "color", description: "Hue of the title (and of the rule or box edge)." },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      description: "Hue of the title (and of the rule or box edge)."
+    },
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Text size of the CONTENT, `mini` ... `massive`;  the title keeps its level's size."
     },
-    { name: "dividing", kind: "keyOnly", description: "A rule under the title." },
-    { name: "block", kind: "keyOnly", description: "The title bar in a tinted box." },
-    { name: "bordered", kind: "keyOnly", description: "A box around the section, as a segment." },
+    { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule under the title." },
+    { name: "block", group: "layout", kind: "keyOnly", description: "The title bar in a tinted box." },
+    { name: "bordered", group: "appearance", kind: "keyOnly", description: "A box around the section, as a segment." },
     {
       name: "styled",
+      group: "appearance",
       kind: "keyOnly",
       description: "Boxed as a styled accordion:  a tinted title bar over padded content."
     },
-    { name: "raised", kind: "keyOnly", description: "With a box:  lifted with a shadow." },
-    { name: "basic", kind: "keyOnly", description: "No box, rule or tint, whatever else is set." },
-    { name: "compact", kind: "keyOnly", description: "Less padding and space around the title." },
+    { name: "raised", group: "appearance", kind: "keyOnly", description: "With a box:  lifted with a shadow." },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box, rule or tint, whatever else is set." },
+    { name: "compact", group: "layout", kind: "keyOnly", description: "Less padding and space around the title." },
     {
       name: "padded",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'More padding in the content;  `padded="very"` for even more.'
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
     },
     {
       name: "scrolling",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["short", "very short", "long", "very long"],
       description: "The content has a capped height and scrolls;  `short` ... `very long` scale the cap."
     },
     {
       name: "height",
+      group: "layout",
       kind: "string",
       description:
         "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
     },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: ["left", "center", "right"],
       description: "Aligns the TITLE `left`, `center` or `right`."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "loading", kind: "keyOnly", description: "Dims the content under a spinner;  `aria-busy`." },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and inert;  can't be folded." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    {
+      name: "loading",
+      group: "states",
+      kind: "keyOnly",
+      description: "Dims the content under a spinner;  `aria-busy`."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert;  can't be folded." },
     ...UIT.SourceBodyAttributes
   ],
   events: [

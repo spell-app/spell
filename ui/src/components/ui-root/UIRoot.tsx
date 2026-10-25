@@ -56,14 +56,14 @@ import rootCSS from "./UIRoot.css?inline"
  * - Static server render (`spell-ui/static`):  nothing loads and nothing is hidden;
  *   the root is a plain wrapper (`serverWrapper()`).
  *   None of its `@E.onChange` effects runs there (none writes the DOM element).
- * - A subclass is a root too (`elementSetup.root`), under its own tag, e.g. `<spell-app>`:
+ * - A subclass is a root too (`elementSetup.root`), under its own tag, e.g. `<spell-viewer>`:
  *   - it draws an app instead of a `<slot>` (`content()`)
  *   - it loads what's inside its shadow root too (`contentRoots`), and tags of its own (`ownTagLoader()`)
  *   - its vocabulary has the root's names, plus its own
  ****************/
 export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.UIComponent<V> {
   @E.proto static vocabulary: E.ComponentVocabulary = rootVocabulary
-  // typed, not `satisfies`:  a subclass states other keys (`<spell-app>`)
+  // typed, not `satisfies`:  a subclass states other keys (`<spell-viewer>`)
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { root: rootCSS },
     delegatesFocus: false,
@@ -230,7 +230,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
 
   /**
    * What the root shows once ready:  a `<slot>` for the page, hidden while loading (`contentStyle`).
-   * - A subclass that draws its own content puts it here, with `contentStyle` on its outside (`<spell-app>`).
+   * - A subclass that draws its own content puts it here, with `contentStyle` on its outside (`<spell-viewer>`).
    */
   protected content(): JSX.Element {
     return <slot class={this.rootClass} style={this.contentStyle} />
@@ -304,7 +304,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
 
   /**
    * Where the content the root loads is:  the DOM element's children.
-   * - A subclass that draws its content in its shadow root adds that (`<spell-app>`).
+   * - A subclass that draws its content in its shadow root adds that (`<spell-viewer>`).
    */
   protected get contentRoots(): readonly ParentNode[] {
     return [this.domElement]
@@ -313,7 +313,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
   /**
    * How to load `tag`, an undefined tag the root loads ITSELF, beyond Spell UI's and the packs';
    * `undefined` for any other tag.
-   * - None here:  a subclass's own (`<spell-app>`:  `spell-editor` => `spell-editor.js`).
+   * - None here:  a subclass's own (`<spell-viewer>`:  `spell-editor` => `spell-editor.js`).
    */
   protected ownTagLoader(_tag: string): (() => Promise<void>) | undefined {
     return undefined
@@ -505,7 +505,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
 
   /**
    * Folder the built-in icon packs load from:  `assets`.
-   * - A subclass whose `assets` means something else says where its packs are (`<spell-app>`:  beside its script).
+   * - A subclass whose `assets` means something else says where its packs are (`<spell-viewer>`:  beside its script).
    */
   protected get iconAssets(): string | undefined {
     return this.assets

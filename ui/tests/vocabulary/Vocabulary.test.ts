@@ -225,7 +225,7 @@ describe("Vocabulary.define() with a Spanish dictionary", () => {
 describe("Vocabulary.define():  another package's events", () => {
   /** A component pack's tag, with an event of its own prefix and one of Spell UI's. */
   const APP = {
-    tag: "spell-app",
+    tag: "spell-viewer",
     noun: "app",
     attributes: [],
     events: [
@@ -241,14 +241,19 @@ describe("Vocabulary.define():  another package's events", () => {
   it("keep their names, canonical or under another prefix;  Spell UI's take the prefix", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
-    expect([...vocabulary.define().get("spell-app")!.events.keys()]).toEqual(["spell-open", "ui-change"])
-    expect([...vocabulary.define("ie", SPANISH).get("spell-app")!.events.keys()]).toEqual(["spell-open", "ie-cambio"])
+    expect([...vocabulary.define().get("spell-viewer")!.events.keys()]).toEqual(["spell-open", "ui-change"])
+    expect([...vocabulary.define("ie", SPANISH).get("spell-viewer")!.events.keys()]).toEqual([
+      "spell-open",
+      "ie-cambio"
+    ])
   })
 
   it("are translated when the dictionary names them", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
-    const events = vocabulary.define("ie", { lang: "es", events: { "spell-open": "abrir" } }).get("spell-app")!.events
+    const events = vocabulary
+      .define("ie", { lang: "es", events: { "spell-open": "abrir" } })
+      .get("spell-viewer")!.events
     expect([...events.keys()]).toEqual(["ie-abrir", "ie-change"])
   })
 })

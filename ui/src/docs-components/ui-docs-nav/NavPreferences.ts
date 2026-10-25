@@ -1,10 +1,12 @@
+// Import directly:  in `core`'s util barrel it cost every page 1.9 kB
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { NavGroups, NavViews, STORAGE_KEYS, type NavGroup, type NavView } from "./UIDocsNav.types"
 
 /****************
  * ### `NavPreferences`
  * The viewer's nav preferences in `localStorage`:  favourites, the view, the open topics, the folded groups.
- * Replaces the Astro site's `SiteStorage` (same keys, `STORAGE_KEYS`, so a viewer keeps theirs).
- * - Every access is wrapped:  private windows and blocked storage THROW, and then a preference just doesn't persist.
+ * - Replaces the Astro site's `SiteStorage`, with the same keys (`STORAGE_KEYS`), so a viewer keeps theirs.
+ * - Through `PrefStore`:  private windows and blocked storage keep a preference for this page only.
  * - Per viewer and browser only;  NOT the search text.
  * - Static only:  the storage is one per page, and holds no state of its own.
  ****************/
@@ -58,38 +60,26 @@ export class NavPreferences {
   // ## Storage
   ////////////////
 
-  /** `localStorage.getItem()`;  `undefined` if absent or storage is unavailable. */
+  /** The text kept at `key`;  `undefined` if none, or not text. */
   private static read(key: string): string | undefined {
-    try {
-      return localStorage.getItem(key) ?? undefined
-    } catch {
-      return undefined
-    }
+    const value = PrefStore.getAt(key)
+    return typeof value === "string" ? value : undefined
   }
 
-  /** `localStorage.setItem()`, or `removeItem()` for `undefined`;  skipped if unavailable. */
+  /** Keep `value` at `key`;  `undefined` forgets it. */
   private static write(key: string, value: string | undefined) {
-    try {
-      if (value === undefined) localStorage.removeItem(key)
-      else localStorage.setItem(key, value)
-    } catch {
-      // private mode / blocked storage:  the preference just doesn't persist
-    }
+    PrefStore.setAt(key, value)
   }
 
   /** A stored list of strings;  `[]` if absent, unreadable or not a string array (a hand-edited value). */
   private static readList(key: string): string[] {
-    try {
-      const value: unknown = JSON.parse(NavPreferences.read(key) ?? "[]")
-      return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
-    } catch {
-      return []
-    }
+    const value = PrefStore.getAt(key)
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
   }
 
-  /** Store a list of strings;  an empty list removes the key. */
+  /** Store a list of strings, as JSON;  an empty list removes the key. */
   private static writeList(key: string, list: Iterable<string>) {
     const items = [...list]
-    NavPreferences.write(key, items.length ? JSON.stringify(items) : undefined)
+    PrefStore.setAt(key, items.length ? items : undefined)
   }
 }

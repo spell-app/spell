@@ -29,18 +29,25 @@ export const statisticsVocabulary = {
   noun: "statistics",
   description: "A group of statistics.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of every statistic in the group." },
-    { name: "color", kind: "color", description: "Hue of every value in the group." },
-    { name: "horizontal", kind: "keyOnly", description: "Statistics stacked, each with its label beside its value." },
-    { name: "inverted", kind: "keyOnly", description: "Every statistic for dark backgrounds." },
+    { name: "size", group: "appearance", kind: "size", description: "Size of every statistic in the group." },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of every value in the group." },
+    {
+      name: "horizontal",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Statistics stacked, each with its label beside its value."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every statistic for dark backgrounds." },
     {
       name: "stackable",
+      group: "layout",
       kind: "keyOnly",
       description:
         "Below 768px of the group's width (or the screen's:  `stack-with`), one statistic per row, full width."
     },
     {
       name: "stack-with",
+      group: "layout",
       kind: "enum",
       values: UIT.StackWithValues,
       description:
@@ -50,6 +57,7 @@ export const statisticsVocabulary = {
     },
     {
       name: "equal",
+      group: "layout",
       kind: "keyOnly",
       description:
         "Every statistic the same width, from the statistics themselves (no count):  one row, an equal share of " +
@@ -57,6 +65,7 @@ export const statisticsVocabulary = {
     },
     {
       name: "widths",
+      group: "appearance",
       kind: "width",
       widthClass: "",
       values: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],

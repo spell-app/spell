@@ -22,24 +22,44 @@ export const ratingVocabulary = {
   noun: "rating",
   description: "A rating indicates people's interest in content.",
   attributes: [
-    { name: "size", kind: "size", description: "Icon size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue of the filled icons." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Icon size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the filled icons." },
     {
       name: "disabled",
+      group: "states",
       kind: "keyOnly",
       description: "Can't be used:  left out of the form, not focusable.  Shows its value."
     },
     {
       name: "readonly",
+      group: "form",
       kind: "keyOnly",
       property: "readOnly",
       key: "read-only",
       description: "Shows its value but can't be changed;  still focusable and submitted."
     },
-    { name: "icon", kind: "icon", default: "star", description: "Icon name, e.g. `star` (default), `heart`." },
-    { name: "max-rating", kind: "number", default: 4, description: "How many icons (Fomantic's default:  4)." },
+    {
+      name: "icon",
+      group: "content",
+      kind: "icon",
+      default: "star",
+      description: "Icon name, e.g. `star` (default), `heart`."
+    },
+    {
+      name: "max-rating",
+      group: "appearance",
+      kind: "number",
+      default: 4,
+      description: "How many icons (Fomantic's default:  4)."
+    },
     {
       name: "value",
+      group: "form",
       kind: "number",
       reflect: false,
       description:
@@ -48,11 +68,12 @@ export const ratingVocabulary = {
     },
     {
       name: "clearable",
+      group: "form",
       kind: "boolean",
       description: "Choosing the current rating again clears it (as do Backspace / Delete);  always, with one icon."
     },
-    { name: "name", kind: "string", description: "Form field name." },
-    { name: "required", kind: "boolean", description: "Form validation:  a rating must be given." }
+    { name: "name", group: "name", kind: "string", description: "Form field name." },
+    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a rating must be given." }
   ],
   events: [
     {

@@ -34,6 +34,7 @@ export const emojiVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       values: ["small", "medium", "large", "big"],
       description:
@@ -42,6 +43,7 @@ export const emojiVocabulary = {
     },
     {
       name: "name",
+      group: "name",
       kind: "string",
       description:
         "The emoji's name in the page's name set:  by default its CLDR shortcode (Unicode's name, `thumbs_up`, " +
@@ -51,14 +53,20 @@ export const emojiVocabulary = {
     },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description:
         "Accessible name (`role=img`), when the emoji stands for something else;  bare `label` hides it " +
         "(decorative).  Default:  the character's own Unicode name, read by assistive tech."
     },
-    { name: "link", kind: "keyOnly", description: "Clickable look:  a pointer cursor.  The page adds the control." },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed." },
-    { name: "loading", kind: "keyOnly", description: "Spins (a still glyph under reduced motion)." }
+    {
+      name: "link",
+      group: "link",
+      kind: "keyOnly",
+      description: "Clickable look:  a pointer cursor.  The page adds the control."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Spins (a still glyph under reduced motion)." }
   ],
   events: [],
   slots: [],

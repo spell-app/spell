@@ -27,48 +27,79 @@ export const cardVocabulary = {
   plural: "cards",
   description: "A card displays site content in a manner similar to a playing card.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "A coloured line along the bottom edge (a tinted fill when `basic`)."
     },
     {
       name: "horizontal",
+      group: "layout",
       kind: "keyOnly",
       description: "Image and content side by side;  the extra content spans the bottom."
     },
-    { name: "raised", kind: "keyOnly", description: "Lifted off the page with a stronger shadow." },
+    {
+      name: "raised",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Lifted off the page with a stronger shadow."
+    },
     {
       name: "link",
+      group: "link",
       kind: "keyOnly",
       description: "Rises on hover, as a link card does.  A LOOK only:  give it `href` to make it a link."
     },
-    { name: "fluid", kind: "keyOnly", description: "Takes the width of its container." },
-    { name: "centered", kind: "keyOnly", description: "Centred in its container." },
-    { name: "basic", kind: "keyOnly", description: "No border or shadow." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the width of its container." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container." },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "No border or shadow." },
     {
       name: "dashed",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "A placeholder:  a dashed border (`--ui-card-border-color`) and no drop shadow, unless `raised`.  Not Fomantic's."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert;  a link card loses its `href`." },
-    { name: "loading", kind: "keyOnly", description: "Dimmed under a spinner, announced as busy." },
-    { name: "href", kind: "string", description: "Makes the whole card a link (`<a>`)." },
-    { name: "target", kind: "string", description: "Link target, with `href`." },
-    { name: "header", kind: "string", description: "Shorthand:  the header of a content block." },
-    { name: "meta", kind: "string", description: "Shorthand:  metadata below the header." },
-    { name: "description", kind: "string", description: "Shorthand:  the description of the content block." },
-    { name: "extra", kind: "string", description: "Shorthand:  extra content at the bottom (a footer)." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Faded and inert;  a link card loses its `href`."
+    },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Dimmed under a spinner, announced as busy." },
+    { name: "href", group: "link", kind: "string", description: "Makes the whole card a link (`<a>`)." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
+    { name: "header", group: "name", kind: "string", description: "Shorthand:  the header of a content block." },
+    { name: "meta", group: "content", kind: "string", description: "Shorthand:  metadata below the header." },
+    {
+      name: "description",
+      group: "content",
+      kind: "string",
+      description: "Shorthand:  the description of the content block."
+    },
+    {
+      name: "extra",
+      group: "content",
+      kind: "string",
+      description: "Shorthand:  extra content at the bottom (a footer)."
+    },
     {
       name: "image",
+      group: "content",
       kind: "string",
       description: "Shorthand:  image URL, shown at the top (at the start when horizontal)."
     },
     {
       name: "alt",
+      group: "content",
       kind: "string",
       description: 'Alternative text of the `image` shorthand;  default `""` (decorative:  the card\'s text names it).'
     }

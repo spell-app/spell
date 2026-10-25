@@ -202,7 +202,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-64 families, 106 tags;  3 families in progress.
+65 families, 107 tags;  3 families in progress.
 
 ### Elements
 
@@ -304,6 +304,7 @@ Elements with no Fomantic counterpart.
 | Picture | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- | --- |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 | <img src="docs/images/components/ui-markdown.png" alt="Markdown, its first example" width="131" height="96"> | [Markdown](docs/ui-markdown.html) | `<ui-markdown>` | Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. | markdown, md, gfm, readme |
 | <img src="docs/images/components/ui-panel.png" alt="Panel, its first example" width="169" height="96"> | [Panel](docs/ui-panel.html) | `<ui-panel>` | A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute. | inspector, property panel, properties, settings panel |
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |

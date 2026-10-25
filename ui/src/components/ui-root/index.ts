@@ -10,7 +10,7 @@
  * - NOTE: the three families are imported HERE, not by `LoaderMessage` / `PlaceholderSkeleton` / `UIRoot`:
  *   the static server render (`spell-ui/static`) loads `UIRoot` from its own file, and defining an element throws in node.
  * - `RootCatalogEntry` is exported for component packs:  `spell pack build` writes a catalog of them.
- * - `RootVocabulary`, for a subclass's vocabulary (`<spell-app>`'s).
+ * - `RootVocabulary`, for a subclass's vocabulary (`<spell-viewer>`'s).
  * - Also the library's `spell-ui/ui-root` entry (its size is in `notes/report.md`).
  */
 

@@ -27,28 +27,33 @@ export const itemsVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Text size of every item, `mini` ... `massive`;  `medium` is the default."
     },
-    { name: "divided", kind: "keyOnly", description: "A rule between items." },
+    { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
     {
       name: "relaxed",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'More space between items;  `relaxed="very"` even more.'
     },
     {
       name: "link",
+      group: "link",
       kind: "keyOnly",
       description: "Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`."
     },
     {
       name: "unstackable",
+      group: "layout",
       kind: "keyOnly",
       description: "Keeps the image beside the content in a narrow group (mobile widths), where items otherwise stack."
     },
     {
       name: "stack-with",
+      group: "layout",
       kind: "enum",
       values: UIT.StackWithValues,
       description:
@@ -56,8 +61,8 @@ export const itemsVocabulary = {
         "width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token " +
         "decides (`<ui-root stack-with>`)."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert." }
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-item>`s." }],

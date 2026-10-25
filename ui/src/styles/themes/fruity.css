@@ -446,10 +446,10 @@
   /*
    * an INVERTED surface on a light page (a dark segment, the inverted examples):  dark glass that reads as dark,
    * not the translucent grey the dark scheme's glass makes over a light wallpaper
-   * (Owen:  "inversion surround should be darker")
+   * (Owen:  "inversion surround should be darker";  2026-10-25, again:  "inverted background panel should be darker")
    */
   .ui.inverted.segment:not(.basic) {
-    background-color: rgb(28 26 36 / 0.9);
+    background-color: rgb(16 15 22 / 0.96);
   }
   /*
    * the docs' side column in its flyout, over the page (page only:  the panel is the element's own box)

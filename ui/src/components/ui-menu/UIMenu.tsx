@@ -77,8 +77,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   // ## The menu tree
   ////////////////
 
-  /** Owning menu, when this is a sub-menu. */
-  readonly context = new E.PartContext({ domElement: this.domElement, noun: this.vocabulary.noun })
+  /**
+   * Owning menu, when this is a sub-menu.
+   * - A `segmented` menu is never one:  a single-choice control keeps its own look and thumb,
+   *   even inside another menu (Owen:  the editor's Run | Edit | Debug, in its top bar).
+   */
+  readonly context = new E.PartContext({
+    domElement: this.domElement,
+    noun: this.vocabulary.noun,
+    barrier: (element) => this.appearance === SEGMENTED || E.PartContext.isBarrier(element)
+  })
 
   /** The owning menu's component, when this is a sub-menu:  only menus own `menu` parts. */
   get parentMenu(): UIMenu | undefined {

@@ -25,6 +25,7 @@ export const dateVocabulary = {
   attributes: [
     {
       name: "datetime",
+      group: "appearance",
       kind: "string",
       property: "dateTime",
       description: "Machine-readable date, as `<time datetime>`."

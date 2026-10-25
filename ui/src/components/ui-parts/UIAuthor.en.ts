@@ -23,8 +23,8 @@ export const authorVocabulary = {
   ui: false,
   description: "Who wrote a comment or did a feed event (Fomantic's feed `user`).",
   attributes: [
-    { name: "href", kind: "string", description: "Renders a link (`<a>`), e.g. to a profile." },
-    { name: "target", kind: "string", description: "Link target, with `href`." }
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`), e.g. to a profile." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
   ],
   events: [],
   slots: [{ name: "", description: "The name." }],

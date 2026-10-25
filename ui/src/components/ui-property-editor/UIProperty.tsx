@@ -196,12 +196,19 @@ export class UIProperty extends UIField {
   /** Choices loaded from a source (`options`, `choicesFrom`), once they arrive. */
   @E.state accessor loadedChoices: readonly Choice[] | undefined = undefined
 
-  /** Its choices:  `options` written as a list, else a source's (once loaded), else the schema's `values`. */
+  /**
+   * Its choices:  `options` written as a list, else a source's (once loaded), else the schema's values.
+   * - The schema's values:  its own `values` (a list, or a value set's name), else its kind's set
+   *   (`ValueSets.setFor()`):  a tag's `size` is the sizes, its `color` the hues.
+   *   Without the kind's set, a tag's own schema drew its selects with nothing to choose (Owen:  "dropdowns don't
+   *   have options").
+   */
   get choices(): readonly Choice[] | undefined {
     const text = this.optionsText
     if (text && text.includes(",")) return text.split(",").map((choice) => choice.trim())
     if (text || this.spec?.choicesFrom) return this.loadedChoices
-    return this.spec?.values as readonly string[] | undefined
+    const set = this.spec && E.ValueSets.setFor(this.spec)
+    return set ? E.ValueSets.get(set) : undefined
   }
 
   /** A choice source to load:  `options` naming one, else the schema's `choicesFrom`. */
@@ -261,6 +268,8 @@ export class UIProperty extends UIField {
     if (spec?.step !== undefined) element.setAttribute("step", String(spec.step))
     if (this.isReadOnly) element.setAttribute("readonly", "")
     if (control.choices === "items") {
+      // no value and no default:  it reads "none", never blank
+      if (spec?.default === undefined) element.setAttribute("placeholder", this.translationForKey("none"))
       for (const choice of this.choices ?? []) element.append(UIProperty.item(choice))
     }
     if (control.tag === EDITOR_TAG) element.setAttribute(VALUE_FROM_ATTRIBUTE, this.propertyName)

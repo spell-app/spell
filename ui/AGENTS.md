@@ -1074,7 +1074,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - `brand`:  `src/components/`
   - The others, by `patternLintIn()` in their own `vite.config.ts`:
     - spell-epic:  `src/components/`
-    - spell-app:  `src/app/components/` (`<spell-app>`, `<spell-editor>`;  since epic `people-and-orgs` P17)
+    - spell-app:  `src/app/components/` (`<spell-viewer>`, `<spell-editor>`;  since epic `people-and-orgs` P17)
   - NOT the rest of the app (WWOD §17's function components),
     NOT the element core (`spell/element`, `src/elements/`), NOT tests.
 - What it flags ([the rules](../src/toolchain/lint.patterns.ts)).
@@ -1140,7 +1140,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - `entryOf()`, `owns()`:  for the root.
   - A `define()` may return a promise, when it imports its families first.
     - The load resolves once that settles, so the root waits for the tags.
-    - spell-app's `spell.pack.js` (`<spell-app>`, `<spell-editor>`) imports two ES modules that way.
+    - spell-app's `spell.pack.js` (`<spell-viewer>`, `<spell-editor>`) imports two ES modules that way.
       It's built by Vite, not `spell pack build` ([app's AGENTS.md](../spell-app/src/app/AGENTS.md), `components/`).
   - A pack's events keep their own names (`spell-open`).
     - Only Spell UI's `ui-*` ones take a translated tag's prefix

@@ -1,3 +1,5 @@
+// Import directly:  in `core`'s util barrel it cost every page 1.9 kB
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell-ui/core"
 import {
   DOCS_DARK_QUERY,
@@ -19,7 +21,7 @@ import {
  * `<ui-docs-themes>` changes it;  the site entry (`site/_src/site.ts`) calls `restore()` once per page.
  * - Theme:  `defaultTheme` (the docs: `DOCS_DEFAULT_THEME`, `spell`, the brand) until the viewer picks another;
  *   picking Plain (our own look, `undefined`) is stored as `DOCS_PLAIN_THEME`, so it outlives the page.
- * - Stored in `localStorage` (`DOCS_LOOK_KEYS`), every access in try/catch:
+ * - Stored in `localStorage` (`DOCS_LOOK_KEYS`), through `PrefStore`:
  *   a private window or blocked storage just forgets between pages.
  *   The look is ALSO kept in memory, so it works for the page either way.
  * - Scheme:  ONE store for every doc site.
@@ -67,7 +69,8 @@ export class ThemePreference {
   /**
    * Inline `<head>` script re-applying the stored scheme before first paint, as `applyScheme()` does.
    * - The page template (`templates/spell-ui-docs.html`) inlines it, in `<head>` before the stylesheet `<link>`.
-   * - ES5, no dependencies, never throws.
+   * - ES5, no dependencies, never throws:  so it reads the key raw, not through `PrefStore`,
+   *   whose text it matches (a scheme is kept as `dark`, unquoted).
    * - Reads the old keys too (`DOCS_LEGACY_SCHEME_KEYS`) while the new one is absent:  `restore()` moves them over.
    */
   static readonly HEAD_SCRIPT =
@@ -261,23 +264,18 @@ export class ThemePreference {
     return found
   }
 
-  /** `localStorage[key]`, or `undefined` (absent, or storage blocked). */
+  /** The text kept at `key` (`spell-site:scheme`), or `undefined`:  none, or not text. */
   private static load(key: string): string | undefined {
-    try {
-      return globalThis.localStorage?.getItem(key) ?? undefined
-    } catch {
-      return undefined
-    }
+    const value = PrefStore.getAt(key)
+    return typeof value === "string" ? value : undefined
   }
 
-  /** Write `value` under `key` (`undefined`:  remove it);  storage blocked:  nothing. */
+  /**
+   * Keep `value` at `key` (`undefined`:  forget it).
+   * - Storage blocked:  kept for this page (`PrefStore`'s memory).
+   */
   private static store(key: string, value: string | undefined): void {
-    try {
-      if (value === undefined) globalThis.localStorage?.removeItem(key)
-      else globalThis.localStorage?.setItem(key, value)
-    } catch {
-      // private window / blocked storage:  the look still holds for this page, in memory
-    }
+    PrefStore.setAt(key, value)
   }
 }
 

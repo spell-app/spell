@@ -25,60 +25,98 @@ export const tableVocabulary = {
   noun: "table",
   description: "A table displays a collection of data grouped into rows.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Coloured top edge;  with `inverted`, a coloured fill." },
-    { name: "celled", kind: "keyOnly", description: "Borders between cells." },
-    { name: "collapsing", kind: "keyOnly", description: "As narrow as its content (`width: auto`)." },
-    { name: "definition", kind: "keyOnly", description: "First column is a definition column;  blank corner." },
-    { name: "fixed", kind: "keyOnly", description: "`table-layout: fixed`;  overflowing cell text is cut with `…`." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "resizable", kind: "keyOnly", description: "With `scrolling`:  people can drag the height." },
-    { name: "selectable", kind: "keyOnly", description: "Body rows highlight on hover." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      description: "Coloured top edge;  with `inverted`, a coloured fill."
+    },
+    { name: "celled", group: "layout", kind: "keyOnly", description: "Borders between cells." },
+    { name: "collapsing", group: "layout", kind: "keyOnly", description: "As narrow as its content (`width: auto`)." },
+    {
+      name: "definition",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "First column is a definition column;  blank corner."
+    },
+    {
+      name: "fixed",
+      group: "layout",
+      kind: "keyOnly",
+      description: "`table-layout: fixed`;  overflowing cell text is cut with `…`."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    {
+      name: "resizable",
+      group: "behaviour",
+      kind: "keyOnly",
+      description: "With `scrolling`:  people can drag the height."
+    },
+    { name: "selectable", group: "behaviour", kind: "keyOnly", description: "Body rows highlight on hover." },
     {
       name: "single-line",
+      group: "appearance",
       kind: "keyOnly",
       description: "No wrapping:  every cell's text stays on one line (`single line`)."
     },
     {
       name: "sortable",
+      group: "behaviour",
       kind: "keyOnly",
       description:
         "Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets " +
         '`aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic\'s `class="disabled"`).'
     },
-    { name: "striped", kind: "keyOnly", description: "Every other body row is tinted." },
-    { name: "structured", kind: "keyOnly", description: "Collapsed borders, for `rowspan` / `colspan` headers." },
+    { name: "striped", group: "appearance", kind: "keyOnly", description: "Every other body row is tinted." },
+    {
+      name: "structured",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Collapsed borders, for `rowspan` / `colspan` headers."
+    },
     {
       name: "unstackable",
+      group: "layout",
       kind: "keyOnly",
       description: "Never stacks rows into blocks, even on a viewport below 768px."
     },
     {
       name: "basic",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: '`basic`:  no header fill;  `basic="very"`:  no outer border or edge padding either.'
     },
     {
       name: "compact",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: '`compact` / `compact="very"`:  less cell padding.'
     },
     {
       name: "padded",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: '`padded` / `padded="very"`:  more cell padding.'
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description: "Joins a segment or another table:  `attached` (middle), `top` or `bottom`."
     },
     {
       name: "stackable",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["tablet"],
       description:
@@ -87,6 +125,7 @@ export const tableVocabulary = {
     },
     {
       name: "stack-by",
+      group: "layout",
       kind: "enum",
       values: ["viewport", "container", "none"],
       description:
@@ -98,6 +137,7 @@ export const tableVocabulary = {
     },
     {
       name: "scrolling",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["short", "very short", "long", "very long"],
       description:
@@ -106,12 +146,14 @@ export const tableVocabulary = {
     },
     {
       name: "overflowing",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["short", "very short", "long", "very long"],
       description: "Like `scrolling`, both ways, with nothing stuck;  same height steps."
     },
     {
       name: "stuck",
+      group: "appearance",
       kind: "multiple",
       values: ["head", "foot", "first", "last"],
       description:
@@ -120,15 +162,22 @@ export const tableVocabulary = {
     },
     {
       name: "columns",
+      group: "layout",
       kind: "width",
       values: "widths",
       widthClass: "column",
       description: "Equal-width column count, `1` ... `16` (or `1/4`, `25%`):  `four column`."
     },
-    { name: "text-align", kind: "textAlign", description: "Text alignment of every cell." },
-    { name: "vertical-align", kind: "verticalAlign", description: "Vertical alignment of every cell." },
+    { name: "text-align", group: "layout", kind: "textAlign", description: "Text alignment of every cell." },
+    {
+      name: "vertical-align",
+      group: "layout",
+      kind: "verticalAlign",
+      description: "Vertical alignment of every cell."
+    },
     {
       name: "sort-column",
+      group: "behaviour",
       kind: "number",
       description:
         "Index of the sorted column (0-based, counting `colspan`s);  set by people's clicks unless the app " +
@@ -136,12 +185,14 @@ export const tableVocabulary = {
     },
     {
       name: "sort-direction",
+      group: "behaviour",
       kind: "enum",
       values: ["ascending", "descending"],
       description: "Direction of `sort-column`;  a newly sorted column starts `ascending`."
     },
     {
       name: "client-sort",
+      group: "advanced",
       kind: "boolean",
       description:
         "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  " +
@@ -149,6 +200,7 @@ export const tableVocabulary = {
     },
     {
       name: "column-defs",
+      group: "content",
       kind: "json",
       reflect: false,
       description:
@@ -157,6 +209,7 @@ export const tableVocabulary = {
     },
     {
       name: "rows",
+      group: "content",
       kind: "json",
       reflect: false,
       description:

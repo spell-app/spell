@@ -27,7 +27,7 @@ import { ClassBuilder } from "./ClassBuilder"
  *     Spell UI's site and the brand's pages lost it.
  *   - Every page has a root, or loads `spell-ui`.
  *   - Not `core.ts` in `sideEffects` instead:  that re-chunks the app's `spell-solid.js`
- *     (its `BuiltInPacks` moves out, away from where `<spell-app>` finds its icons).
+ *     (its `BuiltInPacks` moves out, away from where `<spell-viewer>` finds its icons).
  * - A code-split build may run a family's chunk first:
  *   that family's `define()` waits for the install (`SpellSolid.whenInstalled()`).
  *   - The app's `spell-solid.js` ran `<ui-components>`'s before its entry's body, where this file lands.

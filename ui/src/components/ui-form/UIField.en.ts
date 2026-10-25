@@ -30,37 +30,48 @@ export const fieldVocabulary = {
   attributes: [
     {
       name: "label",
+      group: "name",
       kind: "string",
       description:
         'The label, in the label row;  `slot="label"` is the rich version.  Names the control for screen readers.'
     },
     {
       name: "description",
+      group: "content",
       kind: "string",
       description:
         'A tip behind an info icon at the end of the label row, shown on hover and focus;  `slot="description"` is ' +
         "the rich version (bold words, line breaks)."
     },
-    { name: "hint", kind: "string", description: 'Text under the control;  `slot="hint"` is the rich version.' },
+    {
+      name: "hint",
+      group: "form",
+      kind: "string",
+      description: 'Text under the control;  `slot="hint"` is the rich version.'
+    },
     {
       name: "output",
+      group: "content",
       kind: "string",
       description: 'A value shown at the end of the label row (`100%`, `+8°`);  `slot="output"` is the rich version.'
     },
     {
       name: "error",
+      group: "form",
       kind: "string",
       description:
         "An error, as a line under the control, and the `error` state.  `<ui-form>`'s validation shows its own there."
     },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: UIT.FormStates,
       description: "Field state:  tints its label and controls.  An error shows `error` on top."
     },
     {
       name: "apply",
+      group: "form",
       kind: "string",
       default: "immediately",
       description:
@@ -69,6 +80,7 @@ export const fieldVocabulary = {
     },
     {
       name: "mixed",
+      group: "appearance",
       kind: "boolean",
       description:
         "The things being edited disagree on this value:  the control shows blank, with a `Mixed` placeholder.  " +
@@ -76,27 +88,31 @@ export const fieldVocabulary = {
     },
     {
       name: "rules",
+      group: "form",
       kind: "json",
       reflect: false,
       description:
         'Validation rules for this field\'s control, in `<ui-form rules>`\'s shape (`"email"`, `["notEmpty", ' +
         '"minLength[6]"]`);  added to the form\'s own rules for it.'
     },
-    { name: "inline", kind: "keyOnly", description: "Label beside the control, not above it." },
+    { name: "inline", group: "layout", kind: "keyOnly", description: "Label beside the control, not above it." },
     {
       name: "required",
+      group: "form",
       kind: "keyOnly",
       description: "Marks the label with an asterisk (validation is `rules` / `required`)."
     },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       description:
         "Shows the value;  it can't be changed.  Nests like `disabled`:  set on a group, it reaches each field."
     },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and not usable (`inert`)." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and not usable (`inert`)." },
     {
       name: "width",
+      group: "layout",
       kind: "width",
       description: "Width in a row of fields:  columns (`4` of 16), fractions (`1/4`) or percentages (`25%`)."
     }
@@ -140,6 +156,11 @@ export const fieldVocabulary = {
   ],
   texts: [
     { key: "info", text: "More about {label}", description: "The info icon's name;  `{label}` is the label." },
-    { key: "mixed", text: "Mixed", description: "The placeholder of a control whose things disagree." }
+    { key: "mixed", text: "Mixed", description: "The placeholder of a control whose things disagree." },
+    {
+      key: "none",
+      text: "none",
+      description: "What a property's select shows, in italics, when it has no value and no default."
+    }
   ]
 } as const satisfies E.ComponentVocabulary

@@ -286,9 +286,21 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     if (element && isInteractive) element.setAttribute("aria-expanded", String(isVisible))
   }
 
-  /** Pointer onto the target (`hover`):  show after `show-delay`. */
+  /** Pointer onto the target (`hover`):  show after `show-delay`, else the page's `--ui-hover-delay`. */
   private readonly onTargetEnter = (event: PointerEvent) => {
-    this.schedule(true, this.showDelay ?? 0, event)
+    this.schedule(true, this.hoverDelay, event)
+  }
+
+  /**
+   * How long the pointer rests before it shows:  its own `show-delay` when written, else the page's preference,
+   * the `--ui-hover-delay` token (`styles.en.ts`'s `hoverDelay`), in `ms` or `s`;  else `show-delay`'s default.
+   */
+  private get hoverDelay(): number {
+    if (this.attributes["show-delay"] !== null) return this.showDelay ?? 0
+    const token = getComputedStyle(this.domElement).getPropertyValue(HOVER_DELAY_TOKEN).trim()
+    const match = DURATION.exec(token)
+    if (!match) return this.showDelay ?? 0
+    return Number(match[1]) * (match[2] === "s" ? 1000 : 1)
   }
 
   /** Pointer off the target (`hover`):  hide after `hide-delay`, unless it reaches the popup first. */
@@ -655,3 +667,9 @@ const POSITION_AREAS: Readonly<Record<string, string>> = {
   "right top": "right span-bottom",
   "right bottom": "right span-top"
 }
+
+/** The page's hover-delay preference, a token (`styles.en.ts`'s `hoverDelay`). */
+const HOVER_DELAY_TOKEN = "--ui-hover-delay"
+
+/** A CSS time:  `800ms`, `2s`, `1.5s`. */
+const DURATION = /^(\d+(?:\.\d+)?)(ms|s)$/

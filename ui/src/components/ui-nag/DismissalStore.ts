@@ -2,16 +2,21 @@ import type { UIT } from "spell-ui/core"
 
 /****************
  * ### `DismissalStore`
- * Where a `<ui-nag>` remembers that it was dismissed (Fomantic's nag `storage`):  `localStorage`,
- * `sessionStorage` or a cookie, holding `value` under `key`.
+ * Where a `<ui-nag>` remembers that it was dismissed (Fomantic's nag `storage`):
+ * `localStorage`, `sessionStorage` or a cookie, holding `value` under `key`.
  * - Plain DOM, no Solid:  `UINag` makes one per access, from its current attributes.
- * - EVERY access is guarded:  storage can be missing (SSR), blocked (privacy settings throw a `SecurityError` on
- *   the mere `localStorage` getter) or full.  A failed read counts as "not dismissed", a failed write is dropped:
- *   the nag still renders and still closes, it just won't remember.
- * - Expiry (`expires`, days;  `0` never):  a cookie's own `expires`;  in `localStorage` a second item
- *   `<key>ExpirationDate` (Fomantic's `expirationKey`) holding the UTC date, checked (and the pair removed) on read.
- *   `sessionStorage` ends with the tab anyway.
+ * - EVERY access is guarded:  storage can be missing (SSR), blocked or full.
+ *   - blocked:  privacy settings throw a `SecurityError` on the mere `localStorage` getter
+ *   - a failed read counts as "not dismissed", a failed write is dropped:
+ *     the nag still renders and still closes, it just won't remember
+ * - Expiry (`expires`, days;  `0` never):
+ *   - a cookie:  its own `expires`
+ *   - `localStorage`:  a second item, `<key>ExpirationDate` (Fomantic's `expirationKey`), holding the UTC date,
+ *     checked (and the pair removed) on read
+ *   - `sessionStorage` ends with the tab anyway
  * - Cookies:  Fomantic's RFC 6265 encoding;  `path` (default `/`), `domain`, `secure`, `samesite`.
+ * - NOT on `spell/util`'s `PrefStore`, on purpose:
+ *   its keys are the page author's, whole and with no store name (Fomantic's), and it keeps cookies too.
  ****************/
 export class DismissalStore {
   /** Where. */
@@ -38,7 +43,9 @@ export class DismissalStore {
   }
 
   /**
-   * Was it dismissed (and not expired)?  `false` when the storage can't be read.  Reads the storage on every access.
+   * Was it dismissed (and not expired)?
+   * - `false` when the storage can't be read.
+   * - Reads the storage on every access.
    */
   get isDismissed(): boolean {
     try {

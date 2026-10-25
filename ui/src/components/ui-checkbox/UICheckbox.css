@@ -46,8 +46,13 @@
 
 @layer ui.components.checkbox.types {
   /* The DOM element:  layout only;  the look lives on the root inside. */
+  /*
+   * inline-flex, not inline-block:  the box as tall as what it draws.  As an inline-block, its own line's spare room
+   * hung under the box, so a checkbox with no text stood ~5px above the label beside it (Owen:  "messing up
+   * vertical alignment").  Its baseline is still its text's.
+   */
   :host {
-    display: inline-block;
+    display: inline-flex;
     vertical-align: baseline;
   }
   /* `delegatesFocus`:  the box draws the focus ring, never the DOM element. */

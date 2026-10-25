@@ -22,6 +22,8 @@
     --_ui-field-tip-background: var(--ui-field-tip-background, var(--ui-text-dark));
     --_ui-field-tip-color: var(--ui-field-tip-color, var(--ui-surface));
     --_ui-field-tip-width: var(--ui-field-tip-width, 16.25em);
+    /* how long a hover waits before the tip shows;  keyboard focus shows it at once */
+    --_ui-field-tip-delay: var(--ui-field-tip-delay, var(--ui-hover-delay, 0s));
   }
   .field > .control {
     display: contents;
@@ -116,6 +118,12 @@
   .field > .row > .info:is(:hover, :focus-visible) > .tip {
     opacity: 1;
     visibility: visible;
+  }
+  .field > .row > .info:hover > .tip {
+    transition-delay: var(--_ui-field-tip-delay);
+  }
+  .field > .row > .info:focus-visible > .tip {
+    transition-delay: 0s;
   }
 
   /* ## The hint and the errors:  lines under the control */

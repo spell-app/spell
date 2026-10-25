@@ -16,7 +16,7 @@
  * - SIDE EFFECT:  sets `globalThis.SpellUI`;  listed in `package.json`'s `sideEffects`, or the bundler drops it.
  * - `packModules` MUST name the pack build's externals (`PACK_MODULES`, the kit's `element-tools/packModules.ts`).
  *   - Also `@solidjs/h` and `ui-root`, as the docs bundle's:  the app's element bundles (`/element/spell.pack.js`,
- *     App UI's live `<spell-app>`) take the page's Solid only when ALL their shared modules are here
+ *     App UI's live `<spell-viewer>`) take the page's Solid only when ALL their shared modules are here
  *     (`spell-solid-shared.js`, app's `vite.solid.config.ts`), else they'd load a second one.
  * - A pack's elements draw Spell UI's in their shadow roots (`<epic-phase>`'s `<ui-section>`), which the root never
  *   sees:  so a pack's `define()` waits for EVERY Spell UI family first (`spell-ui`), as the docs bundle has them.  Only
@@ -35,6 +35,11 @@ import * as uiCore from "spell-ui/core"
 import * as uiForms from "spell-ui/forms"
 import type { ComponentPack } from "spell-ui/components/ui-components/UIComponents.types"
 import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
+import { PackHotSwap } from "spell-ui/hot"
+
+// a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
+// installed now, before any pack defines its tags
+PackHotSwap.install()
 
 /**
  * What a pack imports, by its `packModules` key => the page's copy of that module.

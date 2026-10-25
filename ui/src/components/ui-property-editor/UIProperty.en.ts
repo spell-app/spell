@@ -24,11 +24,13 @@ export const propertyVocabulary = {
     [
       {
         name: "name",
+        group: "name",
         kind: "string",
         description: "The property it edits;  a dotted path reaches into a nested thing (`font.size`).  Required."
       },
       {
         name: "as",
+        group: "appearance",
         kind: "string",
         description:
           "Which control (a kind `UI.propertyControls` knows):  `input`, `text`, `number`, `date`, `select`, `buttons`, " +
@@ -36,6 +38,7 @@ export const propertyVocabulary = {
       },
       {
         name: "options",
+        group: "form",
         kind: "string",
         description:
           "Where its choices come from, when not the schema's:  a source the page added " +
