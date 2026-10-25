@@ -116,6 +116,8 @@ The task, word for word:
 
 The helper's report reaches this session as a notice, between whatever else it's doing.
 1. `epic agents done <name>`.
+   - It prints how long the agent worked (`<full name> done:  took 21m`, from its transcript), and logs it on the
+     epic page.
 2. Reply, the FIRST line in bold, by itself:  `**Agent <full name> came back with:**`.
    - Then the report, short, in Owen's words:  what changed, where to look, what needs him.
    - Links as the root rules say:

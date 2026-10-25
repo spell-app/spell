@@ -16,37 +16,34 @@
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
  *   serving `src/demo/shots/` as its content folder, so the routes are this branch's code as it is now;
  *   stopped at the end
- *   - it WAKES NOBODY (epic `epic-engine` I11):  a Send or Do Now with nobody listening reaches `DemoServer`'s
+ *   - it WAKES NOBODY (epic `epic-engine` I11):  a Send with nobody listening reaches `DemoServer`'s
  *     stubbed wake, never a window or a session on this machine;  the check asserts the wake was asked for
  *   - airplane mode is off for it, whatever this machine's switch says
  * - Owen's side, clicked:
- *   - every item's buttons:  ONE group, Approve, Revisit, Make Todo, then Do Now apart (the wand)
+ *   - every item's buttons:  ONE group, Make Todo, Revisit, Approve;  no Do Now (the wand:  gone, Owen, 2026-10-25)
  *     - an Overview sub-section's:  without Approve
- *     - the note box's:  Later, the x (skip this:  Owen, 2026-10-09;  no "now":  Do Now is the line's)
+ *     - the note box's:  Later, the x (skip this:  Owen, 2026-10-09)
  *   - the fill:  Approve pressed dashed green, again none;  Make Todo the same
  *   - Revisit on an item with details:  it opens, its box focused;  ten lines grow it;
  *     the box's x saves a skip WITH its note, the id chip dashed in its state's colour
  *   - Revisit on an item without details (one added to the copy):  a box under its line;  typing turns Revisit on at
  *     once (epic `epic-engine` P20), saved on Tab;  after a reload, a revisit soon shown under the line;  Edit puts it
  *     back in the box, and Later keeps it
- *   - Do Now WITH a note (an Overview sub-section):  a revisit now, dashed while nobody listens, the tooltip saying so;
- *     clicked again:  called off, the note back in its box
+ *   - Revisit WITH a note (an Overview sub-section):  typing turns it on, dashed blue
  *   - a pick on a judgement call's REPLY cards
  *     (I8:  picks work anywhere;  the call added to the copy, its text and a reply each holding cards):
  *     the mark names that set (`choices: 1`), its pill dashed, the text's untouched
- *   - Send:  the header's button idle -> unsent -> sent;  the marks outlined
+ *   - Send:  the header's button idle -> unsent -> sent;  the marks outlined;  nobody listening:  the epic woken (stubbed)
  * - Claude's side, by the epic tool on the copy (`PlanDocCommands`), the page reloaded after each:
- *   - Do Now without a note on an item:
- *     - `inbox watch`, `inbox wait` takes it:  its button outlined, its icon turning (`data-busy`)
- *     - `status underway`:  a blue Underway card, the item `progress`
- *     - `status done`:  the card green
- *     - `inbox done`:  Do Now CLEARED (`review-as="now"`:  the buttons are Owen's input, the chip carries the result)
+ *   - `inbox watch`, `inbox wait`:  listening, the header's tooltips say so
+ *   - on a question:  `status underway`, a blue Underway card, the item `progress`;  `status done`, the card green
  *   - `inbox apply`:
  *     - the sent Approve CLEARED (`review-as="approve"`), the chip solid green
  *     - the skip:  reviewed, still open, its note kept as Owen's reply
  *     - the pick approves its call (closed, the reply's set `chosen`, a Noted card `Chose C · ...:  recorded ...`),
  *       its pill SOLID
- *   - the countdown running out (epic `epic-engine` P20, as Review Now did):  the revisit waiting asked now
+ *   - a countdown's send (epic `epic-engine` P20, as Review Now did;  no wand draws one since 2026-10-25, the
+ *     page still takes it):  the revisit waiting asked now
  *   - a COMMENT only (Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up"):
  *     written into the copy's inbox as the bullhorn would (the comments route takes only the shared folders' pages);
  *     Send turns blue, a click sends it (the inbox's `sent` moves, `unsentComments` empties),
@@ -55,7 +52,7 @@
  *   (read back through `GET /api/epics/review/inbox`)
  * - and at 280px and 900px, light and dark, unless:
  *   - no review control runs past the window, and none sits over its line's title
- *   - every button's glyph is centred in it (within 1px);  the page's round buttons too (Send's plane and wand, git)
+ *   - every button's glyph is centred in it (within 1px);  the page's round buttons too (Send's plane, git)
  * - screenshots (outDir, default `demo/shots/`):
  *   `review-<width>-<scheme>.png`, `review-marked.png`, `review-done.png`,
  *   `review-picked.png` / `review-picked-dark.png` (the pick applied)
@@ -112,7 +109,6 @@ const SKIP_NOTE = "check-review-epics:  nothing to do, the routes settle it"
 const SECTION_NOTE = "check-review-epics:  is the Overview part clear?"
 const COMMENT = "check-review-epics:  is Send hooked up?"
 const SESSION = "check-review-epics"
-const HOLD_MS = 900
 const problems = []
 const summary = { doc: docName }
 
@@ -209,16 +205,16 @@ async function run() {
   BrowserPage.watch(page, { onProblem: logInto(logs) })
   await open(page)
 
-  // Send and its countdown:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);
-  // countdown mode on by default (decision Q6)
+  // Send:  in the page header from the start, grey with nothing marked (Owen, 2026-10-10);  no wand since Owen,
+  // 2026-10-25 ("remove the wand EVERYWHERE")
   expect("the header's buttons, nothing marked", await headerState(page), {
     send: "idle",
-    countdown: "true",
+    countdown: null,
     nobody: false,
     inHeader: true
   })
 
-  // every item and Overview part:  the group (Approve, Revisit, Make Todo), then Do Now apart
+  // every item and Overview part:  the group (Make Todo, Revisit, Approve);  nothing apart (no Do Now since 2026-10-25)
   const ids = await page.evaluate(() =>
     Array.from(document.querySelectorAll("epic-item, epic-section[kind='overview-part']"), (element) => element.id)
   )
@@ -229,25 +225,25 @@ async function run() {
   for (const id of ids) {
     const layout = await page.evaluate(
       (id) => ({
+        limit: document.getElementById(id).hasAttribute("limit"),
         group: Array.from(
           rootOf(id).querySelectorAll(".review-group ui-button[data-action]"),
           (button) => button.dataset.action
         ),
-        apart: Array.from(
-          rootOf(id).querySelectorAll(".review-controls > ui-button.review-do-now"),
-          (button) => button.dataset.action
-        )
+        apart: Array.from(rootOf(id).querySelectorAll(".review-controls > ui-button"), (button) => button.dataset.action)
       }),
       id
     )
-    // a todo's:  the plane (next phase), Revisit, the x (drop), no Do Now (Owen, 2026-10-09)
-    const todo = /^t\d+$/.test(id)
+    // a WORK caveat's (no `limit`;  a todo, `t`, before epic `epic-engine` P32):  the plane (next phase), Revisit,
+    // the x (drop) (Owen, 2026-10-09)
+    const todo = /^[tc]\d+$/.test(id) && !layout.limit
+    delete layout.limit
     const group = todo
       ? ["next", "revisit", "drop"]
       : /^o\d+$/.test(id)
-        ? ["revisit", "todo"]
-        : ["approve", "revisit", "todo"]
-    expect(`${id}'s buttons`, layout, { group, apart: todo ? [] : ["details"] })
+        ? ["todo", "revisit"]
+        : ["todo", "revisit", "approve"]
+    expect(`${id}'s buttons`, layout, { group, apart: [] })
   }
   expect(
     "<epic-page reviewing>",
@@ -320,7 +316,7 @@ async function run() {
     )
     .catch(() => problems.push(`${withDetails}:  Revisit didn't open it with its note box focused`))
   expect(
-    `${withDetails}'s note box buttons (Do Now is the line's)`,
+    `${withDetails}'s note box buttons`,
     await page.evaluate(
       (id) => Array.from(rootOf(id).querySelectorAll(".note-actions button"), (button) => button.dataset.how),
       withDetails
@@ -379,42 +375,25 @@ async function run() {
   // left in the box, not changed:  the mark stays as it was
   await page.keyboard.press("Escape")
 
-  // Do Now WITH a note (an Overview part):  a revisit now;  queued with nobody listening:  dashed;  again:  called off
+  // Revisit WITH a note (an Overview part):  typing turns Revisit on (epic `epic-engine` P20), dashed blue
   if (section) {
     await press(page, section, "revisit")
     await page
       .waitForFunction((id) => rootOf(id).activeElement?.matches("textarea"), section, { timeout: 4000 })
       .catch(() => problems.push(`${section}:  Revisit didn't focus its note box`))
     await page.keyboard.type(SECTION_NOTE)
-    await press(page, section, "details")
+    await page.keyboard.press("Tab")
     await waitInbox(
       page,
-      (inbox) =>
-        inbox.now.some((each) => each.id === section && each.action === "revisit" && each.note === SECTION_NOTE),
-      `${section}:  Do Now with its note, a revisit now`
+      (inbox) => inbox.marks[section]?.action === "revisit" && inbox.marks[section]?.note === SECTION_NOTE,
+      `${section}:  typing its note turns Revisit on`
     )
     await page.waitForTimeout(200)
-    expect(`${section}'s Do Now, queued:  dashed blue`, await buttonState(page, section, "details"), {
+    expect(`${section}'s Revisit, typed:  dashed blue`, await buttonState(page, section, "revisit"), {
       fill: "dashed",
-      color: "blue",
-      busy: false
+      color: "blue"
     })
-    const tip = await page.evaluate(
-      (id) => rootOf(id).querySelector('ui-button[data-action="details"]').getAttribute("aria-label"),
-      section
-    )
-    if (!NOBODY.test(tip)) problems.push(`${section}:  a queued request doesn't say nobody is listening:  "${tip}"`)
-    // nobody listening:  the request woke the epic, through the demo server's stub (I11)
-    expect(`${section}'s Do Now, nobody listening:  the epic woken (stubbed)`, server.wakes.at(-1), docName)
     await page.screenshot({ path: join(out, "review-marked.png") })
-    await press(page, section, "details")
-    await waitInbox(
-      page,
-      (inbox) => !inbox.now.length && inbox.drafts[section]?.note === SECTION_NOTE,
-      `${section}:  called off, note kept`
-    )
-    await page.waitForTimeout(300)
-    expect(`${section}'s box after calling off`, await noteValue(page, section), SECTION_NOTE)
   }
 
   // a pick on the judgement call's REPLY cards (I8):  its set named by position, the pill dashed;  the text's untouched
@@ -434,7 +413,7 @@ async function run() {
   // the header's Send:  unsent marks, its tooltip saying nobody listens;  a click sends;  the marks outlined
   expect("the header's buttons, marks unsent", await headerState(page), {
     send: "unsent",
-    countdown: "true",
+    countdown: null,
     nobody: true,
     inHeader: true
   })
@@ -443,37 +422,23 @@ async function run() {
   await page.waitForTimeout(200)
   expect("the header's buttons, marks sent", await headerState(page), {
     send: "sent",
-    countdown: "true",
+    countdown: null,
     nobody: true,
     inHeader: true
   })
   expect(`${approved}'s Approve, sent:  outlined`, (await buttonState(page, approved, "approve")).fill, "outline")
   expect(`${bare}'s Revisit, sent:  outlined`, (await buttonState(page, bare, "revisit")).fill, "outline")
   expect(`${pickCall}'s pick, sent:  outlined`, (await pickPills(page, pickCall))[1][2], "outline")
+  // nobody listening:  the send woke the epic, through the demo server's stub (I11)
+  expect("Send, nobody listening:  the epic woken (stubbed)", server.wakes.at(-1), docName)
 
-  // Do Now without a note, held on its way:  asked;  queued, nobody listening:  dashed
-  await holdNext(page, "now")
-  await press(page, question, "details")
-  await waitInbox(page, (inbox) => inbox.now.some((each) => each.id === question), "Do Now queued")
-  await page.waitForTimeout(200)
-  expect("Do Now, queued:  dashed, not turning", await buttonState(page, question, "details"), {
-    fill: "dashed",
-    color: "blue",
-    busy: false
-  })
-
-  // Claude listens and takes it:  outlined, its icon turning
+  // Claude listens
   await tool.run(["inbox", docName, "watch", "--session", SESSION])
   await tool.run(["inbox", docName, "wait", "--timeout", "5", "--json"])
   await open(page)
   expect("listening:  the header's tooltips", (await headerState(page)).nobody, false)
-  expect("Do Now, taken:  outlined and turning", await buttonState(page, question, "details"), {
-    fill: "outline",
-    color: "blue",
-    busy: true
-  })
 
-  // its status card:  Underway (blue, the item `progress`), then Done (green);  `inbox done`:  Do Now cleared
+  // a status card:  Underway (blue, the item `progress`), then Done (green)
   await tool.run(["status", docName, question, "underway", "<p>Write what the question's text leaves out.</p>"])
   await open(page)
   expect(`${question}:  an Underway card, the item in progress`, await statusOf(page, question), {
@@ -481,17 +446,9 @@ async function run() {
     state: "progress"
   })
   await tool.run(["status", docName, question, "done", "<p>Added the cost of each option.</p>"])
-  await tool.run(["inbox", docName, "done", question])
   await open(page)
   const done = await statusOf(page, question)
   expect(`${question}:  the card Done`, done.cards, ["done"])
-  // handled:  the buttons CLEAR (Owen's input, taken), the chip carries the result (Owen, 2026-10-08)
-  expect("Do Now, done:  cleared, not turning", await buttonState(page, question, "details"), {
-    fill: "none",
-    color: "blue",
-    busy: false
-  })
-  expect(`${question}'s review-as`, await attribute(page, question, "review-as"), "now")
 
   // `inbox apply`:  the sent Approve applied, its button cleared, the chip green;  the skip reviewed, its note kept
   await tool.run(["inbox", docName, "apply"])
@@ -561,7 +518,8 @@ async function run() {
   await page.locator(`#${question}`).scrollIntoViewIfNeeded()
   await page.screenshot({ path: join(out, "review-done.png") })
 
-  // the countdown running out (epic `epic-engine` P20;  its 2 minutes are the element's own test's, on a fake clock):
+  // a countdown's send, as the wand's would be (epic `epic-engine` P20;  the wand's gone since 2026-10-25, the page still
+  // takes one):
   // the revisit waiting (sent, to talk over) asked now, as Review Now did (decision Q7)
   await page.evaluate(() =>
     document
@@ -675,7 +633,7 @@ function measure(width) {
         found.push(`${host.id}'s ${button.dataset.action} glyph off centre by ${dx.toFixed(1)}, ${dy.toFixed(1)}`)
     }
   }
-  // the header's round buttons (Send's plane and wand, the git toggle):  in the window, centred
+  // the header's round buttons (Send's plane, the git toggle):  in the window, centred
   const head = document.querySelector("epic-page")?.shadowRoot
   const round = [
     ...(head?.querySelector("epic-send-buttons")?.shadowRoot?.querySelectorAll("button") ?? []),
@@ -741,7 +699,7 @@ async function open(page) {
 
 /**
  * The items to click, four different ones (`items`:  `{ id, open, details }` each, in page order):
- * - a question (Do Now's lifecycle on it)
+ * - a question (its status cards)
  * - an open item with details
  * - an open one without:  `bare`, the one added to the copy (`addBareItem()`)
  * - an open item Approve closes or reviews, not a question (approving one needs a recommended option)
@@ -801,13 +759,12 @@ async function noteButton(page, id, how) {
   await page.waitForTimeout(250)
 }
 
-/** `id`'s `action` button, as drawn:  its fill, its colour;  Do Now's turning icon too. */
+/** `id`'s `action` button, as drawn:  its fill, its colour. */
 function buttonState(page, id, action) {
   return page.evaluate(
     ({ id, action }) => {
       const button = rootOf(id).querySelector(`ui-button[data-action="${action}"]`)
-      const state = { fill: button.dataset.fill, color: button.dataset.color }
-      return action === "details" ? { ...state, busy: button.hasAttribute("data-busy") } : state
+      return { fill: button.dataset.fill, color: button.dataset.color }
     },
     { id, action }
   )
@@ -890,8 +847,8 @@ function attribute(page, id, name) {
 }
 
 /**
- * The page header's Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20), as drawn:  Send's state,
- * the countdown's mode (`aria-pressed`), whether the plane says nobody listens, and whether it sits in the sticky header.
+ * The page header's Send (`<epic-send-buttons>`, epic `epic-engine` P20), as drawn:  Send's state,
+ * the wand's mode (`aria-pressed`;  `null`:  no wand, since 2026-10-25), whether the plane says nobody listens, and whether it sits in the sticky header.
  */
 function headerState(page) {
   return page.evaluate((nobody) => {
@@ -959,14 +916,3 @@ function expect(what, actual, wanted) {
     problems.push(`${what}:  ${JSON.stringify(actual)}, wanted ${JSON.stringify(wanted)}`)
 }
 
-/** Have the next POST to `route` wait `HOLD_MS`. */
-async function holdNext(page, route) {
-  let held = false
-  await page.route(`**/api/epics/review/${route}`, async (request) => {
-    if (!held) {
-      held = true
-      await new Promise((resolve) => setTimeout(resolve, HOLD_MS))
-    }
-    await request.fallback()
-  })
-}

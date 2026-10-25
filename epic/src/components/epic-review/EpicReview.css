@@ -8,7 +8,7 @@
  * - the controls box is one line tall and centres its children, so it sits on the title's first line
  * - colours (decision Q20):
  *   - green:  decided or done (Approve, Make Todo, a pick, a todo's plane)
- *   - blue:  an ask of Claude (Revisit, Do Now)
+ *   - blue:  an ask of Claude (Revisit)
  *   - grey:  no longer relevant (a todo's x, the note box's x:  Owen, 2026-10-09)
  *   - Owen's own words (the note box, a marked note, the note bubble):  on the brand's ivory (`--ui-brown-*`)
  * - THE FILL (`data-fill`, Q20), never solid:
@@ -38,6 +38,8 @@
     --_epic-act-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
     --_epic-act-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
     --_epic-act-focus: var(--ui-focus-color, Highlight);
+    /* the ring of a group WAITING on Owen (Owen, 2026-10-25:  "try 2px border, #666") */
+    --_epic-asks-ring: #666;
     display: block;
   }
   /* the buttons sit in their line or title like the box they draw:  one line tall, never shrunk */
@@ -50,7 +52,7 @@
     display: none;
   }
 
-  /* ## The line's controls:  bubble, letter, the group, Do Now */
+  /* ## The line's controls:  bubble, letter, the group */
   .review-controls {
     display: inline-flex;
     flex: none;
@@ -87,24 +89,18 @@
   }
   /*
    * A waiting plan's Accept, Revisit and Defer (`buttons="plan"`):  icons in the row's own group, so they line up row to
-   * row;  the group ringed in the text's colour, 3px solid while it waits on Owen, dotted once he's pressed one
-   * (Owen, 2026-10-25:  "Make the entire group just icons, black border.  Dotted when action is being taken, 3px solid
-   * when you're waiting on input from me")
+   * row;  the group's OWN border (`ui-buttons`' `group` part) 2px #666, solid while it waits on Owen, dotted once he's
+   * pressed one
+   * - Owen, 2026-10-25:  "Dotted when action is being taken, 3px solid when you're waiting on input from me";  then "too
+   *   much, try 2px border, #666.  Also, there are two borders if you zoom in close" (an outline beside the hairline)
+   * - 1px out on every side, so the thicker border never moves what's beside it
    */
-  .review-group[data-asks] {
-    border-radius: 999px;
-    outline: 3px solid var(--ui-text-color, CanvasText);
-    outline-offset: 1px;
+  .review-group[data-asks]::part(group) {
+    margin: -1px;
+    border: 2px solid var(--_epic-asks-ring);
   }
-  .review-group[data-asks="taken"] {
-    outline: 2px dotted var(--ui-text-color, CanvasText);
-  }
-  /* Do Now:  an action, not a state (Q8, Q20):  its own round button, apart from the group */
-  .review-do-now {
-    margin-inline-start: 6px;
-  }
-  .review-do-now::part(button) {
-    border-radius: 50%;
+  .review-group[data-asks="taken"]::part(group) {
+    border-style: dotted;
   }
   [data-color="green"] {
     --_act: var(--_epic-act-green);
@@ -121,7 +117,7 @@
     outline-offset: -2px;
     color: var(--_act);
   }
-  /* sent (a Do Now:  taken), not done:  outlined in its colour */
+  /* sent (a revisit now:  taken), not done:  outlined in its colour */
   ui-button[data-fill="outline"]::part(button) {
     box-shadow: inset 0 0 0 1.5px var(--_act);
     color: var(--_act);

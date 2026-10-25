@@ -317,6 +317,27 @@ describe("<epic-item>", () => {
     }
   })
 
+  test("taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P2`, its tooltip saying so;  still green", async () => {
+    const phases = document.createElement("div")
+    phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
+    document.body.append(phases)
+    try {
+      const { host, chip } = await item(
+        `<epic-item id="i1" title="Old numbers" status="done" state="recent" taken-in="p-fix"></epic-item>`
+      )
+      const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
+      expect([mark.textContent, mark.getAttribute("href"), mark.title]).toEqual([
+        "in P2",
+        "#p-fix",
+        "Taken up in P2 · Fix Open Issues:  fixed or done there"
+      ])
+      expect(chip.title).toMatch(/^Decided or done/)
+      await expectAccessible(host)
+    } finally {
+      phases.remove()
+    }
+  })
+
   test("`calm`:  the chip follows the script's `state` (open:  yellow), and stays a link without a review", async () => {
     const { chip } = await item(`<epic-item id="j10" title="Follows WWOD" status="open" state="open" calm></epic-item>`)
     expect([chip.localName, chip.title]).toEqual(["a", "Open, still undecided · not reviewed yet"])

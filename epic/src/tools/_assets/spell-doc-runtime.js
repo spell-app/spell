@@ -48,6 +48,9 @@
  *   - the comments wait in an inbox file (a docs page's own, an epic page's review inbox), drawn under their blocks
  *   - their own module, `spell-doc-comments.js` (epic `epic-engine` P2), which Epic UI's pages load alone too
  *   - PAGE NOTES (`wireNotes()`), written into docs pages before them:  each `<spell-note>` a folded card
+ * - SCREENSHOTS open full size (`wireImageZoom()`, epic `epic-engine` I129):  a click on a content image (one shown
+ *   smaller than its size, in a `<figure>`, or in a link to an image) shows it over the page, in the epics pack's
+ *   `<epic-zoom>`, never following its link;  the rule is `ImageZoom`'s
  * - the EPICS PAGE's sort buttons, `<epic-sort>`, in its header (`wireEpicSort()`):
  *   its list, its cards' stars and saga chips are the epics pack's elements (`<epic-list>`, `<epic-card>`),
  *   which do their own
@@ -106,6 +109,8 @@ import { readingTime } from "spell-epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell-epic/links"
 import { PageStages } from "spell-epic/phases"
 import { ServerLink } from "spell-epic/review"
+// plain DOM, no Solid:  the element it opens, `<epic-zoom>`, is the epics pack's
+import { ImageZoom } from "spell-epic/components/epic-zoom/ImageZoom"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
@@ -283,6 +288,7 @@ async function start() {
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
   highlight()
+  wireImageZoom()
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
   if (main.querySelector("epic-page")) {
@@ -944,7 +950,7 @@ const EPIC_PAGE_STATE = ["open", "reviewing"]
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):
  * a patch keeps them (`PagePatch`'s `keptAttributes`, beside the shared `collapsed` and `open`).
  */
-const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", ...EPIC_PAGE_STATE]
+const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", "data-epic-zoom", ...EPIC_PAGE_STATE]
 
 /**
  * Elements that manage their children (panels and tabs by index, options):  a change inside replaces the whole
@@ -2959,6 +2965,23 @@ function drawNoteCards(main) {
       head.addEventListener(type, (event) => note.toggleAttribute("open", !!event.detail?.open))
     note.prepend(head)
   }
+}
+
+////////////////
+// ## Screenshots full size
+////////////////
+
+/**
+ * SCREENSHOTS open full size (epic `epic-engine` I129;  Owen, 2026-10-25:  "Can't click on images in the page to
+ * expand so I can't tell"):  ONE pair of listeners for the whole page, `ImageZoom`'s.
+ * - a click on a zoomable image shows it in `<epic-zoom>`, its link never followed (a `target="_blank"` one too)
+ * - the pointer over one marks it `data-epic-zoom`, the zoom-in cursor (`spell-doc.css`);  a patch keeps the mark
+ *   (`KEPT_ATTRIBUTES`)
+ * - a request's thumbnail takes its own click first (`<epic-field>`):  this one sees it prevented, and leaves it
+ */
+function wireImageZoom() {
+  document.addEventListener("click", ImageZoom.onClick)
+  document.addEventListener("pointerover", ImageZoom.onPointerOver, { passive: true })
 }
 
 ////////////////

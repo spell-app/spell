@@ -56,7 +56,7 @@ where the build stands and where you're needed are one glance up.
    The step pill names the phase under way (`P13`), else the next one to do, DONE, FUTURE or STANDING;
    it turns red when every phase is done but items still need you, and grey when the epic is paused,
    untouched for 3 days.
-   - Beside it:  Send and its countdown (the paper plane and the wand, one pill), while the page is being reviewed,
+   - Beside it:  Send (the paper plane), while the page is being reviewed,
      and the git toggle, which shows or hides every commit the page lists.
    - The epic's name, at the left, copies `/epic resume <name>` when you click it;
      the chip after it says how long what's open takes to read.
@@ -160,7 +160,7 @@ it explains every card and colour change you'll see on an item.
 3. It applies the mechanical ones at once:
    approvals, picks, new caveats, a caveat's plane or x, skips, new items, test results.
    A pick or a queued caveat gets a calm "Noted" card saying what happens next.
-4. Each revisit or Do Now gets a blue "Underway" card:  what the agent took the task to be.
+4. Each revisit asked now gets a blue "Underway" card:  what the agent took the task to be.
    A background agent writes the answer into the item, and the card turns green, "Done".
    An answer that offers options turns the item ORANGE:  your pick.
 5. The page updates in place:  the buttons clear, and the chips show the result.
@@ -170,15 +170,10 @@ it explains every card and colour change you'll see on an item.
 The command behind each step, and why a finished `wait` is what wakes a session:
 [README-cli.md](README-cli.md#a-session-wakes-when-its-wait-exits).
 
-- The wand beside Send is COUNTDOWN MODE (epic `epic-engine` P20), on unless you turn it off:
-  - 2 minutes after you stop typing, clicking and scrolling, what's unsent goes by itself;  a ring round the wand
-    drains while it counts
-  - that send also turns each revisit waiting into a request for now, as Review Now did:  the session answers them all
-    at once, by background agents
-  - off, the paper plane is filled blue while something waits, and nothing goes until you press it
+- Nothing goes until you press the paper plane:  it's filled blue while something waits.
 - Typing in an item's note box turns its Revisit on at the first key;  the box stays open while you type.
-- Do Now (the wand on one item) needs no Send:  it goes at once.
-  Click its spinner again to call it off ("nevermind");  an answer that arrives after that is refused.
+- A request Claude is on spins its button:  click it again to call it off ("nevermind");  an answer that arrives
+  after that is refused.
 - A revisit on a judgement call or a caveat that's work starts with `do it` already in its note box, Revisit on with it:
   type over it to say something else.
 
@@ -196,7 +191,6 @@ Every mark, and what applying it does:
 | a pick | Choose, on an option card | a question:  answered with that option;  any other item:  approved with that option |
 | Make Caveat | the list, green | a new caveat, "Follow up:  ...", linking back;  on any item, phase, the summary or an Overview sub-section |
 | Revisit | the history arrow, blue, then a note | answered INTO the item as a reply, then cleared;  with a pick, talked over first, and recorded once you agree |
-| Do Now | the wand, blue, apart from the others | as Revisit, but at once, with no Send |
 | a caveat's plane | "Do it in the next phase", green | queued into the first phase still to do |
 | a caveat's x | "Drop it", grey | canceled, "dropped in review" |
 | Skip This | the note box's x, grey | reviewed, nothing else;  your note kept as your reply |
@@ -204,12 +198,12 @@ Every mark, and what applying it does:
 
 - Each applied mark logs one line:  `J9 approved:  closed (accepted)`.
 - A mark you changed meanwhile stays, for the next Send.
-- The summary, each phase and each Overview sub-section take Revisit, Make Caveat and Do Now too, but no Approve.
+- The summary, each phase and each Overview sub-section take Make Caveat and Revisit too, but no Approve.
 
 <details>
 <summary>How Send wakes a session</summary>
 
-Send (or its countdown) or Do Now, while NO session listens, makes the page server wake the epic.
+Send, while NO session listens, makes the page server wake the epic.
 
 - Who, first match wins:
   1. the ONE running session titled for the epic, `🚧 <epic>`:  `/epic review <epic>` typed into it
@@ -221,7 +215,7 @@ Send (or its countdown) or Do Now, while NO session listens, makes the page serv
 - Once per epic per 10 minutes, or until a session listens;  a second press says when it already did.
 - No wake when several sessions are titled for the epic, in airplane mode, or for a Send with nothing new;
   clicking the pill still types the command.
-- A Do Now waiting with nobody listening says "waiting for a session".
+- A revisit now waiting with nobody listening says "waiting for a session".
 
 </details>
 
@@ -241,9 +235,9 @@ Only the tool writes it, under a lock.
   },
   urgency: {}, // a chip clicked red or yellow
   sent: "2026-10-21T12:50:32", // the last Send
-  now: [], // Do Now and Review Now requests, waiting to be taken
+  now: [], // requests for now (an older page's Do Now, a revisit now), waiting to be taken
   working: {}, // items an agent is on:  the spinner
-  canceled: {}, // a Do Now called off
+  canceled: {}, // a request for now called off
   listening: { session: "...", since: "...", seen: "..." }, // the review session's heartbeat
   handedOver: "2026-10-21T12:50:32", // the last Send a session took
   comments: {},
@@ -341,7 +335,7 @@ A new element takes its colour from this table, never one that means something e
 | --- | --- | --- |
 | red | needs you | an open question's chip;  an unreviewed judgement call or issue;  the toolbar's count |
 | yellow | open, still undecided | an open caveat or test;  a reviewed call or issue |
-| blue | do it now, or the agent is on it | Do Now, Revisit, Send;  the Underway card;  an epic in progress |
+| blue | do it now, or the agent is on it | Revisit, Send;  the Underway card;  an epic in progress |
 | green | decided or done, however long ago | Approve, Make Caveat, a pick;  a phase done;  the Done and Noted cards |
 | orange | changed since you looked;  or the agent's options, waiting for your pick | UPDATE labels;  "nobody is listening";  a replied item's chip |
 | violet | the agent's voice | its reply cards;  "recommended" (a thumbs-up) |
@@ -516,12 +510,12 @@ are drawn only inside other elements.
 
 | Group | Elements |
 | --- | --- |
-| Page structure | `epic-page` (the header, meta, step pill, Send and its countdown, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-event` (a log line), `epic-commit` |
+| Page structure | `epic-page` (the header, meta, step pill, Send, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-event` (a log line), `epic-commit` |
 | Prose blocks | `epic-question`, `epic-choices` and `epic-option`, `epic-answer`, `epic-net-effect`, `epic-reply`, `epic-more` (More Details), `epic-original` and `epic-version` (Original Discussion), `epic-update`, `epic-note`, `epic-aside`, `epic-code`, `epic-link` |
 | Review | `epic-review` (an item's buttons), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-test-run` |
 | Comments | `epic-comment-pane`, `epic-thread`, `epic-thread-message`, `epic-threads`, `epic-page-note-head` (older page notes) |
 | Lists | `epic-list`, `epic-card` and `epic-sort` (the Epics list), `epic-cards` (a saga's epics) |
-| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send and its countdown, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar` |
+| Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar` |
 
 - `<epic-link epic="seo" item="J3">` links an item on another page by what it is, never by a path:
   it draws "seo J3", with J3's title as its tooltip.

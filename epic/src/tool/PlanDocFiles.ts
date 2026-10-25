@@ -363,6 +363,8 @@ export class PlanDocFiles {
       if (!ran.length || dryRun) return done
       plan.log(`migrated:  ${ran.join(", ")}`)
       plan.updateStates()
+      // a step may renumber phases (`whole-phase-numbers`):  the Overview's total names them by number
+      plan.updateEstimate()
       const broken = plan.check().filter((problem) => !before.has(problem))
       if (broken.length)
         throw new PlanDocError(
@@ -415,9 +417,9 @@ export class PlanDocFiles {
       return
     }
     const { document } = parseHTML(linked)
-    // linkedom writes `&` in attribute values bare (I2):  escaped in this throwaway copy, as the converter does,
+    // linkedom writes `&`, `<` and `>` in attribute values bare (I2, I126):  escaped in this throwaway copy,
     // since the parts are serialized inside `split()`
-    PlanMarkup.escapeAmpersands(document as unknown as Document)
+    PlanMarkup.escapeAttributes(document as unknown as Document)
     const parts = new EpicParts(document as unknown as Document).split({ docName: basename(file) })
     const outputs = await Promise.all(
       [...parts].map(async ([id, html]): Promise<[string, string]> => {

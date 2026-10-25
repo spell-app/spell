@@ -6,7 +6,7 @@
 
 import type { EpicVocabulary } from "spell-epic/definitions"
 
-import { SEND_STATES } from "./EpicSendButtons.types"
+import { SEND_ASKS, SEND_STATES } from "./EpicSendButtons.types"
 
 /****************
  * ### `<epic-send-buttons>`
@@ -20,7 +20,8 @@ export const epicSendButtonsVocabulary = {
   noun: "send-buttons",
   ui: false,
   description:
-    "Send and its countdown, ONE group (epic `epic-engine` P20):  the paper plane sends;  the wand turns COUNTDOWN " +
+    'Send, the paper plane, ALONE since 2026-10-25 (Owen:  "remove the wand EVERYWHERE").  With `wand`, its countdown ' +
+    "too (epic `epic-engine` P20):  the wand turns COUNTDOWN " +
     "MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting " +
     "again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  " +
     "With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by " +
@@ -63,11 +64,22 @@ export const epicSendButtonsVocabulary = {
         "The stage button pressed:  outlined green, waiting for the session to move the page on.  Only with `accept`."
     },
     {
-      name: "manual",
+      name: "asks",
+      kind: "enum",
+      values: SEND_ASKS,
+      description:
+        "The pill WAITS ON YOU (Owen, 2026-10-25):  `waiting`, the pill's own border 2px #666, darker than its hairline, solid;  `taken`, " +
+        "dotted once you've pressed what it waits for;  none:  no ring.  An epic page's header sets it while " +
+        "Claude's build plans wait for your Accept, on their phases;  the pill stays Send, never green.  " +
+        "The same ring as a waiting plan's own buttons on its phase."
+    },
+    {
+      name: "wand",
       kind: "boolean",
       description:
-        "No countdown:  only a press sends, and no wand is drawn.  For a page a COMMAND waits on (`<epic-run>`):  it " +
-        "carries on with exactly what was sent (Owen, 2026-10-23)."
+        "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere since Owen, " +
+        '2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back later"), so only a press sends.  ' +
+        "`manual` before, the other way round, for a page a command waits on (`<epic-run>`)."
     }
   ],
   events: [
@@ -92,7 +104,7 @@ export const epicSendButtonsVocabulary = {
     },
     {
       name: "countdown",
-      description: "The wand, a `<button aria-pressed>`:  countdown mode on (blue) or off (grey)."
+      description: "The wand, a `<button aria-pressed>`, only with `wand`:  countdown mode on (blue) or off (grey)."
     },
     {
       name: "ring",

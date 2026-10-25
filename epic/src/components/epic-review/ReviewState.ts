@@ -125,17 +125,12 @@ export class ReviewState {
 
   /**
    * How far `action`'s mark has got:  its review button's FILL (decision Q20).
-   * - Do Now (`details`):  dashed while its request waits to be taken, outlined while Claude is on it
-   * - the rest:  their mark dashed until sent, then outlined
+   * - its mark dashed until sent, then outlined;  a request for now (`details`, an old Do Now) draws no button
    * - once Claude has handled a mark, it's gone from the inbox, and every button CLEARS (`none`):
    *   the buttons are Owen's INPUT (Owen, 2026-10-08), and the id chip shows the result
    * - the element's `review-as` stays as the record, never drawn here
    */
   readonly fillOf = (action: ReviewAction): ReviewFill => {
-    if (action === "details") {
-      if (this.busyButton() !== action) return "none"
-      return this.workedOn() ? "outline" : "dashed"
-    }
     const mark = this.mark()
     if (mark?.action !== action || isImmediate(mark)) return "none"
     return this.isSent() ? "outline" : "dashed"

@@ -91,7 +91,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     - no `DOCS / EPICS /` while the doc still holds its old `.spell-crumbs` before the page, nor narrow, 720px or
  *       less, where the side bar is too narrow for them (`Crumbs.css`)
  *     - the epic's title isn't drawn:  the name says it (the page's `<title>` and the Epics list still show it)
- *     at its right, while reviewed, Send and its countdown;  then the bedtime label, the step label (the state's icon in
+ *     at its right, while reviewed, Send;  then the bedtime label, the step label (the state's icon in
  *     it) and the git toggle (Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git
  *     icon, but bigger)";  then the state went into the step label:  "Into the pill")
  *   - the toolbar's bar, sticky again, right below the header (`--epic-head-h`):  the new item form, the toolbar
@@ -116,7 +116,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     a session listening to the review counts as running
  * - The review line under the header:  "To review this doc, type `/epic review <name>`", copied on click (it flashes)
  *   - on every epic page, as today:  it's how a review starts;  airplane mode:  `/airplane land`
- * - SEND AND ITS COUNTDOWN, `<epic-send-buttons>`, at the header's right, before its labels
+ * - SEND, `<epic-send-buttons>`, at the header's right, before its labels
  *   (epic `epic-engine` P20, in place of P10's Send and Review Now)
  *   - there whenever the page is reviewed (served with a token, its inbox answering:
  *     `ReviewClient`, through a `ReviewState` of its own), so it's always in the same place
@@ -126,10 +126,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     - grey with nothing to send, blue with marks not sent, outlined blue once sent
  *     - Owen's comments too (Owen, 2026-10-10, he keeps Send as the way they reach Claude):
  *       a new comment, or his reply on a thread, makes it blue;  its tooltip counts both ("2 marks, 1 comment")
- *   - the wand:  countdown mode (Owen, 2026-10-22)
- *     - on (the default):  what's unsent goes by itself 2 minutes after Owen stops typing, clicking and scrolling,
- *       a ring draining round the wand;  that send asks every revisit now, as Review Now did (decision Q7)
- *     - off:  the plane is filled blue until he presses it
+ *   - NO wand since Owen, 2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back later"):  the
+ *     countdown it turned on (2026-10-22) never runs, and the plane is filled blue until he presses it
+ *     - `<epic-send-buttons wand>` brings it back;  a countdown's send still asks every revisit now (`onSendAsked()`)
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
@@ -138,17 +137,20 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     what shows (`spell-doc-runtime.js` reads the same rule)
  *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON
  *     (Q14:  "Accept Overview", then "Accept Phases";  `stageButton()`)
- *   - building, while a phase's build plan waits:  "Accept plan" / "Accept 3 plans" there too (I119), so it shows
- *     however far the page is scrolled;  a press accepts them all and sends
  *     - a press sends what's unsent, with an accept mark (`accept()`),
  *       and the session moves the page on (`epic inbox apply`)
  *     - its tooltip says what's still open ("2 questions open"):  a reminder, never a lock
- *     - the wand stays:  the countdown still sends Owen's answers by itself
  *   - Send's plane is back once building starts
- * - THE PILL, under the review line, while marks, comments or Do Now requests wait and nobody can take them:
+ *   - building, while a phase's build plan waits (`plansWaiting()`):  Send as ever, RINGED (its border 2px #666, darker than its hairline),
+ *     "waiting on you", its tooltip naming them ("2 build plans wait for your Accept:  P43, P44");  dotted once
+ *     every one has his mark
+ *     - Owen, 2026-10-25:  "This just needs to be `send|wand` and not green -- I may not be accepting the phases.
+ *       Maybe try the thicker border if you are waiting on me to accept"
+ *     - accepting stays per phase, on its row;  a green "Accept 2 plans" stood here before (I119)
+ * - THE PILL, under the review line, while marks, comments or requests for now wait and nobody can take them:
  *   no session listening (solid orange, a warning), or airplane mode;  a click copies the review line's command,
  *   and, out of airplane mode, starts the review in the epic's own session (`ReviewClient.startReview()`)
- *   - once a Send or Do Now WOKE the epic (epic `epic-workflow` P16), it says what the wake did instead,
+ *   - once a Send WOKE the epic (epic `epic-workflow` P16), it says what the wake did instead,
  *     until a session listens:  "Typed /epic review <name> into 🚧 <name>:  press Enter there"
  * - NEW ITEMS (epic `airplane` P2):  each item section's own comment-dots button, on its title (`<epic-section>`);
  *   the page's toolbar has none since 2026-10-13
@@ -395,7 +397,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const stage = this.pageStage
     const client = this.review.client
     if (!this.review.reviewing() || !client) return undefined
-    if (!PageStages.isPlanning(stage)) return this.plansButton()
+    if (!PageStages.isPlanning(stage)) return undefined
     const mark = client.inbox.marks[STAGE_ID]
     const accepted = mark?.action === "accept" && mark.stage === stage
     const texts = STAGE_TEXTS[stage]
@@ -417,26 +419,27 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * While building, the header's button for Claude's build plans that wait (epic `epic-engine` I119;  Owen, 2026-10-25:
-   * "Accept plan needs to be in the top bar, otherwise I won't see it if it's scrolled off"):  "Accept plan", or
-   * "Accept 3 plans";  its tooltip names them.  `undefined` while none waits.
-   * - a press:  Accept plan on every one of them, then Send (`accept()`), so Claude builds them straight through
+   * While building, Claude's build plans that wait for Owen's Accept, as the header's Send shows them
+   * (epic `epic-engine` I119;  Owen, 2026-10-25:  "Accept plan needs to be in the top bar, otherwise I won't see it if
+   * it's scrolled off", then "This just needs to be `send|wand` and not green -- I may not be accepting the phases"):
+   * - `asks`:  `waiting` (Send ringed:  its border 2px #666) until every one has his mark, then `taken` (dotted)
+   * - `tip`:  "2 build plans wait for your Accept:  P43, P44"
+   * - `undefined` while none waits, or the page isn't reviewed;  accepting is per phase, on its row
    */
-  private plansButton(): StageButton | undefined {
-    const client = this.review.client!
+  readonly plansWaiting = createMemo((): { asks: "waiting" | "taken"; tip: string } | undefined => {
+    this.signals.layout.get()
+    const client = this.review.client
+    if (!this.review.reviewing() || !client || PageStages.isPlanning(this.pageStage)) return undefined
     const waiting = Array.from(this.domElement.querySelectorAll(PLANS_WAITING))
     if (!waiting.length) return undefined
-    const accepted = waiting.every((phase) => client.markOf(phase.id)?.action === "approve")
-    const names = waiting.map((phase) => PhaseIds.labelOf(phase)).join(", ")
-    const label =
-      waiting.length === 1
-        ? this.translationForKey("acceptPlanOne")
-        : this.translationForKey("acceptPlansMany", { count: waiting.length })
-    const tip = accepted
-      ? this.translationForKey("acceptedPlans")
-      : this.translationForKey("acceptPlansTip", { phases: names })
-    return { label, tip, accepted }
-  }
+    const marked = waiting.every((phase) => !!client.markOf(phase.id))
+    const phases = waiting.map((phase) => PhaseIds.labelOf(phase)).join(", ")
+    const tip = this.translationForKey(waiting.length === 1 ? "plansWaitOne" : "plansWaitMany", {
+      count: waiting.length,
+      phases
+    })
+    return { asks: marked ? "taken" : "waiting", tip }
+  })
 
   /**
    * The step label;  `undefined` for none.
@@ -496,7 +499,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /**
    * Does the pill show?  Reviewed, nobody can take the work, and something waits:
-   * marks SENT and not worked through, a Do Now not taken, or a wake to tell of (P16).
+   * marks SENT and not worked through, a request for now not taken, or a wake to tell of (P16).
    * - NOT for marks and comments not sent yet (epic `epic-engine` I123):  the pill appeared above the page the moment
    *   Owen pressed a button, and everything under it jumped down (Owen, 2026-10-25:  "Screen seems to be jumping a
    *   lot when I click Accept Phase");  Send itself wakes the epic when nobody listens
@@ -962,12 +965,17 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * Send and its countdown (`<epic-send-buttons>`), at the header's right, before its labels.
+   * Send (`<epic-send-buttons>`), at the header's right, before its labels.
    * - the plane by the fill rule (Q20), its tooltip what a press sends, or why it sends nothing
-   * - a press, or the countdown running out:  `onSendAsked()`
+   * - a press (or, with the wand back, the countdown running out):  `onSendAsked()`
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
     const stage = () => this.stageButton()
+    const plans = () => this.plansWaiting()
+    const sendTip = () => {
+      const words = this.sendWords(marks())
+      return plans() ? `${plans()!.tip} · ${words}` : words
+    }
     return (
       <epic-send-buttons
         class={SEND}
@@ -975,10 +983,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         state={marks().send}
         accept={stage()?.label}
         accepted={stage()?.accepted ? "" : undefined}
+        asks={plans()?.asks}
         send-tip={
           stage()
             ? this.withNobody(stage()!.tip, marks(), true)
-            : this.withNobody(this.sendWords(marks()), marks(), marks().send !== "idle")
+            : this.withNobody(sendTip(), marks(), marks().send !== "idle")
         }
       />
     )
@@ -1007,14 +1016,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const client = this.review.client
     if (!client) return
     const stage = this.pageStage
-    if (!PageStages.isPlanning(stage)) {
-      // building:  Accept plan on every phase whose plan waits (I119), then Send
-      for (const phase of Array.from(this.domElement.querySelectorAll(PLANS_WAITING)))
-        if (client.markOf(phase.id)?.action !== "approve" && !(await client.save(phase.id, { action: "approve" })))
-          return
-      await client.send()
-      return
-    }
+    if (!PageStages.isPlanning(stage)) return
     const mark = client.markOf(STAGE_ID)
     if (mark?.action !== "accept" || mark.stage !== stage) {
       if (!(await client.save(STAGE_ID, { action: "accept", stage }))) return
@@ -1025,7 +1027,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The pill under the review line, while work waits and nobody can take it (`hasPill()`):
    * no Claude session listening (orange), or airplane mode.
-   * - what the page server's wake did, once a Send or Do Now woke the epic (epic `epic-workflow` P16):
+   * - what the page server's wake did, once a Send woke the epic (epic `epic-workflow` P16):
    *   `Typed /epic review <name> into 🚧 <name>:  press Enter there`, until a session listens
    * - a click copies the review line's command (`/epic review <name>`, `/airplane land`), and, out of airplane
    *   mode, starts the review in the epic's own session (`copyCommand()`), woken or not
@@ -1437,7 +1439,7 @@ type FilterHost = E.DOMElement & {
 const SECTIONS = "epic-section"
 
 /** The stage button's texts, by the stage it ends. */
-/** The phases whose build plan waits for Owen's Accept, not done (`plansButton()`). */
+/** The phases whose build plan waits for Owen's Accept, not done (`plansWaiting()`). */
 const PLANS_WAITING =
   ':scope > epic-section[kind="phases"] > epic-phase[plan="waiting"]:not([status="done"], [title="Doc Review" i])'
 

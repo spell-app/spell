@@ -1,6 +1,6 @@
 ---
 name: airplane
-description: Get the laptop ready for Owen to work on the epics and docs with NO Claude (on a plane, or bad wifi) -- check and fix what pages need offline, turn airplane mode on, say how it works;  `/airplane land` afterwards gathers everything he left (marks, notes, new items, Do Now requests, new epics) across every epic and page, works through it in the background, and asks which new epics to start.  Use for `/airplane`, `/airplane land`, `/airplane status`, or when Owen says "I'm going offline", "I'm getting on a plane", "I'm back, go through what I left".
+description: Get the laptop ready for Owen to work on the epics and docs with NO Claude (on a plane, or bad wifi) -- check and fix what pages need offline, turn airplane mode on, say how it works;  `/airplane land` afterwards gathers everything he left (marks, notes, new items, requests for now, new epics) across every epic and page, works through it in the background, and asks which new epics to start.  Use for `/airplane`, `/airplane land`, `/airplane status`, or when Owen says "I'm going offline", "I'm getting on a plane", "I'm back, go through what I left".
 argument-hint: '[land | status]'
 ---
 
@@ -78,7 +78,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
      - Tab or a click away saves a comment or reply;  emptied, it's gone
      - a new epic:  the Epics page's New epic pill (its seedling):  a title and what it's for.
        It's written down as a future epic at once, and the landing asks whether to start it.
-     - Do Now still works:  it waits, dashed, for landing
+     - Send still works:  what's sent waits for landing
      - the page server stopped (laptop asleep, restarted):  the Review tab's "Restart Page Server" button
      - turn Wi-Fi fully off while reading:  a "pay first" wifi page makes requests hang
    - last line:  "When you're back:  `/airplane land`."
@@ -88,7 +88,7 @@ Airplane mode:  Owen works on the pages ALONE, with no internet and no Claude (e
 Owen is back online.  Gather everything, work through it in the background, then hand him the review.
 
 1. `epic airplane inbox --json`:  everything waiting, by place:
-   - each epic's marks, sent or not, its drafts, Do Now requests, and new items from the page's `+`
+   - each epic's marks, sent or not, its drafts, requests for now, and new items from the page's `+`
    - new epics made from the Epics page, not started (`newEpics`)
    - each epic's comments (`comments`:  on its epic page's blocks)
    - comments on docs pages (`comments`)
@@ -138,7 +138,7 @@ Owen is back online.  Gather everything, work through it in the background, then
    - Say which pages, and that `/epic review feedback` works them;  nothing else to do for them now.
 5. The rest goes to background agents, up to 5 at once.
    They're named and listed (the root `CLAUDE.md`, "Delegated work").
-   - Each Do Now, revisit and phase note:  as `/epic review` answers one ("7.3", step 2).
+   - Each request for now, revisit and phase note:  as `/epic review` answers one ("7.3", step 2).
      - The status card first, then the answer INTO the item.
      - Then `status ... done`, and `inbox done | clear`.
    - A mark that only asked to RECORD a choice (no answer to write):

@@ -229,8 +229,8 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 ## A page is something you act on
 
 A wiki page is read;  this one has buttons.
-Open an item and three sit at its right:  Approve (the check), Revisit, which opens a box for your note,
-and Make Caveat, with Do Now's wand set apart.
+Open an item and three sit at its right, one group:  Make Caveat, Revisit, which opens a box for your note,
+and Approve (the check).
 A question's option cards each have Choose, and a caveat that's work has three of its own:
 the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
@@ -239,11 +239,7 @@ the plane, do it in the next phase;  Revisit;  and the x, drop it.
 _A judgement call on a real epic page, its note box open:  the yellow chip says it's open, and calm;
 Approve, Revisit and Make Caveat sit together, Do Now's wand apart._
 
-Nothing you press goes anywhere until Send, in the page's header, hands it all over:
-- you press the paper plane, or
-- countdown mode does it 2 minutes after you stop typing, clicking and scrolling, every revisit asked for now too
-  (the wand beside the plane turns it on and off)
-Do Now is the one that doesn't wait:  a background agent writes the answer into the item, with no Send.
+Nothing you press goes anywhere until Send, in the page's header, hands it all over:  you press the paper plane.
 
 Two more things you'll do on a page, and one you can do from any session:
 - comment on any block of any docs page, with the bullhorn beside it, or select text and press ⌘-I:

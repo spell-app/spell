@@ -68,6 +68,22 @@ export type Phase = {
   status: string
   /** its estimate's text (`1-2h`);  `undefined` while missing or `TBD` */
   estimate: string | undefined
+  /** how long Claude worked on it (`21m`, `<epic-phase took>`, epic `epic-engine` P41);  `undefined` until measured */
+  took: string | undefined
+}
+
+/**
+ * How long Claude worked on phase `phase` (`P40`) of epic `epic` while it was active (`window`), in minutes;  0 for
+ * none found (`PlanDocCommands`' `phaseTimer`, by default `WorkTime.ofPhase()`).
+ */
+export type PhaseTimer = (request: { epic: string; phase: string; window: PhaseWindow }) => number
+
+/** When a phase was at work, as its log has it (`PlanDoc.activeWindow()`):  ms since the epoch. */
+export type PhaseWindow = {
+  /** its last `active` */
+  from: number
+  /** the `done` after it, else now */
+  to: number
 }
 
 /** A phase's fields as HTML, by flag:  `PlanDoc.setPhaseFields()`;  `""` removes one. */
@@ -80,7 +96,7 @@ export type AddPhaseOptions = Prettify<
     estimate?: string
     /** inserted at this place, the to-do phases from it on moving down a number (`add-phase --before N`);  default last */
     before?: number
-    /** a decimal phase after the phase at this place (`add-phase --after 11`:  P11.1, epic `epic-engine` P39) */
+    /** right after the phase at this place, the to-do phases after it moving down a number (`add-phase --after 11`:  P12) */
     after?: number
   }
 >
