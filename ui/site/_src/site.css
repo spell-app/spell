@@ -769,16 +769,28 @@
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
   .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
-    /* a theme with no bar fill of its own:  a faint tint, so the bar's shape reads */
-    background-color: var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent));
-    background-image: none;
+    /*
+     * its fill laid over the page's own ground (a theme's wallpaper, fixed as the page's is):  it looks see-through,
+     * but hides what scrolls under it while its section's end pushes it up, not yet stuck (Owen, 2026-10-25:  "Need
+     * more opacity on "Read only"")
+     * - a theme with no bar fill of its own:  a faint tint, so the bar's shape reads
+     */
+    background-color: var(--ui-bar-wallpaper-color, var(--ui-background));
+    background-image:
+      linear-gradient(
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent)),
+        var(--ui-bar-rest-background, color-mix(in oklab, var(--ui-ink, currentColor) 3%, transparent))
+      ),
+      var(--ui-bar-wallpaper, none);
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
   }
   /*
    * a section's first nested title tucks under its parent's, square at its top;  the parent's stays round
-   * (Owen, 2026-10-25:  "top header should have round bottom")
+   * (Owen, 2026-10-25:  "top header should have round bottom");  so does any nested title while stuck under it
+   * ("should NOT be rounded on top when stuck")
    */
-  .site-main ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(title) {
+  .site-main ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(title),
+  .site-main ui-section ui-section[sticky]:state(stuck)::part(title) {
     border-start-start-radius: 0;
     border-start-end-radius: 0;
   }

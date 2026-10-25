@@ -37,7 +37,7 @@ describe("UIDocsExample.css layout", () => {
     `<div class="description" part="description">D</div>` +
     `<div class="frame"><button part="toggle">c</button><div part="demo">X</div></div></section>`
 
-  it("puts the header and description above the frame, the code button over the frame's corner (centred in a one-line frame)", () => {
+  it("puts the header and description above the frame, the code button centred on the frame's top edge", () => {
     const host = Sheets.host(MARKUP, [...foundationCSS, exampleCSS])
     const shadow = host.shadowRoot!
     expect(getComputedStyle(shadow.querySelector(".heading")!).display).toBe("flex")
@@ -47,15 +47,15 @@ describe("UIDocsExample.css layout", () => {
     const toggle = shadow.querySelector<HTMLElement>("[part~=toggle]")!
     expect(getComputedStyle(toggle).position).toBe("absolute")
     expect(getComputedStyle(toggle).opacity).toBe("1")
-    // a one-line frame:  centred top to bottom (the sheet takes the button as the mini `<ui-button>`'s 1.35em)
     toggle.style.cssText = "height: 1.35em; box-sizing: border-box; padding: 0; border: 0"
+    // half above the frame, its middle on the frame's top edge (inside its hairline), the example taking no room for it
     const box = toggle.getBoundingClientRect()
-    expect(Math.abs(box.top - frame.top - (frame.bottom - box.bottom))).toBeLessThan(1.5)
-    // a tall frame:  the same inset from its top and right edges
-    shadow.querySelector<HTMLElement>("[part~=demo]")!.style.height = "200px"
-    const tall = shadow.querySelector(".frame")!.getBoundingClientRect()
-    const corner = toggle.getBoundingClientRect()
-    expect(Math.abs(corner.top - tall.top - (tall.right - corner.right))).toBeLessThan(1)
+    const edge = shadow.querySelector<HTMLElement>(".frame")!
+    expect(Math.abs((box.top + box.bottom) / 2 - (frame.top + edge.clientTop))).toBeLessThan(1)
+    // in from the frame's right edge by the inset (0.8em)
+    const inset = parseFloat(getComputedStyle(toggle).fontSize) * 0.8
+    const borderRight = frame.width - edge.clientLeft - edge.clientWidth
+    expect(Math.abs(frame.right - borderRight - box.right - inset)).toBeLessThan(1)
   })
 
   it("takes a public token from outside", () => {

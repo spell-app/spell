@@ -7,7 +7,7 @@
  *   - `<div class="heading">`:  the `<ui-header part="header">` (only when there is a header)
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
  *   - `<div class="frame">`:
- *     - the `<ui-button part="toggle">`, over its top right corner
+ *     - the `<ui-button part="toggle">`, on its top edge at the right, half above it (a bare example's:  over its corner)
  *     - the `<ui-segment part="demo">`, around the default slot
  *     - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
  *   - the header and description sit on the page, outside the frame:
@@ -135,6 +135,15 @@
       0 0 0 1px var(--ui-border-color),
       var(--ui-shadow-subtle, 0 0 #0000);
   }
+  /*
+   * a framed example's button sits ON the frame's top edge, at its right, half above it:  the example takes no room
+   * for it, so its sides and top keep the same space (Owen, 2026-10-25:  "make the "code" icon float above the
+   * top-right of the panel and don't take space for it in the content")
+   */
+  .ui.example:not(.bare) > .frame > [part~="toggle"] {
+    inset-block-start: 0;
+    translate: 0 -50%;
+  }
   .frame > [part~="toggle"]:hover,
   .frame > [part~="toggle"]:focus-within,
   :host(:state(open)) .frame > [part~="toggle"] {
@@ -194,27 +203,6 @@
     margin: 0;
   }
   /*
-   * Room for the code button over the corner, so the demo's first line never runs under it
-   * (on a phone, the Button page's "Like", "Forks 1,048" and "Next" did):
-   * - a float as wide and tall as the button's corner, first in the demo:
-   *   the first line's buttons and words wrap round it
-   * - the rest of the demo keeps the frame's whole width
-   *   (padding down the whole demo left its right side three times its left)
-   * - the button is 28px wide and about 1.35em tall, its inset in from the frame's edge;
-   *   the demo's content starts the frame's padding (1em, 0.75em) in
-   */
-  .toggle-room {
-    float: inline-end;
-    width: var(--_ui-docs-example-toggle-room);
-    height: calc(var(--_ui-docs-example-toggle-inset) - 0.75em + 1.35em);
-  }
-  .ui.bare.example .toggle-room {
-    display: none;
-  }
-  .ui.example {
-    --_ui-docs-example-toggle-room: calc(28px + var(--_ui-docs-example-toggle-inset) - 1em + 0.4em);
-  }
-  /*
    * The frame is the glass:  the demo and the code inside it blur nothing again.
    * - A theme's segment glass did, a shade off the frame round it
    *   (Owen, 2026-10-23:  "Lose whatever is causing background color shift under code").
@@ -236,7 +224,6 @@
    */
   :host(:state(code-shown)) .ui.example:not(.bare) > .frame {
     padding: 0;
-    overflow: hidden;
   }
   :host(:state(code-shown)) .ui.example:not(.bare) [part~="demo"]::part(segment) {
     position: relative;
@@ -246,7 +233,9 @@
     border: none;
     /* its bottom corners round, the frame's:  a card over the code
        (Owen, 2026-10-23:  "The example should keep its rounding on the bottom when opened") */
-    border-radius: 0 0 var(--_ui-docs-example-frame-radius) var(--_ui-docs-example-frame-radius);
+    /* its top corners the frame's, inside its hairline:  the frame doesn't clip, so the code button can stand over its edge */
+    border-radius: calc(var(--_ui-docs-example-frame-radius) - 1px) calc(var(--_ui-docs-example-frame-radius) - 1px)
+      var(--_ui-docs-example-frame-radius) var(--_ui-docs-example-frame-radius);
     background: var(--_ui-docs-example-demo-background);
     box-shadow:
       0 1px 0 var(--ui-border-color),
@@ -261,7 +250,8 @@
     overflow-x: auto;
     overflow-y: hidden;
     border: none;
-    border-radius: 0;
+    /* its bottom corners the frame's, inside its hairline */
+    border-radius: 0 0 calc(var(--_ui-docs-example-frame-radius) - 1px) calc(var(--_ui-docs-example-frame-radius) - 1px);
     background: color-mix(in oklab, var(--ui-text-color) 3%, transparent);
     box-shadow: none;
     interpolate-size: allow-keywords;
