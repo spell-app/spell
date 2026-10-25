@@ -81,7 +81,7 @@ export function initializeExtended(target: any, ..._what: Array<"derived" | "pro
 
 /**
  * Prop `property` of `target`, tracked:  a reader re-runs when it changes, even if it's unset now.
- * - Unset:  `initializer()`'s value, stored once per object.
+ * - Unset:  `initializer()`'s value, stored once per object;  when it makes nothing, its declared default.
  *   - Else what its class's schema declares (see `PropInfo`):
  *     its `init`, stored the same way, or its default, NOT stored (`defaultFor()`):
  *     its `default`, else its first choice (`oneOf`), else its type's (`number` 0, `text` "", `choice` false).
@@ -102,7 +102,8 @@ export function getProp<T>(target: any, property: string, initializer?: () => T)
     if (!initializer) return defaultFor(info)
   }
   const value = initializer.call(target)
-  if (value === undefined) return defaultFor(info)
+  // a passed `initializer` that makes nothing:  its declared default all the same
+  if (value === undefined) return defaultFor(info ?? declared(target, property))
   record.set(property, value)
   extended[KEYS]?.changed()
   return value
