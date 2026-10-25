@@ -62,15 +62,28 @@ export class PrefStore {
   /**
    * The value kept at `fullKey` (`spell-site:scheme`), a key named whole:  `get()` of its store, in `place`.
    * - For code that names its keys whole, as a plain script does (`splitKey()`).
+   * - `place`:  a quick place's name, or a place itself (a `StoragePlace` over a test's storage)
    * - throws `TypeError` for a key with no colon
    */
-  static getAt(fullKey: string, place: PrefPlaceName = "local"): unknown {
+  static getAt(fullKey: string, place: PrefPlaceName | PrefPlace = "local"): unknown {
     const [store, key] = PrefStore.splitKey(fullKey)
     return new PrefStore(store, { place }).get(key)
   }
 
+  /**
+   * Move what's kept under `oldKey`, a key no store names (written before `PrefStore`:  `spell-epics-sort`), to
+   * `fullKey` (`spell-epics:sort`), once.
+   * - Its text moved byte for byte, so it reads as it did;  a value `fullKey` already has wins.
+   * - Nothing under `oldKey`:  nothing happens.  So it's safe to call on every start.
+   * - throws `TypeError` for a `fullKey` with no colon
+   */
+  static moveOldKey(oldKey: string, fullKey: string, place: "local" | "session" = "local"): void {
+    const [store, key] = PrefStore.splitKey(fullKey)
+    ;(placeFor(place) as StoragePlace).moveText(oldKey, store, key)
+  }
+
   /** Keep `value` at `fullKey`, a key named whole;  `undefined` forgets it:  `set()` of its store, in `place`. */
-  static setAt(fullKey: string, value: unknown, place: PrefPlaceName = "local"): void {
+  static setAt(fullKey: string, value: unknown, place: PrefPlaceName | PrefPlace = "local"): void {
     const [store, key] = PrefStore.splitKey(fullKey)
     new PrefStore(store, { place }).set(key, value)
   }

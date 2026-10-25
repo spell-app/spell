@@ -78,6 +78,11 @@
       "types": "./dist-types/src/util/index.d.ts",
       "default": "./src/util/index.ts"
     },
+    "./util/persist": {
+      "spell-source": "./src/util/persist/index.ts",
+      "types": "./dist-types/src/util/persist/index.d.ts",
+      "default": "./src/util/persist/index.ts"
+    },
     "./util/reactive": {
       "spell-source": "./src/util/reactive/index.ts",
       "types": "./dist-types/src/util/reactive/index.d.ts",

@@ -67,6 +67,20 @@ export class StoragePlace extends PrefPlace {
     return keys ?? []
   }
 
+  /**
+   * Move the text kept under `oldKey`, a key no store names (written before `PrefStore`), to `key` of `store`.
+   * - The text as it is, byte for byte;  a value `key` already has wins, and `oldKey` is forgotten either way.
+   * - Nothing under `oldKey`:  nothing happens.  NEVER throws:  a failure is logged.
+   */
+  moveText(oldKey: string, store: string, key: string): void {
+    this.attempt("moveText", store, key, (storage) => {
+      const text = storage.getItem(oldKey)
+      if (text === null) return
+      if (storage.getItem(fullKey(store, key)) === null) storage.setItem(fullKey(store, key), text)
+      storage.removeItem(oldKey)
+    })
+  }
+
   ////////////////
   // ## The storage
   ////////////////
