@@ -17,6 +17,11 @@
     /* inside its section's inset, not edge to edge:  rounded cards with room at their sides, as items are (Owen,
        2026-10-25:  "P1...P2 should have some horizontal margin.  NOT drawer appearance") */
     --_epic-fold-bleed: 0px;
+    /*
+     * a card inside its section, which already sits in the page's column:  its own inset, not the column's again
+     * (Owen, 2026-10-25:  on a wide window the column's inset, taken twice, squeezed its title into a narrow strip)
+     */
+    --epic-inset: var(--epic-card-inset, 16px);
   }
   :host([status="done"]) {
     --_epic-fold-title-color: var(--epic-muted, var(--ui-text-muted));

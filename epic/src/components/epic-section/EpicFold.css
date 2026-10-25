@@ -56,10 +56,12 @@
     --ui-section-stuck-shadow: none;
     /* under the page header (5);  nested titles slide under their parents' (Spell UI subtracts the depth) */
     --ui-section-z-index: 4;
+    /*
+     * the fold chevron at the row's START, before the icon, as an item's line has it:  folded it points right, open
+     * down (Owen, 2026-10-25:  "disclosure triangle on one side for phases, other side for questions" ... "put it on
+     * the left";  before, at the row's end, up when open:  J5 of `review-review`)
+     */
     --ui-section-fold-icon-size: 12px;
-    /* Material's convention (Owen, J5 of `review-review`):  open, the chevron points UP;  folded, DOWN */
-    --ui-section-fold-icon-rotate: 180deg;
-    --ui-section-fold-icon-folded-rotate: 0deg;
     --ui-section-tip-width: 340px;
     --ui-font-family-heading: var(--epic-serif, var(--ui-font-family-heading));
     display: block;
