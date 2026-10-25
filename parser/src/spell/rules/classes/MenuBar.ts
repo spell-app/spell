@@ -8,8 +8,8 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * `menu_bar` rule:  which of an app's menus is its MENU BAR (epic `elemental-spell` P10, Q34).
  * - e.g. `- its menu bar is "game menu"`;  Spanish's `- su barra de menú es "menú del juego"`
  * - spellx's twin:  the app tag's `menu-bar="GameMenu"`.
- * - Compiles to the name on the class, `static menuBar = "game menu"`:  the page draws that menu along its top
- *   (`core.menuBarOf()`).
+ * - Compiles to the name on the class, `static menuBar = "game menu"`:
+ *   the page draws that menu along its top (`core.menuBarOf()`).
  */
 export class MenuBar extends SpellStatement<"type|menu"> {
   @proto static priority = Priority.declaration

@@ -5,12 +5,13 @@ import { SpellExpression } from "spell-parser/spell/rules/expressions/SpellExpre
 import { Negatable } from "spell-parser/spell/rules/expressions"
 
 /**
- * `input_state` rule:  the mouse and the keys, readable anywhere (epic `elemental-spell` P9, Q31, Q32;  HyperCard's
- * `the shiftKey`) -- core's `input`, `input.ts`.
+ * `input_state` rule:  the mouse and the keys, readable anywhere -- core's `input`, `input.ts`.
+ * - Epic `elemental-spell` P9, Q31, Q32;  HyperCard's `the shiftKey`.
  * - e.g. `the shift key is down`:  `core.input.shiftKey`;  `the mouse isn't down`:  `!core.input.button`
  * - `the meta key`:  command on a Mac, control elsewhere, by the system the program runs on (Q31)
- * - `the button` (the left), `the right button`, `the center button`;  `the mouse is still down` (held a second,
- *   barely moving);  `space is down`, a named key
+ * - `the button` (the left), `the right button`, `the center button`
+ * - `the mouse is still down` (held a second, barely moving)
+ * - `space is down`, a named key
  * - Not tied to an event:  read in any step, a handler's or not.  A handler that waits reads it as it is THEN.
  * - Each form is its own registration, `specialize()`d with what it reads (`reads`), and a named key with `key`.
  */

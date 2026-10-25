@@ -63,8 +63,8 @@ export function parseSpellProject(
  *   - a class member's in its class's body
  * - `code`:  that, markers out, as its `<Project>.spell.js`
  * - `declarations`:  as its `<Project>.declarations.json5`, read back as another project would
- * - `map`:  with `options.sourceMap`, its source map, marks made as it was written (`P.SourceMarks`);  `code`
- *   is then the code with the marks taken out again, which must be what it is without them
+ * - `map`:  with `options.sourceMap`, its source map, marks made as it was written (`P.SourceMarks`);
+ *   `code` is then the code with the marks taken out again, which must be what it is without them
  */
 export function compiledSpellProject(
   files: SpellSourceFile[],

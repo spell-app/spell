@@ -61,8 +61,9 @@ export class SourceMarks {
 
   /**
    * `output`, written for `node`, with its mark -- if marks are being made and `node` has a place.
-   * - At the end of its first line that's code, not a comment or a blank:  `/** docs *\/` and a declaration's
-   *   marker comment stay at their lines' starts, as `SP.SpellDeclarations.split()` reads them.
+   * - At the end of its first line that's code, not a comment or a blank:
+   *   `/** docs *\/` and a declaration's marker comment stay at their lines' starts,
+   *   as `SP.SpellDeclarations.split()` reads them.
    */
   static mark(output: unknown, node: P.ASTNode): unknown {
     const marks = SourceMarks.current

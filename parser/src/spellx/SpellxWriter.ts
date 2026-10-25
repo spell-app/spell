@@ -2,8 +2,8 @@ import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 
 /**
- * A `.spell` file written as SPELLX (epic `elemental-spell` P12, Q19):  `SpellxWriter.write(file)` => its `.spellx`
- * text, a fresh layout of the same program.
+ * A `.spell` file written as SPELLX (epic `elemental-spell` P12, Q19):
+ * `SpellxWriter.write(file)` => its `.spellx` text, a fresh layout of the same program.
  * - The other way from `SX.CodeSpellWriter`, and the same idea:  each declaration line is written as the tag whose
  *   code-spell TWIN (`SP.SpellxTwin`) it is, so the `.spellx` compiles to exactly what the `.spell` did.
  * - Rule by rule, from the file's PARSE:  each line's statement says what it declares (`create_type`,
@@ -24,8 +24,9 @@ import { SP } from "spell-parser/spell"
 export class SpellxWriter {
   /**
    * `file`, a parsed `.spell` file, as spellx text.
-   * - `text`:  its source;  `match`:  its parse (a `block`);  `scope`:  its file scope, which says its language and
-   *   knows its types.
+   * - `text`:  its source
+   * - `match`:  its parse (a `block`)
+   * - `scope`:  its file scope, which says its language and knows its types
    */
   static write({ text, match, scope }: SpellxWriteInput): string {
     const writer = new SpellxWriter(text, scope)
@@ -281,8 +282,8 @@ export class SpellxWriter {
 
   /**
    * `- its "suit" is one of clubs, hearts` and its aliases => `<property "suit" one-of="clubs, hearts" alias="..." />`;
-   * `- its "symbol" is:` and its lines => `<property "symbol">` ... `</property>`;  `- its "moves" is 0` =>
-   * `<property "moves">0</>`.
+   * - `- its "symbol" is:` and its lines => `<property "symbol">` ... `</property>`
+   * - `- its "moves" is 0` => `<property "moves">0</>`
    */
   private property(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
     const name = unquote(groupText(statement, "property"))

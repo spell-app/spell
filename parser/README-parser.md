@@ -187,7 +187,7 @@ flowchart TB
 ```
 
 _A Group of two `Trigger` rules, one per syntax.
-Rulex folded `(trigger|fire|send) event?` into a single Keywords rule._
+Rulex folded `(trigger|fire) event?` into a single Keywords rule._
 
 - A syntax is compiled ONCE, when its rule is registered:  parsing never sees the string again
   ([when, and what a bad one says](README-rulex.md#it-compiles-once-when-a-rule-registers)).
@@ -217,7 +217,7 @@ export class Trigger extends SpellStatement<"eventName|props?"> {
 }
 
 events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?",
+  syntax: "(trigger|fire) event? {eventName:keyword} (with {props:object_literal_properties})?",
   tests: [
     {
       compileAs: "statement",
@@ -230,7 +230,7 @@ events.addRule(Trigger, {
 })
 // `fire event card click with card = it`:  an event's name of several words -- see `event_words`
 events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?",
+  syntax: "(trigger|fire) event? {eventName:event_words} (with {props:object_literal_properties})?",
   tests: [
     { compileAs: "statement", tests: [["fire event card click with card = 1", 'trigger("card-click", { card: 1 })']] }
   ]
@@ -256,10 +256,10 @@ spell explain trigger
 <summary>Output</summary>
 
 ```text
-trigger  (trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?
+trigger  (trigger|fire) event? {eventName:keyword} (with {props:object_literal_properties})?
 e.g. trigger card-click
 
-trigger  (trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?
+trigger  (trigger|fire) event? {eventName:event_words} (with {props:object_literal_properties})?
 e.g. fire event card click with card = 1
 ```
 

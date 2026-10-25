@@ -538,8 +538,8 @@ export type SpellxTwinWords = {
   /** A part placed in a drawing:  `draw its {words}`. */
   placePart: string
   /**
-   * A menu, its `<action>`s quoted after it (epic `elemental-spell` P10):  `its {name} is a menu of`,
-   * then `"deal" , "-" and "undo"`.
+   * A menu, its `<action>`s quoted after it (epic `elemental-spell` P10):
+   * `its {name} is a menu of`, then `"deal" , "-" and "undo"`.
    */
   menu: string
   /** The words between a menu's items:  the last pair's, `and`. */

@@ -870,15 +870,16 @@ A kind that says so is saved in a file of its own.
   - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
     - `- when flipped:` is the same (`On`'s `when` registrations);  `- when created:` stays the creation hook,
       which wins on the same words by its `priority`.
-    - Inside one, the handler's `event` argument is a variable of kind `argument`:  that's how `pass event`,
-      `cancel event`, `target`, `sender` and `the original target` know they're in a handler (`inHandler()`),
-      and refuse to parse elsewhere.
+    - Inside one, the handler's `event` argument is a variable of kind `argument`:
+      that's how `pass event`, `cancel event`, `target`, `sender` and `the original target`
+      know they're in a handler (`inHandler()`), and refuse to parse elsewhere.
   - A WHILE handler, `- while the mouse is down:` (`while_handler`), is a method too, `whileMouseDown()`:
     the page starts it and puts back what it set, through core's `startWhile()` / `endWhile()`.
   - `send flipped` (`Send`) inside a template's method sends from `this`, and to `this` when it names no target:
     `parse()` finds the method's scope (`mapItTo === "this"`) into `match.data`.
-    - An event whose name is still happening, by the language's `ongoingEventName` (`-ing`;  Spanish `-ando`,
-      `-iendo`), is awaited and its `canceled` checked:  `if ((await send(...)).canceled) return`.
+    - An event whose name is still happening, by the language's `ongoingEventName`
+      (`-ing`;  Spanish `-ando`, `-iendo`), is awaited and its `canceled` checked:
+      `if ((await send(...)).canceled) return`.
   - An EVENT its things send, `- it sends "flipped" with side as a direction` (`declare_event`):
     `core.describeEvent(...)` after the class.
 
@@ -1099,8 +1100,8 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     `{markup:draw_part}` => `return ...`, at `Priority.specific`.
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
     A loop's body counts as the drawing around it (`SpellStatement.loops`:  `for each`, `repeat`).
-  - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts), from `draw_it`'s and
-    `to_do_something`'s `getAST()`, makes them ONE `return [ ... ]`, in order:
+  - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts),
+    from `draw_it`'s and `to_do_something`'s `getAST()`, makes them ONE `return [ ... ]`, in order:
     - markup lines one after another are one fragment already (the tokenizer's), spread into the list
     - a loop with drawn lines is its `core.map(list, (item) => ...)`, its body gathered the same way
     - an `if` chain among them is `cond ? a : b` (`null` when no branch is picked);  alone, it stays an `if`, each
@@ -1799,8 +1800,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   `<Project>.spell.js.map` in the build folder, beside its code, which ends `//# sourceMappingURL=<file>.map`.
   - Made as the code is written:  inside `P.SourceMarks.during()`, `P.Writer.write()` puts an inline mark at the end
     of each statement's first code line (`SP.SpellProject.sourcePlaceOf()`:  its file, line and column).
-  - `SpellDeclarations.split()` and the writer's `module()` run with the marks in;  `extract()` takes them out
-    again, so the code is EXACTLY what it is with no map, and each marked line becomes a mapping.
+  - `SpellDeclarations.split()` and the writer's `module()` run with the marks in;
+    `extract()` takes them out again, so the code is EXACTLY what it is with no map,
+    and each marked line becomes a mapping.
     spell-app's `sourceMaps.test.ts` checks that for every fixture, both targets.
   - A writer that lays a line out by its length measures it without marks (`P.SourceMarks.widthOf()`).
   - The map names each file by its name in the project (`Card.spell`) and carries its text (`sourcesContent`).

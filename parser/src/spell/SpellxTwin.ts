@@ -191,8 +191,9 @@ export class SpellxTwin {
   }
 
   /**
-   * A menu, ONE line naming its actions (Q34, Q41):  `<menu "game menu">` holding `<action "deal" />`,
-   * `<action "-" />` and `<action "undo" />` is `its "game menu" is a menu of "deal" , "-" and "undo"`.
+   * A menu, ONE line naming its actions (Q34, Q41).
+   * - `<menu "game menu">` holding `<action "deal" />`, `<action "-" />` and `<action "undo" />`
+   *   is `its "game menu" is a menu of "deal" , "-" and "undo"`.
    * - Its block is the line's:  nothing left to parse under it.
    */
   private menu(): SpellxTwinLine {

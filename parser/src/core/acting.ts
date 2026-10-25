@@ -7,16 +7,17 @@
  *   - an action `undone as "Turn Card"` runs as one undo step (`undoing.ts`, C11)
  *   - then it tells whoever listens that the person did it, and how (`core.onActionRun()`):  tours, analytics, tests
  * - Shortcuts:  `core.runShortcut(focused, key)` finds the first ENABLED action bound to the key, starting at the
- *   focused thing and going up its chain to the app (Q35 B), and runs it.  `meta` is command on a Mac, control
- *   elsewhere (Q31).
+ *   focused thing and going up its chain to the app (Q35 B), and runs it.
+ *   `meta` is command on a Mac, control elsewhere (Q31).
  * - MENUS:  a template's named lists of its actions (Q34, Q41), `- its "game menu" is a menu of "deal" and "undo"`,
  *   compiled to `core.describeMenu(Game, "gameMenu", { items: ["deal", "undo"] })`.
  *   - `core.menuOf(thing, "game menu")` finds it on the thing or up its chain, and gives its items, each an action
  *     ready to draw:  a toolbar, the app's menu bar or a context menu draws the same list.
  *   - `core.menuBarOf(app)`:  the one its app names as its menu bar, `- its menu bar is "game menu"`.
  * - `undo` and `redo` are the app's own actions:  their titles follow the history, `Undo Turn Card`.
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.  Knows nothing of the page:  the
- *   runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
+ * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Knows nothing of the page:
+ *   the runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
  */
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"

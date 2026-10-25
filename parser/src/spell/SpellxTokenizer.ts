@@ -445,8 +445,8 @@ export class SpellxTokenizer extends P.Tokenizer {
   /**
    * The closer ending the line from `start` to `lineEnd`:  `...jack, queen or king</>`.
    * - Only one spellx closes:  `</>`, or a spellx word's;  a line of markup ending `</ui-text>` is markup.
-   * - A comment may follow it, as on any line of spell:  `<property "value">its rank</>   // ace = 1`
-   *   (epic `elemental-spell` P12).
+   * - A comment may follow it, as on any line of spell (epic `elemental-spell` P12):
+   *   `<property "value">its rank</>   // ace = 1`
    */
   private closerEnding(text: string, start: number, lineEnd: number): Closer | undefined {
     const line = text.slice(start, lineEnd).trimEnd()

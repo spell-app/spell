@@ -331,8 +331,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     reads (compiled spell checks it only for a name still happening, `closing`)
   - nobody takes it:  dropped, silently;  a handler that throws is warned about, and the event stops there
 - `core.input` ([input.ts](input.ts)):  the mouse and keys, readable anywhere, reactive.
-  - The page's runner calls `listen(window, { isMac })` once per core;  the meta key is command on a Mac, control
-    elsewhere.
+  - The page's runner calls `listen(window, { isMac })` once per core;
+    the meta key is command on a Mac, control elsewhere.
   - `onStillDown`:  the mouse held a second within 4 pixels.
 - `send` and `input` aren't in the Python core yet (`not_ported_yet.json5`).
 

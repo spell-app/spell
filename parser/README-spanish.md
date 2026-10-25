@@ -220,6 +220,7 @@ _The Spanish file names the English type, `player`, and calls its English method
 | drawing | a Spanish view gets its tag from its Spanish names, `<solitario-carta>` |
 | the editor | its menus and panes, on a Spanish page;  colouring, completion and hover in each file's language |
 | translating | `spell translate <project> --to es`:  an English project written again in Spanish (below) |
+| Spell itself | its Spanish name is **Encanto**:  in a Spanish spellx file the template tags say so, `<encanto-vista "carta">` beside English `<spell-view "card">`, and the words inside keep their accents, `<propiedad "palo">`, `<acción>` |
 
 ### A wrong article is a warning
 
