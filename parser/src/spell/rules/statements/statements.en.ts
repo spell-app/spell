@@ -6,6 +6,7 @@
  */
 import { statements } from "./statements.parser"
 import { DoNothing } from "./DoNothing"
+import { SpellxCloser } from "./SpellxCloser"
 
 statements.addRule(DoNothing, {
   syntax: "do nothing",
@@ -16,3 +17,6 @@ statements.addRule(DoNothing, {
     }
   ]
 })
+
+// a spellx file's closers (epic `elemental-spell` P6):  no words, so no syntax
+statements.addRule(SpellxCloser)

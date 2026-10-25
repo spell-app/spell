@@ -84,6 +84,14 @@ export class SpellFile extends TextFile {
     return SP.Language.forFile(this.file)
   }
 
+  /**
+   * The form we're written in, by our name:  `Card.spellx` is spellx, spell's tag-shaped form;  `Card.spell` code spell.
+   * - Both parse to the same program, by the same rules:  spellx through its own tokenizer (epic `elemental-spell` P6).
+   */
+  get form(): SP.SpellForm {
+    return this.file?.endsWith(".spellx") ? "spellx" : "spell"
+  }
+
   /** Pointer to our `SpellProject`. */
   /*@memoize*/
   get project(): SP.SpellProject {
@@ -163,7 +171,7 @@ export class SpellFile extends TextFile {
     // If we were passed a `parentScope` with `types`, set up as a `FileScope` and use same parser.
     if (parentScope && parentScope.types) {
       const parser = parentScope.parser as SP.SpellParser | undefined
-      const twin = parser?.twinFor?.(this.language)
+      const twin = parser?.twinFor?.(this.language, this.form)
       return new P.FileScope({
         name: this.file,
         path: this.path,
@@ -176,7 +184,10 @@ export class SpellFile extends TextFile {
     return new P.ProjectScope({
       name: this.file,
       path: this.path,
-      parser: SP.SpellParser.rootScope.parser!.clone({ module: this.path }),
+      parser: SP.SpellParser.rootScope.parser!.clone({
+        module: this.path,
+        ...(this.form === "spellx" ? { form: this.form } : {})
+      } as P.ParserProps),
       parentScope: SP.SpellParser.rootScope
     })
   }

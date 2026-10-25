@@ -21,6 +21,12 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 /** The subset of `AnySpellFile` that can actually be `parse()`d/`compile()`d as spell source. */
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
+/**
+ * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+ * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
+ */
+export type SpellForm = "spell" | "spellx"
+
 // ## SpellProject
 
 /**
@@ -154,6 +160,11 @@ export type ProjectManifestJSON5 = {
   exports?: string[]
   /** Targets it compiles to, from its project file, e.g. `["ts/solid"]` -- `js/solid` always:  see `SP.TARGETS`. */
   targets?: string[]
+  /**
+   * The component packs its spellx drawings name components from, by their bare names (`<button>`), first first,
+   * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
+   */
+  packs?: string[]
   /** Where its lists start counting, from its project file:  `1` (the default) or `0` -- see `P.WriterOptions`. */
   listsStartAt?: 0 | 1
   /**

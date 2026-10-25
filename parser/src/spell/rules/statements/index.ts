@@ -8,3 +8,4 @@
  */
 export * from "./statements.parser"
 export * from "./DoNothing"
+export * from "./SpellxCloser"

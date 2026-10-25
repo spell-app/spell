@@ -1,0 +1,5 @@
+a "card" is a thing
+
+a "deck" is a list of cards where:
+	- its "name" is "the deck"
+	- to announce it: print its name

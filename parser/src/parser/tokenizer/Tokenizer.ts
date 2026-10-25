@@ -24,6 +24,13 @@ export class Tokenizer {
   rawTextTags: string[] = []
 
   /**
+   * Does `</>` close the innermost open JSX element, as in a spellx drawing (`<text>{its rank}</>`;  epic
+   * `elemental-spell` P7, Q40)?
+   * - Off by default:  in code spell, `</>` only ends a fragment, `<>...</>`.
+   */
+  emptyEndTagCloses = false
+
+  /**
    * Quote symbols recognized by `matchText`.
    * - REFACTOR: backtick?  left/right quotes, e.g. `""` and `''`?
    */
@@ -116,6 +123,7 @@ export class Tokenizer {
    * - `BlockToken` lines / blocks
    * - JSX element attributes + children, a fragment's children, attribute values, expression `contents` when it's a token
    * - JSX expression `innerTokens`, once a rule has parsed its `{...}` contents
+   * - any other token's `nested` ones, e.g. a spellx tag's
    */
   static forEachToken(tokens: P.Token[], callback: (token: P.Token) => void) {
     tokens.forEach(visit)
@@ -139,6 +147,8 @@ export class Tokenizer {
       } else if (token instanceof P.JSXExpressionToken) {
         visit(token.contents)
         token.innerTokens?.forEach(visit)
+      } else {
+        token.nested?.forEach(visit)
       }
     }
   }
@@ -436,8 +446,9 @@ export class Tokenizer {
    * Where an element right after one ending at `from` would start -- see `matchJSXElements()`:
    * past spaces, and past ONE newline when the line after it is indented at least `indent`.
    * - `end` when there's no room for one:  `matchJSXElement()` then matches nothing.
+   * - A subclass may end a run sooner:  spellx stops at a line its own tag starts (`SP.SpellxTokenizer`).
    */
-  private nextElementStart(text: string, from: number, end: number, indent: number): number {
+  protected nextElementStart(text: string, from: number, end: number, indent: number): number {
     let at = this.eatWhitespace(text, from, end)
     if (text[at] === "\r") at++
     if (text[at] !== "\n") return text[at] === "<" ? at : end
@@ -624,7 +635,10 @@ export class Tokenizer {
     if (start >= end) return undefined
 
     const nextStart = this.eatWhitespace(text, start, end)
-    const endTag = `</${endTagName}>`
+    const named = `</${endTagName}>`
+    // `</>` closes any element where `emptyEndTagCloses` says so:  a spellx drawing's
+    const endTag =
+      this.emptyEndTagCloses && endTagName && this.matchStringAtHead("</>", text, nextStart, end) ? "</>" : named
     if (!this.matchStringAtHead(endTag, text, nextStart, end)) return undefined
 
     end = nextStart + endTag.length
@@ -1058,13 +1072,15 @@ export class Tokenizer {
 }
 
 /** Constructor props for `Tokenizer`. */
-type TokenizerProps = {
+export type TokenizerProps = {
   /** See `Tokenizer.whitespacePolicy`. */
   whitespacePolicy?: P.WhitespacePolicy
   /** See `Tokenizer.quoteSymbols`. */
   quoteSymbols?: string[]
   /** See `Tokenizer.rawTextTags`. */
   rawTextTags?: string[]
+  /** See `Tokenizer.emptyEndTagCloses`. */
+  emptyEndTagCloses?: boolean
 }
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */

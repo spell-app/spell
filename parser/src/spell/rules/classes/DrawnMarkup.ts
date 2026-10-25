@@ -28,13 +28,28 @@ export class DrawnMarkup extends SpellStatement<"markup", { part?: string }> {
   @proto static priority = Priority.specific
   @proto static alias = "statement"
 
-  /** Only in a drawing;  notes which part's, if a part's, for `getAST()`. */
+  /**
+   * Only in a drawing;  notes which part's, if a part's, for `getAST()`.
+   * - The tokens first (`test()`):  they turn down nearly every line at once,
+   *   while `drawingIn()` asks the method around it for its signature.
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
+    if (!match) return undefined
     const drawing = DrawIt.drawingIn(scope)
     if (!drawing) return undefined
-    const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (match && drawing.part) match.data.part = drawing.part
+    if (drawing.part) match.data.part = drawing.part
     return match
+  }
+
+  /**
+   * Our one slot's own test:  a line that can't start markup, or `draw its`, is turned down at once.
+   * - A sequence's quick test can't look inside a slot, so without this, every line of every program would be
+   *   parsed as markup, three times (epic `elemental-spell` I3).
+   */
+  test(scope: P.Scope, tokens: P.Token[], start = 0): boolean | undefined {
+    if (this.rules[0]?.test(scope, tokens, start) === false) return false
+    return super.test(scope, tokens, start)
   }
 
   getAST(match: P.MatchFor<this>): P.ASTReturnStatement {

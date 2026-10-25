@@ -41,6 +41,12 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Una línea sin sujeto, o con "su", habla de un tipo solo en su esquema, con sangría bajo p. ej. "una carta es una cosa donde:"',
   "inline-and-nested-body": "Tiene a la vez una instrucción en la misma línea y un bloque con sangría debajo",
   "not-an-element": "<{tag}> no es un elemento:  escribe la etiqueta propia de Spell UI, p. ej. <ui-form>",
+  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
+  "spellx-unknown-component":
+    "<{tag}> no es un componente de ningún paquete de aquí (buscado:  {packs}):  revisa su nombre, o añade su paquete a los paquetes del proyecto",
+  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
+  "spellx-tag-in-markup":
+    "<{tag} ...> aún no puede ir dentro de un elemento:  escríbelo en una línea propia del dibujo, fuera del elemento",
   "markdown-hole":
     'No entiendo "{{hole}}" en <markdown>:  un hueco es spell, p. ej. {la puntuación del juego};  escribe \\{ para una llave',
 
@@ -115,6 +121,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-where-control": "va dentro de un dibujo;  una acción lo dice como una línea",
   "spellx-where-member": "va entre los miembros de su plantilla, junto al dibujo",
   "spellx-part-in-drawing": 'Una parte se dibuja en su propio {draw} junto al dibujo:  aquí, "{place}" la coloca',
+  "spellx-not-yet": "{tag} aún no se puede leer:  llega con una versión posterior de spellx",
 
   ////////////////
   // ## Long forms

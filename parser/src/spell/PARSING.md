@@ -15,6 +15,8 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
 - [`Parser.parse(input, ruleName, scope)`](../parser/Parser.ts) tokenizes,
   then calls `scope.getRuleOrDie(ruleName).parse()`.
 - [`SpellParser.tokenize()`](SpellParser.ts) calls `Tokenizer.tokenize()`.
+  - Its `tokenizer` by the parser's `form`:  spell's own (`spellTokenizer`), or a `.spellx` file's,
+    `SP.SpellxTokenizer`, for a whole file (the `"block"` rule) only;  see "Spellx", below.
   - For the `"block"` rule, it then calls [`breakIntoIndentedBlocks()`](../parser/tokenizer/Tokenizer.ts).
   - The result is ONE root `BlockToken`:  its lines (`LineToken`s), and nested blocks of the same kind.
   - indent ~== count of leading whitespace chars (tab === space === 1)
@@ -47,6 +49,8 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       [`SpellJSXContent.placeInFile()`](rules/JSX/SpellJSXContent.ts).
     - They hang them on the `JSXExpressionToken`, as `innerTokens`.
     - There `Tokenizer.forEachToken()` reaches them, and so does `moveTokens()`.
+  - Any other token holding tokens of its own lists them as `nested` (a spellx tag's head:  its name, values and
+    phrase), and `forEachToken()` reaches those too.
 - A token's or match's two ends:
   - `end`:  where its TEXT stops
   - `next`:  where the next token starts, i.e. `end` plus the trailing whitespace
@@ -621,7 +625,9 @@ A kind that says so is saved in a file of its own.
   - `items.splice(0, match.length)`:  a header + its nested block is one item of length 2
 - [`BlockLine.parse()`](rules/BlockLine.ts), in order:
   1. a blank line => `blank_line`
-  2. pop a trailing comment
+     - a spellx tag's line is read as its code-spell twin from here on (`SP.SpellxTwin`;  "Spellx", below),
+       and what the spellx tokenizer found wrong on it is the line's error
+  2. pop the trailing comments:  usually one;  a spellx description adds its own
   3. parse the rest as `"statement"`;  leftovers become a `parse_error`
      - a statement its rule REFUSED is a `parse_error` already, saying why (`SpellStatement.refuse()`):
        the line's error, never committed
@@ -1103,6 +1109,65 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
       the template's words (`voltearla boca arriba`), not `poner su dirección a arriba`.
   - A two sided view's:  its parts front and back, `its "direction" is down or up` (a new one starts face down, J36),
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a part.
+
+## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
+
+A `.spellx` file is read by spell's own parser and rules, as sentences and the outline are:
+each tag line reads as its code-spell twin line, so it compiles to exactly what its twin `.spell` file does.
+
+- Which form a file is:  its suffix (`SpellFile.form`, `"spell"` or `"spellx"`).
+  - Its parser is the language's, cloned for that form:  `SpellParser.twinFor(language, form)`.
+  - A spellx parser tokenizes a whole file (`"block"`) with [`SP.SpellxTokenizer`](SpellxTokenizer.ts),
+    and everything else (a line, an expression) with spell's own.
+    So code spell's tokenizer and speed are untouched.
+- [`SpellxTokenizer`](SpellxTokenizer.ts):  spell's tokenizer, plus three tokens ([SpellxTokens.ts](SpellxTokens.ts)):
+  - a tag's head, `<property "suit" one-of="clubs, hearts">`, is ONE `SpellxTagToken`, its lines and all
+    - What it says is its `tag`:  category, kind (in English), name, attributes, phrase, `/>`.
+    - Its name's, values' and phrase's own spell tokens are `nested`, at their places in the file.
+  - a closer, `</>` or `</property>`:  a `SpellxCloserToken`
+  - a line of prose (a template's line that isn't a tag, Q12) or a note's text:  a `SpellxProseToken`, a comment
+  - The rest is spell's own tokens:  a body's spell, a drawing's markup.
+  - So a tag line and its indented body are a line and its block, as an outline item and its body are:
+    `breakIntoIndentedBlocks()` needs nothing new.
+  - It keeps a stack of open tags, by indent, to check what it can see there:
+    a word spellx doesn't know (naming the closest), a closer for another tag, a tag never closed (one still open at
+    the file's end too), an `<otherwise>` after a `</>` closed its `<if>`, a body line indented less than its tag's.
+    - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
+  - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
+    controls;  in a drawing, those and a placed part;  in a menu, its actions (`isTagHere()`).
+  - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
+    else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
+- [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
+  - The twin's words are the LANGUAGE's, in its words file (`spellx.twins`), with slots:
+    `its {name} is one of {one-of}`, `to {words} :`, `on {phrase} :`.
+  - A slot takes the tag's own tokens, so a name or phrase keeps its place in the file;
+    the twin's own words are new tokens at the tag's start, marked `synthetic`.
+  - Then the twin parses with the ordinary rules:  the SAME match, AST and code as the code-spell line.
+  - A tag body on the head's own line (`<action "go">print 1</>`) is the twin's inline body;
+    an indented one, its nested block.
+  - A repeated `alias=` adds a line per alias in the property's body;  an action's details, a line each.
+  - A `description=`, or a leading `<description>` note, becomes trailing comments on the twin line:
+    `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
+  - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
+  - A tag spellx can't read yet (`<menu>`, P10) is the line's error, `spellx-not-yet`, with its block.
+- A spellx DRAWING's markup (epic `elemental-spell` P7):
+  - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
+    name may hold any letter (`<botón>`).
+  - A BARE name is a component's (`SpellJSX.componentTagFor()`):  one of the project's own views first (`<card>`, by
+    its element's name), then the first of its packs that has it (`SP.ComponentPacks`;  the project file's `packs`,
+    carried on its parser as `SpellParser.packs`).  Spell UI's pack is spell-app's to register:  spell-parser never
+    imports Spell UI.
+  - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a control inside an element,
+    `spellx-tag-in-markup` (C29).
+  - Code spell's drawings are untouched.
+- The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
+  file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
+- Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
+  a `.es.spellx` file is a Spanish code-spell file's twin, its words the language's.
+- Its tests:  each pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same and has no
+  errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
+- A file's CHUNK TREE (`SX.SpellxView`, `spell-parser/spellx`) is built from these same tokens, for the editor, the
+  notebook and agents:  no rules, nothing compiled (J30).
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 
@@ -1719,7 +1784,8 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
   - So a statement's output doesn't depend on its depth.
 - A DECLARATION's docstring compiles as one `/** ... */`, in place of its `//` lines.
   - See `getDocComments()`, in [Block.ts](rules/Block.ts).
-  - The docstring:  the comment-only lines directly above it, else the comment on its own line.
+  - The docstring:  the comment-only lines directly above it, else the comments on its own line
+    (one in code spell;  a spellx description's, one per line of it).
   - It goes above the `SPELL: DECLARES` comment:  after any `/* SPELL: added rule ... */` notes the statement makes.
   - A `##` heading is part of it only if DIRECTLY above.
     One followed by a regular comment compiles as a `// ## heading` banner.

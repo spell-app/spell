@@ -1,0 +1,31 @@
+<spell-view "flip tile" template="view">
+	A tile that shows one side at a time.
+
+	<property "side" one-of="up, down"
+		alias="is showing (side)"
+	/>
+	<event "flipped" count="number"
+		description="Sent each time it turns over"
+	/>
+	<action "flip it" shortcut="meta+F" enabled-when="it is showing up" undone-as="Flip Tile">
+		<description>Turns it over.</>
+		if it is showing up
+			set its side to down
+		otherwise
+			set its side to up
+	</action>
+	<draw "face">
+		<text>face</text>
+	</draw>
+	<draw "back">
+		<text>back</>
+	</draw>
+	<draw>
+		<if it is showing up>
+			<draw "face" />
+		<otherwise>
+			<draw "back" />
+		</>
+	</draw>
+	<on mouse down>flip it</>
+</spell-view>

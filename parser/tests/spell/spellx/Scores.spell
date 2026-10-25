@@ -1,0 +1,10 @@
+a "score page" is a page where:
+	- its "scores" is a new list of numbers
+
+scorer is an app where:
+	- its "best" is one of low, high
+	- to start over:
+		- shortcut meta+N
+		print "again"
+	- to test starting over:
+		start over

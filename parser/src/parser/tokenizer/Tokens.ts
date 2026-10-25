@@ -91,6 +91,15 @@ export class Token<ValueType = any, RecordType extends P.TokenProps<ValueType> =
   toString() {
     return (typeof this.raw === "string" ? this.raw : this.value) + (this.whitespace || "")
   }
+
+  /**
+   * Tokens held INSIDE this one, which move with it:  `Tokenizer.forEachToken()` visits them.
+   * - None by default;  a token class the tokenizer doesn't know says what it holds, e.g. spell's `SpellxTagToken`
+   *   (a spellx tag's name, attribute values and phrase, tokenized where they sit in the file).
+   */
+  get nested(): Token[] | undefined {
+    return undefined
+  }
 }
 
 /**

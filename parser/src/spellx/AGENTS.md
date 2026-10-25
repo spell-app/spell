@@ -17,20 +17,22 @@ when working with code in this folder, `src/spellx/` of the `spell-parser` packa
   - The plan, and every decision its shape follows:
     [its epic page](../../../spell.epics/epics/elemental-spell/elemental-spell.plan.html).
   - Its page for people:  [README-spellx.md](../../README-spellx.md).
-- Its files:
-  - [spellx.types.ts](spellx.types.ts):  the CHUNK TREE's nodes, spans and diagnostics
-  - [SpellxReader.ts](SpellxReader.ts):  reads a file into its chunk tree
-  - [SpellxFile.ts](SpellxFile.ts):  a file, read:  its nodes, diagnostics, `walk()`, `toOutline()`
-- It stands on `spell-parser/spell`:  the language's spellx words (`SP.SpellxWords`, in each language's
-  `words.ts`) and its messages (the `spellx-*` keys of `parserMessages.ts`).
+- A `.spellx` file is read by spell's OWN parser (P6, Q69 A):  `spell-parser/spell`'s `SpellxTokenizer` reads its tags as
+  tokens, and each tag line parses as its code-spell twin (`SpellxTwin`, J44).  It compiles there, with the rest of spell.
+- This folder is its CHUNK TREE, for the editor, the notebook (P12) and agents (J30):
+  - [spellx.types.ts](spellx.types.ts):  the tree's nodes, spans and diagnostics
+  - [SpellxView.ts](SpellxView.ts):  a file's tree, built from the spellx tokens spell's parser reads it as
+  - [SpellxFile.ts](SpellxFile.ts):  a file's tree:  its nodes, diagnostics, `walk()`, `toOutline()`
+- It stands on `spell-parser/spell`:  the spellx tokenizer and its tokens, the language's spellx words (`SP.SpellxWords`,
+  in each language's `words.ts`) and its messages (the `spellx-*` keys of `parserMessages.ts`).
   - NEVER imported by `spell-parser/spell`, nor by anything below it.
-- It compiles nothing:  a body stays raw spell text, with its spans.
-  Writing a chunk tree into `.spell` text is the epic's P5.
-- Its reader is our own, never an HTML or JSX parser (Q5, Q8):
-  a body's `<`, `&` and indentation stay exactly as written.
+- It compiles nothing and runs no rules:  a body stays raw spell text, with its spans.
+  Its diagnostics are the tokenizer's (spellx's own mistakes);  what the rules say is the compiled file's errors.
+- Never an HTML or JSX parser (Q5, Q8):  a body's `<`, `&` and indentation stay exactly as written.
 - The tests live in the repo's `tests/spellx/`, at the same paths as the code.
   - `fixtures/`:  the epic page's example files (its Overview's o1), English and Spanish;
-    their outlines are snapshots.
+    their outlines are snapshots (P3's hand-written reader's, which the view still gives).
+  - The compile-equality pairs (`X.spellx` beside `X.spell`) are spell's:  the repo's `tests/spell/spellx/`.
 
 ## Types / Exports
 

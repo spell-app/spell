@@ -1,0 +1,38 @@
+<encanto-vista "ficha giratoria" plantilla="vista">
+	Una ficha que muestra un lado a la vez.
+
+	<propiedad "lado" uno-de="arriba, abajo"
+		frase="está (lado)"
+	/>
+	<evento "volteada" cuenta="número"
+		descripción="Se envía cada vez que se voltea"
+	/>
+	<acción "girarla" atajo="meta+G" activa-cuando="está arriba" se-deshace-como="Girar ficha">
+		<descripción>La da vuelta.</>
+		si está arriba
+			poner su lado a abajo
+		de lo contrario
+			poner su lado a arriba
+	</acción>
+	<dibujar "cara">
+		<texto>cara</texto>
+	</dibujar>
+	<dibujar "dorso">
+		<texto>dorso</>
+	</dibujar>
+	<dibujar>
+		<si está arriba>
+			<dibujar "cara" />
+		<de lo contrario>
+			<dibujar "dorso" />
+		</>
+	</dibujar>
+	<al clic>girar eso</>
+</encanto-vista>
+
+<encanto-aplicación "marcador">
+	<propiedad "mejor" uno-de="bajo, alto" />
+	<probar "empezar de nuevo">
+		eco "otra vez"
+	</>
+</encanto-aplicación>

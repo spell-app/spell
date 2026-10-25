@@ -24,10 +24,13 @@ export class DrawPart extends SpellStatement<"part", { part?: string }> {
   @proto static alias = "expression"
   @proto static priority = Priority.specific
 
+  /**
+   * Only in a drawing, and never a list's `draw its placeholder`.
+   * - Its words first:  as an expression, it's tried wherever one starts (epic `elemental-spell` I3).
+   */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
-    if (!DrawIt.drawingIn(scope)) return undefined
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
-    if (!match) return undefined
+    if (!match || !DrawIt.drawingIn(scope)) return undefined
     const words = match.inputText.trim()
     if (Wording.reads(scope, "draw_method", words, "draw_its_placeholder")) return undefined
     const part = DrawIt.partName(`${match.groups.part.value}`)

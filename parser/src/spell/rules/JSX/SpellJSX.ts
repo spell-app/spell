@@ -1,7 +1,7 @@
-import { proto } from "spell/util"
+import { elementTagFor, proto } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
-import { SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
+import { SPELL_JSX_MEANINGS, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSXContent } from "./SpellJSXContent"
 
@@ -27,6 +27,9 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *   - `<h3 in="header">` => `h("h3", { slot: "header" })`, in `SpellJSXAttribute`
  *   - each language's words, in its word rules `spell_jsx_tag` and `spell_jsx_attribute`:
  *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
+ * - In a spellx file, a BARE name is a component's (epic `elemental-spell` P7, Q46):  `componentTagFor()`.
+ *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
+ *   - No native HTML (Q46, C1):  `<div>` is an error unless a pack has it.
  * - NOTE: rule name is `jsxElement`, kept distinct from class name `SpellJSX` (pre-existing convention).
  */
 export class SpellJSX extends P.TokenType<never, JSXMatchData> {
@@ -52,9 +55,23 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     // a fragment (`jsxFragment`) has no tag and no attributes
     if (!(element instanceof P.JSXElementToken)) return match
     match.data.tagName = webWordFor(scope, SPELL_TAG_WORDS, element.tagName)
+    // a spellx drawing names components by their bare names:  `<button>` => `<ui-button>`
+    if ((scope.parser as SP.SpellParser | undefined)?.form === "spellx" && match.data.tagName === element.tagName) {
+      const tag = SpellJSX.componentTagFor(scope, element.tagName)
+      if (tag) match.data.tagName = tag
+      else if (BARE_NAME.test(element.tagName) && !SPELL_JSX_MEANINGS.includes(element.tagName)) {
+        const language = SP.Language.of(scope)
+        const packs = SP.ComponentPacks.searched(SpellJSX.packsFor(scope))
+        // a control or handler inside an element (`<segment><if ...>`):  spellx reads those on a drawing's own lines
+        const message = SpellJSX.isSpellxPhraseWord(language, element.tagName)
+          ? language.parserMessage("spellx-tag-in-markup", { tag: element.tagName })
+          : language.parserMessage("spellx-unknown-component", { tag: element.tagName, packs })
+        match.data.error = SP.spellParser.createParseError(scope, [element], message)
+      }
+    }
     match.data.attributes = element.attributes?.map((attr) => scope.parser?.parse(attr, "jsxAttribute", scope))
     // a dotted tag, `<UI.Form>`:  the writer writes the error where the element would be, this reports it
-    if (P.ASTJSXElement.tagError(element.tagName)) {
+    if (P.ASTJSXElement.tagError(match.data.tagName)) {
       const message = SP.Language.of(scope).parserMessage("not-an-element", { tag: element.tagName })
       match.data.error = SP.spellParser.createParseError(scope, [element], message)
     }
@@ -73,6 +90,38 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       attrs: SpellJSX.clickableAttrs(match, attrs),
       children: this.childASTs(match)
     })
+  }
+
+  /**
+   * The tag of the component a spellx drawing names by bare `word` (`<button>`, `<card>`):
+   * - the project's own view of that name first:  `card` => `solitaire-card`, as its element is named
+   * - else the first of the project's packs that has it (`SP.ComponentPacks`):  `button` => `ui-button`,
+   *   `botón` in a Spanish file => `es-boton`
+   * - `undefined`:  not a bare name (`ui-text`, `solitaire-card`, `slot` are left as written), or nobody has it
+   */
+  static componentTagFor(scope: P.Scope, word: string): string | undefined {
+    if (!BARE_NAME.test(word) || SPELL_JSX_MEANINGS.includes(word)) return undefined
+    const type = scope.getType(SP.typeName(word))
+    if (type?.isA("View")) {
+      const project = projectScopeOf(scope)
+      if (project?.name) return elementTagFor(project.name, type.name)
+    }
+    return SP.ComponentPacks.tagFor(word, SP.Language.of(scope).lang, SpellJSX.packsFor(scope))
+  }
+
+  /**
+   * Does `word` start one of spellx's control or handler tags in `language` (`if`, `otherwise`, `for`, `on` ...)?
+   * - Those are read on a drawing's own lines;  inside an element they'd be taken for components (C29).
+   */
+  static isSpellxPhraseWord(language: SP.Language, word: string): boolean {
+    const spellx = language.words.spellx
+    const phrases = [...Object.keys(spellx?.controls ?? {}), ...Object.keys(spellx?.handlers ?? {})]
+    return phrases.some((phrase) => phrase.split(" ")[0] === word)
+  }
+
+  /** The packs `scope`'s project draws with:  its project file's `packs`, else `SP.ComponentPacks.DEFAULT`. */
+  static packsFor(scope: P.Scope): readonly string[] {
+    return (scope.parser as SP.SpellParser | undefined)?.packs ?? SP.ComponentPacks.DEFAULT
   }
 
   /**
@@ -129,6 +178,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       for (const item of below) if (item instanceof P.Match) visit(item)
     }
   }
+}
+
+/** A tag a spellx drawing may write bare, for a component:  letters alone, accents too (`button`, `botón`). */
+const BARE_NAME = /^\p{Ll}+$/u
+
+/** The project scope `scope` is in, if any:  its `name` names the project's elements. */
+function projectScopeOf(scope: P.Scope): P.ProjectScope | undefined {
+  for (let at: P.Scope | undefined = scope; at; at = at.parentScope) if (at instanceof P.ProjectScope) return at
+  return undefined
 }
 
 /** What an element with an `onClick` looks like by itself -- see `SpellJSX.clickableAttrs()`. */

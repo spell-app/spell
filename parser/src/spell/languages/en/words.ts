@@ -170,7 +170,56 @@ export const englishWords: SP.LanguageWords = {
       shortcut: "shortcut",
       "enabled-when": "enabled-when",
       "selected-when": "selected-when",
+      "undone-as": "undone-as",
+      icon: "icon",
       "menu-bar": "menu-bar"
+    },
+    // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
+    twins: {
+      template: "{a name} {name} is {a super} {super} :",
+      templateAka: "{a words} {words} aka {aka} is {a super} {super} :",
+      singleton: "{words} is {a super} {super} :",
+      supers: {
+        view: "view",
+        thing: "thing",
+        page: "page",
+        app: "app",
+        "page template": "page",
+        "app template": "app"
+      },
+      property: {
+        list: "its {name} is one of {one-of}",
+        listBody: "its {name} is one of {one-of} :",
+        body: "its {name} is :",
+        value: "its {name} is",
+        bare: "it has {a words} {words}"
+      },
+      propertyAlias: "it {quoted alias}",
+      alias: "it {name}",
+      aliasBlock: "it {name} :",
+      action: "to {words} :",
+      actionDetails: {
+        shortcut: "shortcut {shortcut}",
+        "enabled-when": "enabled when {enabled-when}",
+        "selected-when": "selected when {selected-when}",
+        "undone-as": "undone as {quoted undone-as}",
+        icon: "icon {quoted icon}"
+      },
+      test: "to test {words} :",
+      event: "it sends {name}",
+      eventWith: "with",
+      eventParam: "{param} as {a value} {value}",
+      eventAnd: "and",
+      draw: "to draw it :",
+      drawPart: "to draw its {words} :",
+      placePart: "draw its {words}",
+      handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
+      controls: {
+        if: "if {phrase}",
+        "otherwise if": "otherwise if {phrase}",
+        otherwise: "otherwise",
+        "for each": "for each {phrase}"
+      }
     }
   },
 
@@ -191,6 +240,13 @@ export const englishWords: SP.LanguageWords = {
      */
     typeDeclaration:
       /^[ \t]*(?:-[ \t]+)?(?:an?[ \t]+["']?([\p{L}\p{M}\d_-]+)["']?[ \t]+is\b|an?[ \t]+["']?((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){1,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)["']?[ \t]+(?:is[ \t]+an?|aka)\b|create[ \t]+a[ \t]+type[ \t]+(?:named|called)[ \t]+([\p{L}\p{M}\d_-]+)|(?!(?:an?|its?|the)\b)((?:(?!is\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!is\b)[\p{L}\p{M}\d_-]+)[ \t]+is[ \t]+an[ \t]+app\b)/gimu,
+    /**
+     * A line naming its kind, its groups an article (if any), its name and its kind's words, up to 4 of each:
+     * `a "card game" is an app`, `klondike is a card game:`, `high scores is a score page where:`.
+     * - The kind ends at `where`, `with`, a `:` or the line's end.
+     */
+    kindDeclaration:
+      /^[ \t]*(?:-[ \t]+)?(an?[ \t]+)?(?!(?:its?|the|an?)[ \t])["']?((?:(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+[ \t]+){0,3}(?!(?:is|aka)\b)[\p{L}\p{M}\d_-]+)["']?(?:[ \t]+aka[ \t]+["']?[\p{L}\p{M}\d_-]+["']?)?[ \t]+is[ \t]+an?[ \t]+((?:[\p{L}\p{M}\d_-]+[ \t]+){0,3}?[\p{L}\p{M}\d_-]+)(?=[ \t]*(?:where\b|with\b|:|$))/gimu,
     /** A line declaring a value kind, its PLURAL name captured, e.g. `suits` in `- "suits" as one of ...`. */
     valueKindDeclaration: /^[ \t]*(?:-[ \t]+)?["']([\p{L}\p{M}\d_-]+)["'][ \t]+as[ \t]+(?:one[ \t]+of|either)\b/gimu,
     /**

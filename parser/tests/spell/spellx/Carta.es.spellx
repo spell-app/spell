@@ -1,0 +1,66 @@
+<encanto-vista "carta de la baraja" alias="carta" plantilla="vista reversible">
+	Una carta tiene un palo y un rango.
+	Boca arriba los muestra;  boca abajo, el dorso que comparten todas las cartas.
+
+	## Palo y color
+
+	<propiedad "palo" uno-de="tréboles, diamantes, corazones, espadas"
+		descripción="A cuál de los cuatro palos pertenece"
+		frase="es un (palo)"
+	/>
+	<propiedad "color" uno-de="rojo, negro"
+		frase="es (color)"
+		frase="es una carta (color)"
+	>
+		rojo si es un diamante o es un corazón
+		negro de lo contrario
+	</propiedad>
+	<propiedad "símbolo" descripción="El signo de su palo, para dibujarla">
+		"♣" si es un trébol
+		"♦" si es un diamante
+		"♥" si es un corazón
+		"♠" si es una espada
+	</propiedad>
+
+	## Rango
+
+	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey"
+		descripción="El as es bajo:  as = 1 ... rey = 13"
+		frase="es un (rango)"
+	/>
+	<frase "es el (rango) de (palo)" />
+	<frase "es una figura">si su rango es jota, dama o rey</>
+	<frase "es una carta numérica">si no es una figura</>
+
+	## Jugarla
+
+	<acción "mostrarla">
+		<descripción>
+			La pone boca arriba, si no lo está ya.
+			Una pila muestra su carta de arriba cada vez que una carta la deja.
+		</descripción>
+		si está boca abajo
+			voltear eso
+	</acción>
+
+	<al clic>
+		<comentario>Boca abajo:  voltearla.</>
+		si está boca abajo
+			voltear eso
+	</>
+
+	## Dibujarla
+
+	<dibujar "frente">
+		<comentario>Una línea de texto, del tamaño del texto de alrededor:  su pila la escala para que quepa.</>
+		<texto part="cara" color={su color}>{su rango} {su símbolo}</texto>
+	</dibujar>
+	<dibujar "dorso">
+		<imagen part="dorso" src="dorso.svg" alt="el dorso de una carta" />
+	</dibujar>
+
+	<probar "preparación de la carta">
+		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
+		eco "probando la " + su rango + " de " + su palo
+	</>
+</encanto-vista>

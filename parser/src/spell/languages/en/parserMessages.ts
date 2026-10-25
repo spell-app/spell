@@ -62,6 +62,12 @@ export const PARSER_MESSAGES = {
   "inline-and-nested-body": "Got both inline statement and nested block",
   /** A dotted tag, `<UI.Form>`. */
   "not-an-element": "<{tag}> isn't an element:  write Spell UI's own tag, e.g. <ui-form>",
+  /** A bare tag in a spellx drawing that no pack has (epic `elemental-spell` P7). */
+  "spellx-unknown-component":
+    "<{tag}> isn't a component any pack here has (searched:  {packs}):  check its name, or add its pack to the project's packs",
+  /** A control or handler tag inside an element in a spellx drawing (epic `elemental-spell` P7, C29). */
+  "spellx-tag-in-markup":
+    "<{tag} ...> can't sit inside an element yet:  write it on a line of its own in the drawing, outside the element",
   /** A `{...}` in a `<markdown>` block that isn't spell. */
   "markdown-hole":
     'Don\'t understand "{{hole}}" in <markdown>:  a hole is spell, e.g. {the score of the game};  write \\{ for a brace',
@@ -145,7 +151,7 @@ export const PARSER_MESSAGES = {
   "the-property-of-a-type": "the {property} of a {type}",
 
   ////////////////
-  // ## Spellx:  what `SX.SpellxReader` says about a .spellx file (epic `elemental-spell`)
+  // ## Spellx:  what spell says about a .spellx file, as it reads it (epic `elemental-spell`)
   ////////////////
 
   /** A tag word spellx doesn't know, with the closest it does:  `{tag}` is `<propety>`, `{suggestion}` `<property>`. */
@@ -185,6 +191,8 @@ export const PARSER_MESSAGES = {
   "spellx-where-member": "it goes among its template's members, beside the drawing",
   /** A part defined (with a body) inside a drawing:  `{draw}` is `<draw "front">`. */
   "spellx-part-in-drawing": 'A part is drawn in its own {draw} beside the drawing:  here, "{place}" places it',
+  /** A tag spellx knows, but can't read yet:  `{tag}` is `<menu>`. */
+  "spellx-not-yet": "{tag} can't be read yet:  it comes with a later version of spellx",
 
   ////////////////
   // ## Long forms:  "Reads as", `SP.SpellStatement.getLongForm()`

@@ -516,7 +516,9 @@ Here's Solitaire's project file, its files in the order they run:
 
 - `imports` lists the project's own files by path, and other projects by address, naming what it takes from them:
   `{ "path": "@spell/library/people", "active": true, "import": ["Person"] }`.
-- Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`.
+- Other keys:  `"targets"` (the people library's is `["ts/lib"]`), `"listsStartAt"`, `"title"`, and `"packs"`:
+  the component packs a `.spellx` drawing names components from by their bare names, Spell UI's (`["spell-ui"]`)
+  unless it says more ([README-spellx.md](README-spellx.md)).
 - A file's human language is in its name, not the project file:  `Carta.es.spell` is Spanish, `Card.spell` English.
 - A project file can start as `{}`, as the card's did:  the first compile lists the folder's files in it,
   and spell-app's spaces keeps that list in step with the folder, adding a new file and dropping a deleted one.

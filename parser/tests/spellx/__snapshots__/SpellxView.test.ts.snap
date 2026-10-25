@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SpellxReader.read():  the examples > Card.spellx reads with NO diagnostics, to its outline 1`] = `
+exports[`SpellxView.read():  the examples > Card.spellx reads with NO diagnostics, to its outline 1`] = `
 "template view <spell-view> "playing card" 1:1-68:14 aka="card" template="two sided view"
   prose 2:2-5:19 "A playing card has a suit and a rank.…"
   declaration property <property> "suit" /> 7:2-10:4 one-of="clubs, diamonds, hearts, spades" description="Which of the four suits it belongs to" alias="is a (suit)"
@@ -35,7 +35,7 @@ exports[`SpellxReader.read():  the examples > Card.spellx reads with NO diagnost
     code 2 lines 65:3-66:53 "get a new card whose rank is queen, suit is spad…""
 `;
 
-exports[`SpellxReader.read():  the examples > Carta.es.spellx reads with NO diagnostics, to its outline 1`] = `
+exports[`SpellxView.read():  the examples > Carta.es.spellx reads with NO diagnostics, to its outline 1`] = `
 "template view <encanto-vista> "carta de la baraja" 1:1-68:17 alias(aka)="carta" plantilla(template)="vista reversible"
   prose 2:2-5:17 "Una carta tiene un palo y un rango.…"
   declaration property <propiedad> "palo" /> 7:2-10:4 uno-de(one-of)="tréboles, diamantes, corazones, espadas" descripción(description)="A cuál de los cuatro palos pertenece" frase(alias)="es un (palo)"
@@ -70,13 +70,13 @@ exports[`SpellxReader.read():  the examples > Carta.es.spellx reads with NO diag
     code 2 lines 65:3-66:51 "obtener una nueva carta cuyo rango es dama, palo…""
 `;
 
-exports[`SpellxReader.read():  the examples > Deck.spellx reads with NO diagnostics, to its outline 1`] = `
+exports[`SpellxView.read():  the examples > Deck.spellx reads with NO diagnostics, to its outline 1`] = `
 "template thing <spell-thing> "deck" 1:1-3:15 template="list of cards"
   declaration action <action> "shuffle it" 2:2-2:57
     code 1 line 2:23-2:54 "put its cards in a random order""
 `;
 
-exports[`SpellxReader.read():  the examples > Solitaire.spellx reads with NO diagnostics, to its outline 1`] = `
+exports[`SpellxView.read():  the examples > Solitaire.spellx reads with NO diagnostics, to its outline 1`] = `
 "template app <spell-app> "solitaire" 1:1-35:13 menu-bar="GameMenu"
   prose 2:2-2:99 "Klondike solitaire:  deal seven columns, then bu…"
   declaration property <property> "deck" 4:2-4:32
@@ -115,7 +115,7 @@ template page <spell-page> "high scores" 42:1-50:14 template="score page"
         hole {the score's time} 47:10-47:28"
 `;
 
-exports[`SpellxReader.read():  the examples > TwoSidedView.spellx reads with NO diagnostics, to its outline 1`] = `
+exports[`SpellxView.read():  the examples > TwoSidedView.spellx reads with NO diagnostics, to its outline 1`] = `
 "template view <spell-view> "two sided view" 1:1-37:14
   prose 2:2-3:90 "A view with a front and a back:  it shows one si…"
   declaration property <property> "direction" /> 5:2-8:4 one-of="up, down" description="Which way it faces" alias="is face (direction)"

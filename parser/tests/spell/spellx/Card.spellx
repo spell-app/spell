@@ -1,0 +1,66 @@
+<spell-view "playing card" aka="card" template="two sided view">
+	A playing card has a suit and a rank.
+	Face up it shows them;  face down, the back every card shares.
+
+	## Suit and color
+
+	<property "suit" one-of="clubs, diamonds, hearts, spades"
+		description="Which of the four suits it belongs to"
+		alias="is a (suit)"
+	/>
+	<property "color" one-of="red, black"
+		alias="is (color)"
+		alias="is a (color) card"
+	>
+		red if it is a diamond or it is a heart
+		black otherwise
+	</property>
+	<property "symbol" description="Its suit's sign, for drawing">
+		"♣" if it is a club
+		"♦" if it is a diamond
+		"♥" if it is a heart
+		"♠" if it is a spade
+	</property>
+
+	## Rank
+
+	<property "rank" one-of="ace, 2 ... 10, jack, queen, king"
+		description="Ace is low:  ace = 1 ... king = 13"
+		alias="is a (rank)"
+	/>
+	<alias "is the (rank) of (suit)" />
+	<alias "is a face card">if its rank is jack, queen or king</>
+	<alias "is a number card">if it is not a face card</>
+
+	## Playing it
+
+	<action "show it">
+		<description>
+			Turns it face up, if it isn't already.
+			A pile shows its top card each time a card leaves it.
+		</description>
+		if it is face down
+			turn it over
+	</action>
+
+	<on mouse down>
+		<comment>Face down:  turn it over.</>
+		if it is face down
+			turn it over
+	</>
+
+	## Drawing it
+
+	<draw "front">
+		<comment>One line of text, the size of the text around it:  its pile scales it to fit.</>
+		<text part="face" color={its color}>{its rank} {its symbol}</>
+	</draw>
+	<draw "back">
+		<image part="back" src="card-back.svg" alt="the back of a card" />
+	</draw>
+
+	<test "card setup">
+		get a new card whose rank is queen, suit is spades and direction is down
+		echo "testing the " + its rank + " of " + its suit
+	</>
+</spell-view>
