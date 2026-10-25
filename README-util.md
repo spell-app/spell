@@ -333,7 +333,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 - `flushCells()` settles everything now:  pending derived checks, then the host's Solid `flush()`.
   Compiled Spell calls it `core.flush()`;  tests call it, never Solid's `flush()` alone, which skips the checks.
 - One context per page, on `globalThis`.
-  The editor's own copy of util and each `<spell-app>`'s runtime share it, so one bridge sees every program's things.
+  The editor's own copy of util and each `<spell-viewer>`'s runtime share it, so one bridge sees every program's things.
   Two builds that disagree on its shape throw, rather than mis-track in silence.
 
 </details>

@@ -1,7 +1,7 @@
 /**
  * Readers OUTSIDE spell state:  how Solid, and plain code, follow cells -- see `cells.ts`.
  * - `bridgeSolid()` -- every Solid computation reads cells, installed ONCE per Solid by the HOST (the app, a
- *   runner, `<spell-app>`):  `util` and `core` never import Solid, so `spell-runtime.js` holds none.
+ *   runner, `<spell-viewer>`):  `util` and `core` never import Solid, so `spell-runtime.js` holds none.
  * - `observe()` -- a plain function re-run synchronously as what it read changes, e.g. `SpellModels`.
  * - (React's was `view()`, gone with React:  epic `output-targets` P11.)
  */
@@ -18,7 +18,7 @@ import { Reaction } from "./Reaction"
  * - Pass the page's Solid:  `bridgeSolid({ enableExternalSource, flush })` from `solid-js`.
  * - ONCE per Solid, however many hosts call it:  Solid PIPES each `enableExternalSource()` call into the last, so a
  *   second registration would wrap every computation twice.  Remembered in the page's shared context, so a
- *   `<spell-app>` and the editor on one page share the one bridge -- and every runtime copy's cells reach it.
+ *   `<spell-viewer>` and the editor on one page share the one bridge -- and every runtime copy's cells reach it.
  * - Applies to computations made AFTER it:  call it before the host renders anything that reads spell state.
  * - SIDE EFFECT:  `flushCells()` (`core.flush()`) now also calls this Solid's `flush()`.
  * - A changed cell triggers its readers at once, but Solid re-runs them on ITS schedule (a microtask, or

@@ -333,7 +333,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   /**
    * The value an app handed its `ui-*` elements;  `null` when none:
    * the `appContext` property of the nearest root around this element (crossing shadow roots):
-   * a `<ui-root>`, or any other root (`elementSetup.root`:  `<spell-app>`).
+   * a `<ui-root>`, or any other root (`elementSetup.root`:  `<spell-viewer>`).
    * - `<ui-root appContext={value}>` in a Solid app, `root.appContext = value` anywhere else.
    * - Read once, when this object is built.
    * - Why not a Solid context:  each element draws in a Solid root of its own, with no parent,
@@ -357,7 +357,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Is `localName` a root's tag?
-   * - One whose class says `elementSetup.root` (`<ui-root>`, a translation of it, `<spell-app>`)
+   * - One whose class says `elementSetup.root` (`<ui-root>`, a translation of it, `<spell-viewer>`)
    * - or `<ui-root>` before its family has loaded:  an app may set its `appContext` that early
    */
   private static isRootTag(localName: string): boolean {

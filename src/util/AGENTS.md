@@ -94,7 +94,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - the same names and options as Spell UI's `Reactive.ts`
   - `bridges.ts`:
     - `bridgeSolid()`:  every Solid computation reads cells
-      - The host (the app, a runner, `<spell-app>`) calls it once with its Solid:  util never imports Solid.
+      - The host (the app, a runner, `<spell-viewer>`) calls it once with its Solid:  util never imports Solid.
     - `observe()`:  a plain function re-run as what it read changes
 - GENERIC, like the files beside `index.ts`:  no lodash, no Solid, nothing spell-specific.
   - So Spell UI may import it file by file, once it moves onto spell cells

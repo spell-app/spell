@@ -91,7 +91,7 @@ This spoke is house style on top.
     before touching anything else, then move them.
 - **Brand checks only where `instanceof` can't work:**
   - TODO (not settled):  this rule, as written.
-  - `instanceof` fails across bundles (each `<spell-app>`'s `spell-runtime.js` is its own copy), across HMR
+  - `instanceof` fails across bundles (each `<spell-viewer>`'s `spell-runtime.js` is its own copy), across HMR
     reloads, and on a global the environment lacks (`Element` / `Node` under node or linkedom).  There, and only
     there:  `static __isX__ = true` + an exported `isX()` guard above the class, with
     `// NOTE: use this rather than instanceof -- <which bundles / HMR / environment>.`

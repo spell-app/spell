@@ -7,7 +7,7 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
  *   and its message names that decorator or helper.
  * - Turned on only for the component folders `PATTERN_FOLDERS` names (`lint.ts`):
  *   every set's elements, all written on `spell/element`:  Spell UI's own, the epic pages' (`epics`), the brand pages'
- *   and the app's (`<spell-app>`, `<spell-editor>`).
+ *   and the app's (`<spell-viewer>`, `<spell-editor>`).
  *   Not the app's function components, not the element core, not tests.
  * - A use that has to stay says why, on the line above:
  *   `// oxlint-disable-next-line spell-ui/no-untrack -- a starting value, read once as the component is built`.

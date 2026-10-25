@@ -345,7 +345,7 @@ export type ElementSetup = {
   /**
    * Is this element a ROOT:  the top of a page or app, which the elements inside look up to?
    * - Default `false`.
-   * - `true` for `UIRoot`, and so for every subclass of it, whatever its tag (`<spell-app>`).
+   * - `true` for `UIRoot`, and so for every subclass of it, whatever its tag (`<spell-viewer>`).
    * - What looks for a root by it:  `UIComponent.appContext` (the nearest root's `appContext`).
    * - Read once, when the tag is defined.
    */

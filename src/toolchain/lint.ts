@@ -182,7 +182,7 @@ export const testLint = {
  * folder:  `patternLint()` turns the `spell-ui/*` rules on there (`packageLint({ name })`).
  * - Every set's elements, all written on `spell/element`, held to the same patterns, each in its package's
  *   `src/components/`:  Spell UI's (and its docs site's widgets, `src/docs-components/`), the brand's.
- *   - The app's (`<spell-app>`, `<spell-editor>`) and the epics' are held to the same rules in their own repos
+ *   - The app's (`<spell-viewer>`, `<spell-editor>`) and the epics' are held to the same rules in their own repos
  *     (`patternLintIn()`).
  * - Not:
  *   - `app`'s `src/`:  WWOD §17's function components (Owen:  "other than app components")

@@ -403,10 +403,10 @@ Under node:
 - What needs a browser does nothing under node, with a note:  starting a UI (`start the game`), installing styles.
   Other browser-only code, e.g. touching `document` directly, throws.
 - Then `run` on a UI project opens it in your browser:
-  a page with the app's `<spell-app>` element, served from localhost until `Ctrl-C`.
+  a page with the app's `<spell-viewer>` element, served from localhost until `Ctrl-C`.
   - It serves the project as compiled for this run (nothing written), its scope pack for the Type Explorer,
     and the compiled projects it imports.
-  - The first time in a checkout it builds `<spell-app>` (`spell-app`'s `yarn build:element`):  a few seconds.
+  - The first time in a checkout it builds `<spell-viewer>` (`spell-app`'s `yarn build:element`):  a few seconds.
   - No live reload:  it serves what was compiled at the start.
   - `SPELL_NO_BROWSER=1` prints the address instead of opening a browser:  for tests, CI, a remote shell.
 
