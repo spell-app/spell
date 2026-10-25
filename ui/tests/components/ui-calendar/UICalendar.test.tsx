@@ -157,7 +157,7 @@ describe("<ui-calendar> markup", () => {
 describe("<ui-calendar> views", () => {
   it("walks date:  the title goes up to months and years;  choosing goes back down to the value", async () => {
     const { host, grid, title, cell } = await calendar(INLINE)
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changing")
     title().click()
     await ElementFixture.tick()
     expect(grid().classList.contains("month")).toBe(true)
@@ -393,7 +393,7 @@ describe("<ui-calendar> keyboard (APG date picker)", () => {
 
   it("opens from the field with ArrowDown, focus in the grid;  Escape closes and focus returns to the field", async () => {
     const { host, input, popup, focused, trigger } = await calendar(DATE)
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     input.focus()
     await press("{ArrowDown}")
     expect(popup.matches(":popover-open")).toBe(true)
@@ -500,7 +500,7 @@ describe("<ui-calendar> typing", () => {
 
   it("reverts unreadable or out-of-range text;  clears on empty text", async () => {
     const { host, input } = await calendar(DATE.replace("type", 'max="2026-12-31" type'))
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changing")
     await userEvent.clear(input)
     await userEvent.type(input, "not a date{Enter}")
     await ElementFixture.tick()
@@ -522,23 +522,23 @@ describe("<ui-calendar> typing", () => {
 ////////////////
 
 describe("<ui-calendar> events and value", () => {
-  it("ui-change is cancelable:  a veto keeps the old value", async () => {
+  it("ui-changing is cancelable:  a veto keeps the old value", async () => {
     const { host, cell } = await calendar(INLINE)
-    host.addEventListener("ui-change", (event) => event.preventDefault())
+    host.addEventListener("ui-changing", (event) => event.preventDefault())
     cell("Tuesday, September 15, 2026").click()
     await ElementFixture.tick()
     expect(host.value).toBe("2026-09-30")
     expect(parts(host).stop().textContent).toBe("15")
   })
 
-  it("ui-open is cancelable;  `open` opens and closes from the property", async () => {
+  it("ui-opening is cancelable;  `open` opens and closes from the property", async () => {
     const { host, trigger, popup } = await calendar(DATE)
     const veto = (event: Event) => event.preventDefault()
-    host.addEventListener("ui-open", veto)
+    host.addEventListener("ui-opening", veto)
     trigger.click()
     await ElementFixture.tick()
     expect(popup.matches(":popover-open")).toBe(false)
-    host.removeEventListener("ui-open", veto)
+    host.removeEventListener("ui-opening", veto)
     host.open = true
     await ElementFixture.tick()
     expect(popup.matches(":popover-open")).toBe(true)

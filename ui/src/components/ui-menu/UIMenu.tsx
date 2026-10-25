@@ -152,7 +152,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     if (!item || item.matches(UIT.DISABLED_STATE)) return
     const component = (item as E.DOMElement).component as ItemComponent | undefined
     const value = component?.value ?? item.textContent?.trim() ?? ""
-    const isChosen = this.send("ui-select", { value, item, originalEvent: event })
+    const isChosen = this.send("ui-choosing", { value, item, originalEvent: event })
     if (isChosen && this.appearance === SEGMENTED) this.choose(item)
   }
 

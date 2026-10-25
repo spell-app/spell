@@ -88,10 +88,10 @@ function focusedTab(host: Element, buttons: HTMLElement[]) {
   return buttons.indexOf(host.shadowRoot!.activeElement as HTMLElement)
 }
 
-/** Collect `ui-change` details from `host`. */
+/** Collect `ui-changing` details from `host`. */
 function changes(host: Element) {
   const seen: TabChangeDetail[] = []
-  host.addEventListener("ui-change", (event) => seen.push((event as CustomEvent<TabChangeDetail>).detail))
+  host.addEventListener("ui-changing", (event) => seen.push((event as CustomEvent<TabChangeDetail>).detail))
   return seen
 }
 
@@ -215,7 +215,7 @@ describe("<ui-tabs> selection", () => {
     await expect.poll(() => shown(panes)).toEqual([0])
   })
 
-  it("selects on a click:  ui-change first, then `value` (reflected), the pane and its tab", async () => {
+  it("selects on a click:  ui-changing first, then `value` (reflected), the pane and its tab", async () => {
     const { host, buttons, panes } = await tabs()
     const seen = changes(host)
     await userEvent.click(buttons[1]!)
@@ -229,10 +229,10 @@ describe("<ui-tabs> selection", () => {
     expect(boxOf(panes[1]!).classList.contains("active")).toBe(true)
   })
 
-  it("lets ui-change veto;  ignores a disabled tab and the selected one", async () => {
+  it("lets ui-changing veto;  ignores a disabled tab and the selected one", async () => {
     const { host, buttons, panes } = await tabs("", PANES.replace(`value="third"`, `value="third" disabled`))
     const seen = changes(host)
-    host.addEventListener("ui-change", (event) => event.preventDefault(), { once: true })
+    host.addEventListener("ui-changing", (event) => event.preventDefault(), { once: true })
     await userEvent.click(buttons[1]!)
     // Playwright won't click an `aria-disabled` element:  a DOM click, as a script or assistive tech would
     buttons[2]!.click()
@@ -386,9 +386,9 @@ describe("<ui-tabs> transitions", () => {
 ////////////////
 
 describe("<ui-tab>", () => {
-  it("fires ui-show each time it becomes the shown pane;  `first` the first time", async () => {
+  it("fires ui-opened each time it becomes the shown pane;  `first` the first time", async () => {
     const shows: [string, boolean][] = []
-    document.addEventListener("ui-show", (event) => {
+    document.addEventListener("ui-opened", (event) => {
       const { value, first } = (event as CustomEvent<TabShowDetail>).detail
       shows.push([value, first])
     })

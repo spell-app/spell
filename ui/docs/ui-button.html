@@ -423,7 +423,7 @@
 
               <ui-section id="examples-variations-toggle" label="Toggle" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A button can be formatted to toggle on and off:  a click flips `active` and fires `ui-toggle`."
+                  description="A button can be formatted to toggle on and off:  a click flips `active` and fires `ui-selected` or `ui-deselected`."
                 >
                   <ui-button toggle>Vote</ui-button>
                 </ui-docs-example>
@@ -856,14 +856,15 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A plain click is the native `click`. `ui-toggle` is the only custom event: a `toggle` button
-                  fires it when its `active` flips, with `event.detail.active`.
+                  A plain click is the native `click`. A `toggle` button sends `ui-selected` when it turns on and `ui-deselected` when it
+                  turns off, with `event.detail.active`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const toggle = document.querySelector("ui-button[toggle]")
-                  toggle.addEventListener("ui-toggle", (event) => console.log(event.detail.active))
+                  toggle.addEventListener("ui-selected", () => console.log("on"))
+                  toggle.addEventListener("ui-deselected", () => console.log("off"))
                 </script>
               </ui-code>
             </ui-section>
@@ -878,14 +879,14 @@
 
                   Because the label SAYS the state, a `toggle` button with a state text leaves `aria-pressed` off: a
                   toggle button whose name changes would announce the state twice (WAI-ARIA APG). Listen for
-                  `ui-toggle` as usual.
+                  `ui-selected` and `ui-deselected` as usual.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  document.querySelector("ui-button[active-text]").addEventListener("ui-toggle", (event) => {
-                    event.detail.active ? follow() : unfollow()
-                  })
+                  const follow = document.querySelector("ui-button[active-text]")
+                  follow.addEventListener("ui-selected", () => startFollowing())
+                  follow.addEventListener("ui-deselected", () => stopFollowing())
                 </script>
               </ui-code>
             </ui-section>
@@ -1020,7 +1021,8 @@
                   <ui-button
                     primary
                     toggle
-                    on-ui-toggle={(event) => setOn(event.detail.active)}
+                    on-ui-selected={(event) => setOn(event.detail.active)}
+                    on-ui-deselected={(event) => setOn(event.detail.active)}
                   >
                     Vote
                   </ui-button>

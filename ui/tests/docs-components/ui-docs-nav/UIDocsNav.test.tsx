@@ -339,10 +339,10 @@ describe("<ui-docs-nav> topics", () => {
     expect(links(nav, ".topic-rows")).toEqual([])
   })
 
-  it("switches views with the A-Z / Topics buttons:  `ui-change`, reflected, remembered", async () => {
+  it("switches views with the A-Z / Topics buttons:  `ui-changed`, reflected, remembered", async () => {
     const nav = await render()
     const views: string[] = []
-    nav.addEventListener("ui-change", (event) => views.push((event as CustomEvent<{ view: string }>).detail.view))
+    nav.addEventListener("ui-changed", (event) => views.push((event as CustomEvent<{ view: string }>).detail.view))
     const az = find(nav, '[data-nav-view="az"]')
     expect(az.shadowRoot!.querySelector("button")!.getAttribute("aria-pressed")).toBe("true")
 
@@ -488,10 +488,10 @@ describe("<ui-docs-nav> search", () => {
 })
 
 describe("<ui-docs-nav> favourites", () => {
-  it("stars a component:  Favourites on top, remembered, `ui-favorite`, the star pressed", async () => {
+  it("stars a component:  Favourites on top, remembered, `ui-starred`, the star pressed", async () => {
     const nav = await render()
     const events: unknown[] = []
-    nav.addEventListener("ui-favorite", (event) => {
+    nav.addEventListener("ui-starred", (event) => {
       const { tag, favorite, favorites } = (event as CustomEvent).detail
       events.push({ tag, favorite, favorites })
     })
@@ -543,10 +543,10 @@ describe("<ui-docs-nav> favourites", () => {
 ////////////////
 
 describe("<ui-docs-nav> navigation and scrolling", () => {
-  it("fires a cancelable `ui-navigate` for a plain click on a link", async () => {
+  it("fires a cancelable `ui-navigating` for a plain click on a link", async () => {
     const nav = await render()
     const seen: string[] = []
-    nav.addEventListener("ui-navigate", (event) => {
+    nav.addEventListener("ui-navigating", (event) => {
       const { page, href } = (event as CustomEvent<{ page: string; href: string }>).detail
       seen.push(`${page} ${new URL(href).hash}`)
       event.preventDefault()

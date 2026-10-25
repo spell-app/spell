@@ -8,7 +8,7 @@ import type { PackSwap } from "./UIComponents.types"
  * ### `PackHotSwap`
  * A page that swaps in a REBUILT component pack instead of reloading (epic `epic-engine` I116;  Owen, 2026-10-25,
  * on every epic page reloading at each merge:  "YUCK.  Can you do something about that?").
- * - The page server's live client says which scripts changed, and offers them (`spell-server:scripts`) before it
+ * - The page server's live client says which scripts changed, and offers them (`spell-server:scripts-reloading`) before it
  *   reloads.  When every one is a pack on the page, this takes them:  no reload.
  * - Each pack's script runs again (`ComponentPacks.reload()`), and only the families whose sources changed are
  *   swapped into the live elements, which re-render in place (the kit's `HotDefinitions`);
@@ -41,7 +41,7 @@ export class PackHotSwap {
   }
 
   /**
-   * The live client offers the scripts that changed (`spell-server:scripts`):  take them when every one is a pack on
+   * The live client offers the scripts that changed (`spell-server:scripts-reloading`):  take them when every one is a pack on
    * the page, and swap each in;  else leave them, and the page reloads.
    */
   private static onScripts(event: CustomEvent<{ paths: string[] }>) {
@@ -65,4 +65,4 @@ export class PackHotSwap {
 }
 
 /** The live client's offer of the scripts that changed, before it reloads (the kit's `liveClient()`). */
-const SCRIPTS_EVENT = "spell-server:scripts"
+const SCRIPTS_EVENT = "spell-server:scripts-reloading"

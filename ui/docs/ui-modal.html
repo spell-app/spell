@@ -177,7 +177,7 @@
                         <code>&lt;ui-button negative&gt;</code>
                       </li>
                     </ul>
-                    Each fires the cancelable <code>ui-approve</code> / <code>ui-deny</code>, then closes the
+                    Each fires the cancelable <code>ui-approving</code> / <code>ui-denying</code>, then closes the
                     modal.</ui-message
                   >
                   <ui-message slot="description" size="small" state="warning"
@@ -383,7 +383,7 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
                 <ui-docs-example
-                  description="An active modal is visible on the page:  `open` (it emits Fomantic's `active` class).  Writing it shows or hides the modal and fires no `ui-open` / `ui-close`."
+                  description="An active modal is visible on the page:  `open` (it emits Fomantic's `active` class).  Writing it shows or hides the modal and fires no `ui-opening` / `ui-closing`."
                 >
                   <ui-button commandfor="modal-states-active" command="--toggle">Toggle</ui-button>
                   <ui-modal
@@ -548,7 +548,7 @@
                 <script type="text/markdown">
                   - With no script, from a native `<button commandfor="id" command="--show">` or a `<ui-button>` (an invoker
                     command; Fomantic's `attach events`). `--close` closes it and `--toggle` flips it.
-                  - From code, set `open`: writing it is your own decision and fires no `ui-open` / `ui-close`.
+                  - From code, set `open`: writing it is your own decision and fires no `ui-opening` / `ui-closing`.
                 </script>
               </ui-markdown>
               <ui-code language="html">
@@ -605,27 +605,27 @@
                   `visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
                   or hides the modal and fires nothing. A modal starts hidden. The events, in order:
 
-                  - `ui-open` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
+                  - `ui-opening` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
                     `{ visible: true, originalEvent? }`.
-                  - `ui-approve` / `ui-deny` (cancelable) -- an approve / deny button was activated; `detail` is
+                  - `ui-approving` / `ui-denying` (cancelable) -- an approve / deny button was activated; `detail` is
                     `{ action, originalEvent? }`. `preventDefault()` keeps the modal shown, like Fomantic's `onApprove`
                     returning `false`.
-                  - `ui-close` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
+                  - `ui-closing` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
                     `reason` is `escape`, `outside` (the dimmer), `close` (the close icon or `--close`), `approve`, `deny` or
                     `close-all`.
-                  - `ui-show` / `ui-hide` -- shown or hidden, once the transition has finished (Fomantic's `onVisible` /
+                  - `ui-opened` / `ui-closed` -- shown or hidden, once the transition has finished (Fomantic's `onVisible` /
                     `onHidden`).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const modal = document.querySelector("#modal-types-standard")
-                  modal.addEventListener("ui-approve", (event) => {
+                  modal.addEventListener("ui-approving", (event) => {
                     if (!form.checkValidity()) event.preventDefault() // stay shown
                   })
-                  modal.addEventListener("ui-close", (event) => console.log(event.detail.reason))
-                  modal.addEventListener("ui-hide", () => console.log("gone"))
-                  modal.visible = true // show from code:  no ui-open
+                  modal.addEventListener("ui-closing", (event) => console.log(event.detail.reason))
+                  modal.addEventListener("ui-closed", () => console.log("gone"))
+                  modal.visible = true // show from code:  no ui-opening
                 </script>
               </ui-code>
               <ui-message size="small" class="site-not-ported"
@@ -685,8 +685,8 @@
                   - Open it from a real button (`commandfor`), so keyboard and screen reader users can reach it the same way.
                   - If the element fails to render, there's no dialog: it shows its children through a bare `<slot>`, in
                     the page where they're written rather than over it, so nothing traps focus, dims the page or closes
-                    on Escape. `open`, invoker commands, `ui-approve` / `ui-deny`, the `ui-open` / `ui-close` vetoes,
-                    `ui-show`, `closedby`, scroll lock and the close button go.
+                    on Escape. `open`, invoker commands, `ui-approving` / `ui-denying`, the `ui-opening` / `ui-closing` vetoes,
+                    `ui-opened`, `closedby`, scroll lock and the close button go.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -694,7 +694,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `open` to your state and listen for `ui-close` (and `ui-approve` / `ui-deny`) to follow the user.
+                  Bind `open` to your state and listen for `ui-closing` (and `ui-approving` / `ui-denying`) to follow the user.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -709,7 +709,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-modal :visible="open" heading="Delete?" @ui-close="open = false" @ui-approve="remove">...</ui-modal>
+                  <ui-modal :visible="open" heading="Delete?" @ui-closing="open = false" @ui-approving="remove">...</ui-modal>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -718,9 +718,9 @@
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-modal
                     visible={open()}
-                    heading="Delete?"
-                    on-ui-close={() => setOpen(false)}
-                    on-ui-approve={remove}
+                    header="Delete?"
+                    on-ui-closing={() => setOpen(false)}
+                    on-ui-approving={remove}
                   >
                     ...
                   </ui-modal>

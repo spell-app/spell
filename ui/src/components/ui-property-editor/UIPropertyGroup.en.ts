@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-property-group>`:  every name the tag uses.
  * - Its own names first, then `<ui-section>`'s, which it PASSES THROUGH (it is one), where they mean the same.
- *   - Not passed through:  `source`, and what only works with it (`ui-load`, `:state(loaded)`, the load texts).
+ *   - Not passed through:  `source`, and what only works with it (`ui-loaded`, `:state(loaded)`, the load texts).
  *   - Its own `select` picks from the editor's `source` page instead.
  * - The shape is `E.ComponentVocabulary`.  Pure data.
  */
@@ -14,7 +14,7 @@ import { passThrough } from "./UIPropertyEditor.types"
 /** The section's names that only work with `source`:  a group has none. */
 const SOURCE_ONLY = [
   "source",
-  "ui-load",
+  "ui-loaded",
   "loaded",
   "sourceLoadError",
   "sourceCrossOrigin",
@@ -73,7 +73,7 @@ export const propertyGroupVocabulary = {
         description: "A property in the group failed validation (the editor sends it on the group too)."
       },
       {
-        name: "ui-success",
+        name: "ui-saved",
         detail: "{ values: Record<string, FieldValue>, originalEvent?: Event }",
         description: "The editor's submit or Save passed validation (sent on each group too)."
       }

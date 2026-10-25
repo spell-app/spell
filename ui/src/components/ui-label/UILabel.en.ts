@@ -132,7 +132,7 @@ export const labelVocabulary = {
       name: "removable",
       group: "behaviour",
       kind: "boolean",
-      description: "Shows a delete icon button;  clicking it dispatches `ui-remove`."
+      description: "Shows a delete icon button;  clicking it dispatches `ui-removing`."
     },
     {
       name: "link",
@@ -145,7 +145,7 @@ export const labelVocabulary = {
   ],
   events: [
     {
-      name: "ui-remove",
+      name: "ui-removing",
       detail: "{ originalEvent?: Event }",
       cancelable: true,
       description: "The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself."

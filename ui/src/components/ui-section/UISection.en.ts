@@ -16,7 +16,7 @@
  *   - `label`, `hint`, `description`
  *   - events in pairs:  `ui-closing` then `ui-closed`
  *   - states `nested` and `in-group`
- *   - Its old words (`header`, `subhead`, `info`, `ui-open`, `ui-close`, `ui-load`) went in epic `repo-split` P14 (Q45).
+ *   - Its old words (`header`, `subhead`, `info`, `ui-opening`, `ui-closing`, `ui-loaded`) went in epic `repo-split` P14 (Q45).
  */
 
 import type { E } from "spell-ui/core"

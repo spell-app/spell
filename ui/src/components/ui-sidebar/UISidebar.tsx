@@ -31,10 +31,10 @@ import sidebarCSS from "./UISidebar.css?inline"
  *   while it slides out, `:state(hiding)` keeps it on screen (`onVisibleChange()`).
  *
  * - `visible` / `hidden` are controlled:
- *   the cancelable `ui-open` / `ui-close` come first for a person's actions
+ *   the cancelable `ui-opening` / `ui-closing` come first for a person's actions
  *   (invoker commands, `UIT.ToggleCommands`;  Escape;  a click beside it).
- *   - `ui-show` / `ui-hide` follow once the transition has ended.
- *   - Writing `visible` or `hidden` fires no `ui-open` / `ui-close`.
+ *   - `ui-opened` / `ui-closed` follow once the transition has ended.
+ *   - Writing `visible` or `hidden` fires no `ui-opening` / `ui-closing`.
  ****************/
 export class UISidebar extends E.UIComponent<SidebarVocabulary> {
   @E.proto static vocabulary = sidebarVocabulary
@@ -61,20 +61,20 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
     return !this.persistent
   }
 
-  /** Show for a person's action, dispatching the cancelable `ui-open` first;  true when applied. */
+  /** Show for a person's action, dispatching the cancelable `ui-opening` first;  true when applied. */
   @E.untracked
   requestOpen(originalEvent?: Event): boolean {
     if (this.isVisible) return false
     const detail: UIT.SidebarOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.send("ui-open", detail))
+    return this.requestChange("isVisible", true, () => this.send("ui-opening", detail))
   }
 
-  /** Hide for `reason`, dispatching the cancelable `ui-close` first;  true when applied. */
+  /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
   @E.untracked
   requestClose(reason: UIT.SidebarCloseReason, originalEvent?: Event): boolean {
     if (!this.isVisible) return false
     const detail: UIT.SidebarCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.send("ui-close", detail))
+    return this.requestChange("isVisible", false, () => this.send("ui-closing", detail))
   }
 
   /** An invoker command aimed at the DOM element (`ToggleCommands`). */
@@ -95,7 +95,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
   /** Undoes the focus trap of a modal sidebar. */
   private releaseFocusTrap?: E.Disposer
 
-  /** Bumped on every show / hide, so a late `ui-show` / `ui-hide` of an earlier one is dropped. */
+  /** Bumped on every show / hide, so a late `ui-opened` / `ui-closed` of an earlier one is dropped. */
   private generation = 0
 
   /** A modal sidebar's `UI.overlays` entry;  its options follow `closedby` when it shows. */
@@ -119,7 +119,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
 
   /**
    * A modal sidebar:  `show()` (focus moves in), the focus trap, `UI.overlays`;
-   * then `ui-show` once its transition ends.
+   * then `ui-opened` once its transition ends.
    */
   @E.untracked
   private show(modal: boolean) {
@@ -143,7 +143,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
     }
     this.after(() => {
       const detail: UIT.SidebarOpenDetail = { visible: true }
-      if (this.isVisible) this.send("ui-show", detail)
+      if (this.isVisible) this.send("ui-opened", detail)
     })
   }
 
@@ -162,7 +162,7 @@ export class UISidebar extends E.UIComponent<SidebarVocabulary> {
     }
     this.after(() => {
       const detail: UIT.SidebarOpenDetail = { visible: false }
-      if (!this.isVisible && this.domElement.isConnected) this.send("ui-hide", detail)
+      if (!this.isVisible && this.domElement.isConnected) this.send("ui-closed", detail)
     })
   }
 

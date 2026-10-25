@@ -75,7 +75,7 @@ import sectionCSS from "./UISection.css?inline"
  *   - with `source`:  replaces its own light children (the placeholder) with the file's body.
  *
  * - Its words match `<ui-field>`'s (epic `property-editor` P10, decision Q12):  `label` / `hint` / `description`,
- *   `ui-opening` / `ui-closing`.  The old ones (`header`, `subhead`, `info`, `ui-open` ...) went in epic
+ *   `ui-opening` / `ui-closing`.  The old ones (`header`, `subhead`, `info`, `ui-opening` ...) went in epic
  *   `repo-split` P14 (Q45).
  ****************/
 export class UISection extends E.UIComponent<SectionVocabulary> {

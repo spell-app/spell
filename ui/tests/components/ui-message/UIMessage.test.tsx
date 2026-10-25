@@ -239,10 +239,10 @@ describe("<ui-message> owner context", () => {
 ////////////////
 
 describe("<ui-message> dismiss", () => {
-  it("dispatches a cancelable, composed ui-dismiss, then hides itself (never removes itself)", async () => {
+  it("dispatches a cancelable, composed ui-closing, then hides itself (never removes itself)", async () => {
     const { host, root } = await message(`<ui-message dismissible>x</ui-message>`)
     const events: CustomEvent<MessageDismissDetail>[] = []
-    document.addEventListener("ui-dismiss", (event) => events.push(event as CustomEvent), { once: true })
+    document.addEventListener("ui-closing", (event) => events.push(event as CustomEvent), { once: true })
     root.querySelector("button")!.click()
     expect(events).toHaveLength(1)
     const [event] = events
@@ -260,7 +260,7 @@ describe("<ui-message> dismiss", () => {
 
   it("stays visible when a handler cancels", async () => {
     const { host, root } = await message(`<ui-message dismissible>x</ui-message>`)
-    host.addEventListener("ui-dismiss", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     root.querySelector("button")!.click()
     expect(host.hidden).toBe(false)
     expect(host.hasAttribute("hidden")).toBe(false)

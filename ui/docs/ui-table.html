@@ -2171,7 +2171,7 @@
                 <ui-docs-example>
                   <p slot="description">A table may allow a user to sort contents by clicking on a table header.</p>
                   <ui-message slot="description" state="info" size="small"
-                    >No plugin needed:  a header click (or Enter / Space) fires <code>ui-sort</code>, and marks the column
+                    >No plugin needed:  a header click (or Enter / Space) fires <code>ui-sorting</code>, and marks the column
                     with sort-column, sort-direction and aria-sort. <code>client-sort</code> also reorders the rows;
                     click a header to try it.</ui-message
                   >
@@ -3165,7 +3165,7 @@
                   With `sortable`, every header in the `thead` sorts, unless it has `data-sortable="false"` (or Fomantic's
                   `class="disabled"`).
 
-                  - A click, or Enter / Space on a focused header, first dispatches the cancelable `ui-sort`
+                  - A click, or Enter / Space on a focused header, first dispatches the cancelable `ui-sorting`
                     (`{ column, key, direction }`, where `key` is the header's `data-key`).
                   - Then `sort-column`, `sort-direction` and the header's `aria-sort` update. The same header again flips the
                     direction; a new one starts `ascending`.
@@ -3175,7 +3175,7 @@
               </ui-markdown>
               <ui-section id="usage-sorting-client-sort" label="Client sort" sticky collapsible dividing>
                 <ui-docs-example
-                  description="`client-sort` reorders the rows by cell text on each `ui-sort`.  Click a header."
+                  description="`client-sort` reorders the rows by cell text on each `ui-sorting`.  Click a header."
                 >
                   <ui-table sortable client-sort celled>
                     <table>
@@ -3217,7 +3217,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-sort` is the only event: `detail` is `{ column, key, direction, originalEvent }`. `preventDefault()` keeps
+                  `ui-sorting` is the only event: `detail` is `{ column, key, direction, originalEvent }`. `preventDefault()` keeps
                   the current sort (and skips data mode / `client-sort` reordering).
                 </script>
               </ui-markdown>
@@ -3225,7 +3225,7 @@
                 <script type="text/plain">
                   // the app sorts its own rows;  `event.preventDefault()` would keep the current sort instead
                   const table = document.querySelector("ui-table")
-                  table.addEventListener("ui-sort", async (event) => {
+                  table.addEventListener("ui-sorting", async (event) => {
                     const { key, direction } = event.detail
                     renderRows(await fetchRows({ sort: key, direction }))
                   })
@@ -3266,7 +3266,7 @@
                     { name: "Mars", moons: 2, day: 24.7 },
                     { name: "Jupiter", moons: 95, day: 9.9 }
                   ]
-                  table.addEventListener("ui-sort", (event) => console.log(event.detail))
+                  table.addEventListener("ui-sorting", (event) => console.log(event.detail))
                 </script>
               </ui-code>
             </ui-section>
@@ -3293,7 +3293,7 @@
                   - `scrolling` and `overflowing` make the scroller a focusable `role="region"`, so keyboard users can scroll it.
                     It is named by the host's `aria-label`, else the table's `<caption>`, else the translated `label` ("Table").
                   - If the element fails to render, it shows a slotted `<table>` through a bare `<slot>`, so the data
-                    stays, but without the table look or the scroller. It drops sorting (`ui-sort`, `aria-sort`,
+                    stays, but without the table look or the scroller. It drops sorting (`ui-sorting`, `aria-sort`,
                     focusable headers, `client-sort`), data mode (nothing shows without a slotted `<table>`)
                     and the translated `label`.
                 </script>
@@ -3304,7 +3304,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Render the `<table>` inside `<ui-table>` as usual. For data mode, set `rows` / `columnDefs` as properties, not
-                  attributes, and listen for `ui-sort`.
+                  attributes, and listen for `ui-sorting`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -3317,7 +3317,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-table celled sortable :rows="rows" :columnDefs="columns" @ui-sort="(event) => (sort = event.detail)" />
+                  <ui-table celled sortable :rows="rows" :columnDefs="columns" @ui-sorting="(event) => (sort = event.detail)" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -3329,7 +3329,7 @@
                     sortable
                     rows={rows()}
                     columnDefs={columns}
-                    on-ui-sort={(event) => setSort(event.detail)}
+                    on-ui-sorting={(event) => setSort(event.detail)}
                   />
                 </script>
               </ui-code>

@@ -108,9 +108,9 @@ export class DOMDocsNavElement extends E.DOMElement<UIDocsNav> {
  * - The current page (`current`, by default the page's file name) is `aria-current="page"`,
  *   and scrolled into view inside the panel once the list has rendered (`revealCurrent()`).
  * - Events:
- *   - `ui-navigate`:  a plain click on a link, cancelable (the search field fires its own)
- *   - `ui-change` (`{ view }`)
- *   - `ui-favorite`
+ *   - `ui-navigating`:  a plain click on a link, cancelable (the search field fires its own)
+ *   - `ui-changed` (`{ view }`)
+ *   - `ui-starred`
  * - `/` and Cmd / Ctrl+K focus the search field:  `<ui-docs-search>`'s shortcuts.
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
  *   which its barrel imports.
@@ -306,7 +306,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   }
 
   /**
-   * Star or un-star `tag`;  remembered, `ui-favorite`.
+   * Star or un-star `tag`;  remembered, `ui-starred`.
    * - Un-starring from the Favourites list removes the clicked row:
    *   focus moves to the tag's star in the list below, else the search box.
    * - Stored tags this site doesn't list stay stored:  every site on this bundle shares the key (`STORAGE_KEYS`), so
@@ -322,7 +322,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     const list = rows.filter((row) => favorites.has(row.tag)).map((row) => row.tag)
     const elsewhere = NavPreferences.favorites().filter((stored) => !this.navIndex?.row(stored))
     NavPreferences.setFavorites([...list, ...elsewhere])
-    this.send("ui-favorite", { tag, favorite: isFavorite, favorites: list, originalEvent: event })
+    this.send("ui-starred", { tag, favorite: isFavorite, favorites: list, originalEvent: event })
     if (isFavorite || !star.closest(`.${FAVORITES}`)) return
     E.afterSolidUpdate(() => {
       const next = this.box?.querySelector<HTMLElement>(
@@ -349,7 +349,7 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   /** Switch the view, as the viewer did with `event`;  remembered.  No `view` (not a `NavView`):  nothing. */
   private switchView(view: NavView | undefined, event: Event) {
     if (!view || view === this.view) return
-    const isApplied = this.requestChange("view", view, () => this.send("ui-change", { view, originalEvent: event }))
+    const isApplied = this.requestChange("view", view, () => this.send("ui-changed", { view, originalEvent: event }))
     if (isApplied) NavPreferences.setView(view)
   }
 
@@ -800,8 +800,9 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   private wire(box: HTMLElement) {
     this.box = box
     box.addEventListener("click", (event) => this.onClick(event))
-    box.addEventListener("ui-input", (event) => this.onSearch(event as CustomEvent<{ value?: string }>))
-    box.addEventListener("ui-toggle", (event) => this.onToggle(event))
+    box.addEventListener("ui-typed", (event) => this.onSearch(event as CustomEvent<{ value?: string }>))
+    box.addEventListener("ui-selected", (event) => this.onToggle(event))
+    box.addEventListener("ui-deselected", (event) => this.onToggle(event))
     box.addEventListener("transitionend", (event) => this.onTransitionEnd(event))
   }
 
@@ -821,12 +822,12 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
     else if (name === DATA.link) this.navigate(value, event)
   }
 
-  /** A link was followed:  `ui-navigate` for a plain left click;  vetoed, the browser stays. */
+  /** A link was followed:  `ui-navigating` for a plain left click;  vetoed, the browser stays. */
   private navigate(page: string, event: MouseEvent) {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
     const link = event.composedPath().find((target): target is HTMLAnchorElement => target instanceof HTMLAnchorElement)
     if (!link) return
-    if (!this.send("ui-navigate", { href: link.href, page, originalEvent: event })) event.preventDefault()
+    if (!this.send("ui-navigating", { href: link.href, page, originalEvent: event })) event.preventDefault()
   }
 
   ////////////////

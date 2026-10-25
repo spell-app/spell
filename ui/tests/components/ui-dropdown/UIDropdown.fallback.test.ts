@@ -99,12 +99,12 @@ describe("DropdownFallback", () => {
     expect(new FormData(form).get("pick")).toBe("b")
   })
 
-  it("changes the form value, host value, and fires ui-change", () => {
+  it("changes the form value, host value, and fires ui-changed", () => {
     const { form, host, select } = dropdown(
       `<x-fb-dropdown name="pick" aria-label="x"><ui-item value="a">A</ui-item><ui-item value="b">B</ui-item></x-fb-dropdown>`
     )
     const details: CustomEvent<DropdownChangeDetail>[] = []
-    form.addEventListener("ui-change", (event) => details.push(event as CustomEvent<DropdownChangeDetail>))
+    form.addEventListener("ui-changed", (event) => details.push(event as CustomEvent<DropdownChangeDetail>))
     choose(select(), "b")
     expect(new FormData(form).get("pick")).toBe("b")
     expect(host.value).toBe("b")

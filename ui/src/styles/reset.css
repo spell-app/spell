@@ -117,12 +117,8 @@
   }
 
   /*
-   * The shared `font` (`UIComponent`, "Shared words";  epic `ui-gaps`):  how the letters look, on every element.
-   * - `<ui-text>` draws each word as its HTML element (`<strong>`, `<em>` ...);  every other element, the look alone.
-   * - Weight, slant and the code face inherit through a `display: contents` element, so they go on the element;
-   *   lines through and under the text don't, so they go on the shadow root's top-level boxes.
-   * - `highlight`, `subscript` and `superscript` only mean something inside running text:  `<ui-text>` draws them.
-   * - `:state(linked)`, a shared `link`:  a pointer.
+   * The shared `font` and `link` (`UIComponent`, "Shared words"):  the look alone;  `<ui-text>` draws the elements.
+   * - Inherited ones on the element;  lines on its top-level boxes.  Underline and line-through:  the latter wins.
    */
   :host(:state(font-bold)) {
     font-weight: var(--ui-font-weight-bold);
@@ -134,16 +130,11 @@
     font-family: var(--ui-font-family-mono);
   }
   :host(:state(font-underline)) > :not(slot) {
-    text-decoration-line: underline;
-    /* as a link's (`<ui-text link>`):  one underline, drawn one way */
-    text-decoration-thickness: 0.06em;
+    text-decoration: underline 0.06em;
     text-underline-offset: 0.15em;
   }
   :host(:state(font-strikethrough)) > :not(slot) {
-    text-decoration-line: line-through;
-  }
-  :host(:state(font-underline):state(font-strikethrough)) > :not(slot) {
-    text-decoration-line: underline line-through;
+    text-decoration: line-through;
   }
   :host(:state(linked)) {
     cursor: pointer;

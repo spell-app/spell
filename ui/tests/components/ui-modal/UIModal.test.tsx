@@ -31,18 +31,18 @@ async function modal(html: string) {
   return { wrapper, host, dialog, trigger }
 }
 
-/** Open `host` from its trigger (so focus has somewhere to return), and wait for `ui-show`. */
+/** Open `host` from its trigger (so focus has somewhere to return), and wait for `ui-opened`. */
 async function open(host: Modal, trigger?: HTMLElement) {
   trigger?.focus()
-  const shown = next(host, "ui-show")
+  const shown = next(host, "ui-opened")
   host.visible = true
   await settle()
   await shown
 }
 
-/** Hide `host`, and wait for `ui-hide`. */
+/** Hide `host`, and wait for `ui-closed`. */
 async function close(host: Modal) {
-  const hidden = next(host, "ui-hide")
+  const hidden = next(host, "ui-closed")
   host.visible = false
   await hidden
   await settle()
@@ -226,17 +226,17 @@ describe("<ui-modal> tokens from outside", () => {
 ////////////////
 
 describe("<ui-modal> open / close", () => {
-  it("`open` shows it with showModal():  top layer, inert page, scroll lock;  ui-show, then ui-hide", async () => {
+  it("`open` shows it with showModal():  top layer, inert page, scroll lock;  ui-opened, then ui-closed", async () => {
     const { host, dialog } = await modal(`<ui-modal heading="Hi">x</ui-modal>`)
-    const opens = record(host, "ui-open")
-    const shows = record(host, "ui-show")
+    const opens = record(host, "ui-opening")
+    const shows = record(host, "ui-opened")
     await open(host)
     expect(dialog.open).toBe(true)
     expect(dialog.matches(":modal")).toBe(true)
     expect(document.documentElement.classList.contains("ui-scroll-locked")).toBe(true)
     expect(opens).toHaveLength(0)
     expect(shows).toEqual([{ visible: true }])
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     host.visible = false
     await settle()
     expect(dialog.open).toBe(false)
@@ -244,10 +244,10 @@ describe("<ui-modal> open / close", () => {
     expect(((await hidden) as CustomEvent).detail).toEqual({ visible: false })
   })
 
-  it("waits for the transition before ui-show / ui-hide", async () => {
+  it("waits for the transition before ui-opened / ui-closed", async () => {
     speedUp.remove()
     const { host, dialog } = await modal(`<ui-modal>x</ui-modal>`)
-    const shows = record(host, "ui-show")
+    const shows = record(host, "ui-opened")
     host.visible = true
     await settle()
     expect(dialog.getAnimations().length).toBeGreaterThan(0)
@@ -255,12 +255,12 @@ describe("<ui-modal> open / close", () => {
     await expect.poll(() => shows.length, { timeout: 2000 }).toBe(1)
   })
 
-  it("an invoker command (`--show`) opens it as a user action:  a cancelable ui-open", async () => {
+  it("an invoker command (`--show`) opens it as a user action:  a cancelable ui-opening", async () => {
     const { host, dialog, wrapper } = await modal(`<ui-modal id="m">x</ui-modal>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="m" command="--show">Show</button>`)
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     let veto = true
-    host.addEventListener("ui-open", (event) => veto && event.preventDefault())
+    host.addEventListener("ui-opening", (event) => veto && event.preventDefault())
     wrapper.querySelector<HTMLButtonElement>("#show")!.click()
     await settle()
     expect(opens).toHaveLength(1)
@@ -274,7 +274,7 @@ describe("<ui-modal> open / close", () => {
 
   it("Escape closes it (reason `escape`), and focus returns to the trigger", async () => {
     const { host, dialog, trigger } = await modal(`<ui-modal heading="Hi"><button>Inside</button></ui-modal>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host, trigger)
     await userEvent.keyboard("{Escape}")
     await settle()
@@ -284,9 +284,9 @@ describe("<ui-modal> open / close", () => {
     expect(document.activeElement).toBe(trigger)
   })
 
-  it("a vetoed ui-close keeps it open", async () => {
+  it("a vetoed ui-closing keeps it open", async () => {
     const { host, dialog } = await modal(`<ui-modal><button>Inside</button></ui-modal>`)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     await open(host)
     await userEvent.keyboard("{Escape}")
     await settle()
@@ -298,9 +298,9 @@ describe("<ui-modal> open / close", () => {
     UI.overlays.useCloseWatcher = true
     const { host, dialog, wrapper } = await modal(`<ui-modal id="m"><button>Inside</button></ui-modal>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="m" command="--show">Show</button>`)
-    const closes = record(host, "ui-close")
-    host.addEventListener("ui-close", (event) => event.preventDefault())
-    const shown = next(host, "ui-show")
+    const closes = record(host, "ui-closing")
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
+    const shown = next(host, "ui-opened")
     await userEvent.click(wrapper.querySelector("#show")!)
     await shown
     await userEvent.keyboard("{Escape}")
@@ -313,7 +313,7 @@ describe("<ui-modal> open / close", () => {
 
   it("a click on the dimmer closes it (reason `outside`);  one inside doesn't", async () => {
     const { host, dialog } = await modal(`<ui-modal size="mini" heading="Hi" content="Body"></ui-modal>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host)
     await userEvent.click(dialog.querySelector(".content")!)
     await settle()
@@ -378,8 +378,8 @@ describe("<ui-modal> open / close", () => {
   it("invoker commands:  `--toggle` opens a closed modal and closes an open one, as user actions", async () => {
     const { host, dialog, wrapper } = await modal(`<ui-modal id="m" content="Body"></ui-modal>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="flip" commandfor="m" command="--toggle">Flip</button>`)
-    const opens = record(host, "ui-open")
-    const closes = record(host, "ui-close")
+    const opens = record(host, "ui-opening")
+    const closes = record(host, "ui-closing")
     const flip = wrapper.querySelector<HTMLButtonElement>("#flip")!
     flip.click()
     await settle()
@@ -419,7 +419,7 @@ describe("<ui-modal> open / close", () => {
     supports.dialogClosedBy = false
     try {
       const { host, dialog } = await modal(`<ui-modal size="mini" content="Body"></ui-modal>`)
-      const closes = record(host, "ui-close")
+      const closes = record(host, "ui-closing")
       await open(host)
       expect(dialog.hasAttribute("closedby")).toBe(false)
       await userEvent.click(dialog.querySelector(".content")!)
@@ -436,7 +436,7 @@ describe("<ui-modal> open / close", () => {
 
   it("the close icon closes it (reason `close`)", async () => {
     const { host, dialog } = await modal(`<ui-modal closable content="Body"></ui-modal>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host)
     await userEvent.click(dialog.querySelector("[part~=close]")!)
     await settle()
@@ -479,10 +479,10 @@ describe("<ui-modal> actions", () => {
     `<ui-modal heading="Sure?"><ui-actions><ui-button class="deny">No</ui-button>` +
     `<ui-button positive>Yes</ui-button></ui-actions></ui-modal>`
 
-  it("approve:  a cancelable ui-approve naming the button, then closes (reason `approve`)", async () => {
+  it("approve:  a cancelable ui-approving naming the button, then closes (reason `approve`)", async () => {
     const { host, dialog } = await modal(ACTIONS)
-    const approves = record<{ action: Element }>(host, "ui-approve")
-    const closes = record(host, "ui-close")
+    const approves = record<{ action: Element }>(host, "ui-approving")
+    const closes = record(host, "ui-closing")
     await open(host)
     await userEvent.click(host.querySelector("[positive]")!)
     await settle()
@@ -492,11 +492,11 @@ describe("<ui-modal> actions", () => {
     expect(dialog.open).toBe(false)
   })
 
-  it("deny:  ui-deny, then closes;  a vetoed one keeps it open", async () => {
+  it("deny:  ui-denying, then closes;  a vetoed one keeps it open", async () => {
     const { host, dialog } = await modal(ACTIONS)
-    const denies = record(host, "ui-deny")
+    const denies = record(host, "ui-denying")
     let veto = true
-    host.addEventListener("ui-deny", (event) => veto && event.preventDefault())
+    host.addEventListener("ui-denying", (event) => veto && event.preventDefault())
     await open(host)
     await userEvent.click(host.querySelector(".deny")!)
     await settle()
@@ -534,7 +534,7 @@ describe("<ui-modal> accessibility", () => {
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="m" command="--show">Show</button>`)
     const show = wrapper.querySelector<HTMLButtonElement>("#show")!
     show.focus()
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opened")
     await userEvent.keyboard("{Enter}")
     await settle()
     await shown

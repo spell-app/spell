@@ -200,7 +200,7 @@ export const menuVocabulary = {
   ],
   events: [
     {
-      name: "ui-select",
+      name: "ui-choosing",
       detail: "{ value: string, item: Element, originalEvent?: Event }",
       cancelable: true,
       description:

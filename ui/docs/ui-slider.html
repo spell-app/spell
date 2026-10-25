@@ -449,7 +449,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-input` fires on every move (Fomantic's `onMove`) and `ui-change` when a key press or a drag ends (its
+                  `ui-input` fires on every move (Fomantic's `onMove`) and `ui-changed` when a key press or a drag ends (its
                   `onChange`), both with `{ value, end }`. Setting `value` inside a `ui-input` handler wins, so you can clamp or
                   reject a move. `step-labels` is also a property:
                 </script>
@@ -458,7 +458,7 @@
                 <script type="text/plain">
                   const size = document.querySelector("#size") // <ui-slider id="size" labeled max="4" aria-label="Size">
                   size.stepLabels = ["XS", "S", "M", "L", "XL"]
-                  size.addEventListener("ui-change", (event) => console.log(event.detail.value))
+                  size.addEventListener("ui-changed", (event) => console.log(event.detail.value))
                 </script>
               </ui-code>
             </ui-section>
@@ -533,7 +533,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `value` / `end` are plain attributes and `stepLabels` a property; listen for `ui-input` or `ui-change`.
+                  `value` / `end` are plain attributes and `stepLabels` a property; listen for `ui-input` or `ui-changed`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -558,7 +558,7 @@
                     max="10"
                     value={volume()}
                     stepLabels={labels}
-                    on-ui-input={(event) => setVolume(event.detail.value)}
+                    on-ui-moved={(event) => setVolume(event.detail.value)}
                   />
                 </script>
               </ui-code>

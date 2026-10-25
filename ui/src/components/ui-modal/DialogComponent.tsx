@@ -21,31 +21,31 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  *
  * - Every dialog vocabulary MUST name (each family's tests check it;  types can't):
  *   - attributes `closable`, `closedby`, `heading`, `content`
- *   - events `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`
+ *   - events `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`
  *   - parts `rootPart`, `header`, `content`, `close`;  text `close`.
  *
  * - Shown by the shared `visible` / `hidden` (`UIComponent`, "Shown or hidden"), starting hidden
  *   (`elementSetup.visible`):  `<ui-modal visible>`, `modal.visible = true`.
- *   - Controlled (`isVisible`):  a person's `ui-open` / `ui-close` (with a `reason`) come first and can veto;
- *     `ui-show` / `ui-hide` follow once the transition has finished.
+ *   - Controlled (`isVisible`):  a person's `ui-opening` / `ui-closing` (with a `reason`) come first and can veto;
+ *     `ui-opened` / `ui-closed` follow once the transition has finished.
  *   - The `<dialog>` opens with `showModal()` and closes with `close()` as `visible` changes (`onVisibleChange()`).
  *
  * - Dismissal, by `closedby` (read when it opens;  `closedBy` says what an absent one means):
  *   - Escape:  through `UI.overlays` (kind `overlayKind`:  scroll lock, keyboard scope, focus restore),
- *     so only the topmost overlay closes, and `ui-close` can veto.
+ *     so only the topmost overlay closes, and `ui-closing` can veto.
  *     The dialog's own `cancel` is always prevented.
  *   - A click on the `::backdrop`:  the browser's light dismiss (`<dialog closedby>`)
  *     when `UI.browser.supports.dialogClosedBy`, reported as `cancel`;
  *     else `UI.overlays`' outside click, which tells a backdrop click from one on the dialog by where the pointer is.
  *   - A close the browser forces anyway (a repeated Escape it won't let a page veto) is followed:
- *     a `ui-close` that can't veto, then `visible` off.
+ *     a `ui-closing` that can't veto, then `visible` off.
  *
- * - Opening as a PERSON'S action, so `ui-open` fires:
+ * - Opening as a PERSON'S action, so `ui-opening` fires:
  *   an invoker command, `<button commandfor="id" command="--show">`
  *   (`ToggleCommands`;  `--close` closes, `--toggle` flips).
  *   Writing `visible` (or `hidden`) is the app's own decision, and fires nothing.
  *
- * - Buttons:  a click on an approve / deny element fires the cancelable `ui-approve` / `ui-deny`, then closes.
+ * - Buttons:  a click on an approve / deny element fires the cancelable `ui-approving` / `ui-denying`, then closes.
  *   - Those elements (`ModalActionSelectors`):
  *     Fomantic's `.approve` / `.deny` classes, `<ui-button positive / negative>`.
  *   - The `closable` icon closes (reason `close`).
@@ -118,7 +118,7 @@ export abstract class DialogComponent<
   /** Fomantic's class word on the `<dialog>` while it shows:  `active` (a modal), `visible` (a flyout). */
   declare shownClass: string
 
-  /** Bumped on every show / hide, so a late `ui-show` / `ui-hide` of an earlier one is dropped. */
+  /** Bumped on every show / hide, so a late `ui-opened` / `ui-closed` of an earlier one is dropped. */
   private generation = 0
 
   /** Fomantic's shown class (`shownClass`), just before the noun while `visible`. */
@@ -126,32 +126,32 @@ export abstract class DialogComponent<
     return this.isVisible ? this.shownClass : undefined
   }
 
-  /** Show, dispatching the cancelable `ui-open` first;  true when applied. */
+  /** Show, dispatching the cancelable `ui-opening` first;  true when applied. */
   @E.untracked
   requestOpen(originalEvent?: Event): boolean {
     if (this.isVisible) return false
     const detail: UIT.ModalOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.fire("ui-open", detail))
+    return this.requestChange("isVisible", true, () => this.fire("ui-opening", detail))
   }
 
-  /** Hide for `reason`, dispatching the cancelable `ui-close` first;  true when applied. */
+  /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
   @E.untracked
   requestClose(reason: UIT.ModalCloseReason, originalEvent?: Event): boolean {
     if (!this.isVisible) return false
     this.isDismissing = true
     E.soon(() => (this.isDismissing = false))
     const detail: UIT.ModalCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.fire("ui-close", detail))
+    return this.requestChange("isVisible", false, () => this.fire("ui-closing", detail))
   }
 
   /**
    * `visible` changed (`UIComponent`'s hook):  open or close the `<dialog>`;
-   * resolves once its transition has ended, with `ui-show` / `ui-hide`.
+   * resolves once its transition has ended, with `ui-opened` / `ui-closed`.
    * - `animation`:
    *   - the family's own (`elementSetup.animation`):  the sheet's transition (`UIModal.css`, `UIFlyout.css`)
    *   - another one (the element's own `animation`):  run on the `<dialog>` through `UI.transitions`
    *   - `none`:  at once (motion off, or the element's first draw)
-   * - `ui-hide` only when it was shown:  a modal that starts hidden fires nothing.
+   * - `ui-closed` only when it was shown:  a modal that starts hidden fires nothing.
    */
   protected async onVisibleChange(visible: boolean, animation: UIT.Animation): Promise<void> {
     const dialog = this.dialog
@@ -161,7 +161,7 @@ export abstract class DialogComponent<
       this.show()
       if (keyframes) await UI.transitions.animate({ element: dialog, name: keyframes, direction: UIT.IN })
       const detail: UIT.ModalOpenDetail = { visible: true }
-      if ((await this.transitionsEnd()) && this.isVisible) this.fire("ui-show", detail)
+      if ((await this.transitionsEnd()) && this.isVisible) this.fire("ui-opened", detail)
       return
     }
     const wasShown = UI.overlays.isOpen(this.overlayEntry)
@@ -171,7 +171,7 @@ export abstract class DialogComponent<
     this.hide()
     const detail: UIT.ModalOpenDetail = { visible: false }
     if (!wasShown || !(await this.transitionsEnd())) return
-    if (!this.isVisible && this.domElement.isConnected) this.fire("ui-hide", detail)
+    if (!this.isVisible && this.domElement.isConnected) this.fire("ui-closed", detail)
   }
 
   /**
@@ -278,7 +278,7 @@ export abstract class DialogComponent<
 
   /**
    * The dialog's `cancel`:  Escape the overlay didn't take, or the browser's light dismiss (`closedby`).
-   * - Always prevented;  the element decides, by `closedby`, and `ui-close` may veto.
+   * - Always prevented;  the element decides, by `closedby`, and `ui-closing` may veto.
    */
   private readonly onCancel = (event: Event) => {
     event.preventDefault()
@@ -299,7 +299,7 @@ export abstract class DialogComponent<
   private readonly onClose = (event: Event) => {
     if (this.dialog?.open || !this.domElement.isConnected || !this.isVisible) return
     const detail: UIT.ModalCloseDetail = { visible: false, reason: "escape", originalEvent: event }
-    this.fire("ui-close", detail)
+    this.fire("ui-closing", detail)
     this.isVisible = false
   }
 
@@ -333,7 +333,7 @@ export abstract class DialogComponent<
     if (!found) return
     const [kind, action] = found
     const detail: UIT.ModalActionDetail = { action, originalEvent: event }
-    if (!this.fire(kind === "approve" ? "ui-approve" : "ui-deny", detail)) return
+    if (!this.fire(kind === "approve" ? "ui-approving" : "ui-denying", detail)) return
     this.requestClose(kind, event)
   }
 

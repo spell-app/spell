@@ -199,7 +199,7 @@ export const FALLBACK_CASES: readonly FallbackCase[] = [
     }
   },
   {
-    name: "the fallback select changes the DOM element's form value and fires ui-change",
+    name: "the fallback select changes the DOM element's form value and fires ui-changed",
     async run(adapter) {
       const container = await adapter.mount(
         `<form><ui-dropdown name="fruit" selection placeholder="Fruit">` +
@@ -209,7 +209,7 @@ export const FALLBACK_CASES: readonly FallbackCase[] = [
       const form = container.querySelector("form")!
       const host = container.querySelector<HTMLElement & { value?: unknown }>("ui-dropdown")!
       const changes: unknown[] = []
-      host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent).detail.value))
+      host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent).detail.value))
       await captureErrors(() => adapter.breakRender(host))
       const select = host.shadowRoot!.querySelector<HTMLSelectElement>("select[part~=trigger]")!
       check(!!select, "a native <select part=trigger>")
@@ -221,7 +221,7 @@ export const FALLBACK_CASES: readonly FallbackCase[] = [
         new FormData(form).get("fruit") === "c",
         `the form value follows, got ${JSON.stringify(new FormData(form).get("fruit"))}`
       )
-      check(changes.length === 1 && changes[0] === "c", `one ui-change with "c", got ${JSON.stringify(changes)}`)
+      check(changes.length === 1 && changes[0] === "c", `one ui-changed with "c", got ${JSON.stringify(changes)}`)
       check(host.value === "c", `host.value follows, got ${JSON.stringify(host.value)}`)
     }
   },

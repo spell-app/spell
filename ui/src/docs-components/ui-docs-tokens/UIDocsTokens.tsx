@@ -37,7 +37,7 @@ import tokensCSS from "./UIDocsTokens.css?inline"
  *     or on `:root` with `target="page"`.
  *   - The swatches follow.
  *   - An empty input removes the token.
- * - Events:  the inner `<ui-input>`s' `ui-input` / `ui-change` stop here;
+ * - Events:  the inner `<ui-input>`s' `ui-input` / `ui-changed` stop here;
  *   the element's own `ui-input` (`{ token, value }`) and `ui-reset` (`{ tokens }`) say what the playground did.
  * - Phone width:  every table is `stackable` by its OWN width
  *   (the sheet sets `--ui-table-stack-by: container` on the DOM element),
@@ -213,8 +213,8 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
    * - Both stop here:  outside, `ui-input` from this DOM element is its own (`{ token, value }`).
    */
   private takeInnerEvents(section: HTMLElement): void {
-    section.addEventListener("ui-input", (event) => this.onInput(event as CustomEvent<{ value: string }>))
-    section.addEventListener("ui-change", (event) => event.stopPropagation())
+    section.addEventListener("ui-typed", (event) => this.onInput(event as CustomEvent<{ value: string }>))
+    section.addEventListener("ui-changed", (event) => event.stopPropagation())
   }
 
   /** An inner `<ui-input>` changed. */
@@ -232,7 +232,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
     if (value.trim()) next.set(token, value.trim())
     else next.delete(token)
     this.overrides = next
-    this.send("ui-input", { token, value: value.trim(), originalEvent: event })
+    this.send("ui-changed", { token, value: value.trim(), originalEvent: event })
   }
 
   /**

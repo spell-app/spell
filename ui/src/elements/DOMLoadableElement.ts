@@ -48,7 +48,7 @@ export class DOMLoadableElement<C extends LoadableComponentType = LoadableCompon
 
   /**
    * Show `text` instead of the source's, until `source` changes or `reload()`.
-   * - `dirty` until saved;  sends `ui-change`.
+   * - `dirty` until saved;  sends `ui-changed`.
    * - Before the component exists:  kept, and shown once it does.
    */
   set content(text: string) {

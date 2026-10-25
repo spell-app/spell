@@ -71,9 +71,16 @@ export const iconPickerVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changing",
       detail: "{ value: string, originalEvent?: Event }",
-      description: 'An icon was picked (`""` for none).  A handler that re-sets `value` wins.'
+      cancelable: true,
+      description:
+        'An icon was picked (`""` for none);  `preventDefault()` keeps the old one, and a handler that re-sets `value` wins.'
+    },
+    {
+      name: "ui-changed",
+      detail: "{ value: string, originalEvent?: Event }",
+      description: "The icon changed:  after `ui-changing`, unless it was cancelled."
     }
   ],
   slots: [],

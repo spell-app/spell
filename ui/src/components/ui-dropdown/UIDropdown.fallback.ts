@@ -14,7 +14,7 @@ import { dropdownVocabulary } from "./UIDropdown.en"
  * - A single select starts with an empty `<option>` (the `placeholder` text) when nothing is chosen,
  *   so the browser doesn't silently choose the first option.
  * - On `change`:  the form value follows (`FormData` for `multiple`), `domElement.value` is set,
- *   and a composed `ui-change` is sent.
+ *   and a composed `ui-changed` is sent.
  *   The form value is also set on the first render, so the form submits without a change.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
  ****************/
@@ -26,7 +26,7 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
     "multiple-value labels (a native multi-select list)",
     "option `icon` / `image` / `flag` / `description`",
     "keyboard pattern:  the native `<select>`'s, not the combobox listbox",
-    "invoker commands, `ui-open` / `ui-close` / `ui-search` / `ui-add` / `ui-remove`",
+    "invoker commands, `ui-opening` / `ui-closing` / `ui-searched` / `ui-added` / `ui-removed`",
     "`readonly` is a disabled select (the value still submits)"
   ]
 
@@ -174,4 +174,4 @@ const SELECT_PART = "select"
 const DIVIDER = "divider"
 
 /** The event the select's `change` becomes. */
-const CHANGE_EVENT: E.EventName<typeof dropdownVocabulary> = "ui-change"
+const CHANGE_EVENT: E.EventName<typeof dropdownVocabulary> = "ui-changed"

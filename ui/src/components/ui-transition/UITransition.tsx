@@ -21,12 +21,12 @@ import transitionCSS from "./UITransition.css?inline"
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
 export class DOMTransitionElement extends E.DOMElement<UITransition> {
-  /** Animate in (its `animation`), then `ui-show`. */
+  /** Animate in (its `animation`), then `ui-opened`. */
   show(): Promise<boolean> {
     return this.component?.animateTo(true) ?? Promise.resolve(false)
   }
 
-  /** Animate out, then `ui-hide`. */
+  /** Animate out, then `ui-closed`. */
   hide(): Promise<boolean> {
     return this.component?.animateTo(false) ?? Promise.resolve(false)
   }
@@ -67,7 +67,7 @@ export class DOMTransitionElement extends E.DOMElement<UITransition> {
  *   - The same animation twice in a row is dropped unless `allow-repeats`.
  *   - `interrupt` makes a new one stop the running one instead.
  *
- * - `ui-show` / `ui-hide` once an `in` / `out` has run;  `ui-complete` after every animation.
+ * - `ui-opened` / `ui-closed` once an `in` / `out` has run;  `ui-animated` after every animation.
  ****************/
 export class UITransition extends E.UIComponent<typeof transitionVocabulary> {
   @E.proto static vocabulary = transitionVocabulary
@@ -269,15 +269,15 @@ export class UITransition extends E.UIComponent<typeof transitionVocabulary> {
     return UI.transitions.animate({ element: box, name, direction: step.direction, ...this.animateOptions })
   }
 
-  /** `ui-show` / `ui-hide` after an `in` / `out`, then `ui-complete`. */
+  /** `ui-opened` / `ui-closed` after an `in` / `out`, then `ui-animated`. */
   private announce(step: TransitionStep) {
     const detail: UIT.TransitionDetail = {
       visible: step.direction === STATIC ? this.willBeVisible : step.direction === UIT.IN,
       animation: step.animation
     }
-    if (step.direction === UIT.IN) this.send("ui-show", detail)
-    else if (step.direction === UIT.OUT) this.send("ui-hide", detail)
-    this.send("ui-complete", detail)
+    if (step.direction === UIT.IN) this.send("ui-opened", detail)
+    else if (step.direction === UIT.OUT) this.send("ui-closed", detail)
+    this.send("ui-animated", detail)
   }
 
   ////////////////

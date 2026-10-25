@@ -165,9 +165,9 @@ describe("<ui-select> value", () => {
     expect(fromItem.host.value).toBeUndefined()
   })
 
-  it("dispatches ui-change and sets `value` when the user chooses", async () => {
+  it("dispatches ui-changed and sets `value` when the user chooses", async () => {
     const { host, native, shown } = await select(GENDER)
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changed")
     choose(native(), "female")
     await ElementFixture.tick()
     expect(changes).toEqual([expect.objectContaining({ value: "female", originalEvent: expect.any(Event) })])
@@ -186,11 +186,11 @@ describe("<ui-select> value", () => {
     expect(shown()).toBe("Gender")
   })
 
-  it("reverts when the host re-sets the old value in its ui-change handler", async () => {
+  it("reverts when the host re-sets the old value in its ui-changed handler", async () => {
     const { host, native, shown } = await select(GENDER)
     host.value = "male"
     await ElementFixture.tick()
-    host.addEventListener("ui-change", () => (host.value = "male"))
+    host.addEventListener("ui-changed", () => (host.value = "male"))
     choose(native(), "other")
     await ElementFixture.tick()
     expect(host.value).toBe("male")
@@ -217,7 +217,7 @@ describe("<ui-select> keyboard", () => {
     "opens the customizable picker, moves and chooses with the keys (the browser's own pattern)",
     async () => {
       const { host, native, shown } = await select(GENDER)
-      const changes = record(host, "ui-change")
+      const changes = record(host, "ui-changed")
       native().focus()
       await userEvent.keyboard("{ArrowDown}")
       await expect.poll(() => native().matches(":open")).toBe(true)
@@ -254,7 +254,7 @@ describe("<ui-select> multiple", () => {
     expect(native().querySelector("button, option.placeholder")).toBeNull()
     expect(getComputedStyle(native()).appearance).not.toBe("base-select")
     expect([...native().selectedOptions].map((option) => option.value)).toEqual(["css"])
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changed")
     choose(native(), "angular", "html")
     await ElementFixture.tick()
     expect(changes).toEqual([expect.objectContaining({ value: ["angular", "html"] })])

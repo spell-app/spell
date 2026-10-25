@@ -19,7 +19,7 @@ import { Invoker } from "./Invoker"
 export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
   @E.proto static vocabulary = buttonVocabulary
   @E.proto static degraded = [
-    "`ui-toggle` event (toggle only flips `aria-pressed` + `active`)",
+    "`ui-selected` / `ui-deselected` events (toggle only flips `aria-pressed` + `active`)",
     "`icon` glyph and `icon` / `label` slots",
     "joined `label`",
     "`animated`",

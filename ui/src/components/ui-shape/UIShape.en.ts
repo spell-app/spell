@@ -56,7 +56,7 @@ export const shapeVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-animated",
       detail: "{ activeIndex: number, side: Element, flip: ShapeFlip }",
       description: "Another side is shown, its flip finished (Fomantic's `onChange`)."
     }

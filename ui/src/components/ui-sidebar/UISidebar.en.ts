@@ -9,7 +9,7 @@
  *   (`uncover` left / right, `overlay` top / bottom).
  * - `visible` / `hidden` are every element's (`SharedVocabulary`):  a sidebar starts hidden (`elementSetup.visible`).
  *   - The element adds the `visible` class word while it shows.
- *   - `ui-open` / `ui-close` can veto a person's changes.
+ *   - `ui-opening` / `ui-closing` can veto a person's changes.
  * - `position` and `transition` are `kind: "valueOnly"`:  each emits its value alone.
  * - `width` (`kind: "width"`, as `<ui-flyout>`'s) takes Fomantic's sidebar words (`very thin` ... `very wide`),
  *   which the element adds before the noun (`ui left thin sidebar`),
@@ -86,24 +86,24 @@ export const sidebarVocabulary = {
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ visible: true, originalEvent?: Event }",
       cancelable: true,
       description: "About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden."
     },
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ visible: true }",
       description: "Shown, its transition finished (Fomantic's `onVisible`)."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ visible: false, reason: SidebarCloseReason, originalEvent?: Event }",
       cancelable: true,
       description: "About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ visible: false }",
       description: "Hidden, its transition finished (Fomantic's `onHidden`)."
     }

@@ -63,7 +63,7 @@ export const docsThemesVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ theme?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
       description:
         "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name, absent for our own look;  " +

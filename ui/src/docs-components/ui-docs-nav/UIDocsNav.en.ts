@@ -45,7 +45,7 @@ export const docsNavVocabulary = {
       values: ["az", "topics"],
       description:
         "Components A-Z, or grouped by `topics` (a tag sits under each of its topics).  The switch sets it " +
-        "(reflected, `ui-change`) and the viewer's choice is remembered;  set in markup, it wins.  Default:  the " +
+        "(reflected, `ui-changed`) and the viewer's choice is remembered;  set in markup, it wins.  Default:  the " +
         "remembered one, else `topics`."
     },
     {
@@ -56,7 +56,7 @@ export const docsNavVocabulary = {
   ],
   events: [
     {
-      name: "ui-navigate",
+      name: "ui-navigating",
       detail: "{ href: string, page: string, originalEvent: Event }",
       cancelable: true,
       description:
@@ -64,12 +64,12 @@ export const docsNavVocabulary = {
         "`preventDefault()` keeps the browser on the page (a router takes over)."
     },
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ view: 'az' | 'topics', originalEvent?: Event }",
       description: "The viewer switched between A-Z and Topics."
     },
     {
-      name: "ui-favorite",
+      name: "ui-starred",
       detail: "{ tag: string, favorite: boolean, favorites: string[], originalEvent?: Event }",
       description: "The viewer starred or un-starred a component;  `favorites` is the whole list, A-Z."
     }

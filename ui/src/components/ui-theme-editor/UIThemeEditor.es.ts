@@ -2,7 +2,7 @@ import type { E } from "spell-ui/core"
 
 /**
  * `<ui-theme-editor>` in Spanish:  `<es-editor-temas>`, with the names and texts only it uses (from `UIThemeEditor.en.ts`).
- * - The names it shares with other tags (`ui-change`, `ui-save` ...) are translated once, for every tag:
+ * - The names it shares with other tags (`ui-changed`, `ui-saved` ...) are translated once, for every tag:
  *   in `components.es.ts`, with the values every tag shares.
  * - Names stay ASCII (no accents):  tags and attributes are typed, and a tag can't hold every letter safely.
  */
@@ -12,7 +12,7 @@ export const themeEditorEs = {
   name: "editor-temas",
   aka: ["editor de temas", "creador de temas", "generador de temas", "editor de estilos"],
   attributes: { base: "base" },
-  events: { "ui-copy": "copiar" },
+  events: { "ui-copied": "copiado" },
   parts: { editor: "editor", inspector: "inspector", preview: "vista-previa", sheet: "hoja" },
   texts: {
     theme: "Tema",

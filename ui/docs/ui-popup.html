@@ -833,8 +833,8 @@
                   or hides the popup and fires nothing. A popup starts hidden. The user's own changes (the trigger, an
                   invoker command) dispatch the cancelable events first.
 
-                  - `ui-open` -- about to show; `detail` is `{ visible: true, originalEvent? }`. `preventDefault()` keeps it hidden.
-                  - `ui-close` -- about to hide; `detail` is `{ visible: false, originalEvent? }`. `preventDefault()` keeps it shown,
+                  - `ui-opening` -- about to show; `detail` is `{ visible: true, originalEvent? }`. `preventDefault()` keeps it hidden.
+                  - `ui-closing` -- about to hide; `detail` is `{ visible: false, originalEvent? }`. `preventDefault()` keeps it shown,
                     except when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
                 </script>
               </ui-markdown>
@@ -842,7 +842,7 @@
                 <script type="text/plain">
                   const popup = document.querySelector("ui-popup")
                   popup.target = document.querySelector("#avatar") // wins over `for`
-                  popup.addEventListener("ui-close", (event) => {
+                  popup.addEventListener("ui-closing", (event) => {
                     if (form.dirty) event.preventDefault() // keep it shown
                   })
                   popup.visible = true // show it from code:  no event
@@ -850,8 +850,8 @@
               </ui-code>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's behaviors (show, hide, toggle, reposition ...) and callbacks (onShow, onHidden
-                ...):  write <code>visible</code> instead. Listen for <code>ui-open</code> /
-                <code>ui-close</code>.</ui-message
+                ...):  write <code>visible</code> instead. Listen for <code>ui-opening</code> /
+                <code>ui-closing</code>.</ui-message
               >
             </ui-section>
 
@@ -908,7 +908,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Set `target` as a property when the target is not a sibling or an id, and listen for `ui-open` / `ui-close`.
+                  Set `target` as a property when the target is not a sibling or an id, and listen for `ui-opening` / `ui-closing`.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -923,7 +923,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-popup :target="anchorEl" open-on="click" heading="Share" @ui-close="open = false">...</ui-popup>
+                  <ui-popup :target="anchorEl" open-on="click" heading="Share" @ui-closing="open = false">...</ui-popup>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -933,8 +933,8 @@
                   <ui-popup
                     target={anchorEl}
                     open-on="click"
-                    heading="Share"
-                    on-ui-close={() => setOpen(false)}
+                    header="Share"
+                    on-ui-closing={() => setOpen(false)}
                   >
                     ...
                   </ui-popup>

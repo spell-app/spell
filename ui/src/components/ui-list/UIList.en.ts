@@ -93,7 +93,7 @@ export const listVocabulary = {
   ],
   events: [
     {
-      name: "ui-select",
+      name: "ui-chosen",
       detail: "{ value: string, item: Element, originalEvent?: Event }",
       description:
         "An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / " +

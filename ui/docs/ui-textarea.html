@@ -195,7 +195,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-input` fires on every keystroke, with `event.detail.value`.
-                  - `ui-change` fires when the user commits: when the field loses focus after an edit.
+                  - `ui-changed` fires when the user commits: when the field loses focus after an edit.
                   - Setting `value` from a `ui-input` handler wins over what was typed, so a handler can reformat or reject input.
                 </script>
               </ui-markdown>
@@ -204,7 +204,7 @@
                   const bio = document.querySelector("ui-textarea[name=bio]")
                   bio.rules = ["notEmpty", "maxLength[280]"]
                   bio.addEventListener("ui-input", (event) => console.log(280 - event.detail.value.length, "left"))
-                  bio.addEventListener("ui-change", (event) => console.log(event.detail.value, bio.validity.valid))
+                  bio.addEventListener("ui-changed", (event) => console.log(event.detail.value, bio.validity.valid))
                 </script>
               </ui-code>
             </ui-section>
@@ -230,7 +230,7 @@
                   - A field that fails validation after the user has touched it gets `aria-invalid="true"`; a `<ui-form>` marks
                     failing fields the same way.
                   - If the element fails to render, its native fallback keeps the same box with a plain native
-                    `<textarea>`: it still submits, validates its native constraints and fires `ui-input` / `ui-change`.
+                    `<textarea>`: it still submits, validates its native constraints and fires `ui-input` / `ui-changed`.
                     It drops `rules`, the invalid state, reset to the starting value, and naming through `<label for>`
                     (only `aria-label` or `placeholder` name the control).
                 </script>
@@ -264,7 +264,7 @@
                     name="bio"
                     rows="4"
                     value={bio()}
-                    on-ui-input={(e) => setBio(e.detail.value)}
+                    on-ui-typed={(e) => setBio(e.detail.value)}
                   />
                 </script>
               </ui-code>

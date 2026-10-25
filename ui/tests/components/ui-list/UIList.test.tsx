@@ -55,7 +55,7 @@ function style(element: Element, pseudo?: string): CSSStyleDeclaration {
 /** Record `ui-select` events reaching `host` (including a sub-list's, bubbling through). */
 function selections(host: Element): CustomEvent<ListSelectDetail>[] {
   const events: CustomEvent<ListSelectDetail>[] = []
-  host.addEventListener("ui-select", (event) => events.push(event as CustomEvent<ListSelectDetail>))
+  host.addEventListener("ui-chosen", (event) => events.push(event as CustomEvent<ListSelectDetail>))
   return events
 }
 

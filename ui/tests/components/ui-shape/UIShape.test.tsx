@@ -40,10 +40,10 @@ function shown(sides: readonly Element[]): boolean[] {
   return sides.map((side) => getComputedStyle(side).display !== "none")
 }
 
-/** Collect `ui-change` details. */
+/** Collect `ui-animated` details. */
 function changes(target: EventTarget) {
   const details: ShapeChangeDetail[] = []
-  target.addEventListener("ui-change", (event) => details.push((event as CustomEvent<ShapeChangeDetail>).detail))
+  target.addEventListener("ui-animated", (event) => details.push((event as CustomEvent<ShapeChangeDetail>).detail))
   return details
 }
 
@@ -122,7 +122,7 @@ describe("<ui-shape> classes and markup", () => {
 ////////////////
 
 describe("<ui-shape> flipping", () => {
-  it("next() turns the sides box, then shows the next side and fires ui-change", async () => {
+  it("next() turns the sides box, then shows the next side and fires ui-animated", async () => {
     const { host, box, sides } = await shape(`<ui-shape>${SIDES}</ui-shape>`)
     const details = changes(host)
     const done = host.next()
@@ -176,7 +176,7 @@ describe("<ui-shape> flipping", () => {
     expect(shown(sides)).toEqual([false, false, true])
   })
 
-  it("reduced motion:  an instant swap, ui-change all the same", async () => {
+  it("reduced motion:  an instant swap, ui-animated all the same", async () => {
     Object.defineProperty(UI.browser, "isReducedMotion", { value: true, configurable: true })
     const { host, box, sides } = await shape(`<ui-shape>${SIDES}</ui-shape>`)
     const details = changes(host)

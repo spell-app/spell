@@ -21,7 +21,7 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
  *   - `ClassBuilder` writes no class for a string attribute, so the `image` class is added by hand.
  *
  * - `removable`:  a real `<button class="delete icon">`, named by the `remove` text.
- *   A click sends the cancelable `ui-remove`:  the label never removes itself, the page does.
+ *   A click sends the cancelable `ui-removing`:  the label never removes itself, the page does.
  *
  * - Inside a statistic (an owner of `label`, through `PartContext`), it is that statistic's `.label` PART:
  *   it draws `<div class="label" part="label">`, adopts `UIParts.css` after `UILabel.css`
@@ -155,7 +155,7 @@ export class UILabel extends E.UIComponent<typeof labelVocabulary> {
   private readonly onRemove = (event: MouseEvent) => {
     event.preventDefault()
     event.stopPropagation()
-    this.send("ui-remove", { originalEvent: event })
+    this.send("ui-removing", { originalEvent: event })
   }
 }
 

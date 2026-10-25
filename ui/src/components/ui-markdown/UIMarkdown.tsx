@@ -14,7 +14,7 @@ import markdownCSS from "./UIMarkdown.css?inline"
  * The DOM element of `<ui-markdown>`:  it adds `headings` and `reveal()`
  * to the source API it inherits from `DOMLoadableElement` (`content`, `save()` ...).
  * - `headings`:  `{ level, text, id }` of each heading of the last render, e.g. for a table of contents;
- *   `[]` before the first (`ui-render` says when).
+ *   `[]` before the first (`ui-drawn` says when).
  * - `reveal(id)`:  scroll to one of them from outside.
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
@@ -45,7 +45,7 @@ export class DOMMarkdownElement extends E.DOMLoadableElement<UIMarkdown> {
  * - The text:  the element's own (`<script type="text/markdown">` keeps it exact),
  *   or a `source` file (see `LoadableComponent`).
  * - Rendering:  marked, loaded with the first render (`MarkdownRenderer` -> `MarkdownEngine`, the lazy chunk).
- *   Headings get GitHub's ids (`headings`, `ui-render`).
+ *   Headings get GitHub's ids (`headings`, `ui-drawn`).
  *   - A subclass may draw with an engine of its own (`loadEngine()`):
  *     the app's `<spell-markdown>` draws with spell's, in `ui-*` elements.
  * - NOT sanitized unless `sanitized`:  raw HTML in the text is kept.
@@ -63,7 +63,7 @@ export class DOMMarkdownElement extends E.DOMLoadableElement<UIMarkdown> {
  * - A failed render (an engine that won't load) is a `render` error, with its message.
  * - `editable`:  Write / Preview tabs (`role=tablist`, arrow keys), a `<textarea>` for the text,
  *   and the article as the preview, drawn by the same engine.
- *   - each keystroke sets `content`:  `ui-change`, `:state(dirty)`, and `save()` writes it back to `source`
+ *   - each keystroke sets `content`:  `ui-changed`, `:state(dirty)`, and `save()` writes it back to `source`
  *   - the preview renders while it's shown:  the WHOLE text each time (~2 ms for 32 kB),
  *     then swaps only the top-level blocks whose markup changed (`patchBody()`),
  *     so unchanged elements keep their state (a highlighted `<ui-code>`, a scrolled table).
@@ -209,7 +209,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     if (this.textBox && this.textBox.value !== text) this.textBox.value = text
   }
 
-  /** `editable`:  each keystroke is an edit (`ui-change`, `dirty`). */
+  /** `editable`:  each keystroke is an edit (`ui-changed`, `dirty`). */
   private readonly onInput = (event: InputEvent) => {
     this.content = (event.currentTarget as HTMLTextAreaElement).value
   }
@@ -286,7 +286,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   }
 
   /**
-   * Render `text` into the article;  `ui-render` when done.
+   * Render `text` into the article;  `ui-drawn` when done.
    * - `isEditable`:  the markup patched in (`patchBody()`), so unchanged blocks keep their state.
    */
   private async renderMarkdown({ text, options, isEditable }: RenderParams) {
@@ -308,7 +308,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
       if (isEditable) this.patchBody(this.body, fragment)
       else this.body.replaceChildren(fragment)
       this.headings = headings
-      this.send("ui-render", { headings })
+      this.send("ui-drawn", { headings })
       if (!this.hasRendered) {
         this.hasRendered = true
         this.onHashChange()

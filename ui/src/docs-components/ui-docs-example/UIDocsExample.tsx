@@ -28,7 +28,7 @@ import exampleCSS from "./UIDocsExample.css?inline"
  * - A `<template>` child is also stamped out live, once, right after it
  *   (on a microtask:  never inside this render, so the stamped elements upgrade under their own owners).
  * - `code` is the open state (auto-controlled, reflected):
- *   the button flips it and fires `ui-toggle { open }`;  `:state(open)` follows it.
+ *   the button flips it and fires `ui-opened` / `ui-closed` (`{ open }`);  `:state(open)` follows it.
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
  *   which its barrel imports.
  ****************/
@@ -83,7 +83,9 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   /** Open or close the code pane, as the viewer did with `event`. */
   toggle(event?: Event): void {
     const next = !this.isCodeOpen
-    this.requestChange("isCodeOpen", next, () => this.send("ui-toggle", { open: next, originalEvent: event }))
+    this.requestChange("isCodeOpen", next, () =>
+      this.send(next ? "ui-opened" : "ui-closed", { open: next, originalEvent: event })
+    )
   }
 
   /** The code button's name:  what a click does. */

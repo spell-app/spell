@@ -631,7 +631,7 @@ describe("<ui-menu> ui-select", () => {
   /** Collect `ui-select` details from `host`. */
   function selections(host: Element) {
     const details: { value: string; item: Element; originalEvent?: Event }[] = []
-    host.addEventListener("ui-select", (event) => details.push((event as CustomEvent).detail))
+    host.addEventListener("ui-choosing", (event) => details.push((event as CustomEvent).detail))
     return details
   }
 
@@ -750,7 +750,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
     const chosen = () => items.map((item) => item.matches(":state(selected)"))
     await userEvent.click(boxOf(items[2]!))
     await expect.poll(chosen).toEqual([false, false, true])
-    host.addEventListener("ui-select", (event) => event.preventDefault(), { once: true })
+    host.addEventListener("ui-choosing", (event) => event.preventDefault(), { once: true })
     await userEvent.click(boxOf(items[0]!))
     await ElementFixture.settle()
     expect(chosen()).toEqual([false, false, true])

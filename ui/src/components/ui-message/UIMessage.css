@@ -41,7 +41,7 @@
  * - Colours:  `color` (hues) and `state` (`positive negative error info success warning`) are both remaps
  *   (`colors.css`);  one rule set reads `--ui-color-background` / `-text` / `-header` / `-border`.
  *
- * - Dismissing:  the close button sends the cancelable `ui-dismiss`.
+ * - Dismissing:  the close button sends the cancelable `ui-closing`.
  *   Unless it's cancelled, the element HIDES itself (`hidden`) rather than removing itself:
  *   a framework that drew the node still owns it, and a handler can remove it.
  *

@@ -164,21 +164,21 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-highlight` -- coloured: `{ language, detected }`, `language` `undefined` for plain text, `detected` when it
+                  - `ui-coloured` -- coloured: `{ language, detected }`, `language` `undefined` for plain text, `detected` when it
                     was guessed.
-                  - `ui-copy` -- the copy button copied `{ content }`.
-                  - `ui-load` -- the text arrived, from `source` or the element's own content: `{ source, content }`.
+                  - `ui-copied` -- the copy button copied `{ content }`.
+                  - `ui-loaded` -- the text arrived, from `source` or the element's own content: `{ source, content }`.
                   - `ui-error` (cancelable) -- loading or colouring failed: `{ kind, source, error }`. Cancel it to skip the error
                     message.
-                  - `ui-change`, `ui-save`, `ui-saved` -- editing and saving, shared with `<ui-markdown>` and `<ui-include>` (see
+                  - `ui-changed`, `ui-saving`, `ui-saved` -- editing and saving, shared with `<ui-markdown>` and `<ui-include>` (see
                     Include's Usage tab).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const code = document.querySelector("ui-code")
-                  code.addEventListener("ui-highlight", (event) => console.log(event.detail.language, event.detail.detected))
-                  code.addEventListener("ui-copy", (event) => console.log("copied", event.detail.content.length, "characters"))
+                  code.addEventListener("ui-coloured", (event) => console.log(event.detail.language, event.detail.detected))
+                  code.addEventListener("ui-copied", (event) => console.log("copied", event.detail.content.length, "characters"))
                 </script>
               </ui-code>
             </ui-section>

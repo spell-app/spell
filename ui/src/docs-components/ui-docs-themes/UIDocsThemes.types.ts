@@ -24,7 +24,7 @@ export type DocsThemesText = (key: DocsThemesTextKey, params?: Record<string, st
 /** `show`:  which controls render. */
 export type DocsThemesShow = "both" | "theme" | "scheme"
 
-/** `ui-change`'s detail. */
+/** `ui-changed`'s detail. */
 export type DocsThemesChange = {
   /** a `UI.themes` name;  absent:  our own look */
   theme?: string

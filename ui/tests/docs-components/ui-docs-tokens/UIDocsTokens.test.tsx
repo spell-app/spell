@@ -267,7 +267,7 @@ describe("<ui-docs-tokens global>", () => {
   it("filters rows with its search input;  the input's own events stay inside", async () => {
     const host = await render(`<ui-docs-tokens global></ui-docs-tokens>`)
     const outside: Event[] = []
-    host.addEventListener("ui-input", (event) => outside.push(event))
+    host.addEventListener("ui-changed", (event) => outside.push(event))
     const search = host.shadowRoot!.querySelector("[part~=search]")!
     await type(search, "BLUE")
     expect(tablesOf(host).map(namesOf)).toEqual([["--ui-blue"]])
@@ -316,7 +316,7 @@ describe("<ui-docs-tokens playground>", () => {
   it("sets a typed token on the preview (the children inherit it), says so, and resets", async () => {
     const host = await playground()
     const events: unknown[] = []
-    host.addEventListener("ui-input", (event) => events.push((event as CustomEvent).detail))
+    host.addEventListener("ui-changed", (event) => events.push((event as CustomEvent).detail))
     host.addEventListener("ui-reset", (event) => events.push((event as CustomEvent).detail))
     const sample = host.querySelector(".sample")!
     const input = rowOf(host, "--x-button-radius").querySelector("[part~=input]")!

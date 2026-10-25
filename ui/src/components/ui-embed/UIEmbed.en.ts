@@ -101,12 +101,12 @@ export const embedVocabulary = {
       group: "states",
       kind: "keyOnly",
       description:
-        "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-activate` first."
+        "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-loading` first."
     }
   ],
   events: [
     {
-      name: "ui-activate",
+      name: "ui-loading",
       detail: "{ url: string, originalEvent?: Event }",
       cancelable: true,
       description:

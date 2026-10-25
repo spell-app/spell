@@ -84,7 +84,7 @@ export const buttonVocabulary = {
       name: "toggle",
       group: "appearance",
       kind: "keyOnly",
-      description: "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`."
+      description: "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
     },
     {
       name: "active",
@@ -260,9 +260,14 @@ export const buttonVocabulary = {
   ],
   events: [
     {
-      name: "ui-toggle",
-      detail: "{ active: boolean, originalEvent?: Event }",
-      description: "A `toggle` button flipped its `active` state.  NOTE: plain clicks are the native `click`."
+      name: "ui-selected",
+      detail: "{ active: true, originalEvent?: Event }",
+      description: "A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`."
+    },
+    {
+      name: "ui-deselected",
+      detail: "{ active: false, originalEvent?: Event }",
+      description: "A `toggle` button turned `active` off."
     }
   ],
   slots: [

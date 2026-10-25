@@ -82,14 +82,14 @@
                     Take it off the page and the page's own theme comes back.
                   - `value` starts it from a theme you made before (`{"primary": "pink", "corners": "soft"}`);
                     `base` from another base.
-                  - Events:  `ui-change` (`{ value, css }`) on every choice, `ui-copy` from Copy CSS,
-                    `ui-save` from Use this theme and Stop using.
+                  - Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` from Copy CSS,
+                    `ui-saved` from Use this theme and Stop using.
                   - Script:  `el.theme` (every choice now), `el.css` (the stylesheet).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  document.querySelector("ui-theme-editor").addEventListener("ui-change", (event) => {
+                  document.querySelector("ui-theme-editor").addEventListener("ui-changed", (event) => {
                     console.log(event.detail.value.primary, event.detail.css)
                   })
                 </script>

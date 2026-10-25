@@ -383,7 +383,7 @@
                 <script type="text/markdown">
                   - With no script, from a native `<button commandfor="id" command="--show">` or a `<ui-button>` (an invoker
                     command; Fomantic's `attach events`). `--close` closes it and `--toggle` flips it (Fomantic's `toggle`).
-                  - From code, write `open` (which fires no `ui-open` / `ui-close`).
+                  - From code, write `open` (which fires no `ui-opening` / `ui-closing`).
 
                   `closedby` says what dismisses it: `any` (the default: **Escape** or a click on the dimmer), `closerequest`
                   (**Escape** only) or `none` (only its own buttons). `closable` adds the close icon; `closable="false"` is also
@@ -440,26 +440,26 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Buttons inside act by Fomantic's classes: `approve` / `ok` / `positive` approve, `deny` / `cancel` / `negative`
-                  deny, each first dispatching the cancelable `ui-approve` / `ui-deny` (`{ action, originalEvent? }`).
+                  deny, each first dispatching the cancelable `ui-approving` / `ui-denying` (`{ action, originalEvent? }`).
 
                   `visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
                   or hides the flyout and fires nothing. A flyout starts hidden.
 
-                  - `ui-open` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
+                  - `ui-opening` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
                     `{ visible: true, originalEvent? }`.
-                  - `ui-close` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
+                  - `ui-closing` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
                     `reason` is `escape`, `outside`, `close`, `approve`, `deny` or `close-all`.
-                  - `ui-show` / `ui-hide` -- shown or hidden, once the slide has finished (Fomantic's `onVisible` / `onHidden`).
+                  - `ui-opened` / `ui-closed` -- shown or hidden, once the slide has finished (Fomantic's `onVisible` / `onHidden`).
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const help = document.querySelector("#help")
-                  help.addEventListener("ui-approve", (event) => {
+                  help.addEventListener("ui-approving", (event) => {
                     if (!form.checkValidity()) event.preventDefault() // stay shown
                   })
-                  help.addEventListener("ui-close", (event) => console.log(event.detail.reason))
-                  help.visible = true // show from code:  no ui-open
+                  help.addEventListener("ui-closing", (event) => console.log(event.detail.reason))
+                  help.visible = true // show from code:  no ui-opening
                 </script>
               </ui-code>
               <ui-message size="small" class="site-not-ported"
@@ -491,7 +491,7 @@
                   - **Escape** closes it unless `closedby="none"`; with `none`, make sure a button inside closes it.
                   - If the element fails to render, there's no dialog: it shows its children through a bare `<slot>`, in
                     the page where they're written rather than over it, so nothing traps focus, dims the page or closes
-                    on Escape. `open`, invoker commands, the `ui-open` / `ui-close` vetoes and the slide go.
+                    on Escape. `open`, invoker commands, the `ui-opening` / `ui-closing` vetoes and the slide go.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -499,7 +499,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `open` to your state and listen for `ui-close` (and `ui-approve` / `ui-deny`) to follow the user.
+                  Bind `open` to your state and listen for `ui-closing` (and `ui-approving` / `ui-denying`) to follow the user.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -514,7 +514,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-flyout :visible="open" position="right" heading="Help" @ui-close="open = false">...</ui-flyout>
+                  <ui-flyout :visible="open" position="right" heading="Help" @ui-closing="open = false">...</ui-flyout>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -524,8 +524,8 @@
                   <ui-flyout
                     visible={open()}
                     position="right"
-                    heading="Help"
-                    on-ui-close={() => setOpen(false)}
+                    header="Help"
+                    on-ui-closing={() => setOpen(false)}
                   >
                     ...
                   </ui-flyout>

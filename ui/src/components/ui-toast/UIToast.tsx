@@ -15,7 +15,7 @@ import toastCSS from "./UIToast.css?inline"
  * - Above the component:  its `elementSetup` reads this class while the component is defined.
  ****************/
 export class DOMToastElement extends E.DOMElement<UIToast> {
-  /** Close it now, reason `dismiss` (the cancelable `ui-close` first);  true when it closes. */
+  /** Close it now, reason `dismiss` (the cancelable `ui-closing` first);  true when it closes. */
   close(): boolean {
     return this.component?.close() ?? false
   }
@@ -33,11 +33,11 @@ export class DOMToastElement extends E.DOMElement<UIToast> {
  *     a popover in the top layer.
  *   - A `<ui-toast>` written in the page is an ordinary block.
  *
- * - Its life:  once connected it animates in (Fomantic's `scale`), fires `ui-show`,
+ * - Its life:  once connected it animates in (Fomantic's `scale`), fires `ui-opened`,
  *   and starts counting down `display-time` (absent or `0`:  it stays).
  *   - Closing (the countdown, the close icon, a click, Escape inside it, an action, `domElement.close()`)
- *     fires the cancelable `ui-close` (with a `reason`), animates out,
- *     sets `hidden` on the DOM element and fires `ui-hide`.
+ *     fires the cancelable `ui-closing` (with a `reason`), animates out,
+ *     sets `hidden` on the DOM element and fires `ui-closed`.
  *   - It never removes itself:  whoever inserted it owns the node.
  *
  * - The countdown pauses while the pointer moves over it (`pause-on-hover`, on by default)
@@ -56,7 +56,7 @@ export class DOMToastElement extends E.DOMElement<UIToast> {
  *     so `--show` and `--toggle` are not answered.
  *
  * - Actions:  a slotted button closes the toast unless its click was `preventDefault()`ed;
- *   approve / deny ones (`UIT.ModalActionSelectors`) fire the cancelable `ui-approve` / `ui-deny` first.
+ *   approve / deny ones (`UIT.ModalActionSelectors`) fire the cancelable `ui-approving` / `ui-denying` first.
  ****************/
 export class UIToast extends E.UIComponent<Vocabulary> {
   @E.proto static vocabulary = toastVocabulary
@@ -283,7 +283,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
   // ## Appearing
   ////////////////
 
-  /** Has appeared once:  `ui-show` fired, the countdown started. */
+  /** Has appeared once:  `ui-opened` fired, the countdown started. */
   private hasShown = false
 
   /** This element's `UI.overlays` entry:  no Escape, no outside clicks, no focus restore (kind `toast`). */
@@ -305,7 +305,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
     return () => this.disappear()
   }
 
-  /** Connected:  join `UI.overlays`;  the first time, animate in, start counting, `ui-show`. */
+  /** Connected:  join `UI.overlays`;  the first time, animate in, start counting, `ui-opened`. */
   private appear() {
     if (this.isClosing) return
     UI.overlays.open(this.overlay)
@@ -318,7 +318,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
       : Promise.resolve(true)
     void entered.then(() => {
       const detail: UIT.ToastShowDetail = { displayTime: this.displayDuration }
-      if (!this.isClosing) this.send("ui-show", detail)
+      if (!this.isClosing) this.send("ui-opened", detail)
     })
   }
 
@@ -343,13 +343,13 @@ export class UIToast extends E.UIComponent<Vocabulary> {
   }
 
   /**
-   * Close for `reason`:  the cancelable `ui-close`, then the exit animation, `hidden` on the DOM element and `ui-hide`.
+   * Close for `reason`:  the cancelable `ui-closing`, then the exit animation, `hidden` on the DOM element and `ui-closed`.
    * - True when it closes;  false when vetoed or already closing.
    */
   close(reason: UIT.ToastCloseReason = "dismiss", originalEvent?: Event): boolean {
     if (this.isClosing) return false
     const detail: UIT.ToastCloseDetail = { reason, originalEvent }
-    if (!this.send("ui-close", detail)) return false
+    if (!this.send("ui-closing", detail)) return false
     this.isClosing = true
     this.stopTimer()
     UI.overlays.close(this.overlay)
@@ -360,7 +360,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
     void exited.then(() => {
       this.domElement.hidden = true
       const hidden: UIT.ToastCloseDetail = { reason }
-      this.send("ui-hide", hidden)
+      this.send("ui-closed", hidden)
     })
     return true
   }
@@ -545,7 +545,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
       const [kind, action] = found
       if (kind !== "action") {
         const detail: UIT.ToastActionDetail = { action, originalEvent: event }
-        if (!this.send(kind === "approve" ? "ui-approve" : "ui-deny", detail)) return
+        if (!this.send(kind === "approve" ? "ui-approving" : "ui-denying", detail)) return
       }
       this.close(kind, event)
       return

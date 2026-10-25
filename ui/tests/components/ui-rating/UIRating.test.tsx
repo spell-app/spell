@@ -36,10 +36,10 @@ function parts(host: Element) {
   }
 }
 
-/** Collect `detail.value`s of `ui-change`. */
+/** Collect `detail.value`s of `ui-changed`. */
 function changes(host: Element) {
   const values: number[] = []
-  host.addEventListener("ui-change", (event) => values.push((event as CustomEvent).detail.value))
+  host.addEventListener("ui-changed", (event) => values.push((event as CustomEvent).detail.value))
   return values
 }
 
@@ -113,7 +113,7 @@ describe("<ui-rating> markup", () => {
 ////////////////
 
 describe("<ui-rating> choosing", () => {
-  it("chooses on click, with ui-change first", async () => {
+  it("chooses on click, with ui-changed first", async () => {
     const { host, icons, radios } = await rating(`<ui-rating aria-label="R"></ui-rating>`)
     const values = changes(host)
     icons[2]!.click()
@@ -124,9 +124,9 @@ describe("<ui-rating> choosing", () => {
     expect(parts(host).icons.map((icon) => icon.classList.contains("active"))).toEqual([true, true, true, false])
   })
 
-  it("keeps the host's value when a ui-change handler re-sets it", async () => {
+  it("keeps the host's value when a ui-changed handler re-sets it", async () => {
     const { host, icons, radios } = await rating(`<ui-rating value="1" aria-label="R"></ui-rating>`)
-    host.addEventListener("ui-change", () => (host.value = 1))
+    host.addEventListener("ui-changed", () => (host.value = 1))
     icons[3]!.click()
     await settle()
     expect(host.value).toBe(1)

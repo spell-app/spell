@@ -165,13 +165,13 @@
                   follow HTML: presence, `""`, `"true"` or `"yes"` mean true; `"false"` and `"no"` mean false (see
                   [Grammar](grammar.html#booleans)).
                 - **`ui-*` events.** Every event is a `CustomEvent` with `bubbles: true, composed: true` and a
-                  lowercase kebab name (`ui-change`, `ui-open`). `detail` carries the computed state, e.g.
+                  lowercase kebab name (`ui-changed`, `ui-opening`). `detail` carries the computed state, e.g.
                   `{ value }`, plus `originalEvent`.
               </script>
             </ui-markdown>
             <ui-section id="the-contract-plain-html" label="Plain HTML" sticky collapsible dividing>
               <ui-docs-example
-                description="No framework:  attributes in markup, the `options` property and a `ui-change` listener in script.  Pick a fruit."
+                description="No framework:  attributes in markup, the `options` property and a `ui-changed` listener in script.  Pick a fruit."
               >
                 <ui-dropdown id="contract-dropdown" selection placeholder="Fruit" aria-label="Fruit"></ui-dropdown>
                 <ui-label id="contract-value" basic pointing="left">nothing chosen</ui-label>
@@ -181,7 +181,7 @@
                     { value: "apple", text: "Apple" },
                     { value: "pear", text: "Pear" }
                   ]
-                  dropdown.addEventListener("ui-change", (event) => {
+                  dropdown.addEventListener("ui-changed", (event) => {
                     document.querySelector("#contract-value").textContent = event.detail.value
                   })
                 </script>
@@ -203,11 +203,11 @@
 
                 | Framework | Usage                                                                                                                 |
                 | --------- | --------------------------------------------------------------------------------------------------------------------- |
-                | React 19  | `<ui-dropdown options={arr} value="x" open onui-change={fn} />`                                                       |
-                | Vue 3.5   | `isCustomElement: (tag) => tag.startsWith("ui-")`, then `<ui-dropdown .options="arr" value="x" open @ui-change="fn">` |
-                | Svelte 5  | `<ui-dropdown options={arr} value="x" open onui-change={fn}>`                                                         |
-                | Solid     | `<ui-dropdown options={arr} value="x" open={o} on-ui-change={fn}>`                                                    |
-                | Angular   | `[options]="arr" (ui-change)="fn($event)"` plus `CUSTOM_ELEMENTS_SCHEMA`                                              |
+                | React 19  | `<ui-dropdown options={arr} value="x" open onui-changed={fn} />`                                                       |
+                | Vue 3.5   | `isCustomElement: (tag) => tag.startsWith("ui-")`, then `<ui-dropdown .options="arr" value="x" open @ui-changed="fn">` |
+                | Svelte 5  | `<ui-dropdown options={arr} value="x" open onui-changed={fn}>`                                                         |
+                | Solid     | `<ui-dropdown options={arr} value="x" open={o} on-ui-changed={fn}>`                                                    |
+                | Angular   | `[options]="arr" (ui-changed)="fn($event)"` plus `CUSTOM_ELEMENTS_SCHEMA`                                              |
 
                 - Define the elements before the framework renders them. As a backstop, a property set before
                   definition is upgraded (above).

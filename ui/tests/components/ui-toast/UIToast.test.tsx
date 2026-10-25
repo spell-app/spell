@@ -330,11 +330,11 @@ describe("<ui-toast> life", () => {
   // `pause-on-hover="false"` on the timer tests:  on CI (Linux) they never time out,
   // perhaps because the test pointer rests where toasts appear -- see `agents/SUSPECTED-BUGS.md`.
   // Hover pausing has its own tests, below.
-  it("fires ui-show, then closes itself after display-time:  ui-close (timeout), hidden, ui-hide", async () => {
+  it("fires ui-opened, then closes itself after display-time:  ui-closing (timeout), hidden, ui-closed", async () => {
     const host = Fixture.render<Toast>(`<ui-toast display-time="80" pause-on-hover="false" message="Bye"></ui-toast>`)
-    const shown = next<ToastShowDetail>(host, "ui-show")
-    const closes = record(host, "ui-close")
-    const hidden = next<ToastCloseDetail>(host, "ui-hide")
+    const shown = next<ToastShowDetail>(host, "ui-opened")
+    const closes = record(host, "ui-closing")
+    const hidden = next<ToastCloseDetail>(host, "ui-closed")
     expect((await shown).displayTime).toBe(80)
     expect(host.hidden).toBe(false)
     expect((await hidden).reason).toBe("timeout")
@@ -351,11 +351,11 @@ describe("<ui-toast> life", () => {
     expect(host.hidden).toBe(false)
   })
 
-  it("stays when a handler cancels ui-close", async () => {
+  it("stays when a handler cancels ui-closing", async () => {
     fakeClock()
     const host = Fixture.render<Toast>(`<ui-toast display-time="40" pause-on-hover="false" message="Stay"></ui-toast>`)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
-    const closes = record(host, "ui-close")
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
+    const closes = record(host, "ui-closing")
     await host.ready
     await vi.advanceTimersByTimeAsync(40)
     await expect.poll(() => closes.length).toBe(1)
@@ -383,7 +383,7 @@ describe("<ui-toast> life", () => {
 
   it("closes from script:  host.close(), reason dismiss", async () => {
     const { host } = await toast(`<ui-toast message="Hi"></ui-toast>`)
-    const hidden = next<ToastCloseDetail>(host, "ui-hide")
+    const hidden = next<ToastCloseDetail>(host, "ui-closed")
     expect(host.close()).toBe(true)
     expect((await hidden).reason).toBe("dismiss")
     expect(host.close()).toBe(false)
@@ -391,7 +391,7 @@ describe("<ui-toast> life", () => {
 
   it("closes with every toast on UI.overlays.closeAll('toast')", async () => {
     const { host } = await toast(`<ui-toast message="Hi"></ui-toast>`)
-    const hidden = next<ToastCloseDetail>(host, "ui-hide")
+    const hidden = next<ToastCloseDetail>(host, "ui-closed")
     UI.overlays.closeAll("toast")
     expect((await hidden).reason).toBe("close-all")
   })
@@ -409,7 +409,7 @@ describe("<ui-toast> pausing", () => {
   it("pauses while the pointer is over it, and resumes after", async () => {
     fakeClock()
     const host = Fixture.render<Toast>(`<ui-toast display-time="120" progress="bottom" message="Hover"></ui-toast>`)
-    await next(host, "ui-show")
+    await next(host, "ui-opened")
     host.dispatchEvent(new PointerEvent("pointerenter"))
     host.dispatchEvent(new PointerEvent("pointermove", { movementX: 2 }))
     await ElementFixture.tick()
@@ -432,7 +432,7 @@ describe("<ui-toast> pausing", () => {
 
   it("doesn't pause on hover with pause-on-hover=false", async () => {
     const host = Fixture.render<Toast>(`<ui-toast display-time="60" pause-on-hover="false" message="Go"></ui-toast>`)
-    await next(host, "ui-show")
+    await next(host, "ui-opened")
     host.dispatchEvent(new PointerEvent("pointerenter"))
     host.dispatchEvent(new PointerEvent("pointermove", { movementX: 2 }))
     await expect.poll(() => host.hidden, { timeout: 1000 }).toBe(true)
@@ -443,7 +443,7 @@ describe("<ui-toast> pausing", () => {
     const host = Fixture.render<Toast>(
       `<ui-toast display-time="100" pause-on-hover="false" closable message="Focus"></ui-toast>`
     )
-    await next(host, "ui-show")
+    await next(host, "ui-opened")
     host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=close]")!.focus()
     await ElementFixture.tick()
     expect(host.matches(":state(paused)")).toBe(true)
@@ -460,7 +460,7 @@ describe("<ui-toast> pausing", () => {
 describe("<ui-toast> closing", () => {
   it("closes from the close icon:  reason close", async () => {
     const { host, root } = await toast(`<ui-toast closable message="Hi"></ui-toast>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.click(root.querySelector("[part~=close]")!)
     expect(closes.map(({ reason }) => reason)).toEqual(["close"])
     await expect.poll(() => host.hidden).toBe(true)
@@ -468,7 +468,7 @@ describe("<ui-toast> closing", () => {
 
   it("closes on a click (close-on-click), not with a close icon, actions or controls", async () => {
     const { host, root } = await toast(`<ui-toast message="Click me"></ui-toast>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.click(root)
     expect(closes.map(({ reason }) => reason)).toEqual(["click"])
     for (const html of [
@@ -477,7 +477,7 @@ describe("<ui-toast> closing", () => {
       `<ui-toast message="Hi"><input aria-label="Name"></ui-toast>`
     ]) {
       const { host: other, root: otherRoot } = await toast(html)
-      const otherCloses = record(other, "ui-close")
+      const otherCloses = record(other, "ui-closing")
       await userEvent.click(otherRoot.querySelector(".message")!)
       expect(otherCloses, html).toEqual([])
     }
@@ -490,24 +490,24 @@ describe("<ui-toast> closing", () => {
     expect(clickable.className).toBe("floating toast-box compact")
   })
 
-  it("approves:  a cancelable ui-approve, then closes (reason approve)", async () => {
+  it("approves:  a cancelable ui-approving, then closes (reason approve)", async () => {
     const { host } = await toast(
       `<ui-toast message="Sure?"><ui-button slot="actions" positive>Yes</ui-button><ui-button slot="actions" class="deny">No</ui-button></ui-toast>`
     )
-    const approves = record<ToastActionDetail>(host, "ui-approve")
-    const closes = record(host, "ui-close")
+    const approves = record<ToastActionDetail>(host, "ui-approving")
+    const closes = record(host, "ui-closing")
     await userEvent.click(host.querySelector("[positive]")!)
     expect(approves).toHaveLength(1)
     expect(approves[0]!.action).toBe(host.querySelector("[positive]"))
     expect(closes.map(({ reason }) => reason)).toEqual(["approve"])
   })
 
-  it("stays when ui-deny is cancelled", async () => {
+  it("stays when ui-denying is cancelled", async () => {
     const { host } = await toast(
       `<ui-toast message="Sure?"><ui-button slot="actions" negative>No</ui-button></ui-toast>`
     )
-    host.addEventListener("ui-deny", (event) => event.preventDefault())
-    const closes = record(host, "ui-close")
+    host.addEventListener("ui-denying", (event) => event.preventDefault())
+    const closes = record(host, "ui-closing")
     await userEvent.click(host.querySelector("[negative]")!)
     expect(closes).toEqual([])
   })
@@ -517,7 +517,7 @@ describe("<ui-toast> closing", () => {
       `<ui-toast message="Hi"><ui-button slot="actions" id="keep">Keep</ui-button><ui-button slot="actions" id="go">Go</ui-button></ui-toast>`
     )
     host.querySelector("#keep")!.addEventListener("click", (event) => event.preventDefault())
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.click(host.querySelector("#keep")!)
     expect(closes).toEqual([])
     await userEvent.click(host.querySelector("#go")!)
@@ -533,14 +533,14 @@ describe("<ui-toast> keyboard", () => {
     before.focus()
     await Keys.tab()
     expect(host.shadowRoot!.activeElement).toBe(host.shadowRoot!.querySelector("[part~=close]"))
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.keyboard("{Enter}")
     expect(closes.map(({ reason }) => reason)).toEqual(["close"])
   })
 
   it("closes on Escape while focus is inside", async () => {
     const { host } = await toast(`<ui-toast message="Hi"><ui-button slot="actions">Ok</ui-button></ui-toast>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     host.querySelector<HTMLElement>("ui-button")!.focus()
     await userEvent.keyboard("{Escape}")
     expect(closes.map(({ reason }) => reason)).toEqual(["escape"])
@@ -548,7 +548,7 @@ describe("<ui-toast> keyboard", () => {
 
   it("ignores Escape pressed elsewhere", async () => {
     const { host } = await toast(`<ui-toast message="Hi"></ui-toast>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     const input = Fixture.render<HTMLInputElement>(`<input aria-label="Elsewhere">`)
     input.focus()
     await userEvent.keyboard("{Escape}")
@@ -687,7 +687,7 @@ describe("UI.toast()", () => {
     await ElementFixture.settle(element)
     await userEvent.click(keep!)
     expect(element.hidden).toBe(false)
-    const approved = next<ToastActionDetail>(element, "ui-approve")
+    const approved = next<ToastActionDetail>(element, "ui-approving")
     await userEvent.click(yes!)
     expect((await approved).action).toBe(yes)
     expect(clicks).toEqual(["keep", "yes"])
@@ -740,17 +740,17 @@ describe("<ui-toast> invoker commands", () => {
     )
     const host = wrapper.querySelector<Toast>("ui-toast")!
     await host.ready
-    const closes = record(host, "ui-close")
-    const hidden = next<ToastCloseDetail>(host, "ui-hide")
+    const closes = record(host, "ui-closing")
+    const hidden = next<ToastCloseDetail>(host, "ui-closed")
     wrapper.querySelector<HTMLButtonElement>("#x")!.click()
     expect((await hidden).reason).toBe("close")
     expect(closes.map((detail) => detail.reason)).toEqual(["close"])
     expect(host.hidden).toBe(true)
   })
 
-  it("a vetoed ui-close keeps it", async () => {
+  it("a vetoed ui-closing keeps it", async () => {
     const { host } = await toast(`<ui-toast message="Hi"></ui-toast>`)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     send(host, "--close")
     await animationsDone(host)
     expect(host.hidden).toBe(false)
@@ -758,13 +758,13 @@ describe("<ui-toast> invoker commands", () => {
 
   it("`--show` and `--toggle` do nothing:  a closed toast stays closed", async () => {
     const { host } = await toast(`<ui-toast message="Hi"></ui-toast>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     send(host, "--toggle")
     send(host, "--show")
     await animationsDone(host)
     expect(closes).toHaveLength(0)
     expect(host.hidden).toBe(false)
-    const hidden = next<ToastCloseDetail>(host, "ui-hide")
+    const hidden = next<ToastCloseDetail>(host, "ui-closed")
     send(host, "--close")
     await hidden
     send(host, "--show")
@@ -785,7 +785,7 @@ describe("<ui-toast> invoker commands", () => {
       )
       const host = wrapper.querySelector<Toast>("ui-toast")!
       await host.ready
-      const hidden = next<ToastCloseDetail>(host, "ui-hide")
+      const hidden = next<ToastCloseDetail>(host, "ui-closed")
       wrapper.querySelector<HTMLElement>("#x")!.shadowRoot!.querySelector<HTMLButtonElement>("button")!.click()
       expect((await hidden).reason).toBe("close")
     } finally {

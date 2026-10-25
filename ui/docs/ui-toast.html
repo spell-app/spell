@@ -526,7 +526,7 @@
                 <ui-docs-example>
                   <p slot="description">
                     Just like a modal, a toast ties approve / deny to any positive / approve, negative / deny or ok /
-                    cancel button, with the cancelable <code>ui-approve</code> and <code>ui-deny</code>. Calling
+                    cancel button, with the cancelable <code>ui-approving</code> and <code>ui-denying</code>. Calling
                     <code>preventDefault()</code> on one keeps it open.
                   </p>
                   <template>
@@ -536,11 +536,11 @@
                     </ui-toast>
                     <script type="module">
                       const toast = document.querySelector("#toast-approve-deny")
-                      toast.addEventListener("ui-deny", (event) => {
+                      toast.addEventListener("ui-denying", (event) => {
                         UI.toast({ message: "Wait not yet!" })
                         event.preventDefault()
                       })
-                      toast.addEventListener("ui-approve", () => UI.toast({ message: "Approved" }))
+                      toast.addEventListener("ui-approving", () => UI.toast({ message: "Approved" }))
                     </script>
                   </template>
                 </ui-docs-example>
@@ -679,8 +679,8 @@
                 <script type="text/markdown">
                   What closes a toast: the countdown, the close icon, a click on it (`close-on-click`, off with a
                   close icon, actions or form controls inside), Escape while focus is inside, an action, a `--close`
-                  invoker command, or `host.close()`. Each goes through the cancelable `ui-close` (`detail.reason`),
-                  then the exit animation, then `hidden` on the host and `ui-hide`.
+                  invoker command, or `host.close()`. Each goes through the cancelable `ui-closing` (`detail.reason`),
+                  then the exit animation, then `hidden` on the host and `ui-closed`.
 
                   A `<ui-button commandfor="id" command="--close">` (or a native button) closes a toast in the page
                   with no script. Only `--close`: a closed toast stays closed (`hidden`, never removed), so there is
@@ -696,17 +696,17 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-show` (`{ displayTime }`): shown, its entry animation finished; the countdown has started.
-                  - `ui-close` (`{ reason }`, cancelable): about to close; `preventDefault()` keeps it.
-                  - `ui-hide` (`{ reason }`): closed, its exit animation finished; the host is `hidden` now.
-                  - `ui-approve` / `ui-deny` (`{ action }`, cancelable): an approve action (`positive`, `.approve`,
+                  - `ui-opened` (`{ displayTime }`): shown, its entry animation finished; the countdown has started.
+                  - `ui-closing` (`{ reason }`, cancelable): about to close; `preventDefault()` keeps it.
+                  - `ui-closed` (`{ reason }`): closed, its exit animation finished; the host is `hidden` now.
+                  - `ui-approving` / `ui-denying` (`{ action }`, cancelable): an approve action (`positive`, `.approve`,
                     `.ok`) or a deny one (`negative`, `.deny`, `.cancel`) was activated; `preventDefault()` keeps
                     the toast open.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  document.querySelector("#saved").addEventListener("ui-close", (event) => {
+                  document.querySelector("#saved").addEventListener("ui-closing", (event) => {
                     if (event.detail.reason === "timeout" && stillSaving) event.preventDefault() // keep it up
                   })
                 </script>
@@ -745,7 +745,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Most apps call `UI.toast()` from an event handler. A `<ui-toast>` in a template is an ordinary
-                  element: listen for `ui-hide` to drop it from your state.
+                  element: listen for `ui-closed` to drop it from your state.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -758,7 +758,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-toast v-if="saved" type="success" message="Saved" display-time="3000" @ui-hide="saved = false" />
+                  <ui-toast v-if="saved" type="success" message="Saved" display-time="3000" @ui-closed="saved = false" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -770,7 +770,7 @@
                       type="success"
                       message="Saved"
                       display-time="3000"
-                      on-ui-hide={() => setSaved(false)}
+                      on-ui-closed={() => setSaved(false)}
                     />
                   </Show>
                 </script>

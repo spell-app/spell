@@ -146,10 +146,10 @@ describe("<ui-dropdown> markup", () => {
 ////////////////
 
 describe("<ui-dropdown> open / close", () => {
-  it("opens and closes with clicks, with ui-open / ui-close", async () => {
+  it("opens and closes with clicks, with ui-opening / ui-closing", async () => {
     const { host, root, menu, combobox, rows } = await dropdown(GENDER)
-    const opens = record(host, "ui-open")
-    const closes = record(host, "ui-close")
+    const opens = record(host, "ui-opening")
+    const closes = record(host, "ui-closing")
     combobox.click()
     await ElementFixture.tick()
     expect(menu.matches(":popover-open")).toBe(true)
@@ -164,17 +164,17 @@ describe("<ui-dropdown> open / close", () => {
     expect(closes).toEqual([expect.objectContaining({ open: false })])
   })
 
-  it("stays closed when ui-open is cancelled", async () => {
+  it("stays closed when ui-opening is cancelled", async () => {
     const { host, menu, combobox } = await dropdown(GENDER)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     combobox.click()
     await ElementFixture.tick()
     expect(menu.matches(":popover-open")).toBe(false)
   })
 
-  it("stays open when ui-close is cancelled", async () => {
+  it("stays open when ui-closing is cancelled", async () => {
     const { host, menu, combobox } = await dropdown(GENDER)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     combobox.click()
     await ElementFixture.tick()
     combobox.click()
@@ -271,7 +271,7 @@ describe("<ui-dropdown> open / close", () => {
 describe("<ui-dropdown> keyboard", () => {
   it("opens, navigates and selects (combobox pattern)", async () => {
     const { host, combobox, text, highlighted } = await dropdown(GENDER)
-    const changes = record(host, "ui-change")
+    const changes = record(host, "ui-changed")
     combobox.focus()
     await userEvent.keyboard("{ArrowDown}")
     await ElementFixture.tick()
@@ -345,7 +345,7 @@ describe("<ui-dropdown> search", () => {
       { value: "fr", text: "France" },
       { value: "gh", text: "Ghana" }
     ]
-    const searches = record(host, "ui-search")
+    const searches = record(host, "ui-searched")
     expect(combobox.localName).toBe("input")
     await userEvent.type(combobox, "an")
     await ElementFixture.tick()
@@ -375,7 +375,7 @@ describe("<ui-dropdown> search", () => {
     const { host, combobox, rows, labels } = await dropdown(
       `<ui-dropdown search multiple selection allow-additions placeholder="Tags"><ui-item>React</ui-item></ui-dropdown>`
     )
-    const adds = record(host, "ui-add")
+    const adds = record(host, "ui-added")
     await userEvent.type(combobox, "Svelte")
     await ElementFixture.tick()
     expect(rows()[0]!.textContent).toBe("Add Svelte")
@@ -396,10 +396,10 @@ describe("<ui-dropdown> multiple", () => {
     <ui-item value="angular">Angular</ui-item><ui-item value="css">CSS</ui-item><ui-item value="html">HTML</ui-item>
   </ui-dropdown>`
 
-  it("adds and removes labels, with ui-add / ui-remove", async () => {
+  it("adds and removes labels, with ui-added / ui-removed", async () => {
     const { host, combobox, rows, labels, root } = await dropdown(SKILLS)
-    const adds = record(host, "ui-add")
-    const removes = record(host, "ui-remove")
+    const adds = record(host, "ui-added")
+    const removes = record(host, "ui-removed")
     expect(labels()).toEqual(["CSS"])
     combobox.focus()
     combobox.click()
@@ -473,12 +473,12 @@ describe("<ui-dropdown> value", () => {
     expect(text.textContent).toBe("Other")
   })
 
-  it("reverts when the host re-sets the old value in its ui-change handler", async () => {
+  it("reverts when the host re-sets the old value in its ui-changed handler", async () => {
     const { host, combobox, rows, text } = await dropdown(GENDER)
     host.value = "male"
     await ElementFixture.tick()
-    const changes = record(host, "ui-change")
-    host.addEventListener("ui-change", () => (host.value = "male"))
+    const changes = record(host, "ui-changed")
+    host.addEventListener("ui-changed", () => (host.value = "male"))
     combobox.click()
     await ElementFixture.tick()
     rows()[1]!.click()
@@ -661,9 +661,9 @@ describe("<ui-dropdown> invoker commands", () => {
     return { wrapper, host, ...parts(host) }
   }
 
-  it.skipIf(!NATIVE)("native buttons:  --show opens the menu (a cancelable ui-open) and focuses it", async () => {
+  it.skipIf(!NATIVE)("native buttons:  --show opens the menu (a cancelable ui-opening) and focuses it", async () => {
     const { host, wrapper, menu, combobox } = await commanded()
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     wrapper.querySelector<HTMLButtonElement>("#show")!.click()
     await ElementFixture.tick()
     expect(opens).toHaveLength(1)
@@ -675,7 +675,7 @@ describe("<ui-dropdown> invoker commands", () => {
   it.skipIf(!NATIVE)("native buttons:  --close closes, --toggle flips, a veto keeps it", async () => {
     const { host, wrapper } = await commanded()
     const press = (id: string) => wrapper.querySelector<HTMLButtonElement>(`#${id}`)!.click()
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     press("show")
     await ElementFixture.tick()
     expect(host.open).toBe(true)
@@ -686,7 +686,7 @@ describe("<ui-dropdown> invoker commands", () => {
     press("flip")
     await ElementFixture.tick()
     expect(host.open).toBe(true)
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     press("flip")
     await ElementFixture.tick()
     expect(host.open).toBe(true)
@@ -711,7 +711,7 @@ describe("<ui-dropdown> invoker commands", () => {
   it.skipIf(!NATIVE)("a disabled or read-only dropdown ignores commands", async () => {
     for (const attrs of ["disabled", "readonly"]) {
       const { host, wrapper } = await commanded(attrs)
-      const opens = record(host, "ui-open")
+      const opens = record(host, "ui-opening")
       wrapper.querySelector<HTMLButtonElement>("#show")!.click()
       wrapper.querySelector<HTMLButtonElement>("#flip")!.click()
       await ElementFixture.tick()

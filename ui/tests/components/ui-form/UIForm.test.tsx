@@ -438,10 +438,10 @@ describe("<ui-form> values", () => {
 ////////////////
 
 describe("<ui-form> validation", () => {
-  it("blocks an invalid submit:  prompts, aria-invalid, error state and message, ui-failure, focus", async () => {
+  it("blocks an invalid submit:  prompts, aria-invalid, error state and message, ui-save-failed, focus", async () => {
     const { host, native } = await form(SIGN_UP)
     host.rules = SIGN_UP_RULES
-    const failures = record<FormFailureDetail>(host, "ui-failure")
+    const failures = record<FormFailureDetail>(host, "ui-save-failed")
     const invalid = record<FormInvalidDetail>(host, "ui-invalid")
     let pageSubmits = 0
     native.addEventListener("submit", () => pageSubmits++)
@@ -477,7 +477,7 @@ describe("<ui-form> validation", () => {
     expect(document.activeElement).toBe(native.querySelector("[name=name]"))
   })
 
-  it("passes a valid submit on to the page, with ui-success;  cancelling it stops the submission", async () => {
+  it("passes a valid submit on to the page, with ui-saving;  cancelling it stops the submission", async () => {
     const { host, native } = await form(SIGN_UP)
     host.rules = SIGN_UP_RULES
     await set(native.querySelector("[name=name]"), "Ada")
@@ -485,7 +485,7 @@ describe("<ui-form> validation", () => {
     await set(native.querySelector("[name=password]"), "secret1")
     await set(native.querySelector("[name=confirm]"), "secret1")
     await set(native.querySelector("[name=terms]"), true)
-    const successes = record<FormSuccessDetail>(host, "ui-success")
+    const successes = record<FormSuccessDetail>(host, "ui-saving")
     let pageSubmits = 0
     native.addEventListener("submit", (event) => {
       pageSubmits++
@@ -496,7 +496,7 @@ describe("<ui-form> validation", () => {
     expect(pageSubmits).toBe(1)
     expect(successes).toHaveLength(1)
     expect(successes[0]!.values).toEqual(expect.objectContaining({ name: "Ada", terms: true }))
-    host.addEventListener("ui-success", (event) => event.preventDefault())
+    host.addEventListener("ui-saving", (event) => event.preventDefault())
     const submit = new SubmitEvent("submit", { cancelable: true })
     native.dispatchEvent(submit)
     expect(submit.defaultPrevented).toBe(true)

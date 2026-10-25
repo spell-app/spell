@@ -27,6 +27,29 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "select"
     ]
   },
+  "ui-action": {
+    folder: "ui-action",
+    skeleton: { display: "inline", width: "8em", height: "2.5em" },
+    attributes: [
+      "color",
+      "position",
+      "value",
+      "text",
+      "description",
+      "icon",
+      "image",
+      "flag",
+      "href",
+      "target",
+      "link",
+      "disabled",
+      "selected",
+      "fitted",
+      "type",
+      "action",
+      "shortcut"
+    ]
+  },
   "ui-actions": { folder: "ui-parts", attributes: [] },
   "ui-ad": { folder: "ui-ad", skeleton: { width: "18em", height: "15em" }, attributes: ["unit", "centered", "test"] },
   "ui-author": { folder: "ui-parts", attributes: ["link", "href", "target"] },

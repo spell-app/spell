@@ -32,14 +32,14 @@ async function code(html: string, count = 1): Promise<DOMCodeElement> {
   return host
 }
 
-/** Wait for `host`'s next `ui-highlight` or `ui-error`, then flush. */
+/** Wait for `host`'s next `ui-coloured` or `ui-error`, then flush. */
 async function settled(host: DOMCodeElement) {
   await highlights(host)
   await ElementFixture.tick()
 }
 
 /**
- * Resolves once `count` `ui-highlight` / `ui-error` events have reached `target`.
+ * Resolves once `count` `ui-coloured` / `ui-error` events have reached `target`.
  * - Listen BEFORE the change that colours:  an event that already went by never comes back (the test's timeout
  *   catches one that never comes).
  */
@@ -47,13 +47,13 @@ function highlights(target: EventTarget, count = 1): Promise<void> {
   let left = count
   return new Promise<void>((resolve) => {
     if (left <= 0) return resolve()
-    target.addEventListener("ui-highlight", seen)
+    target.addEventListener("ui-coloured", seen)
     target.addEventListener("ui-error", seen)
 
     /** One more colouring (or failure);  stops listening after the last. */
     function seen() {
       if (--left > 0) return
-      target.removeEventListener("ui-highlight", seen)
+      target.removeEventListener("ui-coloured", seen)
       target.removeEventListener("ui-error", seen)
       resolve()
     }
@@ -86,13 +86,13 @@ describe("<ui-code> behaviour", () => {
     expect(codeOf(host).classList.contains("language-typescript")).toBe(true)
   })
 
-  it("guesses the language when none is given:  `detectedLanguage`, `ui-highlight`", async () => {
+  it("guesses the language when none is given:  `detectedLanguage`, `ui-coloured`", async () => {
     const onHighlight = vi.fn()
-    document.addEventListener("ui-highlight", onHighlight)
+    document.addEventListener("ui-coloured", onHighlight)
     const host = await code(`<ui-code><script type="text/plain">
       {"name": "spell", "version": 2, "private": true}
     </script></ui-code>`)
-    document.removeEventListener("ui-highlight", onHighlight)
+    document.removeEventListener("ui-coloured", onHighlight)
     expect(host.detectedLanguage).toBe("json")
     expect(onHighlight.mock.calls.at(-1)![0].detail).toEqual({ language: "json", detected: true })
   })
@@ -150,7 +150,7 @@ describe("<ui-code> behaviour", () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     const host = await code(`<ui-code language="text" copy>copy me</ui-code>`)
     const onCopy = vi.fn()
-    host.addEventListener("ui-copy", onCopy)
+    host.addEventListener("ui-copied", onCopy)
     host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=copy]")!.click()
     await vi.waitFor(() => expect(onCopy).toHaveBeenCalled())
     expect(writeText).toHaveBeenCalledWith("copy me")

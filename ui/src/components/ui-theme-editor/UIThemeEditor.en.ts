@@ -44,17 +44,17 @@ export const themeEditorVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: ThemeChoices, css: string }",
       description: "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet."
     },
     {
-      name: "ui-copy",
+      name: "ui-copied",
       detail: "{ css: string }",
       description: "Copy CSS put the stylesheet on the clipboard."
     },
     {
-      name: "ui-save",
+      name: "ui-saved",
       detail: "{ value?: ThemeChoices, css: string }",
       description:
         "Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  " +

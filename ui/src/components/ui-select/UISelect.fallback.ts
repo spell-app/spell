@@ -17,7 +17,7 @@ import { DIVIDER, PLACEHOLDER, type Vocabulary } from "./UISelect.types"
  * - A single select starts with an empty `<option>` (the `placeholder` text) when nothing is chosen,
  *   as the component does.
  * - On `change`:  the form value follows (`FormData` for `multiple`), `domElement.value` is set,
- *   and a composed `ui-change` is sent.
+ *   and a composed `ui-changed` is sent.
  * - The form value is also set on the first render, so the form submits without a change.
  * - `readonly`:  `aria-readonly`, and a change is undone (nothing sent), as the component does.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
@@ -28,7 +28,7 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
     "the customizable picker:  option icons and images (flags and descriptions stay, as text)",
     "a `<label for>` naming the element (use `aria-label`)",
     "`:state(invalid)`, `:state(customizable)`",
-    "vetoing a change by re-setting `value` in a `ui-change` handler"
+    "vetoing a change by re-setting `value` in a `ui-changed` handler"
   ]
 
   /** The native select, once built, for `attached()`. */
@@ -197,7 +197,7 @@ type SelectDOMElement = HTMLElement & {
 }
 
 /** The event the select's `change` becomes. */
-const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-change"
+const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-changed"
 
 /** The part of the empty first option. */
 const PLACEHOLDER_PART: E.PartName<Vocabulary> = "placeholder"

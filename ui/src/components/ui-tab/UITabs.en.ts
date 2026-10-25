@@ -137,7 +137,7 @@ export const tabsVocabulary = {
       kind: "string",
       description:
         "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  " +
-        "`ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one."
+        "`ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one."
     },
     {
       name: "activation",
@@ -160,12 +160,17 @@ export const tabsVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changing",
       detail: "{ value: string, tab: Element, originalEvent?: Event }",
       cancelable: true,
       description:
         "A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the " +
         "current one."
+    },
+    {
+      name: "ui-changed",
+      detail: "{ value: string, tab: Element, originalEvent?: Event }",
+      description: "A pane was selected:  after `ui-changing`, unless it was cancelled."
     }
   ],
   slots: [{ name: "", description: "`<ui-tab>` panes;  each one's `label` becomes a tab." }],

@@ -147,12 +147,12 @@ export const sliderVocabulary = {
   ],
   events: [
     {
-      name: "ui-input",
+      name: "ui-moved",
       detail: "{ value: number, end?: number, originalEvent?: Event }",
       description: "A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins."
     },
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: number, end?: number, originalEvent?: Event }",
       description: "A change was committed:  on a key, or when a drag ends somewhere new."
     }

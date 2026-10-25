@@ -70,7 +70,7 @@ export const tableVocabulary = {
       group: "behaviour",
       kind: "keyOnly",
       description:
-        "Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets " +
+        "Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets " +
         '`aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic\'s `class="disabled"`).'
     },
     { name: "striped", group: "appearance", kind: "keyOnly", description: "Every other body row is tinted." },
@@ -195,7 +195,7 @@ export const tableVocabulary = {
       group: "advanced",
       kind: "boolean",
       description:
-        "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  " +
+        "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  " +
         "Off, the app sorts its own rows."
     },
     {
@@ -219,7 +219,7 @@ export const tableVocabulary = {
   ],
   events: [
     {
-      name: "ui-sort",
+      name: "ui-sorting",
       detail: '{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }',
       cancelable: true,
       description:

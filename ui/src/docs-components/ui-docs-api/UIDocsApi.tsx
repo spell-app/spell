@@ -115,7 +115,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
 
   /** The tables are in the DOM:  announce them, then scroll to `location.hash` if it names one of them. */
   private onTablesDrawn(items: readonly ApiItem[]) {
-    this.send("ui-render", { tags: items.map((item) => item.tag.tag) })
+    this.send("ui-drawn", { tags: items.map((item) => item.tag.tag) })
     void this.reveal(location.hash)
   }
 

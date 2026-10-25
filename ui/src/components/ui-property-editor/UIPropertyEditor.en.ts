@@ -69,7 +69,7 @@ export const propertyEditorVocabulary = {
   events: passThrough<E.EventSpec>(
     [
       {
-        name: "ui-change",
+        name: "ui-changed",
         detail: "{ name: string, value: unknown, things: object[] }",
         description: "A property was written to the thing (or things)."
       },
@@ -77,7 +77,7 @@ export const propertyEditorVocabulary = {
       { name: "ui-loaded", detail: "{ source: string, content: string }", description: "It arrived (P6)." }
     ] as const satisfies readonly E.EventSpec[],
     [formVocabulary.events, sectionVocabulary.events],
-    ["ui-load"]
+    ["ui-loaded"]
   ),
   slots: passThrough<E.SlotSpec>(
     [

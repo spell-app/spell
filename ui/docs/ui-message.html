@@ -104,7 +104,7 @@
                   </p>
                   <ui-message slot="description" state="info" size="small"
                     >Unlike Fomantic's, the close button works by itself: it fires the cancelable
-                    <code>ui-dismiss</code>, then the message sets <code>hidden</code> on itself (see the Usage tab).
+                    <code>ui-closing</code>, then the message sets <code>hidden</code> on itself (see the Usage tab).
                     Reload the page to bring it back.</ui-message
                   >
                   <ui-message dismissible heading="Welcome back!">
@@ -371,7 +371,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A `dismissible` message fires the cancelable `ui-dismiss` when its close button is used (`detail.originalEvent`
+                  A `dismissible` message fires the cancelable `ui-closing` when its close button is used (`detail.originalEvent`
                   is the click). Unless a handler cancels it, the message sets `hidden` on itself. It never removes itself, so a
                   framework that rendered it still owns the node; remove `hidden` to show it again.
                 </script>
@@ -379,7 +379,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const message = document.querySelector("ui-message[dismissible]")
-                  message.addEventListener("ui-dismiss", (event) => {
+                  message.addEventListener("ui-closing", (event) => {
                     event.preventDefault() // keep it on screen
                     message.remove() // ... or take it out yourself
                   })
@@ -417,7 +417,7 @@
                   - A `state` or `color` is never the only signal: write the meaning in the header or text as well.
                   - If the element fails to render, it shows its children through a bare `<slot>`, so the text stays;
                     the message box and colours, the `icon` glyph (a slotted icon too),
-                    the close button and `ui-dismiss` go.
+                    the close button and `ui-closing` go.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -425,7 +425,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Listen for `ui-dismiss`, and cancel it when your framework should decide whether the message stays.
+                  Listen for `ui-closing`, and cancel it when your framework should decide whether the message stays.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -447,7 +447,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-message v-if="shown" dismissible heading="Saved" @ui-dismiss.prevent="shown = false" />
+                  <ui-message v-if="shown" dismissible heading="Saved" @ui-closing.prevent="shown = false" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -457,8 +457,8 @@
                   <Show when={shown()}>
                     <ui-message
                       dismissible
-                      heading="Saved"
-                      on-ui-dismiss={(event) => {
+                      header="Saved"
+                      on-ui-closing={(event) => {
                         event.preventDefault()
                         setShown(false)
                       }}

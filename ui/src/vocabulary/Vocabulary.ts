@@ -19,7 +19,7 @@ import { ValueSets } from "./ValueSets"
  * Registry of every component's vocabulary, and the resolver that turns canonical names into localized ones.
  * - `register()` collects each `UI<Name>.en.ts` by canonical tag.
  * - `define(prefix, dictionary)` resolves, for every registered component,
- *   the names an author types in that language (`es-tarjeta`, `color="rojo"`, `es-cambio`).
+ *   the names an author types in that language (`es-tarjeta`, `color="rojo"`, `es-cambiado`).
  *   - What a translated tag's `ElementDefinition` is built from (`UIButton.define("es-boton", es)`).
  *   - The English identity dictionary is the default.
  * - `canonicalize()` / `localize()` convert single names both ways, for attribute parsing and rendering.
@@ -35,7 +35,7 @@ import { ValueSets } from "./ValueSets"
  ****************/
 export class Vocabulary {
   /**
-   * Default tag / event prefix:  `ui-card`, `ui-change`.
+   * Default tag / event prefix:  `ui-card`, `ui-changed`.
    * - `@proto static`:  a subclass, or one instance, may set its own.
    */
   @proto static prefix = "ui"
@@ -440,7 +440,7 @@ export class Vocabulary {
     return tokens.join(" ")
   }
 
-  /** Name without its prefix:  `ui-card` => `card`, `ui-change` => `change`. */
+  /** Name without its prefix:  `ui-card` => `card`, `ui-changed` => `change`. */
   private static stem(name: string) {
     const dash = name.indexOf("-")
     return dash < 0 ? name : name.slice(dash + 1)
@@ -448,8 +448,8 @@ export class Vocabulary {
 
   /**
    * Event `name`'s name under `prefix`, `translated` when the dictionary names it.
-   * - One of Spell UI's own (`ui-change`) takes the prefix:  `es-change`, or `es-cambio` translated.
-   * - Another package's (`spell-open`, of the `<spell-viewer>` component pack) keeps its name, unless translated:
+   * - One of Spell UI's own (`ui-changed`) takes the prefix:  `es-changed`, or `es-cambiado` translated.
+   * - Another package's (`spell-exploring`, of the `<spell-viewer>` component pack) keeps its name, unless translated:
    *   a tag outside Spell UI names its events as it likes, and the page listens for them by that name.
    */
   private static eventName(name: string, prefix: string, translated: string | undefined): string {
@@ -460,7 +460,7 @@ export class Vocabulary {
 
 /** A page language:  the prefix its tags take (`es`), and the dictionary that names them. */
 export type PageLanguage = {
-  /** Its tags' and events' prefix, e.g. `es`:  `<es-boton>`, `es-cambio`. */
+  /** Its tags' and events' prefix, e.g. `es`:  `<es-boton>`, `es-cambiado`. */
   readonly prefix: string
   /** Its names (and texts). */
   readonly dictionary: Dictionary
@@ -481,7 +481,7 @@ type ValuesProps = {
 /** Combining marks, once `normalize("NFD")` has split them off their letters. */
 const ACCENTS = /\p{M}/gu
 
-/** What Spell UI's own event names start with (`ui-change`):  they take a translated tag's prefix. */
+/** What Spell UI's own event names start with (`ui-changed`):  they take a translated tag's prefix. */
 const UI_EVENT_PREFIX = "ui-"
 
 /** Longest multi-word value `mapValue()` looks for, e.g. `large screen` (2) with room to spare. */

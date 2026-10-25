@@ -23,7 +23,7 @@
           return { options: OPTIONS, value, open }
         },
         template: `<ui-dropdown selection placeholder="Fruit" :options="options" :value="value" :open="open"
-            @ui-change="value = $event.detail.value" @ui-open="open = true" @ui-close="open = false"></ui-dropdown>
+            @ui-changed="value = $event.detail.value" @ui-opening="open = true" @ui-closing="open = false"></ui-dropdown>
           <p>Vue state: <output id="value">{{ value }}</output></p>
           <button id="set" type="button" @click="value = 'c'">set cherry</button>
           <button id="open" type="button" @click="open = true">open</button>`

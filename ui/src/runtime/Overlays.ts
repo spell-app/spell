@@ -130,7 +130,7 @@ export class Overlays {
 
   /**
    * Ask every open entry (optionally only in `pool`) to dismiss, topmost first, with reason `close-all`.
-   * - NOTE: asks only;  entries that veto (a cancelled `ui-close`) stay open.
+   * - NOTE: asks only;  entries that veto (a cancelled `ui-closing`) stay open.
    */
   closeAll(pool?: string) {
     const records = this.stack.filter((record) => !pool || record.pool === pool).reverse()

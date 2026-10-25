@@ -40,10 +40,10 @@ function parts(host: Element) {
   }
 }
 
-/** Collect `detail.value`s of `ui-change`. */
+/** Collect `detail.value`s of `ui-changing`. */
 function changes(host: Element) {
   const values: string[] = []
-  host.addEventListener("ui-change", (event) => values.push((event as CustomEvent).detail.value))
+  host.addEventListener("ui-changing", (event) => values.push((event as CustomEvent).detail.value))
   return values
 }
 
@@ -210,17 +210,20 @@ describe("<ui-icon-picker> panel", () => {
 ////////////////
 
 describe("<ui-icon-picker> picking", () => {
-  test("a click on a glyph sets `value`, sends `ui-change` and closes", async () => {
+  test("a click on a glyph sets `value`, sends `ui-changing` then `ui-changed`, and closes", async () => {
     const { host, field, panel, search, cells, text } = await picker(
       `<ui-icon-picker name="icon" aria-label="Icon"></ui-icon-picker>`
     )
     const values = changes(host)
+    const changed: string[] = []
+    host.addEventListener("ui-changed", (event) => changed.push((event as CustomEvent).detail.value))
     await openGrid(field, cells)
     await userEvent.type(search, "bell")
     await expect.poll(() => cells()[1]?.title).toBe("bell")
     await userEvent.click(cells()[1]!)
     await ElementFixture.tick()
     expect(values).toEqual(["bell"])
+    expect(changed).toEqual(["bell"])
     expect(host.value).toBe("bell")
     expect(text().textContent).toBe("bell")
     expect(panel.matches(":popover-open")).toBe(false)
@@ -260,9 +263,9 @@ describe("<ui-icon-picker> picking", () => {
     expect(text().textContent).toBe("none")
   })
 
-  test("a `ui-change` handler that sets `value` again wins", async () => {
+  test("a `ui-changing` handler that sets `value` again wins", async () => {
     const { host, field, cells, text } = await picker(`<ui-icon-picker aria-label="Icon"></ui-icon-picker>`)
-    host.addEventListener("ui-change", () => (host.value = "heart"))
+    host.addEventListener("ui-changing", () => (host.value = "heart"))
     await openGrid(field, cells)
     await userEvent.click(cells()[1]!)
     await ElementFixture.tick()

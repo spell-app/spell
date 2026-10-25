@@ -25,10 +25,10 @@ function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
-/** Every `ui-change` `host` sends. */
+/** Every `ui-changed` `host` sends. */
 function changes(host: Element): CustomEvent[] {
   const events: CustomEvent[] = []
-  host.addEventListener("ui-change", (event) => events.push(event as CustomEvent))
+  host.addEventListener("ui-changed", (event) => events.push(event as CustomEvent))
   return events
 }
 
@@ -90,7 +90,7 @@ describe("<ui-theme-editor> starting", () => {
 ////////////////
 
 describe("<ui-theme-editor> choosing", () => {
-  it("a colour swatch changes the page's primary, and sends `ui-change` with the stylesheet", async () => {
+  it("a colour swatch changes the page's primary, and sends `ui-changed` with the stylesheet", async () => {
     const host = await editor()
     const events = changes(host)
     inner(host, 'ui-property[name="primary"] button[value="pink"]').click()
@@ -127,7 +127,7 @@ describe("<ui-theme-editor> choosing", () => {
     const host = await editor()
     const events = changes(host)
     inner(host, ".sample ui-checkbox").dispatchEvent(
-      new CustomEvent("ui-change", { detail: { value: true }, bubbles: true, composed: true })
+      new CustomEvent("ui-changed", { detail: { value: true }, bubbles: true, composed: true })
     )
     expect(events).toHaveLength(0)
   })
@@ -159,11 +159,11 @@ describe("<ui-theme-editor> sheet", () => {
     expect(token("--ui-primary")).toBe(token("--ui-green"))
   })
 
-  it("Copy CSS copies the stylesheet, and sends `ui-copy`", async () => {
+  it("Copy CSS copies the stylesheet, and sends `ui-copied`", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
     const host = await editor(`<ui-theme-editor value='{"depth": "flat"}'></ui-theme-editor>`)
     const copies: CustomEvent[] = []
-    host.addEventListener("ui-copy", (event) => copies.push(event as CustomEvent))
+    host.addEventListener("ui-copied", (event) => copies.push(event as CustomEvent))
     inner(host, '[part~="sheet"] ui-button').click()
     await applied()
     expect(writeText).toHaveBeenCalledWith(host.css)

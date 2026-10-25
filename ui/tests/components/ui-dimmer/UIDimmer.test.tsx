@@ -97,7 +97,7 @@ describe("<ui-dimmer> element dimmer", () => {
       `<ui-segment><p>Text</p><p>More</p><ui-dimmer><ui-header level="4">Hi</ui-header></ui-dimmer></ui-segment>`
     )
     expect(getComputedStyle(box).display).toBe("none")
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opened")
     host.visible = true
     await settle()
     await shown
@@ -111,7 +111,7 @@ describe("<ui-dimmer> element dimmer", () => {
     expect(rect.width).toBeCloseTo(segment.clientWidth, 0)
     expect(rect.height).toBeCloseTo(segment.clientHeight, 0)
     expect(rect.left - segment.getBoundingClientRect().left).toBe(segment.clientLeft)
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     host.visible = false
     await settle()
     await hidden
@@ -134,7 +134,7 @@ describe("<ui-dimmer> element dimmer", () => {
     const { host, box } = await dimmer(
       `<ui-segment style="min-height: 10em"><ui-dimmer visible><button>Content</button></ui-dimmer></ui-segment>`
     )
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.click(host.querySelector("button")!)
     await settle()
     expect(host.visible).toBe(true)
@@ -144,13 +144,13 @@ describe("<ui-dimmer> element dimmer", () => {
     expect(closes.map((detail) => detail.reason)).toEqual(["click"])
   })
 
-  it("closedby=none ignores clicks;  a vetoed ui-close keeps it", async () => {
+  it("closedby=none ignores clicks;  a vetoed ui-closing keeps it", async () => {
     const { host, box } = await dimmer(`<ui-segment><ui-dimmer visible closedby="none"></ui-dimmer>x</ui-segment>`)
     await userEvent.click(box)
     await settle()
     expect(host.visible).toBe(true)
     host.closedBy = "any"
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     await settle()
     await userEvent.click(box)
     await settle()
@@ -163,13 +163,13 @@ describe("<ui-dimmer> element dimmer", () => {
     expect(box.classList.contains("active")).toBe(false)
   })
 
-  it("invoker commands:  --show (a cancelable ui-open), --toggle, --close", async () => {
+  it("invoker commands:  --show (a cancelable ui-opening), --toggle, --close", async () => {
     const { host, wrapper } = await dimmer(
       `<button id="show" commandfor="d" command="--show">Show</button>` +
         `<button id="toggle" commandfor="d" command="--toggle">Toggle</button>` +
         `<ui-segment><ui-dimmer id="d"></ui-dimmer>x</ui-segment>`
     )
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     wrapper.querySelector<HTMLButtonElement>("#show")!.click()
     await settle()
     expect(host.visible).toBe(true)
@@ -287,7 +287,7 @@ describe("<ui-dimmer> page", () => {
     )
     const trigger = wrapper.querySelector<HTMLButtonElement>("#trigger")!
     trigger.focus()
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opened")
     host.visible = true
     await settle()
     await shown
@@ -298,7 +298,7 @@ describe("<ui-dimmer> page", () => {
     const rect = dialog.getBoundingClientRect()
     expect([rect.left, rect.top, rect.width, rect.height]).toEqual([0, 0, innerWidth, innerHeight])
     expect(UI.focus.containsDeep(host.querySelector("button")!, UI.focus.activeElementDeep())).toBe(true)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await userEvent.keyboard("{Escape}")
     await settle()
     expect(host.visible).toBe(false)
@@ -313,8 +313,8 @@ describe("<ui-dimmer> page", () => {
     const { host, wrapper } = await dimmer(
       `<button id="show" commandfor="d" command="--show">Show</button><ui-dimmer id="d" page><p>Busy</p></ui-dimmer>`
     )
-    const closes = record(host, "ui-close")
-    const shown = next(host, "ui-show")
+    const closes = record(host, "ui-closing")
+    const shown = next(host, "ui-opened")
     await userEvent.click(wrapper.querySelector("#show")!)
     await shown
     await userEvent.keyboard("{Escape}")

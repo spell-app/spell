@@ -112,12 +112,12 @@ export const toastVocabulary = {
   ],
   events: [
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ displayTime: number }",
       description: "Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ reason: ToastCloseReason, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -125,14 +125,14 @@ export const toastVocabulary = {
         "`preventDefault()` keeps it (Fomantic's `onHide` returning `false`)."
     },
     {
-      name: "ui-hide",
+      name: "ui-closed",
       detail: "{ reason: ToastCloseReason }",
       description:
         "Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  " +
         "`UI.toast()` removes its toasts here."
     },
     {
-      name: "ui-approve",
+      name: "ui-approving",
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -140,7 +140,7 @@ export const toastVocabulary = {
         "`preventDefault()` keeps the toast open."
     },
     {
-      name: "ui-deny",
+      name: "ui-denying",
       detail: "{ action: Element, originalEvent?: Event }",
       cancelable: true,
       description:

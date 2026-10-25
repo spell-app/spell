@@ -5,7 +5,7 @@
  *   - and its texts:  `UI.i18n.registerDictionary(es)`
  * - Gathered from two kinds of file:
  *   - each tag's own, `UI<Name>.es.ts` beside its vocabulary:  its tag, the names only it uses, its texts, `aka`
- *   - this one:  the names several tags share (`size`, `ui-change`), the shared value sets (hues, sizes ...)
+ *   - this one:  the names several tags share (`size`, `ui-changed`), the shared value sets (hues, sizes ...)
  *     and `words`, every other value, each translated once;  and the texts every component shares
  * - What stays English:
  *   - the platform's own attributes, with their values:  `href`, `type` on a button or input, `name`, `value`,
@@ -27,6 +27,7 @@ import { adEs } from "spell-ui/components/ui-ad/UIAd.es"
 import { breadcrumbEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumb.es"
 import { breadcrumbSectionEs } from "spell-ui/components/ui-breadcrumb/UIBreadcrumbSection.es"
 import { buttonEs } from "spell-ui/components/ui-button/UIButton.es"
+import { actionEs } from "spell-ui/components/ui-action/UIAction.es"
 import { buttonsEs } from "spell-ui/components/ui-button/UIButtons.es"
 import { orEs } from "spell-ui/components/ui-button/UIOr.es"
 import { calendarEs } from "spell-ui/components/ui-calendar/UICalendar.es"
@@ -269,35 +270,42 @@ export const sharedEs = {
     duration: "duracion"
   },
   events: {
-    "ui-open": "abrir",
-    "ui-close": "cerrar",
-    "ui-loading": "cargando",
-    "ui-loaded": "cargado",
-    "ui-error": "error",
-    "ui-change": "cambio",
-    "ui-load": "cargar",
-    "ui-save": "guardar",
-    "ui-saved": "guardado",
-    "ui-show": "mostrar",
-    "ui-hide": "ocultar",
-    "ui-search": "buscar",
-    "ui-remove": "quitar",
-    "ui-approve": "aprobar",
-    "ui-deny": "denegar",
-    "ui-valid": "valido",
-    "ui-invalid": "invalido",
-    "ui-success": "exito",
-    "ui-failure": "fallo",
-    "ui-saving": "guardando",
-    "ui-cancelling": "cancelando",
-    "ui-cancelled": "cancelado",
-    "ui-input": "entrada",
-    "ui-select": "seleccionar",
     "ui-opening": "abriendo",
     "ui-opened": "abierto",
     "ui-closing": "cerrando",
     "ui-closed": "cerrado",
-    "ui-complete": "completo"
+    "ui-loading": "cargando",
+    "ui-loaded": "cargado",
+    "ui-error": "error",
+    "ui-changing": "cambiando",
+    "ui-changed": "cambiado",
+    "ui-saving": "guardando",
+    "ui-saved": "guardado",
+    "ui-save-failed": "fallo-al-guardar",
+    "ui-applying": "aplicando",
+    "ui-applied": "aplicado",
+    "ui-searched": "buscado",
+    "ui-removing": "quitando",
+    "ui-removed": "quitado",
+    "ui-approving": "aprobando",
+    "ui-approved": "aprobado",
+    "ui-denying": "denegando",
+    "ui-denied": "denegado",
+    "ui-valid": "valido",
+    "ui-invalid": "invalido",
+    "ui-cancelling": "cancelando",
+    "ui-cancelled": "cancelado",
+    "ui-typed": "escrito",
+    "ui-moved": "movido",
+    "ui-choosing": "eligiendo",
+    "ui-chosen": "elegido",
+    "ui-selected": "seleccionado",
+    "ui-deselected": "deseleccionado",
+    "ui-animated": "animado",
+    "ui-completed": "completado",
+    "ui-copied": "copiado",
+    "ui-drawn": "dibujado",
+    "ui-navigating": "navegando"
   },
   slots: {
     icon: "icono",
@@ -665,6 +673,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   nagEs,
   panelEs,
   actionsEs,
+  actionEs,
   authorEs,
   avatarEs,
   contentEs,

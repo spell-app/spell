@@ -31,18 +31,18 @@ async function flyout(html: string) {
   return { wrapper, host, dialog, trigger }
 }
 
-/** Open `host` from `trigger` (so focus has somewhere to return), and wait for `ui-show`. */
+/** Open `host` from `trigger` (so focus has somewhere to return), and wait for `ui-opened`. */
 async function open(host: Flyout, trigger?: HTMLElement) {
   trigger?.focus()
-  const shown = next(host, "ui-show")
+  const shown = next(host, "ui-opened")
   host.visible = true
   await settle()
   await shown
 }
 
-/** Hide `host`, and wait for `ui-hide`. */
+/** Hide `host`, and wait for `ui-closed`. */
 async function close(host: Flyout) {
-  const hidden = next(host, "ui-hide")
+  const hidden = next(host, "ui-closed")
   host.visible = false
   await hidden
   await settle()
@@ -238,14 +238,14 @@ describe("<ui-flyout> layout", () => {
 ////////////////
 
 describe("<ui-flyout> behaviour (DialogComponent)", () => {
-  it("`open` shows it with showModal():  top layer, scroll lock;  ui-show then ui-hide", async () => {
+  it("`open` shows it with showModal():  top layer, scroll lock;  ui-opened then ui-closed", async () => {
     const { host, dialog } = await flyout(`<ui-flyout heading="Hi">x</ui-flyout>`)
-    const shows = record(host, "ui-show")
+    const shows = record(host, "ui-opened")
     await open(host)
     expect(dialog.matches(":modal")).toBe(true)
     expect(document.documentElement.classList.contains("ui-scroll-locked")).toBe(true)
     expect(shows).toEqual([{ visible: true }])
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     host.visible = false
     await settle()
     await hidden
@@ -255,7 +255,7 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
 
   it("a click on the dimmer closes it (reason `outside`);  one inside doesn't", async () => {
     const { host, dialog } = await flyout(`<ui-flyout heading="Hi" content="Body"></ui-flyout>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host)
     await userEvent.click(dialog.querySelector(".content")!)
     await settle()
@@ -266,13 +266,13 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
     expect(closes.map((detail) => detail.reason)).toEqual(["outside"])
   })
 
-  it("approve:  a cancelable ui-approve, then closes;  the close icon closes (reason `close`)", async () => {
+  it("approve:  a cancelable ui-approving, then closes;  the close icon closes (reason `close`)", async () => {
     const { host, dialog } = await flyout(
       `<ui-flyout heading="Sure?" content="Body" closable><ui-actions><ui-button class="approve">Yes</ui-button>` +
         `</ui-actions></ui-flyout>`
     )
-    const closes = record(host, "ui-close")
-    const approves = record(host, "ui-approve")
+    const closes = record(host, "ui-closing")
+    const approves = record(host, "ui-approving")
     await open(host)
     await userEvent.click(host.querySelector(".approve")!)
     await settle()
@@ -300,9 +300,9 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
     )
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="f" command="--show">Show</button>`)
     const show = wrapper.querySelector<HTMLButtonElement>("#show")!
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     show.focus()
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opened")
     await userEvent.keyboard("{Enter}")
     await settle()
     await shown
@@ -326,8 +326,8 @@ describe("<ui-flyout> behaviour (DialogComponent)", () => {
     UI.overlays.useCloseWatcher = true
     const { host, dialog, wrapper } = await flyout(`<ui-flyout id="f" heading="Hi">x</ui-flyout>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="show" commandfor="f" command="--show">Show</button>`)
-    const closes = record(host, "ui-close")
-    const shown = next(host, "ui-show")
+    const closes = record(host, "ui-closing")
+    const shown = next(host, "ui-opened")
     await userEvent.click(wrapper.querySelector("#show")!)
     await shown
     await userEvent.keyboard("{Escape}")
@@ -362,7 +362,7 @@ describe("<ui-flyout> modeless", () => {
   it("shows with show():  no dimmer, no scroll lock;  a click on the page lands, and closes it", async () => {
     const { host, dialog, trigger } = await flyout(`<ui-flyout modeless heading="Hi" content="Body"></ui-flyout>`)
     const clicks = record<MouseEvent>(trigger, "click")
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host)
     expect(dialog.open).toBe(true)
     expect(dialog.matches(":modal")).toBe(false)
@@ -402,7 +402,7 @@ describe("<ui-flyout> modeless", () => {
 
   it("Escape and the close icon still close it", async () => {
     const { host, dialog, trigger } = await flyout(`<ui-flyout modeless closable heading="Hi">x</ui-flyout>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await open(host, trigger)
     await userEvent.keyboard("{Escape}")
     await settle()

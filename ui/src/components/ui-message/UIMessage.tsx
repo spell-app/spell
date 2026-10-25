@@ -23,7 +23,7 @@ import messageCSS from "./UIMessage.css?inline"
  *   reading the owner tokens `UIMessage.css` declares on the inner box.
  *   `define()` registers it as their owner;  nothing to do here.
  *
- * - Dismissing:  the close button sends the cancelable `ui-dismiss`.
+ * - Dismissing:  the close button sends the cancelable `ui-closing`.
  *   - Unless it's cancelled, the element sets `hidden` on ITSELF.
  *   - It never removes itself:  a framework that drew the node still owns it.
  *
@@ -100,7 +100,7 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
   /** The close button:  announce, then hide, unless a handler cancelled. */
   private readonly onDismiss = (event: MouseEvent) => {
     const detail: UIT.MessageDismissDetail = { originalEvent: event }
-    if (this.send("ui-dismiss", detail)) this.domElement.hidden = true
+    if (this.send("ui-closing", detail)) this.domElement.hidden = true
   }
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
