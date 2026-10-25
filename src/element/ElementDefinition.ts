@@ -157,7 +157,11 @@ export class ElementDefinition {
     const isOn = text !== null && this.words.converters.boolean(text, old.name)
     const ownWords = new Set([old.value, ...Object.values(old.values ?? {})].filter((word) => word !== undefined))
     if (attribute.spec.kind === "multiple") {
-      const words = new Set(ElementDefinition.text(current ?? "").split(/\s+/).filter(Boolean))
+      const words = new Set(
+        ElementDefinition.text(current ?? "")
+          .split(/\s+/)
+          .filter(Boolean)
+      )
       for (const word of ownWords) words.delete(word)
       if (isOn) words.add(ElementDefinition.newWord(old, text!))
       return { value: this.convert(attribute, [...words].join(" ") || null) }

@@ -291,7 +291,9 @@ export class SiteHeader extends HTMLElement {
   private toggleEdit(): void {
     const on = !readEdit()
     tabPrefs.set(EDIT_PREF, on ? EDIT_ON : undefined)
-    document.dispatchEvent(new CustomEvent(on ? "spell-site:edit-opened" : "spell-site:edit-closed", { detail: { on } }))
+    document.dispatchEvent(
+      new CustomEvent(on ? "spell-site:edit-opened" : "spell-site:edit-closed", { detail: { on } })
+    )
     this.render()
   }
 

@@ -180,8 +180,14 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     const attribute = definition?.attributeNamed(name)
     // a vocabulary's own `hidden` (none ships one) keeps its meaning
     if (visibleAttribute && name === "hidden" && !attribute) return this.onHiddenAttributeChanged(text)
-    const old = attribute ? undefined : definition?.oldAttributeNamed(name)
-    if (old) return this.onOldAttributeChanged(old, text)
+    const old = definition?.oldAttributeNamed(name)
+    if (old && !attribute) return this.onOldAttributeChanged(old, text)
+    // an old switch named like a new attribute (`link`:  a look once, now where a click goes):
+    // written bare, it's the old switch;  with text, the new attribute;  removed, both let go
+    if (old && (text === "" || text === null)) {
+      this.onOldAttributeChanged(old, text)
+      if (text === "") return
+    }
     if (!attribute || connectedState.upgradeValues?.has(attribute.property)) return
     if (attribute === visibleAttribute) return this.onVisibleAttributeChanged(text)
     this.setValue(attribute, definition.convert(attribute, text), "attribute")

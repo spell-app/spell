@@ -125,7 +125,9 @@ export type AttributeSpec = {
    * The class words a value draws, where they aren't the value itself (epic `ui-gaps` P4):
    * `{ md: "padded", lg: "very padded", none: "fitted" }` on `padding`;  `""` draws none.
    * - Fomantic's classes stay as they are:  only the words a page writes change.
-   * - On an attribute that takes several words (`kind: "multiple"`), each word is looked up on its own.
+   * - On an attribute that takes several words (`kind: "multiple"`), each word is looked up on its own,
+   *   and draws ALONE:  so a several-word look (`appearance`) takes a `classes` map, even `{}`;
+   *   without one, each word is drawn with the attribute's key after it (`mobile only`, the grid's way).
    */
   classes?: Readonly<Record<string, string>>
   /** What it does, for docs and the custom-elements manifest:  written for developers. */

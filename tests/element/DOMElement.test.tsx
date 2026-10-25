@@ -340,6 +340,19 @@ describe("DOMElement old names", () => {
     expect(host.look).toBe("very-basic")
   })
 
+  test("an old switch named like a new attribute is the old one written bare, the new one with text", async () => {
+    const { tag } = definedTag("old-same-name", [
+      attribute("look", "multiple", { values: ["link"], replaces: [{ from: "link", value: "link" }] }),
+      attribute("link", "string")
+    ])
+    const host = await renderTag(tag, "link")
+    expect([host.look, host.link]).toEqual(["link", undefined])
+    host.setAttribute("link", "help.html")
+    expect(host.link).toBe("help.html")
+    host.removeAttribute("link")
+    expect([host.look, host.link]).toEqual([undefined, undefined])
+  })
+
   test("observes the old names, beside the attributes", () => {
     const { Class } = definedTag("old-observed", [COLOR])
     expect((Class as unknown as { observedAttributes: string[] }).observedAttributes).toEqual(
