@@ -70,7 +70,8 @@ export class StoragePlace extends PrefPlace {
   /**
    * Move the text kept under `oldKey`, a key no store names (written before `PrefStore`), to `key` of `store`.
    * - The text as it is, byte for byte;  a value `key` already has wins, and `oldKey` is forgotten either way.
-   * - Nothing under `oldKey`:  nothing happens.  NEVER throws:  a failure is logged.
+   * - Nothing under `oldKey`:  nothing happens.
+   * - NEVER throws:  a failure is logged.
    */
   moveText(oldKey: string, store: string, key: string): void {
     this.attempt("moveText", store, key, (storage) => {

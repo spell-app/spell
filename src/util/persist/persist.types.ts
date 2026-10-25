@@ -1,5 +1,6 @@
 /**
- * Types for `spell/util/persist`:  keeping values for people, across visits -- see `PrefStore`.
+ * Types for `spell/util/persist`:  what an app keeps for people --
+ * their preferences across visits (`PrefStore`), and the history they undo and redo (`UndoStack`).
  * - Generic, like every file of this folder:  nothing spell-specific, so Spell UI uses it too.
  * - Types only, apart from the place names:  the folder's other files import it, never the reverse.
  * - The page server's side of `ServerPlace`'s protocol (spell-app's spaces) imports its types too.
@@ -20,8 +21,8 @@ export const PrefPlaceNames = ["local", "session", "memory"] as const
 export type PrefPlaceName = (typeof PrefPlaceNames)[number]
 
 /**
- * What a `StoragePlace` needs of a web `Storage`:  `localStorage`, `sessionStorage`, a `MemoryStorage`, or a test's
- * stand-in.
+ * What a `StoragePlace` needs of a web `Storage`.
+ * - e.g. `localStorage`, `sessionStorage`, a `MemoryStorage`, or a test's stand-in
  */
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem" | "key" | "length">
 
@@ -35,8 +36,8 @@ export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem" | "
  */
 export type ValueInfo = {
   /**
-   * Its type, as Spell's runtime names it:  `number`, `text`, `choice` (true or false);  any other name (a class's)
-   * isn't checked.
+   * Its type, as Spell's runtime names it:  `number`, `text`, `choice` (true or false).
+   * - Any other name (a class's) isn't checked.
    */
   type?: string
   /** Its legal values, e.g. `["light", "dark", "auto"]`, or a function returning them;  the first is the default. */
@@ -93,8 +94,8 @@ export type PrefForgetRequest = {
 ////////////////
 
 /**
- * One change `UndoStack` can undo and redo:  what it holds is whoever records it's (Spell's runtime records the
- * properties an action set).
+ * One change `UndoStack` can undo and redo.
+ * - What it holds is up to whoever records it:  Spell's runtime records the properties an action set.
  * - Both run at once, and must NOT wait:  an async action's redo puts its end state back, it doesn't run it again.
  */
 export type UndoRecord = {
@@ -109,8 +110,8 @@ export type UndoStep = {
   /** What people see after "Undo":  short, capitalized like a menu item, e.g. `Change Margin`, `Turn Card`. */
   title: string
   /**
-   * What it changed, so a run of steps with the same title AND target folds into one (typing into one field);
-   * none:  it never folds.
+   * What it changed, so a run of steps with the same title AND target folds into one (typing into one field).
+   * - None:  it never folds.
    */
   target?: unknown
   /** Its changes, in the order they were made. */

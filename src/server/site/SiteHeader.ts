@@ -42,7 +42,8 @@ import {
  *   - light / dark:  ONE button showing the scheme the page shows (sun / moon);  a click flips it
  *     - until the first click, it follows the OS
  *     - flipping BACK to the OS's own scheme follows the OS again, so two clicks always undo one (`flipTheme()`)
- *     - stored under `SCHEME_KEY`, the one key every doc site shares (Spell UI's `ThemePreference` too)
+ *     - kept under `SCHEME_KEY` (through a `PrefStore`):
+ *       the one key every doc site shares, Spell UI's `ThemePreference` too
  *     - applied as `ui-light` / `ui-dark` on `<html>` (UI's tokens, `--ui-scheme`)
  *       AND as inline `color-scheme` (pages without UI's sheets, and this bar's own `light-dark()`)
  *     - follows the OS while it changes, and other tabs' switches (`storage`)
@@ -52,8 +53,8 @@ import {
  * - Self-contained:  its own shadow DOM and CSS, no UI elements, so it looks the same on every property.
  * - Tooltips:  the browser's own, a `title` on each link and button (the logo, the pencil, `<>`, the theme)
  *   - its icon takes no pointer (`pointer-events: none`):  the pointer lands on the titled element ITSELF
- *   - why:  VS Code's side bar (Electron 38 and up, on macOS) shows a `title` only on the element under the
- *     pointer, not on its parent (electron/electron#49843;  epic `epic-engine` I43)
+ *   - why:  VS Code's side bar (Electron 38 and up, on macOS) shows a `title` only on the element under the pointer,
+ *     not on its parent (electron/electron#49843;  epic `epic-engine` I43)
  * - `docked`:  a compact row in place, not a fixed bar, inside the page's own chrome
  *   (the Spell UI site's side column and top bar)
  *   - no light / dark button (the page has its own)
@@ -162,8 +163,8 @@ export class SiteHeader extends HTMLElement {
   }
 
   /**
-   * The URL of `tab`'s home (or the site's, `SITE_HOME`), or `undefined` where it can't be reached
-   * (server-only, from `file://`).
+   * The URL of `tab`'s home (or the site's, `SITE_HOME`);
+   * `undefined` where it can't be reached (server-only, from `file://`).
    * - A worktree's page on the main checkout's server (`/worktrees/<w>/...`) keeps that prefix on repo paths,
    *   so a tab stays in the worktree:  a tab only the branch has (Brand, before it merges) is a 404 on `main`.
    * - A server route (`/components/ui/`, `/editor/`) is the server's own:  never prefixed.
@@ -182,8 +183,8 @@ export class SiteHeader extends HTMLElement {
    * Absolute path of the page's source file, for VS Code;  `undefined` when unknown (a proxied page).
    * - served:  the file the server served (`SPELL_SERVER.source`), wherever it lives
    *   - e.g. a guide, from the content folder:  `.../spell-app.epics/guides/x.html`
-   *   - epic `epic-engine` I42:  `root` + `file` gave `.../spell-app/guides/x.html`, which doesn't exist since the
-   *     guides moved to the content folder (epic `epic-eject` P12;  `file` is the page's path in it)
+   *   - epic `epic-engine` I42:  `root` + `file` gave `.../spell-app/guides/x.html`, which doesn't exist
+   *     since the guides moved to the content folder (epic `epic-eject` P12;  `file` is the page's path in it)
    * - a server from before `source`:  `root` + `file`, right for the checkout's own pages
    */
   get sourceFile(): string | undefined {
@@ -214,8 +215,8 @@ export class SiteHeader extends HTMLElement {
     const badge = checkout
       ? `<span class="badge${this.info?.worktree ? " worktree" : ""}" title="${escape(this.info?.root ?? "")}">⎇ ${escape(checkout)}</span>`
       : ""
-    // framed (VS Code's side bar):  no "open in VS Code" (a framed page can't follow a `vscode://` link) and no edit
-    // mode -- they did nothing there (Owen, 2026-10-08);  a browser tab keeps both
+    // framed (VS Code's side bar):  no "open in VS Code" (a framed page can't follow a `vscode://` link)
+    // and no edit mode -- they did nothing there (Owen, 2026-10-08);  a browser tab keeps both
     const framed = window.self !== window.top
     // `no-tools`:  a page whose chrome has no use for them
     // (the Spell UI site's, Owen 2026-10-23:  "they don't do anything anyway")
@@ -316,7 +317,7 @@ type Theme = SiteScheme
  */
 const sitePrefs = new PrefStore(SITE_PREFS)
 
-/** This tab's:  edit mode, `spell-site:edit`. */
+/** This tab's preferences:  edit mode, `spell-site:edit`. */
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
 
 /** Edit mode on, as kept:  `1`, as it always was. */
@@ -348,7 +349,7 @@ function readTheme(): Theme | undefined {
 
 /**
  * Move the scheme from the keys it lived under before `SCHEME_KEY` (`LEGACY_SCHEME_KEYS`).
- * Returns the scheme, else `undefined`.
+ * - Returns the scheme, else `undefined`.
  * - the first valid one is copied to `SCHEME_KEY`, and every old key removed, so this runs once
  * - the same steps as Spell UI's `ThemePreference`:  whichever site the viewer opens first moves it
  */
@@ -423,8 +424,9 @@ function svg(body: string): string {
 
 /**
  * The bar's look:  follows the page's `color-scheme` through `light-dark()`.
- * - a page may set its fill and its rule under it (`--spell-site-header-fill`, `--spell-site-header-rule`, `--spell-site-header-shadow`):  an epic
- *   page lays it on its own background, one block with its header (epic `epic-engine` I100)
+ * - a page may set its fill, the rule under it and its shadow
+ *   (`--spell-site-header-fill`, `--spell-site-header-rule`, `--spell-site-header-shadow`):
+ *   an epic page lays it on its own background, one block with its header (epic `epic-engine` I100)
  */
 const STYLE = `
 :host { display: block; }
@@ -470,8 +472,8 @@ nav { display: flex; gap: 2px; }
 :host([docked]) .tab { padding: 5px 8px; }
 :host([docked]) .tool { width: 26px; height: 26px; }
 :host([docked]) .tool svg { width: 16px; height: 16px; }
-/* narrow (VS Code's side bar, a phone):  the tabs scroll sideways;  the pages' own eyebrow crumbs hide at the same
-   width (spell-doc.css, <epic-page>'s Crumbs.css) */
+/* narrow (VS Code's side bar, a phone):  the tabs scroll sideways;
+   the pages' own eyebrow crumbs hide at the same width (spell-doc.css, <epic-page>'s Crumbs.css) */
 @media (max-width: 720px) {
   header { gap: 6px; padding: 0 8px; }
   nav { overflow-x: auto; flex: 1; scrollbar-width: none; }

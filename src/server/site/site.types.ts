@@ -10,8 +10,8 @@
  * - DATA, never code in this package:  the header knows no site's parts
  *   - served:  the page server's settings, `"siteTabs"` (`PageServerSettings.siteTabs`),
  *     handed to every page it serves as `SPELL_SERVER.siteTabs`
- *   - else (a `file://` page, a server whose settings name none):  what `defineSite()`'s caller passes
- *     (`SiteHeader.fallbackTabs`)
+ *   - else (a `file://` page, a server whose settings name none):
+ *     what `defineSite()`'s caller passes (`SiteHeader.fallbackTabs`)
  *   - plain JSON, so a setting and a served page can carry it
  * - `name`:  its label, e.g. `Epic/UI`
  * - `path`:  its home page, relative to the site's root (`guides/index.html`), or server-absolute (`/components/ui/`)
@@ -72,10 +72,10 @@ export function litTab(tabs: readonly SiteTab[], path: string): SiteTab | undefi
 }
 
 /**
- * Which component set page path `path` is in (`location.pathname`), by its served address;  `undefined` for anything
- * else.
- * - `/components/<set>/`, a worktree's too (`/worktrees/<w>/components/<set>/`):  the page server's `componentSets`
- *   setting, each at `/components/<id>/`
+ * Which component set page path `path` is in (`location.pathname`), by its served address;
+ * `undefined` for anything else.
+ * - `/components/<set>/`, a worktree's too (`/worktrees/<w>/components/<set>/`):
+ *   the page server's `componentSets` setting, each at `/components/<id>/`
  * - a set's folder on disk (a `file://` page) has no address:  a tab names it in its `paths`
  */
 export function componentSet(path: string): string | undefined {
@@ -83,8 +83,9 @@ export function componentSet(path: string): string | undefined {
 }
 
 /**
- * Which docs area page path `path` is in (`location.pathname`:  served, or a `file://` path), of `areas`, the area
- * folders' names (`guides`, `epics` ...);  `undefined` for anything else.
+ * Which docs area page path `path` is in (`location.pathname`:  served, or a `file://` path);
+ * `undefined` for anything else.
+ * - `areas`:  the area folders' names (`guides`, `epics` ...)
  * - an area is a folder with a tab of its own (`SiteTab.areas`):  the page server's, or the shared content folder's
  * - the area is the FIRST area folder in the path:  `templates/epics/plan.html` is a template, not an epic
  * - a worktree's page, served from the main checkout (`/worktrees/<w>/...`) or opened from disk
@@ -102,19 +103,19 @@ export function docsArea(path: string, areas: readonly string[]): string | undef
  * `localStorage` key of the chosen color scheme:  `light`, `dark`, or absent for the OS's.
  * - ONE key for every doc site, so a switch on one site holds on the others:
  *   Spell UI's `ThemePreference` reads and writes it too, as `DOCS_LOOK_KEYS.scheme`
- *   (`packages/ui/src/docs-components/docs-components.types.ts`)
+ *   (spell-ui's `src/docs-components/docs-components.types.ts`)
  * - MUST stay equal:  `ui`'s `UIDocsThemes.test.tsx` pins it
  */
 export const SCHEME_KEY = "spell-site:scheme"
 
-/** The site's preferences' store:  `SCHEME_KEY` is its `scheme`, `spell-site:edit` (per tab) its `edit`. */
+/** The name of the site header's `PrefStore`:  `SCHEME_KEY` is its `scheme`, `spell-site:edit` (per tab) its `edit`. */
 export const SITE_PREFS = "spell-site"
 /** The chosen color scheme's key in `SITE_PREFS`:  `SCHEME_KEY`. */
 export const SCHEME_PREF = "scheme"
 
 /**
  * Keys the scheme lived under before `SCHEME_KEY` (2026-10-04).
- * Read once while `SCHEME_KEY` is absent, copied to it, then removed;  the first valid one wins.
+ * - Read once while `SCHEME_KEY` is absent, copied to it, then removed;  the first valid one wins.
  * - `spell-site:theme`:  this header's
  * - `spell-ui-site:scheme`:  Spell UI's site
  * - MUST equal `DOCS_LEGACY_SCHEME_KEYS` in `ui`'s `docs-components.types.ts`

@@ -1,7 +1,8 @@
 /**
- * How a kept value is written as text, read back, defaulted and checked:  `PrefStore`'s, and spell properties' defaults.
- * - Text people and plain scripts can read:  a string as itself (`dark`), anything else as JSON (`1`, `true`,
- *   `{"open":true}`).
+ * How a kept value is written as text, read back, defaulted and checked:
+ * `PrefStore`'s, and spell properties' defaults.
+ * - Text people and plain scripts can read:
+ *   a string as itself (`dark`), anything else as JSON (`1`, `true`, `{"open":true}`).
  */
 import type { ValueInfo } from "./persist.types"
 
@@ -10,8 +11,8 @@ import type { ValueInfo } from "./persist.types"
 ////////////////
 
 /**
- * Text that reads back as JSON:  it starts with a quote, a brace or a bracket, or it's a number, `true`, `false` or
- * `null`, whole.
+ * Text that reads back as JSON:
+ * it starts with a quote, a brace or a bracket, or it's a number, `true`, `false` or `null`, whole.
  * - A JSON number exactly:  `007` and `1.` are text.
  */
 const JSON_TEXT = /^(?:["{[]|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$|true$|false$|null$)/

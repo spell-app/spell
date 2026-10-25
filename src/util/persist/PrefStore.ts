@@ -14,15 +14,16 @@ import { choicesOf, defaultFor, isAllowed } from "./values"
  *   - the browser's storage, unless it says otherwise
  *   - per tab, or memory, by name (`session`, `memory`)
  *   - the browser's database or the page server, waited on (`DatabasePlace.shared`, `ServerPlace.shared`)
- * - In the browser's storage, values are text people and plain scripts can read:  `dark`, `1`, `{"open":true}`
- *   (`textForValue()`);  the browser's database keeps them as they are, a server as JSON.
+ * - In the browser's storage, values are text people and plain scripts can read:
+ *   `dark`, `1`, `{"open":true}` (`textForValue()`).
+ *   The browser's database keeps them as they are, a server as JSON.
  * - A pref may be declared, with its type, choices and default (`declare()`):
  *   `get()` then answers its default while nothing's kept, and refuses to keep what it doesn't allow.
- * - Quick (`get()`, `set()` ...) and waited on (`load()`, `save()`, `update()`):
- *   a place that must be waited on refuses a quick read, and does a quick write later.
+ * - Two ways to ask:  quick (`get()`, `set()` ...) and waited on (`load()`, `save()`, `update()`).
+ *   A place that must be waited on refuses a quick read, and does a quick write later.
  * - NEVER throws when storage fails (blocked, full, a value it can't read):  it logs, and answers the default.
- *   - It throws `TypeError` for a caller's mistake:  a store name with a colon, no key, a value its declaration
- *     doesn't allow, a quick read of a waited-on place.
+ *   - It throws `TypeError` for a caller's mistake:
+ *     a store name with a colon, no key, a value its declaration doesn't allow, a quick read of a waited-on place.
  * - Generic, in the kit's util:  nothing spell-specific, and nothing imported from outside this folder,
  *   so Spell UI uses it too.
  ****************/
@@ -48,8 +49,8 @@ export class PrefStore {
 
   /**
    * `fullKey`, as a plain script names it, split into its store's name and its key, at the first colon.
-   * - e.g. `"spell-site:scheme"` => `["spell-site", "scheme"]`;  `"spell-ui-site:folds:/x.html"` =>
-   *   `["spell-ui-site", "folds:/x.html"]`
+   * - e.g. `"spell-site:scheme"` => `["spell-site", "scheme"]`
+   *   and `"spell-ui-site:folds:/x.html"` => `["spell-ui-site", "folds:/x.html"]`
    * - For code that knows a key whole:  a key two files share, a plain script's, an old one being moved over.
    * - throws `TypeError` for a key with no colon
    */
@@ -71,10 +72,10 @@ export class PrefStore {
   }
 
   /**
-   * Move what's kept under `oldKey`, a key no store names (written before `PrefStore`:  `spell-epics-sort`), to
-   * `fullKey` (`spell-epics:sort`), once.
+   * Move what's kept under `oldKey` to `fullKey` (`spell-epics:sort`), once.
+   * - `oldKey`:  a key no store names, written before `PrefStore` (`spell-epics-sort`)
    * - Its text moved byte for byte, so it reads as it did;  a value `fullKey` already has wins.
-   * - Nothing under `oldKey`:  nothing happens.  So it's safe to call on every start.
+   * - Nothing under `oldKey`:  nothing happens, so it's safe to call on every start.
    * - throws `TypeError` for a `fullKey` with no colon
    */
   static moveOldKey(oldKey: string, fullKey: string, place: "local" | "session" = "local"): void {
@@ -175,7 +176,7 @@ export class PrefStore {
   /**
    * Move the value kept under `oldKey` to `newKey`, when a pref is renamed.  Returns this store.
    * - Only when `newKey` keeps none yet;  `oldKey` is forgotten either way.
-   * - Nothing kept under `oldKey`:  nothing happens.  So it's safe to call on every start.
+   * - Nothing kept under `oldKey`:  nothing happens, so it's safe to call on every start.
    * - throws `TypeError` when its place must be waited on
    */
   rename(oldKey: string, newKey: string): this {
@@ -288,8 +289,8 @@ export class PrefStore {
 /** Options for a `PrefStore`. */
 export type PrefStoreOptions = {
   /**
-   * Where it keeps its values:  a place's name (`PrefPlaceNames`), or a place itself (a `StoragePlace` over a test's
-   * storage ...).
+   * Where it keeps its values:
+   * a place's name (`PrefPlaceNames`), or a place itself (a `StoragePlace` over a test's storage ...).
    * - Default `local`:  the browser's lasting storage.
    */
   place?: PrefPlaceName | PrefPlace

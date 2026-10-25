@@ -4,8 +4,9 @@ import { WaitedOnPlace } from "./WaitedOnPlace"
 /****************
  * ### `ServerPlace`
  * A waited-on `PrefPlace` on a server:  a person's preferences follow them to every browser they use.
- * - It speaks a small protocol under its URL, `/api/prefs` by default:  `PrefLoadAnswer` has it.
- *   - spell-app's page server answers it, keeping each store in the person's space.
+ * - It speaks a small protocol under its URL, `/api/prefs` by default:
+ *   four requests, written out above `PrefLoadAnswer` ("The server's protocol").
+ *   - spell-app's spaces answer it on the page server, keeping each store in the person's space (`__prefs/`).
  * - Values travel as JSON:  plain data only (no `Blob`, no `Date`).
  * - Each request is its own:  `PrefStore.update()` reads, then saves, one at a time in this page.
  * - NEVER throws when the server fails (offline, refused, an error):  it logs, and a read answers `undefined`.

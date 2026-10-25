@@ -34,7 +34,8 @@ It stands on Spell cells instead, and so does the editor.
 `spell/util` is the floor of every Spell repo:  the small things more than one package needs,
 in one folder of the kit, under one import name.
 The cells are its middle layer.
-Under them sit plain helpers with no dependencies at all;  over them, Spell's own utilities.
+Under them sit plain helpers with no dependencies at all;  over them, Spell's own utilities,
+and beside those what an app keeps for people:  its preferences, and the history they undo.
 
 ## This, or lodash?
 
@@ -70,8 +71,11 @@ flowchart TB
   spell["Spell's own<br/>Observable · Loadable · $fetch · Logger · Task"]
   reactive["Spell cells, the reactive engine<br/>records · @prop @state @derived · bridgeSolid()"]
   generic["generic helpers<br/>@proto @lazy @once · class · string · dom"]
+  persist["what an app keeps for people<br/>PrefStore · UndoStack"]
   spell --> reactive --> generic
+  persist --> reactive
   ui["Spell UI, the kit's element framework"] -. "one file at a time" .-> generic
+  ui -. "PrefStore, by its file" .-> persist
   lang["spell-parser, spell-app"] -- "the whole barrel" --> spell
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
@@ -80,7 +84,7 @@ flowchart TB
 ```
 
 _Each layer uses only the ones below it;  Spell UI takes the generic files one by one,
-so nothing above them lands in its bundles._
+and the pref store by its own file, so nothing else above them lands in its bundles._
 
 Its biggest reader by far is the language:  242 of spell-parser's files import the barrel,
 207 of them in its `spell` folder, against 14 in spell-app's editor, language server, spaces and command line.
@@ -96,6 +100,8 @@ Use the barrel, except for these:
 | --- | --- | --- |
 | `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
 | `spell/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
+| `spell/util/persist` | the preferences and undo, without lodash:  the barrel would bundle it into every page | the kit's site header (`spell/server/site`) |
+| `spell/util/persist/PrefStore` | the pref store alone:  in Spell UI's core bundle the whole folder cost every page 1.9 kB | Spell UI's theme, nav, saved-theme and site-fold preferences |
 | `spell/util/spell/Derivative`, `/spell/Logger` | one class, and nothing else | spell-parser's parser:  its `Rule` and its tokenizer |
 | `spell/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
 | `spell/util/node/json5` | node only:  never through a barrel, so no browser code pulls it in | the tools that write JSON5 (below) |
@@ -208,10 +214,14 @@ One store per app keeps what each person set:  a theme, a panel's width, the las
 import { PrefStore } from "spell/util"
 
 const prefs = new PrefStore("spell-site").declare("scheme", { oneOf: ["light", "dark", "auto"] })
-prefs.get("scheme")          // "light":  nothing kept yet, so the first choice
-prefs.set("scheme", "dark")  // localStorage now holds  spell-site:scheme = dark
-prefs.set("width", 250)      //                          spell-site:width  = 250
+prefs.get("scheme")            // "light":  nothing kept yet, so the first choice
+prefs.set("scheme", "dark")    // localStorage now holds  spell-site:scheme = dark
+prefs.set("width", 250)        //                          spell-site:width  = 250
+prefs.set("scheme", "purple")  // throws:  PrefStore.set():  `scheme` is one of light, dark, auto;  not `purple`
 ```
+
+_One run under node 24, over a store in memory whose text could be read back;
+the store's tests check the same text in Chromium's own `localStorage`._
 
 - Every key starts with the store's name and a colon, so two apps on one site never share a value,
   and `forgetAll()` forgets only its own.
@@ -219,44 +229,89 @@ prefs.set("width", 250)      //                          spell-site:width  = 250
   - So a page's inline script, which can't import anything, reads the same key raw, before the page draws.
   - A string that would read back as something else is quoted:  the text `"1"` is kept as `"1"`, the number as `1`.
 - A declared pref's default is its `default`, else its first choice, else its type's:  `0`, `""` or `false`.
-- Where it keeps them is its place's business:  `local` (the default), `session` (per tab), `memory`
-  (servers, tests), or a place you hand it:
-  - `DatabasePlace.shared`:  the browser's database (IndexedDB), for big values and values that aren't text.
-    A `Blob`, a `Date` or a file handle comes back as it went in;
-    `update()` reads, changes and saves in one transaction, so two tabs never read the same value.
-  - `ServerPlace.shared`:  the page server, which keeps each store in the person's space
-    ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)), so it follows them to every browser.
-  - a `StoragePlace` over a storage you hand it (a test's).
+- Where it keeps them is its place's business, so the code that asks never changes:
+
+  | Place | Where | Kept as | Read |
+  | --- | --- | --- | --- |
+  | `local`, the default | the browser's storage, per site:  it survives a reload and a restart | text | at once |
+  | `session` | the browser's per-tab storage:  gone when the tab closes | text | at once |
+  | `memory` | this store alone, for this page:  a server's request, a test | text | at once |
+  | `DatabasePlace.shared` | the browser's database (IndexedDB), one for the site, `spell-prefs` | as it is:  a `Blob`, a `Date` or a file handle comes back as it went in | waited on |
+  | `ServerPlace.shared` | the page server's `/api/prefs`, in the person's space ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)), so it follows them to every browser | JSON:  plain data only | waited on |
+  | a `StoragePlace` you make | over a storage you hand it (a test's) | text | at once |
+
+- `update()` reads, changes and saves a value as one step;
+  in the browser's database that's one transaction, so two tabs never read the same value.
 - The edges:
   - It never throws when storage fails.
     Blocked storage (a private window) keeps values in memory for the visit, and says so once;
     a full one logs, and `get()` answers the default.
   - It throws `TypeError` for a caller's mistake:  no key, a store name with a colon,
     a value its declaration doesn't allow.
-  - `load()`, `save()` and `update()` are the waited-on forms, for a place that must be waited on;
-    a quick `get()` there throws, naming `load()`.
+  - A place that must be waited on refuses a quick `get()`, naming `load()`, and does a quick `set()` later:
+    `load()`, `save()` and `update()` are the forms that work everywhere.
 - It's generic, but not in Spell UI's core bundle:  there it cost every page 1.9 kB,
   so Spell UI's few stores import it by file, `spell/util/persist/PrefStore`.
+
+<details>
+<summary>Every method, one line each</summary>
+
+| Method | What it does |
+| --- | --- |
+| `get(key, fallback?)`, `has(key)` | the value kept, else `fallback`, else the declared default;  is one kept? |
+| `set(key, value)`, `forget(key)` | keep it;  `undefined` forgets it |
+| `declare(key, info)`, `defaultFor(key)` | its type, choices and default;  what it reads while nothing's kept |
+| `keysUnder(prefix)`, `forgetUnder(prefix)`, `forgetAll()` | keys with a shared start act like a folder (`layout/`) |
+| `rename(oldKey, newKey)` | move a renamed pref's value, once:  safe to call on every start |
+| `load()`, `save()`, `update()`, `loadKeysUnder()` | the waited-on forms, for every place |
+| `PrefStore.getAt(fullKey)`, `setAt(fullKey, value)` | a key named whole, as a plain script names it (`spell-site:scheme`) |
+| `PrefStore.splitKey(fullKey)` | `"spell-ui-site:folds:/x.html"` => `["spell-ui-site", "folds:/x.html"]`:  the first colon splits |
+| `PrefStore.moveOldKey(oldKey, fullKey)` | move a key written before `PrefStore` (`spell-epics-sort`), byte for byte, once |
+
+</details>
 
 ### `UndoStack`:  one step for everything an action does
 
 ```ts
 import { UndoStack } from "spell/util"
 
+const box = { margin: 0 }
 const history = new UndoStack({ limit: 100 })
+
+/** Set the margin, and record how to put it back. */
+function setMargin(margin: number) {
+  const before = box.margin
+  box.margin = margin
+  history.record(
+    { undo: () => (box.margin = before), redo: () => (box.margin = margin) },
+    { title: "Change Margin", target: box }
+  )
+}
+
 await history.transaction("Deal", async () => {
-  for (const card of deck) await moveCard(card)   // each move records its change:  all of them join "Deal"
+  for (const margin of [10, 20, 30]) {
+    await Promise.resolve() // a wait:  what comes after it still joins "Deal"
+    setMargin(margin)
+  }
 })
-history.undoTitle   // "Undo Deal"
-history.undo()      // every card back, at once
-history.redo()      // dealt again, at once:  the moves aren't run again, their end state is put back
+history.undoTitle   // "Undo Deal":  three changes, one step
+history.undo()      // margin 0, at once
+history.redo()      // margin 30, at once:  nothing runs again, the end state is put back
+setMargin(31)
+setMargin(32)       // the same title and target:  one "Change Margin" step, which undoes to 30
 ```
 
+_One run under node 24:  each comment is what its line did._
+
 - A step is a title and its records, each saying how to undo and redo itself:  the stack knows nothing of what's kept.
+  Spell's runtime records the props an action set;  an app may record its own.
 - A transaction stays open until its function returns, or its promise settles:
   anything recorded meanwhile, nested or begun while it waits, joins it.
+  - Its function throws, or its promise rejects:  what it recorded is still a step, and the error passes on.
 - A run of steps with the same title AND target folds into one:  typing "hello" into one field undoes in one go.
-- `canUndo`, `undoTitle`, `redoTitle` are Spell cells:  a menu reading them redraws by itself.
+  A step with no target never folds.
+- A new step empties the redo stack;  past `limit`, the oldest step goes;  `clear()` forgets them all.
+- `canUndo`, `canRedo`, `undoTitle` and `redoTitle` read Spell cells:  a menu reading them redraws by itself.
 - The edges:
   - while it undoes or redoes, nothing records, so the changes it puts back aren't new steps
   - something else that changes state while an action waits joins that action's step
@@ -361,6 +416,10 @@ its declared `default`, else its first choice, else its type's.
 A new card's `suit` above reads `clubs`;  a `number` reads `0`, a `text` `""`, a `choice` `false`;
 a prop typed as a class has none, so it reads as nothing.
 Python's runtime reads the same.
+
+The catch:  only an `Observable`'s class keeps a schema its props read.
+The plain `Card` under "Spell cells" above is none, so its `direction` reads `undefined` until it's set,
+its `default: "down"` notwithstanding.
 
 - A drawn thing's element shows no attribute for an implied default, only for what was set:
   `<solitaire-card>` doesn't grow `suit="clubs"` (`readsAsImpliedDefault()`).
@@ -563,7 +622,7 @@ And when you're in there:
 | [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
-| [persist/](src/util/persist/) | what an app keeps for people:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`;  `UndoStack`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
+| [persist/](src/util/persist/) | what an app keeps for people:  `PrefStore`, and where it keeps them, `PrefPlace` (the quick `StoragePlace`, over the browser's storage or a `MemoryStorage`;  the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`);  `UndoStack`;  `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`);  `persist.types.ts` (the server's protocol too) |
 | [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |

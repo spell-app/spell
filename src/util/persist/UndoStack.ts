@@ -9,20 +9,25 @@ import type { UndoAction, UndoRecord, UndoStep } from "./persist.types"
  * - A TRANSACTION (`transaction()`) is ONE step, however many changes it records:
  *   - open until its function returns, or, for an async one, until its promise settles, chains included
  *   - undoable work started meanwhile, nested or begun while it waits, joins it:  never a step of its own
- * - FOLDING:  a step with the same title AND target as the newest joins it (`fold()`), so typing "hello" into one
- *   field is one step;  a step with no target never folds.
- * - Undo and redo put the recorded changes back at once:  nothing is run again, nothing waited on, so an async
- *   action's redo is instant.
+ * - FOLDING:  a step with the same title AND target as the newest joins it (`fold()`),
+ *   so typing "hello" into one field is one step;  a step with no target never folds.
+ * - Undo and redo put the recorded changes back at once:  nothing is run again, nothing waited on,
+ *   so an async action's redo is instant.
  * - While it undoes or redoes it records nothing (`isApplying`):  the changes it puts back aren't new steps.
- * - Live:  `canUndo`, `undoTitle` ... read spell cells, so a menu that reads them redraws by itself (`observe()`, or
- *   Solid through the cells bridge).
- * - Generic, on util's reactive engine:  a step's records say how to undo and redo themselves, and what they hold is
- *   the recorder's.  Spell's runtime records the properties an action set;  an app may record its own.
+ * - Live:  `canUndo`, `undoTitle` ... read spell cells, so a menu that reads them redraws by itself
+ *   (`observe()`, or Solid through the cells bridge).
+ * - Generic, on util's reactive engine:
+ *   a step's records say how to undo and redo themselves, and what they hold is the recorder's.
+ *   Spell's runtime records the properties an action set;  an app may record its own.
  ****************/
 export class UndoStack {
   /** The most steps it keeps:  the oldest are dropped past it;  `undefined`:  no limit. */
   readonly limit: number | undefined
 
+  /**
+   * An empty history, keeping at most `limit` steps, its menu titles worded by `titleFor`.
+   * - throws `TypeError` for a limit under 1
+   */
   constructor({ limit, titleFor = englishTitle }: UndoStackProps = {}) {
     if (limit !== undefined && !(limit >= 1)) {
       throw new TypeError(`new UndoStack():  a limit of \`${limit}\` keeps no step;  give one of 1 or more`)
@@ -89,8 +94,8 @@ export class UndoStack {
    * Run `run` as ONE step, titled `title`:  everything recorded until it's done joins it.  Returns what `run` returns.
    * - `run` returns a promise:  the step stays open until it settles, so what the action does after a wait joins too.
    * - A transaction already open (nested, or one waiting):  `run` joins it, and opens no step of its own.
-   * - `run` throws, or its promise rejects:  what it recorded is still a step (its changes happened), and the error
-   *   is passed on.
+   * - `run` throws, or its promise rejects:
+   *   what it recorded is still a step (its changes happened), and the error is passed on.
    * - Nothing recorded:  no step.
    */
   transaction<T>(title: string, run: () => T, target?: unknown): T {

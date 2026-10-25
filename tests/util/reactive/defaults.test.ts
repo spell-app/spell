@@ -3,8 +3,8 @@ import { describe, expect, test } from "vite-plus/test"
 import { Observable, getProps, peekProp, prop, readsAsImpliedDefault } from "spell/util"
 
 /**
- * Typed defaults (epic `prefs-and-undo` P7):  an unset prop reads as its declared default, else its first choice,
- * else its type's, and none is ever stored.
+ * Typed defaults (epic `prefs-and-undo` P7):
+ * an unset prop reads as its declared default, else its first choice, else its type's, and none is ever stored.
  * - On an `Observable`, whose class has a schema:  what every compiled `Thing` and `List` is.
  */
 
