@@ -309,7 +309,7 @@ import type {} from "spell-ui/jsx"
   a misspelt attribute (`sise="large"`), or a value its set doesn't hold (`size="enormous"`), is an error.
 - HTML's global attributes (`class`, `id`, `slot`, `onClick`, `aria-*` ...) stay allowed.
 - A name with a dash in it (`data-*`) is never checked:  TypeScript lets any through.
-- Flags:  `basic`, `basic={true}` or `basic=""`;  `basic={false}` removes it.
+- Flags:  `fluid`, `fluid={true}` or `fluid=""`;  `fluid={false}` removes it.
 - Rich data is a plain prop:  `options={[...]}`.
   It reaches the element whole, as its property (Solid's "How", above).
 - So are the few properties no attribute stands for:

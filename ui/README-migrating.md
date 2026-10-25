@@ -117,14 +117,15 @@ _That card, drawn by Spell UI:  the docs site's snapshot of it, in the site's ow
 
 ## Every class word becomes an attribute
 
-`class="ui small primary basic button"` becomes `<ui-button size="small" color="primary" appearance="basic">`, by four rules:
+`class="ui small primary basic button"` becomes `<ui-button size="small" color="primary" appearance="basic">`, by five rules:
 
-- A bare word becomes a bare attribute:  `basic`, `raised`, `fluid`, `circular`, `inverted`.
+- A look joins `appearance`, several at once:  `appearance="basic circular"`, `appearance="raised"`.
+- Any other bare word becomes a bare attribute:  `fluid`, `inverted`, `labeled`.
 - A word with a side or a direction takes it as a value:
-  `left floated` → `floated="left"`, `left pointing` → `pointing="left"`.
+  `left pointing` → `pointing="left"`, `top attached` → `attach="top"`, `vertical` → `direction="vertical"`.
 - Size and colour take a value:  `size="small"`, `color="red"`.
 - Attributes go in any order.
-  Fomantic needs some words in a strict order (`ui left labeled right floated button`);
+  Fomantic needs some words in a strict order (`ui left labeled icon button`);
   Spell UI writes them in that order itself.
 
 Twenty common classes.
@@ -138,7 +139,7 @@ its shadow root carries the words on the left, except the icon's, which is an SV
 | `class="ui small basic button"` | `<ui-button size="small" appearance="basic">` |
 | `class="ui red button"` | `<ui-button color="red">` |
 | `class="ui labeled icon button"` + `<i class="save icon">` | `<ui-button labeled icon="save">` |
-| `class="ui left floated segment"` | `<ui-segment floated="left">` |
+| `class="ui left floated image"` | `<ui-image floated="left">`:  text wraps round it |
 | `class="ui raised segment"` | `<ui-segment appearance="raised">` |
 | `class="ui top attached segment"` | `<ui-segment attach="top">` |
 | `class="ui center aligned segment"` | `<ui-segment align="center">` |
@@ -175,19 +176,19 @@ The word is the attribute's name with `-` as a space, unless the vocabulary name
 | an icon (`icon`) | `icon="user"` | nothing:  a glyph name |
 | a bare word (`keyOnly`) | `basic` | `basic` |
 | | `very-short` | `very short` |
-| value and word (`valueAndKey`) | `floated="left"` | `left floated` |
+| value and word (`valueAndKey`) | `floated="left"` (an image) | `left floated` |
 | | `floated`, bare | nothing |
 | word, or value and word (`keyOrValueAndKey`) | `pointing` | `pointing` |
 | | `pointing="left"` | `left pointing` |
 | several (`multiple`) | `only="mobile tablet"` | `mobile only tablet only` |
 | a width (`width`) | `width="4"`, `"four"`, `"1/4"`, `"25%"` | `four wide` |
 | | `columns="equal"` | `equal width` |
-| text alignment (`textAlign`) | `text-align="left"` | `left aligned` |
-| | `text-align="justified"` | `justified` |
+| text alignment (`textAlign`) | `align="left"` | `left aligned` |
+| | `align="justified"` | `justified` |
 | vertical alignment (`verticalAlign`) | `vertical-align="middle"` | `middle aligned` |
-| a typed property (`boolean`, `enum`, `string`, `number`, `json`) | `href`, `value`, `options` ... | nothing |
+| a typed property (`boolean`, `enum`, `string`, `number`, `json`) | `link`, `value`, `options` ... | nothing |
 
-- Booleans follow HTML, with one difference:  `basic="false"`, `basic="no"` and `basic="0"` mean NOT basic.
+- Booleans follow HTML, with one difference:  `fluid="false"`, `fluid="no"` and `fluid="0"` mean NOT fluid.
   - Except `disabled` on a form control:  the browser disables it whenever the attribute is present,
     so remove the attribute instead.
 - A value that isn't allowed is dropped, with a "did you mean" warning in development:
@@ -332,7 +333,7 @@ Filled in, it sent `ui-success`, with the values in `detail`.
   - Fomantic's own `selected` meant "highlighted", so it's the one word that changed meaning:
     grep your dropdown code for it.
   - `checked` is accepted on a checkbox or a radio.
-  - A button's `active` still means pressed.
+  - On a button, `selected` means pressed:  Fomantic's `active button`.
 - A message's, a field's or a form's `warning`, `error`, `success` is `state="..."`:  `<ui-message state="warning">`.
 
 <details>
@@ -366,7 +367,7 @@ and passes a prop as a PROPERTY when the element has one ([README-frameworks.md]
 
 | Semantic UI React | Spell UI, in React 19 |
 | --- | --- |
-| a prop:  `size="small"`, `primary` | an attribute, the same word:  `size="small"`, `primary` |
+| a prop:  `size="small"`, `primary` | an attribute:  `size="small"`, `color="primary"` |
 | rich data:  `options={OPTIONS}` | a property, written the same way:  `options={OPTIONS}` |
 | an option:  `{ key, text, value }` | `{ value, text }`, with `description`, `icon`, `image`, `flag` and `disabled` beside them |
 | a callback:  `onChange={(e, data) => ...}` | a listener:  `onui-change={(event) => ...}`, with the data in `event.detail` |

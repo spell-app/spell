@@ -71,7 +71,7 @@ What each column holds, and where it stops:
   - The page is plain HTML in [`docs/`](docs/), so on GitHub the link shows its source.
     Served by the page server, from a checkout of the kit, it shows the page
     ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then [README-site.md](README-site.md)).
-  - *(In progress)* marks the two not done yet:  Property Editor and Section.
+  - *(In progress)* marks the three not done yet:  Property Editor, Section and Theme Editor.
 - **Tags:**  every tag of the family;  one with a docs page of its own is linked (`<ui-textarea>`, `<ui-radio>`).
 - **What it is:**  the main tag's one-line description, from its vocabulary.
 - **Also called:**  the first four names other libraries and everyday speech give the main tag (its `aka`).
@@ -162,12 +162,13 @@ _A Message and a Nag.  Toast and Popup have no picture:  their first examples ar
 
 _A Section and a Panel, Spell UI's own:  Fomantic has neither._
 
-- **Segment** groups anything in a box:  `raised`, `piled` or `stacked`;  or no box at all, with `basic`,
-  or `vertical` for a band across the page.
+- **Segment** groups anything in a box:  `appearance="raised"`, `piled` or `stacked`;
+  or no box at all, with `basic`, or `vertical` for a band across the page.
 - **Card** is a playing card:  an image on top, then content parts (a header, meta, a description),
-  then an extra footer.  `href` makes the whole card a link.
+  then an extra footer.  `link` makes the whole card go somewhere on a click.
 - **Section** is a titled block with a real heading, `<h2>` unless it's nested or `level` says otherwise.
-  `collapsible` folds it;  `sticky` keeps its title in view while you scroll through it.  It's still in progress.
+  `collapsible` lets its title fold it, and `open="false"` starts it folded;
+  `sticky` keeps its title in view while you scroll through it.  It's still in progress.
 - **Panel** is a Section dressed as an inspector:  a tinted box of fields under a header band, with sub-heads that
   fold.  It takes every Section attribute.
 - **Accordion** is a stack of title and content pairs on the browser's own `<details>`:
@@ -185,7 +186,7 @@ _A Section and a Panel, Spell UI's own:  Fomantic has neither._
   - Another site's URL is refused, and so is any page opened from disk (`file://`).
   - `save()` writes an edit back, once the page has registered somewhere to save it
     ([README-runtime.md](README-runtime.md)).
-- **Include** puts part of another page into this one (`select`, a CSS selector), in a shadow root of its own;
+- **Include** puts part of another page into this one (`selector`, a CSS selector), in a shadow root of its own;
   `page-styles` puts it in the light DOM instead, so the page's stylesheets reach it.
 - **Code** colours source by language with highlight.js, and with any language the page registers
   (`UI.code.register()`).
@@ -193,6 +194,34 @@ _A Section and a Panel, Spell UI's own:  Fomantic has neither._
   It keeps raw HTML as written:  set `sanitized` for text you didn't write.
 - **Embed** frames another site:  a YouTube or Vimeo video by its id, or any `http(s)` URL,
   behind a placeholder until someone clicks it.
+  - A video file of your own is **Video** instead (below).
+
+</details>
+
+<details>
+<summary>Stack, Grid or Table:  a row or column of anything, sixteen columns, or rows of data</summary>
+
+- **Stack** lays its children out in a column, or with `direction="horizontal"` a row that can `wrap`.
+  - `spacing` is the room between them, `none` to `xl`;  `align` lines them up across it, `justify` along it.
+  - It has no look of its own:  it's what `<div style="display: flex">` was for.
+  - One on the left, one on the right:  `<ui-stack direction="horizontal" justify="between">`.
+- **Grid** is Fomantic's 16-column grid of `<ui-row>`s and `<ui-column>`s, for a page's layout.
+- **Table** is for data:  a native `<table>` inside it, or its own `<ui-row>`s of `<ui-cell>`s.
+  - The same `<ui-row>` is a grid row in a grid, and a table row in a table:  its parent decides.
+  - A cell covers columns with `span`, never rows.
+
+</details>
+
+<details>
+<summary>Video, Audio or Embed:  a file of your own, a sound, or another site's player</summary>
+
+- **Video** plays a file from your site in the browser's own player:
+  `src`, `poster`, `captions` (a `.vtt` file), `ratio`;  `controls="false"` hides the controls.
+- **Audio** is the same player for a sound.
+  Without `controls` it shows nothing, so a page can play a sound with `play()`, from a button's click.
+- Both send `ui-play`, `ui-pause` and `ui-ended`, and take `autoplay`, `muted` and `loop`.
+  A browser plays on its own only when `muted`, or once the reader has clicked.
+- **Embed** frames YouTube, Vimeo or another site, behind a placeholder until it's clicked.
 
 </details>
 
@@ -202,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-66 families, 108 tags;  3 families in progress.
+72 families, 118 tags;  3 families in progress.
 
 ### Elements
 
@@ -226,7 +255,8 @@ The basic pieces of a page.
 |  | [Reveal](docs/ui-reveal.html) | `<ui-reveal>` | A reveal displays additional content in place of previous content when activated. | hover reveal, flip, slide reveal, overlay image |
 |  | [Segment](docs/ui-segment.html) | `<ui-segment>` `<ui-segments>` | A segment is used to create a grouping of related content. | panel, box, section, well |
 | <img src="docs/images/components/ui-step.png" alt="Step, its first example" width="142" height="68"> | [Step](docs/ui-step.html) | `<ui-step>` `<ui-steps>` | One step of a set of steps. | wizard step, stage |
-| <img src="docs/images/components/ui-text.png" alt="Text, its first example" width="190" height="96"> | [Text](docs/ui-text.html) | `<ui-text>` | A text is used to style some inline text with a simple color. | span, inline text, colored text, label text |
+| <img src="docs/images/components/ui-text.png" alt="Text, its first example" width="190" height="96"> | [Text](docs/ui-text.html) | `<ui-text>` `<ui-link>` | A text is used to style some inline text with a simple color, or to hold a paragraph. | span, inline text, colored text, label text |
+|  | [Video](docs/ui-video.html) | `<ui-video>` [`<ui-audio>`](docs/ui-audio.html) | A video plays a video file in the browser's own player. | video, movie, clip, player |
 
 ### Collections
 
@@ -240,7 +270,8 @@ Pieces made of several kinds of part.
 | <img src="docs/images/components/ui-menu.png" alt="Menu, its first example" width="200" height="18"> | [Menu](docs/ui-menu.html) | `<ui-menu>` | A menu displays grouped navigation actions. | navbar, nav, tabs bar, toolbar |
 | <img src="docs/images/components/ui-message.png" alt="Message, its first example" width="200" height="36"> | [Message](docs/ui-message.html) | `<ui-message>` | A message displays information that explains nearby content. | alert, callout, notice, banner |
 | <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) *(In progress)* | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
-| <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
+| <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` `<ui-cell>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
+|  | [Terms](docs/ui-terms.html) | `<ui-terms>` `<ui-term>` | Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen. | dl, definition list, description list, key value list |
 |  | [Toolbar](docs/ui-toolbar.html) | `<ui-toolbar>` | A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute. | toolbar, tool bar, scrolling tabs, overflow menu |
 
 ### Views
@@ -306,10 +337,14 @@ Elements with no Fomantic counterpart.
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
+|  | [Keys](docs/ui-keys.html) | `<ui-keys>` | Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. | kbd, keyboard shortcut, key caps, hotkey |
 | <img src="docs/images/components/ui-markdown.png" alt="Markdown, its first example" width="131" height="96"> | [Markdown](docs/ui-markdown.html) | `<ui-markdown>` | Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. | markdown, md, gfm, readme |
-| <img src="docs/images/components/ui-panel.png" alt="Panel, its first example" width="169" height="96"> | [Panel](docs/ui-panel.html) | `<ui-panel>` | A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute. | inspector, property panel, properties, settings panel |
+|  | [Page](docs/ui-page.html) | `<ui-page>` | A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It's a root too:  it loads the components inside it. | page, app shell, body, layout |
+| <img src="docs/images/components/ui-panel.png" alt="Panel, its first example" width="169" height="96"> | [Panel](docs/ui-panel.html) | `<ui-panel>` | A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute. | inspector, property panel, properties, settings panel |
+|  | [Quote](docs/ui-quote.html) | `<ui-quote>` | A quote holds someone else's words:  a block of its own, or a few words inside a sentence. | blockquote, quotation, q, pull quote |
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |
-| <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can fold away and keep its title in view. | section, panel, collapsible, disclosure |
+| <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
+|  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
 |  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser. | theme editor, theme builder, theme creator, theme generator |
 
 <details>

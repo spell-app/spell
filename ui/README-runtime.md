@@ -135,7 +135,7 @@ This is a Spell UI page, written in Spanish:
 ```html
 <html lang="es">
   <ui-root>
-    <es-boton primario color="rojo" tamano="pequeño">Borrar</es-boton>
+    <es-boton color="rojo" tamano="pequeño">Borrar</es-boton>
     <es-tarjeta>
       <es-contenido><es-encabezado>Informe</es-encabezado></es-contenido>
     </es-tarjeta>
@@ -146,7 +146,7 @@ This is a Spell UI page, written in Spanish:
 - The root reads the page's language:  its own `lang`, else the document's.
 - Spanish is one Spell UI ships, so the root loads it first, once per page:  a chunk of its own.
 - Then each Spanish tag loads its family on demand, as a `ui-*` tag does.
-  `<es-boton>` is Spell UI's button, drawn as `ui small red primary button`.
+  `<es-boton>` is Spell UI's button, drawn as `ui small red button`.
 - And the texts people read are Spanish too:  a modal's close button says "Cerrar".
 
 From code, the same thing is two calls on the runtime:
@@ -162,7 +162,7 @@ i18n.registerDictionary(es) //                                   and its texts
 const boton = document.querySelector("es-boton")
 boton.color = "verde"
 boton.getAttribute("color") // "verde"
-boton.color //                 "green", and it now draws `ui green primary button`
+boton.color //                 "green", and it now draws `ui green button`
 ```
 
 _What [the translation smoke page](src/tools/smoke/translate.html) checks, in headless Chromium, on every
