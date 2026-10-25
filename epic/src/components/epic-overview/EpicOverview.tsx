@@ -1,5 +1,5 @@
 import { Show } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
@@ -10,7 +10,7 @@ import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/E
 
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell-epic/components/epic-section/EpicFold"
-import type { ContentsEntry } from "spell-epic/components/epic-section/EpicSection.types"
+import { RUN_ATTRIBUTES, type ContentsEntry } from "spell-epic/components/epic-section/EpicSection.types"
 
 import { epicOverviewVocabulary } from "./EpicOverview.en"
 
@@ -88,6 +88,44 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     void this.reveal()
   }
 
+  /**
+   * Its parts (`<epic-section kind="overview-part">`), read again whenever one folds, unfolds or hides:
+   * their RUNS follow (`runEnds`).
+   */
+  @E.watches({ childList: true, subtree: true, attributeFilter: RUN_ATTRIBUTES })
+  get parts(): readonly Element[] {
+    if (isServer) return NO_PARTS
+    return Array.from(this.domElement.querySelectorAll(PARTS))
+  }
+
+  /**
+   * Where its parts' RUNS start and end, as the Phases section's phases (`EpicSection.runEnds`;  Owen, 2026-10-25:
+   * "1.3 top and 1.4 bottom should be rounded"):  folded title rows touching are one card, square between them,
+   * rounded at its ends;  an open part stands free, a drawer, so the rows either side of it round towards it.
+   */
+  get runEnds(): { tops: Element[]; bottoms: Element[] } {
+    const shown = this.parts.filter((part) => !part.hasAttribute("hidden"))
+    const isOpen = (part: Element | undefined) => !!part?.hasAttribute("open")
+    return {
+      tops: shown.filter((part, index) => index === 0 || isOpen(shown[index - 1]) || isOpen(part)),
+      bottoms: shown.filter((part, index) => index === shown.length - 1 || isOpen(part) || isOpen(shown[index + 1]))
+    }
+  }
+
+  /** The rules rounding its parts' runs:  `::slotted(#o3) { --epic-part-top-radius: ... }` (`EpicSection.css`). */
+  private runRules(): string {
+    if (isServer) return ""
+    const { tops, bottoms } = this.runEnds
+    const ruleFor = (parts: Element[], declarations: string) => {
+      const selectors = parts.filter((part) => part.id).map((part) => `::slotted(#${CSS.escape(part.id)})`)
+      return selectors.length ? `${selectors.join(", ")} { ${declarations} }` : ""
+    }
+    return [
+      ruleFor(tops, `${PART_TOP_RADIUS}: var(--_epic-run-radius, 8px);`),
+      ruleFor(bottoms, `${PART_BOTTOM_RADIUS}: var(--_epic-run-radius, 8px);`)
+    ].join("\n")
+  }
+
   /** Its number, by its place among the page's blocks (always the first:  `1`). */
   get number(): number {
     void this.layout
@@ -113,6 +151,7 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
       tools: () => <Show when={this.reviewed}>{this.reviewControl("buttons", "review-buttons")}</Show>,
       before: () => (
         <>
+          <style>{this.runRules()}</style>
           {/* under the title row:  a marked note, then the note box once opened */}
           <Show when={this.reviewed}>
             <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
@@ -166,6 +205,14 @@ export interface EpicOverview extends E.AttributeValues<typeof epicOverviewVocab
 /** Classes of the shadow markup:  the folded prompt, the estimate line. */
 const PROMPT = "prompt"
 const ESTIMATE = "estimate"
+
+/** Its parts, its own sub-sections;  none on a server (one list, so a re-read keeps it). */
+const PARTS = ":scope > epic-section[kind='overview-part']"
+const NO_PARTS: readonly Element[] = []
+
+/** `<epic-section kind="overview-part">`'s tokens for its title row's corners, top and bottom (`runRules()`). */
+const PART_TOP_RADIUS = "--epic-part-top-radius"
+const PART_BOTTOM_RADIUS = "--epic-part-bottom-radius"
 
 /** Its summary:  what its review controls are about (keyed `summary`). */
 const SUMMARY_TAG = ":scope > epic-summary"
