@@ -279,7 +279,7 @@ describe("<ui-docs-toc> folds", () => {
     expect(links(toc, "entry")).toEqual([])
     expect(fold.getAttribute("aria-expanded")).toBe("false")
     expect(fold.title).toBe("Open Types")
-    expect(toc.shadowRoot!.querySelector("[part~=section]")!.getAttribute("href")).toBe("#types")
+    expect(toc.shadowRoot!.querySelector("[part~=section]")!.getAttribute("link")).toBe("#types")
     await click(toc, foldOf(toc, "States"))
     expect(links(toc, "entry")).toEqual(["Disabled", "Loading"])
   })
