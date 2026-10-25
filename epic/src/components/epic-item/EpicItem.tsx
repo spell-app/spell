@@ -49,6 +49,7 @@ import {
   STATE_TIP_KEYS,
   STATUS_SLOT,
   STATUS_STATES,
+  ItemAge,
   THREAD_ATTRIBUTES,
   TITLE,
   TOGGLE,
@@ -230,8 +231,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const urgency = this.reviewState.urgency()
     if (urgency && this.canCalm()) return urgency.calm ? "open" : "attention"
     const state = this.state
-    if (state && (ITEM_STATES as readonly string[]).includes(state)) return state
-    return STATUS_STATES[this.status ?? ""] ?? "open"
+    const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
+    return ItemAge.shown(written ?? STATUS_STATES[this.status ?? ""] ?? "open", this.changed)
   })
 
   /**
@@ -381,7 +382,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    */
   readonly chipTip = createMemo(() => {
     const { queued, work, reviewed, deferred, status } = this
-    const parts = [this.translationForKey(STATE_TIP_KEYS[this.itemState()])]
+    // greyed with age (`ItemAge`), it's still decided or done, not "no longer relevant"
+    const aged = this.itemState() === "old" && this.status !== "canceled"
+    const parts = [this.translationForKey(STATE_TIP_KEYS[aged ? "recent" : this.itemState()])]
     const mark = this.chipMark()
     // a mark with no label (work still due:  queued, Claude on it):  the state's words and `to do` say it
     if (mark?.label) {

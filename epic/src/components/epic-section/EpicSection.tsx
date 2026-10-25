@@ -11,7 +11,7 @@ import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell-
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell-epic/components/epic-new-item/EpicNewItem.types"
-import { NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
+import { ItemAge, NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
 import {
   SHOW_ALL,
   STATE_PICK,
@@ -872,9 +872,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    */
   private static stateOf(item: Element): ItemStateName {
     const state = item.getAttribute("state")
-    const known = FILTER_STATES.find((it) => it.state === state)
-    if (known) return known.state
-    return STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
+    const known = FILTER_STATES.find((it) => it.state === state)?.state
+    // a week-old decided or done item draws grey (`ItemAge`):  its count and chip with it
+    const written = known ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
+    return ItemAge.shown(written, item.getAttribute("changed")) as ItemStateName
   }
 
   /** The Phases toggles as last left on this page;  none without storage. */

@@ -56,10 +56,12 @@
     --ui-section-stuck-shadow: none;
     /* under the page header (5);  nested titles slide under their parents' (Spell UI subtracts the depth) */
     --ui-section-z-index: 4;
+    /*
+     * the fold chevron at the row's START, before the icon, as an item's line has it:  folded it points right, open
+     * down (Owen, 2026-10-25:  "disclosure triangle on one side for phases, other side for questions" ... "put it on
+     * the left";  before, at the row's end, up when open:  J5 of `review-review`)
+     */
     --ui-section-fold-icon-size: 12px;
-    /* Material's convention (Owen, J5 of `review-review`):  open, the chevron points UP;  folded, DOWN */
-    --ui-section-fold-icon-rotate: 180deg;
-    --ui-section-fold-icon-folded-rotate: 0deg;
     --ui-section-tip-width: 340px;
     --ui-font-family-heading: var(--epic-serif, var(--ui-font-family-heading));
     display: block;
@@ -201,6 +203,12 @@
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:not(:state(stuck))::part(title) {
     border-radius: var(--epic-drawer-radius, 8px);
   }
+  /* stuck:  square on top, flush under the titles above it, its bottom still round (Owen, 2026-10-25:  "bottom of P1
+     should be round when sticky") */
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:state(stuck)::part(title) {
+    border-end-start-radius: var(--epic-drawer-radius, 8px);
+    border-end-end-radius: var(--epic-drawer-radius, 8px);
+  }
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body {
     margin: 0 var(--epic-drawer-inset, 4px);
     /* the body's text where it stood:  the band's inset, less the drawer's and its rule */
@@ -209,7 +217,7 @@
     border-top: none;
     border-end-start-radius: var(--epic-drawer-radius, 8px);
     border-end-end-radius: var(--epic-drawer-radius, 8px);
-    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.03)));
+    background: var(--epic-drawer-fill, light-dark(rgb(255 255 255 / 0.28), rgb(255 255 255 / 0.02)));
   }
   /* the note box, last:  the drawer's bottom, side to side, its bottom corners the drawer's */
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body > [part~="note-box"]:last-child {

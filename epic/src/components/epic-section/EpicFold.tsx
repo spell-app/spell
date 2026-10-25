@@ -41,20 +41,20 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  * ### `EpicFold`
  * Base of the epic page's FOLDING components -- `<epic-overview>`, `<epic-section>`, `<epic-phase>`:
  * a title bar that sticks and folds, over the element's own children.
- * - The chrome is a `<ui-section sticky collapsible fold-icon="end">` in the shadow root (`renderFold()`):
+ * - The chrome is a `<ui-section sticky collapsible>` in the shadow root (`renderFold()`):
  *   - its title bar drawn from the subclass's pieces
  *   - the element's light children show through a `<slot>` inside it, wrapped in the `body` part
  * - So Spell UI's section brings:
  *   - the sticky stack:  nested titles stack below their parents', across these shadow roots
  *     (its owner lookup climbs the flat tree)
- *   - the fold chevron
+ *   - the fold chevron, at the row's start, as an item's line has it (Owen, 2026-10-25)
  *   - `hidden="until-found"`:  find-in-page and `#links` unfold it
  * - Folding:  `open` (page state, never in a doc:  epic pages open folded), `@controlled`.
  *   - The inner section's own `ui-opening` / `ui-closing` are CANCELLED and stopped there:
  *     the DOM element announces its own (cancelable), then `open` changes and the inner section follows.
  *   - Find-in-page (`beforematch`, not cancelable) is adopted.
  * - Collapse-all (epic `airplane` P8):
- *   - while open, a double chevron beside the fold chevron folds everything inside it, not itself
+ *   - while open, a double chevron at the row's end folds everything inside it, not itself
  *     (`collapseAll()`;  each subclass adopts `CollapseAll.css`)
  *   - `<epic-page>`'s toolbar folds the whole page, every block through its `collapse()`
  * - Expand-all (Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"):
@@ -368,7 +368,6 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
           part={this.partForName("section" as never)}
           sticky=""
           collapsible=""
-          fold-icon="end"
           collapsed={!this.isOpen || this.isVeiled ? "" : undefined}
           loading={this.body.isBusy ? "" : undefined}
           offset={this.offset}
@@ -389,7 +388,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
             {/* the page's own buttons first, then its tools */}
             <slot name={this.slotForName("actions" as never)} />
             {pieces.tools?.()}
-            {/* last, beside the fold chevron:  ONE toggle, open everything / fold everything (Owen, 2026-10-25) */}
+            {/* last:  ONE toggle, open everything / fold everything (Owen, 2026-10-25) */}
             {Fold.toggleAllButton({
               expandLabel: this.translationForKey("expandAll" as never, { name: this.contentsEntry().label }),
               collapseLabel: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
