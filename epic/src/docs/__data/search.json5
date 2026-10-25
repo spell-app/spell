@@ -33,6 +33,30 @@
       ]
     },
     {
+      "path": "epic-actions.html",
+      "title": "<epic-actions>",
+      "summary": "The <epic-actions> element: a block's actions row on an epic page, its buttons over the block's top right corner.",
+      "tag": "epic-actions",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-attributes",
+          "title": "3. Attributes"
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
+        }
+      ]
+    },
+    {
       "path": "epic-answer.html",
       "title": "<epic-answer>",
       "summary": "An answered question's answer: an ivory card titled Answer · <the answer>, holding why.",
@@ -880,6 +904,35 @@
         {
           "id": "6-written-by",
           "title": "6. Written by"
+        }
+      ]
+    },
+    {
+      "path": "epic-mark.html",
+      "title": "<epic-mark>",
+      "summary": "The <epic-mark> element: an item's id as a chip in its state colour, a link that lands on it.",
+      "tag": "epic-mark",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-attributes",
+          "title": "3. Attributes"
+        },
+        {
+          "id": "epic-mark-parts",
+          "title": "Parts and states",
+          "parent": 2
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
         }
       ]
     },

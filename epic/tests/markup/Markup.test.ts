@@ -93,6 +93,8 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-code": { title: "design.ts · 12 lines", language: "ts", open: true },
   "epic-link": { saga: "drawable-spell", epic: "python-target", item: "T1" },
   "epic-zoom": { src: "shots/before.png", alt: "Before:  segmented" },
+  "epic-mark": { item: "i126", link: true },
+  "epic-actions": { headRow: true },
   "epic-change": { id: "ch3", item: "q16", at: "2026-10-24 15:10", answer: "One list", accepted: "2026-10-24 19:02" },
   "epic-review": { of: "q7", shows: "note", buttons: "todo", label: "Q7", tip: "reviewed 10/7/26", underLine: true },
   "epic-new-item": { open: true, adds: "question", near: "p3", editing: "new1" },
@@ -198,14 +200,14 @@ function planDoc(document: Document): Element {
     make("epic-section", { id: "phases", kind: "phases" }, [
       make("epic-phase", { id: "p1", title: "Saved Replies", status: "done", estimate: "2h" }, [
         make("epic-field", { name: "symptom" }, "notes get lost"),
-        make("epic-field", { name: "changes" }, "notes are saved"),
         make("epic-updated", { at: "2026-10-06 14:30", phase: "1" }, "<p>moved the box</p>"),
         make("epic-field", { name: "goal" }, "<ul><li>nothing lost</li></ul>"),
+        make("epic-field", { name: "changes" }, "notes are saved"),
         make("epic-field", { name: "done" }, "<ul><li>saved</li></ul>"),
         make("epic-commit", { sha: "82d5106" }, "saves notes"),
         make("epic-field", { name: "files" }, "<code>x.ts</code>"),
         make("epic-field", { name: "verify" }, "type, reload"),
-        make("epic-field", { name: "to-review" }, '<a href="#j1">J1</a>')
+        make("epic-field", { name: "to-review" }, '<epic-mark item="j1" link></epic-mark>')
       ])
     ]),
     make("epic-section", { id: "decisions", kind: "questions" }, [

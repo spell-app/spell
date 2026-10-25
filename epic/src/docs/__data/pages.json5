@@ -16,6 +16,8 @@
         "epic-cards",
         "epic-phase",
         "epic-field",
+        "epic-mark",
+        "epic-actions",
         "epic-updated",
         "epic-update"
       ]

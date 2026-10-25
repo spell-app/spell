@@ -2,11 +2,13 @@
  * The epic page migrations (`spell-epic/tool/migrations`):  the registry, its steps and their types.
  */
 export { CaveatsAndTests } from "./CaveatsAndTests"
+export { ChangesAfterGoal } from "./ChangesAfterGoal"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
 export { LinksAgree } from "./LinksAgree"
 export { Migrations } from "./Migrations"
 export { MoreRequestsFirst } from "./MoreRequestsFirst"
 export { TakenInPhase } from "./TakenInPhase"
+export { ToReviewMarks } from "./ToReviewMarks"
 export { TookAsMinutes } from "./TookAsMinutes"
 export { WholePhaseNumbers } from "./WholePhaseNumbers"
 export { PAGE_KINDS } from "./migrations.types"

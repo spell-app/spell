@@ -132,15 +132,16 @@ describe("PlanDoc phases", () => {
     expect(problems(plan)).toEqual([])
   })
 
-  test("framed:  Symptom, Changes, then the details;  the goal optional", () => {
+  // Changes after Goal, next to the plan (epic `epic-engine` P45;  Owen, 2026-10-25)
+  test("framed:  Symptom, Goal, Changes, then the details;  the goal optional", () => {
     const plan = freshPlan()
     plan.addPhase("One", { symptom: "notes get lost", changes: "saved as typed" })
     expect(kids(el(plan, "p1"))).toEqual(["field:symptom", "field:changes", "field:files", "field:verify"])
     plan.addPhase("Two", { symptom: "x", goal: "<ul><li>g</li></ul>" })
     expect(kids(el(plan, "p2"))).toEqual([
       "field:symptom",
-      "field:changes",
       "field:goal",
+      "field:changes",
       "field:files",
       "field:verify"
     ])
@@ -153,8 +154,8 @@ describe("PlanDoc phases", () => {
     expect(plan.setPhaseFields(1, { changes: "c", symptom: "s" })).toEqual(["Symptom", "Changes"])
     expect(kids(el(plan, "p1"))).toEqual([
       "field:symptom",
-      "field:changes",
       "field:goal",
+      "field:changes",
       "field:files",
       "field:verify"
     ])
@@ -210,7 +211,7 @@ describe("PlanDoc phases", () => {
     expect(problems(plan)).toEqual([])
   })
 
-  test("a request files into its phase's Requests field, after Changes;  filing it again replaces its block", () => {
+  test("a request files into its phase's Requests field, after Symptom;  filing it again replaces its block", () => {
     const plan = freshPlan()
     plan.addPhase("One", { symptom: "broken", changes: "fixed", goal: "<ul><li>works</li></ul>" })
     plan.addPhaseUpdate(1, "<p>widened</p>")
@@ -221,9 +222,9 @@ describe("PlanDoc phases", () => {
     plan.addPhaseRequest(1, "r3", "🚧 python", "<blockquote><p>the box, again</p></blockquote>")
     expect(kids(el(plan, "p1"))).toEqual([
       "field:symptom",
-      "field:changes",
       "field:requests",
       "field:goal",
+      "field:changes",
       "epic-update",
       "field:files",
       "field:verify"
@@ -377,8 +378,8 @@ describe("PlanDoc phases", () => {
     plan.setDone(2, "<ul><li>built</li></ul>")
     expect(kids(el(plan, "p2"))).toEqual([
       "field:symptom",
-      "field:changes",
       "field:goal",
+      "field:changes",
       "epic-update",
       "epic-update",
       "field:done",
@@ -968,8 +969,14 @@ describe("PlanDoc states", () => {
     expect(["c1", "i1", "q1"].map((id) => el(plan, id).getAttribute("phase"))).toEqual([null, "1", "1"])
     plan.updateStates()
     const line = el(plan, "p1").querySelector(':scope > epic-field[name="to-review"]')!
-    expect(line.innerHTML).toBe('<a href="#q1">Q1</a>, <a href="#j1">J1</a>, <a href="#c2">C2</a>')
+    // each an `<epic-mark item link>` (epic `epic-engine` P45), drawn in its item's state colour
+    const marks = Array.from(line.children, (mark) => `${mark.localName} ${mark.getAttribute("item")}`)
+    expect(marks).toEqual(["epic-mark q1", "epic-mark j1", "epic-mark c2"])
+    expect(Array.from(line.children).every((mark) => mark.hasAttribute("link"))).toBe(true)
+    expect(line.textContent).toBe(", , ")
     expect(line.nextElementSibling).toBe(null)
+    // written once:  the same marks again change nothing
+    expect(plan.updateToReview(el(plan, "p1"))).toBe(false)
     expect(el(plan, "p2").querySelector('[name="to-review"]')).toBe(null)
     for (const id of ["q1", "j1", "c2"]) plan.review(id)
     plan.updateStates()
@@ -1516,7 +1523,7 @@ describe("PlanDoc review inbox", () => {
     })
     plan.keepNote("p1", { note: "too big?", action: "revisit", when: "soon", at: "2026-10-01T09:10:00" })
     plan.keepNote("p1", { note: "too big?", action: "revisit", when: "soon", at: "2026-10-01T09:10:00" })
-    expect(kids(phase).slice(0, 4)).toEqual(["field:symptom", "field:changes", "epic-reply", "epic-update"])
+    expect(kids(phase).slice(0, 4)).toEqual(["field:symptom", "epic-reply", "field:changes", "epic-update"])
     const reply = phase.querySelector(":scope > epic-reply")!
     expect([reply.getAttribute("from"), reply.getAttribute("re"), reply.textContent]).toEqual([
       "Owen",

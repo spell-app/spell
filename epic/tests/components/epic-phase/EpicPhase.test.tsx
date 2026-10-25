@@ -10,6 +10,7 @@ import "spell-epic/components/epic-section"
 import "spell-epic/components/epic-phase"
 import "spell-epic/components/epic-update"
 import "spell-epic/components/epic-item"
+import "spell-epic/components/epic-mark"
 import "spell-ui/components/ui-modal"
 
 /** `host`'s inner `<ui-section>`. */
@@ -191,15 +192,26 @@ describe("<epic-field>", () => {
     await expectAccessible(field)
   })
 
-  test("To review:  each link marked with its item's state, which colours its chip", async () => {
+  // epic `epic-engine` P45:  `<epic-mark>`s, which draw their own chips (the field wrote `data-spell-state` before)
+  test("To review:  its marks, each in its item's state colour, laid out in its prose", async () => {
     const field = await render(
-      `<div><epic-field name="to-review"><a href="#j9">J9</a>, <a href="#q9">Q9</a>, <a href="#i9">I9</a></epic-field>` +
+      `<div><epic-field name="to-review"><epic-mark item="j9" link></epic-mark>, <epic-mark item="q9" link></epic-mark>, ` +
+        `<epic-mark item="i9" link></epic-mark></epic-field>` +
         `<p id="j9" state="attention"></p><p id="q9" status="decided"></p><p id="i9" status="canceled"></p></div>`,
       "epic-field"
     )
-    const states = Array.from(field.querySelectorAll("a"), (link) => link.getAttribute("data-spell-state"))
+    await ElementFixture.tick()
+    const chips = Array.from(field.querySelectorAll("epic-mark"), (mark) =>
+      mark.shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
+    )
     // without a `state`:  decided green for good, canceled grey (no longer relevant)
-    expect(states).toEqual(["attention", "recent", "old"])
+    expect(chips.map((chip) => chip.dataset.state)).toEqual(["attention", "recent", "old"])
+    expect(field.textContent).toBe(", , ")
+    // on the label's line, after it
+    const label = field.shadowRoot!.querySelector('[part~="label"]')!.getBoundingClientRect()
+    const first = chips[0]!.getBoundingClientRect()
+    expect(first.left).toBeGreaterThan(label.right)
+    expect(Math.abs((first.top + first.bottom) / 2 - (label.top + label.bottom) / 2)).toBeLessThan(2)
   })
 })
 

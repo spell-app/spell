@@ -61,6 +61,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A piece several families draw is a family of its own.
     - It's drawn in their shadow roots, and never written in a doc.
     - Those pieces:  `<epic-review>`, `<epic-new-item>`, `<epic-agents>`, `<epic-thread-message>`.
+  - The pieces INSIDE an epic page's blocks are elements too (epic `epic-engine` P45;  Owen, 2026-10-25:  "You should
+    be creating web elements for the things inside an `<epic-phase>` for a) consistent styling, b) themeability,
+    c) less stuff to manage"):
+    - `<epic-mark item link>`:  an item's id as a chip in its state colour (a phase's To review), not a link a script
+      colours
+    - `<epic-actions>`:  a block's actions row, made by the docs runtime (`addBlockAction()`)
+    - a field's label and icon come from its `name` alone (`<epic-field>`)
+    - a list's RUNS (rounded ends) and its filter's hidden items:  one page sheet, by position
+      (`EpicSection.runs.css`;  Owen:  "generic CSS, using sibling selectors ... rather than with explicit ids"),
+      the filter marking what it hides `data-epic-filtered`
   - `<epic-zoom>` (epic `epic-engine` I129):  a screenshot full size over the page, ONE per page, made at the end of
     `<body>` by `ImageZoom` (`spell-epic/components/epic-zoom/ImageZoom`), never written in a page.
     - `ImageZoom` is plain DOM:  the docs runtime imports that leaf alone (the barrel would bundle the element), and
@@ -860,6 +870,8 @@ In `tools/`:
     - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `.spell-block-actions`):
       the bullhorn first, then a table's expand button;  never a row or corner of their own
       (see "Comments", WHERE it sits)
+      - on an epic page it's an element, `<epic-actions>` (epic `epic-engine` P45):  it places and styles its buttons
+        itself;  the runtime still measures where its block's top edge lies (`alignBlockActions()`)
   - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`
     - the bullhorns, Send, Owen's field, where a box of threads sits
     - the threads and the pane draw themselves (their own sheets)

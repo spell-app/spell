@@ -265,6 +265,16 @@
       "types": "./dist-types/src/components/epic-zoom/index.d.ts",
       "default": "./src/components/epic-zoom/index.ts"
     },
+    "./components/epic-mark": {
+      "spell-epic-source": "./src/components/epic-mark/index.ts",
+      "types": "./dist-types/src/components/epic-mark/index.d.ts",
+      "default": "./src/components/epic-mark/index.ts"
+    },
+    "./components/epic-actions": {
+      "spell-epic-source": "./src/components/epic-actions/index.ts",
+      "types": "./dist-types/src/components/epic-actions/index.d.ts",
+      "default": "./src/components/epic-actions/index.ts"
+    },
     "./*": {
       "spell-epic-source": [
         "./src/*.ts",

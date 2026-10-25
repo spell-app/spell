@@ -84,6 +84,7 @@ import { wireComments } from "./spell-doc-comments.js"
 import {
   FIELDS,
   addBlockAction,
+  BLOCK_ROW,
   addHeadTool,
   alignBlockActions,
   dropBlockAction,
@@ -457,7 +458,7 @@ function wireTableWidths(main) {
     const toggle = toggles.get(box)
     const parent = box.parentElement
     if (!toggle || !parent || !box.isConnected) return
-    const row = toggle.closest(".spell-block-actions")
+    const row = toggle.closest(BLOCK_ROW)
     // its width in the column, measured while not widened:
     // the column is often the table's own `max-width`, not its parent's
     if (!box.style.width && box.getClientRects().length) narrow.set(box, box.getBoundingClientRect().width)
@@ -506,7 +507,7 @@ function wireTableWidths(main) {
   const watch = () => {
     // a table a live update replaced:  its button goes with it
     for (const [box, toggle] of toggles) {
-      const row = toggle.closest(".spell-block-actions")
+      const row = toggle.closest(BLOCK_ROW)
       if (box.isConnected && row?.nextElementSibling === box) continue
       for (const name of ["width", "margin-inline-start"]) row?.style.removeProperty(name)
       dropBlockAction(toggle)
@@ -604,7 +605,7 @@ function wireTableHeads(main) {
       pin.hidden = true
       pins.set(box, pin)
       const row = box.previousElementSibling
-      ;(row?.classList.contains("spell-block-actions") ? row : box).before(pin)
+      ;(row?.matches(BLOCK_ROW) ? row : box).before(pin)
     }
     // shown again:  the header as it is now (a live update may have changed it)
     if (pin.hidden) copyHead(pin, box, table, rows)
@@ -940,11 +941,12 @@ const ADDED = ".spell-item-filter, .spell-hidden-note, [data-spell-added]"
 
 /**
  * The page state of an `<epic-*>` element (epic `epic-components`, P10):  folded or open (items, sections, phases,
- * the Overview), and the page being reviewed (`<epic-page reviewing>`);  never in the file, so a patch keeps them
+ * the Overview), the page being reviewed (`<epic-page reviewing>`), and an item its section's filter hides
+ * (`data-epic-filtered`, epic `epic-engine` P45);  never in the file, so a patch keeps them
  * (`KEPT_ATTRIBUTES`), and a replaced subtree carries them over (`carryEpicState()`).
  * - NOTE: their review controls and note boxes are in their shadow roots (P9):  a patch never sees them
  */
-const EPIC_PAGE_STATE = ["open", "reviewing"]
+const EPIC_PAGE_STATE = ["open", "reviewing", "data-epic-filtered"]
 
 /**
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):

@@ -152,18 +152,18 @@ As `plan-doc.md`, "Ids":
 ```html
 <epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" changes="1">
   <epic-field name="symptom">what's wrong today, one line</epic-field>
-  <epic-field name="changes">what changes, two or three lines</epic-field>
   <epic-field name="requests"
     ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>Owen's words</p></blockquote> ...</epic-field
   ></epic-field>
   <epic-field name="goal"><ul><li>a bullet per outcome</li></ul></epic-field>
+  <epic-field name="changes">what changes, two or three lines</epic-field>
   <epic-field name="plan" accepted="2026-10-24 21:40"><ol><li>Claude's build steps</li></ol></epic-field>
   <epic-update at="2026-10-06 14:30" phase="3" summary="Split in two"><p>what changed in the plan, and why</p></epic-update>
   <epic-field name="done"><ul><li>what was built</li></ul></epic-field>
   <epic-commit sha="2c71ac57...">one or two sentences</epic-commit>
   <epic-field name="files">...</epic-field>
   <epic-field name="verify">...</epic-field>
-  <epic-field name="to-review"><a href="#j1">J1</a>, <a href="#c3">C3</a></epic-field>
+  <epic-field name="to-review"><epic-mark item="j1" link></epic-mark>, <epic-mark item="c3" link></epic-mark></epic-field>
 </epic-phase>
 ```
 
@@ -184,8 +184,12 @@ As `plan-doc.md`, "Ids":
 - Children in that order, always (the vocabulary's `childOrder: "listed"`):
   the tool puts each where it belongs.
   - Owen's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
+  - Changes after Goal, next to Claude's plan (epic `epic-engine` P45;  Owen, 2026-10-25:  "Move `changes` below
+    `goal` so it's next to the plan");  the migration `changes-after-goal` moves an older page's.
+  - To review's items are `<epic-mark item link>`s (P45), each drawn in its item's state colour;  the migration
+    `to-review-marks` turns an older page's `<a href="#j1">` links into them.
 - `add-phase`'s fields:
-  - with `--symptom` / `--changes`:  Symptom, Changes, then Goal (optional), Files, Verify
+  - with `--symptom` / `--changes`:  Symptom, then Goal (optional), Changes, Files, Verify
   - without:  Goal, Files, Verify
   - A field not given reads `TBD`;  but the plan, which comes only once written (`--plan`).
 - `add-phase ... --after N`:  the new P<N+1>, right after PN;  the phases after it move down a number, as `--before`
@@ -854,6 +858,11 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - fixes one written by hand (`21 min`, `1.5h`, `took 45m`);  one that won't read is reported, left;  an empty one
       goes
     - a page without one is left as it is:  older phases get a time only when asked (`epic phase … took`)
+  - `to-review-marks` (2026-10-25, every edit;  epic `epic-engine` P45):  a phase's To review links as
+    `<epic-mark item link>`s (`ToReviewMarks`), the commas kept;  a link whose words aren't its item's id is left,
+    reported
+  - `changes-after-goal` (2026-10-25, every edit;  P45):  a phase's Changes field after its Goal, where the content
+    model lists it now (`ChangesAfterGoal`, by `Markup.place()`)
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

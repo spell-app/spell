@@ -60,7 +60,7 @@
   }
   /*
    * the title rows as RUNS, as an item list's lines (epic `epic-engine` I96;  Owen, 2026-10-24:  "showed the white
-   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runRules()`),
+   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runs.css`, by position),
    * rounded at a run's top (the first phase, the one after an open phase) and bottom (the last);  square while stuck
    */
   ui-section:not(:state(stuck))::part(title) {

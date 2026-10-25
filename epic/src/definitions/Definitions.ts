@@ -1,3 +1,4 @@
+import { epicActionsVocabulary } from "spell-epic/components/epic-actions/EpicActions.en"
 import { epicAgentsVocabulary } from "spell-epic/components/epic-agents/EpicAgents.en"
 import { epicAnswerVocabulary } from "spell-epic/components/epic-answer/EpicAnswer.en"
 import { epicMoreVocabulary } from "spell-epic/components/epic-answer/EpicMore.en"
@@ -17,6 +18,7 @@ import { epicCommitVocabulary } from "spell-epic/components/epic-commit/EpicComm
 import { epicEventVocabulary } from "spell-epic/components/epic-event/EpicEvent.en"
 import { epicItemVocabulary } from "spell-epic/components/epic-item/EpicItem.en"
 import { epicLinkVocabulary } from "spell-epic/components/epic-link/EpicLink.en"
+import { epicMarkVocabulary } from "spell-epic/components/epic-mark/EpicMark.en"
 import { epicCardVocabulary } from "spell-epic/components/epic-list/EpicCard.en"
 import { epicListVocabulary } from "spell-epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell-epic/components/epic-list/EpicSort.en"
@@ -94,10 +96,14 @@ export class Definitions {
     "epic-code": epicCodeVocabulary,
     // a link to a saga, an epic, a phase or an item (epic `epic-workflow` P15), anywhere prose goes
     "epic-link": epicLinkVocabulary,
+    // an item's id as a chip in its state colour (epic `epic-engine` P45):  a phase's To review
+    "epic-mark": epicMarkVocabulary,
     // a change mark (epic `epic-engine` P30):  words an answer changed, in the text itself
     "epic-change": epicChangeVocabulary,
     // a screenshot full size over the page (epic `epic-engine` I129):  made by a click, never written in a page
     "epic-zoom": epicZoomVocabulary,
+    // a block's actions row on an epic page (epic `epic-engine` P45):  made by the docs runtime, never written
+    "epic-actions": epicActionsVocabulary,
     // the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12):  details and choice pages
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,

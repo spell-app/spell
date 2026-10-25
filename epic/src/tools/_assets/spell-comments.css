@@ -129,6 +129,15 @@
   border-radius: 999px;
   background: var(--spell-bg);
 }
+/*
+ * An epic page's actions row is an element, `<epic-actions>` (epic `epic-engine` P45):  it places and styles its own
+ * buttons.  Until its family loads it's a line of no height here too, so nothing in the page moves as it upgrades
+ * (the page's cloak hides its buttons meanwhile, `spell-doc.css`).
+ */
+:is(.spell-doc-main, .site-main) epic-actions:not([hidden]) {
+  display: block;
+  height: 0;
+}
 :is(.spell-doc-main, .site-main) .spell-comment-mark {
   position: relative;
 }
@@ -138,7 +147,7 @@
     :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
     epic-overview:hover:not(:has(epic-section:hover)) > .spell-comment-mark,
     :is(.spell-page-head, .site-masthead):hover > .spell-comment-mark,
-    .spell-block-actions:is(:hover, :has(+ :hover)) .spell-comment-mark,
+    :is(.spell-block-actions, epic-actions):is(:hover, :has(+ :hover)) .spell-comment-mark,
     .spell-comment-mark:focus-within
   ) {
   opacity: 1;

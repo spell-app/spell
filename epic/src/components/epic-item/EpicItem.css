@@ -9,7 +9,7 @@
  *   - `--epic-band-row`:  the line's band
  *   - `--epic-stack`:  how far below the window's top an open item's line sticks (the stuck section titles)
  *   - `--epic-item-top-radius` / `--epic-item-bottom-radius`:  its line's corners, set by its section
- *     on the first and last line of each run of lines (`EpicSection.runRules()`)
+ *     on the first and last line of each run of lines (`EpicSection.runs.css`, by position)
  * - Every box on the line sits in a `.cell` one line tall, centred in it:
  *   so the chevron, chip and label centre on the title's FIRST line, however many lines it wraps to.
  * - Public tokens (`--epic-item-*`) are never declared here:  read through private aliases.
@@ -35,7 +35,7 @@
     --_epic-item-muted: var(--ui-text-muted, GrayText);
     --_epic-chip-size: var(--epic-chip-font-size, 0.8em);
     --_epic-chip-height: var(--epic-chip-height, 1.6em);
-    /* its line's corners:  square, but at a run's ends, which its section rounds (`EpicSection.runRules()`) */
+    /* its line's corners:  square, but at a run's ends, which its section rounds (`EpicSection.runs.css`, by position) */
     --_epic-item-top-radius: var(--epic-item-top-radius, 0px);
     --_epic-item-bottom-radius: var(--epic-item-bottom-radius, 0px);
     display: block;
@@ -103,7 +103,7 @@
   /*
    * OPEN, a DRAWER pulled out under its line (epic `epic-engine` I104;  Owen, 2026-10-25:  "item header is rounded when
    * it's open, with 1px shadow ... lines extending down ... making it look like a drawer that was opened"):
-   * - the line rounded all round (a run of its own:  `EpicSection.runEnds`), the bars' one line of shadow under it
+   * - the line rounded all round (a run of its own:  `EpicSection.runs.css`), the bars' one line of shadow under it
    * - its details:  half-white, thin side rules running down from under the line, closed at the bottom with rounded
    *   corners;  the note box, when there, IS that bottom (below)
    */

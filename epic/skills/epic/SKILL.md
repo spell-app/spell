@@ -323,7 +323,8 @@ The phases go to a background agent, `<name>-plan-doc`, as if Owen had typed `/b
   a phase's Done list and items at its end, a reorder, Doc Review's pruning.
 
 - Per phase, in order, `add-phase`
-  (Owen, 2026-10-06:  "Symptom, Changes, then the details"):
+  (Owen, 2026-10-06:  "Symptom, Changes, then the details";  the page draws Changes after the Goal, next to the plan,
+  since epic `epic-engine` P45):
 
   ```sh
   epic add-phase <name> "Short Name" --symptom "..." --changes "..." --goal "<ul><li>...</li></ul>" \

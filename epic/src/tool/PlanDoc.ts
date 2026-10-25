@@ -582,7 +582,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Request `id` (`r3`, epic `epic-workflow`) into phase `n`'s Requests field, as one labelled block:  `html` (his
    * words, the sender, the screenshots), under the label `r3 · <from>`.
-   * - the field is made, after Symptom / Changes and their Updated lines, when the phase has none
+   * - the field is made, after Symptom and its Updated lines (before Goal and Changes), when the phase has none
    * - a block already there for `id` is replaced:  filing a request again moves nothing
    * - URLs in `html` are the page's (`requests/r3/image-1.png`):  a split doc's part file rebases them
    * - SIDE EFFECT:  logs it
@@ -1740,7 +1740,8 @@ export class PlanDoc extends PlanReader {
 
   /**
    * Phase `phase`'s "To review" field (`<epic-field name="to-review">`), last:  the items added while it was active
-   * (`phase="N"`) still open and not reviewed, not under way, in page order, as links;  none:  no field.  Changed?
+   * (`phase="N"`) still open and not reviewed, not under way, in page order, as marks
+   * (`<epic-mark item="j1" link>`, epic `epic-engine` P45:  `<a href="#j1">J1</a>` before);  none:  no field.  Changed?
    */
   updateToReview(phase: Element): boolean {
     const n = PhaseIds.numberOf(phase)
@@ -1754,10 +1755,16 @@ export class PlanDoc extends PlanReader {
       old?.remove()
       return Boolean(old)
     }
-    const html = items.map((item) => `<a href="#${item.id}">${item.id.toUpperCase()}</a>`).join(", ")
-    // as oxfmt left it:  only the whitespace may differ
-    if (old && PlanMarkup.squeeze(old.innerHTML) === PlanMarkup.squeeze(html)) return false
-    this.setField(phase, "to-review", html)
+    // the same marks already, in order (`link=""` and oxfmt's wrapping aside):  unchanged
+    const ids = items.map((item) => item.id)
+    const marks = old ? Array.from(old.children) : []
+    const same =
+      marks.length === ids.length &&
+      marks.every(
+        (mark, at) => mark.localName === MARK && mark.getAttribute("item") === ids[at] && mark.hasAttribute("link")
+      )
+    if (old && same) return false
+    this.setField(phase, "to-review", ids.map((id) => `<${MARK} item="${id}" link></${MARK}>`).join(", "))
     return true
   }
 
@@ -2619,6 +2626,9 @@ const DOC_REVIEW = /^doc review$/i
 
 /** A change mark's tag (epic `epic-engine` P30). */
 const CHANGE_TAG = "epic-change"
+
+/** An item mark's tag, a To review field's chips (`updateToReview()`, epic `epic-engine` P45). */
+const MARK = "epic-mark"
 
 /**
  * The hosts whose `to-accept` lists the change marks waiting inside them:  the body hosts of a split doc

@@ -31,7 +31,7 @@ export const epicFieldVocabulary = {
       description:
         "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` " +
         "(a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
-        "toggles), `to-review` (the script's)."
+        "toggles), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
     },
     {
       name: "accepted",

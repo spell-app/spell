@@ -31,8 +31,8 @@ export const epicPhaseVocabulary = {
   noun: "phase",
   ui: false,
   description:
-    "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, " +
-    "Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
+    "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, " +
+    "Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
     "description), then Done, commits, Files, Verify and To review, as children in that order.  " +
     "While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
   attributes: [
@@ -197,12 +197,6 @@ export const epicPhaseVocabulary = {
       description: "Symptom:  what's wrong today, one line."
     },
     {
-      tag: "epic-field",
-      where: { attribute: "name", values: ["changes"] },
-      max: 1,
-      description: "Changes:  what changes, two or three lines."
-    },
-    {
       tag: "epic-updated",
       slot: "changes",
       description:
@@ -238,6 +232,14 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["goal"] },
       max: 1,
       description: "Goal:  a bullet per outcome."
+    },
+    {
+      tag: "epic-field",
+      where: { attribute: "name", values: ["changes"] },
+      max: 1,
+      description:
+        "Changes:  what changes, two or three lines;  after Goal, next to the plan (epic `epic-engine` P45;  Owen, " +
+        '2026-10-25:  "Move `changes` below `goal` so it\'s next to the plan").'
     },
     {
       tag: "epic-update",

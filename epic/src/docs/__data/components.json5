@@ -33,6 +33,48 @@
   ],
   "components": [
     {
+      "tag": "epic-actions",
+      "name": "epic-actions",
+      "folder": "epic-actions",
+      "mainTag": "epic-actions",
+      "main": true,
+      "page": true,
+      "href": "epic-actions.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "actions row",
+        "block actions",
+        "bullhorn row",
+        "block buttons"
+      ],
+      "description": "The one row of a block's own controls, for a block with no title row of its own (a table, a paragraph, a list):  a line of no height just before the block, its buttons over the block's top right corner, the comments' bullhorn first, then a table's expand button.  The docs runtime makes it (`addBlockAction()`) and measures where the block's top edge is;  it's never written in a page.",
+      "noun": "actions row",
+      "attributes": [
+        {
+          "name": "head-row",
+          "kind": "boolean",
+          "description": "Its block is a table:  the buttons centred on its header row, not 2px inside its top edge (set by the docs runtime as it measures, `alignBlockActions()`)."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The controls, in their order:  `<ui-button>`s, the bullhorn first."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The controls' box, out of the flow, over the block's top right corner."
+        }
+      ],
+      "states": [],
+      "texts": []
+    },
+    {
       "tag": "epic-answer",
       "name": "epic-answer",
       "folder": "epic-answer",
@@ -1650,7 +1692,7 @@
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
@@ -2573,6 +2615,64 @@
           "key": "showToo",
           "text": "Click to show {saga} too",
           "description": "A chip's tooltip's last line, while hidden."
+        }
+      ]
+    },
+    {
+      "tag": "epic-mark",
+      "name": "epic-mark",
+      "folder": "epic-mark",
+      "mainTag": "epic-mark",
+      "main": true,
+      "page": true,
+      "href": "epic-mark.html",
+      "topics": [
+        "page"
+      ],
+      "aka": [
+        "mark",
+        "item mark",
+        "id chip",
+        "item reference",
+        "to review"
+      ],
+      "description": "An item's id as a chip, in the colour of the item's state:  `<epic-mark item=\"i126\" link>` draws `I126`, red while it waits on Owen, green when it's newly decided, grey once it's old (the same rule as the item's own chip, `ItemAge`).  The item's title is its tooltip;  with `link`, a click lands on the item.  The tool writes them in a phase's To review field (Owen, 2026-10-25:  \"`<epic-mark link>` for rendering the I126 mark\").",
+      "noun": "mark",
+      "attributes": [
+        {
+          "name": "item",
+          "kind": "string",
+          "description": "The item's id on this page, any case (`i126`, `Q3`):  drawn in capitals."
+        },
+        {
+          "name": "link",
+          "kind": "boolean",
+          "description": "A link that lands on the item, opening it;  without it, the chip alone."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The chip:  an `<a>` with `link`, else a `<span>`."
+        },
+        {
+          "name": "id",
+          "description": "The item's id, in capitals."
+        }
+      ],
+      "states": [
+        {
+          "name": "missing",
+          "description": "No item with that id on the page (yet):  the chip in the accent colour."
+        }
+      ],
+      "texts": [
+        {
+          "key": "missing",
+          "text": "Not on this page:  {id}",
+          "description": "The tooltip of a mark with no item."
         }
       ]
     },
@@ -4016,7 +4116,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -5559,13 +5659,18 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a blue dotted badge first, whatever the filter.",
       "noun": "state-filter",
       "attributes": [
         {
           "name": "counts",
           "kind": "string",
           "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+        },
+        {
+          "name": "marked",
+          "kind": "number",
+          "description": "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
         },
         {
           "name": "shown",
@@ -5589,6 +5694,10 @@
         {
           "name": "chip",
           "description": "Each chip, a `<button>`:  `data-state`, `data-color`, `aria-pressed`."
+        },
+        {
+          "name": "marked",
+          "description": "The blue badge of the items marked in this pass (`marked`):  not a button."
         }
       ],
       "states": [],
@@ -5602,6 +5711,11 @@
           "key": "chipWords",
           "text": "{count} {words}:  {does}",
           "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+        },
+        {
+          "key": "markedWords",
+          "text": "{count} marked in this pass, waiting for Claude",
+          "description": "The blue badge's name and tooltip:  how many items Owen marked in this pass (epic `epic-engine` P43)."
         },
         {
           "key": "showAll",
@@ -6985,6 +7099,18 @@
   ],
   "docs": [],
   "families": {
+    "epic-actions": {
+      "folder": "epic-actions",
+      "mainTag": "epic-actions",
+      "title": "<epic-actions>",
+      "summary": "The <epic-actions> element: a block's actions row on an epic page, its buttons over the block's top right corner.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-actions"
+      ],
+      "tokens": []
+    },
     "epic-answer": {
       "folder": "epic-answer",
       "mainTag": "epic-answer",
@@ -7210,6 +7336,18 @@
       "docs": false,
       "tags": [
         "epic-list"
+      ],
+      "tokens": []
+    },
+    "epic-mark": {
+      "folder": "epic-mark",
+      "mainTag": "epic-mark",
+      "title": "<epic-mark>",
+      "summary": "The <epic-mark> element: an item's id as a chip in its state colour, a link that lands on it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-mark"
       ],
       "tokens": []
     },
