@@ -4171,6 +4171,10 @@
         {
           "name": "error",
           "description": "Its `source` part couldn't be loaded."
+        },
+        {
+          "name": "movable",
+          "description": "Still to do, on a page being reviewed:  dragged by its title row to another place (epic `epic-engine` P34)."
         }
       ],
       "texts": [

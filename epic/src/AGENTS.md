@@ -1375,6 +1375,13 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
     - else Revisit, Make Caveat, Do Now:  notes on the plan, no Approve
+  - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
+    by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
+    - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
+      phase between is still to do;  Escape calls it off
+    - the page moves it at once, and keeps it there (`ReviewClient.pendingMoves`) over live patches until applied
+    - it waits for Send, as Defer does;  `epic inbox apply` moves it in the file (`PlanDoc.movePhase()`):  numbers,
+      links and "P5 · Name" text follow;  dragged again, the newer mark replaces it
   - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.

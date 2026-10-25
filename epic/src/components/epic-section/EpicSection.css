@@ -234,4 +234,10 @@
     color: var(--ui-link, LinkText);
     font-size: 12px;
   }
+
+  /* a phase being dragged (`PhaseDrag`, epic `epic-engine` P34):  no text selected on the way, the grabbing cursor */
+  :host([data-dragging]) {
+    cursor: grabbing;
+    user-select: none;
+  }
 }

@@ -138,7 +138,14 @@ export const epicPhaseVocabulary = {
     },
     ...REVIEW_PARTS
   ],
-  states: [...FOLD_STATES],
+  states: [
+    ...FOLD_STATES,
+    {
+      name: "movable",
+      description:
+        "Still to do, on a page being reviewed:  dragged by its title row to another place (epic `epic-engine` P34)."
+    }
+  ],
   texts: [
     ...FOLD_TEXTS,
     // `status*`:  the review controls' `todo` is Make Todo

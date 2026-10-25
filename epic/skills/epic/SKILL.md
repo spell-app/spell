@@ -610,6 +610,8 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
 - Every other note box:  Revisit Later;  the x, "skip this" (`skip`:  nothing to do).
   `inbox apply` applies it as reviewed:  the note kept, the status left as it was.
 - Choose, on option cards.
+- A to-do PHASE dragged by its title to another place (epic `epic-engine` P34):  its move arrives as a mark
+  (`{ action: "move", to }`);  `inbox apply` moves it, the numbers and every link and "P5 · Name" following.
 - Their colours and fills:  `plan-doc.md`, "Colours".
 - He sends them with the page header's paper plane,
   or with Review Now beside it (the wand:  every revisit waiting is asked now too, epic `windows-and-review` P4).

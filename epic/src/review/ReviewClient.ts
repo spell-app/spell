@@ -577,6 +577,22 @@ export class ReviewClient {
   // ## Writes
   ////////////////
 
+  /**
+   * Phase `id` dragged to place `to` (1-based, epic `epic-engine` P34):  its move mark, waiting for Send as Defer's
+   * does;  `inbox apply` moves it in the file.  A second drag replaces the first.
+   */
+  move(id: string, to: number): Promise<boolean> {
+    return this.save(id, { action: "move", to })
+  }
+
+  /** The phases Owen dragged that Claude hasn't moved in the file yet, oldest first:  the page keeps them there. */
+  get pendingMoves(): { id: string; to: number }[] {
+    return Object.entries(this.inbox.marks)
+      .filter(([, mark]) => mark.action === "move" && typeof mark.to === "number")
+      .sort(([, a], [, b]) => a.at.localeCompare(b.at))
+      .map(([id, mark]) => ({ id, to: mark.to! }))
+  }
+
   /** Mark item `id` (`mark`, or `null` to clear), shown at once, then saved. */
   async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word

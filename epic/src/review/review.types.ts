@@ -134,7 +134,9 @@ export const REVIEW_ACTIONS = [
   "drop",
   "defer",
   "accept",
-  "reopen"
+  "reopen",
+  // a phase dragged to another place (epic `epic-engine` P34):  `{ action: "move", to }`
+  "move"
 ] as const
 
 /** One of `REVIEW_ACTIONS`. */

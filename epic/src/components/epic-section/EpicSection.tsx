@@ -21,6 +21,7 @@ import { TEST_START } from "spell-epic/components/epic-test-run/EpicTestRun.type
 
 import { epicSectionVocabulary } from "./EpicSection.en"
 import { DOMEpicFoldElement, EpicFold } from "./EpicFold"
+import { PhaseDrag } from "./PhaseDrag"
 import { StateFilter } from "./StateFilter"
 import {
   CLOSED_STATUSES,
@@ -323,6 +324,23 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   protected followReviews() {
     const follows = this.kind === "overview-part" || !!this.newKind()
     return follows ? this.reviewState.connect() : undefined
+  }
+
+  /**
+   * The Phases section, while connected:  its to-do phases DRAG to another place by their title rows (epic
+   * `epic-engine` P34, `PhaseDrag`), while the page is reviewed;  each drop a move mark, the page keeping the
+   * moves not applied yet.
+   */
+  @E.whileConnected
+  protected dragPhases() {
+    if (this.kind !== "phases" || isServer) return undefined
+    const client = () => this.reviewState.client
+    return PhaseDrag.wire(this.domElement, {
+      enabled: () => this.reviewState.reviewing(),
+      move: (id, to) => void client()?.move(id, to),
+      pending: () => client()?.pendingMoves ?? [],
+      subscribe: (listener) => client()?.subscribe(listener) ?? (() => undefined)
+    })
   }
 
   render(): JSX.Element {
