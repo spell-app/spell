@@ -171,23 +171,23 @@ export interface UIAccordionAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  exclusive?: boolean | ""
+  exclusive?: boolean | "" | "false"
   /**
    * `exclusive`, as the DOM element's property.
    * @deprecated write `exclusive` -- `prop:` stays only for compiled spell
    */
-  "prop:exclusive"?: boolean | ""
+  "prop:exclusive"?: boolean | "" | "false"
   /**
    * The open panel closes when its title is activated;  `collapsible="no"` keeps one open.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  collapsible?: boolean | ""
+  collapsible?: boolean | "" | "false"
   /**
    * `collapsible`, as the DOM element's property.
    * @deprecated write `collapsible` -- `prop:` stays only for compiled spell
    */
-  "prop:collapsible"?: boolean | ""
+  "prop:collapsible"?: boolean | "" | "false"
   /**
    * Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to open / close panels;  `ui-opening` / `ui-closing` can veto people's changes.  When `exclusive`, only the first index counts.
    * - takes:  text
@@ -8513,12 +8513,12 @@ export interface UIEmbedAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  autoplay?: boolean | ""
+  autoplay?: boolean | "" | "false"
   /**
    * `autoplay`, as the DOM element's property.
    * @deprecated write `autoplay` -- `prop:` stays only for compiled spell
    */
-  "prop:autoplay"?: boolean | ""
+  "prop:autoplay"?: boolean | "" | "false"
   /**
    * Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute).
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -10899,12 +10899,12 @@ export interface UIFormAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  "error-focus"?: boolean | ""
+  "error-focus"?: boolean | "" | "false"
   /**
    * `error-focus`, as the DOM element's property.
    * @deprecated write `error-focus` -- `prop:` stays only for compiled spell
    */
-  "prop:errorFocus"?: boolean | ""
+  "prop:errorFocus"?: boolean | "" | "false"
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
@@ -18034,12 +18034,12 @@ export interface UINagAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  closable?: boolean | ""
+  closable?: boolean | "" | "false"
   /**
    * `closable`, as the DOM element's property.
    * @deprecated write `closable` -- `prop:` stays only for compiled spell
    */
-  "prop:closable"?: boolean | ""
+  "prop:closable"?: boolean | "" | "false"
   /**
    * Remembers the dismissal under this name, in `storage`;  without one nothing is stored.
    * - takes:  text
@@ -18945,12 +18945,12 @@ export interface UIPanelAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  open?: boolean | ""
+  open?: boolean | "" | "false"
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:open"?: boolean | ""
+  "prop:open"?: boolean | "" | "false"
   /**
    * Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.
    * - takes:  `start` · `end`
@@ -20467,12 +20467,12 @@ export interface UIPopupAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  hoverable?: boolean | ""
+  hoverable?: boolean | "" | "false"
   /**
    * `hoverable`, as the DOM element's property.
    * @deprecated write `hoverable` -- `prop:` stays only for compiled spell
    */
-  "prop:hoverable"?: boolean | ""
+  "prop:hoverable"?: boolean | "" | "false"
   /**
    * `hover`:  ms before it shows;  not written, the page's `--ui-hover-delay` (800ms by default).
    * - takes:  number
@@ -21718,12 +21718,12 @@ export interface UIPropertyEditorAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  "error-focus"?: boolean | ""
+  "error-focus"?: boolean | "" | "false"
   /**
    * `error-focus`, as the DOM element's property.
    * @deprecated write `error-focus` -- `prop:` stays only for compiled spell
    */
-  "prop:errorFocus"?: boolean | ""
+  "prop:errorFocus"?: boolean | "" | "false"
   /**
    * Ask before leaving the page while fields differ from their starting values.
    * - takes:  flag (present / absent)
@@ -21829,12 +21829,12 @@ export interface UIPropertyEditorAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  open?: boolean | ""
+  open?: boolean | "" | "false"
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:open"?: boolean | ""
+  "prop:open"?: boolean | "" | "false"
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -22407,12 +22407,12 @@ export interface UIPropertyGroupAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  open?: boolean | ""
+  open?: boolean | "" | "false"
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:open"?: boolean | ""
+  "prop:open"?: boolean | "" | "false"
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -25634,12 +25634,12 @@ export interface UISearchAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  "show-no-results"?: boolean | ""
+  "show-no-results"?: boolean | "" | "false"
   /**
    * `show-no-results`, as the DOM element's property.
    * @deprecated write `show-no-results` -- `prop:` stays only for compiled spell
    */
-  "prop:showNoResults"?: boolean | ""
+  "prop:showNoResults"?: boolean | "" | "false"
   /**
    * Local results as a PROPERTY:  `SearchResult[]` (`{ title, description, image, price, category, url }`).
    * - a JS property (rich data):  an object, array or function, given as it is
@@ -25963,12 +25963,12 @@ export interface UISectionAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  open?: boolean | ""
+  open?: boolean | "" | "false"
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
    */
-  "prop:open"?: boolean | ""
+  "prop:open"?: boolean | "" | "false"
   /**
    * With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).
    * - takes:  `start` · `end`
@@ -33043,12 +33043,12 @@ export interface UIToastAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  "close-on-click"?: boolean | ""
+  "close-on-click"?: boolean | "" | "false"
   /**
    * `close-on-click`, as the DOM element's property.
    * @deprecated write `close-on-click` -- `prop:` stays only for compiled spell
    */
-  "prop:closeOnClick"?: boolean | ""
+  "prop:closeOnClick"?: boolean | "" | "false"
   /**
    * Milliseconds before it closes itself;  absent or `0` keeps it until closed;  `auto` ~== reading time (120 words a minute, at least a second).  `UI.toast()` defaults to `3000`.
    * - takes:  text
@@ -33084,23 +33084,23 @@ export interface UIToastAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  "pause-on-hover"?: boolean | ""
+  "pause-on-hover"?: boolean | "" | "false"
   /**
    * `pause-on-hover`, as the DOM element's property.
    * @deprecated write `pause-on-hover` -- `prop:` stays only for compiled spell
    */
-  "prop:pauseOnHover"?: boolean | ""
+  "prop:pauseOnHover"?: boolean | "" | "false"
   /**
    * A fixed width (350px);  `compact="false"` sizes it to its content.
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  compact?: boolean | ""
+  compact?: boolean | "" | "false"
   /**
    * `compact`, as the DOM element's property.
    * @deprecated write `compact` -- `prop:` stays only for compiled spell
    */
-  "prop:compact"?: boolean | ""
+  "prop:compact"?: boolean | "" | "false"
   /**
    * Layout words of the `actions` slot (Fomantic's `classActions`):  `basic` (no bar), `left` (aligned left), `attached` (joined below, or `attached top` above), `vertical` (a column beside the content).
    * - takes:  `basic` · `left` · `attached` · `vertical` · `top` · `bottom`
@@ -34520,12 +34520,12 @@ export interface UIVideoAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  controls?: boolean | ""
+  controls?: boolean | "" | "false"
   /**
    * `controls`, as the DOM element's property.
    * @deprecated write `controls` -- `prop:` stays only for compiled spell
    */
-  "prop:controls"?: boolean | ""
+  "prop:controls"?: boolean | "" | "false"
   /**
    * A captions file (WebVTT, `.vtt`), in the page's language:  the player offers them.
    * - takes:  text
@@ -34778,12 +34778,12 @@ export interface UIVisibilityAttributes {
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
-  once?: boolean | ""
+  once?: boolean | "" | "false"
   /**
    * `once`, as the DOM element's property.
    * @deprecated write `once` -- `prop:` stays only for compiled spell
    */
-  "prop:once"?: boolean | ""
+  "prop:once"?: boolean | "" | "false"
   /**
    * Events fire at every check while their condition holds (each crossing, not every scrolled pixel).
    * - takes:  flag (present / absent)
