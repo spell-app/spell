@@ -21,6 +21,7 @@ import { getProps, schemaOf, setProp, withoutCreate, type PropInfo } from "spell
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
+import { isPlainObject } from "./state"
 // Import directly to avoid circular import
 import { Thing } from "./classes/Thing"
 import { List } from "./classes/List"
@@ -262,12 +263,6 @@ function legalValues(info: PropInfo): readonly unknown[] | undefined {
 /** Is `value` a spell thing:  a `Thing`, or any `List`? */
 function isThingLike(value: unknown): value is ThingLike {
   return value instanceof Thing || value instanceof List
-}
-
-/** Is `value` a plain object, as a literal makes:  NOT an array, a thing, or `null`? */
-function isPlainObject(value: object): value is Record<string, unknown> {
-  const proto = Object.getPrototypeOf(value) as unknown
-  return proto === Object.prototype || proto === null
 }
 
 /** Does `proto`, or one up its chain, have a setter for `key`?  The nearest accessor decides. */
