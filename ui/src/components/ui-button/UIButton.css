@@ -26,7 +26,6 @@
  * - The `:state()`s the components must set (the DOM element's own layout can't come from inside):
  *   - `:state(fluid)` -- the DOM element is block-level:  `fluid`, bare / `top` / `bottom` `attached`,
  *     and groups with `width` (equal width) or `fluid`
- *   - `:state(left-floated)` / `:state(right-floated)` -- mirrors `floated`
  *   - `:state(or)` on `<ui-or>` -- so a group doesn't stretch its separators
  *   - `:state(active)` / `:state(disabled)` / `:state(loading)` -- for PAGE styling only;
  *     this sheet keys on the root's classes
@@ -90,12 +89,6 @@
   }
   :host(:state(fluid)) {
     display: flex;
-  }
-  :host(:state(left-floated)) {
-    float: left;
-  }
-  :host(:state(right-floated)) {
-    float: right;
   }
   /* `ellipsis`:  never wider than the parent, so the label has a width to cut at. */
   :host(:state(ellipsis)) {

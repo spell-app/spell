@@ -108,13 +108,6 @@ export const buttonsVocabulary = {
         "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "width",
       group: "layout",
       kind: "width",
@@ -134,9 +127,7 @@ export const buttonsVocabulary = {
     {
       name: "fluid",
       description: "The host is block-level:  `fluid`, `width`, or attached top, bottom or both."
-    },
-    { name: "left-floated", description: "The host floats left." },
-    { name: "right-floated", description: "The host floats right." }
+    }
   ],
   texts: []
 } as const satisfies E.ComponentVocabulary

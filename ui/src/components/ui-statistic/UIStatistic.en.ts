@@ -53,13 +53,6 @@ export const statisticVocabulary = {
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats to the `left` / `right` of the content after it."
-    },
-    {
       name: "value",
       group: "form",
       kind: "string",

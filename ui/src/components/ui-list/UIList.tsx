@@ -8,7 +8,7 @@ import listCSS from "./UIList.css?inline"
 /****************
  * ### `UIList`
  * The component behind `<ui-list>`:  a list of GENERIC `<ui-item>`s,
- * `<ul class="ui [size] [keyOnly ...] [relaxed] [floated] [aligned] list" part="list" role="list">`
+ * `<ul class="ui [size] [keyOnly ...] [relaxed] [aligned] list" part="list" role="list">`
  * around the `<slot>` (an `<ol>` when `ordered`).
  *
  * - It owns its items (`ItemOwner`):  every `<ui-item>` inside finds this list (`PartContext`)

@@ -58,13 +58,6 @@ export const imagesVocabulary = {
       description: "Every image fills the group's width, one per row."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats the group `left` or `right`."
-    },
-    {
       name: "vertical-align",
       group: "layout",
       kind: "verticalAlign",

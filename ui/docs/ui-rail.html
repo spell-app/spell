@@ -30,7 +30,7 @@
     <main id="main" class="site-main" data-toc-header="Rail">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-rail%3A%20%20"
               icon="bug"
@@ -74,7 +74,8 @@
               <ui-section id="examples-types-rail" label="Rail" sticky collapsible dividing>
                 <ui-docs-example description="A rail can be presented on the left or right side of a container.">
                   <ui-grid>
-                    <ui-column width="8" floated="right">
+                    <ui-column width="8"></ui-column>
+                    <ui-column width="8">
                       <ui-segment>
                         <ui-rail position="left"><ui-segment>Left Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -106,7 +107,8 @@
               <ui-section id="examples-types-dividing" label="Dividing" sticky collapsible dividing>
                 <ui-docs-example description="A rail can create a division between itself and a container.">
                   <ui-grid>
-                    <ui-column width="8" floated="right">
+                    <ui-column width="8"></ui-column>
+                    <ui-column width="8">
                       <ui-segment>
                         <ui-rail position="left" dividing><ui-segment>Left Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -131,7 +133,8 @@
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example description="A rail can appear attached to the main viewport.">
                   <ui-grid>
-                    <ui-column width="8" floated="right">
+                    <ui-column width="8"></ui-column>
+                    <ui-column width="8">
                       <ui-segment>
                         <ui-rail position="left" attach="both"><ui-segment>Left Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -162,7 +165,8 @@
                   description='A rail can appear closer to the main viewport:  `close`, or `close="very"`.'
                 >
                   <ui-grid>
-                    <ui-column width="8" floated="right">
+                    <ui-column width="8"></ui-column>
+                    <ui-column width="8">
                       <ui-segment>
                         <ui-rail position="left" close><ui-segment>Left Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>

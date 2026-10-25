@@ -31,13 +31,6 @@ export const contentVocabulary = {
     },
     { name: "scrolling", group: "layout", kind: "keyOnly", description: "In a modal:  a capped height that scrolls." },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "align",
       group: "layout",
       kind: "textAlign",

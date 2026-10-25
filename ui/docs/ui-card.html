@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Card">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-card%3A%20%20"
               icon="bug"
@@ -81,16 +81,21 @@
                   </ui-card>
                 </ui-docs-example>
 
-                <!-- GAP I125:  no `floated` on <ui-meta> / plain content (Fomantic's `right floated meta`, `right floated` likes);  they sit in line. -->
+                <!-- I125:  Fomantic's `right floated` meta and likes:  a `<ui-stack>` puts them at the right. -->
                 <ui-docs-example>
                   <ui-card>
                     <ui-content>
-                      <ui-avatar src="images/avatar/large/elliot.jpg" tooltip=""></ui-avatar> Elliot
-                      <ui-meta>14h</ui-meta>
+                      <ui-stack direction="horizontal" justify="between">
+                        <span><ui-image avatar src="images/avatar/large/elliot.jpg" alt=""></ui-image> Elliot</span>
+                        <ui-meta>14h</ui-meta>
+                      </ui-stack>
                     </ui-content>
                     <img src="images/wireframe/image.png" alt="" />
                     <ui-content>
-                      <ui-icon name="heart"></ui-icon> 17 likes · <ui-icon name="comment"></ui-icon> 3 comments
+                      <ui-stack direction="horizontal" justify="between">
+                        <span><ui-icon name="comment"></ui-icon> 3 comments</span>
+                        <span><ui-icon name="heart"></ui-icon> 17 likes</span>
+                      </ui-stack>
                     </ui-content>
                     <ui-extra>
                       <ui-input
@@ -372,8 +377,10 @@
                       </ui-description>
                     </ui-content>
                     <ui-extra>
-                      <ui-button size="mini" icon="heart" appearance="basic">Like</ui-button>
-                      <ui-button size="mini" icon="star" floated="right" appearance="basic">Favorite</ui-button>
+                      <ui-stack direction="horizontal" justify="between">
+                        <ui-button size="mini" icon="heart" appearance="basic">Like</ui-button>
+                        <ui-button size="mini" icon="star" appearance="basic">Favorite</ui-button>
+                      </ui-stack>
                     </ui-extra>
                   </ui-card>
                 </ui-docs-example>
@@ -625,17 +632,25 @@
               </ui-section>
 
               <!-- GAP I125:  only <ui-header> / <ui-content> float;  the meta's time and the author sit in line. -->
-              <ui-section id="examples-variations-floated-content" label="Floated Content" sticky collapsible dividing>
-                <ui-docs-example description="Any content element can be floated left or right.">
+              <ui-section id="examples-variations-content-at-the-right" label="Content at the Right" sticky collapsible dividing>
+                <ui-docs-example
+                  description="Content has no `floated` any more:  a `<ui-stack>` puts the meta's time and the author at the right."
+                >
                   <ui-card>
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
-                      <ui-meta>2 days ago · Animals</ui-meta>
+                      <ui-meta>
+                        <ui-stack direction="horizontal" justify="between"><span>Animals</span><span>2 days ago</span></ui-stack>
+                      </ui-meta>
                       <ui-description>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-description>
                     </ui-content>
-                    <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
+                    <ui-extra>
+                      <ui-stack direction="horizontal" justify="end">
+                        <span><ui-image avatar src="images/avatar/small/matt.jpg" alt=""></ui-image> Matt</span>
+                      </ui-stack>
+                    </ui-extra>
                   </ui-card>
                 </ui-docs-example>
               </ui-section>

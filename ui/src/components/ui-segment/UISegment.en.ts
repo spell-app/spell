@@ -90,13 +90,6 @@ export const segmentVocabulary = {
     },
     { name: "clearing", group: "appearance", kind: "keyOnly", description: "Contains its floated children." },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "align",
       group: "layout",
       kind: "textAlign",

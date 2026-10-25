@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Statistic">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-statistic%3A%20%20"
               icon="bug"
@@ -245,33 +245,45 @@
                 </ui-docs-example>
               </ui-section>
 
-              <ui-section id="examples-variations-floated" label="Floated" sticky collapsible dividing>
-                <ui-docs-example description="A statistic can sit to the left or right of other content.">
+              <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
+                <ui-docs-example>
+                  <p slot="description">
+                    A statistic has no <code>floated</code> any more: a <code>&lt;ui-stack&gt;</code> puts it at the left
+                    or the right of other content. The text stays in a column beside it; it doesn't wrap round it.
+                  </p>
                   <ui-segment>
-                    <ui-statistic floated="right" value="2,204" label="Views"></ui-statistic>
-                    <p>
-                      Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est
-                      autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea
-                      laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex
-                      natum rebum iisque.
-                    </p>
-                    <p>
-                      Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla
-                      ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas
-                      oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.
-                    </p>
-                    <ui-statistic floated="left" value="2,204" label="Views"></ui-statistic>
-                    <p>
-                      Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores
-                      adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque
-                      quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at. Quodsi convenire
-                      mnesarchum eu per, quas minimum postulant per id.
-                    </p>
-                    <p>
-                      Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla
-                      ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas
-                      oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.
-                    </p>
+                    <ui-stack direction="horizontal" align="start">
+                      <div>
+                        <p>
+                          Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est
+                          autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea
+                          laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex
+                          natum rebum iisque.
+                        </p>
+                        <p>
+                          Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla
+                          ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas
+                          oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.
+                        </p>
+                      </div>
+                      <ui-statistic value="2,204" label="Views"></ui-statistic>
+                    </ui-stack>
+                    <ui-stack direction="horizontal" align="start">
+                      <ui-statistic value="2,204" label="Views"></ui-statistic>
+                      <div>
+                        <p>
+                          Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores
+                          adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque
+                          quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at. Quodsi convenire
+                          mnesarchum eu per, quas minimum postulant per id.
+                        </p>
+                        <p>
+                          Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla
+                          ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas
+                          oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.
+                        </p>
+                      </div>
+                    </ui-stack>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>

@@ -55,7 +55,7 @@ describe("<ui-button> classes", () => {
     ["animated", "ui animated button"],
     ['animated="fade"', "ui fade animated button"],
     ['attached="top"', "ui top attached button"],
-    ['floated="left"', "ui left floated button"],
+    // `floated` is gone (epic ui-gaps P8):  a `<ui-stack>` places buttons
     ["floated", "ui button"]
   ])("<ui-button %s>", async (attributes, classes) => {
     const { control } = await button(`<ui-button ${attributes}>Go</ui-button>`)
@@ -103,9 +103,8 @@ describe("<ui-button> classes", () => {
   })
 
   it("sets host states for layout", async () => {
-    const { host } = await button(`<ui-button attached="top" floated="left">Go</ui-button>`)
+    const { host } = await button(`<ui-button attached="top">Go</ui-button>`)
     expect(host.matches(":state(fluid)")).toBe(true)
-    expect(host.matches(":state(left-floated)")).toBe(true)
   })
 
   it("hides with the `hidden` attribute, fluid or not", async () => {

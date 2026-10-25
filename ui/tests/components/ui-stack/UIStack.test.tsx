@@ -78,3 +78,28 @@ describe("<ui-stack>", () => {
     await expectAccessible(host)
   })
 })
+
+describe("<ui-stack> and its Spell UI children", () => {
+  it("drops a child's own outside margins:  two headers in a row sit level", async () => {
+    await import("spell-ui/components/ui-parts")
+    const host = await ElementFixture.render<HTMLElement>(
+      `<ui-stack direction="horizontal" justify="between"><ui-header level="3">Go back</ui-header>` +
+        `<ui-header level="3">Go forward</ui-header></ui-stack>`
+    )
+    await ElementFixture.settle()
+    const [first, second] = [...host.querySelectorAll("ui-header")].map(
+      (header) => header.shadowRoot!.querySelector<HTMLElement>("[part~=header]")!.getBoundingClientRect().top
+    )
+    expect(Math.round(second!)).toBe(Math.round(first!))
+  })
+
+  it("only for its own children:  a header inside a child keeps its margins", async () => {
+    await import("spell-ui/components/ui-segment")
+    const host = await ElementFixture.render<HTMLElement>(
+      `<ui-stack><ui-segment><p>x</p><ui-header level="3">Inside</ui-header></ui-segment></ui-stack>`
+    )
+    await ElementFixture.settle()
+    const root = host.querySelector("ui-header")!.shadowRoot!.querySelector<HTMLElement>("[part~=header]")!
+    expect(parseFloat(getComputedStyle(root).marginBlockStart)).toBeGreaterThan(0)
+  })
+})

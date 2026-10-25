@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Getting started">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=Getting%20started%3A%20%20"
               icon="bug"
@@ -82,15 +82,15 @@
             <ui-section id="general-usage-attribute-order" label="Attribute Order" sticky collapsible dividing>
               <ui-docs-example>
                 <p slot="description">
-                  Fomantic needs some class names in a strict order (<code>ui left labeled right floated button</code>,
-                  never <code>ui left right button floated labeled</code>). Attributes have no such rule: each names its
+                  Fomantic needs some class names in a strict order (<code>ui left spaced right floated image</code>,
+                  never <code>ui left right image floated spaced</code>). Attributes have no such rule: each names its
                   own side, so any order renders the same.
                 </p>
                 <ui-segment clearing appearance="basic">
-                  <ui-button labeled="left" floated="right" icon="heart">Labeled</ui-button>
+                  <ui-image floated="right" spacing="left" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
                 <ui-segment clearing appearance="basic">
-                  <ui-button floated="right" icon="heart" labeled="left">Labeled</ui-button>
+                  <ui-image spacing="left" size="tiny" floated="right" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
               </ui-docs-example>
             </ui-section>

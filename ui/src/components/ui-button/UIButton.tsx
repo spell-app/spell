@@ -132,18 +132,6 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return this.fluid || attach === "both" || attach === "top" || attach === "bottom"
   }
 
-  /** `floated="left"`:  the whole element floats left. */
-  @E.cssState("left-floated")
-  get floatsLeft(): boolean {
-    return this.floated === "left"
-  }
-
-  /** `floated="right"`:  the whole element floats right. */
-  @E.cssState("right-floated")
-  get floatsRight(): boolean {
-    return this.floated === "right"
-  }
-
   ////////////////
   // ## Classes
   ////////////////

@@ -572,16 +572,18 @@
   </section>
 
   <section>
-    <h4>Floated</h4>
-    <ui-list floated="right" direction="horizontal">
-      <ui-item>&copy; GitHub, Inc.</ui-item>
-      <ui-item link="#terms">Terms</ui-item>
-      <ui-item link="#privacy">Privacy</ui-item>
-      <ui-item link="#contact">Contact</ui-item>
-    </ui-list>
-    <ui-list direction="horizontal">
-      <ui-item link="#about">About Us</ui-item>
-      <ui-item link="#jobs">Jobs</ui-item>
-    </ui-list>
+    <h4>Left and right</h4>
+    <ui-stack direction="horizontal" justify="between" wrap>
+      <ui-list direction="horizontal">
+        <ui-item link="#about">About Us</ui-item>
+        <ui-item link="#jobs">Jobs</ui-item>
+      </ui-list>
+      <ui-list direction="horizontal">
+        <ui-item>&copy; GitHub, Inc.</ui-item>
+        <ui-item link="#terms">Terms</ui-item>
+        <ui-item link="#privacy">Privacy</ui-item>
+        <ui-item link="#contact">Contact</ui-item>
+      </ui-list>
+    </ui-stack>
   </section>
 </div>

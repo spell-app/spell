@@ -121,13 +121,6 @@ export const menuVocabulary = {
       description: "The dark scheme;  with `color`, filled with the colour."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["left", "right"],
-      description: "Floats beside the content;  `right` floats right."
-    },
-    {
       name: "padding",
       group: "layout",
       kind: "valueOnly",

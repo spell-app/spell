@@ -78,7 +78,6 @@ describe("<ui-list> classes and markup", () => {
     ["divided relaxed selection", "ui relaxed divided selection list"],
     ["horizontal inverted", "ui horizontal inverted list"],
     ["link animated fitted celled", "ui animated fitted celled link list"],
-    ['floated="right"', "ui right floated list"],
     ['vertical-align="middle"', "ui middle aligned list"]
   ])("<ui-list %s>", async (attributes, classes) => {
     const { root } = await list(attributes)

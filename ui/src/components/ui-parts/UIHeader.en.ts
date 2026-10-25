@@ -72,13 +72,6 @@ export const headerVocabulary = {
       description: "With `attached`:  no line where it meets the segment."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "align",
       group: "layout",
       kind: "textAlign",

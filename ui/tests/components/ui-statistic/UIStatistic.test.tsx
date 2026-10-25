@@ -47,7 +47,6 @@ describe("<ui-statistic> classes", () => {
     ['color="red" inverted', "ui red inverted statistic"],
     ["horizontal", "ui horizontal statistic"],
     ['horizontal="no"', "ui statistic"],
-    ['floated="left"', "ui left floated statistic"],
     ["fluid", "ui fluid statistic"],
     ['text value="Three" label="x"', "ui statistic"]
   ])("<ui-statistic %s>", async (attributes, classes) => {

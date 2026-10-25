@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Grid">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-grid%3A%20%20"
               icon="bug"
@@ -316,13 +316,16 @@
               <ui-section id="examples-rows-clearing-content" label="Clearing Content" sticky collapsible dividing>
                 <ui-docs-example>
                   <p slot="description">
-                    Row wrappers will automatically clear previous columns, making them useful when using
-                    <a href="#examples-variations-floated"><code>floated</code></a> variations.
+                    Row wrappers will automatically clear previous columns:  the next row starts on a line of its own,
+                    even when this one isn't full.  Here empty columns push the second one to the right
+                    (<a href="#examples-variations-left-and-right">Left and Right</a>).
                   </p>
                   <ui-grid>
                     <ui-row columns="4">
-                      <ui-column floated="left"><ui-segment></ui-segment></ui-column>
-                      <ui-column floated="right"><ui-segment></ui-segment></ui-column>
+                      <ui-column><ui-segment></ui-segment></ui-column>
+                      <ui-column></ui-column>
+                      <ui-column></ui-column>
+                      <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                     <ui-row>
                       <ui-column width="3"><ui-segment></ui-segment></ui-column>
@@ -470,16 +473,18 @@
                     alignment, or default gutter sizes.
                   </p>
                   <p slot="description">
-                    Some multi-word variations, like <a href="#examples-variations-floated"><code>floated="left"</code></a> or
-                    <a href="#examples-variations-text-alignment"><code>text-align="right"</code></a> are word-order dependent and require
-                    you to use adjacent class names.
+                    Some multi-word variations, like
+                    <a href="#examples-variations-vertical-alignment"><code>vertical-align="middle"</code></a> or
+                    <a href="#examples-variations-text-alignment"><code>align="right"</code></a> are word-order dependent
+                    and require you to use adjacent class names.
                   </p>
                   <ui-grid>
-                    <ui-column width="6" align="right" floated="left">
-                      <ui-segment>Left floated right aligned column</ui-segment>
+                    <ui-column width="6" align="right">
+                      <ui-segment>Right aligned column</ui-segment>
                     </ui-column>
-                    <ui-column width="6" align="left" floated="right">
-                      <ui-segment>Right floated left aligned column</ui-segment>
+                    <ui-column width="4"></ui-column>
+                    <ui-column width="6" align="left">
+                      <ui-segment>Left aligned column</ui-segment>
                     </ui-column>
                     <ui-row columns="2" align="center">
                       <ui-column>
@@ -799,13 +804,16 @@
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-floated" label="Floated" sticky collapsible dividing>
-                <ui-docs-example description="A column can sit flush against the left or right edge of a row.">
+              <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
+                <ui-docs-example
+                  description="A column has no `floated` any more:  an empty column between two others pushes them to the left and right edges of the row."
+                >
                   <ui-grid>
-                    <ui-column width="5" floated="left">
+                    <ui-column width="5">
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
-                    <ui-column width="5" floated="right">
+                    <ui-column width="6"></ui-column>
+                    <ui-column width="5">
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
                   </ui-grid>
@@ -1675,8 +1683,8 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - A grid is layout only: plain boxes with no role. Put headings, lists and landmarks inside the columns.
-                  - Screen readers and the Tab key follow the source order, so `reversed` and `floated` change only what the eye
-                    sees. Keep the source in a sensible reading order.
+                  - Screen readers and the Tab key follow the source order, so `reversed` changes only what the eye sees.
+                    Keep the source in a sensible reading order.
                   - `only` hides rows and columns with `display: none`, from assistive tech too. Don't put anything there that the
                     other devices need.
                   - `color` fills a row or column with a hue and switches its text to a contrasting colour; check any colours you

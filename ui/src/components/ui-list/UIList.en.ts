@@ -108,13 +108,6 @@ export const listVocabulary = {
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "vertical-align",
       group: "layout",
       kind: "verticalAlign",

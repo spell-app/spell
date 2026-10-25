@@ -30,7 +30,7 @@
     <main id="main" class="site-main" data-toc-header="Grammar">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=Grammar%3A%20%20"
               icon="bug"
@@ -101,15 +101,15 @@
               </ui-docs-example>
               <ui-docs-example>
                 <p slot="description">
-                  Attributes in any order render the same words in the same order: both buttons are
-                  <code>ui left labeled right floated button icon</code> (<code>icon</code> is an extra class, after the
-                  noun). Fomantic needs <code>left labeled right floated</code> spelled exactly so.
+                  Attributes in any order render the same words in the same order: both images are
+                  <code>ui tiny left spaced right floated image</code>. Fomantic needs <code>left spaced</code> and
+                  <code>right floated</code> spelled exactly so.
                 </p>
                 <ui-segment clearing appearance="basic">
-                  <ui-button labeled="left" floated="right" icon="pause">Pause</ui-button>
+                  <ui-image floated="right" spacing="left" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
                 <ui-segment clearing appearance="basic">
-                  <ui-button floated="right" icon="pause" labeled="left">Pause</ui-button>
+                  <ui-image size="tiny" spacing="left" floated="right" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
               </ui-docs-example>
             </ui-section>
@@ -131,7 +131,7 @@
                 | `icon`                                        | `icon="user"`                  | nothing: a glyph name     |
                 | `keyOnly`                                     | `basic`                        | `basic`                   |
                 |                                               | `very-short`                   | `very short`              |
-                | `valueAndKey`                                 | `floated="left"`               | `left floated`            |
+                | `valueAndKey`                                 | `floated="left"` (an image's)  | `left floated`            |
                 |                                               | `floated` (bare)               | nothing                   |
                 | `keyOrValueAndKey`                            | `pointing`                     | `pointing`                |
                 |                                               | `pointing="left"`              | `left pointing`           |
@@ -177,10 +177,12 @@
             </ui-section>
             <ui-section id="attribute-kinds-value-and-key" label="Value and Key" sticky collapsible dividing>
               <ui-docs-example
-                description='`floated="left"` => `ui left floated segment`;  a bare `floated` emits nothing.'
+                description='`floated="left"` => `ui left floated image`;  a bare `floated` emits nothing.'
               >
-                <ui-segment floated="left">floated="left"</ui-segment>
-                <ui-segment floated="right">floated="right"</ui-segment>
+                <ui-segment clearing appearance="basic">
+                  <ui-image floated="left" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
+                  <p>An image with <code>floated="left"</code>: the text wraps round it.</p>
+                </ui-segment>
               </ui-docs-example>
             </ui-section>
             <ui-section

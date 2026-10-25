@@ -30,7 +30,7 @@
     <main id="main" class="site-main" data-toc-header="Content">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-content%3A%20%20"
               icon="bug"
@@ -205,7 +205,8 @@
 
                   - Inside it go the other parts: `<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>` ...
                   - `align` aligns one block (a card's `center aligned content`); `vertical-align` lines it up against the image
-                    or icon beside it in an item or a list; `floated` floats it.
+                    or icon beside it in an item or a list.  To put content at the left or right, a `<ui-stack>` inside it
+                    places it.
                   - In a modal, `image` puts an image beside the description and `scrolling` caps the height and scrolls.
                   - In a `<ui-header>` it is the text column beside an icon or image.
                 </script>

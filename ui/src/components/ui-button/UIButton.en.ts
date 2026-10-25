@@ -176,13 +176,6 @@ export const buttonVocabulary = {
         "Its old name is `attached`."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Floats `left` or `right`."
-    },
-    {
       name: "icon",
       group: "content",
       kind: "icon",
@@ -309,8 +302,6 @@ export const buttonVocabulary = {
     { name: "disabled", description: "Can't be used." },
     { name: "loading", description: "Busy." },
     { name: "fluid", description: "The host is block-level:  `fluid`, or attached top, bottom or both (`attach`)." },
-    { name: "left-floated", description: 'The host floats left (`floated="left"`).' },
-    { name: "right-floated", description: 'The host floats right (`floated="right"`).' },
     { name: "ellipsis", description: "Cuts its text off with `…`:  the host is never wider than its parent." }
   ],
   texts: [{ key: "loading", text: "Loading…", description: "Announced while `loading`." }]

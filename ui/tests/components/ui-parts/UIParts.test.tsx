@@ -174,7 +174,6 @@ describe("<ui-header> standalone", () => {
     ["icon block", "ui block icon header"],
     ['attached="top"', "ui top attached header"],
     ["attached", "ui attached header"],
-    ['floated="right"', "ui right floated header"],
     ['text-align="center"', "ui center aligned header"],
     ['text-align="justified"', "ui justified header"],
     // the old names (epic ui-gaps P4), and the new

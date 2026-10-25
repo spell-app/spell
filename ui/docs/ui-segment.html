@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Segment">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-segment%3A%20%20"
               icon="bug"
@@ -604,21 +604,25 @@
               </ui-section>
 
               <ui-section id="examples-variations-clearing" label="Clearing" sticky collapsible dividing>
-                <ui-docs-example description="A segment can clear floated content.">
+                <ui-docs-example description="A segment can clear floated content, such as a floated image.">
                   <ui-segment clearing>
-                    <ui-button floated="right">Floated</ui-button>
+                    <ui-image floated="right" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
 
-              <ui-section id="examples-variations-floated" label="Floated" sticky collapsible dividing>
-                <ui-docs-example description="A segment can appear to the left or right of other content.">
-                  <ui-segment floated="right">
-                    <p>This segment will appear to the right</p>
-                  </ui-segment>
-                  <ui-segment floated="left">
-                    <p>This segment will appear to the left</p>
-                  </ui-segment>
+              <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
+                <ui-docs-example
+                  description="A segment has no `floated` any more:  a `<ui-stack>` puts one segment at the left and one at the right."
+                >
+                  <ui-stack direction="horizontal" justify="between">
+                    <ui-segment>
+                      <p>This segment will appear to the left</p>
+                    </ui-segment>
+                    <ui-segment>
+                      <p>This segment will appear to the right</p>
+                    </ui-segment>
+                  </ui-stack>
                 </ui-docs-example>
               </ui-section>
 

@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Dropdown">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-dropdown%3A%20%20"
               icon="bug"
@@ -925,11 +925,11 @@
               </ui-section>
 
               <!-- GAP I107:  no floated content in an item (`right floated icon`). -->
-              <ui-section id="examples-content-floated-content" label="Floated Content" sticky collapsible dividing>
+              <ui-section id="examples-content-content-at-the-end" label="Content at the End" sticky collapsible dividing>
                 <ui-docs-example>
                   <p slot="description">
-                    A dropdown menu can contain floated content. Ours has <code>description</code> at the end of a row;
-                    an icon can't float right yet.
+                    A dropdown item can have content at the end of its row: its <code>description</code>. An icon can't go
+                    at the end yet.
                   </p>
                   <ui-dropdown fluid selection placeholder="Select Type">
                     <ui-item description="!">Important</ui-item>

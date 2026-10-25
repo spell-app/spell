@@ -53,7 +53,6 @@ describe("<ui-segment> classes", () => {
     ['text-align="center"', "ui center aligned segment"],
     ['align="center"', "ui center aligned segment"],
     ['padded="very"', "ui very padded segment"],
-    ['floated="right"', "ui right floated segment"],
     ['text-align="center"', "ui center aligned segment"],
     ["secondary", "ui secondary segment"],
     ['attached="top"', "ui top attached segment"],

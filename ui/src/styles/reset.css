@@ -11,6 +11,22 @@
  */
 
 @layer ui.reset {
+  /*
+   * A child of a `<ui-stack>` (epic `ui-gaps` P8):  its own outside margins go, the stack's spacing is the space.
+   * - The stack marks its direct children (`--_ui-stacked: 1`, `UIStack.css`);  each shadow's top boxes reset the
+   *   mark, so it reaches no deeper, and ask their host whether it's set (a style query reads the host).
+   * - `!important` in this, the FIRST layer:  an important declaration of an earlier layer beats every later layer's,
+   *   so it overrides a family's own margins (a second header's top margin) without knowing them.
+   */
+  :host > * {
+    --_ui-stacked: initial;
+  }
+  @container style(--_ui-stacked: 1) {
+    :host > * {
+      margin-block: 0 !important;
+    }
+  }
+
   :host,
   :host *,
   :host *::before,

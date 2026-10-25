@@ -95,8 +95,6 @@ describe("<ui-menu> classes", () => {
     ["compact centered wrapping wrapped", "ui compact centered wrapped wrapping menu"],
     ["inverted", "ui inverted menu"],
     ["link", "ui link menu"],
-    ["floated", "ui floated menu"],
-    ['floated="right"', "ui right floated menu"],
     ['fitted="horizontally"', "ui horizontally fitted menu"],
     ["attached", "ui attached menu"],
     ['attached="top"', "ui top attached menu"],

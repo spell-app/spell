@@ -214,17 +214,11 @@ describe("<ui-card> content parts", () => {
     expect(style(partRoot(horizontal.querySelector("ui-content")!)).borderTopWidth).toBe("0px")
   })
 
-  it("aligns and floats content (`text-align`, `floated`)", async () => {
-    const host = await render(
-      `<ui-card><ui-content text-align="center">Centred</ui-content><ui-content floated="right">R</ui-content></ui-card>`
-    )
-    const [centred, floated] = host.querySelectorAll("ui-content")
+  it("aligns content (`text-align`)", async () => {
+    const host = await render(`<ui-card><ui-content text-align="center">Centred</ui-content></ui-card>`)
+    const [centred] = host.querySelectorAll("ui-content")
     expect(partRoot(centred!).className).toBe("center aligned content")
     expect(style(partRoot(centred!)).textAlign).toBe("center")
-    expect(partRoot(floated!).className).toBe("right floated content")
-    // the float is moot in the card's flex column (the UICard.css tests prove the rule on static markup):
-    // Chromium and Firefox still compute `right`, WebKit computes `none` for a flex item
-    expect(["right", "none"]).toContain(style(partRoot(floated!)).float)
   })
 
   it("keeps a header inside a nested segment standalone (a barrier)", async () => {

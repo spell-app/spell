@@ -27,7 +27,7 @@
     <main id="main" class="site-main" data-toc-header="Menu">
       <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
-          <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
+          <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-menu%3A%20%20"
               icon="bug"
@@ -1308,14 +1308,16 @@
                   </ui-docs-example>
                 </ui-section>
 
-                <ui-section id="examples-variations-items-floated" label="Floated" sticky collapsible dividing>
-                  <ui-docs-example description="A menu can appear to the left or right of other content.">
-                    <ui-segment clearing appearance="basic">
-                      <ui-menu floated="right" padding="compact" aria-label="Floated">
+                <ui-section id="examples-variations-items-at-the-right" label="At the Right" sticky collapsible dividing>
+                  <ui-docs-example
+                    description="A menu has no `floated` any more:  a `<ui-stack>` puts it at the left or the right."
+                  >
+                    <ui-stack direction="horizontal" justify="end">
+                      <ui-menu padding="compact" aria-label="At the right">
                         <ui-item link="#1">1</ui-item>
                         <ui-item link="#2">2</ui-item>
                       </ui-menu>
-                    </ui-segment>
+                    </ui-stack>
                   </ui-docs-example>
                 </ui-section>
 

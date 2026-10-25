@@ -79,13 +79,6 @@ export const columnVocabulary = {
       description: "Width while the grid is 1920px wide or more."
     },
     {
-      name: "floated",
-      group: "layout",
-      kind: "valueAndKey",
-      values: "floats",
-      description: "Pushed to the `left` or `right` end."
-    },
-    {
       name: "attach",
       group: "layout",
       kind: "valueOnly",
