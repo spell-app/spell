@@ -27,7 +27,7 @@ import { assignment } from "./assignment"
 import { expressions, Negatable } from "./expressions"
 import { statements } from "./statements"
 import { _if_ } from "./if"
-import { JSX, SPELL_TAG_NAMES, type JSXMatchData, MarkdownBlock } from "./JSX"
+import { JSX, SPELL_TAG_NAMES, isBareComponentName, type JSXMatchData, MarkdownBlock } from "./JSX"
 import { lists } from "./lists"
 import { math } from "./math"
 import { properties } from "./properties"
@@ -97,8 +97,11 @@ export { Block, BlockLine }
  * -- e.g. for UI code that reads them.
  */
 export type { JSXMatchData }
-/** Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `SPELL_TAG_NAMES`. */
-export { SPELL_TAG_NAMES }
+/**
+ * Export so editors can offer spell's own JSX tags, e.g. `<children/>` -- see `SPELL_TAG_NAMES`;
+ * and so the spellx converter can tell a component's bare name -- see `isBareComponentName()`.
+ */
+export { SPELL_TAG_NAMES, isBareComponentName }
 
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }

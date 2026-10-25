@@ -1189,7 +1189,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     imports Spell UI.
   - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a control inside an element,
     `spellx-tag-in-markup` (C29).
-  - Code spell's drawings are untouched.
+  - Code spell's drawings are untouched;  so are a `<spell>` chunk's, in a spellx file (J83):  the tokenizer marks
+    its JSX as it unwraps the chunk (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything
+    inside it, `{...}` too, as code spell.
 - The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
   file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
   - A `<spell>` chunk's lines are in it as written:  at the top, and among a template's members;

@@ -135,6 +135,34 @@ export function addSpellxError(token: P.Token, message: string) {
 /** A token's `record`, with what the spellx tokenizer found wrong there. */
 type SpellxErrorRecord = P.TokenProps & { spellxError?: string }
 
+/**
+ * Is `token` (a JSX element or fragment) inside a `<spell>` chunk of a spellx file:  CODE spell, as written?
+ * - There a drawing names tags as code spell does (`<div>`, `<button>`), never a pack's component (epic
+ *   `elemental-spell` J83):  `SpellJSX` reads them so.
+ * - Noted by the spellx tokenizer as it unwraps the chunk:  `markCodeSpell()`.
+ */
+export function isCodeSpell(token: P.Token): boolean {
+  return !!(token.record as CodeSpellRecord).codeSpell
+}
+
+/**
+ * Note every JSX element and fragment in `token` (a chunk's line or block, and what's inside it) as code spell.
+ * - The ones a `{...}` holds are tokenized later, as their element parses:  `SpellJSX` reads them as its own.
+ */
+export function markCodeSpell(token: P.Token) {
+  if (token instanceof P.JSXElementToken || token instanceof P.JSXFragmentToken) {
+    ;(token.record as CodeSpellRecord).codeSpell = true
+  }
+  const record = token.record as { tokens?: unknown; children?: unknown; attributes?: unknown; value?: unknown }
+  for (const inner of [record.tokens, record.children, record.attributes, record.value]) {
+    if (inner instanceof P.Token) markCodeSpell(inner)
+    else if (Array.isArray(inner)) for (const item of inner) if (item instanceof P.Token) markCodeSpell(item)
+  }
+}
+
+/** A JSX token's `record`, with whether it's code spell. */
+type CodeSpellRecord = P.TokenProps & { codeSpell?: boolean }
+
 /** Is `token` a spellx tag's head of `category`? */
 export function isSpellxTag(token: unknown, category?: SpellxTag["category"]): token is SpellxTagToken {
   return token instanceof SpellxTagToken && (!category || token.tag.category === category)

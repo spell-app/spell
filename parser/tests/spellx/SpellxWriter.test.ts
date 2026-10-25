@@ -71,6 +71,42 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     )
   })
 
+  // J83:  spellx would read `<div>` as a component's bare name, so the member stays code spell
+  test("a member drawing the web's own elements goes in a <spell> chunk, as written;  the others are tags", () => {
+    const lines = [
+      'a "box" is a view where:',
+      '\t- its "label" is "hi"',
+      "\t- to draw it:",
+      '\t\treturn <div class="Box"><ui-text>{its label}</ui-text></div>'
+    ]
+    const spellx = converted("/Box.spell", lines)
+    expect(spellx).toBe(
+      [
+        '<spell-view "box">',
+        '\t<property "label">"hi"</>',
+        "\t<spell>",
+        "\t\t- to draw it:",
+        '\t\t\treturn <div class="Box"><ui-text>{its label}</ui-text></div>',
+        "\t</spell>",
+        "</spell-view>",
+        ""
+      ].join("\n")
+    )
+    const spell = compiled("/Box.spell", lines.join("\n"))
+    const back = compiled("/Box.spellx", spellx)
+    expect(back.errors).toEqual([])
+    expect(back.code).toBe(spell.code)
+  })
+
+  test("a drawing with spell's own tags and components by their tags converts to its tag", () => {
+    const spellx = converted("/Box.spell", [
+      'a "box" is a view where:',
+      "\t- to draw it:",
+      "\t\treturn <ui-segment><children/></ui-segment>"
+    ])
+    expect(spellx).toContain("\t<draw>")
+  })
+
   test("a member's trailing comment goes after its closer", () => {
     const spellx = converted("/Card.spell", ['a "card" is a thing where:', '\t- its "value" is 1\t\t// ace = 1'])
     expect(spellx).toContain('\t<property "value">1</>\t// ace = 1')

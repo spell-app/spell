@@ -54,6 +54,7 @@ export {
   parseExpression,
   Negatable,
   SPELL_TAG_NAMES,
+  isBareComponentName,
   type JSXMatchData,
   MarkdownDescription,
   MarkdownBlock

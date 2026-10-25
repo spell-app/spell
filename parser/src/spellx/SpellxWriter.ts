@@ -17,6 +17,7 @@ import { SP } from "spell-parser/spell"
  *   - a body:  its lines as written, at the same depth
  * - What has no tag (a file's functions, tests and starting code, a member written another way):
  *   a `<spell>` chunk, holding its lines as written, one tab in (the tokenizer unwraps it:  `SP.SpellxTokenizer`).
+ *   - So is a member whose drawing has the web's own elements, `<div>`, `<button>` (J83):  `drawsBareTags()`.
  * - Comments and blank lines stay as they are;  so do a body's lines.
  * - NEVER throws:  a line it can't write as a tag goes in a `<spell>` chunk.
  * - Above `spell-parser/spell` in the import graph, as the rest of `SX`.
@@ -233,6 +234,8 @@ export class SpellxWriter {
     statement: P.Match,
     indent: string
   ): Written | undefined {
+    // a drawing with the web's own elements (`<div>`):  spellx would read them as components, so it stays code spell
+    if (this.drawsBareTags(line, body)) return undefined
     // its trailing comment, `- its "value" is 1   // ace = 1`:  after the tag's first line, never inside its body
     const last = line.tokens.at(-1)
     const comment = last instanceof P.CommentToken && last !== line.tokens[0] ? last : undefined
@@ -248,6 +251,32 @@ export class SpellxWriter {
         return [`${first}\t${trailing}`, ...rest]
       }
     }
+  }
+
+  /**
+   * Does `line` or its `body` draw a tag spellx would read as a component's bare name (`<div>`, `<button>`)
+   * (epic `elemental-spell` J83)?
+   * - Code spell writes such a tag as the web's;  spellx looks it up in the packs, so `<div>` is an error there and
+   *   `<button>` is Spell UI's.  So the member is written as code spell, in a `<spell>` chunk, and means the same.
+   * - Spell's own tag words (`<children/>`) and names with `-` or a capital (`<ui-text>`) read the same in both.
+   * - Every element, by its parse:  the ones inside a `{...}` too.
+   */
+  private drawsBareTags(line: P.LineToken, body: P.BlockToken | undefined): boolean {
+    const seen = new Set<P.Match>()
+    const draws = (node: unknown): boolean => {
+      if (Array.isArray(node)) return node.some(draws)
+      if (!(node instanceof P.Match) || seen.has(node)) return false
+      seen.add(node)
+      const [element] = node.matched
+      if (node.rule.name === "jsxElement" && element instanceof P.JSXElementToken) {
+        const { tagName } = node.data as SP.JSXMatchData
+        if (tagName === element.tagName && SP.isBareComponentName(tagName)) return true
+      }
+      return node.matched.some(draws) || Object.values(node.data ?? {}).some(draws)
+    }
+    const lines = (item: P.Token): P.Token[] =>
+      item instanceof P.BlockToken ? item.tokens.flatMap(lines) : item instanceof P.LineToken ? [item] : []
+    return [line, ...(body ? lines(body) : [])].some((item) => draws(this.statements.get(item.start)))
   }
 
   /** A member's tag, from its line's `text` without its comment:  by its statement's rule. */

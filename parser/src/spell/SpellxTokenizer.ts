@@ -688,6 +688,7 @@ type TagWord = {
  * of its body join `block` in its place, so they parse as the code spell they are, at that level.
  * - A file's top level:  its functions, tests and starting code;  a template's:  members with no tag of their own.
  * - Its closer stays, as a closer line, which compiles to nothing.
+ * - Its JSX is code spell's:  `<div>` the web's, never a pack's component (`SP.markCodeSpell()`, J83).
  * - SIDE EFFECT:  changes `block` (and the blocks in it) in place;  returns it.
  */
 function unwrapCode(block: P.BlockToken): P.BlockToken {
@@ -700,6 +701,8 @@ function unwrapCode(block: P.BlockToken): P.BlockToken {
     if (!(head instanceof SP.SpellxTagToken) || head.tag.category !== "code") continue
     const next = items[index + 1]
     const body = next instanceof P.BlockToken ? unwrapCode(next).tokens : []
+    // its drawings name tags as code spell does:  `<div>` is the web's (J83)
+    for (const line of body) SP.markCodeSpell(line)
     items.splice(index, next instanceof P.BlockToken ? 2 : 1, ...body)
     index += body.length - 1
   }

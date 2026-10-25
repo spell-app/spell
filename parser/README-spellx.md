@@ -208,8 +208,11 @@ its tree reads as above.
 Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - A name is one of the project's own views first (`<card>`, its `<solitaire-card>`), then the first of the project's
   packs that has it:  its project file's `"packs"`, Spell UI's alone unless it says more.
-- There's no plain HTML:  `<div>` is an error naming the packs it looked in.
-  - So a converted drawing's `<div>` is an error, and its `<button>` becomes Spell UI's.
+- There's no plain HTML in a tag's drawing:  `<div>` is an error naming the packs it looked in.
+- The web's own elements are written in a `<spell>` chunk, which is plain Spell, as written:
+  there `<div>` is the web's, and so is `<button>`, never Spell UI's.
+  - So `spell spellx convert` writes a member whose drawing has one (`<div>`, `<button>`, `<label>`) as a
+    `<spell>` chunk, just that member, and the program stays the same;  every other member is a tag.
 - `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
 - Plain Spell is untouched:  its drawings name tags as before.
 
