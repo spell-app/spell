@@ -902,6 +902,7 @@
               "type": {
                 "text": "\"mini\" | \"tiny\" | \"small\" | \"medium\" | \"large\" | \"big\" | \"huge\" | \"massive\""
               },
+              "default": "\"medium\"",
               "fieldName": "size"
             },
             {
@@ -24584,6 +24585,10 @@
             {
               "name": "--ui-select-placeholder-color",
               "default": "var(--ui-text-light)"
+            },
+            {
+              "name": "--ui-select-placeholder-style",
+              "default": "normal"
             },
             {
               "name": "--ui-select-picker-background",

@@ -78,6 +78,8 @@ describe("<ui-property-editor> schema", () => {
       "md",
       "lg"
     ])
+    // no default:  it reads "none"
+    expect(control(host, "size").getAttribute("placeholder")).toBe("none")
     expect(control(host, "dark").localName).toBe("ui-checkbox")
   })
 

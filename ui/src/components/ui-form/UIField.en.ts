@@ -140,6 +140,11 @@ export const fieldVocabulary = {
   ],
   texts: [
     { key: "info", text: "More about {label}", description: "The info icon's name;  `{label}` is the label." },
-    { key: "mixed", text: "Mixed", description: "The placeholder of a control whose things disagree." }
+    { key: "mixed", text: "Mixed", description: "The placeholder of a control whose things disagree." },
+    {
+      key: "none",
+      text: "none",
+      description: "What a property's select shows, in italics, when it has no value and no default."
+    }
   ]
 } as const satisfies E.ComponentVocabulary

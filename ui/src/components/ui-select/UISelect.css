@@ -90,6 +90,7 @@
       calc(2 * var(--_ui-select-padding-inline) + 2 * var(--_ui-select-caret-size))
     );
     --_ui-select-placeholder-color: var(--ui-select-placeholder-color, var(--ui-text-light));
+    --_ui-select-placeholder-style: var(--ui-select-placeholder-style, normal);
     --_ui-select-picker-background: var(--ui-select-picker-background, var(--ui-surface));
     --_ui-select-picker-color: var(--ui-select-picker-color, var(--ui-text-color));
     --_ui-select-picker-border-color: var(--ui-select-picker-border-color, var(--ui-border-color));
@@ -167,6 +168,7 @@
   /* The placeholder:  the empty first option, grey while it's what the select shows. */
   .ui.select:has(> option.placeholder:checked) {
     color: var(--_ui-select-placeholder-color);
+    font-style: var(--_ui-select-placeholder-style);
   }
   .ui.select > option.placeholder:empty {
     display: none;
@@ -250,6 +252,8 @@
     .ui.select > button > selectedcontent {
       display: flex;
       min-width: 0;
+      /* a line tall, chosen or not:  an empty select stood shorter than one beside it with a value */
+      min-height: 1lh;
       align-items: center;
       gap: var(--_ui-select-item-element-spacing);
       overflow: hidden;
@@ -258,6 +262,14 @@
     }
     .ui.select selectedcontent > .description {
       display: none;
+    }
+    /* an image in the chosen value:  a line's height, so the box is as tall as one with text alone (it drew at its own size) */
+    .ui.select selectedcontent > .image {
+      flex: none;
+      width: auto;
+      height: 1em;
+      margin: 0;
+      border-radius: var(--ui-radius-circle);
     }
     .ui.select::picker-icon {
       display: none;

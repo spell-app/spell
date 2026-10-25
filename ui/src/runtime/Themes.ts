@@ -158,7 +158,7 @@ function rootRulesOn(rules: CSSRuleList, scope: string): string {
 }
 
 /** A selector that is `:root` alone, perhaps with classes or states on it (`:root.ui-dark`). */
-const ROOT_ONLY = /^:root(?:[.:\[][^\s>+~]*)?$/
+const ROOT_ONLY = /^:root(?:[.:[][^\s>+~]*)?$/
 
 /** What `new Themes()` takes. */
 export type ThemesProps = {

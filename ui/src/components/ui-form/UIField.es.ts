@@ -11,5 +11,5 @@ export const fieldEs = {
   tag: "ui-field",
   name: "campo",
   aka: ["campo", "campo de formulario", "grupo de formulario", "etiqueta y entrada", "propiedad"],
-  texts: { info: "Más sobre {label}", mixed: "Varios" }
+  texts: { info: "Más sobre {label}", mixed: "Varios", none: "ninguno" }
 } as const satisfies E.TagDictionary

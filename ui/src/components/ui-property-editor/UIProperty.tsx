@@ -268,6 +268,8 @@ export class UIProperty extends UIField {
     if (spec?.step !== undefined) element.setAttribute("step", String(spec.step))
     if (this.isReadOnly) element.setAttribute("readonly", "")
     if (control.choices === "items") {
+      // no value and no default:  it reads "none", never blank
+      if (spec?.default === undefined) element.setAttribute("placeholder", this.translationForKey("none"))
       for (const choice of this.choices ?? []) element.append(UIProperty.item(choice))
     }
     if (control.tag === EDITOR_TAG) element.setAttribute(VALUE_FROM_ATTRIBUTE, this.propertyName)

@@ -25,7 +25,12 @@ export const buttonVocabulary = {
   plural: "buttons",
   description: "A button indicates a possible action.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      kind: "size",
+      default: "medium",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     { name: "color", kind: "color", description: "Hue;  fills the button (or its ring and text when `basic`)." },
     { name: "primary", kind: "keyOnly", description: "Primary emphasis:  the `primary` brand colour." },
     { name: "secondary", kind: "keyOnly", description: "Secondary emphasis:  the `secondary` brand colour." },
@@ -85,6 +90,7 @@ export const buttonVocabulary = {
     {
       name: "animated",
       kind: "keyOrValueAndKey",
+      label: "Animation",
       values: ["fade", "vertical"],
       description: "Slides the `icon` slot in over the content on hover:  sideways, `fade` or `vertical`."
     },

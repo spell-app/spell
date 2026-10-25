@@ -7814,6 +7814,13 @@
       }
     },
     {
+      "name": "--ui-select-placeholder-style",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-select>`'s token.  Default:  `normal`"
+      }
+    },
+    {
       "name": "--ui-select-picker-background",
       "description": {
         "kind": "markdown",

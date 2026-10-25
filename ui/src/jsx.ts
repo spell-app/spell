@@ -1284,6 +1284,7 @@ export interface UIButtonAttributes {
   /**
    * Size, `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   * - default:  `medium`
    */
   size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**

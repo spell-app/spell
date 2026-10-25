@@ -1460,6 +1460,7 @@
             "massive"
           ],
           "valueSet": "sizes",
+          "default": "medium",
           "description": "Size, `mini` ... `massive`;  `medium` is the default."
         },
         {
@@ -7748,6 +7749,11 @@
           "key": "mixed",
           "text": "Mixed",
           "description": "The placeholder of a control whose things disagree."
+        },
+        {
+          "key": "none",
+          "text": "none",
+          "description": "What a property's select shows, in italics, when it has no value and no default."
         }
       ],
       "mainTag": "ui-form",
@@ -16380,6 +16386,11 @@
           "key": "mixed",
           "text": "Mixed",
           "description": "The placeholder of a control whose things disagree."
+        },
+        {
+          "key": "none",
+          "text": "none",
+          "description": "What a property's select shows, in italics, when it has no value and no default."
         }
       ],
       "mainTag": "ui-property-editor",
@@ -36649,6 +36660,11 @@
           "name": "--ui-select-placeholder-color",
           "default": "var(--ui-text-light)",
           "type": "color"
+        },
+        {
+          "name": "--ui-select-placeholder-style",
+          "default": "normal",
+          "type": "other"
         },
         {
           "name": "--ui-select-picker-background",

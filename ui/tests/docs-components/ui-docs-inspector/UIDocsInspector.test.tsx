@@ -62,7 +62,7 @@ describe("<ui-docs-inspector> rows", () => {
     expect(inspector.shadowRoot!.querySelector("[part~=title]")!.textContent).toBe('<ui-button id="star">')
     const shown = groups(inspector)
     expect(shown.Attributes).toEqual(['id = "star"', 'toggle = ""', 'icon = "star"'])
-    expect(shown.Properties).toEqual(["toggle = true", 'icon = "star"', 'type = "button"'])
+    expect(shown.Properties).toEqual(['size = "medium"', "toggle = true", 'icon = "star"', 'type = "button"'])
     expect(shown.States).toEqual([])
     await expect.poll(() => inspector.internals.ariaLabel).toBe('Live view of <ui-button id="star">')
   })
@@ -90,7 +90,7 @@ describe("<ui-docs-inspector> rows", () => {
     const { inspector } = await render(TOGGLE.replace("<ui-docs-inspector", "<ui-docs-inspector all"))
     const properties = groups(inspector).Properties!
     expect(properties).toContain("active = false")
-    expect(properties).toContain("size = undefined")
+    expect(properties).toContain("color = undefined")
   })
 
   it("is `:state(missing)` while no element has the id, and picks it up once one does", async () => {
@@ -113,7 +113,7 @@ describe("<ui-docs-inspector> rows", () => {
     await expect
       .poll(() => inspector.shadowRoot!.querySelector("[part~=title]")!.textContent)
       .toBe('<ui-button id="other">')
-    expect(groups(inspector).Properties).toEqual(["primary = true", 'type = "button"'])
+    expect(groups(inspector).Properties).toEqual(['size = "medium"', "primary = true", 'type = "button"'])
   })
 })
 

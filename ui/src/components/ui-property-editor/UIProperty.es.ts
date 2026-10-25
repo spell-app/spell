@@ -12,5 +12,5 @@ export const propertyEs = {
   name: "propiedad",
   aka: ["campo", "propiedad", "ajuste", "fila del inspector", "campo de esquema"],
   attributes: { as: "como" },
-  texts: { info: "Más sobre {label}", mixed: "Varios" }
+  texts: { info: "Más sobre {label}", mixed: "Varios", none: "ninguno" }
 } as const satisfies E.TagDictionary

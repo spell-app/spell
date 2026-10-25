@@ -1297,7 +1297,7 @@
           "name": "size",
           "description": {
             "kind": "markdown",
-            "value": "Size, `mini` ... `massive`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+            "value": "Size, `mini` ... `massive`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`\nDefault:  `medium`"
           },
           "values": [
             {
