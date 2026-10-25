@@ -1043,17 +1043,27 @@ function wireLiveUpdate(main) {
     const [before, page] = await Promise.all([base, started])
     // no motion while the page takes the change:  it's the file, not the reader, moving things
     quietFor(QUIET_PATCH_MS)
-    const patched =
-      before === null
-        ? null
-        : patcher.page({
-            before: parse(before),
-            after: parse(html),
-            live: page.main,
-            mainOf: mainIn,
-            top: () => stuckBottom(page.main)
-          })
-    if (!patched) return reload()
+    let patched = null
+    try {
+      patched =
+        before === null
+          ? null
+          : patcher.page({
+              before: parse(before),
+              after: parse(html),
+              live: page.main,
+              mainOf: mainIn,
+              top: () => stuckBottom(page.main)
+            })
+    } catch (error) {
+      // says WHY, so a page that keeps falling back to its reload can be fixed (the reload waits until out of sight)
+      console.warn("live update:  can't patch this page in place;  it reloads once out of sight:", error)
+      return reload()
+    }
+    if (!patched) {
+      console.warn(`live update:  can't patch this page in place (${before === null ? "its source as loaded is unknown" : "its head or shell changed, or too much of it"});  it reloads once out of sight`)
+      return reload()
+    }
     base = Promise.resolve(html)
     await rewire(page, patched.changed)
   }
