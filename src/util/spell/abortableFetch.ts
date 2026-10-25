@@ -10,6 +10,7 @@ export function isAbortError(error: Error) {
  * `fetch()` a resource, attaching a non-standard `promise.cancel()` method which will attempt to abort
  * the server request and reject the `fetch()` promise with an `"AbortError"`.
  * - Use `isAbortError()` above to determine if the response was cancelled.
+ * - `fetcher`:  the `fetch()` to call (a test's stub, a page's own);  default the global one.
  * - See https://developer.mozilla.org/en-US/docs/Web/API/AbortController
  * - We attempt to propagate the `.cancel()` method to subsequent promises made via `.then()`, `.catch()` etc.
  *   However, this propagation is fragile and in particular doesn't survive being returned by an `async` function.
@@ -39,7 +40,7 @@ export function isAbortError(error: Error) {
  *    promise.cancel() <<<<< `cancel` will not be defined
  * ```
  */
-export function abortableFetch(url: string, fetchParams: RequestInit = {}) {
+export function abortableFetch(url: string, fetchParams: RequestInit = {}, fetcher: typeof fetch = fetch) {
   // Semaphore set first thing when `fetch()` completes.
   let completed = false
   const abortController = new global.AbortController()
@@ -68,7 +69,7 @@ export function abortableFetch(url: string, fetchParams: RequestInit = {}) {
     })
   }
   fetchParams.signal = abortController.signal
-  const promise = fetch(url, fetchParams)
+  const promise = fetcher(url, fetchParams)
   // Set `completed` semaphore when fetch completes, before anything else happens.
   void promise.finally(() => {
     completed = true
