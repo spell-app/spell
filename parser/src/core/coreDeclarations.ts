@@ -55,6 +55,7 @@ import { jsonMethods } from "./json"
 import { carryMethods } from "./carry"
 import { classesMethods } from "./classes"
 import { describedMethods } from "./described"
+import { sendingMethods, send } from "./sending"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -79,7 +80,8 @@ const CORE_MODULES: Record<string, object> = {
   json: jsonMethods,
   carry: carryMethods,
   classes: classesMethods,
-  described: describedMethods
+  described: describedMethods,
+  sending: sendingMethods
 }
 
 /**
@@ -100,7 +102,8 @@ const CORE_EXPORTS: Record<string, { value: unknown; module: string }> = {
   on: { value: on, module: "runtime" },
   off: { value: off, module: "runtime" },
   once: { value: once, module: "runtime" },
-  trigger: { value: trigger, module: "runtime" }
+  trigger: { value: trigger, module: "runtime" },
+  send: { value: send, module: "sending" }
 }
 
 /** The name compiled code calls the core by:  `core.getItemAt(...)`. */

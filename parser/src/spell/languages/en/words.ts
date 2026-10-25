@@ -117,6 +117,8 @@ export const englishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `list of cards`. */
   listOfWord: "of",
+  // `closing`, `opening`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
+  ongoingEventName: /ing$/,
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
   retiredTypeWords: {

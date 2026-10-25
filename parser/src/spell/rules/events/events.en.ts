@@ -13,6 +13,12 @@ import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
+import { Send } from "./Send"
+import { EventPart } from "./EventPart"
+import { PassEvent } from "./PassEvent"
+import { CancelEvent } from "./CancelEvent"
+import { InputState } from "./InputState"
+import { WhileHandler } from "./WhileHandler"
 
 // a word that may link two words of an event's name -- `on` is a plain word in English already (`card click on table`)
 events.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "on" })
@@ -20,7 +26,7 @@ events.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax: "
 events.addRule(EventWords)
 
 events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?",
+  syntax: "(trigger|fire) event? {eventName:keyword} (with {props:object_literal_properties})?",
   tests: [
     {
       compileAs: "statement",
@@ -38,10 +44,96 @@ events.addRule(Trigger, {
 
 // `fire event card click with card = it`:  an event's name of several words -- see `event_words`
 events.addRule(Trigger, {
-  syntax: "(trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?",
+  syntax: "(trigger|fire) event? {eventName:event_words} (with {props:object_literal_properties})?",
   tests: [
     { compileAs: "statement", tests: [["fire event card click with card = 1", 'trigger("card-click", { card: 1 })']] }
   ]
+})
+
+// `send flipped with side = up`:  to a thing, up its chain until a handler takes it (epic `elemental-spell` P9)
+events.addRule(Send, {
+  syntax: "send event? {eventName:keyword} (to {target:expression})? (with {props:object_literal_properties})?",
+  tests: [
+    {
+      compileAs: "statement",
+      beforeEach(scope: P.Scope) {
+        scope.variables?.add("card")
+      },
+      tests: [
+        ["send start", 'send(undefined, "start")'],
+        ["send flipped to the card with side = 1", 'send(card, "flipped", { side: 1 })'],
+        ["send closing", 'if ((await send(undefined, "closing")).canceled) return']
+      ]
+    }
+  ]
+})
+events.addRule(Send, {
+  syntax: "send event? {eventName:event_words} (to {target:expression})? (with {props:object_literal_properties})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [["send card picked with card = 1", 'send(undefined, "card-picked", { card: 1 })']]
+    }
+  ]
+})
+
+// a handler's own words:  `pass event`, `cancel event`, `sender`, `target`, `the original target` (Q26, Q27, C25)
+events.addRule(PassEvent, { syntax: "pass (event|{eventName:keyword}|{eventName:event_words})" })
+events.addRule(CancelEvent, { syntax: "cancel (event|{eventName:keyword}|{eventName:event_words})" })
+events.addRule(EventPart.specialize({ reads: "originalTarget" }), { syntax: "the original target" })
+events.addRule(EventPart.specialize({ reads: "sender" }), { syntax: "the? sender" })
+events.addRule(EventPart.specialize({ reads: "target" }), { syntax: "the? target" })
+
+// the mouse and the keys, readable anywhere (Q31, Q32):  `the shift key is down` is `core.input.shiftKey`
+for (const [words, reads] of [
+  ["meta", "metaKey"],
+  ["shift", "shiftKey"],
+  ["option", "optionKey"],
+  ["alt", "optionKey"],
+  ["control", "controlKey"]
+] as const) {
+  events.addRule(InputState.specialize({ reads }), { syntax: `the ${words} key {operator:is_or_is_not} down` })
+}
+events.addRule(InputState.specialize({ reads: "mouseStillDown" }), {
+  syntax: "the mouse {operator:is_or_is_not} still down"
+})
+events.addRule(InputState.specialize({ reads: "button" }), {
+  syntax: "the (mouse|button|left button) {operator:is_or_is_not} down",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        ["the mouse is down", "core.input.button"],
+        ["the mouse isn't down", "!core.input.button"]
+      ]
+    }
+  ]
+})
+events.addRule(InputState.specialize({ reads: "rightButton" }), {
+  syntax: "the right button {operator:is_or_is_not} down"
+})
+events.addRule(InputState.specialize({ reads: "centerButton" }), {
+  syntax: "the (center|middle) button {operator:is_or_is_not} down"
+})
+for (const [words, key] of [
+  ["space", " "],
+  ["enter", "enter"],
+  ["return", "enter"],
+  ["escape", "escape"],
+  ["tab", "tab"],
+  ["backspace", "backspace"],
+  ["delete", "delete"],
+  ["up arrow", "arrowup"],
+  ["down arrow", "arrowdown"],
+  ["left arrow", "arrowleft"],
+  ["right arrow", "arrowright"]
+] as const) {
+  events.addRule(InputState.specialize({ reads: "isKeyDown", key }), {
+    syntax: `the? ${words} (key)? {operator:is_or_is_not} down`
+  })
+}
+events.addRule(InputState.specialize({ reads: "thingUnderMouse", datatype: "thing" }), {
+  syntax: "the thing under the mouse"
 })
 
 events.addRule(On, {
@@ -141,6 +233,19 @@ events.addRule(On, {
       ]
     }
   ]
+})
+
+// `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
+// `when created` stays the creation hook, which wins on the same words (`priority`)
+events.addRule(On, { syntax: "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })
+events.addRule(On, { syntax: "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?" })
+
+// `- while the mouse is down:`:  steps that hold while it's pressed on the thing, put back after (Q51, Q52 A)
+events.addRule(WhileHandler.specialize({ handler: "while_mouse_down" }), {
+  syntax: "while the mouse is down (on it)? :? {statement_body}?"
+})
+events.addRule(WhileHandler.specialize({ handler: "while_mouse_over" }), {
+  syntax: "while the mouse is over it :? {statement_body}?"
 })
 
 // an event a template's things send, and what comes with it (epic `elemental-spell` P5):

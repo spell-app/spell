@@ -2,8 +2,13 @@
 
 exports[`testing spell module events > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
+  "cancel_event": "eventName?",
   "declare_event": "type|event|props?",
+  "input_state": "operator?",
   "on": "eventName|props?|body?",
+  "pass_event": "eventName?",
+  "send": "eventName|target?|props?",
   "trigger": "eventName|props?",
+  "while_handler": "body?",
 }
 `;

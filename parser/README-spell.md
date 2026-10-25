@@ -373,25 +373,72 @@ export class Tableau extends Pile {
 
 ### Events
 
-| Spell | JavaScript | Python |
-| --- | --- | --- |
-| `trigger card-click` | `trigger("card-click")` | `core.trigger("card-click")` |
-| `on card-click with a card`, then `play the card` | `on("card-click", (event) => { const { card } = event; card.play() })` | `@core.on("card-click")` on `async def on_card_click(event)` |
+A thing hears an event when its handler says so, and sends one with `send`:
 
-- `fire` and `send` say the same as `trigger`, and `card click` and `card-click` name the same event.
-- `with card = 1` hands the listener a property:
-  [README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
-  stage of the parse.
-- The handler is [Solitaire's](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spell):  a click on a card plays it.
-- In a template's outline, an event is the template's own:
-  - `- on mouse down:` is each of its things' handler, `onMouseDown(event)`, with `it` the thing.
-    A view's element runs it when the view hears its own `mousedown`, and the innermost thing with a handler takes
-    the event:  a card's runs, not its pile's too.
-    So far only English's mouse words do:  `click`, `double click`, `right click`, `center click`, `mouse down`,
-    `mouse up`, `mouse enter`, `mouse leave`.
-  - `- it sends "flipped" with side as a direction` says an event its things send, and what comes with it:
-    `core.describeEvent(Card, "flipped", { params: { side: "Direction" } })`.
-    Sending it is still `send flipped with side = its direction`.
+| Spell | JavaScript |
+| --- | --- |
+| `- on mouse down:` in a card's outline | `onMouseDown(event) { ... }`, a method of `Card` |
+| `- when flipped:` | `onFlipped(event) { ... }`:  `when` and `on` say the same |
+| `send flipped to the card with side = 1` | `send(card, "flipped", { side: 1 })` |
+| `send closing`, in a handler | `if ((await send(this, "closing", {}, this)).canceled) return` |
+| `trigger card-click` | `trigger("card-click")`:  to every `on card-click` in the program |
+
+- `send` goes to ONE thing, and up its chain until a handler takes it:
+  - the thing itself
+  - then the list holding it (`a card belongs to one pile`:  its pile)
+  - then the app
+  - then the program's `on <event>` listeners
+  - Nobody takes it:  it's dropped, silently.
+- A handler that runs takes the event:  a card's `- on mouse down:` runs, its pile's doesn't.
+  - `pass event` (or `pass mouse down`) hands it on up the chain.
+- An event whose name is still happening (`closing`, `dropping`;  Spanish `cerrando`) can be cancelled.
+  - `cancel event` in its handler, and the sender stops:  `send closing` returns from the step that sent it.
+  - Its finished half, `closed`, is what happened, and can't be.
+- What comes with it is named in the handler:  `send flipped with side = 1` is read as `side` in `- when flipped:`.
+  - `target`:  the thing whose handler is running;  `the original target`:  the thing it was sent to;
+    `sender`:  the thing that sent it.
+  - A card's press passed up to its pile:  in the pile's handler, `target` is the pile, `the original target` the card.
+- `- while the mouse is down:` holds while it's true, and is put back after:
+  every property its steps set returns to what it was as the mouse goes up.
+  - `- while the mouse is over it:` likewise, as the mouse comes and goes.
+- The mouse and the keys can be read anywhere, a handler's step or not, as they are at that moment:
+  - `the shift key is down`, `the meta key` (command on a Mac, control elsewhere), `the option key`,
+    `the control key`
+  - `the mouse is down` (the left button), `the right button`, `the center button`, `the mouse is still down`
+    (held a second, barely moving)
+  - `space is down`, `the escape key is down`, `the up arrow is down` ...
+  - `the thing under the mouse`
+- `trigger` and `fire` stay what they were:  to every listener, no chain, nothing to cancel.
+  `card click` and `card-click` name the same event, and `with card = 1` hands the listener a property
+  ([README-parser](README-parser.md#one-line-six-stages) follows `fire event card click with card = 1` through every
+  stage of the parse).
+- `- it sends "flipped" with side as a direction` says an event a template's things send, and what comes with it:
+  `core.describeEvent(Card, "flipped", { params: { side: "Direction" } })`.
+
+<details>
+<summary>Every event a thing hears</summary>
+
+| Event | When it's sent | Who gets it first | Can be cancelled | What comes with it |
+| --- | --- | --- | --- | --- |
+| `click` | a click on the thing's view | the innermost thing under the mouse, then up its chain | no | |
+| `double click` | a double click | the same | no | |
+| `right click` | a right click | the same | no | |
+| `center click` | a click of the center button | the same | no | |
+| `mouse down`, `mouse up` | a button pressed, let go | the same | no | |
+| `mouse enter`, `mouse leave` | the mouse comes onto the view, leaves it | the thing, then up its chain | no | |
+| `mouse still down` | held a second, moving 4 pixels at most | the thing pressed, then up its chain | no | |
+| `key down` | a key pressed | the thing whose view has the focus, then up its chain;  else the app | no | `key`:  its name, `a`, `enter`, `arrowup` |
+| `a card is dragged over it`, `dragged out of it` | a drag comes onto a list's view, leaves it | the list | no | the card |
+| `a card is dropped on it` | the drop | the list | no | the card |
+| `created` | a thing is made | the new thing:  `- when created:` is its creation hook, not an event | no | |
+| one a template declares, `flipped` | `send flipped` | the thing it's sent to, then up its chain | when its name is still happening (`closing`) | what the template says (`side`) |
+| one the program triggers, `card-click` | `trigger card-click` | every `on card-click` | no | its `with` properties |
+
+- The mouse's events come from the browser's own, `click` to `mouseleave`;  the view's element sends each once,
+  from the innermost thing, and never for a press in a control inside the view.
+- The page's mouse and key events have English names only, so far.
+
+</details>
 
 ### Tests, in English
 

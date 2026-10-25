@@ -13,6 +13,7 @@ import {
   off,
   once,
   trigger,
+  send,
   positionOf,
   position,
   spellPosition,
@@ -64,7 +65,7 @@ export function runSpellFiles(
     // `@spell/core`'s helpers it imports by name, e.g. `trigger()`, as the import it lost would give them
     // and a view type's classes, drawing and `<css>`:  `View`, `h()`, `css`
     const imported = {
-      ...{ on, off, once, trigger, positionOf, position, spellPosition, endPosition, withSpellPositions },
+      ...{ on, off, once, trigger, send, positionOf, position, spellPosition, endPosition, withSpellPositions },
       ...{ View, Page, TwoSidedView, ViewableList, h, css }
     }
     // oxlint-disable-next-line no-implied-eval -- running compiled spell, as a runner does, is the test

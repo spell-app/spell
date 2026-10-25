@@ -13,6 +13,12 @@ import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
 import { On } from "./On"
 import { Trigger } from "./Trigger"
+import { Send } from "./Send"
+import { EventPart } from "./EventPart"
+import { PassEvent } from "./PassEvent"
+import { CancelEvent } from "./CancelEvent"
+import { InputState } from "./InputState"
+import { WhileHandler } from "./WhileHandler"
 
 /** Spanish's `events` rules. */
 export const eventsEs = new SpellParser({ module: "events" })
@@ -23,7 +29,7 @@ eventsEs.addRule(Synonyms.specialize({ ruleName: "event_name_link" }), { syntax:
 eventsEs.addRule(EventWords)
 
 eventsEs.addRule(Trigger, {
-  syntax: "(disparar|lanzar|enviar) (el? evento)? {eventName:keyword} (con {props:object_literal_properties})?",
+  syntax: "(disparar|lanzar) (el? evento)? {eventName:keyword} (con {props:object_literal_properties})?",
   tests: [
     {
       compileAs: "statement",
@@ -33,10 +39,6 @@ eventsEs.addRule(Trigger, {
         {
           input: `lanzar el evento card-click con card = 1`,
           js: 'trigger("card-click", { card: 1 })'
-        },
-        {
-          input: `enviar evento card-click con card = 1`,
-          js: 'trigger("card-click", { card: 1 })'
         }
       ]
     }
@@ -45,7 +47,7 @@ eventsEs.addRule(Trigger, {
 
 // `lanzar evento card click con card = 1`:  an event's name of several words -- see `event_words`
 eventsEs.addRule(Trigger, {
-  syntax: "(disparar|lanzar|enviar) (el? evento)? {eventName:event_words} (con {props:object_literal_properties})?",
+  syntax: "(disparar|lanzar) (el? evento)? {eventName:event_words} (con {props:object_literal_properties})?",
   tests: [
     {
       compileAs: "statement",
@@ -57,6 +59,72 @@ eventsEs.addRule(Trigger, {
       ]
     }
   ]
+})
+
+// `enviar volteada con lado = arriba`:  a una cosa, subiendo por su cadena hasta que un manejador la tome (epic `elemental-spell` P9)
+eventsEs.addRule(Send, {
+  syntax: "enviar (el? evento)? {eventName:keyword} (a {target:expression})? (con {props:object_literal_properties})?",
+  tests: [{ compileAs: "statement", tests: [["enviar inicio", 'send(undefined, "inicio")']] }]
+})
+eventsEs.addRule(Send, {
+  syntax:
+    "enviar (el? evento)? {eventName:event_words} (a {target:expression})? (con {props:object_literal_properties})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [["enviar carta elegida con carta = 1", 'send(undefined, "carta-elegida", { carta: 1 })']]
+    }
+  ]
+})
+
+// las palabras de un manejador:  `pasar evento`, `cancelar evento`, `el remitente`, `el destino`, `el destino original`
+eventsEs.addRule(PassEvent, { syntax: "pasar (el? evento|{eventName:keyword}|{eventName:event_words})" })
+eventsEs.addRule(CancelEvent, { syntax: "cancelar (el? evento|{eventName:keyword}|{eventName:event_words})" })
+eventsEs.addRule(EventPart.specialize({ reads: "originalTarget" }), { syntax: "el destino original" })
+eventsEs.addRule(EventPart.specialize({ reads: "sender" }), { syntax: "el? remitente" })
+eventsEs.addRule(EventPart.specialize({ reads: "target" }), { syntax: "el? destino" })
+
+// el ratón y las teclas, legibles en cualquier parte:  `la tecla mayúsculas está presionada` es `core.input.shiftKey`
+for (const [words, reads] of [
+  ["meta", "metaKey"],
+  ["(mayúsculas|mayusculas)", "shiftKey"],
+  ["(opción|opcion)", "optionKey"],
+  ["alt", "optionKey"],
+  ["control", "controlKey"]
+] as const) {
+  eventsEs.addRule(InputState.specialize({ reads }), { syntax: `la tecla ${words} {operator:is_or_is_not} presionada` })
+}
+eventsEs.addRule(InputState.specialize({ reads: "mouseStillDown" }), {
+  syntax: "el (ratón|raton) {operator:is_or_is_not} presionado (todavía|todavia)"
+})
+eventsEs.addRule(InputState.specialize({ reads: "button" }), {
+  syntax: "el (ratón|raton|botón|boton|botón izquierdo|boton izquierdo) {operator:is_or_is_not} presionado",
+  tests: [{ compileAs: "expression", tests: [["el ratón está presionado", "core.input.button"]] }]
+})
+eventsEs.addRule(InputState.specialize({ reads: "rightButton" }), {
+  syntax: "el (botón|boton) derecho {operator:is_or_is_not} presionado"
+})
+eventsEs.addRule(InputState.specialize({ reads: "centerButton" }), {
+  syntax: "el (botón|boton) central {operator:is_or_is_not} presionado"
+})
+for (const [words, key] of [
+  ["espacio", " "],
+  ["intro", "enter"],
+  ["escape", "escape"],
+  ["tabulador", "tab"],
+  ["retroceso", "backspace"],
+  ["suprimir", "delete"],
+  ["flecha arriba", "arrowup"],
+  ["flecha abajo", "arrowdown"],
+  ["flecha izquierda", "arrowleft"],
+  ["flecha derecha", "arrowright"]
+] as const) {
+  eventsEs.addRule(InputState.specialize({ reads: "isKeyDown", key }), {
+    syntax: `(el|la)? (tecla)? ${words} {operator:is_or_is_not} (presionado|presionada)`
+  })
+}
+eventsEs.addRule(InputState.specialize({ reads: "thingUnderMouse", datatype: "thing" }), {
+  syntax: "la cosa bajo el (ratón|raton)"
 })
 
 eventsEs.addRule(On, {
@@ -123,6 +191,18 @@ eventsEs.addRule(On, {
       ]
     }
   ]
+})
+
+// `cuando volteada:`, lo mismo que `al volteada:` (Q42)
+eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? :? {statement_body}?" })
+eventsEs.addRule(On, { syntax: "cuando {eventName:event_words} {props:with_props_arg}? :? {statement_body}?" })
+
+// `- mientras el ratón está presionado:` (Q51, Q52 A)
+eventsEs.addRule(WhileHandler.specialize({ handler: "while_mouse_down" }), {
+  syntax: "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? :? {statement_body}?"
+})
+eventsEs.addRule(WhileHandler.specialize({ handler: "while_mouse_over" }), {
+  syntax: "mientras el (ratón|raton) (está|esta) sobre (ella|él|el) :? {statement_body}?"
 })
 
 // an event a template's things send, and what comes with it (epic `elemental-spell` P5):

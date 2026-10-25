@@ -14,7 +14,8 @@
     "on",
     "off",
     "once",
-    "trigger"
+    "trigger",
+    "send"
   ],
   "statements": [
     {
@@ -2129,6 +2130,33 @@
       "description": "Every event class `Class`'s things send, its own and its super-classes', by name -- as `actionsOf()`."
     },
     {
+      "kind": "method",
+      "name": "send",
+      "of": "core",
+      "module": "sending",
+      "params": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "type"
+        },
+        {
+          "name": "params"
+        },
+        {
+          "name": "sender"
+        }
+      ],
+      "description": "Send event `type` to `target`, with `params`:  see the module's docs."
+    },
+    {
+      "property": "input",
+      "of": "core",
+      "module": "sending",
+      "description": "The mouse and keys, readable anywhere:  `the shift key is down` is `core.input.shiftKey` -- see `input.ts`."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"
@@ -2267,6 +2295,26 @@
       ],
       "section": "Events -- the running program's, on RUNTIME",
       "description": "`core.trigger(...)` -- see `trigger()`."
+    },
+    {
+      "kind": "function",
+      "name": "send",
+      "module": "sending",
+      "params": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "type"
+        },
+        {
+          "name": "params"
+        },
+        {
+          "name": "sender"
+        }
+      ],
+      "description": "Send event `type` to `target`, with `params`:  see the module's docs."
     }
   ]
 }

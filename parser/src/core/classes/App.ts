@@ -23,6 +23,15 @@ export class App extends View {
   static drawsInItsChildren = true
 
   /**
+   * SIDE EFFECT:  the running program's first app is its app, `core.RUNTIME.app`:
+   * the last stop up an event's chain before the program's own listeners (`send()`, epic `elemental-spell` P9).
+   */
+  constructor(props?: Record<string, unknown>) {
+    super(props)
+    if (core.RUNTIME && !core.RUNTIME.app) core.RUNTIME.app = this
+  }
+
+  /**
    * An app's remembered props are kept by name alone, e.g. `theme` at `@owen/solitaire:theme`:
    * a program has one app, so it needs no id -- see `Thing.rememberedKeyFor()`.
    */

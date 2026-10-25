@@ -378,6 +378,11 @@ export type LanguageWords = {
   /** The word between a list and what it holds:  `of` in `list of cards`, `de` in `lista de cartas`. */
   listOfWord: string
   /**
+   * How an event still HAPPENING is named, which a handler can cancel (epic `elemental-spell` P9, Q27):
+   * English's `-ing` (`closing`), Spanish's gerund (`cerrando`) -- see `send`'s rule.
+   */
+  ongoingEventName: RegExp
+  /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
    * - See `Language.propertyKindName()`.

@@ -868,6 +868,17 @@ A kind that says so is saved in a file of its own.
       after the class, a getter per condition and `core.describeAction(...)` (`P.ASTTypeDescription`).
     - `shortcut_keys` reads a key as typed, its tokens joined up to the first space:  `meta+shift+Z`.
   - A HANDLER, `- on mouse down:`, is a method of the template's things, `on_mouse_down`, `it` the thing (`On`).
+    - `- when flipped:` is the same (`On`'s `when` registrations);  `- when created:` stays the creation hook,
+      which wins on the same words by its `priority`.
+    - Inside one, the handler's `event` argument is a variable of kind `argument`:  that's how `pass event`,
+      `cancel event`, `target`, `sender` and `the original target` know they're in a handler (`inHandler()`),
+      and refuse to parse elsewhere.
+  - A WHILE handler, `- while the mouse is down:` (`while_handler`), is a method too, `whileMouseDown()`:
+    the page starts it and puts back what it set, through core's `startWhile()` / `endWhile()`.
+  - `send flipped` (`Send`) inside a template's method sends from `this`, and to `this` when it names no target:
+    `parse()` finds the method's scope (`mapItTo === "this"`) into `match.data`.
+    - An event whose name is still happening, by the language's `ongoingEventName` (`-ing`;  Spanish `-ando`,
+      `-iendo`), is awaited and its `canceled` checked:  `if ((await send(...)).canceled) return`.
   - An EVENT its things send, `- it sends "flipped" with side as a direction` (`declare_event`):
     `core.describeEvent(...)` after the class.
 

@@ -17,6 +17,8 @@ export class SpellRuntime extends Eventful() {
   remembered?: RememberedValues
   /** This run's undo history (`undoing.ts`):  what its undoable actions changed, to undo and redo. */
   readonly history = new UndoHistory()
+  /** The program's app, once one is made:  the last stop up an event's chain (`send()`, `sending.ts`). */
+  app?: object
 }
 
 /**

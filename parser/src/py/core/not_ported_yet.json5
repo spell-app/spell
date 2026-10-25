@@ -27,6 +27,10 @@
       ]
     },
     {
+      "why": "Events sent to things (epic elemental-spell P9):  `send` up a thing's chain, and the mouse and keys (`input`);  a Python program's page sends them to its things",
+      "names": ["send", "input"]
+    },
+    {
       "why": "A page's drag handlers (epic outline-spell P28):  the page calls them;  a Python program's page sends them to its things, as `start_while()` and `end_while()`",
       "names": [
         "remote",

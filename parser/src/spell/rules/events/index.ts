@@ -1,5 +1,6 @@
 /**
- * The `events` rule module:  firing and watching global events -- `trigger`/`fire`/`send` and `on` --
+ * The `events` rule module:  sending events to things (`send`), firing and watching global ones (`trigger`, `on`),
+ * a handler's own words (`pass event`, `cancel event`, `sender`, `the original target`), the mouse and keys --
  * and the events a template says its things send, `- it sends "flipped" ...` (`declare_event`).
  * - They compile to core's `trigger()` / `on()`, imported from `@spell/core` by name.
  *   Each finds the program's CURRENT runtime when called:  a new one is made each time a program starts.
@@ -12,5 +13,11 @@
 export * from "./events.parser"
 export * from "./EventWords"
 export * from "./Trigger"
+export * from "./Send"
+export * from "./EventPart"
+export * from "./PassEvent"
+export * from "./CancelEvent"
+export * from "./InputState"
+export * from "./WhileHandler"
 export * from "./DeclareEvent"
 export * from "./On"

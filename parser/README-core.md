@@ -240,7 +240,7 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | notices and prompts | `notify`, `alert`, `warn` ...;  and ⌘Z / ⇧⌘Z, through Spell UI's keyboard registry | [ui.ts](src/core/ui.ts) |
 | undo and redo | each run's undo history:  an action declared undoable is one step | [undoing.ts](src/core/undoing.ts) |
 | remembered props | a prop declared `remembered` keeps its value from run to run, in the person's preferences | [remembered.ts](src/core/remembered.ts) |
-| events | `trigger()`, `on()`, `off()`, `once()`;  pauses and processes | [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts) |
+| events | `trigger()`, `on()`, `off()`, `once()`;  `send()`, to one thing and up its chain, passed on or cancelled;  the mouse and keys, `core.input`;  pauses and processes | [runtime.ts](src/core/runtime.ts), [SpellEvent.ts](src/core/SpellEvent.ts), [sending.ts](src/core/sending.ts), [input.ts](src/core/input.ts) |
 | JSON | every object's JSON names its class first, as `"$type"`:  `{ "$type": "Card", "rank": "ace" }`;  `core.fromJSON()` reads it back as that class | [json.ts](src/core/json.ts) |
 | carrying over | keeps the game in progress when the program is recompiled | [carry.ts](src/core/carry.ts) |
 | state by id | a program's state, for a page that mirrors one running elsewhere (in Python, say):  whole the first time, then patches | [state.ts](src/core/state.ts), [page.ts](src/core/page.ts) |
@@ -391,7 +391,7 @@ _From Spell's generated syntax table:  Python takes its own words where it has t
 core only where it doesn't._
 
 Not every call goes through `core.`:
-compiled JavaScript imports a few helpers by name, `trigger`, `on`, `off` and `once` for events and the position
+compiled JavaScript imports a few helpers by name, `trigger`, `on`, `off`, `once` and `send` for events and the position
 helpers above, where Python says `core.trigger()`.
 
 Two copies of anything drift:  the next fix lands in one language, and nobody notices.

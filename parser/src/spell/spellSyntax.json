@@ -2034,6 +2034,345 @@
       ]
     },
     {
+      "module": "events",
+      "rules": [
+        {
+          "className": "EventPart",
+          "ruleNames": ["event_part"],
+          "internal": false,
+          "file": "src/spell/rules/events/EventPart.ts",
+          "line": 15,
+          "purpose": "In an event's handler, who it concerns (epic `elemental-spell` P9, Q26).",
+          "syntaxes": [
+            {
+              "syntax": "the original target"
+            },
+            {
+              "syntax": "the? sender"
+            },
+            {
+              "syntax": "the? target"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "InputState",
+          "ruleNames": ["input_state"],
+          "internal": false,
+          "file": "src/spell/rules/events/InputState.ts",
+          "line": 17,
+          "purpose": "The mouse and the keys, readable anywhere (epic `elemental-spell` P9, Q31, Q32; HyperCard's `the shiftKey`) -- core's `input`, `input.ts`.",
+          "syntaxes": [
+            {
+              "syntax": "the meta key {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the shift key {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the option key {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the alt key {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the control key {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the mouse {operator:is_or_is_not} still down"
+            },
+            {
+              "syntax": "the (mouse|button|left button) {operator:is_or_is_not} down",
+              "example": "the mouse is down",
+              "outputs": {
+                "js": {
+                  "code": "core.input.button"
+                },
+                "ts": {
+                  "code": "core.input.button"
+                },
+                "py": {
+                  "code": "core.input.button"
+                }
+              }
+            },
+            {
+              "syntax": "the right button {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the (center|middle) button {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? space (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? enter (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? return (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? escape (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? tab (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? backspace (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? delete (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? up arrow (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? down arrow (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? left arrow (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the? right arrow (key)? {operator:is_or_is_not} down"
+            },
+            {
+              "syntax": "the thing under the mouse"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "Trigger",
+          "ruleNames": ["trigger"],
+          "internal": false,
+          "file": "src/spell/rules/events/Trigger.ts",
+          "line": 13,
+          "purpose": "Fires a global event, optionally with a `props` object.",
+          "syntaxes": [
+            {
+              "syntax": "(trigger|fire) event? {eventName:keyword} (with {props:object_literal_properties})?",
+              "example": "trigger card-click",
+              "outputs": {
+                "js": {
+                  "code": "trigger(\"card-click\")"
+                },
+                "ts": {
+                  "code": "trigger(\"card-click\")"
+                },
+                "py": {
+                  "code": "core.trigger(\"card-click\")"
+                }
+              }
+            },
+            {
+              "syntax": "(trigger|fire) event? {eventName:event_words} (with {props:object_literal_properties})?",
+              "example": "fire event card click with card = 1",
+              "outputs": {
+                "js": {
+                  "code": "trigger(\"card-click\", { card: 1 })"
+                },
+                "ts": {
+                  "code": "trigger(\"card-click\", { card: 1 })"
+                },
+                "py": {
+                  "code": "core.trigger(\"card-click\", card=1)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Send",
+          "ruleNames": ["send"],
+          "internal": false,
+          "file": "src/spell/rules/events/Send.ts",
+          "line": 21,
+          "purpose": "Sends an event to a thing, which hands it up its chain until a handler takes it (epic `elemental-spell` P9, Owen's event model) -- see core's `send()`, `sending.ts`.",
+          "syntaxes": [
+            {
+              "syntax": "send event? {eventName:keyword} (to {target:expression})? (with {props:object_literal_properties})?",
+              "example": "send start",
+              "outputs": {
+                "js": {
+                  "code": "send(undefined, \"start\")"
+                },
+                "ts": {
+                  "code": "send(undefined, \"start\")"
+                },
+                "py": {
+                  "code": "core.send(None, \"start\")"
+                }
+              }
+            },
+            {
+              "syntax": "send event? {eventName:event_words} (to {target:expression})? (with {props:object_literal_properties})?",
+              "example": "send card picked with card = 1",
+              "outputs": {
+                "js": {
+                  "code": "send(undefined, \"card-picked\", { card: 1 })"
+                },
+                "ts": {
+                  "code": "send(undefined, \"card-picked\", { card: 1 })"
+                },
+                "py": {
+                  "code": "core.send(None, \"card-picked\", {\"card\": 1})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "On",
+          "ruleNames": ["on"],
+          "internal": false,
+          "file": "src/spell/rules/events/On.ts",
+          "line": 25,
+          "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
+          "syntaxes": [
+            {
+              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
+              "example": "on card-click",
+              "outputs": {
+                "js": {
+                  "code": "on(\"card-click\")"
+                },
+                "ts": {
+                  "code": "on(\"card-click\")"
+                },
+                "py": {
+                  "code": "core.on(\"card-click\")"
+                }
+              }
+            },
+            {
+              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
+              "example": "on card click",
+              "outputs": {
+                "js": {
+                  "code": "on(\"card-click\")"
+                },
+                "ts": {
+                  "code": "on(\"card-click\")"
+                },
+                "py": {
+                  "code": "core.on(\"card-click\")"
+                }
+              }
+            },
+            {
+              "syntax": "when {eventName:keyword} {props:with_props_arg}? :? {statement_body}?"
+            },
+            {
+              "syntax": "when {eventName:event_words} {props:with_props_arg}? :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "DeclareEvent",
+          "ruleNames": ["declare_event"],
+          "internal": false,
+          "file": "src/spell/rules/events/DeclareEvent.ts",
+          "line": 20,
+          "purpose": "Says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} sends {event:text} {props:with_props_arg}?",
+              "example": "a card is a thing where:\n\t- it sends \"flipped\" with side as text and a card",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\", card: \"Card\" } })"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\", card: \"Card\" } })"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    pass\n\ncore.describe_event(Card, \"flipped\", {\"params\": {\"side\": \"text\", \"card\": \"Card\"}})"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type} sends {event:text} {props:with_props_arg}?",
+              "example": "a card is a thing\na card sends \"flipped\" with side as text",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\" } })"
+                },
+                "ts": {
+                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\" } })"
+                },
+                "py": {
+                  "code": "class Card(Thing):\n    pass\n\ncore.describe_event(Card, \"flipped\", {\"params\": {\"side\": \"text\"}})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} sends {event:text} {props:with_props_arg}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PassEvent",
+          "ruleNames": ["pass_event"],
+          "internal": false,
+          "file": "src/spell/rules/events/PassEvent.ts",
+          "line": 14,
+          "purpose": "In a handler, hand the event on up its chain, and stop here (epic `elemental-spell` P9, C25).",
+          "syntaxes": [
+            {
+              "syntax": "pass (event|{eventName:keyword}|{eventName:event_words})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CancelEvent",
+          "ruleNames": ["cancel_event"],
+          "internal": false,
+          "file": "src/spell/rules/events/CancelEvent.ts",
+          "line": 16,
+          "purpose": "In a handler, cancel an event still happening (epic `elemental-spell` P9, Q27).",
+          "syntaxes": [
+            {
+              "syntax": "cancel (event|{eventName:keyword}|{eventName:event_words})"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhileHandler",
+          "ruleNames": ["while_handler"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhileHandler.ts",
+          "line": 17,
+          "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
+          "syntaxes": [
+            {
+              "syntax": "while the mouse is down (on it)? :? {statement_body}?"
+            },
+            {
+              "syntax": "while the mouse is over it :? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "EventWords",
+          "ruleNames": ["event_words"],
+          "internal": false,
+          "file": "src/spell/rules/events/EventWords.ts",
+          "line": 17,
+          "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
+          "syntaxes": [],
+          "aliases": []
+        }
+      ]
+    },
+    {
       "module": "lists",
       "rules": [
         {
@@ -5882,147 +6221,6 @@
           "purpose": "A spellx closer on its own line, `</>` or `</property>` (epic `elemental-spell` P6).",
           "syntaxes": [],
           "aliases": ["statement"]
-        }
-      ]
-    },
-    {
-      "module": "events",
-      "rules": [
-        {
-          "className": "Trigger",
-          "ruleNames": ["trigger"],
-          "internal": false,
-          "file": "src/spell/rules/events/Trigger.ts",
-          "line": 13,
-          "purpose": "Fires a global event, optionally with a `props` object.",
-          "syntaxes": [
-            {
-              "syntax": "(trigger|fire|send) event? {eventName:keyword} (with {props:object_literal_properties})?",
-              "example": "trigger card-click",
-              "outputs": {
-                "js": {
-                  "code": "trigger(\"card-click\")"
-                },
-                "ts": {
-                  "code": "trigger(\"card-click\")"
-                },
-                "py": {
-                  "code": "core.trigger(\"card-click\")"
-                }
-              }
-            },
-            {
-              "syntax": "(trigger|fire|send) event? {eventName:event_words} (with {props:object_literal_properties})?",
-              "example": "fire event card click with card = 1",
-              "outputs": {
-                "js": {
-                  "code": "trigger(\"card-click\", { card: 1 })"
-                },
-                "ts": {
-                  "code": "trigger(\"card-click\", { card: 1 })"
-                },
-                "py": {
-                  "code": "core.trigger(\"card-click\", card=1)"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "On",
-          "ruleNames": ["on"],
-          "internal": false,
-          "file": "src/spell/rules/events/On.ts",
-          "line": 25,
-          "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
-          "syntaxes": [
-            {
-              "syntax": "on event? {eventName:keyword} {props:with_props_arg}? :? {statement_body}?",
-              "example": "on card-click",
-              "outputs": {
-                "js": {
-                  "code": "on(\"card-click\")"
-                },
-                "ts": {
-                  "code": "on(\"card-click\")"
-                },
-                "py": {
-                  "code": "core.on(\"card-click\")"
-                }
-              }
-            },
-            {
-              "syntax": "on event? {eventName:event_words} {props:with_props_arg}? :? {statement_body}?",
-              "example": "on card click",
-              "outputs": {
-                "js": {
-                  "code": "on(\"card-click\")"
-                },
-                "ts": {
-                  "code": "on(\"card-click\")"
-                },
-                "py": {
-                  "code": "core.on(\"card-click\")"
-                }
-              }
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "DeclareEvent",
-          "ruleNames": ["declare_event"],
-          "internal": false,
-          "file": "src/spell/rules/events/DeclareEvent.ts",
-          "line": 20,
-          "purpose": "Says an event a template's things SEND, and what comes with it (epic `elemental-spell` P5).",
-          "syntaxes": [
-            {
-              "syntax": "{type:subject_it} sends {event:text} {props:with_props_arg}?",
-              "example": "a card is a thing where:\n\t- it sends \"flipped\" with side as text and a card",
-              "outputs": {
-                "js": {
-                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\", card: \"Card\" } })"
-                },
-                "ts": {
-                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\", card: \"Card\" } })"
-                },
-                "py": {
-                  "code": "class Card(Thing):\n    pass\n\ncore.describe_event(Card, \"flipped\", {\"params\": {\"side\": \"text\", \"card\": \"Card\"}})"
-                }
-              }
-            },
-            {
-              "syntax": "(a|an) {type} sends {event:text} {props:with_props_arg}?",
-              "example": "a card is a thing\na card sends \"flipped\" with side as text",
-              "outputs": {
-                "js": {
-                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\" } })"
-                },
-                "ts": {
-                  "code": "export class Card extends Thing {}\ncore.describeEvent(Card, \"flipped\", { params: { side: \"text\" } })"
-                },
-                "py": {
-                  "code": "class Card(Thing):\n    pass\n\ncore.describe_event(Card, \"flipped\", {\"params\": {\"side\": \"text\"}})"
-                }
-              }
-            },
-            {
-              "syntax": "{type:subject_implied} sends {event:text} {props:with_props_arg}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "EventWords",
-          "ruleNames": ["event_words"],
-          "internal": false,
-          "file": "src/spell/rules/events/EventWords.ts",
-          "line": 17,
-          "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
-          "syntaxes": [],
-          "aliases": []
         }
       ]
     },

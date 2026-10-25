@@ -101,6 +101,8 @@ export const spanishWords: SP.LanguageWords = {
 
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
+  // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
+  ongoingEventName: /(ando|iendo|yendo)$/,
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
   retiredTypeWords: {

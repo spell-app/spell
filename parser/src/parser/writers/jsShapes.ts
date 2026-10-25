@@ -147,7 +147,7 @@ const OPENERS = "([{"
 const CLOSERS = ")]}"
 
 /** Spell's events, through `@spell/core`'s own `on()`, `trigger()` ... -- see `JSWriter.eventCall()`. */
-export const EVENTS = new Set(["on", "off", "once", "trigger"])
+export const EVENTS = new Set(["on", "off", "once", "trigger", "send"])
 
 /** `core` helpers worth importing by name, e.g. `positionOf(Card.Ranks, this.rank)`. */
 export const IMPORTED_HELPERS = new Set(["positionOf"])

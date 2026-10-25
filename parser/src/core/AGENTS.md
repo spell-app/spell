@@ -320,6 +320,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The compiler writes no `declareAction()` yet:  its spell waits for epic `elemental-spell`.
   - Its P10 (Actions and Menus) may take it over, by calling `UndoHistory.run()` (decision Q21).
 
+## Sending events
+
+- `core.send(target, type, params?, sender?)` sends an event to ONE thing, and up its chain until a handler takes it
+  ([sending.ts](sending.ts), epic `elemental-spell` P9):
+  - the thing, then its `eventParent` or the exclusive list holding it (`holderOf()`, [List.ts](classes/List.ts)),
+    then the running app (`core.RUNTIME.app`, set by the first `App` made), then `trigger()`'s listeners
+  - a handler is the thing's `on<Name>()`, else `when<Name>()`
+  - the one that runs takes it, unless it calls `event.pass()`;  `event.cancel()` sets `canceled`, which the sender
+    reads (compiled spell checks it only for a name still happening, `closing`)
+  - nobody takes it:  dropped, silently;  a handler that throws is warned about, and the event stops there
+- `core.input` ([input.ts](input.ts)):  the mouse and keys, readable anywhere, reactive.
+  - The page's runner calls `listen(window, { isMac })` once per core;  the meta key is command on a Mac, control
+    elsewhere.
+  - `onStillDown`:  the mouse held a second within 4 pixels.
+- `send` and `input` aren't in the Python core yet (`not_ported_yet.json5`).
+
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).

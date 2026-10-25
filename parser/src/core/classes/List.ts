@@ -797,10 +797,26 @@ class ListFamily {
   /** SIDE EFFECT:  `owner` holds `item` now -- `undefined`:  nothing does.  Readers re-run if it changed. */
   setOwner(item: unknown, owner: List | undefined): void {
     if (!isOwnable(item) || this.owners.get(item) === owner) return
+    const was = this.owners.get(item)
     if (owner) this.owners.set(item, owner)
     else this.owners.delete(item)
     this.cells.get(item)?.changed()
+    if (owner) HOLDERS.set(item, owner)
+    else if (HOLDERS.get(item) === was) HOLDERS.delete(item)
   }
+}
+
+/** Each item's last exclusive list, of any family:  where an event sent to it goes next -- see `holderOf()`. */
+const HOLDERS = new WeakMap<object, List>()
+
+/**
+ * The exclusive list holding `item`, of whatever family, e.g. the pile holding a card:
+ * the next stop up an event's chain (`send()` in `sending.ts`, epic `elemental-spell` P9).
+ * - The one that took it last, when lists of two families hold it.
+ * - Untracked:  reading it never makes a reader re-run.
+ */
+export function holderOf(item: unknown): List | undefined {
+  return isOwnable(item) ? HOLDERS.get(item) : undefined
 }
 
 /** Can a list own `item`:  an object -- a `WeakMap` key.  A number or text can't be. */
