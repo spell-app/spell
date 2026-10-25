@@ -968,16 +968,22 @@ function agentRows(host: Element) {
   ])
 }
 
-/** Agent `name`'s row, its note box and its Send button. */
+/** Agent `name`'s row, its note box (an `<epic-text-box>`), the box's `<textarea>` and its Send button. */
 function noteBox(host: Element, name: string) {
   const row = agentsRoot(host).querySelector(`.agent[data-name="${name}"]`)!
-  return { row, note: row.querySelector("textarea")!, send: row.querySelector<HTMLElement>("ui-button")! }
+  const box = row.querySelector("epic-text-box")!
+  return {
+    row,
+    box,
+    note: box.shadowRoot!.querySelector("textarea")!,
+    send: row.querySelector<HTMLElement>("ui-button")!
+  }
 }
 
-/** Type `text` into `note`, as a person would. */
+/** Type `text` into `note`, as a person would:  the event leaves the box's shadow root. */
 function type(note: HTMLTextAreaElement, text: string) {
   note.value = text
-  note.dispatchEvent(new InputEvent("input", { bubbles: true }))
+  note.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
 }
 
 /** Render a page with the panel, once it shows. */
@@ -1042,7 +1048,7 @@ describe("<epic-page> Agents running", () => {
     const routes = new FakeAgents()
     const client = await adoptAgents(routes)
     const host = await renderWithAgents()
-    const { note } = noteBox(host, "demo-aaa")
+    const { box, note } = noteBox(host, "demo-aaa")
     note.focus()
     type(note, "Half typed")
     routes.agents[0]!.status = "blocked on demo-ccc"
@@ -1056,7 +1062,8 @@ describe("<epic-page> Agents running", () => {
     ])
     expect(noteBox(host, "demo-aaa").note).toBe(note)
     expect(note.value).toBe("Half typed")
-    expect(agentsRoot(host).activeElement).toBe(note)
+    expect(agentsRoot(host).activeElement).toBe(box)
+    expect(box.shadowRoot!.activeElement).toBe(note)
     expect(agentsRoot(host).querySelector(".agents-button")!.getAttribute("aria-label")).toBe("3 agents running")
   })
 
@@ -1077,7 +1084,7 @@ describe("<epic-page> Agents running", () => {
       expect(agentRows(host)[0]![5]).toEqual([`You · ${clockOf(sent)} · waiting for the sessionUse the new parser`])
     )
     type(note, "And the old tests")
-    note.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", metaKey: true, bubbles: true }))
+    note.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", metaKey: true, bubbles: true, composed: true }))
     await vi.waitFor(() => expect(routes.posts).toHaveLength(2))
     await vi.waitFor(() => expect(note.value).toBe(""))
   })

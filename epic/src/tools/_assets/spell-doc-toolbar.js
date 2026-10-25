@@ -11,8 +11,9 @@
  * - Its look:  `spell-toolbar.css`, beside it (`@import`ed by `spell-doc.css`;  linked by `spell-comments.js`).
  */
 
+import { nextFrame } from "spell/util/dom"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
-import { FIELDS, el, nextFrames, titleInside } from "./spell-doc-helpers.js"
+import { FIELDS, el, titleInside } from "./spell-doc-helpers.js"
 import { ThreadFacts } from "spell-epic/comments"
 
 ////////////////
@@ -360,7 +361,7 @@ export function keepFitted(toolbar, { signal } = {}) {
   const sizes = new ResizeObserver(() => fitTitles(toolbar))
   sizes.observe(toolbar)
   signal?.addEventListener("abort", () => sizes.disconnect(), { once: true })
-  void customElements.whenDefined("ui-item").then(() => nextFrames(2).then(() => fitTitles(toolbar)))
+  void customElements.whenDefined("ui-item").then(() => nextFrame(2).then(() => fitTitles(toolbar)))
   void document.fonts?.ready.then(() => fitTitles(toolbar))
 }
 
@@ -527,7 +528,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
     .whenDefined("ui-modal")
     .then(() => {
       modal.visible = true
-      return nextFrames(2)
+      return nextFrame(2)
     })
     .then(() => input.focus())
 }

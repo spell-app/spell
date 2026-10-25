@@ -204,7 +204,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   get countdownTip(): string {
     if (!this.isCountdownOn) return this.translationForKey("countdownOff")
     const when = this.isCounting
-      ? this.translationForKey("whenCounting", { time: clockOf(this.countdown?.msLeft ?? 0) })
+      ? this.translationForKey("whenCounting", { time: minutesAndSeconds(this.countdown?.msLeft ?? 0) })
       : this.translationForKey("whenIdle")
     return this.translationForKey("countdownOn", { when })
   }
@@ -232,7 +232,7 @@ const TRACK = "track"
 const ELAPSED = "elapsed"
 
 /** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
-function clockOf(ms: number): string {
+function minutesAndSeconds(ms: number): string {
   const seconds = Math.ceil(ms / 1000)
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
 }

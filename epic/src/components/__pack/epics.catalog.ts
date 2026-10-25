@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  d6da483212c6024c
+// sources:  295529241aa81743
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -51,7 +51,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-test-run": {"folder":"epic-test-run","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":6}]},"attributes":["all"]},
-  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label"]},
+  "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
   "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},

@@ -68,7 +68,17 @@ export default defineConfig({
       // `node --test` files (the window script's):  `test()` returns a promise the runner itself awaits
       { files: ["tests/**/*.test.mjs"], rules: { "typescript/no-floating-promises": "off" } },
       // the plan-doc checks (`src/demo/`, Playwright):  a page's own code, measured by text inside `page.evaluate()`
-      { files: ["src/demo/**"], rules: { "no-eval": "off" } }
+      { files: ["src/demo/**"], rules: { "no-eval": "off" } },
+      // plain JavaScript:  no type check catches a name used and never defined (`.map(text)` after `text()` went,
+      // epic `coherence` I20);  node's globals and the browser's, as these scripts run in either
+      {
+        files: ["**/*.js", "**/*.mjs"],
+        env: { node: true, browser: true, es2024: true },
+        rules: { "no-undef": "error" }
+      },
+      // but not the plan-doc checks':  their `page.evaluate()` callbacks run in the page, calling the helpers the check
+      // installed there (`runRoot()`, `rootOf()`, `lineOf()` ...)
+      { files: ["src/demo/**"], rules: { "no-undef": "off" } }
     ]
   }
 })

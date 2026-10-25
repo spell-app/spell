@@ -41,6 +41,15 @@ describe("<epic-text-box>", () => {
     ])
   })
 
+  test("grows to a third of the window;  `max-height` sets its own cap (a redirect note's 40vh)", async () => {
+    const root = await ElementFixture.render(
+      `<div><epic-text-box></epic-text-box><epic-text-box type="note" max-height="40vh"></epic-text-box></div>`
+    )
+    const [plain, capped] = Array.from(root.children)
+    expect(field(plain!).style.maxHeight).toBe("")
+    expect(field(capped!).style.maxHeight).toBe("40vh")
+  })
+
   test("part of the page's answer by its type:  notes, a comment by `for`, Other by `for`;  blank:  nothing", async () => {
     const root = await ElementFixture.render(
       `<div><epic-text-box type="notes"></epic-text-box><epic-text-box for="context"></epic-text-box>` +
