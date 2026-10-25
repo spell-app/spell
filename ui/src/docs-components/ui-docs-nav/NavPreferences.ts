@@ -5,7 +5,7 @@ import { NavGroups, NavViews, STORAGE_KEYS, type NavGroup, type NavView } from "
 /****************
  * ### `NavPreferences`
  * The viewer's nav preferences in `localStorage`:  favourites, the view, the open topics, the folded groups.
- * Replaces the Astro site's `SiteStorage` (same keys, `STORAGE_KEYS`, so a viewer keeps theirs).
+ * - Replaces the Astro site's `SiteStorage`, with the same keys (`STORAGE_KEYS`), so a viewer keeps theirs.
  * - Through `PrefStore`:  private windows and blocked storage keep a preference for this page only.
  * - Per viewer and browser only;  NOT the search text.
  * - Static only:  the storage is one per page, and holds no state of its own.

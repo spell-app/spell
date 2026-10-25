@@ -19,7 +19,8 @@ import { FOLDS_KEY } from "./site.types"
  *   - The same line goes on `main` as `--site-sections-top`,
  *     for the browser's own anchor scrolling (`scroll-margin-top`).
  *   - A page's own sticky bar (`PAGE_BAR`) stacks between.
- * - Folds:  remembered per page (`localStorage`, `FOLDS_KEY` + the path:  `{ [section id]: folded }`).
+ * - Folds:  remembered per page, in `localStorage` through `PrefStore`
+ *   (`FOLDS_KEY` + the path:  `{ [section id]: folded }`).
  *   - The reader's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
  *   - Everything else starts OPEN.
  *   - An unfold made by a landing, or by find-in-page, is never saved.
@@ -277,8 +278,8 @@ export class SiteSections {
    * - False when it doesn't (or names a pane:  the tabs show it themselves),
    *   so the caller can scroll to the top instead.
    * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the folds have drawn.
-   * - `scroll`:  `"jump"` (a page arriving at its address) or `"glide"` (a link on the page:  a smooth scroll, the stuck
-   *   bars staying put;  a jump all the same under reduced motion)
+   * - `scroll`:  `"jump"` (a page arriving at its address) or `"glide"` (a link on the page)
+   *   - glide:  a smooth scroll, the stuck bars staying put;  a jump all the same under reduced motion
    */
   land(main: HTMLElement, hash: string, scroll: LandingScroll = "jump"): boolean {
     const id = TocIndex.decode(hash.replace(/^#/, ""))
