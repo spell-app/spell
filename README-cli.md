@@ -8,9 +8,9 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell 0.0.0
+spell 0.8.0
 spell-parser 0.8.0
-spell-ui 0.0.1
+spell-ui 0.8.0
 spell-app 0.8.0
 ```
 
@@ -91,12 +91,16 @@ spell lint @spell/examples
 
 ```text
 @spell/examples holds several projects -- name one, or pass --all:
+  @spell/examples/bill-splitter
   @spell/examples/calculator
   @spell/examples/fizzbuzz
+  @spell/examples/flash-cards
+  @spell/examples/habit-tracker
   @spell/examples/ListaDeTareas
   @spell/examples/Solitaire
   @spell/examples/Solitario
   @spell/examples/TaskList
+  @spell/examples/tic-tac-toe
 ```
 
 </details>
@@ -109,12 +113,16 @@ spell lint --all @spell/examples
 <summary>Output</summary>
 
 ```text
+✓ @spell/examples/bill-splitter
 ✓ @spell/examples/calculator
 ✓ @spell/examples/fizzbuzz
+✓ @spell/examples/flash-cards
+✓ @spell/examples/habit-tracker
 ✓ @spell/examples/ListaDeTareas
 ✓ @spell/examples/Solitaire
 ✓ @spell/examples/Solitario
 ✓ @spell/examples/TaskList
+✓ @spell/examples/tic-tac-toe
 ```
 
 </details>
@@ -842,8 +850,8 @@ spell projects
 
 ```text
 owen@spell       Projects       ...
-@spell/examples  Examples       6 projects
-@spell/guides    Guides         0 projects
+@spell/examples  Examples       10 projects
+@spell/guides    Guides         12 projects
 @spell/library   Libraries      1 project
 @spell/test      Test fixtures  7 projects
 ```
@@ -966,6 +974,10 @@ After an unknown command it adds `(spell help lists the commands)`.
 - `compile` writes the compiled JavaScript, `<Project>.spell.js`, into the project's build folder, as the app does.
   - The build folder:  `build/` at `spell-app`'s root, never committed, at the project's own path
     (`build/spaces/@spell/examples/Solitaire`);  `SPELL_BUILD_DIR` sets another.
+  - Beside it, its source map, `<Project>.spell.js.map`:
+    each line of JavaScript back to the `.spell` line it came from.
+    `spell run`, the editor's runner and `<spell-viewer>` carry it into what they run,
+    so an error's stack, and the browser's debugger, show Spell's lines.
   - With no errors, also its scope pack there, `<Project>.scopes.js`, as the language server does:
     what the Type Explorer reads.
   - A library (`ts/lib`) compiled with no errors gets each of its types' JSON Schema there too, for VS Code:
