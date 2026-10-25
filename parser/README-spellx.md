@@ -140,6 +140,13 @@ The other form is a read-only view, written when you ask for it:
 - on a `.spellx` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
 - Edits happen only in the real file, so the view always matches it.
 
+The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx)
+and [Task List](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/TaskList/TaskList.spellx),
+in the editor's examples.
+- Their card is a two sided view, drawing only its `<draw "front">` and `<draw "back">`;
+  their filter, a toolbar of actions with `selected-when=`;  their game's moves, keys and a right-click menu.
+- Each file's code-spell twin is kept beside the tests, and a test checks the two compile the same.
+
 Its tree, for a tool or an agent walking it:
 
 ```ts
@@ -185,7 +192,7 @@ for (const { node, depth } of file.walk()) ...
 `spell spellx convert` writes a `.spell` file, or each in a project, as spellx:  the same program, laid out in tags.
 
 ```sh
-spell spellx convert @spell/examples/Solitaire --dry-run
+spell spellx convert @spell/examples/calculator --dry-run
 ```
 
 - `Card.spell` becomes `Card.spellx`, beside it;  `Carta.es.spell` becomes `Carta.es.spellx`, in Spanish spellx.
@@ -228,9 +235,22 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
 - Plain Spell is untouched:  its drawings name tags as before.
 
+**Comments are attributes:**  a member's comment is its `description=`, its docstring as the comment above its twin is.
+- Every member takes one:  a template, a property, an alias, an action, a drawing, a test, a menu, a group.
+- So does a handler, at the end of its phrase:  `<on click description="A click turns it over">`.
+  `description=` and `group=` are its attributes there, never its phrase's words.
+- A comment inside a body is plain Spell's, `// ...`, as every body is.
+
+**Actions:**  `<action "deal" shortcut="meta+D" enabled-when="..." selected-when="..." icon="...">`, its details
+its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).
+- Its body may still sit on its line, `<action "deal" shortcut="meta+D">deal the cards</>`:
+  the twin puts it under the details.
+
 **Menus:**  `<menu "GameMenu">` holds `<action "deal" />`s, `<action "-" />` a line between groups;
 it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`, and an app's `menu-bar="GameMenu"` as
 `- its menu bar is "GameMenu"`.
+- A drawing draws it as a toolbar, `<toolbar menu="GameMenu">`, or as a right click's menu, `context-menu="GameMenu"`.
+- Menus and shortcuts run in a JavaScript program only, so far:  on a page whose program runs in Python they're inert.
 
 **Groups:**  `<group "direction" description="Face up or face down"/>` is a heading over the members after it, up to
 the next, as text sits under a `##` heading;  a member before any group is in none.
@@ -279,6 +299,13 @@ its body a drawing of markdown, markup and examples, with templates of its own.
   element, or a template's class.
 
 **Not yet:**
+- A member of a template from another file:  a template's tag is in ONE file, and spellx has no tag that adds to it.
+  Plain Spell's `a card:` does, in a `<spell>` chunk:  Solitaire's moves are its game's, written so.
+- A top-level action, a function:  `<action>` goes inside a template;  a `<spell>` chunk holds one.
+- `it can be dragged`, `it can take a card if:`, `to draw each item:`:  no tags of their own yet, so `<spell>` chunks.
+- A quoted value in an attribute:  `selected-when="its showing is \"done\""` can't be written.
+  A one-of value read bare there can be taken for an alias of the same word (`is done`):
+  the Task List reads it through its own alias, `selected-when="its checklist is showing done"`.
 - A `<spellx>` block back inside a `<spell>` chunk.
 - A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
