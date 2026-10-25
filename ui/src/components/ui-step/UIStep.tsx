@@ -34,6 +34,8 @@ import stepCSS from "./UIStep.css?inline"
  *   The shorthands are the same parts drawn here with their static `in-step` classes,
  *   which is why the step adopts `UIParts.css`.
  *
+ * - `parent="<id>"`:  written outside its `<ui-steps>`, it moves in, as if nested there (`ParentLink`).
+ *
  * - Group variations (vertical, ordered, stacked, circular ...)
  *   arrive as inherited `--_ui-steps-*` tokens from the `<ui-steps>` root;
  *   `UIStep.css` reads them (see its header).
@@ -48,6 +50,22 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
     // `disabled`:  its link or button is disabled
     disabled: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  ////////////////
+  // ## Parent
+  ////////////////
+
+  /** `parent`:  written elsewhere on the page, it joins the `<ui-steps>` with that id (`ParentLink`). */
+  private readonly parentLink = new E.ParentLink({
+    domElement: this.domElement,
+    attribute: this.elementDefinition.localAttribute("parent")
+  })
+
+  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
+  @E.onChange("isConnected", "parent")
+  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
+    return isConnected ? this.parentLink.follow(parent) : undefined
+  }
 
   ////////////////
   // ## State

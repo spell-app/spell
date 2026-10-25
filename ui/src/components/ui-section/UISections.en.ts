@@ -20,14 +20,14 @@ export const sectionsVocabulary = {
   aka: ["accordion", "section group", "collapsible group", "outline"],
   noun: "sections",
   description:
-    "A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.",
+    "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.",
   attributes: [
     {
       name: "collapsing",
       group: "layout",
       kind: "keyOnly",
       description:
-        "Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded " +
+        "Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed " +
         'ones stack with no space between.  A section opts out with `collapsible="false"`.'
     }
   ],

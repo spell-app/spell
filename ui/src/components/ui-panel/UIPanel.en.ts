@@ -24,7 +24,7 @@ const COLOR_DESCRIPTION =
 
 /** `fold-icon`'s description, as the panel uses it:  its default is `end`. */
 const FOLD_ICON_DESCRIPTION =
-  "Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's " +
+  "Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's " +
   "default), or `start`, before the title."
 
 /****************
@@ -38,7 +38,7 @@ export const panelVocabulary = {
   topics: ["layout", "containers"],
   aka: ["inspector", "property panel", "properties", "settings panel", "fieldset", "property sheet"],
   description:
-    "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  " +
+    "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  " +
     "It takes every `<ui-section>` attribute.",
   attributes: sectionVocabulary.attributes.map((spec) =>
     spec.name === "color"

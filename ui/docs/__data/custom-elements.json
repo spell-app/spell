@@ -17772,8 +17772,8 @@
           "name": "UIPanel",
           "tagName": "ui-panel",
           "customElement": true,
-          "summary": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.",
-          "description": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that fold.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.",
+          "summary": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.",
+          "description": "A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute.\n\nAlso known as:  inspector, property panel, properties, settings panel, fieldset, property sheet.",
           "attributes": [
             {
               "name": "label",
@@ -17800,6 +17800,14 @@
               "fieldName": "level"
             },
             {
+              "name": "parent",
+              "description": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
+            },
+            {
               "name": "icon",
               "description": "Icon name, before the title;  a slotted `slot=\"icon\"` (a `<ui-icon>`, anything) replaces it.",
               "type": {
@@ -17817,7 +17825,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -17825,7 +17833,7 @@
             },
             {
               "name": "collapsible",
-              "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
+              "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
               "type": {
                 "text": "boolean"
               },
@@ -17833,7 +17841,7 @@
             },
             {
               "name": "open",
-              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
@@ -17842,7 +17850,7 @@
             },
             {
               "name": "fold-icon",
-              "description": "Where each band's fold chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.",
+              "description": "Where each band's open / close chevron sits:  `end`, at the far end of the band after any actions (the panel's default), or `start`, before the title.",
               "type": {
                 "text": "\"start\" | \"end\""
               },
@@ -17963,7 +17971,7 @@
             },
             {
               "name": "disabled",
-              "description": "Dimmed and inert;  can't be folded.",
+              "description": "Dimmed and inert;  can't be closed or opened.",
               "type": {
                 "text": "boolean"
               },
@@ -18038,28 +18046,28 @@
           "events": [
             {
               "name": "ui-opening",
-              "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
+              "description": "Opened, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
             },
             {
               "name": "ui-closing",
-              "description": "About to fold:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to close:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
+              "description": "Closed, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -18109,7 +18117,7 @@
             },
             {
               "name": "actions",
-              "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+              "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
             },
             {
               "name": "description",
@@ -18131,7 +18139,7 @@
             },
             {
               "name": "toggle",
-              "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+              "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
             },
             {
               "name": "fold-icon",
@@ -18173,7 +18181,7 @@
           "cssStates": [
             {
               "name": "collapsed",
-              "description": "Folded."
+              "description": "Closed."
             },
             {
               "name": "stuck",
@@ -18181,7 +18189,7 @@
             },
             {
               "name": "animated",
-              "description": "Folds with a height transition (`interpolate-size`)."
+              "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
             {
               "name": "nested",
@@ -22104,7 +22112,8 @@
             },
             {
               "name": "--ui-popup-arrow-edge",
-              "default": "var(--ui-border-color-strong)"
+              "default": "var(--ui-popup-border-color)",
+              "description": "the box's own rim by default, so a themed rim (a glass theme's white one) runs on round the arrow"
             },
             {
               "name": "--ui-popup-distance",
@@ -23137,6 +23146,14 @@
               "fieldName": "level"
             },
             {
+              "name": "parent",
+              "description": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
+            },
+            {
               "name": "icon",
               "description": "Icon name, before the title;  a slotted `slot=\"icon\"` (a `<ui-icon>`, anything) replaces it.",
               "type": {
@@ -23154,7 +23171,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -23162,7 +23179,7 @@
             },
             {
               "name": "collapsible",
-              "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
+              "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
               "type": {
                 "text": "boolean"
               },
@@ -23170,7 +23187,7 @@
             },
             {
               "name": "open",
-              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
@@ -23179,7 +23196,7 @@
             },
             {
               "name": "fold-icon",
-              "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).",
+              "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).",
               "type": {
                 "text": "\"start\" | \"end\""
               },
@@ -23429,28 +23446,28 @@
             },
             {
               "name": "ui-opening",
-              "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
+              "description": "Opened, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
             },
             {
               "name": "ui-closing",
-              "description": "About to fold:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to close:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
+              "description": "Closed, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -23490,7 +23507,7 @@
             },
             {
               "name": "actions",
-              "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+              "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
             },
             {
               "name": "description",
@@ -23536,7 +23553,7 @@
             },
             {
               "name": "toggle",
-              "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+              "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
             },
             {
               "name": "fold-icon",
@@ -23614,7 +23631,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded."
+              "description": "Closed."
             },
             {
               "name": "stuck",
@@ -23622,7 +23639,7 @@
             },
             {
               "name": "animated",
-              "description": "Folds with a height transition (`interpolate-size`)."
+              "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
             {
               "name": "nested",
@@ -23684,8 +23701,8 @@
           "name": "UIPropertyGroup",
           "tagName": "ui-property-group",
           "customElement": true,
-          "summary": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.",
-          "description": "A property group is a folding band of properties in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.",
+          "summary": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.",
+          "description": "A property group is a band of properties that opens and closes, in a property editor.  It takes `<ui-section>`'s attributes.\n\nAlso known as:  property group, fieldset, settings group, inspector section.",
           "attributes": [
             {
               "name": "selector",
@@ -23752,6 +23769,14 @@
               "fieldName": "level"
             },
             {
+              "name": "parent",
+              "description": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
+            },
+            {
               "name": "icon",
               "description": "Icon name, before the title;  a slotted `slot=\"icon\"` (a `<ui-icon>`, anything) replaces it.",
               "type": {
@@ -23769,7 +23794,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -23777,7 +23802,7 @@
             },
             {
               "name": "collapsible",
-              "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
+              "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
               "type": {
                 "text": "boolean"
               },
@@ -23785,7 +23810,7 @@
             },
             {
               "name": "open",
-              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
@@ -23794,7 +23819,7 @@
             },
             {
               "name": "fold-icon",
-              "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).",
+              "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).",
               "type": {
                 "text": "\"start\" | \"end\""
               },
@@ -23915,7 +23940,7 @@
             },
             {
               "name": "disabled",
-              "description": "Dimmed and inert;  can't be folded.",
+              "description": "Dimmed and inert;  can't be closed or opened.",
               "type": {
                 "text": "boolean"
               },
@@ -23988,28 +24013,28 @@
             },
             {
               "name": "ui-opening",
-              "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
+              "description": "Opened, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
             },
             {
               "name": "ui-closing",
-              "description": "About to fold:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to close:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
+              "description": "Closed, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -24056,7 +24081,7 @@
             },
             {
               "name": "actions",
-              "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+              "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
             },
             {
               "name": "description",
@@ -24086,7 +24111,7 @@
             },
             {
               "name": "toggle",
-              "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+              "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
             },
             {
               "name": "fold-icon",
@@ -24140,7 +24165,7 @@
             },
             {
               "name": "collapsed",
-              "description": "Folded."
+              "description": "Closed."
             },
             {
               "name": "stuck",
@@ -24148,7 +24173,7 @@
             },
             {
               "name": "animated",
-              "description": "Folds with a height transition (`interpolate-size`)."
+              "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
             {
               "name": "nested",
@@ -25934,8 +25959,8 @@
           "name": "UISection",
           "tagName": "ui-section",
           "customElement": true,
-          "summary": "A section is a titled block of content that can fold away and keep its title in view.",
-          "description": "A section is a titled block of content that can fold away and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.",
+          "summary": "A section is a titled block of content that can close and keep its title in view.",
+          "description": "A section is a titled block of content that can close and keep its title in view.\n\nAlso known as:  section, panel, collapsible, disclosure, fieldset, expander.",
           "attributes": [
             {
               "name": "label",
@@ -25962,6 +25987,14 @@
               "fieldName": "level"
             },
             {
+              "name": "parent",
+              "description": "Id of the `<ui-section>` (or `<ui-sections>`) this one nests in, when it's written outside it (`parent=\"setup\"`):  it joins it, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
+            },
+            {
               "name": "icon",
               "description": "Icon name, before the title;  a slotted `slot=\"icon\"` (a `<ui-icon>`, anything) replaces it.",
               "type": {
@@ -25979,7 +26012,7 @@
             },
             {
               "name": "description",
-              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the fold button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
+              "description": "A tip about the section, shown under the title bar while the pointer is on the title (or the open / close button has keyboard focus);  it describes the title.  `slot=\"description\"` is the rich version (bold words, line breaks).",
               "type": {
                 "text": "string"
               },
@@ -25987,7 +26020,7 @@
             },
             {
               "name": "collapsible",
-              "description": "The title folds and unfolds the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
+              "description": "The title opens and closes the content:  a button with `aria-expanded`.  Default:  on inside `<ui-sections collapsing>`, sub-sections included;  `collapsible=\"false\"` opts out there.",
               "type": {
                 "text": "boolean"
               },
@@ -25995,7 +26028,7 @@
             },
             {
               "name": "open",
-              "description": "Unfolded;  `open=\"false\"` folds it, so only the title shows.  Controlled:  set it to fold / unfold;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page unfolds a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
               "type": {
                 "text": "boolean"
               },
@@ -26004,7 +26037,7 @@
             },
             {
               "name": "fold-icon",
-              "description": "With `collapsible`:  where the fold chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it folds too).",
+              "description": "With `collapsible`:  where the open / close chevron sits:  `start`, before the title (the default), or `end`, at the far end of the title bar, after the badge and actions (a click on it closes and opens too).",
               "type": {
                 "text": "\"start\" | \"end\""
               },
@@ -26125,7 +26158,7 @@
             },
             {
               "name": "disabled",
-              "description": "Dimmed and inert;  can't be folded.",
+              "description": "Dimmed and inert;  can't be closed or opened.",
               "type": {
                 "text": "boolean"
               },
@@ -26200,28 +26233,28 @@
           "events": [
             {
               "name": "ui-opening",
-              "description": "About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to open:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay closed.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-opened",
-              "description": "Unfolded, by any route:  the title, the page setting `open`, find-in-page.",
+              "description": "Opened, by any route:  the title, the page setting `open`, find-in-page.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
             },
             {
               "name": "ui-closing",
-              "description": "About to fold:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "About to close:  the title was activated.  Cancel to stay open.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element, originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-closed",
-              "description": "Folded, by any route:  the title, or the page setting `open=\"false\"`.",
+              "description": "Closed, by any route:  the title, or the page setting `open=\"false\"`.",
               "type": {
                 "text": "CustomEvent<{ open: boolean, section: Element }>"
               }
@@ -26271,7 +26304,7 @@
             },
             {
               "name": "actions",
-              "description": "Controls at the right of the title bar (buttons, a menu);  never fold it."
+              "description": "Controls at the right of the title bar (buttons, a menu);  never close it."
             },
             {
               "name": "description",
@@ -26293,7 +26326,7 @@
             },
             {
               "name": "toggle",
-              "description": "With `collapsible`:  the `<button>` inside the heading that folds the section."
+              "description": "With `collapsible`:  the `<button>` inside the heading that opens and closes the section."
             },
             {
               "name": "fold-icon",
@@ -26335,7 +26368,7 @@
           "cssStates": [
             {
               "name": "collapsed",
-              "description": "Folded."
+              "description": "Closed."
             },
             {
               "name": "stuck",
@@ -26343,7 +26376,7 @@
             },
             {
               "name": "animated",
-              "description": "Folds with a height transition (`interpolate-size`)."
+              "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
             {
               "name": "nested",
@@ -26608,12 +26641,12 @@
           "name": "UISections",
           "tagName": "ui-sections",
           "customElement": true,
-          "summary": "A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.",
-          "description": "A group of sections:  with `collapsing`, every section in it folds, and folded ones stack with no space between.\n\nAlso known as:  accordion, section group, collapsible group, outline.",
+          "summary": "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.",
+          "description": "A group of sections:  with `collapsing`, every section in it can close, and closed ones stack with no space between.\n\nAlso known as:  accordion, section group, collapsible group, outline.",
           "attributes": [
             {
               "name": "collapsing",
-              "description": "Every section in the group, sub-sections included, folds by default (as if `collapsible`);  folded ones stack with no space between.  A section opts out with `collapsible=\"false\"`.",
+              "description": "Every section in the group, sub-sections included, can close by default (as if `collapsible`);  closed ones stack with no space between.  A section opts out with `collapsible=\"false\"`.",
               "type": {
                 "text": "boolean"
               },
@@ -30138,6 +30171,14 @@
               "fieldName": "description"
             },
             {
+              "name": "parent",
+              "description": "Id of the `<ui-steps>` this step belongs to, when it's written outside them (`parent=\"checkout\"`):  it joins them, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
+            },
+            {
               "name": "loading",
               "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
               "type": {
@@ -31007,6 +31048,14 @@
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
               "fieldName": "attach"
+            },
+            {
+              "name": "parent",
+              "description": "Id of the `<ui-tabs>` this pane belongs to, when it's written outside them (`parent=\"types\"`):  it joins them, in page order, as if nested there.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "parent"
             },
             {
               "name": "appearance",

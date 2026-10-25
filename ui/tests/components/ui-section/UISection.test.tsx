@@ -9,6 +9,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
+import { ParentLink } from "spell-ui/core"
 
 import "spell-ui/components/ui-section"
 import "spell-ui/components/ui-icon"
@@ -83,8 +84,8 @@ function folded(content: HTMLElement) {
 describe("<ui-section> definition", () => {
   it("registers its texts with UI.i18n when DEFINED", async () => {
     await UI.load()
-    expect(UI.i18n.t("fold")).toBe("Fold")
-    expect(UI.i18n.t("unfold")).toBe("Unfold")
+    expect(UI.i18n.t("closeSection")).toBe("Close this section")
+    expect(UI.i18n.t("openSection")).toBe("Open this section")
   })
 })
 
@@ -1083,3 +1084,60 @@ describe("<ui-section> its words:  `<ui-field>`'s (epic `property-editor` P10)",
     expect(b.matches(":state(in-section)")).toBe(false)
   })
 })
+
+////////////////
+// ## Parent
+////////////////
+
+describe("<ui-section parent>", () => {
+  afterEach(() => {
+    ParentLink.reset()
+    vi.restoreAllMocks()
+  })
+
+  it("nests in the section it names, in page order:  its level, nesting and folding follow", async () => {
+    const page = await ElementFixture.render(
+      `<div><ui-section id="flat-outer" label="Outer"><p>Own</p></ui-section>` +
+        `<ui-section parent="flat-outer" label="A" collapsible><p>A's</p></ui-section>` +
+        `<ui-section parent="flat-a" id="flat-b" label="B"></ui-section>` +
+        `<ui-section parent="flat-outer" id="flat-a" label="C"></ui-section></div>`
+    )
+    await joined(page)
+    const outer = page.querySelector<SectionElement>("#flat-outer")!
+    expect([...outer.children].map((child) => child.getAttribute("label") ?? child.localName)).toEqual(["p", "A", "C"])
+    const nested = outer.querySelector<SectionElement>("[label=A]")!
+    expect(nested.matches(":state(nested)")).toBe(true)
+    expect(parts(nested).heading.localName).toBe("h3")
+    // a section nests in a joined one:  B in C (id `flat-a`), one level down
+    const deepest = page.querySelector<SectionElement>("#flat-b")!
+    expect(deepest.parentElement!.id).toBe("flat-a")
+    expect(parts(deepest).heading.localName).toBe("h4")
+    // folding works as for a nested one
+    parts(nested).toggle.click()
+    await ElementFixture.tick()
+    expect(nested.collapsed).toBe(true)
+  })
+
+  it("joins a <ui-sections> group;  warns ONCE for an id no element has", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const page = await ElementFixture.render(
+      `<div><ui-sections id="flat-group" collapsing></ui-sections>` +
+        `<ui-section parent="flat-group" label="In"></ui-section>` +
+        `<ui-section parent="no-such-section" label="X"></ui-section>` +
+        `<ui-section parent="no-such-section" label="Y"></ui-section></div>`
+    )
+    await joined(page)
+    const inGroup = page.querySelector<SectionElement>("[label=In]")!
+    expect(inGroup.parentElement!.id).toBe("flat-group")
+    expect(inGroup.matches(":state(in-group)")).toBe(true)
+    expect(warn.mock.calls.filter(([message]) => String(message).includes("no-such-section"))).toHaveLength(1)
+    expect(page.querySelectorAll(":scope > ui-section")).toHaveLength(2)
+  })
+})
+
+/** Let flat elements join their containers, and the containers hear of it. */
+async function joined(page: Element) {
+  await ElementFixture.tick()
+  await ElementFixture.settle(page)
+  await ElementFixture.tick()
+}

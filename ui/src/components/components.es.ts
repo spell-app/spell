@@ -146,6 +146,7 @@ export const sharedEs = {
     collapsible: "plegable",
     open: "abierto",
     source: "fuente",
+    parent: "padre",
     select: "seleccionar",
     selector: "selector",
     centered: "centrado",

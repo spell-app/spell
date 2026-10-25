@@ -1,4 +1,4 @@
-import { describe, expect, it, onTestFinished } from "vite-plus/test"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 import { Keys } from "spell-ui/test-helpers/Keys"
 
@@ -8,6 +8,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import type { DOMElement } from "spell/element"
+import { ParentLink } from "spell-ui/core"
 
 import "spell-ui/components/ui-step"
 import "spell-ui/components/ui-parts"
@@ -517,3 +518,48 @@ describe("<ui-steps> and <ui-step> old names", () => {
     expect(stepRoots(host)[0]!.localName).toBe("button")
   })
 })
+
+////////////////
+// ## Parent
+////////////////
+
+describe("<ui-step parent>", () => {
+  afterEach(() => {
+    ParentLink.reset()
+    vi.restoreAllMocks()
+  })
+
+  it("joins the <ui-steps> it names, in page order, as a list item of it", async () => {
+    const page = await ElementFixture.render(
+      `<div><ui-steps id="flat-steps" ordered><ui-step heading="One"></ui-step></ui-steps>` +
+        `<p>Between</p><ui-step parent="flat-steps" heading="Two" selected></ui-step>` +
+        `<ui-step parent="flat-steps" heading="Three"></ui-step></div>`
+    )
+    await joined(page)
+    const steps = page.querySelector("ui-steps")!
+    expect([...steps.children].map((step) => step.getAttribute("heading"))).toEqual(["One", "Two", "Three"])
+    expect(token(stepRoots(steps)[2]!, "--_ui-steps-ordered")).toBe("1")
+    await expectAccessible(page)
+  })
+
+  it("joins a <ui-steps> that arrives LATER;  warns once while it's missing", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const page = await ElementFixture.render(
+      `<div><ui-step parent="late-steps" heading="A"></ui-step><ui-step parent="late-steps" heading="B"></ui-step></div>`
+    )
+    await joined(page)
+    expect(warn.mock.calls.filter(([message]) => String(message).includes("late-steps"))).toHaveLength(1)
+    expect(page.querySelectorAll(":scope > ui-step")).toHaveLength(2)
+    const steps = document.createElement("ui-steps")
+    steps.id = "late-steps"
+    page.append(steps)
+    await expect.poll(() => [...steps.children].map((step) => step.getAttribute("heading"))).toEqual(["A", "B"])
+  })
+})
+
+/** Let flat elements join their containers, and the containers hear of it. */
+async function joined(page: Element) {
+  await ElementFixture.tick()
+  await ElementFixture.settle(page)
+  await ElementFixture.tick()
+}

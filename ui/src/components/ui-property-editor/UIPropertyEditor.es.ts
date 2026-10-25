@@ -21,8 +21,8 @@ export const propertyEditorEs = {
     formDebugBound: "Objeto vinculado",
     formDebugValues: "Valores",
     loading: "Cargando…",
-    fold: "Plegar",
-    unfold: "Desplegar",
+    closeSection: "Cerrar esta sección",
+    openSection: "Abrir esta sección",
     sourceLoadError: "No se pudo cargar {source}.",
     sourceCrossOrigin: "No se puede mostrar {source}:  solo se pueden mostrar archivos de este sitio.",
     sourceFileProtocol:

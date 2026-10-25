@@ -4,7 +4,7 @@ import { NavGroups, NavViews, STORAGE_KEYS, type NavGroup, type NavView } from "
 
 /****************
  * ### `NavPreferences`
- * The viewer's nav preferences in `localStorage`:  favourites, the view, the open topics, the folded groups.
+ * The viewer's nav preferences in `localStorage`:  favourites, the view, the open topics, the closed groups.
  * - Replaces the Astro site's `SiteStorage`, with the same keys (`STORAGE_KEYS`), so a viewer keeps theirs.
  * - Through `PrefStore`:  private windows and blocked storage keep a preference for this page only.
  * - Per viewer and browser only;  NOT the search text.
@@ -45,13 +45,13 @@ export class NavPreferences {
     NavPreferences.writeList(STORAGE_KEYS.openTopics, ids)
   }
 
-  /** Groups the viewer folded away;  unknown names (a renamed group, a hand-edited value) are dropped. */
+  /** Groups the viewer closed;  unknown names (a renamed group, a hand-edited value) are dropped. */
   static closedGroups(): NavGroup[] {
     const stored = NavPreferences.readList(STORAGE_KEYS.closedGroups)
     return NavGroups.filter((group) => stored.includes(group))
   }
 
-  /** Store the folded groups;  none removes the key. */
+  /** Store the closed groups;  none removes the key. */
   static setClosedGroups(groups: Iterable<NavGroup>) {
     NavPreferences.writeList(STORAGE_KEYS.closedGroups, groups)
   }

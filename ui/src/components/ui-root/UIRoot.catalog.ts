@@ -1025,6 +1025,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "label",
       "hint",
       "level",
+      "parent",
       "icon",
       "badge",
       "description",
@@ -1171,6 +1172,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "label",
       "hint",
       "level",
+      "parent",
       "icon",
       "badge",
       "description",
@@ -1212,6 +1214,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "label",
       "hint",
       "level",
+      "parent",
       "icon",
       "badge",
       "description",
@@ -1383,6 +1386,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "label",
       "hint",
       "level",
+      "parent",
       "icon",
       "badge",
       "description",
@@ -1559,7 +1563,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "icon",
       "heading",
       "header",
-      "description"
+      "description",
+      "parent"
     ]
   },
   "ui-steps": {
@@ -1599,6 +1604,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "lazy",
       "attach",
       "attached",
+      "parent",
       "appearance",
       "basic",
       "inverted"

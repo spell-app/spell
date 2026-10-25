@@ -435,7 +435,7 @@ export class UIPropertyEditor extends UIForm {
 const SECTION_ATTRIBUTES = new Set(
   sectionVocabulary.attributes
     .map((spec) => spec.name as string)
-    .filter((name) => !["source", "selector", "size", "inverted", "loading", "disabled"].includes(name))
+    .filter((name) => !["source", "selector", "size", "inverted", "loading", "disabled", "parent"].includes(name))
 )
 
 /** The section's named slots the editor passes on. */
