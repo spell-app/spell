@@ -23,6 +23,14 @@ export class App extends View {
   static drawsInItsChildren = true
 
   /**
+   * An app's remembered props are kept by name alone, e.g. `theme` at `@owen/solitaire:theme`:
+   * a program has one app, so it needs no id -- see `Thing.rememberedKeyFor()`.
+   */
+  protected rememberedKeyFor(property: string): string {
+    return property
+  }
+
+  /**
    * Mount this app's drawing into `core.appElement()` (`core.mountApp()`), creating a
    * `core.REACT_APP_ROOT_ID` container `div` if there's none.
    * - On a page that defines elements, that's our element, `<solitaire-app>`, our drawing inside it.

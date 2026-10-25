@@ -1,6 +1,9 @@
+import type { PrefPlace, PrefPlaceName } from "spell/util"
+
 import { core } from "./core"
 import { Eventful, type EventCallback, type SpellEvent } from "./SpellEvent"
 import { defineCoreModule } from "./core.types"
+import { RememberedValues } from "./remembered"
 
 /**
  * Class backing `core.RUNTIME` -- a live per-project state bag (see `SpellRuntimeState`) that's
@@ -8,7 +11,10 @@ import { defineCoreModule } from "./core.types"
  * - Reach them through `on()` / `trigger()` (below), which find the CURRENT runtime.
  * - Programs compiled before those still call `core.RUNTIME.on(...)` / `.trigger(...)` -- the same lists.
  */
-export class SpellRuntime extends Eventful() {}
+export class SpellRuntime extends Eventful() {
+  /** What this run remembers for the next (`remembered.ts`):  `undefined` until `core.remember()`. */
+  remembered?: RememberedValues
+}
 
 /**
  * Call `callback` each time the running program triggers `eventType` -- `on card-click with a card: ...`.
@@ -99,6 +105,21 @@ export const runtimeMethods = defineCoreModule({
     core.things.clear()
     core.RUNTIME = new SpellRuntime() as SpellRuntimeState
     return core.RUNTIME
+  },
+
+  /**
+   * Remember the running program's `remembered` props from run to run, under `name`, its project's id
+   * (epic `prefs-and-undo` P8).
+   * - e.g. `await core.remember("@owen/solitaire")`:  its app's `theme` is kept at `@owen/solitaire:theme`
+   * - Reads what the last run kept, so call it after `resetRuntime()`, before the program starts.
+   * - `place`:  where they're kept;  the browser's storage unless the host says otherwise
+   *   (`ServerPlace.shared`, the page server's)
+   * - What it keeps, and under what keys:  `remembered.ts`.
+   * - throws if no program is running, or `name` can't name a store (one with a colon)
+   */
+  async remember(name: string, place?: PrefPlaceName | PrefPlace): Promise<void> {
+    const runtime = runtimeFor("core.remember")
+    runtime.remembered = await RememberedValues.open(name, place)
   },
 
   /** Clear `core.RUNTIME`:  unset again, as before the first `resetRuntime()` -- see `RUNTIME`. */

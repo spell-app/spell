@@ -64,6 +64,12 @@
       ]
     },
     {
+      "why": "Remembered props (epic prefs-and-undo P8):  kept in the person's preferences, in a browser or on the page server;  a Python program keeps none yet",
+      "names": [
+        "remember"
+      ]
+    },
+    {
       "why": "Not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it",
       "names": [
         "doNothing",

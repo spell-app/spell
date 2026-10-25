@@ -6,7 +6,7 @@
  */
 import _ from "lodash"
 
-import type { PropInfo } from "spell/util"
+import { peekProp, type PropInfo } from "spell/util"
 
 /** Characters a made-up id's random part is written in:  base 36, lower case. */
 const ID_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -25,6 +25,9 @@ export function newThingId(thing: object): string {
   return `${kind}-${randomBase36(ID_LENGTH)}`
 }
 
+/** The id `ID_PROP` made up for each thing:  a different one there now was chosen (`hasChosenId()`). */
+const madeIds = new WeakMap<object, string>()
+
 /**
  * How `Thing` and `List` declare their `id`:  text, made on first read (`newThingId()`), then kept.
  * - Made only when read:  a thing whose id nobody reads has none, so its JSON has none either.
@@ -33,8 +36,22 @@ export function newThingId(thing: object): string {
 export const ID_PROP: PropInfo = {
   type: "text",
   init(this: object) {
-    return newThingId(this)
+    const id = newThingId(this)
+    madeIds.set(this, id)
+    return id
   }
+}
+
+/**
+ * Did the program choose `thing`'s id, or load it, rather than one being made up for it (`newThingId()`)?
+ * - e.g. `new Settings({ id: "main" })`, or a thing read back from a saved file:  the same id every run.
+ * - A made-up id is new each run, so nothing kept under it would be found again:
+ *   what's remembered for a thing is kept under its chosen id (`Thing.rememberedKeyFor()`).
+ * - Reads no id:  a thing whose id is never read still has none.
+ */
+export function hasChosenId(thing: object): boolean {
+  const id = peekProp<string>(thing, "id")
+  return id !== undefined && madeIds.get(thing) !== id
 }
 
 /**

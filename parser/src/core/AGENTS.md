@@ -243,6 +243,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The state names properties as Python does:  the page reads each by its javascript name (`javascriptName()`).
   - Python's side is `spell_core.page`'s `PageSession`.
 
+## Remembered props
+
+- A prop declared `remembered: true` keeps its value from one run to the next ([remembered.ts](remembered.ts), epic
+  `prefs-and-undo` P8):  `this.declareProp("theme", { oneOf: THEMES, remembered: true })`.
+  - Kept in the person's preferences, a `PrefStore` named for the project's id (`spell/util/persist`).
+  - The runner says which, after `resetRuntime()` and before the program loads:  `await core.remember(projectId)`.
+    - spell-app's `runCompiled()`, given `projectId` (the editor, `<spell-viewer>`);  its tests never remember.
+  - Read whole as the run starts, so a store that must be waited on (the page server's) reads at once after.
+- Keys:  an app's by name (`@owen/solitaire:theme`);  any other thing's under the id the program chose,
+  `@owen/solitaire:main.theme` (`Thing.rememberedKeyFor()`, `hasChosenId()`).
+  - A made-up id is new each run:  such a thing's remembered prop isn't kept, said once on the console.
+- Only text, numbers and choices;  a value its prop no longer allows starts afresh, said once.
+- Nothing called `core.remember()` (tests, `spell run`):  a remembered prop is a plain one.
+- The compiler writes no `remembered` yet:  its spell waits for epic `elemental-spell`.
+
 ## The Python core
 
 - Its Python twin, `spell_core`, is in the py folder ([py's AGENTS.md](../py/AGENTS.md), epic `python-target` P21).
