@@ -15,7 +15,7 @@ import { SRV } from "spell/server"
  */
 const TOP = realpathSync(mkdtempSync(join(tmpdir(), "linker-top-")))
 
-/** Write an empty file (or `text`) at `path` under `TOP`, making folders. */
+/** Write an empty file (or `text`) at `path` under `TOP`, making folders;  a `package.json` is `{}`, as node reads one. */
 function put(path: string, text = ""): void {
   mkdirSync(dirname(join(TOP, path)), { recursive: true })
   writeFileSync(join(TOP, path), text)
@@ -34,7 +34,7 @@ for (const file of [
   "spell-app/guides/index.html",
   "spell-app/guides/spell-docs/spell-docs.md"
 ])
-  put(file)
+  put(file, file.endsWith("package.json") ? "{}" : "")
 mkdirSync(join(TOP, "node_modules"), { recursive: true })
 symlinkSync(join(TOP, "spell-ui"), join(TOP, "node_modules", "spell-ui"))
 symlinkSync(join(TOP, "spell-server"), join(TOP, "node_modules", "spell"))

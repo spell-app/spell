@@ -4,6 +4,7 @@ import { createServer, type Server } from "node:http"
 import { tmpdir } from "node:os"
 import { extname, join, normalize } from "node:path"
 
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 import type { PackedPackage, PublishCheck } from "spell/cli/publish"
 
 /****************
@@ -103,13 +104,10 @@ export class ScratchInstall {
 
     const { server, url } = await serveFolder(built)
     try {
-      const { chromium } = await import("playwright")
-      const browser = await chromium.launch()
-      try {
-        const tab = await browser.newPage()
+      return await BrowserPage.with(async (browser) => {
         const errors: string[] = []
-        tab.on("pageerror", (error) => errors.push(error.message))
-        await tab.goto(url)
+        const onProblem = (text: string) => errors.push(text)
+        const tab = await BrowserPage.open(browser, url, { onProblem, consoleTypes: [], settle: false })
         await tab.waitForFunction(() => (window as unknown as { scratchResult?: unknown }).scratchResult, null, {
           timeout: 20_000
         })
@@ -117,9 +115,7 @@ export class ScratchInstall {
         if (errors.length) throw new Error(`page errors:  ${errors.join(";  ")}`)
         if (!result.defined || !result.oneBase || !result.drawn) throw new Error(JSON.stringify(result))
         return `<ui-button> defined, extends the page's DOMElement, drew ${result.drawn};  1 class DOMElement`
-      } finally {
-        await browser.close()
-      }
+      })
     } finally {
       server.close()
     }

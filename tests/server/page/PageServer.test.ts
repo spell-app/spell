@@ -163,7 +163,7 @@ describe("PageServer", () => {
   })
 
   it("adds its settings' page scripts before `</body>`:  only those built, never on pages they skip", async () => {
-    const tag = `<script type="module" src="/colours.js"></script>`
+    const tag = `<script type="module" src="/colours.js" data-spell-page-script></script>`
     const answer = await ask(port, "GET", "/docs/page.html")
     expect(answer.text).toContain(`${tag}\n</body>`)
     expect(answer.text).not.toContain("/unbuilt.js")

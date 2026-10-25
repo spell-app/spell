@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process"
 import {
   copyFileSync,
   existsSync,
@@ -14,6 +13,8 @@ import { dirname, extname, join, matchesGlob, posix, relative, resolve, sep } fr
 import type { Plugin } from "esbuild"
 import JSON5 from "json5"
 
+import { packageRootFor } from "spell/toolchain/sourceNames"
+import { Git } from "spell/server/Git"
 import { ALWAYS_EXCLUDED, DIST, type BuildReport, type PublishedRepo } from "spell/cli/publish"
 
 /****************
@@ -257,21 +258,13 @@ export class PackageBuild {
     const named = path.replace(/\.tsx?$/, "")
     const [, pkg, sub] = /^((?:@[^/]+\/)?[^/]+)(?:\/(.+))?$/.exec(named) ?? []
     if (!pkg || !sub || extname(sub)) return named
-    const folder = this.packageFolder(pkg)
+    const folder = packageRootFor(pkg, this.root)
     if (!folder || (JSON.parse(readFileSync(join(folder, "package.json"), "utf8")) as { exports?: unknown }).exports) {
       return named
     }
     if (isFile(join(folder, `${sub}.js`))) return `${named}.js`
     if (isFile(join(folder, sub, "index.js"))) return `${named}/index.js`
     return named
-  }
-
-  /** Package `pkg`'s folder, as node finds it from the repo;  `undefined` when it isn't installed. */
-  private packageFolder(pkg: string): string | undefined {
-    for (let dir = this.root; ; dir = dirname(dir)) {
-      if (existsSync(join(dir, "node_modules", pkg, "package.json"))) return join(dir, "node_modules", pkg)
-      if (dirname(dir) === dir) return undefined
-    }
   }
 
   /** Where source file `path` (in `src/`, a shipped folder, or the package's `package.json`) goes when staged. */
@@ -407,12 +400,9 @@ function isFile(path: string): boolean {
 
 /** The files git tracks under `folder` of the repo at `root`, from `root`;  every file when it isn't a git repo. */
 export function trackedFiles(root: string, folder: string): string[] {
-  try {
-    const listed = execFileSync("git", ["-C", root, "ls-files", "-z", folder], { encoding: "utf8" })
-    return listed.split("\0").filter((file) => file && isFile(join(root, file)))
-  } catch {
-    return walk(join(root, folder)).map((file) => `${folder}/${file}`)
-  }
+  const listed = Git.run(["ls-files", "-z", folder], root, { trim: false })
+  if (!listed.ok) return walk(join(root, folder)).map((file) => `${folder}/${file}`)
+  return listed.out.split("\0").filter((file) => file && isFile(join(root, file)))
 }
 
 /** Every file under `dir`, from `dir`, `/`-separated. */

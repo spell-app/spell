@@ -5,6 +5,8 @@ import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
 
+import { packageRootFor } from "./sourceNames.ts"
+
 /****************
  * ### `Declarations`
  * Builds a package's `.d.ts` files, which the repos ABOVE its repo read instead of its source (epic `repo-split` I12,
@@ -123,7 +125,7 @@ export class Declarations {
       if (seen.has(packageDir)) return
       seen.add(packageDir)
       for (const name of spellDependencies(packageDir)) {
-        const found = packageFolder(name, packageDir)
+        const found = packageRootFor(name, packageDir)
         if (found) visit(found)
       }
       order.push(packageDir)
@@ -201,15 +203,6 @@ function spellDependencies(packageDir: string): string[] {
   return Object.entries(all)
     .filter(([, range]) => range.startsWith("workspace:"))
     .map(([name]) => name)
-}
-
-/** The real folder of package `name` as `from` finds it in `node_modules`;  `undefined` when it isn't installed. */
-function packageFolder(name: string, from: string): string | undefined {
-  for (let at = from; ; at = dirname(at)) {
-    const link = join(at, "node_modules", name)
-    if (existsSync(join(link, "package.json"))) return realpathSync(link)
-    if (dirname(at) === at) return undefined
-  }
 }
 
 /** The TypeScript compiler's own script, this install's. */

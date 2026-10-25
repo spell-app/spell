@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
-import { merge$fetchParms } from "spell/util/spell/$fetch"
+import { $fetch, merge$fetchParms } from "spell/util/spell/$fetch"
+import { MissingResourceError } from "spell/util/spell/ResponseErrors"
 
 describe("merge$fetchParms()", () => {
   test("merges headers across params, field-by-field", () => {
@@ -42,5 +43,29 @@ describe("merge$fetchParms()", () => {
   test("later falsy/undefined value does not clobber an earlier object value", () => {
     const result = merge$fetchParms({ headers: { Accept: "text/plain" } }, { headers: undefined })
     expect(result.headers).toEqual({ Accept: "text/plain" })
+  })
+})
+
+describe("$fetch()", () => {
+  test("calls the `fetch` it's given, with its `cache` and the query after a `?`", async () => {
+    const calls: Array<[string, RequestInit]> = []
+    const fetcher = (async (url: string, init: RequestInit) => {
+      calls.push([url, init])
+      return new Response('{"answer":1}', { status: 200 })
+    }) as unknown as typeof fetch
+    const reply = await $fetch({
+      url: "/api",
+      query: { page: "/a b.html" },
+      format: "json",
+      cache: "no-store",
+      fetch: fetcher
+    })
+    expect([reply, calls[0]![0], calls[0]![1].cache]).toEqual([{ answer: 1 }, "/api?page=%2Fa%20b.html", "no-store"])
+  })
+
+  test("answers `defaultContents` for a 404, and throws `MissingResourceError` without it", async () => {
+    const fetcher = (async () => new Response("gone", { status: 404 })) as unknown as typeof fetch
+    expect(await $fetch({ url: "/x", format: "json", defaultContents: null, fetch: fetcher })).toBe(null)
+    await expect($fetch({ url: "/x", fetch: fetcher })).rejects.toBeInstanceOf(MissingResourceError)
   })
 })

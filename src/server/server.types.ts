@@ -1,6 +1,7 @@
 /**
  * Types shared across `spell/server`, the constants that go with them (`BUNDLES`), and its small error classes.
  * - MUST stay runtime-light:  `import type` only, so nothing here loads a class module (WWOD §8).
+ * - Plain `node` loads it, its types stripped (`FileLock`, `Git`):  NEVER an `enum` or a parameter property.
  */
 import type { SRV } from "spell/server"
 
@@ -262,14 +263,40 @@ export const BUNDLES: BundleSpec[] = [
  * - `body`:  answered instead of `{ error: message }`, when set
  */
 export class HttpError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-    readonly body?: unknown
-  ) {
+  /** status to answer with */
+  readonly status: number
+  /** answered instead of `{ error: message }`, when set */
+  readonly body?: unknown
+
+  // Fields set by hand, not as parameter properties:  plain `node` strips this file's types (`FileLock`, `Git`)
+  constructor(status: number, message: string, body?: unknown) {
     super(message)
+    this.status = status
+    this.body = body
   }
 }
 
 /** A `FileLock` that stayed held past its wait. */
 export class FileLockError extends Error {}
+
+/**
+ * What `Git.run()` returns.
+ * - `out`, `err`:  trimmed
+ * - `code`:  git's exit status;  `-1` when it didn't run (no `git`, a timeout)
+ */
+export type GitResult = { ok: boolean; out: string; err: string; code: number }
+
+/**
+ * `Git.run()` options.
+ * - `input`:  written to git's stdin (`git apply`, `git hash-object --stdin`)
+ * - `timeout`:  ms, default 15s;  `0`:  none (a clone, a fetch)
+ * - `env`:  git's environment, default this process's
+ * - `trim`:  `false` keeps `out` as git printed it (`git status --porcelain` starts with a space)
+ */
+export type GitOptions = { input?: string; timeout?: number; env?: NodeJS.ProcessEnv; trim?: boolean }
+
+/** Thrown by `Git.mustRun()`:  git failed;  its message names the command, the folder and git's own words. */
+export class GitError extends Error {
+  declare cause: GitResult | undefined
+}
+GitError.prototype.name = "GitError"

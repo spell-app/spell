@@ -18,9 +18,10 @@
  * - Prints each file it changed, with how many names;  `--dry-run` changes nothing.
  * - NEVER touches the content repo (`spell.epics`):  its pages keep their history.
  */
-import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
+
+import { Git } from "spell/server/Git"
 
 /** The kit, the top repo:  this file is in its `tools/`. */
 const TOP = resolve(import.meta.dirname, "..")
@@ -81,9 +82,8 @@ function reposThere(): string[] {
 
 /** Rewrite the old names in `repo`'s tracked text files. */
 function renameIn(repo: string): void {
-  const listed = spawnSync("git", ["-C", repo, "ls-files", "-z"], { encoding: "utf8" })
-  if (listed.status !== 0) throw new Error(`rename-packages:  can't list ${repo}'s files:  ${listed.stderr}`)
-  for (const file of listed.stdout.split("\0").filter(Boolean)) {
+  const listed = Git.mustRun(["ls-files", "-z"], repo, { trim: false })
+  for (const file of listed.split("\0").filter(Boolean)) {
     const path = join(repo, file)
     if (SKIPPED.test(file) || !isFile(path)) continue
     const before = readFileSync(path, "utf8")
@@ -138,12 +138,11 @@ function moveFolder(): void {
     renameSync(from, to)
     git(TOP, ["-C", to, "worktree", "repair"])
   }
-  const origin = spawnSync("git", ["-C", to, "remote", "get-url", "origin"], { encoding: "utf8" }).stdout.trim()
+  const origin = Git.out(["remote", "get-url", "origin"], to) ?? ""
   if (origin.includes(OLD_FOLDER)) git(TOP, ["-C", to, "remote", "set-url", "origin", NEW_URL])
 }
 
-/** Run git;  throws when it fails. */
+/** Run git;  throws a `GitError` when it fails. */
 function git(cwd: string, args: string[]): void {
-  const result = spawnSync("git", args, { cwd, encoding: "utf8" })
-  if (result.status !== 0) throw new Error(`rename-packages:  git ${args.join(" ")} failed:  ${result.stderr}`)
+  Git.mustRun(args, cwd)
 }

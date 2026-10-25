@@ -29,6 +29,9 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - Owen, round 2:  "folding is a programmer concept, showing and hiding are people concepts ... better to reuse
     terms for analogous things."
   - Its P9 makes the renames;  until it's merged, the old words are still in the code.
+- **In code:**  the kit's `Disclosure` (`spell/element`;  epic `coherence` P8) holds the state, sends the pairs and
+  writes `aria-expanded`, its methods `open()`, `close()`, `toggle()`;  each element maps its own public names onto it
+  (`collapsed`, `visible`), so P9's renames change one mapping each.
 
 ## People and things
 

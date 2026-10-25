@@ -5,6 +5,7 @@ import { basename, dirname, join, relative, resolve, sep } from "node:path"
 
 import { SRV } from "spell/server"
 import { pageServerSettings } from "spell/server/page/settings"
+import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
@@ -40,7 +41,7 @@ export class Bundle {
 
   /** the folder of its package, `spec.package`, as the checkout finds it;  throws when it isn't installed */
   get packageDir(): string {
-    const found = packageFolder(this.spec.package, this.root)
+    const found = packageRootFor(this.spec.package, this.root)
     if (!found) throw new Error(`Bundle:  ${this.spec.package} isn't installed where ${this.root} finds packages`)
     return found
   }
@@ -89,7 +90,7 @@ export class Bundle {
     return (pageServerSettings(root).bundles ?? []).map((folder) => {
       const wanted = canonical(resolve(root, folder))
       const spec = SRV.BUNDLES.find((each) => {
-        const dir = packageFolder(each.package, root)
+        const dir = packageRootFor(each.package, root)
         return dir !== undefined && canonical(join(dir, each.output)) === wanted
       })
       if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (the "pageServer" settings)`)
@@ -168,7 +169,7 @@ export class Bundle {
     const roots: string[] = []
     for (const source of this.spec.sources) {
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
-      const folder = named && packageFolder(named[1]!, this.root)
+      const folder = named && packageRootFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
       const path = folder ? join(folder, named![2] ?? "") : join(installRoot(this.root), source)
       if (statSync(path, { throwIfNoEntry: false })) roots.push(path)
@@ -184,7 +185,7 @@ export class Bundle {
       // (`spell-ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
       // (`yarn.lock`)
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
-      const folder = named && packageFolder(named[1]!, this.root)
+      const folder = named && packageRootFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
       const base = folder ?? installRoot(this.root)
       const prefix = folder ? named![1]! : ""
@@ -220,18 +221,6 @@ export class Bundle {
 
 /** Bump to make every bundle stale once, e.g. when what a build records changes. */
 const BUNDLE_FORMAT = "bundle 2"
-
-/**
- * The real folder of package `name` as `from` finds it in `node_modules` (each folder up, as node does);
- * `undefined` when it isn't installed.
- */
-function packageFolder(name: string, from: string): string | undefined {
-  for (let at = resolve(from); ; at = dirname(at)) {
-    const link = join(at, "node_modules", name)
-    if (existsSync(join(link, "package.json"))) return realpathSync(link)
-    if (dirname(at) === at) return undefined
-  }
-}
 
 /** The install's root above `from`:  the nearest folder up holding `yarn.lock`;  `from` itself without one. */
 function installRoot(from: string): string {

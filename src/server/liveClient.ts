@@ -412,9 +412,11 @@ export function liveClient(): void {
     const server = config as ServerConfig
     const page = pushed ?? (await readPage())
     const own = !!page.etag && ownEtags.delete(page.etag)
-    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload }
+    // the reload, if the page can't take the change (or a patch fails), never in front of the reader (I116):
+    // it waits until the page is out of sight, the "Updated" pill meanwhile
+    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload: reloadUnseen }
     const change = new CustomEvent("spell-server:reloading", { cancelable: true, detail })
-    if (dispatchEvent(change) && !own) return reload()
+    if (dispatchEvent(change) && !own) return reloadUnseen()
     etag = page.etag
     server.etag = page.etag
   }

@@ -48,6 +48,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `@cssState`, `@aria`
     - `@onChange`, `@whileConnected`, `@watches`, `@on`, `@untracked`
   - [Cell](Cell.ts), [SlotContent](SlotContent.ts)
+  - [Disclosure](Disclosure.ts):  one open / closed state for anything that shows and hides a box (a fold, a section,
+    a popover, an overlay):  a guarded request with `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed`,
+    `aria-expanded`, find-in-page opening it (epic `coherence` P8)
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots
@@ -80,6 +83,9 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `elementBaseConfig()`:  Spell UI's `baseConfig()` starts from it, and so does the pack build
     - `CSS_TARGETS`, `SOLID_DEDUPE`
   - [HotElements](../element-tools/HotElements.ts):  the Vite plugin for hot reloading a set's elements in `yarn dev`
+  - [BrowserPage](../element-tools/BrowserPage.ts):  a page in headless Chromium for every tool that checks or
+    pictures pages (epic `coherence` P7):  opened, its problems reported, settled;  plain `node` loads it
+    (`spell/element-tools/BrowserPage`, an entry of its own), and it imports Playwright only when it launches
   - [DevServer](../element-tools/DevServer.ts):  a package's Vite dev server, started from node
   - [Terminal](../element-tools/Terminal.ts):  where tools print;  [NodePackage](../element-tools/NodePackage.ts):  finds an installed package
   - [jsx-help/](../element-tools/jsx-help/):

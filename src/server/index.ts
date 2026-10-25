@@ -4,7 +4,8 @@
  *   - content types, safe paths, static folders
  *   - an Express-shaped router, with body parsing
  *   - ports, and openers (browser, Chrome tab, VS Code)
- *   - the git checkout a path is in, and its main checkout (`checkoutOf()`)
+ *   - the git checkout a path is in, and its main checkout (`checkoutOf()`);  running git (`Git`);  real paths
+ *     (`RealPath`)
  *   - a file lock, file operations (save, create, rename, duplicate, delete), live reload, a write guard, pid files
  *   - `WebServer`, putting them together
  *   - ASSEMBLING pages (the kit's `assembler` until epic `repo-split` P14, Q43):  a page's link targets (`Linker`),
@@ -23,6 +24,8 @@ export * from "./safePath"
 export * from "./ports"
 export * from "./open"
 export * from "./checkout"
+export * from "./Git"
+export * from "./RealPath"
 export * from "./untilInterrupted"
 export * from "./FileLock"
 export * from "./FileOperations"

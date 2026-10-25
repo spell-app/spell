@@ -65,6 +65,13 @@ export type $FetchParams = Prettify<
       format?: string
       /** On a 404, return `defaultContents` rather than throwing. */
       defaultContents?: any
+      /** How the browser's HTTP cache takes part, e.g. `"no-store"`:  `fetch()`'s own `cache`;  default its default. */
+      cache?: RequestCache
+      /**
+       * The `fetch()` to call;  default the global one.
+       * - Replace it to answer in-process:  a test's stub, a page's own `fetch` handed in (`ServerLinkOptions.fetch`)
+       */
+      fetch?: typeof fetch
     }
 >
 
@@ -81,6 +88,8 @@ export type $FetchParams = Prettify<
  *   - `requestFormat` Input format, used to set `Content-Type` header.  See `KnownFormat`.
  *   - `format` Output format, used to format output.  Defaults to `text`.  See `KnownFormat`.
  *   - `defaultContents` On a 404, return `defaultContents` rather than throwing.
+ *   - `cache` How the browser's HTTP cache takes part (`"no-store"`).
+ *   - `fetch` The `fetch()` to call, e.g. a test's stub;  default the global one.
  */
 export function $fetch<T = any>($params: $FetchParams): Promise<T> {
   const {
@@ -91,10 +100,12 @@ export function $fetch<T = any>($params: $FetchParams): Promise<T> {
     headers = {},
     requestFormat,
     format = "text/plain",
-    defaultContents
+    defaultContents,
+    cache,
+    fetch: fetcher
   } = $params
 
-  const fetchParams: RequestInit = { method }
+  const fetchParams: RequestInit = { method, ...(cache && { cache }) }
   // Set `Content-Type` header if necessary.
   if (requestFormat) headers["Content-Type"] = requestFormat
   fetchParams.headers = headers
@@ -106,9 +117,10 @@ export function $fetch<T = any>($params: $FetchParams): Promise<T> {
 
   let fullURL = url
   if (typeof query === "string") fullURL += `?${query}`
-  else if (query) fullURL += queryString.stringify(query)
+  // the `?` too:  without it the query ran into the path (`/apipage=x`)
+  else if (query) fullURL += `?${queryString.stringify(query)}`
   // console.warn("$fetch:", fullURL, fetchParams)
-  const request = abortableFetch(fullURL, fetchParams)
+  const request = abortableFetch(fullURL, fetchParams, fetcher)
 
   /** Response completed, but it might actually be signalling an error -- check `response.ok` first. */
   async function success(response: Response) {

@@ -48,6 +48,31 @@
       "types": "./dist-types/src/server/checkout.d.ts",
       "default": "./src/server/checkout.ts"
     },
+    "./server/Git": {
+      "spell-source": "./src/server/Git.ts",
+      "types": "./dist-types/src/server/Git.d.ts",
+      "default": "./src/server/Git.ts"
+    },
+    "./server/RealPath": {
+      "spell-source": "./src/server/RealPath.ts",
+      "types": "./dist-types/src/server/RealPath.d.ts",
+      "default": "./src/server/RealPath.ts"
+    },
+    "./server/FileLock": {
+      "spell-source": "./src/server/FileLock.ts",
+      "types": "./dist-types/src/server/FileLock.d.ts",
+      "default": "./src/server/FileLock.ts"
+    },
+    "./element-tools/BrowserPage": {
+      "spell-source": "./src/element-tools/BrowserPage.ts",
+      "types": "./dist-types/src/element-tools/BrowserPage.d.ts",
+      "default": "./src/element-tools/BrowserPage.ts"
+    },
+    "./server/open": {
+      "spell-source": "./src/server/open.ts",
+      "types": "./dist-types/src/server/open.d.ts",
+      "default": "./src/server/open.ts"
+    },
     "./server/page/settings": {
       "spell-source": "./src/server/page/settings.ts",
       "types": "./dist-types/src/server/page/settings.d.ts",

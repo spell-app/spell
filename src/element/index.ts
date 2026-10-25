@@ -6,6 +6,8 @@
  * - `ElementDefinition`:  a vocabulary => the DOM element's attributes
  * - `Reactive`:  the decorators of an element's reactive members (`@state`, `@controlled`, `@derived` ...)
  * - `Cell`, `SlotContent`
+ * - `Disclosure`:  one open / closed state, its events, `aria-expanded` and find-in-page, for anything that shows
+ *   and hides a box
  * - `PartContext` and `OwnerContext`:  the generic content parts, and the elements they belong to
  * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell-ui/core` loads)
  * - the vocabulary's types (`ComponentVocabulary` ...)
@@ -45,6 +47,7 @@ export * from "./OwnerContext"
 export * from "./PartContext"
 export * from "./UIComponent"
 export * from "./SlotContent"
+export * from "./Disclosure"
 
 /**
  * The package namespace (WWOD §4):

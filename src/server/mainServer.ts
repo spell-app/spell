@@ -19,6 +19,7 @@ import { dirname, join, relative, resolve, sep } from "node:path"
 import { checkoutOf } from "./checkout"
 import { kitOf } from "./page/settings"
 import { PidFile } from "./PidFile"
+import { RealPath } from "./RealPath"
 import { isInside } from "./safePath"
 import { type ServerInfo } from "./server.types"
 import { SERVER_API } from "./WebServer"
@@ -67,7 +68,7 @@ export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFol
   const folder = server.contentFolder
   if (!folder) return undefined
   const inside = (path: string, root: string) => (path !== root && isInside(root, path) ? relative(root, path) : "")
-  const path = inside(resolve(file), folder) || inside(realOrSelf(file), realOrSelf(folder))
+  const path = inside(resolve(file), folder) || inside(RealPath.of(file), RealPath.of(folder))
   return path ? `/${path.split(sep).map(encodeURIComponent).join("/")}` : undefined
 }
 
@@ -82,9 +83,9 @@ export function contentPathOf(file: string, server: Pick<ServerInfo, "contentFol
  * - NEVER throws
  */
 export function contentServerOf(file: string): string | undefined {
-  const repo = checkoutOf(realOrSelf(file))
+  const repo = checkoutOf(RealPath.of(file))
   if (!repo || repo.worktree) return undefined
-  const content = realOrSelf(repo.root)
+  const content = RealPath.of(repo.root)
   const beside = dirname(content)
   let entries
   try {
@@ -97,7 +98,7 @@ export function contentServerOf(file: string): string | undefined {
     .map((entry) => join(beside, entry.name))
   for (const folder of [beside, ...folders]) {
     const info = new PidFile(folder).read()
-    if (info?.contentFolder && realOrSelf(info.contentFolder) === content)
+    if (info?.contentFolder && RealPath.of(info.contentFolder) === content)
       return checkoutOf(info.root)?.main ?? info.root
   }
   return undefined
@@ -110,15 +111,6 @@ async function liveInfo(base: string): Promise<ServerInfo | undefined> {
     return answer.ok ? ((await answer.json()) as ServerInfo) : undefined
   } catch {
     return undefined
-  }
-}
-
-/** `path`'s real path;  `path` itself when it isn't there. */
-function realOrSelf(path: string): string {
-  try {
-    return realpathSync(path)
-  } catch {
-    return resolve(path)
   }
 }
 

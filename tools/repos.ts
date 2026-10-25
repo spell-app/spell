@@ -2,7 +2,8 @@
  * `tools/repos.ts`:  what the kit's yarn scripts run over the child repos (epic `repo-split` P7, Q17;  the top repo
  * became the kit, `spell`, in P9).
  * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts <command>`, no build, no `tsx`.
- *   - So:  node's own modules and `json5` only, `import type` for types, no `enum` or parameter property.
+ *   - So:  node's own modules, `json5` and the kit's plain-node files (`spell/server/Git`) only, `import type` for
+ *     types, no `enum` or parameter property.
  * - The repos, lowest first, and what each needs:  `repos.json5` beside `package.json`.
  *
  * ```sh
@@ -26,6 +27,9 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, s
 import { join, resolve } from "node:path"
 
 import JSON5 from "json5"
+
+// By the kit's own name, which node resolves inside the kit with no link:  `postinstall` runs this before the link
+import { Git } from "spell/server/Git"
 
 /** The kit, the top repo:  this file is in its `tools/`. */
 const TOP = resolve(import.meta.dirname, "..")
@@ -76,10 +80,12 @@ function run(command: string, args: string[], cwd = TOP): number {
   return spawnSync(command, args, { cwd, stdio: "inherit" }).status ?? 1
 }
 
-/** Runs git in `cwd` quietly;  its output, trimmed, or `undefined` when it fails. */
+/**
+ * Runs git in `cwd` quietly;  its output, its end trimmed, or `undefined` when it fails.
+ * - its start kept:  `git status --short` starts a line with a space
+ */
 function git(cwd: string, ...args: string[]): string | undefined {
-  const done = spawnSync("git", args, { cwd, encoding: "utf8" })
-  return done.status === 0 ? done.stdout.trimEnd() : undefined
+  return Git.out(args, cwd, { trim: false })?.trimEnd()
 }
 
 /** `git@github.com:org/repo.git` as `https://github.com/org/repo.git`;  any other URL as it is. */
@@ -143,9 +149,9 @@ function remoteOf(repo: Repo, https: boolean): { url: string; branches: string[]
     GIT_SSH_COMMAND: process.env.GIT_SSH_COMMAND ?? "ssh -o BatchMode=yes"
   }
   for (const url of urls) {
-    const done = spawnSync("git", ["ls-remote", "--heads", signedIn(url)], { encoding: "utf8", env })
-    if (done.status === 0)
-      return { url, branches: done.stdout.split("\n").flatMap((line) => /\trefs\/heads\/(.+)$/.exec(line)?.[1] ?? []) }
+    const listed = Git.out(["ls-remote", "--heads", signedIn(url)], TOP, { env, timeout: 0 })
+    if (listed !== undefined)
+      return { url, branches: listed.split("\n").flatMap((line) => /\trefs\/heads\/(.+)$/.exec(line)?.[1] ?? []) }
   }
   return undefined
 }

@@ -34,7 +34,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     ```
 
   - [open.ts](open.ts) -- browser, new window, reused Chrome tab (VS Code's doc preview is spell-epic's own opener)
-  - `FileLock` -- `<file>.lock`, so tools writing the same file take turns
+  - `FileLock` -- `<file>.lock`, so tools writing the same file take turns;
+    `runOnce()` skips the work when another run holds it (`"held"`), rather than waiting
   - `FileOperations` -- files and folders saved, created, renamed, duplicated and deleted.
     - each under the `FileLock`
     - a save all at once:  a temp file, then a rename
@@ -116,6 +117,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The content folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
         the one beside the content repo whose pid file names it (`contentServerOf()`).
+  - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
+    `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
+  - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
+    from spell-epic, epic `coherence` P7)
   - [checkout.ts](checkout.ts) -- `checkoutOf()`:  the git checkout a path is in, and its MAIN checkout.
     - Read from the disk as git finds them (a worktree's `.git` file, git's common dir), with no `git` run.
     - Plain `node` loads it by path (epics' `EpicConfig`, for the hooks), so node built-ins only.
@@ -405,6 +410,10 @@ As WWOD §8, plus our self-namespace:
 - `SRV` ~== `spell/server`
 - Every file by its package name and path under `src/` (epic `repo-split` P14), the kit's own included:
   `spell/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
-  - Five that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
-    `/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`
-    (node's modules, `json5` and type imports only).
+  - Nine that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
+    `/checkout`, `/Git`, `/RealPath`, `/FileLock`, `/open`, `/page/settings`, `/page/prune`, `/DataFile`,
+    `/contentFolder` (node's modules, `json5`, type imports and each other only).
+    - Those import their peers WITH `.ts` (`./Git.ts`, `./server.types.ts`), and `server.types.ts` stays strip-safe:
+      no `enum`, no parameter property.
+    - Nine, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
+      `spell` command loads `RealPath` and `Git` by file to stay clear of linkedom.
