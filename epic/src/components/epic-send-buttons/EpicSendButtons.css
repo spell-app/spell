@@ -1,8 +1,8 @@
 /*
  * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send and its countdown, ONE pill.
  * - The plane's round end, a hairline, the wand's round end;  each a circle as tall as the pill.
- * - The pill's outline:  none with nothing to send (Owen, 2026-10-25:  "no boder around plane in this mode"), a grey
- *   hairline with something not sent, and a blue one once sent (`state`);  never dashed (Owen, 2026-10-22:
+ * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
+ *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never dashed (Owen, 2026-10-22:
  *   "Lose the dotted outline around both").
  * - The STAGE BUTTON (`accept`, epic `epic-engine` P29):  in the plane's place, a check and its words, green;  the
  *   pill outlined green once pressed (`accepted`).
@@ -42,13 +42,14 @@
     border: 1px solid var(--_rule);
     border-radius: 999px;
   }
-  /* nothing to send:  the grey plane alone, no rim (Owen, 2026-10-25:  "no boder around plane in this mode");  the
-     border kept, see-through, so nothing beside it moves.  Not the stage button's, nor while the pill waits on Owen */
-  :host(:not(:state(stage))) .group[data-state="idle"]:not([data-asks]) {
-    border-color: transparent;
-  }
   .group[data-state="sent"] {
     border: 1.5px solid var(--_tint);
+  }
+  /* INACTIVE, nothing new to send (idle, or all of it sent):  the plane alone, its rim `transparent` (Owen, 2026-10-25:
+     "no boder around plane in this mode", then "I wanted no border when this is inactive, use `transparent`");  the
+     border kept, so nothing beside it moves.  Not the stage button's, nor while the pill waits on Owen */
+  :host(:not(:state(stage))) .group:is([data-state="idle"], [data-state="sent"]):not([data-asks]) {
+    border-color: transparent;
   }
   /* waiting on Owen:  the pill's OWN border 2px #666 (Owen, 2026-10-25:  "try 2px border, #666"), dotted once pressed;
      1px out on every side, so neither the round ends inside nor what's beside it move */
