@@ -306,6 +306,7 @@ export class SpellxWriter {
     if (ALIAS_RULES.has(rule)) return this.alias(text, body, statement, indent)
     if (PROPERTY_RULES.has(rule)) return this.property(text, body, statement, indent)
     if (rule === "declare_event") return this.event(text, body, statement, indent)
+    if (rule === "define_group") return this.group(text, body, statement, indent)
     if (rule === "draw_it" || rule === "to_do_something") return this.action(text, body, statement, indent)
     return this.handler(text, body, indent)
   }
@@ -373,6 +374,19 @@ export class SpellxWriter {
     if (!name || name.includes('"')) return undefined
     const text = this.lineText(line).replace(/^-\s+/, "")
     return text === fill(this.twins.propertyAlias, { "quoted alias": quoted(name) }) ? name : undefined
+  }
+
+  /**
+   * `- group "direction"` => `<group "direction" />` (epic `elemental-spell` P16):  a heading over the members after it.
+   * - A group opened again further down (code spell's way to put a member away from the rest) is a `<group>` again:
+   *   the same group, so it means the same, if not written `group=` on the member.
+   */
+  private group(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
+    if (body) return undefined
+    const name = unquote(groupText(statement, "group"))
+    if (!name || name.includes('"') || text !== fill(this.twins.group, { name: quoted(name) })) return undefined
+    const word = keyFor(this.words.declarations, "group")
+    return this.tag(indent, `<${word} ${quoted(name)}`, [], undefined, undefined, word)
   }
 
   /** `- it sends "flipped" with count as a number` => `<event "flipped" count="number" />`. */
