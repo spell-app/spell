@@ -764,7 +764,7 @@ export class PlanDoc extends PlanReader {
 
   /**
    * The id the next `kind` item will get (`addItem()`'s):  one past the highest of its LETTER, `t4`.
-   * - a caveat and a todo share theirs (`c`, epic `epic-engine` P32)
+   * - a todo and a limit share theirs (`t`, epic `epic-engine` P44)
    * - throws on a kind not in `KINDS`
    */
   nextId(kind: string): string {
@@ -1066,7 +1066,7 @@ export class PlanDoc extends PlanReader {
    *   - an open question:  answered with its recommended option (`decide()`, that option chosen), and reviewed;
    *     none recommended:  left, "needs talk"
    *   - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
-   *   - anything else (an open caveat, issue or todo;  a closed or answered item):  reviewed
+   *   - anything else (an open todo, limit or issue;  a closed or answered item):  reviewed
    * - `pick`, from any of the item's card sets (`choices`, by position;  none, its own:  I8) (`pickOption()`):
    *   - that set's option chosen
    *   - a question answered with it (its title the answer), any other item APPROVED with it (as approve)
@@ -1155,7 +1155,7 @@ export class PlanDoc extends PlanReader {
         const todo = this.followUp(from, note)
         this.review(item.id)
         this.noteStatus(item.id, filedTodo(todo))
-        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
+        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
       }
       case "next": {
         const phase = this.phases.find((each) => each.status === "todo")
@@ -1189,7 +1189,7 @@ export class PlanDoc extends PlanReader {
   /**
    * A test's answer from Owen's TEST RUN on the page (epic `epic-engine` P4):  `result`, maybe his `note` and `shot`.
    * - `passed`:  closed (done), reviewed;  a `failed` from an earlier run goes
-   * - `failed`:  a NEW issue, "T3 failed:  <test title>", linking the test, with his note and his screenshot
+   * - `failed`:  a NEW issue, "M3 failed:  <test title>", linking the test, with his note and his screenshot
    *   (an `<img>`, its path from the epic page's folder, as the page's own) (`fileFailure()`)
    *   - the test stays open (a closed one reopens), reviewed, `failed="i42"`,
    *     and a Noted card linking the issue:  linked both ways
@@ -1244,7 +1244,7 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * File test `item`'s failure as a new issue, "T3 failed:  <test title>";  its id (`i42`).
+   * File test `item`'s failure as a new issue, "M3 failed:  <test title>";  its id (`i42`).
    * - its details:  the run and a link back to the test, Owen's note in his words, his screenshot (`shot`, from the
    *   epic page's folder:  the page's own relative path, so it shows in the page and its part alike)
    */
@@ -1271,7 +1271,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Approve `item` (of `kind`, `open` or not) as it stands;  returns what it did, for the log line.
    * - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
-   * - anything else (an open caveat, issue or todo;  a closed item):  reviewed
+   * - anything else (an open todo, limit or issue;  a closed item):  reviewed
    */
   private approve(item: Element, kind: string, open: boolean): string {
     if (open && (kind === "judgement" || kind === "test")) {
@@ -1331,7 +1331,7 @@ export class PlanDoc extends PlanReader {
    * Choose pill:  `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`.
    * Returns what it did (`picked A:  ...;  approved:  closed (accepted)`).
    * - exactly what the page's pick does (`pickOption()`, `applyMark()`'s):  that set's `chosen`;  a question answered
-   *   with the option's title;  a judgement call (or test) closed, accepted;  an issue, caveat or todo reviewed
+   *   with the option's title;  a judgement call (or test) closed, accepted;  an issue, todo or limit reviewed
    *   (still open:  fixing it is its own work);  a Noted card;  reviewed as approved
    * - the set:  `set` (from 1), else the item's LATEST (Claude's last reply's, often), never one in its Original
    *   Discussion
@@ -2205,7 +2205,7 @@ export class PlanDoc extends PlanReader {
       case "todo": {
         const todo = this.followUp(part, note)
         this.noteStatus(part.id, filedTodo(todo))
-        return { applied: true, did: `to caveat ${todo.toUpperCase()}` }
+        return { applied: true, did: `to todo ${todo.toUpperCase()}` }
       }
       case "pick":
         return { applied: false, left: `${part.label} (${part.what}):  can't pick ${pick}` }
@@ -2468,11 +2468,9 @@ export class PlanDoc extends PlanReader {
     const details = `${promptHTML(note)}${about}`
     const id = this.addItem(kind, title, { details: details || undefined })
     const written = at ? `, written ${PlanTime.clockTime(new Date(at))}` : ""
-    // a todo is a caveat now, work still to do (epic `epic-engine` P32)
-    const word = kind === "todo" ? "caveat" : kind
-    this.noteStatus(id, `Made from the page:  Owen's new ${word}${written}.`)
-    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${word} (${String(key).toUpperCase()})`)
-    return { applied: true, did: `made ${word} ${id.toUpperCase()}:  ${title}` }
+    this.noteStatus(id, `Made from the page:  Owen's new ${kind}${written}.`)
+    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${kind} (${String(key).toUpperCase()})`)
+    return { applied: true, did: `made ${kind} ${id.toUpperCase()}:  ${title}` }
   }
 
   /** A link to `id` (an item, a phase, an Overview sub-section, `summary`) as HTML;  its id alone when it's gone. */
@@ -2534,7 +2532,7 @@ function textNodes(node: Node): Node[] {
 /** `PlanItem.asProse()`'s option for text as a reader sees it:  every element's heading, at any depth. */
 const PLAIN = { plain: true }
 
-/** Who a test answer's log line names (epic `epic-engine` P4):  `T3 passed (Owen's run)`. */
+/** Who a test answer's log line names (epic `epic-engine` P4):  `M3 passed (Owen's run)`. */
 const OWENS_RUN = "Owen's run"
 
 /** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
@@ -2557,7 +2555,7 @@ const SUMMARY_SLOT = "summary"
 /** The slot of Owen's kept notes on the summary (`<epic-reply slot="notes">`, `PlanDoc.keepNote()`). */
 const NOTES_SLOT = "notes"
 
-/** An item's id, or what may be one:  `j3`, a comment's `m3` / `cm3`, `o2` (but an old phase id, `p3`:  `OLD_PHASE_REF`). */
+/** An item's id, or what may be one:  `j3`, a comment's `c3` / `cm3`, `o2` (but an old phase id, `p3`:  `OLD_PHASE_REF`). */
 const ITEM_REF = /^[a-z]{1,2}\d+$/
 
 /** A phase by its number:  `p3`, `3`. */
@@ -2581,9 +2579,9 @@ type ReviewPart = {
 /** Tags that stand as blocks in a status card's reading or summary;  anything else is inline, wrapped in a `<p>`. */
 const STATUS_BLOCKS = /^(p|ul|ol|dl|div|blockquote|pre|table)$/
 
-/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made caveat C23 to follow this up.`, linked. */
+/** A Noted card's line for a todo `inbox apply` made (Q19):  `Made todo T23 to follow this up.`, linked. */
 function filedTodo(todo: string): string {
-  return `Made caveat <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
+  return `Made todo <a href="#${todo}">${todo.toUpperCase()}</a> to follow this up.`
 }
 
 /**

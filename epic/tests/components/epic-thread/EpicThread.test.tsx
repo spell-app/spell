@@ -18,7 +18,7 @@ function part(element: Element, name: string): HTMLElement {
 /** A comment as the comments route answers it, on section `context`. */
 function comment(fields: Partial<ThreadComment> = {}): ThreadComment {
   return {
-    id: "m3",
+    id: "c3",
     anchor: "context",
     kind: "section",
     label: "2. Context",
@@ -53,7 +53,7 @@ function messages(host: Element) {
 }
 
 describe("<epic-thread>", () => {
-  test("its header:  the bullhorn, its id `M3`, the first words it's on, the fold's tooltip the block in full", async () => {
+  test("its header:  the bullhorn, its id `C3`, the first words it's on, the fold's tooltip the block in full", async () => {
     const host = await thread(comment())
     expect({
       id: part(host, "id").textContent,
@@ -62,9 +62,9 @@ describe("<epic-thread>", () => {
       expanded: part(host, "fold").getAttribute("aria-expanded"),
       body: !!part(host, "body")
     }).toEqual({
-      id: "M3",
+      id: "C3",
       headline: "“2. Context”",
-      tip: "Comment M3, on “2. Context”\n(Open this thread)",
+      tip: "Comment C3, on “2. Context”\n(Open this thread)",
       expanded: "false",
       body: false
     })
@@ -225,7 +225,7 @@ describe("<epic-thread>", () => {
           replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Answered.</p>" }]
         })
         await ElementFixture.settle(wrap)
-        // its id chip (`M3`, 10px) included:  epic `epic-engine` I41
+        // its id chip (`C3`, 10px) included:  epic `epic-engine` I41
         await expectAccessible(host)
       }
   })

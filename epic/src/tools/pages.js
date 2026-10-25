@@ -265,10 +265,10 @@ export function inContent(file) {
 }
 
 /**
- * A comment or note on a docs page named as one word, `guides/x.html#M3`, as one on an epic page is (`seo#M3`):
+ * A comment or note on a docs page named as one word, `guides/x.html#C3`, as one on an epic page is (`seo#C3`):
  * `[page, id, ...rest]`, the page and the id as the tools take them (epic `epic-workflow` P19).
- * - the two words, `guides/x.html M3`, read the same:  passed through as they are
- * @param {string[]} words  the verb's words after the verb:  `["guides/x.html#M3", "on"]`
+ * - the two words, `guides/x.html C3`, read the same:  passed through as they are
+ * @param {string[]} words  the verb's words after the verb:  `["guides/x.html#C3", "on"]`
  * @returns {string[]}
  */
 export function pageAndId([page, ...rest]) {

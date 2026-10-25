@@ -198,14 +198,14 @@ export type ChipMark = {
 }
 
 /**
- * A caveat's id:  `c3` (epic `epic-engine` P32).  One without `limit` is work still to do, a TODO:  the todo's
- * buttons (`isTodo()`).
+ * A Todo item's id:  `t3` (epic `epic-engine` P44;  a caveat's `c3` before).  One without `limit` is work still to
+ * do:  the todo's buttons (`isTodo()`).
  */
-export const CAVEAT_ID = /^c\d+$/i
+export const TODO_ID = /^t\d+$/i
 
-/** Is item `id` (`limit`:  its `limit`) work still to do:  a caveat that's no limit (epic `epic-engine` P32)? */
+/** Is item `id` (`limit`:  its `limit`) work still to do:  a todo that's no limit (epic `epic-engine` P44)? */
 export function isTodo(id: string | undefined, limit: boolean | undefined): boolean {
-  return CAVEAT_ID.test(id ?? "") && !limit
+  return TODO_ID.test(id ?? "") && !limit
 }
 
 /** The light DOM's attributes an item's thread reads (`EpicItem.threadChange`, `AnswerThread`). */

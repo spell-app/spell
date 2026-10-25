@@ -32,11 +32,11 @@ const NOW = new Date(2026, 9, 1, 9, 5)
 function richPlan() {
   const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW)
   plan.document.getElementById("o1")!.innerHTML =
-    '<p>See <a href="../../guides/x.html" target="src-x">x</a> and <a href="#c1">C1</a>.</p><h4 id="o1-deep">Deep</h4>'
+    '<p>See <a href="../../guides/x.html" target="src-x">x</a> and <a href="#t1">T1</a>.</p><h4 id="o1-deep">Deep</h4>'
   plan.addPhase("One", { goal: "<ul><li>a goal</li></ul>" })
-  plan.addItem("caveat", "with details", { details: '<p>why, <a href="https://example.com">out</a></p>' })
+  plan.addItem("limit", "with details", { details: '<p>why, <a href="https://example.com">out</a></p>' })
   plan.addItem("todo", "bare line")
-  plan.addCommit({ item: "c1" }, "a".repeat(40), "fixed it")
+  plan.addCommit({ item: "t1" }, "a".repeat(40), "fixed it")
   plan.log("a line")
   return plan
 }
@@ -67,7 +67,7 @@ describe("PlanDocFiles", () => {
     return file
   }
 
-  // epic `epic-engine` T9:  `guide-changes`, the standing `feedback` epic's old name, finds `feedback`
+  // epic `epic-engine` M9:  `guide-changes`, the standing `feedback` epic's old name, finds `feedback`
   test("findDoc():  an epic's old name finds today's;  an epic still called that, itself", () => {
     const root = folder()
     const files = new PlanDocFiles({ root })
@@ -91,13 +91,13 @@ describe("PlanDocFiles", () => {
     expect(existsSync(parts)).toBe(false)
     const whole = squashedPage(FILES.read(file))
     await FILES.edit(file, () => {}, { split: true })
-    expect(readdirSync(parts).sort()).toEqual(["c1.html", "log.html", "o1.html", "p-one.html"])
+    expect(readdirSync(parts).sort()).toEqual(["log.html", "o1.html", "p-one.html", "t1.html"])
     const skeleton = readFileSync(file, "utf8")
     expect(skeleton).toMatch(/<epic-phase[^>]*source="parts\/p-one.html"/)
-    expect(skeleton).toMatch(/<epic-item\s+id="c1"[^>]*source="parts\/c1.html"[^>]*commits/)
+    expect(skeleton).toMatch(/<epic-item\s+id="t1"[^>]*source="parts\/t1.html"[^>]*commits/)
     expect(readFileSync(join(parts, "o1.html"), "utf8")).toContain('href="../../../guides/x.html"')
     const plan = FILES.read(file)
-    expect(plan.parts).toMatchObject({ split: true, hosts: ["o1", "p-one", "c1", "log"], missing: [] })
+    expect(plan.parts).toMatchObject({ split: true, hosts: ["o1", "p-one", "t1", "log"], missing: [] })
     expect(squashedPage(plan)).toBe(whole)
     expect(Markup.validate(plan.document)).toEqual([])
     await FILES.edit(file, () => {}, { split: false })
@@ -116,23 +116,23 @@ describe("PlanDocFiles", () => {
     await FILES.edit(file, (plan) => plan.log("one more"))
     let after = stamps()
     expect(Object.keys(after).filter((name) => after[name] !== before[name])).toEqual(["log.html"])
-    await FILES.edit(file, (plan) => plan.setDetails("c1", "<p>rewritten</p>"))
+    await FILES.edit(file, (plan) => plan.setDetails("t1", "<p>rewritten</p>"))
     const now = stamps()
-    expect(Object.keys(now).filter((name) => now[name] !== after[name])).toEqual(["c1.html"])
+    expect(Object.keys(now).filter((name) => now[name] !== after[name])).toEqual(["t1.html"])
     after = now
-    await FILES.edit(file, (plan) => plan.setItem("c2", "done"))
+    await FILES.edit(file, (plan) => plan.setItem("t2", "done"))
     const last = stamps()
     expect(Object.keys(last).filter((name) => last[name] !== after[name])).toEqual([])
-    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="c2"\s+title="bare line"\s+status="done"/)
-    expect(FILES.read(file).item("c1").textContent).toContain("rewritten")
+    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t2"\s+title="bare line"\s+status="done"/)
+    expect(FILES.read(file).item("t1").textContent).toContain("rewritten")
   })
 
   test("an item that gets details later gets a part on the next write", async () => {
     const file = await oneFile()
     await FILES.edit(file, () => {}, { split: true })
-    await FILES.edit(file, (plan) => plan.setDetails("c2", "<p>now with details</p>"))
-    expect(readFileSync(join(file, "..", "parts", "c2.html"), "utf8")).toContain("now with details")
-    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="c2"[^>]*source="parts\/c2.html"/)
+    await FILES.edit(file, (plan) => plan.setDetails("t2", "<p>now with details</p>"))
+    expect(readFileSync(join(file, "..", "parts", "t2.html"), "utf8")).toContain("now with details")
+    expect(readFileSync(file, "utf8")).toMatch(/<epic-item\s+id="t2"[^>]*source="parts\/t2.html"/)
   })
 
   test("an old-markup doc (restored from an old backup):  refused, read or edited, writing nothing", async () => {
@@ -149,7 +149,7 @@ describe("PlanDocFiles", () => {
     const file = await oneFile()
     const before = readFileSync(file, "utf8")
     await expect(
-      FILES.edit(file, (plan) => plan.findSection("caveats")!.append(plan.make("epic-event", { at: "2026-10-01" })))
+      FILES.edit(file, (plan) => plan.findSection("todos")!.append(plan.make("epic-event", { at: "2026-10-01" })))
     ).rejects.toThrow(/nothing written:  the edit would break the doc/)
     expect(readFileSync(file, "utf8")).toBe(before)
   })

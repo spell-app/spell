@@ -342,9 +342,9 @@ describe("PlanDocCommands rename:  a phase's or an item's title (epic `epic-work
     expect(last.textContent!.replace(/\s+/g, " ")).toBe('P2 renamed: "Two" -> "Second" (1 link)')
 
     printed = []
-    expect(await owner.run(["rename", "x", "C1", "<code>Linked</code> todo", "--html"])).toBe(0)
-    expect(printed).toEqual(['C1 · Linked todo (was "Linked")'])
-    expect(FILES.read(file).item("c1").querySelector(':scope > [slot="title"] > code')!.textContent).toBe("Linked")
+    expect(await owner.run(["rename", "x", "T1", "<code>Linked</code> todo", "--html"])).toBe(0)
+    expect(printed).toEqual(['T1 · Linked todo (was "Linked")'])
+    expect(FILES.read(file).item("t1").querySelector(':scope > [slot="title"] > code')!.textContent).toBe("Linked")
   })
 
   test("refuses no title, or no such phase, writing nothing", async () => {

@@ -316,10 +316,10 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
 export const DO_IT_NOTE = "do it"
 
 /**
- * The items whose empty note box Revisit fills with `DO_IT_NOTE`:  judgement calls and caveats (`j3`, `c5`);
- * a caveat only when it's work, not a `limit` (epic `epic-engine` P32:  todos were `t5`).
+ * The items whose empty note box Revisit fills with `DO_IT_NOTE`:  judgement calls and todos (`j3`, `t5`);
+ * a todo only when it's work, not a `limit` (epic `epic-engine` P44:  `c5`, a caveat, before).
  */
-export const DO_IT_ID = /^[jc]\d+$/i
+export const DO_IT_ID = /^[jt]\d+$/i
 
 ////////////////
 // ## Shadow markup
@@ -403,8 +403,8 @@ export const REVIEW_NAME_TEXTS = [
   { key: "approve", text: "Approve", description: "Review button:  its name." },
   {
     key: "todo",
-    text: "Make Caveat",
-    description: "Review button:  its name (a todo, before epic `epic-engine` P32)."
+    text: "Make Todo",
+    description: "Review button:  its name (Make Caveat, epic `epic-engine` P32 to P44)."
   },
   { key: "revisit", text: "Revisit", description: "Review button:  its name." },
   { key: "next", text: "Do it in the next phase", description: "A todo's review button (the plane):  its name." },
@@ -442,8 +442,8 @@ export const REVIEW_TEXTS = [
   { key: "approveTip", text: "Fine as it is", description: "Review button:  what Approve does." },
   {
     key: "todoTip",
-    text: "Follow it up later, as a caveat:  work still to do",
-    description: "Review button:  what Make Caveat does."
+    text: "Follow it up later, as a todo:  work still to do",
+    description: "Review button:  what Make Todo does."
   },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
   {
@@ -518,7 +518,7 @@ export const REVIEW_TEXTS = [
   { key: "you", text: "You", description: "Who wrote a marked note." },
   { key: "howSoon", text: "revisit soon", description: "A marked note's kind." },
   { key: "howNow", text: "revisit now", description: "A marked note's kind." },
-  { key: "howTodo", text: "caveat", description: "A marked note's kind." },
+  { key: "howTodo", text: "todo", description: "A marked note's kind." },
   { key: "howNext", text: "next phase", description: "A marked note's kind:  a todo's plane." },
   { key: "howDrop", text: "drop", description: "A marked note's kind:  a todo's x." },
   { key: "howSkip", text: "skip", description: "A marked note's kind:  the note box's x." },

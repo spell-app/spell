@@ -23,7 +23,7 @@ export const epicTestRunVocabulary = {
     "(click to zoom) and If not -- answered Passed, Failed (with a pasted screenshot), Skip or Not now, a comment with any of them, " +
     'each a review mark (`{ action: "test", result }`) in the page\'s inbox.  "4 of 9" and a thin bar say how far ' +
     "along;  Back and Next, the keys P / F / S / N, the arrows and Esc;  a summary card at the end, with Send results.  " +
-    "Drawn by `<epic-page>` over its blocks in test mode (the To test section's Start testing, or `?test=1` on the " +
+    "Drawn by `<epic-page>` over its blocks in test mode (the Manual tests section's Start testing, or `?test=1` on the " +
     "page's address);  written in a doc only as an example, inside an `<epic-page>`.  Leaving it (Done testing, " +
     "Esc, the summary's next epic) sends its unsent answers, and the notice line says so.",
   attributes: [

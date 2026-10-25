@@ -91,7 +91,7 @@ flowchart TD
    The agent stops after each phase and asks whether to go on.
 7. At any time you mark the page, and a `/epic review <name>` session takes the marks
    ([README-pages.md](README-pages.md) walks a review round).
-8. The last phase, Doc Review:  open items pruned, the To test list complete, a text pass,
+8. The last phase, Doc Review:  open items pruned, the Manual tests list complete, a text pass,
    the epic's GUIDE written, a changelog entry.
 9. `/isolate done` offers to merge the branch into `main`, and to open a pull request.
    Then `epic worktree remove <name>` takes the worktree away, its servers stopped first.
@@ -125,7 +125,7 @@ An epic page holds all three, for as long as the work runs and after it's merged
 A ticket goes stale the day the work starts, and a chat is true for one session.
 An epic page is written while the work happens, by the agent doing it:
 each phase marked active, then done, with what was built and its commits;
-each issue, caveat and test recorded when it's found, not at the end.
+each issue, todo and manual test recorded when it's found, not at the end.
 
 - Nothing on it is deleted.
   An item is closed, or canceled and struck through, and text rewritten later moves into a folded Original Discussion.
@@ -215,10 +215,10 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 | phase | one step of the plan, built and committed on its own:  `P1 · Short Name` | `P1` |
 | question | something only you can decide;  answered, it's a decision | `Q1` |
 | judgement call | a choice the agent made without you, open until you review it | `J1` |
-| caveat | a loose end:  work still to do, or (marked `limit`) a limit the plan accepts | `C1` |
+| todo | a loose end:  work still to do, or (marked `limit`) a limit the plan accepts | `T1` |
 | issue | a problem found, open until fixed | `I1` |
-| test | something you check by hand before merging:  a step, and what should happen | `T1` |
-| comment | a note you leave on any block of a page, answered in a thread under it | `M1` |
+| manual test | something you check by hand before merging:  a step, and what should happen | `M1` |
+| comment | a note you leave on any block of a page, answered in a thread under it | `C1` |
 
 - The epic page is shared content:  `main` and every worktree see ONE file, in the content folder,
   a git repo of its own beside the code.
@@ -229,9 +229,9 @@ Everything on its page has a short id, so "approve J3" works in chat, and `seo#J
 ## A page is something you act on
 
 A wiki page is read;  this one has buttons.
-Open an item and three sit at its right, one group:  Make Caveat, Revisit, which opens a box for your note,
+Open an item and three sit at its right, one group:  Make Todo, Revisit, which opens a box for your note,
 and Approve (the check).
-A question's option cards each have Choose, and a caveat that's work has three of its own:
+A question's option cards each have Choose, and a todo that's work has three of its own:
 the plane, do it in the next phase;  Revisit;  and the x, drop it.
 
 ![A judgement call's line on an epic page:  its yellow J4 chip and title, the Approve, Revisit and Make Caveat buttons, the Do Now wand apart, and the note box open under it](docs/images/epic-item.png)
@@ -244,7 +244,7 @@ Nothing you press goes anywhere until Send, in the page's header, hands it all o
 Two more things you'll do on a page, and one you can do from any session:
 - comment on any block of any docs page, with the bullhorn beside it, or select text and press ⌘-I:
   the agent answers in a thread under it
-- check the work by hand:  Start testing, on the To test section's title, shows one test at a time, as a card,
+- check the work by hand:  Start testing, on the Manual tests section's title, shows one test at a time, as a card,
   and a failure becomes an issue
 - ask another epic for something:  `/send <epic> <text>` puts your words and screenshots into that epic,
   and wakes it ([README-skills.md](README-skills.md))
@@ -326,15 +326,15 @@ Spanish
 ...
 estimate:  ... in all, ... left
 ...
-open caveats:
-  - C1  Agreement is a warning, never an error
-  - C2  ser and estar are interchangeable to the parser
+open limits:
+  - T1  Agreement is a warning, never an error
+  - T2  ser and estar are interchangeable to the parser
 ...
 ```
 
 </details>
 
-_On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario done, its caveats still open._
+_On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario done, its limits still open._
 
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 

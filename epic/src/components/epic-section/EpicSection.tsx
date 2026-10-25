@@ -142,7 +142,7 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   the Todos and Questions sections end with
  *   - the new items of their kind Owen asked for and Claude hasn't made yet (Edit, Remove:  `newItemList()`)
  *   - then a New todo / New question button, which opens the form there (`<epic-new-item>`)
- * - The To test section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
+ * - The Manual tests section's START TESTING (epic `epic-engine` P4), on its title while the page is reviewed and a test
  *   is open:  "Start testing · 9", a `<ui-button>` that asks the page for its test run (`epic-test-opening`)
  * - SIDE EFFECT:  observes its own children, from the first count on (`@watches`);
  *   follows the review inbox while connected (an Overview sub-section, Todos, Questions).
@@ -463,7 +463,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   ////////////////
 
   /**
-   * A Todos, Questions, Issues or Tests section's NEW button, on its title, while reviewed:
+   * A Todo, Questions, Issues or Manual tests section's NEW button, on its title, while reviewed:
    * comment dots, round, its name the tooltip.
    * - Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers".
    * - A click opens the section, then the form at its end (`openNewForm()`).
@@ -489,7 +489,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * The To test section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
+   * The Manual tests section's Start testing (epic `epic-engine` P4):  a blue button, "Start testing · 9".
    * - A click asks the page for its test run (`epic-test-opening`, out of the shadow root).
    */
   private startTesting(open: number): JSX.Element {
@@ -800,7 +800,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return this.present().length > 0 || this.marked().size > 0
   }
 
-  /** A kind that holds items (Questions ... To test). */
+  /** A kind that holds items (Questions ... Manual tests). */
   private holdsItems(): boolean {
     return (ITEM_KINDS as readonly string[]).includes(this.kind ?? "")
   }
@@ -901,7 +901,7 @@ const RUNS_PAGE_SHEET = "epic-section-runs"
 /** The attribute each item the filter hides gets:  page state, kept by the live patch. */
 const FILTERED = "data-epic-filtered"
 
-/** Class of the To test section's Start testing. */
+/** Class of the Manual tests section's Start testing. */
 const START_TESTING = "start-testing"
 
 /** Classes of the waiting new items (`newItemList()`):  the list, a card. */

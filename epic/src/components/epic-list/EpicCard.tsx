@@ -123,7 +123,14 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           />
         }
       >
-        <ui-label class={MARK} part={this.partForName("mark")} size="mini" color="blue" appearance="basic" title={state().tip}>
+        <ui-label
+          class={MARK}
+          part={this.partForName("mark")}
+          size="mini"
+          color="blue"
+          appearance="basic"
+          title={state().tip}
+        >
           {state().count || this.translationForKey("planning")}
         </ui-label>
       </Show>

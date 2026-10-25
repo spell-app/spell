@@ -7,7 +7,7 @@
  * - `--bundle`:  a scratch build of the docs bundle, served in place of `spell-ui.js` (a runtime change, checked before
  *   the real one is rebuilt)
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox or details,
- *   copied to `src/demo/shots/test-run/epics/test-run-sample/` (git-ignored), its To test section REPLACED by scratch
+ *   copied to `src/demo/shots/test-run/epics/test-run-sample/` (git-ignored), its Manual tests section REPLACED by scratch
  *   tests:
  *   - `v1`, the new shape:  Step (with an action link), Should, Example (a screenshot and a line), If not
  *   - `v2`, the new shape:  Step and Should
@@ -23,7 +23,7 @@
  * - a part's Example image is written from the PART's folder, `../tests/v1.png`:  a part's relative URLs are
  *   rewritten against it as it loads (`LoadableBody`)
  * - the walk, at 390px (the side bar's width), light:
- *   - the To test section's "Start testing · 5" starts it:  `?test=1` on the address, "1 of 5", the blocks hidden
+ *   - the Manual tests section's "Start testing · 5" starts it:  `?test=1` on the address, "1 of 5", the blocks hidden
  *   - v1:  its fields, the action button, the Example zoomed and closed (Esc closes the zoom, not the run);  P:
  *     passed, on to v2
  *   - v2:  Failed opens the failure;  a note typed, a screenshot PASTED (a PNG made in the page):  its thumbnail, the
@@ -147,12 +147,12 @@ async function walk() {
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" })
   await open(page, url)
 
-  // Start testing, on the To test section's title:  "Start testing · 5"
+  // Start testing, on the Manual tests section's title:  "Start testing · 5"
   const start = await page.evaluate(() => {
     const button = document.getElementById("tests").shadowRoot.querySelector("ui-button.start-testing")
     return button && { text: button.textContent.trim(), title: button.getAttribute("title") }
   })
-  expect("Start testing, on the To test title", start?.text, "Start testing · 5")
+  expect("Start testing, on the Manual tests title", start?.text, "Start testing · 5")
   await page.evaluate(() => document.getElementById("tests").scrollIntoView({ block: "center" }))
   await page.waitForTimeout(300)
   await page.screenshot({ path: join(out, "run-button.png") })
@@ -619,7 +619,7 @@ function expect(what, actual, wanted) {
 }
 
 /**
- * Copy epic `from`'s page (skeleton and parts) as epic `name`, titled `title`, its To test section replaced by
+ * Copy epic `from`'s page (skeleton and parts) as epic `name`, titled `title`, its Manual tests section replaced by
  * `tests` (`{ skeleton, parts }`);  its folder.
  */
 function copyEpic(name, title, tests) {
@@ -640,7 +640,7 @@ function copyEpic(name, title, tests) {
     .replaceAll(`epic="${from}"`, `epic="${name}"`)
     .replace(/(<epic-page\b[^>]*?\btitle=")[^"]*"/, `$1${title}"`)
   if (!html.includes('id="v1"')) {
-    console.error(`check-test-run:  ${from}'s page has no To test section to replace`)
+    console.error(`check-test-run:  ${from}'s page has no Manual tests section to replace`)
     process.exit(2)
   }
   writeFileSync(join(folder, `${name}.plan.html`), html)

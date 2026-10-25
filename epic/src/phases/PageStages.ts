@@ -25,8 +25,8 @@ export class PageStages {
    *   2026-10-25:  "we're creating 'issues' ... before making the plan, so show those when in 'accept phases' mode")
    */
   static readonly SHOWN: Readonly<Record<PlanningStage, readonly string[]>> = {
-    overview: ["questions", "caveats"],
-    phases: ["phases", "questions", "caveats", "issues"]
+    overview: ["questions", "todos"],
+    phases: ["phases", "questions", "todos", "issues"]
   }
 
   /** Is `value` one of the stages? */

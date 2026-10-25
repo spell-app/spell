@@ -132,7 +132,7 @@ describe("EpicDocs on a scratch checkout", () => {
     x.setPhase(1, "done", { done: "<ul><li>built one</li></ul>" })
     x.addPhaseUpdate(1, "<p>one changed</p>")
     x.addCommit({ phase: 1 }, listed, "listed", { base: null })
-    x.addItem("caveat", "see a page", { details: '<p><a href="../../guides/linked.html">linked</a></p>' })
+    x.addItem("limit", "see a page", { details: '<p><a href="../../guides/linked.html">linked</a></p>' })
     x.addItem("question", "which way?", {
       details:
         '<epic-choices><epic-option letter="A" title="Left"></epic-option>' +
@@ -187,7 +187,7 @@ describe("EpicDocs on a scratch checkout", () => {
       answer: "Right it is:  Because right."
     })
     expect(items.find((item) => item.id === "J1")).toMatchObject({ kind: "judgement", status: "done" })
-    expect(items.find((item) => item.id === "C1")!.text).toContain("linked")
+    expect(items.find((item) => item.id === "T1")!.text).toContain("linked")
   })
 })
 

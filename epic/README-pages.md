@@ -32,12 +32,12 @@ You review on the page, item by item, when you have time;  the answers come back
 
 1. In Claude Code, type `/epic review <name>`.
    The epic page opens in the Review tab, and that session starts listening for your marks.
-2. Open a section, open an item, and press Approve, Revisit (then type a note) or Make Caveat.
+2. Open a section, open an item, and press Approve, Revisit (then type a note) or Make Todo.
    The button goes DASHED:  saved on the page server, not sent.
 3. Press Send, the paper plane at the top right.
    Dashed turns OUTLINED:  the agent has it.
 4. Watch the item.
-   Approvals and new caveats are applied as soon as the session wakes, and the buttons clear.
+   Approvals and new todos are applied as soon as the session wakes, and the buttons clear.
    A revisit comes back as an answer IN the item, under a card that goes from blue (on it) to green (done).
 
 You can mark for an hour and send once:  nothing needs a session listening until you press Send.
@@ -64,7 +64,7 @@ where the build stands and where you're needed are one glance up.
    An icon per section jumps there;  a red badge on it counts what needs you,
    an orange one the answers waiting on your pick.
    - At its right, a chip per item state with its count:  click one to show only those.
-   - Then unfold-all, fold-all, and `+` for a new caveat or question.
+   - Then unfold-all, fold-all, and `+` for a new todo or question.
 3. **The meta lines say how to start, and where the work lives:**
    the review command (`/epic review <name>`), the branch and worktree, the dates, the saga,
    and once Doc Review has written it, the epic's guide.
@@ -81,7 +81,7 @@ While the plan is still being written, a folded "Plan hung?" notice says how to 
 
 An issue tracker lets every project invent its own labels.
 Every epic page has the same eight sections instead, in this order, with the same ids:
-a link to `#caveats` lands on the caveats of any epic page, a year from now.
+a link to `#todos` lands on the todos of any epic page, a year from now.
 
 | Section | Id | What goes in it |
 | --- | --- | --- |
@@ -89,9 +89,9 @@ a link to `#caveats` lands on the caveats of any epic page, a year from now.
 | 2. Phases | `#phases` | a block per phase (`P1 · Short Name`):  Symptom (what's wrong today), Changes, the Goal;  Done and Commits once it's built;  Files and Verify behind the folder and flask toggles |
 | 3. Questions (`Q1` ...) | `#decisions` | what only you can decide:  open ones first, then the answered ones, which are the decisions |
 | 4. Judgement calls (`J1` ...) | `#judgements` | choices the agent made without you, "chose X over Y because Z", open until you review them |
-| 5. Caveats (`C1` ...) | `#caveats` | loose ends:  work still to do, and limits the plan accepts (marked `limit`, drawn calmer) |
+| 5. Todo (`T1` ...) | `#todos` | loose ends:  work still to do, and limits the plan accepts (marked `limit`, drawn calmer) |
 | 6. Issues (`I1` ...) | `#issues` | problems found, open until fixed |
-| 7. To test (`T1` ...) | `#tests` | what you check by hand before merging:  each a Step, and what it Should do |
+| 7. Manual tests (`M1` ...) | `#tests` | what you check by hand before merging:  each a Step, and what it Should do |
 | 8. Log | `#log` | one line per change to the plan, with its date and time |
 
 ![The Phases section opened, under the sticky header and toolbar:  its title with a 3/15 count of open phases, a
@@ -144,7 +144,7 @@ sequenceDiagram
   You->>Page: Send
   Server->>Session: wakes it (types /epic review)
   Session->>Server: inbox wait returns the marks
-  Session->>Page: inbox apply:  approvals, picks, caveats
+  Session->>Page: inbox apply:  approvals, picks, todos
   Session->>Page: Underway card, then the answer, then Done
   Page->>You: buttons clear, chips show the result
 ```
@@ -158,8 +158,8 @@ it explains every card and colour change you'll see on an item.
    It waits in the background, its turn over, costing nothing.
 2. Your Send wakes it, with a list of your marks.
 3. It applies the mechanical ones at once:
-   approvals, picks, new caveats, a caveat's plane or x, skips, new items, test results.
-   A pick or a queued caveat gets a calm "Noted" card saying what happens next.
+   approvals, picks, new todos, a todo's plane or x, skips, new items, test results.
+   A pick or a queued todo gets a calm "Noted" card saying what happens next.
 4. Each revisit asked now gets a blue "Underway" card:  what the agent took the task to be.
    A background agent writes the answer into the item, and the card turns green, "Done".
    An answer that offers options turns the item ORANGE:  your pick.
@@ -174,7 +174,7 @@ The command behind each step, and why a finished `wait` is what wakes a session:
 - Typing in an item's note box turns its Revisit on at the first key;  the box stays open while you type.
 - A request Claude is on spins its button:  click it again to call it off ("nevermind");  an answer that arrives
   after that is refused.
-- A revisit on a judgement call or a caveat that's work starts with `do it` already in its note box, Revisit on with it:
+- A revisit on a judgement call or a todo that's work starts with `do it` already in its note box, Revisit on with it:
   type over it to say something else.
 
 ![One judgement call, J4, unfolded:  a yellow J4 chip and its title;  at the right the Approve, Revisit and Make Caveat
@@ -189,16 +189,16 @@ Every mark, and what applying it does:
 | --- | --- | --- |
 | Approve | the check, green | an open question:  answered with its recommended option (none recommended:  left to talk over);  an open judgement call:  closed, accepted;  an open test:  closed, passed;  anything else:  marked reviewed |
 | a pick | Choose, on an option card | a question:  answered with that option;  any other item:  approved with that option |
-| Make Caveat | the list, green | a new caveat, "Follow up:  ...", linking back;  on any item, phase, the summary or an Overview sub-section |
+| Make Todo | the list, green | a new todo, "Follow up:  ...", linking back;  on any item, phase, the summary or an Overview sub-section |
 | Revisit | the history arrow, blue, then a note | answered INTO the item as a reply, then cleared;  with a pick, talked over first, and recorded once you agree |
-| a caveat's plane | "Do it in the next phase", green | queued into the first phase still to do |
-| a caveat's x | "Drop it", grey | canceled, "dropped in review" |
+| a todo's plane | "Do it in the next phase", green | queued into the first phase still to do |
+| a todo's x | "Drop it", grey | canceled, "dropped in review" |
 | Skip This | the note box's x, grey | reviewed, nothing else;  your note kept as your reply |
-| new | `+`, or New caveat / New question at the end of those sections | made, with your note as its details |
+| new | `+`, or New todo / New question at the end of those sections | made, with your note as its details |
 
 - Each applied mark logs one line:  `J9 approved:  closed (accepted)`.
 - A mark you changed meanwhile stays, for the next Send.
-- The summary, each phase and each Overview sub-section take Make Caveat and Revisit too, but no Approve.
+- The summary, each phase and each Overview sub-section take Make Todo and Revisit too, but no Approve.
 
 <details>
 <summary>How Send wakes a session</summary>
@@ -259,7 +259,7 @@ Only the tool writes it, under a lock.
           picks B · Land and unfold it
   ```
 
-- A new caveat or question from the page waits under its own key, `new1`, `new2` ...
+- A new todo or question from the page waits under its own key, `new1`, `new2` ...
 - A test answer is `{ action: "test", result, note?, shot? }`, with its screenshot saved beside the page.
 - The inbox's code and every method on it:  [`ReviewInbox`](src/tool/ReviewInbox.ts);
   the verbs that read and write it:  [README-cli.md](README-cli.md#epic-page--the-review-inbox).
@@ -285,7 +285,7 @@ or the page's header), or select text and press ⌘-I (Ctrl-I).
 A small pane opens that saves as you type and never scrolls the page:
 tab away or click elsewhere and it's kept, empty it and it's gone.
 
-Saved, it becomes a THREAD under the paragraph it quotes, numbered `M1`, `M2` ...:
+Saved, it becomes a THREAD under the paragraph it quotes, numbered `C1`, `C2` ...:
 your "You:" messages, the agent's "Claude:" ones, and "Claude:  thinking…" while it works.
 When it's your turn the thread goes orange, with three answers:  ✓ that's good, reply, or × skip it.
 The toolbar's bullhorn counts those threads in orange, and jumps to the next;  ⌘-K takes an id.
@@ -301,7 +301,7 @@ Details and choice pages take no comments, since each sends its answers its own 
 
 ## Test runs:  one card per test
 
-The To test section is the list of things only a person can check:  open this page, click that, it should do this.
+The Manual tests section is the list of things only a person can check:  open this page, click that, it should do this.
 A test run turns it into a checklist you click through, one big card at a time, in the Review tab.
 
 ![A test run on the airplane epic page:  "TESTING 1 of 15" and a Done testing button;  a card for V1, "Merge the
@@ -310,7 +310,7 @@ and Back and Next.](docs/images/test-run.png)
 
 _The first of fifteen tests:  answer it, or press P, F, S or N._
 
-- Start it with "Start testing" on the To test section, or `epic test <name>`.
+- Start it with "Start testing" on the Manual tests section, or `epic test <name>`.
   `epic test --all` runs every epic's in turn, in the sagas' order:  each run's last card leads to the next epic.
 - A card shows the test's Step (with a button for any page it says to open) and what it Should do;
   sometimes an Example (a screenshot the agent took) and If not (what to tell the agent).
@@ -320,7 +320,7 @@ _The first of fifteen tests:  answer it, or press P, F, S or N._
 | Your answer | What `inbox apply` does |
 | --- | --- |
 | Passed | closes the test |
-| Failed, with a note and a pasted screenshot | makes a NEW issue, "T3 failed:  ...", with your note and screenshot;  the test stays open |
+| Failed, with a note and a pasted screenshot | makes a NEW issue, "M3 failed:  ...", with your note and screenshot;  the test stays open |
 | Skip | cancels the test:  it no longer applies |
 | Not now | leaves it open, and puts it last in the next run |
 
@@ -334,9 +334,9 @@ A new element takes its colour from this table, never one that means something e
 | Colour | Means | For example |
 | --- | --- | --- |
 | red | needs you | an open question's chip;  an unreviewed judgement call or issue;  the toolbar's count |
-| yellow | open, still undecided | an open caveat or test;  a reviewed call or issue |
+| yellow | open, still undecided | an open todo or test;  a reviewed call or issue |
 | blue | do it now, or the agent is on it | Revisit, Send;  the Underway card;  an epic in progress |
-| green | decided or done, however long ago | Approve, Make Caveat, a pick;  a phase done;  the Done and Noted cards |
+| green | decided or done, however long ago | Approve, Make Todo, a pick;  a phase done;  the Done and Noted cards |
 | orange | changed since you looked;  or the agent's options, waiting for your pick | UPDATE labels;  "nobody is listening";  a replied item's chip |
 | violet | the agent's voice | its reply cards;  "recommended" (a thumbs-up) |
 | ivory | your voice | your note box, your replies, the answer card;  the toolbar |
@@ -367,11 +367,11 @@ The FIRST row that applies wins, top to bottom.
 | `progress` | blue | the agent is working on it:  an Underway card, or the spinner |
 | `old` | grey | canceled:  made moot, struck through |
 | `recent` | green | decided or done, however long ago |
-| `open` | yellow | work a review queued (a caveat's plane), not started |
+| `open` | yellow | work a review queued (a todo's plane), not started |
 | `replied` | orange | open, and the agent's last reply holds options nothing is picked in yet:  your turn |
 | `attention` | red | an open question;  an open judgement call or issue not reviewed, unless marked calm |
-| `recent` | green | open, but settled by a review:  approved as it stands, or made a caveat |
-| `open` | yellow | anything else open:  caveats, tests, reviewed calls and issues |
+| `recent` | green | open, but settled by a review:  approved as it stands, or made a todo |
+| `open` | yellow | anything else open:  todos, tests, reviewed calls and issues |
 
 - An item's status is `open`, `decided` (an answered question), `done` (closed, never removed) or `canceled`
   (struck through;  `reopen` undoes it).

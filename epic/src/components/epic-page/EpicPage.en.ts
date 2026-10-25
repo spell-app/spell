@@ -79,7 +79,7 @@ export const epicPageVocabulary = {
       values: PageStages.ALL,
       description:
         "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, " +
-        "Questions and Caveats only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is " +
+        "Questions and Todo only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is " +
         "the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are " +
         "Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages " +
         "looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
@@ -242,7 +242,7 @@ export const epicPageVocabulary = {
     {
       name: "test-run",
       description:
-        "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the To test " +
+        "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests " +
         "section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, " +
         "`epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
     }
@@ -374,7 +374,7 @@ export const epicPageVocabulary = {
     },
     {
       key: "stageOverviewTip",
-      text: "Agreeing the Overview:  only it, the questions and caveats show until Accept Overview",
+      text: "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
       description: "The step label's tooltip, Overview stage."
     },
     {
@@ -481,13 +481,13 @@ export const epicPageVocabulary = {
     },
     {
       tag: "epic-section",
-      where: { attribute: "kind", values: ["caveats"] },
+      where: { attribute: "kind", values: ["todos"] },
       max: 1,
       description:
-        "5. Caveats:  work still to do, and limits to know about (`limit`;  the todos too, epic `epic-engine` P32)."
+        "5. Todo:  work still to do, and limits to know about (`limit`;  Caveats, epic `epic-engine` P32 to P44)."
     },
     { tag: "epic-section", where: { attribute: "kind", values: ["issues"] }, max: 1, description: "6. Issues." },
-    { tag: "epic-section", where: { attribute: "kind", values: ["tests"] }, max: 1, description: "7. To test." },
+    { tag: "epic-section", where: { attribute: "kind", values: ["tests"] }, max: 1, description: "7. Manual tests." },
     { tag: "epic-section", where: { attribute: "kind", values: ["log"] }, max: 1, description: "8. Log." }
   ],
   childOrder: "listed"

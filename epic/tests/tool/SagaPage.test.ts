@@ -97,8 +97,8 @@ describe("SagaPage", () => {
   test("edited by the epic verbs through SAGA:/<id>, and checked as an epic page", async () => {
     await new SagaPage(FILES).make("epics", { force: true })
     expect(await commands().run(["add", "SAGA:/epics", "todo", "Make the Epics page group by saga"])).toBe(0)
-    expect(printed).toEqual(["C1"])
-    expect(FILES.read(PAGE).document.querySelector("#caveats > epic-item#c1")?.getAttribute("title")).toBe(
+    expect(printed).toEqual(["T1"])
+    expect(FILES.read(PAGE).document.querySelector("#todos > epic-item#t1")?.getAttribute("title")).toBe(
       "Make the Epics page group by saga"
     )
     expect(FILES.read(PAGE).check()).toEqual([])

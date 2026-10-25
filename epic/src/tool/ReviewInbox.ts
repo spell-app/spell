@@ -41,10 +41,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - none (an older mark):  the item's own (`PlanItem.choicesOf()`)
  *     - "pick B, but ...":  a revisit carrying the pick, `{ action: "revisit", when, note, pick: "B" }`;
  *       never applied:  Claude talks it over (`toMark()`)
- *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`t3`) only:
+ *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`m3`) only:
  *       `{ action: "test", result, note?, shot? }`
  *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
- *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/t3-20261019-1432.png`,
+ *       - `note`:  what Owen says (a failure's);  `shot`:  his screenshot, `tests/m3-20261019-1432.png`,
  *         from the epic page's folder (written by the review routes' `POST shot`)
  *       - sent with the rest;  `epic inbox apply` applies it (`PlanDoc.applyMark()`)
  *     - the page header's STAGE BUTTON (epic `epic-engine` P29), Accept Overview or Accept Phases:
@@ -76,10 +76,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       live while that process runs, heartbeat or not;  gone the moment it ends
  *   - `handedOver`:  the `sent` time a waiting session last took (`takeWork()`), else `null`:
  *     so a second `epic inbox wait` doesn't hand the same send over again
- *   - `comments`:  `{ [m1 ...]: comment }` (shown `M1`;  `cm1` in an older file:  `CommentList.label()`), Owen's comments on the page's blocks and on selected text
+ *   - `comments`:  `{ [c1 ...]: comment }` (shown `C1`;  `m1` or `cm1` in an older file:  `CommentList.label()`), Owen's comments on the page's blocks and on selected text
  *     (epic `airplane` P11), in the shape a guide's inbox holds them (`CommentList`)
  *     - waiting until Claude answers them like a revisit's note (`/epic review`, `/airplane land`),
- *       then `answered` (`epic inbox done <name>#M3`)
+ *       then `answered` (`epic inbox done <name>#C3`)
  *     - Send hands them over, as it does marks (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude):
  *       a waiting comment whose last words are newer than `sent` is unsent (`unsentComments`);
  *       a waiting session takes it with the send (`takeWork()`), once, until Owen speaks on its thread again
@@ -118,7 +118,7 @@ export class ReviewInbox {
   listening: InboxListener | null = null
   /** the `sent` time a waiting session last took, else `null` */
   handedOver: string | null = null
-  /** Owen's comments on the page's blocks, by id (`m1` ...;  `cm1` in an older file):  `CommentList` */
+  /** Owen's comments on the page's blocks, by id (`c1` ...;  `m1` or `cm1` in an older file):  `CommentList` */
   comments: Record<string, Comment> = {}
   /** the page server's last wake of the epic (P16), else `null` */
   woken: InboxWoken | null = null
@@ -128,7 +128,7 @@ export class ReviewInbox {
   /**
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
    * - a field the record lacks keeps its empty value, so readers never check;  a key it adds is kept, after them
-   * - a comment key spelt the other way (`m3`) respelt (`CommentList.migrate()`)
+   * - a comment key spelt an older way (`m3`, `cm3`) respelt (`CommentList.migrate()`)
    */
   constructor(record: Partial<InboxRecord> & Record<string, unknown> = {}) {
     Object.assign(this, record)
@@ -777,7 +777,7 @@ export class ReviewInbox {
    * - marks, drafts, urgency, agents at work, called-off requests:  their key;  an immediate request:  its `id`
    * - a new item about one (`near`), and a comment's anchor on one:  `p7`, `p7#field-1`
    * - an entry already under the new id wins:  the old one goes
-   * - ALL AT ONCE:  a rename may free an id another takes (epic `epic-engine` P32:  `t3` => `c55`, `v3` => `t3`)
+   * - ALL AT ONCE:  a rename may free an id another takes (epic `epic-engine` P44:  `c3` => `t3`, `t3` => `m3`)
    */
   renameIds(renames: Record<string, string>): number {
     let moved = 0
@@ -830,7 +830,7 @@ export class ReviewInbox {
    * - `reopen` (a change mark's Reopen, P30):  the action alone
    * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
    *   `note` trimmed, kept only when there is one;  `shot` kept when given, a screenshot in the epic's `tests/`
-   *   (`tests/t3-20261019-1432.png`:  `TEST_SHOT`)
+   *   (`tests/m3-20261019-1432.png`:  `TEST_SHOT`)
    * - `new` (a new item, `setNew()`):
    *   - `kind`:  one of `NEW_KINDS`
    *   - `title`:  trimmed, never empty, at most `MAX_TITLE` characters
@@ -984,7 +984,7 @@ export type InboxDoing = {
   at: string
 }
 
-/** One thing the session is answering:  its id (`q6`, `m3`) and title. */
+/** One thing the session is answering:  its id (`q6`, a comment's `c3`) and title. */
 export type DoingItem = { id: string; title: string }
 
 /**
@@ -1019,7 +1019,7 @@ export type CheckedMark = {
 /**
  * A test answer's fields (`action: "test"`, epic `epic-engine` P4):
  * - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
- * - `shot`:  Owen's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png`
+ * - `shot`:  Owen's screenshot, from the epic page's folder:  `tests/m3-20261019-1432.png`
  */
 export type TestFields = { result?: TestResult; shot?: string }
 
@@ -1224,15 +1224,15 @@ const ITEM_ID = /^(?:[a-z]{1,2}\d+|p-[a-z0-9]+(?:-[a-z0-9]+)*)$/
 const NEW_PREFIX = "new"
 const NEW_ID = /^new\d+$/
 
-/** A test item's id:  only a test takes a test answer. */
-const TEST_ID = /^t\d+$/
+/** A manual test's id:  only a test takes a test answer. */
+const TEST_ID = /^m\d+$/
 
 /**
- * A test answer's screenshot, from the epic page's folder:  `tests/t3-20261019-1432.png` (`v3-`, a test's letter before epic
- * `epic-engine` P32)
- * (`-2` ... when two land in one minute), as the review routes' `POST shot` writes it.
+ * A test answer's screenshot, from the epic page's folder:  `tests/m3-20261019-1432.png` (`-2` ... when two land in one
+ * minute), as the review routes' `POST shot` writes it.
+ * - a test's older letters too, `t3-` (before epic `epic-engine` P44) and `v3-` (before P32):  the files keep their names
  */
-export const TEST_SHOT = /^tests\/[tv]\d+-\d{8}-\d{4}(?:-\d+)?\.png$/
+export const TEST_SHOT = /^tests\/[mtv]\d+-\d{8}-\d{4}(?:-\d+)?\.png$/
 
 /** The longest a test answer's note may be:  a few paragraphs, not a log. */
 const MAX_TEST_NOTE = 20_000
@@ -1321,7 +1321,7 @@ function toTestAnswer({ result, note = "", shot }: Record<string, unknown>): Che
   if (note.length > MAX_TEST_NOTE) throw new InboxError(`a test answer's note:  ${MAX_TEST_NOTE} characters at most`)
   const given = shot !== undefined && shot !== null && shot !== ""
   if (given && (typeof shot !== "string" || !TEST_SHOT.test(shot)))
-    throw new InboxError(`not a test's screenshot:  ${JSON.stringify(shot)} (tests/t3-20261019-1432.png)`)
+    throw new InboxError(`not a test's screenshot:  ${JSON.stringify(shot)} (tests/m3-20261019-1432.png)`)
   return {
     action: "test",
     result: result as TestResult,

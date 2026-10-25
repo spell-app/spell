@@ -465,7 +465,7 @@ export class PlanDocCommands {
    * - `--saga <id>`:  the saga it serves, from the start (epic `epic-workflow` P15)
    * - every new epic starts in the OVERVIEW STAGE (`<epic-page stage="overview">`, epic `epic-engine` P29, Q15;  the
    *   default since P33, when the epic skill began planning that way):  the page shows only the Overview, Questions
-   *   and Caveats until its Accept Overview
+   *   and Todo until its Accept Overview
    *   - `--stage <stage>`:  another to start in (`building`:  as before stages, everything shown)
    *   - a future epic promoted keeps the stage it has;  one made before stages has none, and reads as building
    *   - refused, writing nothing, for a saga not in the list
@@ -1180,7 +1180,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
-  add <name> question|judgement|caveat|issue|todo|test|decision "title" [--details html] [--calm]
+  add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm]
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
                                                    wouldn't surprise Owen, yellow (open) rather than red
@@ -1219,7 +1219,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   bedtime <name> start "P3-P6"  /  done "summary"  a /bedtime run:  bedtime mode on (every change stays green
                                                    until reviewed) / off;  both logged
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
-  summary <name> [--json]                          open questions, issues, caveats, todos;  the next phase
+  summary <name> [--json]                          open questions, issues, todos, limits, manual tests;  the next phase
   docs <name> [--json]                             the docs the epic wrote besides its epic page:  its
                                                    guide, what its commits changed (wrote), docs that name it
                                                    (related), docs it only links to (linked);  its
@@ -1276,8 +1276,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    urgency (an id chip clicked:  calm or not), to the doc, clear
                                                    them;  prints each, and what it left (revisits, a pick with a
                                                    revisit:  to talk over);  --all:  sent or not (/airplane land)
-  inbox working <name> <id> on|off                 the page's spinner on an item;  a comment (M3):  its
-                                                   thread's "Claude: thinking…" (done M3 turns it off)
+  inbox working <name> <id> on|off                 the page's spinner on an item;  a comment (C3):  its
+                                                   thread's "Claude: thinking…" (done C3 turns it off)
   inbox done <name> <id>...                        an agent finished an item:  its mark and spinner go (a mark
                                                    Owen changed meanwhile stays)
   inbox clear <name> <id>...                       drop marks (a revisit talked over)

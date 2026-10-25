@@ -234,9 +234,9 @@ async function run() {
       }),
       id
     )
-    // a WORK caveat's (no `limit`;  a todo, `t`, before epic `epic-engine` P32):  the plane (next phase), Revisit,
+    // a todo's (no `limit`;  `t`, a caveat `c` from epic `epic-engine` P32 to P44):  the plane (next phase), Revisit,
     // the x (drop) (Owen, 2026-10-09)
-    const todo = /^[tc]\d+$/.test(id) && !layout.limit
+    const todo = /^t\d+$/.test(id) && !layout.limit
     delete layout.limit
     const group = todo
       ? ["next", "revisit", "drop"]
@@ -539,7 +539,7 @@ async function run() {
   ReviewInbox.update(inboxFile, (box) => void box.commentList.add({ anchor: question, kind: "item" }, COMMENT))
   await waitHeader(page, (state) => state.send === "unsent", "Send, with only a comment waiting:  blue (unsent)")
   const unsent = await readInbox(page)
-  expect("the inbox:  the comment unsent", unsent.unsentComments, ["m1"])
+  expect("the inbox:  the comment unsent", unsent.unsentComments, ["c1"])
   await page.locator('epic-page epic-send-buttons [part~="send"]').click()
   await waitInbox(
     page,

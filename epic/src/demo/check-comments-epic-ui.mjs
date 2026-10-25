@@ -470,7 +470,7 @@ async function checkToolbar(page, name, held) {
     visits.join()
   )
 
-  // Cmd / Ctrl + K:  the waiting threads listed;  M2 lands on its thread
+  // Cmd / Ctrl + K:  the waiting threads listed;  C2 lands on its thread
   await page.evaluate(() => scrollTo(0, 0))
   await page.keyboard.press("ControlOrMeta+k")
   await page.waitForSelector("ui-modal .spell-jump input", { timeout: 5000 }).catch(() => {})
@@ -658,7 +658,7 @@ async function checkGuide() {
         takesComments: true,
         comments: [
           {
-            id: "m1",
+            id: "c1",
             anchor,
             kind: "section",
             label: "",

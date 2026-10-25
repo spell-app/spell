@@ -12,16 +12,16 @@
  *     (git-ignored);  the guide:  the real one, read only (the demo server serves the real `guides/` beside it)
  * - their COMMENTS ARE STUBBED (Playwright's `page.route`):  three threads on each page, on its first top-level
  *   sections (a guide) or its first items (an epic page), Claude having spoken last on the first and the third, so two
- *   wait on Owen.  The ids are keyed `m1` ... as an inbox file keys them
+ *   wait on Owen.  The ids are keyed `c1` ... as an inbox file keys them
  * - reads and writes NOTHING of the real pages:  no inbox file is read for comments, and every POST to `/api/` is
  *   aborted, so nothing is sent and no session is woken (nor could one be:  the demo server's wake is stubbed)
  * - checks, on each page:
- *   - each thread's header shows its id, `M1` ...
+ *   - each thread's header shows its id, `C1` ...
  *   - the toolbar's bullhorn shows, its count 2
  *   - a click lands on the first waiting thread in page order, opened, on screen;  the next on the other;  the next
  *     round to the first again
- *   - Cmd-K lists the two waiting threads under its box, `M1 · ...` then `M3 · ...`;  `M99` says it isn't there and
- *     stays open;  the old spelling `cm3` lands on M3's thread, opened (and Enter doesn't fold it again)
+ *   - Cmd-K lists the two waiting threads under its box, `C1 · ...` then `C3 · ...`;  `C99` says it isn't there and
+ *     stays open;  the old spelling `cm3` lands on C3's thread, opened (and Enter doesn't fold it again)
  *   - no page errors
  * - and with no thread waiting:  no bullhorn
  * - screenshots (outDir, default a temporary folder):  `<page>-top.png`, `<page>-landed.png`, `<page>-jump.png`
@@ -119,7 +119,7 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
     const ids = (await page.evaluate(anchors)).slice(0, 3)
     const at = "2026-10-17T10:00:00.000Z"
     const comments = ids.map((anchor, index) => ({
-      id: `m${index + 1}`,
+      id: `c${index + 1}`,
       anchor,
       kind: "section",
       label: "",
@@ -169,7 +169,7 @@ async function checkPage(name, url, anchors) {
   }
   let now = await state(page)
   check(`${name}:  the toolbar's bullhorn shows, counting 2`, now.shown && now.count === "2", `count ${now.count}`)
-  check(`${name}:  each thread shows its id, M1 ...`, now.ids.join(" ") === "M1 M2 M3", now.ids.join(" "))
+  check(`${name}:  each thread shows its id, C1 ...`, now.ids.join(" ") === "C1 C2 C3", now.ids.join(" "))
   await page.screenshot({ path: join(out, `${name}-top.png`) })
   const order = await page.evaluate(() =>
     [...document.querySelectorAll("epic-thread")].filter((each) => each.comment?.turn === "owen").map((each) => each.id)
@@ -197,22 +197,22 @@ async function checkPage(name, url, anchors) {
   const listed = await page.$$eval(".spell-jump-thread > b", (each) => each.map((id) => id.textContent))
   check(
     `${name}:  Cmd-K lists the threads waiting on Owen, in page order`,
-    listed.join(" ") === "M1 M3",
+    listed.join(" ") === "C1 C3",
     listed.join(" ")
   )
   await page.screenshot({ path: join(out, `${name}-jump.png`) })
-  await page.keyboard.type("M99")
+  await page.keyboard.type("C99")
   await page.keyboard.press("Enter")
   await page.waitForTimeout(300)
   const miss = await page.$eval(".spell-jump-miss", (each) => (each.hidden ? "" : each.textContent)).catch(() => "")
-  check(`${name}:  Cmd-K M99 says it isn't there, and stays open`, /No M99/.test(miss), miss)
+  check(`${name}:  Cmd-K C99 says it isn't there, and stays open`, /No C99/.test(miss), miss)
   await page.fill("ui-modal .spell-jump input", "cm3")
   await page.keyboard.press("Enter")
   await page.waitForTimeout(1200)
   now = await state(page)
   check(
-    `${name}:  Cmd-K cm3 (the old spelling) lands on M3's thread, opened, on screen`,
-    now.thread === "comment-m3" && now.open && now.onScreen,
+    `${name}:  Cmd-K cm3 (the old spelling) lands on C3's thread, opened, on screen`,
+    now.thread === "comment-c3" && now.open && now.onScreen,
     JSON.stringify(now)
   )
   check(`${name}:  no page errors`, page.errors.length === 0, page.errors.join(" | "))

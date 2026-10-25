@@ -22,7 +22,7 @@ export const epicThreadVocabulary = {
     "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs " +
     "runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, " +
     "an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green " +
-    "check circle once done), its id (`M3`), the first words it's on;  while it's Owen's turn, his answer (an " +
+    "check circle once done), its id (`C3`), the first words it's on;  while it's Owen's turn, his answer (an " +
     "item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his " +
     "words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange " +
     "while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen " +
@@ -120,7 +120,7 @@ export const epicThreadVocabulary = {
       name: "fold",
       description: "The fold:  the chevron, the bullhorn (a check circle once done), its id, the first words it's on."
     },
-    { name: "id", description: "Its id, `M3`:  small and muted, an outline and no fill." },
+    { name: "id", description: "Its id, `C3`:  small and muted, an outline and no fill." },
     { name: "headline", description: "The first words it's on, in quotes;  its tooltip says the block in full." },
     { name: "answer", description: "Owen's answer while it's his turn (the review pills), or Reopen once done." },
     { name: "body", description: "The messages and the box:  shown while open." },

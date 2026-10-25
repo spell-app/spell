@@ -365,7 +365,7 @@ ui-toolbar.spell-toolbar-titled:is(.spell-toolbar-segmented, :not(.spell-site-to
 
 /*
  * ## The jump dialog (Cmd / Ctrl + K, `openJumpPrompt()`):  a miss says so in red;  the threads waiting on
- * Owen listed under the box, a line each, "M3 · his first words" (epic `epic-workflow` P23)
+ * Owen listed under the box, a line each, "C3 · his first words" (epic `epic-workflow` P23)
  */
 .spell-jump {
   display: grid;

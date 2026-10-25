@@ -147,7 +147,7 @@ export abstract class PlanReader {
 
   /**
    * Items of `kind` in its section, in order:  the elements whose id has the kind's letter (`q7`, never `d7`).
-   * - a `caveat` (a limit, `<epic-item limit>`) or a `todo` (work):  only those (epic `epic-engine` P32);  both are `c`
+   * - a `todo` (work) or a `limit` (`<epic-item limit>`):  only those (epic `epic-engine` P44);  both are `t`
    */
   itemsOf(kind: ItemKind): Element[] {
     const spec: { prefix: string; limit?: boolean } = KINDS[kind]
@@ -182,7 +182,7 @@ export abstract class PlanReader {
   }
 
   /**
-   * What needs attention:  the phases, the next one to do, and the open questions / issues / caveats / todos.
+   * What needs attention:  the phases, the next one to do, and the open questions / issues / todos / limits / manual tests.
    * - feeds the end-of-phase reply and its AskUserQuestion options
    */
   summary(): PlanSummary {

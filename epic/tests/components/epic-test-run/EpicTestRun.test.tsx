@@ -26,20 +26,20 @@ import "spell-epic/components/epic-test-run"
 ////////////////
 
 /**
- * A page whose To test section holds:  t1 (the new shape, an action link and an Example), t2 (older:  prose only),
- * t3 (deferred:  last), t4 (done:  not in the run), t5 (failed before).
+ * A page whose To test section holds:  m1 (the new shape, an action link and an Example), m2 (older:  prose only),
+ * m3 (deferred:  last), m4 (done:  not in the run), m5 (failed before).
  */
 const PAGE =
   `<epic-page epic="demo" title="Demo"><epic-section id="tests" kind="tests">` +
-  `<epic-item id="t1" title="Titles wrap" status="open" state="open">` +
+  `<epic-item id="m1" title="Titles wrap" status="open" state="open">` +
   `<epic-field label="Step"><p>Open the guide.</p><p><a class="epic-test-action" href="/guides/x.html">Open it</a></p></epic-field>` +
   `<epic-field label="Should"><p>Every title wraps.</p></epic-field>` +
-  `<epic-field label="Example"><img src="tests/t1.png" alt="wrapped"><p>At 390px.</p></epic-field>` +
+  `<epic-field label="Example"><img src="tests/m1.png" alt="wrapped"><p>At 390px.</p></epic-field>` +
   `<epic-field label="If not"><p>Say which.</p></epic-field></epic-item>` +
-  `<epic-item id="t2" title="Tabs come back" status="open" state="open"><p>Reload each tab.</p></epic-item>` +
-  `<epic-item id="t3" title="Deferred" status="open" state="open" deferred="2026-10-18"><p>Later.</p></epic-item>` +
-  `<epic-item id="t4" title="Done" status="done" state="recent"><p>Passed.</p></epic-item>` +
-  `<epic-item id="t5" title="Failed once" status="open" state="open" failed="i9"><p>Try again.</p></epic-item>` +
+  `<epic-item id="m2" title="Tabs come back" status="open" state="open"><p>Reload each tab.</p></epic-item>` +
+  `<epic-item id="m3" title="Deferred" status="open" state="open" deferred="2026-10-18"><p>Later.</p></epic-item>` +
+  `<epic-item id="m4" title="Done" status="done" state="recent"><p>Passed.</p></epic-item>` +
+  `<epic-item id="m5" title="Failed once" status="open" state="open" failed="i9"><p>Try again.</p></epic-item>` +
   `</epic-section></epic-page>`
 
 /** The review routes, as `fetch`, over an inbox kept here;  `posts` every POST;  the shot and tests routes too. */
@@ -187,31 +187,31 @@ describe("<epic-test-run>", () => {
     expect(host.matches(":state(testing)")).toBe(true)
     expect(card(host)).toEqual({
       at: "1 of 4",
-      id: "T1",
+      id: "M1",
       title: "Titles wrap",
       fields: ["Step", "Should", "Example", "If not"],
       step: "Open the guide.",
       actions: [["Open it", "/guides/x.html", "_blank"]],
-      shots: ["tests/t1.png"],
+      shots: ["tests/m1.png"],
       labels: []
     })
-    // the blocks hide;  the doc is never touched (the action link still in t1)
+    // the blocks hide;  the doc is never touched (the action link still in m1)
     const slot = host.shadowRoot!.querySelector("slot:not([name])")!
     expect(getComputedStyle(slot).display).toBe("none")
-    expect(host.querySelector("#t1 a.epic-test-action")).not.toBeNull()
+    expect(host.querySelector("#m1 a.epic-test-action")).not.toBeNull()
     await expectAccessible(runOf(host)!.host as Element)
   })
 
-  test("an older test's prose is its Step;  failed before and deferred say so;  `#t5` lands there", async () => {
+  test("an older test's prose is its Step;  failed before and deferred say so;  `#m5` lands there", async () => {
     await adoptClient(routes)
-    const host = await render("?test=1#t5")
-    expect(card(host)).toMatchObject({ at: "3 of 4", id: "T5", step: "Try again.", labels: ["failed before · I9"] })
+    const host = await render("?test=1#m5")
+    expect(card(host)).toMatchObject({ at: "3 of 4", id: "M5", step: "Try again.", labels: ["failed before · I9"] })
     await key(host, "ArrowLeft")
-    expect(card(host)).toMatchObject({ at: "2 of 4", id: "T2", fields: ["Step"], step: "Reload each tab." })
+    expect(card(host)).toMatchObject({ at: "2 of 4", id: "M2", fields: ["Step"], step: "Reload each tab." })
     await key(host, "ArrowRight")
     await key(host, "ArrowRight")
-    expect(card(host)).toMatchObject({ at: "4 of 4", id: "T3", labels: ["not now 2026-10-18"] })
-    expect(location.hash).toBe("#t3")
+    expect(card(host)).toMatchObject({ at: "4 of 4", id: "M3", labels: ["not now 2026-10-18"] })
+    expect(location.hash).toBe("#m3")
   })
 
   // epic-engine r16, Owen:  "put them in code blocks with exactly what I need to type"
@@ -228,7 +228,7 @@ describe("<epic-test-run>", () => {
       ["sh", true, "yarn test"]
     ])
     expect(runOf(host)!.querySelector(".card .step pre")).toBeNull()
-    expect(host.querySelectorAll("#t1 pre")).toHaveLength(2)
+    expect(host.querySelectorAll("#m1 pre")).toHaveLength(2)
 
     const copied = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     await ElementFixture.settle(codes[0]!)
@@ -241,24 +241,24 @@ describe("<epic-test-run>", () => {
     await adoptClient(routes)
     const host = await render()
     await key(host, "p")
-    expect(routes.inbox.marks.t1).toMatchObject({ action: "test", result: "passed" })
+    expect(routes.inbox.marks.m1).toMatchObject({ action: "test", result: "passed" })
     await afterAnswer(host)
-    expect(card(host).id).toBe("T2")
+    expect(card(host).id).toBe("M2")
     expect(runOf(host)!.querySelector("ui-progress")!.getAttribute("value")).toBe("2")
     await key(host, "s")
     await afterAnswer(host)
     await key(host, "n")
     await afterAnswer(host)
     expect(Object.fromEntries(Object.entries(routes.inbox.marks).map(([id, mark]) => [id, mark.result]))).toEqual({
-      t1: "passed",
-      t2: "skip",
-      t5: "notnow"
+      m1: "passed",
+      m2: "skip",
+      m5: "notnow"
     })
-    // back on t1:  its answer shown, dashed green
+    // back on m1:  its answer shown, dashed green
     await key(host, "ArrowLeft")
     await key(host, "ArrowLeft")
     await key(host, "ArrowLeft")
-    expect(card(host).id).toBe("T1")
+    expect(card(host).id).toBe("M1")
     expect([answer(host, "passed").dataset.fill, answer(host, "passed").getAttribute("aria-pressed")]).toEqual([
       "dashed",
       "true"
@@ -292,22 +292,22 @@ describe("<epic-test-run>", () => {
     const host = await render()
     answer(host, "failed").click()
     await settle(host)
-    expect(routes.inbox.marks.t1).toMatchObject({ action: "test", result: "failed" })
+    expect(routes.inbox.marks.m1).toMatchObject({ action: "test", result: "failed" })
     const box = runOf(host)!.querySelector<HTMLElement & { value: string }>(".comment epic-text-box")!
     const field = box.shadowRoot!.querySelector("textarea")!
     field.value = "Still cut short"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     field.dispatchEvent(new FocusEvent("focusout", { bubbles: true, composed: true }))
     await settle(host)
-    expect(routes.inbox.marks.t1).toMatchObject({ result: "failed", note: "Still cut short" })
+    expect(routes.inbox.marks.m1).toMatchObject({ result: "failed", note: "Still cut short" })
     // a screenshot pasted
     const data = new DataTransfer()
     data.items.add(new File([new Uint8Array([137, 80, 78, 71])], "shot.png", { type: "image/png" }))
     field.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true }))
-    await vi.waitFor(() => expect(routes.inbox.marks.t1?.shot).toBe("tests/t1-20261019-1432.png"))
+    await vi.waitFor(() => expect(routes.inbox.marks.m1?.shot).toBe("tests/m1-20261019-1432.png"))
     const shot = routes.posts.find(([route]) => route === "shot")![1]
-    expect([shot.id, String(shot.png).startsWith("data:image/png;base64,")]).toEqual(["t1", true])
-    expect(routes.inbox.marks.t1).toMatchObject({ note: "Still cut short" })
+    expect([shot.id, String(shot.png).startsWith("data:image/png;base64,")]).toEqual(["m1", true])
+    expect(routes.inbox.marks.m1).toMatchObject({ note: "Still cut short" })
     await settle(host)
     expect(runOf(host)!.querySelector(".drop ui-button.shot img")).not.toBeNull()
   })
@@ -322,10 +322,10 @@ describe("<epic-test-run>", () => {
     document.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true }))
     await vi.waitFor(() => expect(routes.posts.some(([route]) => route === "shot")).toBe(true))
     await settle(host)
-    expect(routes.inbox.marks.t1).toBeUndefined()
+    expect(routes.inbox.marks.m1).toBeUndefined()
     answer(host, "passed").click()
     await vi.waitFor(() =>
-      expect(routes.inbox.marks.t1).toMatchObject({ result: "passed", shot: "tests/t1-20261019-1432.png" })
+      expect(routes.inbox.marks.m1).toMatchObject({ result: "passed", shot: "tests/m1-20261019-1432.png" })
     )
   })
 
@@ -337,33 +337,33 @@ describe("<epic-test-run>", () => {
     field().value = "Only the first half worked"
     field().dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     field().dispatchEvent(new FocusEvent("focusout", { bubbles: true, composed: true }))
-    await vi.waitFor(() => expect(routes.inbox.drafts.t1?.note).toBe("Only the first half worked"))
-    expect(routes.inbox.marks.t1).toBeUndefined()
+    await vi.waitFor(() => expect(routes.inbox.drafts.m1?.note).toBe("Only the first half worked"))
+    expect(routes.inbox.marks.m1).toBeUndefined()
     // a reload of the run (a new card) finds it again, from the draft
     await key(host, "ArrowRight")
     await key(host, "ArrowLeft")
     expect(field().value).toBe("Only the first half worked")
     // Passed:  the comment goes with it, the draft gone
     await key(host, "p")
-    expect(routes.inbox.marks.t1).toMatchObject({ result: "passed", note: "Only the first half worked" })
-    expect(routes.inbox.drafts.t1).toBeUndefined()
+    expect(routes.inbox.marks.m1).toMatchObject({ result: "passed", note: "Only the first half worked" })
+    expect(routes.inbox.drafts.m1).toBeUndefined()
     await afterAnswer(host)
     // back, and changed to Not now:  the comment stays
     await key(host, "ArrowLeft")
     await key(host, "n")
-    expect(routes.inbox.marks.t1).toMatchObject({ result: "notnow", note: "Only the first half worked" })
+    expect(routes.inbox.marks.m1).toMatchObject({ result: "notnow", note: "Only the first half worked" })
     await afterAnswer(host)
     for (let at = 0; at < 4; at++) await key(host, "ArrowRight")
     const listed = Array.from(runOf(host)!.querySelectorAll(".commented li"), (li) => words(li))
-    expect(listed).toEqual(["T1Not nowOnly the first half worked"])
+    expect(listed).toEqual(["M1Not nowOnly the first half worked"])
   })
 
   test("past the last:  the summary's counts, Send results, and with `all` the next epic", async () => {
     await adoptClient(routes)
-    routes.inbox.marks.t1 = { action: "test", result: "passed", at: new Date().toISOString() } as never
-    routes.inbox.marks.t2 = { action: "test", result: "failed", note: "x", at: new Date().toISOString() } as never
+    routes.inbox.marks.m1 = { action: "test", result: "passed", at: new Date().toISOString() } as never
+    routes.inbox.marks.m2 = { action: "test", result: "failed", note: "x", at: new Date().toISOString() } as never
     await ReviewClient.forPage().refresh()
-    const host = await render("?test=1&all=1#t3")
+    const host = await render("?test=1&all=1#m3")
     await key(host, "ArrowRight")
     await vi.waitFor(() => expect(runOf(host)!.querySelector("ui-button.next-epic")).not.toBeNull())
     const root = runOf(host)!
@@ -401,7 +401,7 @@ describe("<epic-test-run>", () => {
     start.click()
     await settle(host)
     expect([host.matches(":state(testing)"), new URLSearchParams(location.search).get("test")]).toEqual([true, "1"])
-    expect(card(host).id).toBe("T1")
+    expect(card(host).id).toBe("M1")
     await key(host, "Escape")
     expect([host.matches(":state(testing)"), location.search, runOf(host)]).toEqual([false, "", null])
     // nothing answered:  it just leaves, nothing sent
@@ -423,7 +423,7 @@ describe("<epic-test-run>", () => {
     expect(runOf(host)).toBeNull()
     await vi.waitFor(() => expect(notices.at(-1)).toBe("2 results sent to Claude"))
     expect(routes.posts.map(([route]) => route)).toEqual(["mark", "mark", "send"])
-    expect(["t1", "t2"].every((id) => client.isSent(client.markOf(id)!))).toBe(true)
+    expect(["m1", "m2"].every((id) => client.isSent(client.markOf(id)!))).toBe(true)
   })
 
   test("leaving, the send failing:  the notice says so, the answers wait unsent", async () => {
@@ -439,6 +439,6 @@ describe("<epic-test-run>", () => {
     )
     await key(host, "Escape")
     await vi.waitFor(() => expect(notices.at(-1)).toMatch(/^Couldn't send your answers \(1\): .+They're kept/))
-    expect(client.isSent(client.markOf("t1")!)).toBe(false)
+    expect(client.isSent(client.markOf("m1")!)).toBe(false)
   })
 })

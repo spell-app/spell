@@ -162,7 +162,7 @@ describe("<epic-item>", () => {
 
   test("starts folded (details `hidden=until-found`);  a click on the line unfolds it through `ui-opening`, again folds", async () => {
     const { host, line, details, toggle } = await item(
-      `<epic-item id="c1" title="A caveat" status="open"><p>Why</p></epic-item>`
+      `<epic-item id="t1" title="A todo" status="open"><p>Why</p></epic-item>`
     )
     const opened = vi.fn()
     host.addEventListener("ui-opening", opened)
@@ -179,7 +179,7 @@ describe("<epic-item>", () => {
 
   test("its details fold by height, not at once (Owen, 2026-10-10:  the auto-fold after an action jumped shut)", async () => {
     const { host, line, details } = await item(
-      `<epic-item id="c9" title="A caveat" status="open"><p>Why</p><p>Because</p></epic-item>`
+      `<epic-item id="t9" title="A todo" status="open"><p>Why</p><p>Because</p></epic-item>`
     )
     // its running transitions:  `block-size` shows as `height`
     const resizing = () => details.getAnimations().map((animation) => (animation as CSSTransition).transitionProperty)
@@ -199,7 +199,7 @@ describe("<epic-item>", () => {
   })
 
   test("a click on a link in its line (the chip) doesn't fold;  a cancelled `ui-opening` keeps it folded", async () => {
-    const { host, chip, line } = await item(`<epic-item id="c2" title="A caveat" status="open"><p>Why</p></epic-item>`)
+    const { host, chip, line } = await item(`<epic-item id="t2" title="A todo" status="open"><p>Why</p></epic-item>`)
     chip.addEventListener("click", (event) => event.preventDefault())
     chip.click()
     await ElementFixture.tick()
@@ -260,7 +260,7 @@ describe("<epic-item>", () => {
     expect(host.querySelector("p")!.assignedSlot).not.toBeNull()
   })
 
-  test("with commits, a git icon on its line (T17):  a click opens it and shows its own commits, again hides them", async () => {
+  test("with commits, a git icon on its line (M17):  a click opens it and shows its own commits, again hides them", async () => {
     const { host, line, details } = await item(
       `<epic-item id="i2" title="Fixed" status="done"><p>Why.</p><epic-commit sha="abc1234">Fix it</epic-commit></epic-item>`
     )
@@ -344,8 +344,8 @@ describe("<epic-item>", () => {
   })
 
   test("the chip's colours (Q20):  open yellow with DARK text, progress blue;  both readable (axe's contrast)", async () => {
-    const open = await item(`<epic-item id="t1" title="Later" status="open" state="open"></epic-item>`)
-    const working = await item(`<epic-item id="t2" title="Now" status="open" state="progress"></epic-item>`)
+    const open = await item(`<epic-item id="m1" title="Later" status="open" state="open"></epic-item>`)
+    const working = await item(`<epic-item id="m2" title="Now" status="open" state="progress"></epic-item>`)
     expect(getComputedStyle(working.chip).backgroundColor).not.toBe(getComputedStyle(open.chip).backgroundColor)
     await expectAccessible(open.host)
     await expectAccessible(working.host)
@@ -415,7 +415,7 @@ describe("<epic-item> actions slot", () => {
   // P25:  the page's own buttons in the line, where the docs runtime puts the bullhorn too
   test('`slot="actions"`:  after the title, BEFORE its own buttons;  a click on one (or on the box) never folds it', async () => {
     const { host, line, title } = await item(
-      `<epic-item id="c3" title="A caveat" status="open" overnight><p>Why</p>` +
+      `<epic-item id="t3" title="A todo" status="open" overnight><p>Why</p>` +
         `<button slot="actions" aria-label="Copy">C</button><span slot="actions" class="tag">tag</span></epic-item>`
     )
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
@@ -440,7 +440,7 @@ describe("<epic-item> actions slot", () => {
     expect(host.open).toBe(true)
     // the slotted buttons aren't details:  an item with only them has nothing to fold
     const bare = await item(
-      `<epic-item id="c4" title="Bare" status="open"><button slot="actions">C</button></epic-item>`
+      `<epic-item id="t4" title="Bare" status="open"><button slot="actions">C</button></epic-item>`
     )
     expect(bare.toggle()).toBeNull()
     expect(bare.host.shadowRoot!.querySelector("[part~='actions']")!.hasAttribute("hidden")).toBe(false)
@@ -453,7 +453,7 @@ describe("<epic-item> actions slot", () => {
 describe("<epic-item> title, folded and open", () => {
   test("in full, wrapped, folded and open, no tooltip;  the buttons on its first line;  nothing moves as it opens", async () => {
     const wrap = await ElementFixture.render(
-      `<div style="width: 320px"><epic-item id="c5" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open" overnight><p>Why</p>` +
+      `<div style="width: 320px"><epic-item id="t5" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open" overnight><p>Why</p>` +
         `<button slot="actions" aria-label="Copy">C</button></epic-item></div>`
     )
     const host = wrap.querySelector("epic-item") as ItemHost
@@ -488,7 +488,7 @@ describe("<epic-item> title, folded and open", () => {
     expect(bed.getBoundingClientRect().left).toBeCloseTo(folded.bed.left, 0)
     // nothing to unfold:  it never opens, so it always wraps
     const bare = await ElementFixture.render(
-      `<div style="width: 320px"><epic-item id="c6" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open"></epic-item></div>`
+      `<div style="width: 320px"><epic-item id="t6" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open"></epic-item></div>`
     )
     const bareTitle = bare.querySelector("epic-item")!.shadowRoot!.querySelector<HTMLElement>("[part~='title']")!
     expect([bareTitle.getBoundingClientRect().height > lineHeight * 1.5, bareTitle.hasAttribute("title")]).toEqual([

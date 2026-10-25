@@ -91,7 +91,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-note": { state: "done", title: "option A, 2026-10-06" },
   "epic-aside": { title: "where it stood at kickoff" },
   "epic-code": { title: "design.ts · 12 lines", language: "ts", open: true },
-  "epic-link": { saga: "drawable-spell", epic: "python-target", item: "T1" },
+  "epic-link": { saga: "drawable-spell", epic: "python-target", item: "M1" },
   "epic-zoom": { src: "shots/before.png", alt: "Before:  segmented" },
   "epic-mark": { item: "i126", link: true },
   "epic-actions": { headRow: true },
@@ -145,7 +145,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-hidden-note": { count: 3 },
   "epic-threads": {},
   "epic-thread": {
-    comment: '{"id":"m3","text":"Why?"}',
+    comment: '{"id":"c3","text":"Why?"}',
     open: true,
     unseen: true,
     moved: true,
@@ -423,8 +423,8 @@ describe("Markup.validate()", () => {
   test("reports an epic element inside prose, unless it's a `flow` one (`<epic-update>`)", () => {
     const document = documentOf(`
       <epic-page epic="demo" title="Demo"><epic-overview id="overview"></epic-overview>
-        <epic-section id="caveats" kind="caveats">
-          <epic-item id="c1" title="x" status="open">
+        <epic-section id="todos" kind="todos">
+          <epic-item id="t1" title="x" status="open">
             <p>Text <epic-update phase="2"></epic-update> and <epic-reply>no</epic-reply></p>
           </epic-item>
         </epic-section>

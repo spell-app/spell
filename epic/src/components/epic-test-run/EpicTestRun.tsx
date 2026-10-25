@@ -48,7 +48,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have come in'"
  *   - the send fails (the page server gone, `file://`):  the notice says so, and they wait, Send blue
  *   - not per answer:  each send wakes a waiting session (`handedOver`), so a run of 17 would wake it 17 times
- * - Its place is the address's `#t3` (replaced, never pushed):  a reload resumes there;
+ * - Its place is the address's `#m3` (replaced, never pushed):  a reload resumes there;
  *   without one, at the first test not answered
  * - Past the last, the SUMMARY:  the counts, Send results (the page's Send),
  *   and with `all` (`epic test --all`) the next epic with open tests (`GET /api/epics/tests`)
@@ -197,7 +197,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /**
    * While connected:  the run starts (its tests, its place), follows the inbox, and listens for keys and pastes;
    * returns the undo.
-   * - its place:  the address's `#t3` when it's one of its tests;  else, once the inbox is read, the first test not
+   * - its place:  the address's `#m3` when it's one of its tests;  else, once the inbox is read, the first test not
    *   answered (none:  the summary)
    */
   @E.whileConnected
@@ -234,7 +234,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     if (all && connected) void this.findNextEpic()
   }
 
-  /** Where the run is:  the address says it (`#t3`, replaced), and the test's part loads, the next one's too. */
+  /** Where the run is:  the address says it (`#m3`, replaced), and the test's part loads, the next one's too. */
   @E.onChange("at")
   protected onMoved(at: string) {
     if (!at || isServer) return
@@ -698,7 +698,7 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   }
 
   /**
-   * The address says where the run is, `#t3` (none on the summary), replaced:  a reload resumes there.
+   * The address says where the run is, `#m3` (none on the summary), replaced:  a reload resumes there.
    * - again each time the docs runtime's scroll-follow writes its own (`spell-doc:scrolled-to`):
    *   its sections are hidden, so it would take the hash off
    *   - then said the same way, so VS Code's view keeps the run's place too

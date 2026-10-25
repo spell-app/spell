@@ -66,18 +66,18 @@
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Every state a thread is in, from what the comments route answers (the comments are made up):</p>
             <epic-threads>
-              <epic-thread comment="{&quot;id&quot;: &quot;m1&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Is this still true?  `spell compile` changed.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;}"></epic-thread>
-              <epic-thread open comment="{&quot;id&quot;: &quot;m2&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Explain the second step\nin more words.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;working&quot;: &quot;2026-10-17T13:30:00.000Z&quot;}"></epic-thread>
-              <epic-thread open unseen comment="{&quot;id&quot;: &quot;m3&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Why asyncio and not threads?&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;owen&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-18T12:05:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Because every target awaits the same way:  &lt;code&gt;await&lt;/code&gt; maps one to one.&lt;/p&gt;&quot;}]}"></epic-thread>
-              <epic-thread comment="{&quot;id&quot;: &quot;m4&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;table&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;Name Kind Where&quot;, &quot;text&quot;: &quot;Fix the typo in the table.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;done&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-16T20:00:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Fixed.&lt;/p&gt;&quot;, &quot;commit&quot;: &quot;a1b2c3d&quot;}], &quot;done&quot;: {&quot;how&quot;: &quot;good&quot;, &quot;at&quot;: &quot;2026-10-16T21:00:00.000Z&quot;}}"></epic-thread>
-              <epic-thread open comment="{&quot;id&quot;: &quot;m5&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;This needs a section of its own.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;taken&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;quote&quot;: &quot;every target awaits&quot;, &quot;taken&quot;: {&quot;epic&quot;: &quot;feedback&quot;, &quot;phase&quot;: 4, &quot;phaseId&quot;: &quot;p-memory&quot;, &quot;title&quot;: &quot;Memory&quot;, &quot;at&quot;: &quot;2026-10-18T16:00:00.000Z&quot;}}"></epic-thread>
+              <epic-thread comment="{&quot;id&quot;: &quot;c1&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Is this still true?  `spell compile` changed.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;}"></epic-thread>
+              <epic-thread open comment="{&quot;id&quot;: &quot;c2&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Explain the second step\nin more words.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;new&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;working&quot;: &quot;2026-10-17T13:30:00.000Z&quot;}"></epic-thread>
+              <epic-thread open unseen comment="{&quot;id&quot;: &quot;c3&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;Why asyncio and not threads?&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;owen&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-18T12:05:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Because every target awaits the same way:  &lt;code&gt;await&lt;/code&gt; maps one to one.&lt;/p&gt;&quot;}]}"></epic-thread>
+              <epic-thread comment="{&quot;id&quot;: &quot;c4&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;table&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;Name Kind Where&quot;, &quot;text&quot;: &quot;Fix the typo in the table.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;answered&quot;, &quot;turn&quot;: &quot;done&quot;, &quot;replies&quot;: [{&quot;by&quot;: &quot;Claude&quot;, &quot;at&quot;: &quot;2026-10-16T20:00:00.000Z&quot;, &quot;html&quot;: &quot;&lt;p&gt;Fixed.&lt;/p&gt;&quot;, &quot;commit&quot;: &quot;a1b2c3d&quot;}], &quot;done&quot;: {&quot;how&quot;: &quot;good&quot;, &quot;at&quot;: &quot;2026-10-16T21:00:00.000Z&quot;}}"></epic-thread>
+              <epic-thread open comment="{&quot;id&quot;: &quot;c5&quot;, &quot;anchor&quot;: &quot;context&quot;, &quot;kind&quot;: &quot;section&quot;, &quot;label&quot;: &quot;2. Context&quot;, &quot;excerpt&quot;: &quot;&quot;, &quot;text&quot;: &quot;This needs a section of its own.&quot;, &quot;at&quot;: &quot;2026-10-17T13:12:00.000Z&quot;, &quot;status&quot;: &quot;taken&quot;, &quot;turn&quot;: &quot;claude&quot;, &quot;quote&quot;: &quot;every target awaits&quot;, &quot;taken&quot;: {&quot;epic&quot;: &quot;feedback&quot;, &quot;phase&quot;: 4, &quot;phaseId&quot;: &quot;p-memory&quot;, &quot;title&quot;: &quot;Memory&quot;, &quot;at&quot;: &quot;2026-10-18T16:00:00.000Z&quot;}}"></epic-thread>
             </epic-threads>
             <ul>
-              <li>M1:  new, Claude's turn, folded:  the pen (his words wait, Claude hasn't had them) and the trash.</li>
-              <li>M2:  Claude thinking about it:  the stub his answer replaces.</li>
-              <li>M3:  Owen's turn, orange:  the review pills, That's good, Reply, Skip it.</li>
-              <li>M4:  done:  a check circle, Reopen, and the green Done line inside.</li>
-              <li>M5:  taken into an epic's phase, linked by the phase's stable id.</li>
+              <li>C1:  new, Claude's turn, folded:  the pen (his words wait, Claude hasn't had them) and the trash.</li>
+              <li>C2:  Claude thinking about it:  the stub his answer replaces.</li>
+              <li>C3:  Owen's turn, orange:  the review pills, That's good, Reply, Skip it.</li>
+              <li>C4:  done:  a check circle, Reopen, and the green Done line inside.</li>
+              <li>C5:  taken into an epic's phase, linked by the phase's stable id.</li>
             </ul>
             <p class="meta">
               Live: the real elements, drawn by the epics pack this page loads. Their buttons say what Owen did (their
@@ -94,12 +94,12 @@
             </p>
             <ui-code language="html"><script type="text/plain">
 <epic-threads>
-  <epic-thread id="comment-m3" open unseen comment='{"id":"m3","text":"Why asyncio?","status":"answered","turn":"owen","replies":[...]}'>
+  <epic-thread id="comment-c3" open unseen comment='{"id":"c3","text":"Why asyncio?","status":"answered","turn":"owen","replies":[...]}'>
     <textarea class="spell-comment-field" aria-label="Your reply"></textarea>
   </epic-thread>
 </epic-threads>
             </script></ui-code>
-            <p>Its id, <code>comment-m3</code>, is what Cmd / Ctrl + K and the toolbar's bullhorn land on.</p>
+            <p>Its id, <code>comment-c3</code>, is what Cmd / Ctrl + K and the toolbar's bullhorn land on.</p>
           </ui-section>
 
           <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing collapsed>

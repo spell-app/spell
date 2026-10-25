@@ -70,10 +70,10 @@ export const TEST_START = "epic-test-opening"
 /** Owen left the run (Esc, Done testing):  `<epic-page>` shows its blocks again. */
 export const TEST_DONE = "epic-test-closed"
 
-/** A test's id:  `t3` (`v3` before epic `epic-engine` P32). */
-export const TEST_ID = /^t\d+$/i
+/** A manual test's id:  `m3` (`t3` before epic `epic-engine` P44, `v3` before P32). */
+export const TEST_ID = /^m\d+$/i
 
-/** The tests on a page:  its To test section's items. */
+/** The tests on a page:  its Manual tests section's items. */
 export const TESTS_SELECTOR = 'epic-section[kind="tests"] epic-item'
 
 /** The classes a Step's action links carry (`<a class="epic-test-action" href>`):  drawn as buttons in the run. */

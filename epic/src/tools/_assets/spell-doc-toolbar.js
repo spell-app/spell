@@ -400,7 +400,7 @@ function scrollIntoRow(item) {
 // ## Jump to an id (Cmd / Ctrl + K)
 ////////////////
 
-/** What a typed id looks like (`M3`, `j7`, `cm3`, `#p2`):  on Epic UI's pages, anything else is words to search. */
+/** What a typed id looks like (`C3`, `j7`, `cm3`, `#p2`):  on Epic UI's pages, anything else is words to search. */
 const ID_LIKE = /^#?[a-z]{1,2}\d+$/i
 
 /**
@@ -408,9 +408,10 @@ const ID_LIKE = /^#?[a-z]{1,2}\d+$/i
  * ui-prompt asking what number I want to jump to (e.g. J7)"), and lands there exactly as a link to `#j7` does
  * (`go()`:  what hides it unfolds, an item opens, it lands below the stuck titles).
  * - any id on the page, case and a `#` aside:  `J7`, `q3`, `P2`, `o1`, `#decisions`
- * - a COMMENT's (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids"):  `M3` (`m3`, the old `cm3`)
+ * - a COMMENT's (epic `epic-workflow` P23;  Owen, 2026-10-10:  "⌘K taking comment ids"):  `C3` (`c3`, the old `cm3`;
+ *   `M3` is a manual test's since epic `epic-engine` P44)
  *   lands on its thread, opened, below the stuck titles (`PageComments.landOn()`);  under the box, the threads
- *   waiting on Owen (Claude spoke last), each a line "M3 · his first words" that lands there
+ *   waiting on Owen (Claude spoke last), each a line "C3 · his first words" that lands there
  * - an epic page, and every page that takes comments (a guide, Epic UI's pages:  comment ids, and any other id on it)
  * - an id that isn't there:  the dialog says so and stays open, the text selected for typing over
  * - never while typing in a field (a note box, the new item form), nor with a dialog already open
@@ -441,7 +442,7 @@ export function wireJumpKey(go, canGo, { search, host, first = false } = {}) {
 
 /**
  * The jump dialog:  an id typed, Go lands there;  Cancel or Escape just closes it.
- * - a comment's id (`M3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
+ * - a comment's id (`C3`) lands on its thread, opened;  the threads waiting on Owen are listed under the box
  *   (`jumpWaitingList()`)
  * - `search`, `host`:  as `wireJumpKey()` takes them
  */
@@ -465,10 +466,10 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
         "label",
         { class: "ui-native spell-jump" },
         epicPage
-          ? "Its id:  J7, q3, P2, M3 ..."
+          ? "Its id:  J7, q3, P2, C3 ..."
           : search
-            ? "A comment's id (M3), any id on the page, or words to search the site"
-            : "Its id:  M3, or any id on the page",
+            ? "A comment's id (C3), any id on the page, or words to search the site"
+            : "Its id:  C3, or any id on the page",
         input
       ),
       miss,
@@ -533,7 +534,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
 
 /**
  * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
- * order:  a line each, "M3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
+ * order:  a line each, "C3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
  * no comments.
  * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu vertical secondary link>`, its title a header item, each line
  *   a `<ui-item>` button, so it takes the focus, and Enter

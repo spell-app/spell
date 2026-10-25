@@ -96,8 +96,8 @@ const KINDS: Record<string, readonly [string, string]> = {
   q: ["question", "questions"],
   j: ["judgement call", "judgement calls"],
   i: ["issue", "issues"],
-  t: ["test", "tests"],
-  c: ["caveat", "caveats"]
+  t: ["todo", "todos"],
+  m: ["manual test", "manual tests"]
 }
 
 /**

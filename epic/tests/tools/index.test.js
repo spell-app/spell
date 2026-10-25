@@ -234,7 +234,7 @@ describe("planOf():  an epic page's card data (epic-components P8)", () => {
 <epic-phase id="p2" status="active"><span slot="title">Second</span></epic-phase></epic-section>
 <epic-section id="decisions" kind="questions"><epic-item id="q1" title="a" status="open" state="attention"></epic-item>
 <epic-item id="q2" title="b" status="decided" state="recent"></epic-item></epic-section>
-<epic-section id="caveats" kind="caveats"><epic-item id="c1" title="c" status="open" state="open"></epic-item></epic-section>
+<epic-section id="todos" kind="todos"><epic-item id="t1" title="c" status="open" state="open"></epic-item></epic-section>
 <epic-section id="issues" kind="issues"><epic-item id="i1" title="d" status="open" state="replied"></epic-item>
 <epic-item id="i2" title="e" status="open" state="open"></epic-item></epic-section>
 </epic-page></body></html>`)

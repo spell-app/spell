@@ -209,16 +209,16 @@ describe("ReviewClient.press()", () => {
 
   test("a todo's plane (`next`) and x (`drop`) mark it as Approve does;  a note in the box goes along", async () => {
     const { client, server } = await started()
-    client.press("t1", "next")
-    await vi.waitFor(() => expect(server.inbox.marks.t1).toMatchObject({ action: "next" }))
-    expect(server.inbox.marks.t1).not.toHaveProperty("note")
-    client.press("t1", "next")
-    await vi.waitFor(() => expect(server.inbox.marks.t1).toBeUndefined())
-    client.openBox("t2")
-    client.type("t2", "moot since P3")
-    client.press("t2", "drop")
-    await vi.waitFor(() => expect(server.inbox.marks.t2).toMatchObject({ action: "drop", note: "moot since P3" }))
-    expect([client.isBoxOpen("t2"), client.typedOf("t2"), client.busyButtonOf("t2")]).toEqual([false, "", null])
+    client.press("m1", "next")
+    await vi.waitFor(() => expect(server.inbox.marks.m1).toMatchObject({ action: "next" }))
+    expect(server.inbox.marks.m1).not.toHaveProperty("note")
+    client.press("m1", "next")
+    await vi.waitFor(() => expect(server.inbox.marks.m1).toBeUndefined())
+    client.openBox("m2")
+    client.type("m2", "moot since P3")
+    client.press("m2", "drop")
+    await vi.waitFor(() => expect(server.inbox.marks.m2).toMatchObject({ action: "drop", note: "moot since P3" }))
+    expect([client.isBoxOpen("m2"), client.typedOf("m2"), client.busyButtonOf("m2")]).toEqual([false, "", null])
   })
 
   test("the note box's x (`skip`, Owen, 2026-10-09):  a mark, its note only when typed;  it replaces a pick", async () => {
@@ -567,23 +567,23 @@ describe("ReviewClient's test runs", () => {
   test("answerTest():  a `test` mark, read back by testAnswerOf();  another mark is no answer", async () => {
     const { client, server } = await started()
     expect(
-      await client.answerTest("t1", { result: "failed", note: "cut short", shot: "tests/t1-20261019-1432.png" })
+      await client.answerTest("m1", { result: "failed", note: "cut short", shot: "tests/m1-20261019-1432.png" })
     ).toBe(true)
     expect(server.posts.at(-1)).toEqual([
       "mark",
       {
         page: PAGE,
-        id: "t1",
-        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/t1-20261019-1432.png" }
+        id: "m1",
+        mark: { action: "test", result: "failed", note: "cut short", shot: "tests/m1-20261019-1432.png" }
       }
     ])
-    expect(client.testAnswerOf("t1")).toEqual({
+    expect(client.testAnswerOf("m1")).toEqual({
       result: "failed",
       note: "cut short",
-      shot: "tests/t1-20261019-1432.png"
+      shot: "tests/m1-20261019-1432.png"
     })
-    await client.answerTest("t1", { result: "passed" })
-    expect(client.testAnswerOf("t1")).toEqual({ result: "passed" })
+    await client.answerTest("m1", { result: "passed" })
+    expect(client.testAnswerOf("m1")).toEqual({ result: "passed" })
     await client.save("q1", { action: "approve" })
     expect(client.testAnswerOf("q1")).toBeUndefined()
   })
@@ -592,10 +592,10 @@ describe("ReviewClient's test runs", () => {
     const { client, server } = await started()
     const notices: string[] = []
     client.onNotice((message) => notices.push(message))
-    expect(await client.saveShot("t2", "data:image/png;base64,AAAA")).toBe("tests/t2-20261019-1432.png")
-    expect(server.posts.at(-1)).toEqual(["shot", { page: PAGE, id: "t2", png: "data:image/png;base64,AAAA" }])
+    expect(await client.saveShot("m2", "data:image/png;base64,AAAA")).toBe("tests/m2-20261019-1432.png")
+    expect(server.posts.at(-1)).toEqual(["shot", { page: PAGE, id: "m2", png: "data:image/png;base64,AAAA" }])
     server.failures.set("shot", { status: 413, error: "over 8 MB" })
-    expect(await client.saveShot("t2", "data:image/png;base64,AAAA")).toBeUndefined()
+    expect(await client.saveShot("m2", "data:image/png;base64,AAAA")).toBeUndefined()
     expect(notices).toEqual(["Over 8 MB."])
   })
 

@@ -129,7 +129,7 @@ describe("GuideChanges.gather()", () => {
     expect(epicText()).toMatch(
       /<epic-update[^>]*summary="1 comment more from Owen"[^>]*>[\s\S]*1 comment more from Owen[\s\S]*And the second table\?/
     )
-    expect(other).toBe("m1")
+    expect(other).toBe("c1")
   })
 
   // epic `epic-engine` I16:  the thread's link goes by the phase's id, so an insert ahead of it moves nothing
@@ -147,7 +147,7 @@ describe("GuideChanges.gather()", () => {
     expect(PhaseIds.labelOf(phase)).toBe("P2")
   })
 
-  // epic `epic-engine` P2 (T3):  Epic UI's pages take comments, beside them in the engine's `src/docs/`;  no epic
+  // epic `epic-engine` P2 (M3):  Epic UI's pages take comments, beside them in the engine's `src/docs/`;  no epic
   // owns one, so they're gathered too, each page by its served path
   test("an Epic UI page's comments:  found beside it, named `components/epics/...`, gathered into a phase, taken", async () => {
     const inbox = GuideInbox.fileFor(join(EPIC_UI, "epic-item.html"))
@@ -206,7 +206,7 @@ describe("GuideChanges.gather()", () => {
     expect(changes.waiting(["guides/owned.html"]).map((page) => page.comments.length)).toEqual([1])
   })
 
-  // epic `epic-engine` T9 (J7):  by default they go to the STANDING epic `feedback`, made the first time;
+  // epic `epic-engine` M9 (J7):  by default they go to the STANDING epic `feedback`, made the first time;
   // `guide-changes`, its old name, is read as `feedback`
   test("by default into feedback:  made the first time, titled Feedback, standing;  guide-changes is feedback", async () => {
     expect(new GuideChanges({ root, epic: "guide-changes" }).epic).toBe("feedback")

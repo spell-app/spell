@@ -9,7 +9,7 @@ import { ThreadFacts, type ThreadComment } from "spell-epic/comments"
 /** A comment, as the comments route answers it. */
 function comment(fields: Partial<ThreadComment> = {}): ThreadComment {
   return {
-    id: "m3",
+    id: "c3",
     anchor: "context#table-2",
     kind: "table",
     label: "2. Context",
@@ -52,9 +52,17 @@ describe("ThreadFacts", () => {
     expect(ThreadFacts.latestClaudeAt(comment({ replies: [CLAUDE, OWEN] }))).toBe(CLAUDE.at)
   })
 
-  test("ids:  `M3`, `m3` or the old `cm3`, as typed;  shown `M3`", () => {
-    expect(["M3", "m3", "#cm3", " cm12 ", "q3"].map(ThreadFacts.numberOf)).toEqual([3, 3, 3, 12, undefined])
-    expect([ThreadFacts.label("m3"), ThreadFacts.label("cm7"), ThreadFacts.label("x")]).toEqual(["M3", "M7", "x"])
+  test("ids:  `C3`, `c3` or the old `cm3`, as typed;  shown `C3`", () => {
+    expect(["C3", "c3", "#cm3", " cm12 ", "q3", "M3", "m3"].map(ThreadFacts.numberOf)).toEqual([
+      3,
+      3,
+      3,
+      12,
+      undefined,
+      undefined,
+      undefined
+    ])
+    expect([ThreadFacts.label("c3"), ThreadFacts.label("cm7"), ThreadFacts.label("x")]).toEqual(["C3", "C7", "x"])
   })
 
   test("what it's on:  the quote's first words, else the block's;  its tooltip the block in full", () => {
@@ -64,8 +72,8 @@ describe("ThreadFacts", () => {
       ThreadFacts.headline(comment({ kind: "page" })),
       ThreadFacts.headline(comment({ excerpt: "", label: "", kind: "code" }))
     ]).toEqual(["“Name Kind Where”", "“a quote longer than forty characters, cu…”", "This page", "This code block"])
-    expect(ThreadFacts.aboutTip({ id: "m3", place: comment({ quote: "Kind" }) })).toBe(
-      "Comment M3, on a table in “2. Context”:  “Kind”"
+    expect(ThreadFacts.aboutTip({ id: "c3", place: comment({ quote: "Kind" }) })).toBe(
+      "Comment C3, on a table in “2. Context”:  “Kind”"
     )
     expect(ThreadFacts.aboutTip({ place: comment({ kind: "section" }) })).toBe("On “2. Context”")
     // the whole Overview (epic `epic-engine` I55):  "the", as the page

@@ -5,7 +5,7 @@ import { EpicCommandError } from "./command.types"
  * a thin translation, so the tool itself (`spell-epic/tool/PlanDocCommands`) keeps its arguments.
  * - Owen's scheme (Command Review Page, 2026-10-12):  `epic <verb> <epic>#<id>` for anything inside an epic page
  *   - `seo`:  the page
- *   - `seo#J3`:  an item (or a comment, `seo#M3`, `m3` and the old `cm3` read the same;  or an Overview section)
+ *   - `seo#J3`:  an item (or a comment, `seo#C3`, the old `cm3` read the same;  or an Overview section)
  *   - `seo#P3`:  a phase, by its number, the one way help and messages write it
  *     - `seo#p3` and `seo#3` read the same;  a decimal phase too, `seo#P11.1` (epic `epic-engine` P39)
  *     - `seo#p-epic-migrate`:  by its stable id (epic `epic-workflow` P15)
@@ -36,6 +36,8 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "add": {
       if (ref === undefined) return [["add", ...args]]
       const kind = kindOf(ref)
+      if (!kind && OLD_KIND_LETTERS.includes(ref.toLowerCase()))
+        throw new EpicCommandError(`add:  ${args[at]}?  ${MOVED_LETTERS} (${KIND_HELP})`)
       if (!kind)
         throw new EpicCommandError(`add:  ${args[at]}?  a kind after the #, e.g. ${target!.epic}#J (${KIND_HELP})`)
       return [["add", ...around([kind])]]
@@ -70,7 +72,7 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
       // its own verbs and arguments (`saga set seo epics`):  no epic page to aim at
       return [["saga", ...args]]
     case "test":
-      // `test seo#T3`:  the run, landing on T3;  `test --all`:  no epic
+      // `test seo#M3`:  the run, landing on M3;  `test --all`:  no epic
       return [["test", ...around([]), ...(ref === undefined ? [] : ["--at", ref])]]
     default:
       if (ITEM_VERBS.includes(verb)) return [[verb, ...around(ref === undefined ? [] : [ref])]]
@@ -348,8 +350,9 @@ function addressOf(epic: string, ref: string): string {
 
 /** A kind's letter, for `add seo#J`:  `judgement` -> `J`. */
 function kindLetter(kind: string): string {
+  const word = kind === "limit" || kind === "caveat" ? "todo" : kind
   return Object.entries(KIND_LETTERS)
-    .find(([, word]) => word === kind)![0]
+    .find(([, each]) => each === word)![0]
     .toUpperCase()
 }
 
@@ -427,7 +430,7 @@ const PHASE_EXAMPLES: Record<string, string> = {
 /** A phase ref by number:  `P3`, `p3`, `3`, a decimal phase's `P11.1`. */
 const PHASE_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
 
-/** An item's id (or a comment's, an Overview section's):  `J3`, `M3` (`cm3`), `o2`. */
+/** An item's id (or a comment's, an Overview section's):  `J3`, `C3` (`cm3`), `o2`. */
 const ITEM_REF = /^[A-Za-z]{1,2}\d+$/
 
 /**
@@ -441,26 +444,36 @@ const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/
 /**
  * The item kinds' letters, for `add seo#J`:  each kind's id prefix (the `epic` tool's `KINDS`),
  * plus `d` for a decision (whose ids are questions')
- * - `c`:  a caveat that's work still to do (the tool's `todo`, epic `epic-engine` P32);  `--limit` makes it a limit
- *   to know about (the tool's `caveat`), as does the word `caveat`
+ * - `t`:  a todo, work still to do;  `--limit` makes it a limit to know about (the tool's `limit`), as does the word
+ *   `limit` (or `caveat`, its word before epic `epic-engine` P44)
+ * - `m`:  a manual test (`t` before P44, `v` before P32)
  * - a private copy:  importing `spell-epic/tool/planDoc.types` here would load the tool's types into every call
  */
 const KIND_LETTERS: Record<string, string> = {
   q: "question",
-  c: "todo",
+  t: "todo",
   i: "issue",
-  t: "test",
-  // a test's letter before epic `epic-engine` P32:  old skills and habits still say it
-  v: "test",
+  m: "test",
   d: "decision",
   j: "judgement"
 }
 
 /** The item kinds' words, which `add seo#judgement` takes too. */
-const KIND_WORDS = [...Object.values(KIND_LETTERS), "caveat"]
+const KIND_WORDS = [...Object.values(KIND_LETTERS), "limit", "caveat"]
+
+/**
+ * Letters `add seo#C` took before epic `epic-engine` P44 (Owen, 2026-10-25:  "Can `Mark` be `Comment (C)`"):
+ * refused, naming the new ones, so an old habit never makes the wrong kind.
+ * - `c`:  a caveat, a todo now (`T`);  `v`:  a test before P32, a manual test now (`M`)
+ * - `t` meant a test until P44:  it's a todo now, taken as one
+ */
+const OLD_KIND_LETTERS = ["c", "v"]
+
+/** What `add seo#C` says:  where the letters went. */
+const MOVED_LETTERS = "the letters moved (epic-engine P44):  T todo, M manual test;  C is a comment's now"
 
 /** The kinds, for a message:  `J judgement, Q question ...`. */
-const KIND_HELP = "J judgement, Q question, I issue, C caveat (--limit:  a limit, not work), T test, D decision"
+const KIND_HELP = "J judgement, Q question, I issue, T todo (--limit:  a limit, not work), M manual test, D decision"
 
 /** A phase's body fields, `phase-body`'s flags. */
 const PHASE_BODY = ["symptom", "changes", "goal", "plan", "files", "verify"]

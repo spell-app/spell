@@ -63,7 +63,7 @@ export class DOMThreadElement extends E.DOMElement<EpicThread> {
  * - ONE ivory pane, whoever spoke last ("Make the entire thing ivory");  ORANGE while Claude spoke last and Owen
  *   hasn't answered (`unseen`;  Owen, 2026-10-10:  "make the background of the entire bullhorn thread + the last
  *   claude reply orange").
- * - Its HEADER (`head()`):  the fold -- a chevron, the bullhorn (a green check circle once done), its id (`M3`), the
+ * - Its HEADER (`head()`):  the fold -- a chevron, the bullhorn (a green check circle once done), its id (`C3`), the
  *   first words it's on (its tooltip the block in full) -- then:
  *   - Owen's answer while it's his turn:  an item's review pills (`<epic-review buttons="thread">`;  Owen,
  *     2026-10-10:  "Make top buttons same semantics/look as pills in item header");  Reopen once done

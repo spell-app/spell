@@ -123,7 +123,7 @@ export type AttributeTest = {
  * - `date` -- `2026-10-07`
  * - `time` -- a date, or a date and time:  `2026-10-07 14:30`, or ISO with seconds and offset
  *   (`2026-10-06T09:28:23-04:00`), as the script stamps them
- * - `item id` -- `q7`, `j3`, `c1`, `i2`, `t4`:  its letter is its kind (`ItemLetters`)
+ * - `item id` -- `q7`, `j3`, `t1`, `i2`, `m4`:  its letter is its kind (`ItemLetters`)
  * - `phase id` -- `p-epic-migrate`:  stable, made from its name (`PhaseIds`, epic `epic-workflow` P15);
  *   an older page's `p3`, until the migration `stable-phase-ids`
  * - `phase number` -- a phase as people number it:  `3`, or a decimal phase's `11.1` (epic `epic-engine` P39)
@@ -139,7 +139,7 @@ export type AttributeTest = {
 export const Formats = {
   date: /^\d{4}-\d{2}-\d{2}$/,
   time: /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)?)?$/,
-  "item id": /^[qjcitv]\d+$/,
+  "item id": /^[qjitm]\d+$/,
   "phase id": /^p(?:\d+|-[a-z0-9]+(?:-[a-z0-9]+)*)$/,
   "phase number": /^\d+(?:\.[1-9]\d*)?$/,
   "decimal phase number": /^\d+\.[1-9]\d*$/,
@@ -172,7 +172,7 @@ export const SectionIds = {
   phases: "phases",
   questions: "decisions",
   judgements: "judgements",
-  caveats: "caveats",
+  todos: "todos",
   issues: "issues",
   tests: "tests",
   log: "log"
@@ -202,15 +202,17 @@ export const OVERVIEW_ID = "overview"
 /**
  * The sections that hold `<epic-item>`s => their items' id letter:  ONE element for every kind of item, its kind
  * its id's letter (Q11).
- * - Caveats hold the todos too (epic `epic-engine` P32, Q16):  work still to do, or (`<epic-item limit>`) a limit to
- *   know about;  tests are `t`, freed by the todos (`v`, "verify", before)
+ * - Todo holds the work still to do, and (`<epic-item limit>`) the limits to know about;  Manual tests are `m`
+ *   (epic `epic-engine` P44;  Owen, 2026-10-25:  "`Todo`, key T, `Manual tests` -- can we use `M`")
+ *   - before P44:  Caveats (`c`) and Tests (`t`);  before P32:  Todos (`t`), Caveats (`c`) and Tests (`v`)
+ *   - a comment's id took the `C` (`CommentList`):  it was `M`, for "mark"
  */
 export const ItemLetters = {
   questions: "q",
   judgements: "j",
-  caveats: "c",
+  todos: "t",
   issues: "i",
-  tests: "t"
+  tests: "m"
 } as const satisfies Partial<Record<PageSectionKind, string>>
 
 /** A section kind that holds items:  a key of `ItemLetters`. */

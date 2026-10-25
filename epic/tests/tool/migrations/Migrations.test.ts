@@ -24,12 +24,12 @@ describe("Migrations", () => {
     expect(Migrations.all.map((step) => step.name)).toEqual([
       "links-agree",
       "more-requests-first",
-      "caveats-and-tests",
       "took-as-minutes",
       "whole-phase-numbers",
       "taken-in-phase",
       "to-review-marks",
-      "changes-after-goal"
+      "changes-after-goal",
+      "item-renames"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
