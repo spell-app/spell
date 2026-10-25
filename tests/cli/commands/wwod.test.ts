@@ -59,6 +59,18 @@ describe("checkAgentRules()", () => {
     })
   })
 
+  // epic `coherence` P2:  the catalog names mechanisms anywhere, so a moved one must fail the check
+  test("the coherence catalog:  every FILE path it names, in any folder;  an import name isn't one", () => {
+    put("src/server/LiveReload.ts", "export class LiveReload {}\n")
+    put(
+      "agents/coherence/catalog.md",
+      "`src/server/LiveReload.ts`, `spell-epic/src/gone.mjs` and `spell-parser/parser`, the barrel.\n"
+    )
+    expect(checkAgentRules(CHECKOUT).problems.filter((each) => each.file.startsWith("agents/coherence"))).toEqual([
+      { file: "agents/coherence/catalog.md", line: 1, cite: "`spell-epic/src/gone.mjs`", problem: "no such path" }
+    ])
+  })
+
   // epic `epic-eject` P12:  no `guides` or `goals` link at the checkout's root
   test("the shared content folder's citers, named by their path there", () => {
     const content = realpathSync(mkdtempSync(join(tmpdir(), "agents-content-")))
