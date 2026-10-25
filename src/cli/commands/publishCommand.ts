@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs"
 import { join } from "node:path"
 
+import { kb } from "spell/util/number"
 import { readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
 import {
@@ -190,9 +191,4 @@ function packSummary(
 function checkLine(check: PublishCheck): string {
   const mark = check.ok ? chalk.green("  ✓") : chalk.red("  ✗")
   return `${mark} ${check.check}${check.detail ? chalk.dim(`  -- ${check.detail}`) : ""}`
-}
-
-/** Bytes as kB. */
-function kb(bytes: number): string {
-  return bytes > 1_000_000 ? `${(bytes / 1_000_000).toFixed(1)} MB` : `${Math.round(bytes / 1000)} kB`
 }

@@ -1,4 +1,5 @@
 import { PrefStore } from "spell/util/persist"
+import { escapeHTML } from "spell/util/string"
 import type { ServerConfig, ServerInfo } from "spell/server"
 import {
   DARK_QUERY,
@@ -205,15 +206,15 @@ export class SiteHeader extends HTMLElement {
         const href = this.href(tab)
         const current = tab === active ? ` aria-current="page"` : ""
         // its own tab:  `target` in a browser;  `data-spell-open` tells the side bar's frame (`liveClient.ts`)
-        const own = tab.ownTab ? ` target="spell-${escape(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
+        const own = tab.ownTab ? ` target="spell-${escapeHTML(tab.name.toLowerCase())}" data-spell-open="browser"` : ""
         return href
-          ? `<a class="tab" href="${escape(href)}"${current}${own}>${escape(tab.name)}</a>`
-          : `<span class="tab off" title="only when served:  spell server start">${escape(tab.name)}</span>`
+          ? `<a class="tab" href="${escapeHTML(href)}"${current}${own}>${escapeHTML(tab.name)}</a>`
+          : `<span class="tab off" title="only when served:  spell server start">${escapeHTML(tab.name)}</span>`
       })
       .join("")
     const checkout = this.info?.worktree ?? this.info?.branch
     const badge = checkout
-      ? `<span class="badge${this.info?.worktree ? " worktree" : ""}" title="${escape(this.info?.root ?? "")}">⎇ ${escape(checkout)}</span>`
+      ? `<span class="badge${this.info?.worktree ? " worktree" : ""}" title="${escapeHTML(this.info?.root ?? "")}">⎇ ${escapeHTML(checkout)}</span>`
       : ""
     // framed (VS Code's side bar):  no "open in VS Code" (a framed page can't follow a `vscode://` link)
     // and no edit mode -- they did nothing there (Owen, 2026-10-08);  a browser tab keeps both
@@ -223,7 +224,7 @@ export class SiteHeader extends HTMLElement {
     const noTools = this.hasAttribute("no-tools")
     const file = framed || noTools ? undefined : this.sourceFile
     const vscode = file
-      ? `<a class="tool" href="vscode://file${escape(encodeURI(file))}" title="Open the source in VS Code" aria-label="Open the source in VS Code">${ICONS.code}</a>`
+      ? `<a class="tool" href="vscode://file${escapeHTML(encodeURI(file))}" title="Open the source in VS Code" aria-label="Open the source in VS Code">${ICONS.code}</a>`
       : ""
     const canEdit = !framed && !noTools && Boolean(serverConfig()?.token)
     const editing = canEdit && readEdit()
@@ -235,7 +236,7 @@ export class SiteHeader extends HTMLElement {
     const themeLabel = this.themeLabel()
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
-  <a class="brand" part="brand" href="${escape(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
+  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }) ?? "#")}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
   <nav part="nav" aria-label="Site">${links}</nav>
   <span class="spacer"></span>
   ${badge}${edit}${vscode}
@@ -402,11 +403,6 @@ function installFavicon(): void {
   link.type = "image/svg+xml"
   link.href = `data:image/svg+xml,${encodeURIComponent(FAVICON_SVG)}`
   document.head.append(link)
-}
-
-/** `text` safe in HTML text and attributes. */
-function escape(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`)
 }
 
 /** Inline icons:  24-unit stroke SVGs, `currentColor`. */

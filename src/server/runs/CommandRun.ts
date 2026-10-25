@@ -2,6 +2,8 @@ import { spawn } from "node:child_process"
 import { existsSync, mkdirSync, rmSync, statSync, watch, type FSWatcher } from "node:fs"
 import { delimiter, join } from "node:path"
 
+import { slug } from "spell/util/string"
+import { compactTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
 import {
@@ -608,18 +610,10 @@ export class CommandRun {
   private static newId(runs: string, command: string): string {
     const words = command.split(/\s+/).filter(Boolean)
     const flag = words.findIndex((word) => word.startsWith("-"))
-    const slug =
-      (flag < 0 ? words : words.slice(0, flag))
-        .slice(0, 4)
-        .join("-")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "") || "run"
-    const now = new Date()
-    const two = (n: number) => String(n).padStart(2, "0")
-    const time = `${now.getFullYear()}${two(now.getMonth() + 1)}${two(now.getDate())}-${two(now.getHours())}${two(now.getMinutes())}`
+    const name = slug((flag < 0 ? words : words.slice(0, flag)).slice(0, 4).join(" "), { fallback: "run" })
+    const time = compactTime()
     for (let count = 1; ; count++) {
-      const id = `${slug}-${time}${count === 1 ? "" : `-${count}`}`
+      const id = `${name}-${time}${count === 1 ? "" : `-${count}`}`
       try {
         mkdirSync(join(runs, id))
         return id

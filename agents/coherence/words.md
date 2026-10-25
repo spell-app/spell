@@ -38,6 +38,13 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not:**  users.
 - **Decided:**  WWOD §3, "Naming":  its rule on people.
 
+### viewer
+
+- **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
+- **Not:**  reader, person.
+- **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
+  - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10.
+
 ### Booleans on an element
 
 - **Say:**  bare, as the platform's are, on a custom element's public side:  `open`, `disabled`, `readOnly`.
@@ -57,8 +64,6 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 Words a sweep found more than one of, still to decide.
 
-- **Who reads a page:**  viewer, reader or person?  Spell UI's docs code says "viewer" 51 times, "reader" 18,
-  "person" 10 (sweep 1).  A question on the coherence epic's page.
 - **show / hide:**  with open / close for every fold and overlay, is anything left that shows and hides?
   The brand pages' `shows` / `shown` states, and Spell UI's `ui-show` / `ui-hide` today, would move.
 

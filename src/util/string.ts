@@ -1,5 +1,7 @@
 /**
- * String helpers for names:  attribute <-> property case, Fomantic's number words, and "did you mean".
+ * String helpers:  attribute <-> property case, Fomantic's number words, "did you mean",
+ * slugs and accents, escaping (regular expressions, HTML), and indents.
+ * - Standalone:  no imports, so plain `node` loads it too (`spell/util/string.ts`).
  * - Case conversion is hand-rolled rather than lodash's `kebabCase` / `camelCase`:  lodash splits on digits
  *   (`"h1"` => `"h-1"`), which breaks round-tripping `activeIndex` <-> `active-index` for attribute names.
  * - Case conversions are memoized:  attribute names are converted on every `attributeChangedCallback`.
@@ -109,4 +111,118 @@ export function suggest(word: string, candidates: Iterable<string>, maxDistance 
     }
   }
   return best
+}
+
+////////////////
+// ## Slugs and accents
+////////////////
+
+/** How `slug()` makes its slug. */
+export type SlugOptions = {
+  /**
+   * Which rule (default `"id"`):
+   * - `"id"`:  an id or an address, ASCII only:  accents and apostrophes dropped, every other run of non-letters,
+   *   non-digits one `-`, none at the ends
+   * - `"github"`:  GitHub's heading anchor:  lower case, punctuation dropped, each space a `-`;
+   *   accented letters kept, runs of `-` too
+   */
+  as?: "id" | "github"
+  /** what an empty slug becomes, e.g. `"phase"`;  default `""` */
+  fallback?: string
+}
+
+/**
+ * `text` as a slug, e.g. `Café 2.0` => `cafe-2-0`, `Owen's <epic-link>` => `owens-epic-link`.
+ * - THE rule for ids (`PhaseIds.slugOf()`'s, moved here):  an id drops accents, so a title made into an id anywhere (phase ids, epic addresses,
+ *   Spell UI's contents and site index) agrees with every other place.
+ * - A markdown heading's anchor is GitHub's (`{ as: "github" }`):  `Café` => `café`, `A & B` => `a--b`,
+ *   so links into a README or a docs page land where GitHub's do.
+ * - NEVER throws
+ */
+export function slug(text: string, { as = "id", fallback = "" }: SlugOptions = {}): string {
+  const made =
+    as === "github"
+      ? text
+          .trim()
+          .toLowerCase()
+          .replace(/[^\p{L}\p{M}\p{N}\p{Pc}\- ]/gu, "")
+          .replace(/ /g, "-")
+      : withoutAccents(text.normalize("NFKD"))
+          .toLowerCase()
+          .replace(/['’]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+  return made || fallback
+}
+
+/** How `withoutAccents()` treats letters. */
+export type AccentOptions = {
+  /**
+   * letters whose marks stay, either case, e.g. `"ñü"` for Spanish keywords:  `año` stays `año`
+   * - default none
+   */
+  keep?: string
+}
+
+/**
+ * `text` with its accents and other marks dropped:  `Café` => `Cafe`, `naïve` => `naive`.
+ * - `keep`:  letters left as they are (`{ keep: "ñü" }`:  `pingüino` stays, `canción` => `cancion`)
+ * - Letters with no plain form (`ø`, `ß`) stay as they are.
+ */
+export function withoutAccents(text: string, { keep = "" }: AccentOptions = {}): string {
+  const kept = keep.normalize("NFC").toLowerCase()
+  return text
+    .normalize("NFC")
+    .replace(/\P{ASCII}/gu, (letter) =>
+      kept.includes(letter.toLowerCase()) ? letter : letter.normalize("NFD").replace(/\p{M}+/gu, "")
+    )
+}
+
+////////////////
+// ## Escaping
+////////////////
+
+/**
+ * `text` with every regular expression character escaped, to match it literally:  `a.b` => `a\.b`.
+ * - Ours rather than `RegExp.escape()`:  that one is too new for every browser we run in (coherence J8).
+ */
+export function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/** `text` safe in HTML text and in an attribute's value, either quote:  `&`, `<`, `>`, `"` and `'` escaped. */
+export function escapeHTML(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]!)
+}
+/** What `escapeHTML()` writes for each special character. */
+const HTML_ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
+
+////////////////
+// ## Indents
+////////////////
+
+/**
+ * `text` with the indent its lines share taken off, and its blank first and last lines dropped:
+ * for a template literal written indented in code.
+ * - spaces and tabs count alike, one each;  blank lines don't count
+ */
+export function dedent(text: string): string {
+  const lines = text.split("\n")
+  while (lines.length && !lines[0]!.trim()) lines.shift()
+  while (lines.length && !lines.at(-1)!.trim()) lines.pop()
+  const indents = lines.filter((line) => line.trim()).map((line) => /^[ \t]*/.exec(line)![0].length)
+  const shared = indents.length ? Math.min(...indents) : 0
+  return lines.map((line) => line.slice(shared)).join("\n")
+}
+
+/**
+ * `text` with each line indented by `indent`:  that text, or that many spaces.
+ * - blank lines (empty, or spaces only) are left as they are, so no line ends in spaces
+ */
+export function indented(text: string, indent: string | number): string {
+  const prefix = typeof indent === "number" ? " ".repeat(indent) : indent
+  return text
+    .split("\n")
+    .map((line) => (line.trim() ? `${prefix}${line}` : line))
+    .join("\n")
 }

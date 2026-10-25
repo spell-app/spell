@@ -307,6 +307,38 @@ What a component, or a page built on Spell UI, reaches for first.
   `ShapeCheck` (`spell-parser/src/spell/translate/ShapeCheck.ts`) to compare what two forms compile to
 - **Use it when:**  writing spell out in another language or form, or testing two forms say the same.
 
+## Small helpers (`spell/util`, epic `coherence` P6)
+
+Generic files:  Spell UI imports them one by one, so they reach any page.
+
+### Text
+
+- **It is:**  `slug(text, { as: "id" | "github" })` (an id drops accents and apostrophes;  a heading anchor keeps
+  accented letters, as GitHub does), `withoutAccents(text, { keep })`, `escapeRegExp()`, `escapeHTML()`, `dedent()`,
+  `indented()`:  `src/util/string.ts`
+- **Flag:**  `normalize\("NFD"\)|\\\$&|&amp;|toLowerCase\(\)\.replace\(/\[\^`
+- **Copies:**  left on purpose:  the parser's CommonMark `escapeHTML` (it leaves `'` alone, as the spec tests check);
+  TocIndex's apostrophe rule (its ids are saved);  `InboxPoller.mjs` (node's built-ins only)
+
+### Numbers
+
+- **It is:**  `clamp()`, `kb()` (one unit:  KB of 1024):  `src/util/number.ts`
+- **Flag:**  `Math\.min\(.*Math\.max\(|/ 1024`
+
+### Local dates and times
+
+- **It is:**  `localDate()`, `clockTime()`, `localMinutes()`, `localTime()` ...:  `src/util/time.ts`, standalone, so
+  plain `node` loads it by its name with `.ts`
+- **Use it when:**  any date or time a person reads, or a file is named by.  NEVER `toISOString().slice(0, 10)` for a
+  local date:  it's UTC, tomorrow in the evening west of Greenwich.
+- **Flag:**  `toISOString\(\)\.slice\(0, ?10\)|padStart\(2, "0"\)`
+- **Copies:**  fine:  spell-app's people days, saved as UTC midnight on purpose
+
+### Colour
+
+- **It is:**  OKLCH and sRGB, hex, gamut clipping, luminance, contrast:  `src/util/color.ts`
+- **Flag:**  `0\.4122214708|0\.2126`
+
 ## Showing and hiding
 
 ### A fold:  open and closed
@@ -336,11 +368,6 @@ code (epic `coherence`, Q4 and Q5).
   `aria-expanded`, and find-in-page opening it;  each fold above takes it, and fold-all / open-all are built on it.
   - sweep 1 added:  four popover panels in Spell UI (dropdown, calendar, search, icon picker), six overlays'
     animations, ten fold buttons in the epic pages
-- **Small string helpers,** in `spell/util`:  a slug from a title (8 copies, 4 rules), `escapeRegExp` (16),
-  `escapeHTML` (7), `withoutAccents` (9), `dedent` / `indented` (9), a size in KB (7, in two units), `clamp` (14).
-  Generic ones, so Spell UI may import them file by file.
-- **A local time stamp:**  15 copies in spell-epic and the kit;  three write the UTC date (tomorrow, in the evening).
-- **Colour maths:**  OKLCH, sRGB, contrast:  four copies (Spell UI's styles and tools, the brand, the kit's A11y).
 - **A headless page check:**  open a page in chromium, collect its errors, wait for it to settle:  15 copies.
 - **A draft that saves itself:**  seven in the epic pages.
 - **Loading once per key:**  `Map<key, Promise>`, eight in Spell UI, four ways of handling a failure.

@@ -1,6 +1,7 @@
 /**
  * Barrel for `spell/util` -- helpers shared by `ui`, `spell` and `cli`, in four layers.
- * - GENERIC (the files beside this one):  `@proto`, class, name-case string and shadow-aware DOM helpers.
+ * - GENERIC (the files beside this one):  `@proto`, class, string (case, slugs, escaping, indents) and shadow-aware
+ *   DOM helpers;  numbers (`clamp()`, `kb()`), local time stamps, colour maths.
  *   - No runtime dependencies:  safe anywhere, including `*.types.ts` files and SSR / node tooling.
  *   - `spell-ui` is published, and bundles what it imports from here.
  * - REACTIVE (`./reactive`):  the reactive engine every reactive class shares --
@@ -25,6 +26,9 @@ export * from "./class"
 export * from "./decorators"
 export * from "./string"
 export * from "./dom"
+export * from "./number"
+export * from "./time"
+export * from "./color"
 
 export * from "./reactive"
 export * from "./persist"

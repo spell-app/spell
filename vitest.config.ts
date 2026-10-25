@@ -16,7 +16,7 @@ import { packageVersion } from "spell/toolchain/packageVersion"
  *   - `util`'s:  `dom.test.ts` needs shadow roots and a custom element registry, and `decorators.test.ts` proves
  *     `@proto` after esbuild lowers standard decorators.
  *   - `element`'s:  its elements drawn with NO Spell UI on the page, on the stand-in settings of `TestSettings.ts`.
- * - Every other project runs in node:  `util:node` (util's `spell/`, `reactive/` and `node/`), `server`,
+ * - Every other project runs in node:  `util:node` (util's `spell/`, `reactive/` and `node/`, and `time.ts`), `server`,
  *   `element-tools`, `cli`, `toolchain`, and the glue `tools/`.
  * - `readme`:  every README example, run (`tools/readme-test.ts`);  its tests skip themselves unless
  *   `yarn readme:test` asks for them, since they need every repo cloned.
@@ -30,8 +30,11 @@ const KIT = import.meta.dirname
 /** Packages that MUST resolve to one copy:  two Solids can't share owners. */
 const SOLID_DEDUPE = ["solid-js", "@solidjs/web"]
 
-/** util's node-only tests:  `src/util/spell/`, `reactive/` and `node/`. */
-const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.test.ts"]
+/**
+ * util's node-only tests:  `src/util/spell/`, `reactive/` and `node/`;
+ * and `time.ts`'s, which set the time zone (`process.env.TZ`):  only node lets a test do that.
+ */
+const UTIL_NODE = ["spell/**/*.test.ts", "reactive/**/*.test.ts", "node/**/*.test.ts", "time.test.ts"]
 
 export default defineConfig({
   test: {
