@@ -803,32 +803,32 @@
               <ui-docs-example>
                 <p slot="description">
                   A breadcrumb is used to show hierarchy between content.
-                  <a href="ui-breadcrumb.html">Breadcrumb page</a>
+                  <a href="ui-breadcrumbs.html">Breadcrumb page</a>
                 </p>
-                <ui-breadcrumb aria-label="Breadcrumb demo">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Breadcrumb demo">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
               <ui-docs-example description="Semantic list, token divider">
-                <ui-breadcrumb aria-label="Token divider demo">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
-                <ui-breadcrumb aria-label="Custom divider demo" divider="›">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#store">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Token divider demo">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
+                <ui-breadcrumbs aria-label="Custom divider demo" divider="›">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#store">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
               <ui-docs-example description="Icon divider">
-                <ui-breadcrumb aria-label="Icon divider demo" divider-icon="chevron right">
-                  <ui-breadcrumb-section link="#home">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#registration">Registration</ui-breadcrumb-section>
-                  <ui-breadcrumb-section selected>Personal Information</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Icon divider demo" divider-icon="chevron right">
+                  <ui-breadcrumb link="#home">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#registration">Registration</ui-breadcrumb>
+                  <ui-breadcrumb selected>Personal Information</ui-breadcrumb>
+                </ui-breadcrumbs>
               </ui-docs-example>
             </ui-section>
 
@@ -1688,7 +1688,7 @@
               <ui-docs-example description="One part, with the page's styles">
                 <ui-include
                   source="examples/release-notes.html"
-                  select="#notes"
+                  selector="#notes"
                   page-styles
                 ></ui-include>
               </ui-docs-example>

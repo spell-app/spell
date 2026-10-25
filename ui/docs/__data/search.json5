@@ -441,10 +441,10 @@
       ]
     },
     {
-      "path": "ui-breadcrumb.html",
+      "path": "ui-breadcrumbs.html",
       "title": "Breadcrumb",
       "summary": "A breadcrumb is used to show hierarchy between content.",
-      "tag": "ui-breadcrumb",
+      "tag": "ui-breadcrumbs",
       "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
       "sections": [
         {"id":"examples-types","title":"Types","tab":"examples"},

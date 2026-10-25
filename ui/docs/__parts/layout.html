@@ -3,7 +3,7 @@
   The Spell UI site's LAYOUT:  every page's chrome, written ONCE.  A page's own file holds only its `<head>` and
   `<main id="main" class="site-main">`;  the site bundle wraps that `main` in this file's `<body>` on first load
   (`site/_src/SiteShell.ts`), and from then on the router (`site/_src/SiteRouter.ts`) swaps
-  only the `main`, through a `<ui-include select="main#main">` in `.site-content`, while everything here stays on
+  only the `main`, through a `<ui-include selector="main#main">` in `.site-content`, while everything here stays on
   screen.
   - Relative URLs here are against THIS file (`_parts/`):  the shell makes them absolute as it mounts, so they hold
     whichever page is shown.

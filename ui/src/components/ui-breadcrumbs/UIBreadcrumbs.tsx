@@ -2,16 +2,16 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
 import { BreadcrumbDivider } from "./BreadcrumbDivider"
-import { breadcrumbVocabulary } from "./UIBreadcrumb.en"
+import { breadcrumbsVocabulary } from "./UIBreadcrumbs.en"
 
-import breadcrumbCSS from "./UIBreadcrumb.css?inline"
+import breadcrumbCSS from "./UIBreadcrumbs.css?inline"
 
 /****************
- * ### `UIBreadcrumb`
- * The component behind `<ui-breadcrumb>`:  a trail of links to the pages above this one, in WAI-ARIA's pattern.
+ * ### `UIBreadcrumbs`
+ * The component behind `<ui-breadcrumbs>`:  a trail of links to the pages above this one, in WAI-ARIA's pattern.
  *
  * - Its shadow DOM is `<nav class="ui … breadcrumb" part="breadcrumb" aria-label>`,
- *   around `<ol part="list"><slot></slot></ol>`:  the `<ui-breadcrumb-section>`s are its list items.
+ *   around `<ol part="list"><slot></slot></ol>`:  the `<ui-breadcrumb>`s are its list items.
  *
  * - Dividers:  each section draws its OWN leading divider,
  *   from inherited tokens this component publishes INLINE on its box (`UIT.BreadcrumbDividerTokens`),
@@ -26,8 +26,8 @@ import breadcrumbCSS from "./UIBreadcrumb.css?inline"
  * - `aria-label`:  the element's, moved to the `<nav>` (two trails on one page need distinct landmark names),
  *   else the translated `label` text ("Breadcrumb").
  ****************/
-export class UIBreadcrumb extends E.UIComponent<typeof breadcrumbVocabulary> {
-  @E.proto static vocabulary = breadcrumbVocabulary
+export class UIBreadcrumbs extends E.UIComponent<typeof breadcrumbsVocabulary> {
+  @E.proto static vocabulary = breadcrumbsVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { breadcrumb: breadcrumbCSS },
     delegatesFocus: false
@@ -84,7 +84,7 @@ export class UIBreadcrumb extends E.UIComponent<typeof breadcrumbVocabulary> {
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
-export interface UIBreadcrumb extends E.AttributeValues<typeof breadcrumbVocabulary> {}
+export interface UIBreadcrumbs extends E.AttributeValues<typeof breadcrumbsVocabulary> {}
 
 /** `--_ui-breadcrumb-divider-layout` while an icon divider is set. */
 const ICON_LAYOUT = "icon"

@@ -10,7 +10,7 @@ import { PAGE_MAIN } from "./site.types"
 /****************
  * ### `SiteRouter`
  * Moves between the site's pages WITHOUT leaving the layout:  a click on a link to another page of the site swaps
- * only the page's `main`, through a `<ui-include select="main#main">` in the layout's content box, and
+ * only the page's `main`, through a `<ui-include selector="main#main">` in the layout's content box, and
  * `history.pushState`s the page's real URL.  Back / forward swap it back.
  * - Each swap:  the new page's text is fetched (`UI.sources`, cached), the families it uses loaded, THEN the include
  *   pointed at it, so it goes in already defined;  inside a View Transition where the browser has them.

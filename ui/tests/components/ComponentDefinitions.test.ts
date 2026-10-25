@@ -52,7 +52,7 @@ describe("ComponentDefinitions", () => {
 
   it("puts a folder's main tag first, and names tags readably", () => {
     expect(ComponentDefinitions.byFolder().get("ui-button")?.[0]?.tag).toBe("ui-button")
-    expect(ComponentDefinitions.nameOf("ui-breadcrumb-section")).toBe("Breadcrumb section")
+    expect(ComponentDefinitions.nameOf("ui-property-editor")).toBe("Property editor")
     expect(ComponentDefinitions.byTag("ui-or")?.folder).toBe("ui-button")
   })
 })

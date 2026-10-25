@@ -1,23 +1,23 @@
 /**
- * The English vocabulary of `<ui-breadcrumb>`:  every name the tag uses.
+ * The English vocabulary of `<ui-breadcrumbs>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The family's attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-breadcrumb size="large" inverted>` => `ui large inverted breadcrumb`;
- *   `<ui-breadcrumb-section active>` => `active section` (no `ui`:  Fomantic styles sections by context).
+ *   `<ui-breadcrumbs size="large" inverted>` => `ui large inverted breadcrumb`;
+ *   `<ui-breadcrumb active>` => `active section` (no `ui`:  Fomantic styles sections by context).
  * - Each section draws its divider, from tokens the breadcrumb publishes
- *   (`--ui-breadcrumb-divider*`, `BreadcrumbDividerTokens`):  see `UIBreadcrumb.css`.
+ *   (`--ui-breadcrumb-divider*`, `BreadcrumbDividerTokens`):  see `UIBreadcrumbs.css`.
  */
 
 import type { E } from "spell-ui/core"
 
 /****************
- * ### `breadcrumbVocabulary`
- * The names of `<ui-breadcrumb>`, a breadcrumb trail:
+ * ### `breadcrumbsVocabulary`
+ * The names of `<ui-breadcrumbs>`, a breadcrumb trail:
  * `<nav class="ui … breadcrumb" aria-label>` around an `<ol>` of sections.
  ****************/
-export const breadcrumbVocabulary = {
-  tag: "ui-breadcrumb",
+export const breadcrumbsVocabulary = {
+  tag: "ui-breadcrumbs",
   topics: ["navigation", "basic", "collections"],
   aka: ["crumbs", "path", "trail", "location"],
   skeleton: "medium line",
@@ -47,7 +47,7 @@ export const breadcrumbVocabulary = {
     }
   ],
   events: [],
-  slots: [{ name: "", description: "`<ui-breadcrumb-section>`s, in order." }],
+  slots: [{ name: "", description: "`<ui-breadcrumb>`s, in order." }],
   parts: [
     { name: "breadcrumb", description: "The `<nav>` box." },
     { name: "list", description: "The `<ol>` the sections are items of." }

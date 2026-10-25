@@ -234,7 +234,7 @@ Pieces made of several kinds of part.
 
 | Picture | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- | --- |
-| <img src="docs/images/components/ui-breadcrumb.png" alt="Breadcrumb, its first example" width="179" height="28"> | [Breadcrumb](docs/ui-breadcrumb.html) | `<ui-breadcrumb>` `<ui-breadcrumb-section>` | A breadcrumb is used to show hierarchy between content. | crumbs, path, trail, location |
+| <img src="docs/images/components/ui-breadcrumbs.png" alt="Breadcrumb, its first example" width="179" height="28"> | [Breadcrumb](docs/ui-breadcrumbs.html) | `<ui-breadcrumbs>` `<ui-breadcrumb>` | A breadcrumb is used to show hierarchy between content. | crumbs, path, trail, location |
 | <img src="docs/images/components/ui-form.png" alt="Form, its first example" width="200" height="78"> | [Form](docs/ui-form.html) | `<ui-form>` `<ui-field>` `<ui-fields>` `<ui-repeat>` | A form displays a set of related input fields in a structured way. | form layout, fieldset, validation |
 |  | [Grid](docs/ui-grid.html) | `<ui-grid>` `<ui-column>` `<ui-row>` | A grid is used to harmonize negative space in a layout. | columns, row, flex grid, layout grid |
 | <img src="docs/images/components/ui-menu.png" alt="Menu, its first example" width="200" height="18"> | [Menu](docs/ui-menu.html) | `<ui-menu>` | A menu displays grouped navigation actions. | navbar, nav, tabs bar, toolbar |

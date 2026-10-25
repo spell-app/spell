@@ -9,7 +9,7 @@ import { avatarVocabulary } from "./UIAvatar.en"
  * The component behind `<ui-avatar>`:  a small picture of a person,
  * `<span class="avatar"><img part="image" alt=""></span>` from `src`, else the default slot (a slotted `<img>`).
  *
- * - `alt` defaults to `""`:  the person's name is almost always right next to it.
+ * - `tooltip` is the picture's tooltip and its `alt`, by default `""`:  the person's name is almost always right next to it.
  ****************/
 export class UIAvatar extends E.PartComponent<typeof avatarVocabulary> {
   @E.proto static vocabulary = avatarVocabulary
@@ -21,7 +21,7 @@ export class UIAvatar extends E.PartComponent<typeof avatarVocabulary> {
   protected content(): JSX.Element {
     return (
       <Show when={this.src} fallback={<slot />}>
-        <img src={this.src} alt={this.alt ?? ""} part={this.partForName("image")} />
+        <img src={this.src} alt={this.tooltip ?? ""} title={this.tooltip} part={this.partForName("image")} />
       </Show>
     )
   }

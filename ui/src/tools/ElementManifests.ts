@@ -247,7 +247,7 @@ export class ElementManifests {
   }
 
   /**
-   * `tag`'s class name, by `FamilyFiles.stem()`'s rule:  `ui-breadcrumb-section` => `UIBreadcrumbSection`.
+   * `tag`'s class name, by `FamilyFiles.stem()`'s rule:  `ui-breadcrumb` => `UIBreadcrumb`.
    * - Any set's prefix:  `brand-blob` => `BrandBlob`.
    * - Checked against its family folder, for a file of that name.
    * - Else the class the family barrel names ending in `<Name>`:  `ui-event` => `UIFeedEvent`.
@@ -634,7 +634,7 @@ export class ElementManifests {
     return `An old name:  write \`${instead}\`.  It still works until every page is rewritten.`
   }
 
-  /** `ui-breadcrumb-section` => `BreadcrumbSection`. */
+  /** `ui-breadcrumb` => `BreadcrumbSection`. */
   static pascal(tag: string): string {
     return tag
       .replace(/^ui-/, "")
