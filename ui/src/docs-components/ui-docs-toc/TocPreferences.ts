@@ -4,8 +4,8 @@ import { TOC_ALL_FOLDS, TOC_PREFS, type TocAllFolds, type TocFolds } from "./UID
 
 /****************
  * ### `TocPreferences`
- * The reader's folds in a table of contents, kept in this browser (`localStorage`, through `PrefStore`).
- * - Expand all / collapse all (`all()`):  ONE for every page, until the reader presses the other
+ * The viewer's folds in a table of contents, kept in this browser (`localStorage`, through `PrefStore`).
+ * - Expand all / collapse all (`all()`):  ONE for every page, until the viewer presses the other
  *   (Owen, 2026-10-25:  "keep if I've said 'expand all' -- I probably want that on other pages").
  * - A section folded or opened by hand (`foldsFor()`):  per page, by its path.
  * - Where storage is blocked (a private window), kept for this page only;  NEVER throws.
@@ -23,14 +23,14 @@ export class TocPreferences {
     TocPreferences.store.set(TOC_PREFS.all, all)
   }
 
-  /** The reader's own folds on the page at `path`;  `{}` when none, or a value it can't read. */
+  /** The viewer's own folds on the page at `path`;  `{}` when none, or a value it can't read. */
   static foldsFor(path: string): TocFolds {
     const value = TocPreferences.store.get(TOC_PREFS.folds + path)
     if (!value || typeof value !== "object" || Array.isArray(value)) return {}
     return Object.fromEntries(Object.entries(value).filter(([, open]) => typeof open === "boolean")) as TocFolds
   }
 
-  /** Keep the reader's folds on the page at `path`;  none forgets them. */
+  /** Keep the viewer's folds on the page at `path`;  none forgets them. */
   static setFoldsFor(path: string, folds: TocFolds): void {
     TocPreferences.store.set(TOC_PREFS.folds + path, Object.keys(folds).length ? folds : undefined)
   }

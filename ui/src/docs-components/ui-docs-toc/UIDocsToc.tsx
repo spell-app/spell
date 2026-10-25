@@ -31,7 +31,7 @@ import tocCSS from "./UIDocsToc.css?inline"
  *   - Each section is a `<div part="section-row">`:  its fold `<button part="fold">` (when it has entries), its link.
  *   - Under an open section, an item holds a `<ui-menu part="entries">` of its entries' links.
  * - Folds (Owen, 2026-10-25, r31:  "Make these TOCs expandable with a expandall/collapseall icon in the header"):
- *   - a section the reader folded or opened by hand stays so (`handFolds`, kept per page)
+ *   - a section the viewer folded or opened by hand stays so (`handFolds`, kept per page)
  *   - else what the header's toggle last did, on ANY page (`allFolds`, one for this browser)
  *   - else `expanded`, else open while it's in view (P38's J128)
  *   - kept through `TocPreferences`, read again on every connect:  a page move makes a new toc
@@ -54,7 +54,7 @@ import tocCSS from "./UIDocsToc.css?inline"
  *   (a `ResizeObserver`:  components drawing late move the headings without any scroll).
  * - SIDE EFFECTS:
  *   - gives each listed heading / example without an `id` one (a slug of its text), so its link works
- *   - the reader's folds, in `localStorage` (`TocPreferences`)
+ *   - the viewer's folds, in `localStorage` (`TocPreferences`)
  *   - while connected:  `window` `scroll` / `resize` / `hashchange` listeners, and the two observers.
  ****************/
 export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
@@ -99,13 +99,13 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
   // ## Folds
   ////////////////
 
-  /** The reader's own folds on this page, by section id (`TocPreferences.foldsFor()`). */
+  /** The viewer's own folds on this page, by section id (`TocPreferences.foldsFor()`). */
   @E.state accessor handFolds: TocFolds = {}
 
   /** What the header's toggle last did, on any page;  `undefined` until it's pressed. */
   @E.state accessor allFolds: TocAllFolds | undefined = undefined
 
-  /** Is `section`'s list open?  The reader's own fold, else the toggle's, else `expanded`, else while it's in view. */
+  /** Is `section`'s list open?  The viewer's own fold, else the toggle's, else `expanded`, else while it's in view. */
   isSectionOpen(section: TocSection): boolean {
     const own = this.handFolds[section.id]
     if (own !== undefined) return own

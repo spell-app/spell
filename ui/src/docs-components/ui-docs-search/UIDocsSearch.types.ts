@@ -29,7 +29,7 @@ export const SearchKinds = ["here", "component", "page", "section", "attribute"]
 export type SearchKind = (typeof SearchKinds)[number]
 
 /**
- * Weight of each kind's score:  the page shown first, then what a reader most likely means;
+ * Weight of each kind's score:  the page shown first, then what a viewer most likely means;
  * an attribute never outranks a section of the same name (dozens of tags share `vertical`, `size` ...).
  */
 export const KIND_WEIGHT: Readonly<Record<SearchKind, number>> = {
