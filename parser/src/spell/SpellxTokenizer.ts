@@ -39,7 +39,7 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (!words) throw new TypeError("SpellxTokenizer():  no language has spellx's words;  English's should")
     this.words = words
     // each file starts with no tag open;  one still open at its end was never closed
-    const tokenizeFile = this.tokenize
+    const tokenizeFile = (this.tokenizeText = this.tokenize)
     this.tokenize = (text: string, start?: number, end?: number) => {
       this.frames = []
       this.inlineCloser = undefined
@@ -55,6 +55,28 @@ export class SpellxTokenizer extends P.Tokenizer {
     const groupLines = this.breakIntoIndentedBlocks
     this.breakIntoIndentedBlocks = (tokens: P.Token[]) => groupLines(tokens).map(unwrapCode)
   }
+
+  /**
+   * Tokenize ONE line of a file, `line`, read with the tags `open` before it:  for colouring a file line by line,
+   * as the editor app's Monaco does.
+   * - Returns its tokens, and the tags open after it:  the next line's `open`.
+   * - `open` is never changed.
+   * - No line is checked against the file's end:  a tag still open isn't an error here.
+   * - A tag's head over several lines is read a line at a time, so it's unclosed on its first.
+   */
+  tokenizeLine(line: string, open: readonly SpellxOpenTag[] = []): { tokens: P.Token[]; open: SpellxOpenTag[] } {
+    this.frames = open.map((tag) => ({ ...tag }))
+    this.inlineCloser = undefined
+    this.closedChain = undefined
+    this.lineError = undefined
+    const tokens = this.tokenizeText(line)
+    const after = this.frames
+    this.frames = []
+    return { tokens, open: after }
+  }
+
+  /** Spell's own `tokenize()`, before ours wraps it for a whole file:  see `tokenizeLine()`. */
+  private tokenizeText!: P.Tokenizer["tokenize"]
 
   /** The tags open at the line being read, outermost first. */
   private frames: Frame[] = []
@@ -683,6 +705,9 @@ function unwrapCode(block: P.BlockToken): P.BlockToken {
   }
   return block
 }
+
+/** A tag open where a line starts:  what `SpellxTokenizer.tokenizeLine()` takes and returns. */
+export type SpellxOpenTag = Frame
 
 /** A tag open while a file is tokenized. */
 type Frame = TagWord & {
