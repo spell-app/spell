@@ -78,7 +78,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.
-      - While the reader types in a field, an "Updated:  reload" pill waits;  it reloads once focus leaves the field.
+      - NEVER in front of the reader (epic `epic-engine` I116):  a page in view shows an "Updated:  reload" pill, and
+        reloads the moment it's out of sight (`visibilitychange`), or on a click;  one out of sight reloads at once.
+      - A file rewritten with the same contents (a rebuilt bundle, a `touch`) isn't reported at all (`LiveReload`).
     - A worktree's pages on the main server (`/worktrees/<w>/`):
       epics' `RunningEpics` reports that worktree's docs assets and packs too.
       - It reports them as `/.claude/worktrees/<w>/...`, the path the live client reads them under (`servedPath()`).

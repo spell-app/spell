@@ -57,6 +57,8 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 Words a sweep found more than one of, still to decide.
 
+- **Who reads a page:**  viewer, reader or person?  Spell UI's docs code says "viewer" 51 times, "reader" 18,
+  "person" 10 (sweep 1).  A question on the coherence epic's page.
 - **show / hide:**  with open / close for every fold and overlay, is anything left that shows and hides?
   The brand pages' `shows` / `shown` states, and Spell UI's `ui-show` / `ui-hide` today, would move.
 

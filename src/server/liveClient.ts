@@ -132,12 +132,14 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  *     new code itself takes it, and doesn't reload (a rebuilt component pack swapped in place, epic `epic-engine` I116)
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
- *   - ONE reload, half a second after the last change (a build writes many files), through `reloadGate()`
- *   - not while the reader types in a field:  a small "Updated:  reload" pill says a reload waits,
- *     and it comes once focus leaves the field (or on a click on the pill)
+ *   - half a second after the last change (a build writes many files), through `reloadGate()`
+ *   - NEVER a reload the reader sees (epic `epic-engine` I116;  Owen, 2026-10-25:  "This is really, really, REALLY
+ *     bugging me"):  a page in view keeps its old code, a small "Updated" pill says new code waits, and it reloads
+ *     the moment it's out of sight (another tab, VS Code's view hidden:  `visibilitychange`), or on a click on the pill
+ *   - one out of sight already reloads at once, keeping its place
  *   - any other `.js` (a repo tool) is none of the page's business
  * - the server restarted (its socket says `hello` from another `run`):
- *   reloads the same way, for the new `/api/server/live.js` and write token
+ *   reloads the same way, out of sight, for the new `/api/server/live.js` and write token
  * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
@@ -201,11 +203,16 @@ export function liveClient(): void {
   const changedScripts = new Set<string>()
   // the server restarted since:  the page reloads whatever it takes, for the new client and write token
   let restarted = false
+  // new code the page couldn't take waits for a reload:  it comes once the page is out of sight (`reloadUnseen()`)
+  let stale = false
   const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload, waiting: showPill })
 
   restoreScroll()
   watchFetches()
   addEventListener("focusout", () => gate.settle(), true)
+  document.addEventListener("visibilitychange", () => {
+    if (stale && document.visibilityState === "hidden") reload()
+  })
   config.takeScroll = () => {
     const y = savedScroll
     savedScroll = undefined
@@ -280,7 +287,7 @@ export function liveClient(): void {
       }
     }
     const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded() })
-    if (action === "page") updating = updating.then(updatePage).catch(reload)
+    if (action === "page") updating = updating.then(updatePage).catch(reloadUnseen)
     else if (action === "style") swapStyles(path)
     else if (action === "script") {
       changedScripts.add(path)
@@ -351,7 +358,17 @@ export function liveClient(): void {
     })
     if (!restarted && paths.length && !dispatchEvent(offer)) return
     restarted = false
-    reload()
+    reloadUnseen()
+  }
+
+  /**
+   * Reload for new code, but never in front of the reader (I116):  at once when the page is out of sight, else
+   * the "Updated" pill, and the reload when it next goes out of sight (or a click on the pill).
+   */
+  function reloadUnseen() {
+    if (document.visibilityState === "hidden") return reload()
+    stale = true
+    showPill(true)
   }
 
   function reload() {
@@ -480,7 +497,8 @@ export function liveClient(): void {
     pill.dataset.spellAdded = ""
     pill.type = "button"
     pill.textContent = "Updated:  reload"
-    pill.title = "This page's code changed.  It reloads, keeping its place, once you leave the field you're typing in."
+    pill.title =
+      "This page's code changed.  It reloads by itself, keeping its place, once it's out of sight;  click to reload now."
     pill.style.cssText =
       "position:fixed;bottom:12px;right:12px;z-index:2147483647;padding:4px 10px;border:0;border-radius:999px;" +
       "background:#1e70bf;color:#fff;font:12px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgb(0 0 0 / 25%)"

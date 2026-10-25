@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto"
-import { statSync, watch, type FSWatcher } from "node:fs"
+import { createHash, randomUUID } from "node:crypto"
+import { readFileSync, statSync, watch, type FSWatcher } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
@@ -21,6 +21,8 @@ import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
  * - websockets, not server-sent events:  an `EventSource` holds one of Chrome's 6 connections per host for good,
  *   and every VS Code window shares them (see `webSocket.ts`)
  * - a write is often two (write, then a formatter), so each path waits `debounce` ms (250) for quiet
+ * - a file rewritten with the SAME contents (a build that made the same bundle, a `touch`, a checkout) is not reported
+ *   once it's been seen:  every report is a page's reason to reload (epic `epic-engine` I116)
  * - a ping every `heartbeat` ms (30s) keeps proxies and sleeping laptops from dropping the socket
  * - never reports dot files, `node_modules`, lock files or editor temp files
  * - From the goals server's `/api/events`.
@@ -46,6 +48,9 @@ export class LiveReload {
 
   /** pending reports, by URL path */
   private timers = new Map<string, NodeJS.Timeout>()
+
+  /** each reported file's contents when last reported, a hash, by absolute path (`sameAsReported()`) */
+  private reported = new Map<string, string>()
 
   /** keeps sockets alive */
   private beat?: NodeJS.Timeout
@@ -122,10 +127,33 @@ export class LiveReload {
       path,
       setTimeout(() => {
         this.timers.delete(path)
-        this.send("change", { path })
+        if (!this.sameAsReported(file, path)) this.send("change", { path })
       }, this.debounce)
     )
   }
+
+  /**
+   * Does `file` hold what it held when it was last reported at `path`?  Records it now when not.
+   * - a file not seen before, gone, or too big to read (`HASH_LIMIT`) is never the same:  it's reported
+   * - by served path too:  a file served at several places (a worktree's address) is reported at each
+   */
+  private sameAsReported(file: string, path: string): boolean {
+    let hash: string | undefined
+    try {
+      if ((statSync(file, { throwIfNoEntry: false })?.size ?? Infinity) <= LiveReload.HASH_LIMIT)
+        hash = createHash("sha1").update(readFileSync(file)).digest("hex")
+    } catch {
+      // unreadable:  reported
+    }
+    const key = `${file}\0${path}`
+    const same = hash !== undefined && this.reported.get(key) === hash
+    if (hash === undefined) this.reported.delete(key)
+    else this.reported.set(key, hash)
+    return same
+  }
+
+  /** the largest file whose contents are compared before a report (`sameAsReported()`), in bytes */
+  static readonly HASH_LIMIT = 32 * 1024 * 1024
 
   /** send event `event` with JSON `data` to every page now */
   send(event: string, data: unknown): void {
