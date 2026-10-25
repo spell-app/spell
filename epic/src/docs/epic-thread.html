@@ -120,7 +120,7 @@
                 </thead>
                 <tbody>
                   <tr><td><code>comment</code></td><td>JSON (a property)</td><td>The comment, as <code>GET /api/docs/comments</code> answers it:  <code>id</code>, <code>text</code>, <code>at</code>, <code>status</code>, <code>turn</code>, <code>replies</code>, <code>working</code>, <code>done</code>, <code>taken</code>, and where it is.</td></tr>
-                  <tr><td><code>open</code></td><td>boolean</td><td>Unfolded. A click on its header flips it, and says so (<code>epic-thread-fold</code>).</td></tr>
+                  <tr><td><code>open</code></td><td>boolean</td><td>Unfolded. A click on its header flips it, and says so (<code>epic-thread-opened</code> / <code>epic-thread-closed</code>).</td></tr>
                   <tr><td><code>unseen</code></td><td>boolean</td><td>Orange:  Claude spoke last and Owen hasn't answered yet.</td></tr>
                   <tr><td><code>moved</code></td><td>boolean</td><td>Its block changed since:  it says what it was on.</td></tr>
                   <tr><td><code>boxed</code></td><td><code>first</code> or <code>pending</code></td><td>Owen's words now in the box under it (his first words, or his pending reply), left out of the messages.</td></tr>
@@ -136,10 +136,10 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-thread-fold</code></td><td><code>{ open }</code></td><td>Owen clicked its header.</td></tr>
-                  <tr><td><code>epic-thread-edit</code></td><td><code>{}</code></td><td>The pen.</td></tr>
-                  <tr><td><code>epic-thread-delete</code></td><td><code>{}</code></td><td>The trash.</td></tr>
-                  <tr><td><code>epic-thread-answer</code></td><td><code>{ act }</code></td><td>Its review pills:  <code>good</code>, <code>reply</code>, <code>skip</code>;  <code>reopen</code> once done.</td></tr>
+                  <tr><td><code>epic-thread-opened</code> / <code>epic-thread-closed</code></td><td><code>{ open }</code></td><td>Owen clicked its header:  it unfolded / folded.</td></tr>
+                  <tr><td><code>epic-thread-editing</code></td><td><code>{}</code></td><td>The pen.</td></tr>
+                  <tr><td><code>epic-thread-removing</code></td><td><code>{}</code></td><td>The trash.</td></tr>
+                  <tr><td><code>epic-thread-answered</code></td><td><code>{ act }</code></td><td>Its review pills:  <code>good</code>, <code>reply</code>, <code>skip</code>;  <code>reopen</code> once done.</td></tr>
                 </tbody>
               </table>
             </ui-table>

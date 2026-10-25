@@ -96,7 +96,7 @@ describe("<epic-card>", () => {
       .spyOn(globalThis, "fetch")
       .mockImplementation(async () => new Response(JSON.stringify({ favorites: ["other", "seo"] })))
     const heard = vi.fn()
-    card.addEventListener("epic-favorite", (event) => heard((event as CustomEvent).detail))
+    card.addEventListener("epic-starred", (event) => heard((event as CustomEvent).detail))
     ;(button as HTMLElement).click()
     expect(card.hasAttribute("favorite")).toBe(true)
     await vi.waitFor(() => expect(heard).toHaveBeenCalled())

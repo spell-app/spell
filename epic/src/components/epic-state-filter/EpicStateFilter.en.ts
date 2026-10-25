@@ -22,7 +22,7 @@ export const epicStateFilterVocabulary = {
   description:
     "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill " +
     "per state the items are in, in the state's colour, with how many;  solid while that state's items show, " +
-    "outlined while hidden.  A click asks its owner to filter (`epic-state-pick`), which sets `shown`:  an item " +
+    "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
     "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.",
   attributes: [
@@ -42,7 +42,7 @@ export const epicStateFilterVocabulary = {
   ],
   events: [
     {
-      name: "epic-state-pick",
+      name: "epic-state-changed",
       detail: "{ state, shown }",
       description:
         "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  " +

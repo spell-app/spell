@@ -37,14 +37,19 @@ export const epicPageNoteHeadVocabulary = {
     {
       name: "open",
       kind: "boolean",
-      description: "The note is open:  its preview hides.  A click flips it, and says so (`epic-page-note-fold`)."
+      description: "The note is open:  its preview hides.  A click flips it, and says so (`epic-note-opened` / `epic-note-closed`)."
     }
   ],
   events: [
     {
-      name: "epic-page-note-fold",
-      detail: "{ open: boolean }",
-      description: "Owen clicked it:  the note should open or fold, as `open` now says."
+      name: "epic-note-opened",
+      detail: "{ open: true }",
+      description: "Owen clicked it:  the note should open."
+    },
+    {
+      name: "epic-note-closed",
+      detail: "{ open: false }",
+      description: "Owen clicked it:  the note should fold."
     }
   ],
   slots: [],

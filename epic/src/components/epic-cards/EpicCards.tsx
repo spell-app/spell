@@ -17,7 +17,7 @@ import cardsCSS from "./EpicCards.css?inline"
  *   its shadow root, so an epic looks and behaves the same on both pages (its mark, star, saga label, date)
  * - DRAWN FROM DATA, never a copy in the page:  the page server answers `GET /api/epics/saga?saga=<id>`
  *   (`spell-epic/tool/SagaEpics`), reading every epic page's `<epic-page saga>` as it's asked
- *   - asked again whenever an epic page changes (`spell-server:file`):  an epic that joins the saga, finishes a phase
+ *   - asked again whenever an epic page changes (`spell-server:changed`):  an epic that joins the saga, finishes a phase
  *     or leaves shows at once
  * - each epic's state and group by the ONE rule the Epics page uses (`spell-epic/list/EpicState`, `<epic-list>`):
  *   Active, Planning, Urgent, Done (no Favorites:  Owen's own list, on the Epics page);  an empty group isn't drawn;
@@ -78,8 +78,8 @@ export class EpicCards extends E.UIComponent<typeof epicCardsVocabulary> {
       const path = (event as CustomEvent<{ path: string }>).detail?.path ?? ""
       if (EPIC_FILE.test(path)) void this.load()
     }
-    addEventListener("spell-server:file", onFile)
-    return () => removeEventListener("spell-server:file", onFile)
+    addEventListener("spell-server:changed", onFile)
+    return () => removeEventListener("spell-server:changed", onFile)
   }
 
   /**

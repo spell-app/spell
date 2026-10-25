@@ -97,14 +97,14 @@ export const epicSectionVocabulary = {
   events: [
     ...FOLD_EVENTS,
     {
-      name: "ui-filter",
+      name: "epic-filter-changed",
       detail: "{ states: string[] | undefined }",
       description:
         "Its state filter changed:  its chips, `show all`, or the page's toolbar (`showStates()`).  `states` the ones " +
         "showing;  none:  every state."
     },
     {
-      name: "epic-test-start",
+      name: "epic-test-opening",
       detail: "{}",
       description:
         "The To test section's Start testing was pressed (epic `epic-engine` P4):  `<epic-page>` shows its test run."
@@ -163,7 +163,7 @@ export const epicSectionVocabulary = {
       name: "start-testing",
       description:
         "The To test section's \"Start testing · 9\" (epic `epic-engine` P4), on its title:  the page's test run, its " +
-        "open tests one at a time (`epic-test-start`).  Only while the page is reviewed and a test is open."
+        "open tests one at a time (`epic-test-opening`).  Only while the page is reviewed and a test is open."
     }
   ],
   states: [

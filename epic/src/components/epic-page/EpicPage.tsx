@@ -163,7 +163,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - its guide;  every page in its `details/` folder (details pages, choice pages, its review page), newest
  *     first;  then every guide its epic page and parts link to (epic `epic-workflow` P13), newest first
  *   - gathered by the page server (`GET /api/epics/pages`, the tool's `SeeAlso`) as it connects, and again when a
- *     page in the epic's folder changes (`spell-server:file`):  a page made or linked a moment ago shows
+ *     page in the epic's folder changes (`spell-server:changed`):  a page made or linked a moment ago shows
  *   - none, or not served (`file://`):  no box
  *   - open, folding (a `<details>`):  short, and it's how to get to them
  * - WHAT CLAUDE IS DOING (epic `epic-engine` P35), in its toolbar:  the session's line and the running agents (epic
@@ -190,11 +190,11 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox,
  *     for the session running `/epic review SAGA:/<id>` (`reviewRoutes.ts`)
  * - TEST MODE (epic `epic-engine` P4):  a TEST RUN over its blocks (`<epic-test-run>`), its open tests one at a time
- *   - from the To test section's Start testing (`epic-test-start`), or the address's `?test=1` (`epic test <epic>`);
+ *   - from the To test section's Start testing (`epic-test-opening`), or the address's `?test=1` (`epic test <epic>`);
  *     `?test=1&all=1` (or `?test=all`), one epic of a run across every epic (`epic test --all`)
  *   - only the header (Send, the step label) and the pill stay:  the toolbar's bar, the review line, the meta lines,
  *     See Also, the agents and the blocks hide (`:state(testing)`)
- *   - the address keeps `?test=1` while it runs, so a reload resumes;  Esc or Done testing (`epic-test-done`) takes it
+ *   - the address keeps `?test=1` while it runs, so a reload resumes;  Esc or Done testing (`epic-test-closed`) takes it
  *     off, and the blocks come back
  *   - page state, never in the doc:  the live update never sees it
  * - SIDE EFFECT:  observes its subtree and the site header while connected;
@@ -258,7 +258,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /** The review line, just copied:  it flashes and says so. */
   @E.state accessor isCopied = false
 
-  /** Bumped when a section's filter changes (`ui-filter`) or the sections first draw:  the toolbar's chips follow. */
+  /** Bumped when a section's filter changes (`epic-filter-changed`) or the sections first draw:  the toolbar's chips follow. */
   @E.state accessor filterTick = 0
 
   /** The sticky header's measured height, px:  where the toolbar's bar sticks, below it (`measure()`). */
@@ -553,7 +553,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /** A section's filter changed:  the toolbar's chips follow (`bumpFilters()`). */
-  @E.on("ui-filter")
+  @E.on("epic-filter-changed")
   protected onFilter() {
     this.bumpFilters()
   }
@@ -596,8 +596,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       const path = (event as CustomEvent<{ path: string }>).detail?.path ?? ""
       if (path.includes(folder) && path.endsWith(".html")) void this.loadSeeAlso()
     }
-    addEventListener("spell-server:file", onFile)
-    return () => removeEventListener("spell-server:file", onFile)
+    addEventListener("spell-server:changed", onFile)
+    return () => removeEventListener("spell-server:changed", onFile)
   }
 
   /** Ask the page server for the epic's pages;  a server without the route, or none at all:  none. */
@@ -899,7 +899,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * The page's state filter, in the toolbar:  a chip per state the page's items are in, with how many
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
-   * - a click (`epic-state-pick`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
+   * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
    */
   private pageFilter(): JSX.Element {
     const chips = () => this.filterChips()
@@ -924,7 +924,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     )
   }
 
-  /** A toolbar chip, clicked (`<epic-state-filter>`'s `epic-state-pick`):  every section filtered at once. */
+  /** A toolbar chip, clicked (`<epic-state-filter>`'s `epic-state-changed`):  every section filtered at once. */
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
@@ -955,7 +955,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * Send asked for (`<epic-send-buttons>`'s `epic-send-asked`):  the plane sends what's unsent (`ReviewClient.send()`);
+   * Send asked for (`<epic-send-buttons>`'s `epic-send-saving`):  the plane sends what's unsent (`ReviewClient.send()`);
    * the countdown sends as Review Now did, every revisit asked now (decision Q7).
    * - a press with nothing to send says so on the notice line
    */

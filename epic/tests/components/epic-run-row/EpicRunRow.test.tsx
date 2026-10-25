@@ -36,7 +36,7 @@ describe("<epic-run-row>", () => {
     expect(box.value).toBe("Quehacer")
     expect(row.matches(":state(changed)")).toBe(true)
     const heard = vi.fn()
-    row.addEventListener("epic-run-answer", (event) => heard((event as CustomEvent).detail))
+    row.addEventListener("epic-run-answered", (event) => heard((event as CustomEvent).detail))
     box.value = "Faena"
     box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()

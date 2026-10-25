@@ -29,10 +29,10 @@ function part(host: Element, name: string): HTMLElement | null {
   return host.shadowRoot!.querySelector<HTMLElement>(`[part~="${name}"]`)
 }
 
-/** Every `epic-send-asked` `host` sends, as its `auto`. */
+/** Every `epic-send-saving` `host` sends, as its `auto`. */
 function asks(host: Element): boolean[] {
   const heard: boolean[] = []
-  host.addEventListener("epic-send-asked", (event) => heard.push((event as CustomEvent<{ auto: boolean }>).detail.auto))
+  host.addEventListener("epic-send-saving", (event) => heard.push((event as CustomEvent<{ auto: boolean }>).detail.auto))
   return heard
 }
 

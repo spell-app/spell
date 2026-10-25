@@ -31,7 +31,7 @@ import { ANSWER_RETRY_MS, RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } fr
  *   answers' queue and with their retries;  the command reads it before its next pass.
  * - Send (`send()`):  what's waiting saved first, then `POST /api/runs/<id>/send`, which stamps `sent`;  the waiting
  *   command wakes on it.  Again whenever he likes:  the page never locks.
- * - Kept fresh (`watch()`):  the run's files changing (the live client's `spell-server:file`), the page coming into
+ * - Kept fresh (`watch()`):  the run's files changing (the live client's `spell-server:changed`), the page coming into
  *   view, and every `RUN_POLL_MS` (30s) for the waiting state, whose heartbeat goes stale with no file changing.
  *   - a reload never takes back what he gave and hasn't saved yet:  his rows win over the server's
  * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;  `fetch` comes in through
@@ -307,7 +307,7 @@ export class RunForm {
 
   /**
    * Keep the run fresh on `window`'s page;  returns the undo.
-   * - a file of the run's folder changed (`spell-server:file`):  `run.json5` (rows, progress, passes, taken rows,
+   * - a file of the run's folder changed (`spell-server:changed`):  `run.json5` (rows, progress, passes, taken rows,
    *   how it ended), `waiting.json5`
    * - the page coming into view, and every `RUN_POLL_MS` while it is:  a heartbeat goes stale with no file changing
    * - the page going away:  what's unsaved goes at once, as a request that outlives it
@@ -324,12 +324,12 @@ export class RunForm {
     }
     const onHide = () => void this.flush({ keepalive: true })
     const timer = window.setInterval(onVisible, RUN_POLL_MS)
-    window.addEventListener("spell-server:file", onFile)
+    window.addEventListener("spell-server:changed", onFile)
     window.addEventListener("pagehide", onHide)
     document.addEventListener("visibilitychange", onVisible)
     return () => {
       window.clearInterval(timer)
-      window.removeEventListener("spell-server:file", onFile)
+      window.removeEventListener("spell-server:changed", onFile)
       window.removeEventListener("pagehide", onHide)
       document.removeEventListener("visibilitychange", onVisible)
     }

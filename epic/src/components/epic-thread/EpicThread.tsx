@@ -24,7 +24,8 @@ import {
   SPIN,
   THREAD_DELETE,
   THREAD_EDIT,
-  THREAD_FOLD,
+  THREAD_CLOSED,
+  THREAD_OPENED,
   TOOL,
   type MessageBy
 } from "./EpicThread.types"
@@ -69,11 +70,11 @@ export class DOMThreadElement extends E.DOMElement<EpicThread> {
  *   - the pen, while his first words wait and Claude hasn't had them
  *   - the trash, always
  *   - no date:  each message has its time (Owen, 2026-10-10:  "Dont need date in the top if it's next to who spoke")
- *   - a click on it, not on one of its buttons, folds it:  it flips `open`, and says so (`epic-thread-fold`)
+ *   - a click on it, not on one of its buttons, folds it:  it flips `open`, and says so (`epic-thread-opened` / `epic-thread-closed`)
  * - Its BODY, while open:  what it was on, if its block changed;  the messages in order (`messages`, each an
  *   `<epic-thread-message>`);  then Owen's box, slotted, its floppy in the corner.
  * - It draws what it's given (`comment`, `open` ...) and says what Owen did (its events, `<epic-review>`'s
- *   `epic-thread-answer`):  the comments' code saves, keeps the box and draws it again.
+ *   `epic-thread-answered`):  the comments' code saves, keeps the box and draws it again.
  ****************/
 export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
   @E.proto static vocabulary = epicThreadVocabulary
@@ -345,7 +346,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
 
   /**
    * A click on its header, not on one of its buttons (or its review pills), folds or unfolds it:  `open` flips, and
-   * it says so (`epic-thread-fold`).  Its fold button's click, Enter and Space land here too.
+   * it says so (`epic-thread-opened` / `epic-thread-closed`).  Its fold button's click, Enter and Space land here too.
    */
   @E.untracked
   private readonly onHeadClick = (event: MouseEvent) => {
@@ -356,7 +357,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
     }
     const open = !this.open
     this.open = open
-    this.send(THREAD_FOLD, { open })
+    this.send(open ? THREAD_OPENED : THREAD_CLOSED, { open })
   }
 
   /** The pen or the trash:  say so;  the header doesn't fold for it. */

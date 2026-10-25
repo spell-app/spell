@@ -106,17 +106,17 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   accessor isOpen = false
 
   /**
-   * Fold or unfold as the user would:  the cancelable `ui-open` / `ui-close` first, then `open`.
+   * Fold or unfold as the user would:  the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - true when applied
    */
   toggle(originalEvent?: Event): boolean {
     const opening = !this.isOpen
     const detail: FoldToggleDetail = { open: opening, element: this.domElement, originalEvent }
-    return this.requestChange("isOpen", opening, () => this.send((opening ? "ui-open" : "ui-close") as never, detail))
+    return this.requestChange("isOpen", opening, () => this.send((opening ? "ui-opening" : "ui-closing") as never, detail))
   }
 
   /**
-   * Unfold for a link or find-in-page, and load its part:  `ui-open` after the fact (not cancelable).
+   * Unfold for a link or find-in-page, and load its part:  `ui-opening` after the fact (not cancelable).
    * Resolves once the part is in (at once without one).
    * - NEVER rejects:  a part that can't load shows its note.
    */
@@ -124,7 +124,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     if (!this.isOpen) {
       const detail: FoldToggleDetail = { open: true, element: this.domElement }
       const init = { bubbles: true, composed: true, cancelable: false, detail }
-      this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-open" as never), init))
+      this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-opening" as never), init))
       this.isOpen = true
     }
     return this.foldAttrs.source ? this.body.load().catch(() => undefined) : Promise.resolve()
@@ -229,7 +229,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
 
   /**
    * The inner section's own `ui-opening` / `ui-closing` (the title clicked, or find-in-page):
-   * this element's `ui-open` / `ui-close` instead.
+   * this element's `ui-opening` / `ui-closing` instead.
    * - Heard on the shadow root, which the inner section's events reach on their way out.
    * - A nested fold's events bubble through here too (its DOM element is slotted inside),
    *   and so do those of a `<ui-section>` among the light children:

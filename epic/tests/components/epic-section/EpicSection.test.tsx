@@ -87,11 +87,11 @@ describe("<epic-section>", () => {
     expect({ rule: style.borderBottomWidth, gap: style.marginBottom }).toEqual({ rule: "1px", gap: "0px" })
   })
 
-  test("a click on its title goes through the host's cancelable `ui-open`;  open, a gap below and no rule", async () => {
+  test("a click on its title goes through the host's cancelable `ui-opening`;  open, a gap below and no rule", async () => {
     const host = await render(`<epic-section id="decisions" kind="questions"><p>An item</p></epic-section>`)
     const opens: boolean[] = []
     let veto = true
-    host.addEventListener("ui-open", (event) => {
+    host.addEventListener("ui-opening", (event) => {
       opens.push(event.cancelable)
       if (veto) event.preventDefault()
     })
@@ -397,7 +397,7 @@ describe("<epic-section> counts and state filter", () => {
       "Open everything in 1. Phases"
     ])
     const opened: string[] = []
-    host.addEventListener("ui-open", (event) => opened.push((event.target as Element).id))
+    host.addEventListener("ui-opening", (event) => opened.push((event.target as Element).id))
     expand.click()
     // the phase's part loads, then the item in it opens, then its aside
     await vi.waitFor(() => expect(host.querySelector("epic-aside")?.matches(":state(open)")).toBe(true))

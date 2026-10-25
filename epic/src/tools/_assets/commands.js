@@ -242,8 +242,8 @@
    * - reads the value from the events' `detail`:  during `ui-input` the element's `value` is still the old one
    */
   function wireFilter(input) {
-    input.addEventListener("ui-input", apply)
-    input.addEventListener("ui-change", apply)
+    input.addEventListener("ui-typed", apply)
+    input.addEventListener("ui-changed", apply)
 
     /** Apply the filter in `event`. */
     function apply(event) {

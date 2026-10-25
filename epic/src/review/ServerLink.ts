@@ -97,7 +97,7 @@ export class ServerLink {
     return !!this.info?.token && this.options.protocol !== "file:" && SAGA_PAGE.test(this.options.page)
   }
 
-  /** The page's file, as the page server announces changes (`spell-server:file`'s `path`). */
+  /** The page's file, as the page server announces changes (`spell-server:changed`'s `path`). */
   get file(): string {
     return this.info?.file ?? this.options.page
   }
@@ -134,7 +134,7 @@ export class ServerLink {
 
   /**
    * Keep a client fresh on `window`'s page:  `refresh()` every `REVIEW_POLL_MS` while visible, when the page becomes
-   * visible, and when the page server says `file` changed (`spell-server:file`, the page's live client:  never a
+   * visible, and when the page server says `file` changed (`spell-server:changed`, the page's live client:  never a
    * connection of our own, each holds one of Chrome's 6 per host).  Returns the undo.
    * - a data file (`<name>.json5`) by its old name too, `<name>.json`:  a checkout on older code writes that
    *   (epic `epic-workflow` P21)
@@ -152,11 +152,11 @@ export class ServerLink {
       if (names.includes((event as CustomEvent<{ path?: string }>).detail?.path ?? "")) refresh()
     }
     document.addEventListener("visibilitychange", onVisible)
-    window.addEventListener("spell-server:file", onFile)
+    window.addEventListener("spell-server:changed", onFile)
     return () => {
       window.clearInterval(timer)
       document.removeEventListener("visibilitychange", onVisible)
-      window.removeEventListener("spell-server:file", onFile)
+      window.removeEventListener("spell-server:changed", onFile)
     }
   }
 

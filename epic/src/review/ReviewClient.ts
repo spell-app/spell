@@ -57,7 +57,7 @@ import { ServerLink } from "./ServerLink"
  * - it re-reads the inbox (`watch()`, the link's):
  *   - every `REVIEW_POLL_MS` while the page is visible
  *   - when the page becomes visible
- *   - when the page server says the inbox file changed (the page's live client's `spell-server:file`)
+ *   - when the page server says the inbox file changed (the page's live client's `spell-server:changed`)
  * - note drafts:
  *   - saved to the inbox (`POST draft`)
  *   - backed up in localStorage under the old page runtime's key (`REVISIT_KEY_PREFIX`),
@@ -204,7 +204,7 @@ export class ReviewClient {
    * Keep the inbox fresh on `window`'s page;  returns the undo.
    * - a poll every `REVIEW_POLL_MS` while visible
    * - a read when it becomes visible
-   * - one when the page server says the inbox file changed (`spell-server:file`, the page's live client:
+   * - one when the page server says the inbox file changed (`spell-server:changed`, the page's live client:
    *   never a connection of our own, each holds one of Chrome's 6 per host)
    */
   watch(window: Window): () => void {

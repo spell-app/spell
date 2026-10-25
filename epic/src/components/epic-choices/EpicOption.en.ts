@@ -66,11 +66,15 @@ export const epicOptionVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
-      detail: "{ letter: string, selected: boolean, more: boolean }",
+      name: "ui-selected",
+      detail: "{ letter: string, selected: true, more: boolean }",
       description:
-        "In an `<epic-ask>`:  Owen ticked or unticked it (`selected`), or pressed its (?) (`more`).  Its question " +
-        "takes it, and draws the result."
+        "In an `<epic-ask>`:  Owen ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
+    },
+    {
+      name: "ui-deselected",
+      detail: "{ letter: string, selected: false, more: boolean }",
+      description: "In an `<epic-ask>`:  Owen unticked it.  Its question takes it, and draws the result."
     }
   ],
   slots: [

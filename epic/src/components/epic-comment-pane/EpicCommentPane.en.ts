@@ -57,9 +57,9 @@ export const epicCommentPaneVocabulary = {
     }
   ],
   events: [
-    { name: "epic-comment-close", detail: "{}", description: "× pressed:  save what's typed, then close it." },
+    { name: "epic-comment-closing", detail: "{}", description: "× pressed:  save what's typed, then close it." },
     {
-      name: "epic-comment-delete",
+      name: "epic-comment-removing",
       detail: "{}",
       description: "The trash pressed:  delete the comment at once (Undo in the toast that follows)."
     }

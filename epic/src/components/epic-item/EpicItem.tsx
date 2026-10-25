@@ -98,7 +98,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - at the line's end:  Approve, Revisit, Make Todo, then Do Now (the wand)
  *     - a todo's:  the plane (do it in the next phase), Revisit, the x (drop it:  Owen, 2026-10-09)
  *     - the review label in their tooltips, not beside them (Owen, 2026-10-07)
- *   - Revisit and Edit unfold it to show the box (`epic-show-note`)
+ *   - Revisit and Edit unfold it to show the box (`epic-note-showing`)
  *   - the note box:  LAST in its details, whatever its state
  *     - sticky at the window's bottom while it's open and taller than the window
  *     - without details:  under its line once Revisit opens it, lined up with where details start;
@@ -112,7 +112,7 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - All in the shadow root:  a part reloaded keeps a half-typed note.
  * - FOLDING:  `open` (page state, never in the file).
  *   - a click on the line (not on a link or control in it), or Enter / Space on the chevron,
- *     go through the cancelable `ui-open` / `ui-close`
+ *     go through the cancelable `ui-opening` / `ui-closing`
  *   - it opens for a link to the item, to an id in `part-ids`, or to an element inside it, and for find-in-page
  *   - folding while its line is stuck keeps the line where it is on screen (`keepLinePut()`)
  *   - its details fold and unfold by height, in Spell UI's section timing (`EpicItem.css`), however it folds:
@@ -745,7 +745,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   ////////////////
 
   /**
-   * Fold or unfold as the user would:  the cancelable `ui-open` / `ui-close` first, then `open`.
+   * Fold or unfold as the user would:  the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - true when applied
    * - without details:  folding its note box open under the line closes it, the draft kept;  else nothing
    */
@@ -759,7 +759,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const opening = !this.isOpen()
     const detail = { open: opening, item: this.domElement, originalEvent }
     return this.requestChange("isMarkedOpen", opening, () => {
-      const applied = this.send(opening ? "ui-open" : "ui-close", detail)
+      const applied = this.send(opening ? "ui-opening" : "ui-closing", detail)
       if (applied && !opening) this.keepLinePut()
       return applied
     })
@@ -821,13 +821,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     })
   }
 
-  /** Unfold for a link or find-in-page:  `ui-open` after the fact (not cancelable). */
+  /** Unfold for a link or find-in-page:  `ui-opening` after the fact (not cancelable). */
   @E.untracked
   private reveal() {
     if (this.isOpen() || !this.hasDetails()) return
     const detail = { open: true, item: this.domElement }
     const init = { bubbles: true, composed: true, cancelable: false, detail }
-    this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-open"), init))
+    this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-opening"), init))
     this.isMarkedOpen = true
   }
 

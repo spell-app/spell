@@ -147,12 +147,12 @@ describe("<epic-item>", () => {
     ])
   })
 
-  test("starts folded (details `hidden=until-found`);  a click on the line unfolds it through `ui-open`, again folds", async () => {
+  test("starts folded (details `hidden=until-found`);  a click on the line unfolds it through `ui-opening`, again folds", async () => {
     const { host, line, details, toggle } = await item(
       `<epic-item id="c1" title="A caveat" status="open"><p>Why</p></epic-item>`
     )
     const opened = vi.fn()
-    host.addEventListener("ui-open", opened)
+    host.addEventListener("ui-opening", opened)
     expect([host.open, details.getAttribute("hidden")]).toEqual([false, "until-found"])
     expect(toggle()!.getAttribute("aria-expanded")).toBe("false")
     line.click()
@@ -185,13 +185,13 @@ describe("<epic-item>", () => {
     await vi.waitFor(() => expect(details.getBoundingClientRect().height).toBe(0), { timeout: 2000 })
   })
 
-  test("a click on a link in its line (the chip) doesn't fold;  a cancelled `ui-open` keeps it folded", async () => {
+  test("a click on a link in its line (the chip) doesn't fold;  a cancelled `ui-opening` keeps it folded", async () => {
     const { host, chip, line } = await item(`<epic-item id="c2" title="A caveat" status="open"><p>Why</p></epic-item>`)
     chip.addEventListener("click", (event) => event.preventDefault())
     chip.click()
     await ElementFixture.tick()
     expect(host.open).toBe(false)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     line.click()
     await ElementFixture.tick()
     expect(host.open).toBe(false)
@@ -218,7 +218,7 @@ describe("<epic-item>", () => {
     expect([answered.label(), more.label(), bare.label()]).toEqual(["Original question", "Original reply", null])
   })
 
-  test("a link to it, or to an element inside it, unfolds it (`ui-open` after the fact)", async () => {
+  test("a link to it, or to an element inside it, unfolds it (`ui-opening` after the fact)", async () => {
     const { host } = await item(`<epic-item id="q7" title="A" status="open"><p id="q7-why">Why</p></epic-item>`)
     location.hash = "#q7-why"
     await new Promise((resolve) => setTimeout(resolve, 0))

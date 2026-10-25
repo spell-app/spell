@@ -63,7 +63,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     the question moves the pick with the arrow keys
  *   - a comment box under it, always shown (`<epic-text-box>` for `<key>-<letter>`)
  *   - ticked:  framed green;  `done`, under the question's Open:  hidden
- *   - a tick, an untick or the (?) sends `ui-change`, which its question takes
+ *   - a tick, an untick or the (?) sends `ui-selected` / `ui-deselected`, which its question takes
  ****************/
 export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   @E.proto static vocabulary = epicOptionVocabulary
@@ -478,16 +478,17 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   // ## Events
   ////////////////
 
-  /** Answering:  its tick box changed:  its question hears it (`ui-change`);  unticked, its (?) goes off too. */
+  /** Answering:  its tick box changed:  its question hears it (`ui-selected` / `ui-deselected`);  unticked, its (?) goes off too. */
   private readonly onTick = (event: Event) => {
     const selected = (event.currentTarget as HTMLInputElement).checked
-    this.send("ui-change", { letter: this.letter ?? "", selected, more: selected && this.wantsMore })
+    this.send(selected ? "ui-selected" : "ui-deselected", { letter: this.letter ?? "", selected, more: selected && this.wantsMore })
   }
 
   /** Answering:  its (?) pressed:  on, it's ticked too;  off, its tick stays as it is. */
   private readonly onMore = () => {
     const more = !this.wantsMore
-    this.send("ui-change", { letter: this.letter ?? "", selected: more || this.isTicked, more })
+    const selected = more || this.isTicked
+    this.send(selected ? "ui-selected" : "ui-deselected", { letter: this.letter ?? "", selected, more })
   }
 
   /** A click on its header:  folds its card or panel (a card with no pros and cons has nothing to fold). */

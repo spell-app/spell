@@ -351,7 +351,7 @@ export const REVIEWING = "reviewing"
  * The event an `<epic-review>` sends to take the reader to its note box (Revisit, Edit):
  * the family that draws it unfolds to show the box (`EpicReview.takeToNote()`).
  */
-export const SHOW_NOTE = "epic-show-note"
+export const SHOW_NOTE = "epic-note-showing"
 
 /**
  * The event an `<epic-review>` sends once Owen chose an action with it:
@@ -366,7 +366,7 @@ export const CHOSEN = "epic-chosen"
  * The event a thread's answer button sends (`buttons="thread"` / `"closed"`):  `{ act }`, which one (`ThreadAct`).
  * - It crosses shadow roots:  the comments' code hears it on the `<epic-thread>` that draws it.
  */
-export const THREAD_ANSWER = "epic-thread-answer"
+export const THREAD_ANSWER = "epic-thread-answered"
 
 ////////////////
 // ## In the vocabularies

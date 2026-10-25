@@ -143,7 +143,7 @@ describe("<epic-list>", () => {
   test("a card's star answered:  every card starred as the page server says", async () => {
     const host = await render(card("a", "A") + card("b", "B", 'phases="active" favorite'))
     host.querySelector('[epic="a"]')!.dispatchEvent(
-      new CustomEvent("epic-favorite", {
+      new CustomEvent("epic-starred", {
         bubbles: true,
         composed: true,
         detail: { epic: "a", favorite: true, favorites: ["a"] }
