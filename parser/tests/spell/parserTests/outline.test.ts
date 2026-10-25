@@ -375,6 +375,42 @@ describe("outline style", () => {
     test("only an app", () => {
       expect(() => runSpell(["game is a thing"])).toThrow(/parse errors/)
     })
+
+    // epic `elemental-spell` C27
+    test("a declared kind of several words:  `klondike is a card game`, `high scores is a score page`", () => {
+      const game = ['a "card game" is an app where:', '\t- its "name" is "game"']
+      const klondike = compile([...game, "klondike is a card game:", '\t- its "name" is "Klondike"'])
+      expect(klondike).toContain("export class Klondike extends CardGame {")
+      expect(klondike).toContain("export const klondike = new Klondike()")
+
+      const scores = compile([
+        'a "score page" is a page where:',
+        '\t- its "title" is "Scores"',
+        "high scores is a score page"
+      ])
+      expect(scores).toContain("export class HighScore extends ScorePage {")
+      expect(scores).toContain("export const highScores = new HighScore()")
+    })
+
+    test("an undeclared kind of several words is no guess:  still not understood", () => {
+      expect(() => compile(["klondike is a card game:", '\t- its "name" is "Klondike"'])).toThrow(/Don't understand/)
+    })
+
+    test("`if klondike is a card game` stays a test of its kind, not a declaration", () => {
+      const lines = ['a "card game" is an app', "klondike is a card game", "if klondike is a card game", "\tprint 1"]
+      expect(compile(lines)).toContain("if (klondike instanceof CardGame) core.console.log(1)")
+    })
+
+    test("in Spanish:  `puntuaciones altas es una página de puntos`", () => {
+      const lines = [
+        'una "página de puntos" es una página donde:',
+        '\t- su "título" es "Puntos"',
+        "puntuaciones altas es una página de puntos"
+      ]
+      const { files } = parseSpellProject([{ path: "/test.es.spell", contents: lines.join("\n") }])
+      expect(files[0]!.errors).toEqual([])
+      expect(files[0]!.compiled).toMatch(/export class \S+ extends PáginaDePuntos \{/)
+    })
   })
 
   describe("body methods (P20, I15):  a method in a type's body that names no type is the type's", () => {

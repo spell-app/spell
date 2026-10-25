@@ -29,7 +29,7 @@
 	<property "scores">a new list of numbers</>
 </spell-page-template>
 
-<spell-page "leaderboard">
+<spell-page "leaderboard" template="score page">
 	The ten best games, fastest first.
 	<draw>
 		<ui-header>High scores</ui-header>

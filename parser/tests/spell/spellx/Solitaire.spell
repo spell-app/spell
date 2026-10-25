@@ -25,7 +25,7 @@ a "score page" is a page where:
 	// A page that lists games, best first.
 	- its "scores" is a new list of numbers
 
-leaderboard is a page where:
+leaderboard is a score page where:
 	// The ten best games, fastest first.
 	- to draw it:
 		<ui-header>High scores</ui-header>

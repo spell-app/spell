@@ -35,6 +35,22 @@ describe("spellx:  a third style of spell", () => {
     }
   )
 
+  // epic `elemental-spell` C27
+  test("an app or a page made from a template of several words reads as its twin does", () => {
+    const spellx = compiledText([
+      '<spell-app-template "card game" />',
+      '<spell-app "klondike" template="card game">',
+      '\t<property "moves">0</>',
+      "</spell-app>"
+    ])
+    const spell = compiledText(['a "card game" is an app', "klondike is a card game where:", '\t- its "moves" is 0'], {
+      path: "/test.spell"
+    })
+    expect(spellx.errors).toEqual([])
+    expect(spellx.code).toBe(spell.code)
+    expect(spellx.code).toContain("export const klondike = new Klondike()")
+  })
+
   test("a description becomes the docstring, as the comments above its twin are", () => {
     const { code } = compiledText(
       ['<spell-thing "card">', '\t<property "suit" one-of="clubs, hearts" description="Its suit" />', "</spell-thing>"],

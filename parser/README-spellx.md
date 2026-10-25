@@ -180,8 +180,6 @@ its tree reads as above.
 - A drawing in spellx's own markup:  bare component names (`<text>` for `<ui-text>`) and `<for each>` in a drawing.
   Write `ui-*` names until then.
 - `<menu>`:  read into the tree, but an error when compiled, until menus come.
-- `<spell-page "leaderboard" template="score page">`, a one-of-a-kind made from a template of several words:
-  plain Spell can't say `leaderboard is a score page` yet.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
 - The editor's colours and hover inside a tag's head, and the way back, from a `.spell` file to `.spellx`.
 

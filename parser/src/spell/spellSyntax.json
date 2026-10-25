@@ -3772,7 +3772,7 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 23,
+          "line": 24,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
