@@ -205,6 +205,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
       - each one's default is spell-app's layout before the file existed;  `app`'s:  none
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
+      - a BROKEN worktree too, one git no longer knows (its `.git` names `<main>/.git/worktrees/<id>`, gone):  the
+        main checkout from that path (epic `epic-engine` P26, r20:  solid-17's settings came out inside solid-17);  the
+        window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main checkout)
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
     - a repo MOVED behind compat links (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
       - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:  an unrepaired
@@ -297,6 +300,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       Haiku's (`claude -p`, hooks off);  every prompt logged to `epic-prompts.log` in the checkout's git folder;
       `promptAck` in the config turns it off (epic `epic-engine` P18)
       - plain `node` loads it by path, with `command.types.ts`
+    - `SessionMoves`:  whether a session's move to another window (`epic window handoff`, `launch --move`) will
+      really happen, and what's said when it didn't (epic `epic-engine` P26, request r20)
+      - why:  the move is ONLY the end-of-turn hook's ([handoff.mjs](../hooks/handoff.mjs));  with the plugin's hooks
+        failing (Claude Code still looked for spell-epic in spell-app's old folder), "this session moves" was said,
+        and nothing happened
+      - `hookProblem()`:  before a move is promised, why that hook won't run, from Claude Code's own plugin lists
+        (`~/.claude/settings.json`, `plugins/known_marketplaces.json`, `plugins/installed_plugins.json`:  a folder
+        that's gone, the plugin off) and this session's mark;  `fixFor()`:  what fixes it
+      - the mark:  the prompt hook writes `~/.spell-epic/windows/hooks-seen/<session id>` on every prompt
+        (`sawHooks()`), so a session whose hooks aren't loaded (started before a fix) is known too
+      - refused:  `handoff` exits 1, saying why, the fix, and `epic window launch <name>`;  `launch --move` starts a NEW
+        session in the epic's window instead, and says why
+      - `missedMove()`:  a move's record still waiting when the session's next prompt comes (the hook renames it the
+        moment it runs) is said to Owen and Claude, and set aside as `<session id>.missed.json`;  the window script's
+        worktree commands say it too when the hook can't run, since then the prompt hook can't either
+      - plain `node` loads it by path
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
       - the `epic` on the `PATH` is the main checkout's

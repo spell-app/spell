@@ -159,6 +159,8 @@
  *     `/epic <name>` typed in another epic's session (the `/epic` skill's "From another worktree"), `/send`
  *   - `--move`:  this session goes there instead, as its turn ends (`handoff`), when nothing of the epic runs:
  *     a session started only to type `/epic <name>`
+ *     - nothing would carry the move out (the end-of-turn hook won't run:  `moveProblem()`, epic `epic-engine` P26):
+ *       a NEW session there instead, as without `--move`, and a line saying why and what fixes it
  *   - which, by `launchPlan()` (epic `epic-eject` P10):
  *     - one of its sessions is running:  typed into it, in its window
  *     - none, but its window is open:  a NEW session there;  the window's file and look untouched
@@ -169,6 +171,12 @@
  *   - `--back`:  from it to its package's window, closing it after
  *   - `--prompt`:  typed into the new tab
  *   - needs `$CLAUDE_CODE_SESSION_ID` (Claude sets it in a session's commands)
+ *   - the end-of-turn hook won't run (`moveProblem()`):  nothing recorded;  exits 1, saying why, the fix, and
+ *     `launch <name>` (a new session there) as what works
+ * - `open`, `launch`, `close` and `handoff` say first, on stderr (`sayBefore()`;  epic `epic-engine` P26):
+ *   - this session's move promised earlier that now can't happen (`SessionMoves.missedMove()`), its record cleared
+ *   - that the checkout is a BROKEN worktree, one git no longer knows:  its settings come from the main checkout
+ *     (`checkoutOf()` finds it from the gone git folder's path), and the fix is `git worktree repair`
  * - `resume <record> [--title <title>]...`:  the move itself, run by the `Stop` hook:
  *   `<record>` the handoff's file (deleted once read), each `<title>` a label the session's tab may show,
  *   tried in order
@@ -184,9 +192,12 @@ import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { checkoutOf } from "spell/server/checkout"
+
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { RealPath } from "spell-epic/config/RealPath.ts"
 import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { SessionMoves } from "spell-epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell-epic/command/WorktreeGuard.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
@@ -754,20 +765,26 @@ export class Window {
    *   - and its worktree recorded as `name`'s (`WorktreeGuard.record()`), so the session-start guard doesn't send it
    *     back to the worktree it was typed in (epic `epic-engine` r15)
    *   - one of the epic's sessions running:  woken as above, and this session stays
+   *   - it can't move (`moveProblem()`:  the end-of-turn hook won't run;  epic `epic-engine` P26):  launched as if
+   *     without `move`, a NEW session in the epic's window, and `refused` says why
    * - a new session starts in the window's first folder, the worktree (`worktreeWorkspace()`):  the session-start
    *   guard records it there, so a reopen comes back (epic `epic-eject` I3), with no `EnterWorktree` (epic `epic-engine`
    *   P12);  in a window written before P12 it starts in the main root, and `/epic <name>` enters the worktree
    */
   static async launch(name, pkg, { color = null, prompt = null, move = null } = {}) {
+    // asked to move, this session is never one of the epic's to wake:  the prompt hook titled it for the epic
+    const mover = move
+    // nothing would carry the move out:  a new session there instead, never a promise that can't be kept (r20)
+    const refused = move ? Window.moveProblem(move) : null
+    if (refused) move = null
     const file = Window.worktreeFile(name)
     const open = Window.windowOf(file)
-    // moving:  this session is the one going there, never one of the epic's to wake
-    const sessions = Window.epicSessions(name, open).filter((session) => !move || session.sessionId !== move)
+    const sessions = Window.epicSessions(name, open).filter((session) => !mover || session.sessionId !== mover)
     const plan = launchPlan({ windowOpen: Boolean(open), sessions })
     const typed = prompt ? { prompt } : {}
     if (plan.wake) await Window.request("open-session", { sessionId: plan.wake.sessionId, ...typed }, plan.wake.window)
     if (plan.start && !plan.open && !move) await Window.request("open-session", typed, open)
-    if (!plan.open && !(move && plan.start)) return { ...plan, file }
+    if (!plan.open && !(move && plan.start)) return { ...plan, file, refused }
     if (plan.open) {
       // the engine's own hook, the one the plugin runs (`hooks/hooks.json`)
       const hook = join(ENGINE, "hooks", "worktree.mjs")
@@ -787,7 +804,7 @@ export class Window {
     const window = await Window.waitFor(file)
     if (colors) await Window.applyColors(file, colors)
     await Window.request("open-session", typed, window)
-    return { ...plan, file }
+    return { ...plan, file, refused }
   }
 
   /**
@@ -871,11 +888,15 @@ export class Window {
    *   - `remove`:  a file to delete after
    *   - `show`:  a doc to show there, `{ file, hash?, view? }` (`Window.show()` sets it)
    *   - `prompt`:  text typed into the new tab (or `null`)
+   * - throws when nothing would carry the move out (`moveProblem()`;  epic `epic-engine` P26):  the end-of-turn hook
+   *   won't run, so the record would only wait, and "this session moves" would be a promise never kept (r20)
    */
   static handoff(name, sessionId, { back = false, prompt = null } = {}) {
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error("no session:  $CLAUDE_CODE_SESSION_ID isn't set")
     const file = Window.worktreeFile(name)
     if (!existsSync(file)) throw new Error(`no window file for ${name}:  \`open ${name}\` first`)
+    const refused = Window.moveProblem(sessionId)
+    if (refused) throw new Error(`this session can't move to ${name}'s window:  ${refused.problem};  ${refused.fix}`)
     const from = Window.current()
     let handoff = { sessionId, to: file, from: from?.pid ?? null, close: "tab", remove: null, show: null, prompt }
     if (back) {
@@ -887,6 +908,17 @@ export class Window {
     mkdirSync(Window.handoffs, { recursive: true, mode: 0o700 })
     writeFileSync(Window.handoffFile(sessionId), `${JSON.stringify(handoff, null, 2)}\n`, { mode: 0o600 })
     return handoff
+  }
+
+  /**
+   * Why session `sessionId` can't move to another window as its turn ends, `{ problem, fix }`, or `null` when it can.
+   * - the move is the plugin's end-of-turn hook's (`hooks/handoff.mjs`):  `SessionMoves.hookProblem()` says when
+   *   Claude Code won't run it, from its plugin lists and this session's own mark (its prompt hook ran)
+   */
+  static moveProblem(sessionId) {
+    const moves = new SessionMoves()
+    const problem = moves.hookProblem(sessionId)
+    return problem ? { problem, fix: moves.fixFor(problem) } : null
   }
 
   /**
@@ -999,7 +1031,7 @@ export class Window {
    * `$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`.  Read on every call, for tests.
    */
   static get registry() {
-    return process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows")
+    return SessionMoves.registry()
   }
 
   /**
@@ -1113,8 +1145,10 @@ export class Window {
       else console.log([`recommend ${advice.recommend}`, ...advice.reasons.map((reason) => `- ${reason}`)].join("\n"))
       return 0
     }
-    if (["open", "launch", "close", "handoff", "resume"].includes(command))
+    if (["open", "launch", "close", "handoff", "resume"].includes(command)) {
+      if (command !== "resume") sayBefore(process.env.CLAUDE_CODE_SESSION_ID)
       return Window.worktreeCommand(command, target, flags)
+    }
     const window = Window.current()
     if (!window) {
       console.error("no window:  the spell-epic extension's bridge isn't running in this session's VS Code window")
@@ -1214,7 +1248,15 @@ export class Window {
     try {
       if (command === "handoff") {
         const prompt = typeof flags.prompt === "string" ? flags.prompt : null
-        const handoff = Window.handoff(name, process.env.CLAUDE_CODE_SESSION_ID, { back: Boolean(flags.back), prompt })
+        const sessionId = process.env.CLAUDE_CODE_SESSION_ID
+        const refused = SESSION_ID.test(sessionId ?? "") ? Window.moveProblem(sessionId) : null
+        if (refused) {
+          console.error(`this session can't move to ${name}'s window:  ${refused.problem}`)
+          console.error(`  fix:  ${refused.fix}`)
+          console.error(`  to work there now:  \`epic window launch ${name}\` (a new session in its window)`)
+          return 1
+        }
+        const handoff = Window.handoff(name, sessionId, { back: Boolean(flags.back), prompt })
         if (!handoff) {
           const closed = await Window.close(name)
           console.log(
@@ -1243,7 +1285,12 @@ export class Window {
         const move = flags.move ? process.env.CLAUDE_CODE_SESSION_ID : null
         if (flags.move && !SESSION_ID.test(move ?? "")) throw new Error("--move:  $CLAUDE_CODE_SESSION_ID isn't set")
         const launched = await Window.launch(name, pkg, { color, prompt, move })
-        console.log(launchedLine(name, prompt, launched))
+        if (launched.refused) {
+          console.log(`this session can't move to ${name}'s window:  ${launched.refused.problem}`)
+          console.log(`  fix:  ${launched.refused.fix}`)
+          console.log(`  so instead:  ${launchedLine(name, prompt, launched)}`)
+          console.log("  this tab stays here:  close it once the new session is up")
+        } else console.log(launchedLine(name, prompt, launched))
         return ["several", "no-window"].includes(launched.action) ? 1 : 0
       }
       if (command === "close") {
@@ -1323,6 +1370,41 @@ const USAGE = `usage:  epic window <command>
                                the move itself (the Stop hook runs it)
   should-stay [--epic] [--json]
                                stay in this window when isolating, or move?  recommend stay|window, and why`
+
+/**
+ * What a worktree command says first, on stderr (epic `epic-engine` P26, request r20):
+ * - this session's move that was promised but can't happen now (`SessionMoves.missedMove()`):
+ *   its prompt hook may not run either, so nothing else would say it;  the record is cleared
+ * - the checkout being a BROKEN worktree (`brokenWorktreeLines()`)
+ * - NEVER throws
+ */
+function sayBefore(sessionId) {
+  try {
+    const missed = new SessionMoves().missedMove(sessionId)
+    if (missed) console.error(missed.message)
+    for (const line of brokenWorktreeLines(checkoutOf(ROOT))) console.error(line)
+  } catch (error) {
+    console.error(`(couldn't check this session's moves:  ${error.message})`)
+  }
+}
+
+/**
+ * What's said about `checkout` (`checkoutOf()`'s) when it's a BROKEN worktree, one git no longer knows:  its `.git`
+ * names a git folder that's gone (`missingGitDir`);  `[]` when it isn't one.
+ * - the settings still come from its main checkout (`checkoutOf()` finds it from that folder's path), so the windows,
+ *   worktrees and content folders are the right ones;  git itself fails there
+ *   - before P26 they came out inside the worktree (solid-17's, r20)
+ * - the fix:  `git worktree repair`, from the main checkout
+ */
+export function brokenWorktreeLines(checkout) {
+  if (!checkout?.missingGitDir) return []
+  return [
+    `${checkout.root} is a broken worktree:  git no longer knows it (its .git names ${checkout.missingGitDir}, gone)`,
+    `  the epic settings come from its main checkout, ${checkout.main};  git commands fail in it`,
+    `  fix, from ${checkout.main}:  \`git worktree repair ${checkout.root}\`;  when that can't, move the folder aside,`,
+    `  \`git worktree add\` it again on its branch, and copy its uncommitted files back`
+  ]
+}
 
 /**
  * The package worktree window file `file` was opened from:  its `spell.package`.

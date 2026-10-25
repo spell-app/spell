@@ -38,9 +38,17 @@ writeFileSync(join(repo, ".epic", "config.json5"), "{}\n")
 writeFileSync(join(repo, "package.json"), '{ "name": "spell-app" }\n')
 process.env.EPIC_CHECKOUT = repo
 
+/**
+ * Claude Code's own folder, a temp one with no plugin lists:  nothing says the end-of-turn hook won't run
+ * (`SessionMoves.pluginProblem()`), and the real `~/.claude` is never read.
+ */
+const claudeHome = mkdtempSync(join(tmpdir(), "spell-windows-claude-"))
+process.env.CLAUDE_CONFIG_DIR = claudeHome
+
 const {
   LOOKS,
   Window,
+  brokenWorktreeLines,
   claudeSessions,
   codeEnv,
   envCheckout,
@@ -85,6 +93,7 @@ beforeEach(() => {
 after(() => {
   sleeper.kill()
   rmSync(dir, { recursive: true, force: true })
+  rmSync(claudeHome, { recursive: true, force: true })
   rmSync(dirname(repo), { recursive: true, force: true })
 })
 
@@ -679,6 +688,7 @@ test("handoff():  records the move, keyed by session;  needs a session and the w
   assert.throws(() => Window.handoff(name, SESSION), /no window file/)
   mkdirSync(dirname(Window.worktreeFile(name)), { recursive: true })
   writeFileSync(Window.worktreeFile(name), JSON.stringify(Window.worktreeWorkspace("ui", name)))
+  sawHooks(SESSION)
   try {
     const handoff = Window.handoff(name, SESSION)
     assert.equal(handoff.to, Window.worktreeFile(name))
@@ -885,6 +895,201 @@ test("codeEnv() + envCheckout():  a window never inherits the engine's checkout;
   assert.equal(envCheckout({}), undefined)
   assert.equal(envCheckout({ EPIC_CHECKOUT: join(repo, "gone-worktree") }), undefined)
 })
+
+////////////////
+// ## Reliable moves (epic `epic-engine` P26, request r20)
+////////////////
+
+test("handoff:  refused, no record written, when the end-of-turn hook won't run;  the command says why and what works", async () => {
+  const name = `test-refused-${process.pid}`
+  mkdirSync(dirname(Window.worktreeFile(name)), { recursive: true })
+  writeFileSync(Window.worktreeFile(name), JSON.stringify(Window.worktreeWorkspace("ui", name)))
+  try {
+    // this session's prompt hook never marked it:  its hooks aren't loaded
+    assert.throws(() => Window.handoff(name, SESSION), /can't move .* hooks haven't run/)
+    assert.equal(existsSync(Window.handoffFile(SESSION)), false)
+    // marked, but Claude Code looks for the plugin in a folder that's gone (r20:  spell-app's old spell-epic/)
+    sawHooks(SESSION)
+    pluginListsAt(join(claudeHome, "gone-spell-epic"))
+    assert.throws(() => Window.handoff(name, SESSION), /gone-spell-epic, which is gone/)
+    assert.equal(existsSync(Window.handoffFile(SESSION)), false)
+    const { code, err, out } = await mainWith(["handoff", name])
+    assert.equal(code, 1)
+    assert.equal(out, "")
+    assert.match(err, /this session can't move to .*'s window:  Claude Code looks for the plugin's marketplace in/)
+    assert.match(err, /fix:  run the plugin install steps again .*claude plugin marketplace add/)
+    assert.match(err, new RegExp(`to work there now:  \`epic window launch ${name}\``))
+    // put right:  the move is promised, and recorded
+    pluginListsAt(dirname(import.meta.dirname))
+    assert.equal((await mainWith(["handoff", name])).code, 0)
+    assert.equal(existsSync(Window.handoffFile(SESSION)), true)
+  } finally {
+    rmSync(Window.worktreeFile(name), { force: true })
+    rmSync(join(claudeHome, "settings.json"), { force: true })
+    rmSync(join(claudeHome, "plugins"), { recursive: true, force: true })
+  }
+})
+
+test("launch --move:  can't move (the hook won't run):  a NEW session in the epic's open window instead, saying why", async () => {
+  const seen = []
+  const server = createServer((request, response) => {
+    let body = ""
+    request.on("data", (chunk) => (body += chunk))
+    request.on("end", () => {
+      seen.push([request.url, JSON.parse(body)])
+      response.writeHead(200, { "Content-Type": "application/json" })
+      response.end(JSON.stringify({ ok: true }))
+    })
+  })
+  await new Promise((done) => server.listen(0, "127.0.0.1", done))
+  const name = `test-move-${process.pid}`
+  const file = Window.worktreeFile(name)
+  const entry = { pid: process.pid, port: server.address().port, token: "t", folders: [], workspaceFile: file }
+  writeFileSync(join(dir, `${process.pid}.json`), JSON.stringify(entry))
+  const home = mkdtempSync(join(tmpdir(), "spell-claude-home-"))
+  mkdirSync(join(home, "sessions"))
+  process.env.SPELL_CLAUDE_HOME = home
+  // this session, titled for the epic by the prompt hook:  never the epic's own session to wake
+  const record = { pid: sleeper.pid, sessionId: SESSION, name: `🚧 ${name}` }
+  writeFileSync(join(home, "sessions", `${SESSION}.json`), JSON.stringify(record))
+  try {
+    // never marked:  its hooks don't run
+    const launched = await Window.launch(name, "spell-app", { prompt: `/epic ${name}`, move: SESSION })
+    assert.equal(launched.action, "start")
+    assert.match(launched.refused.problem, /hooks haven't run/)
+    assert.deepEqual(seen.splice(0), [["/open-session", { prompt: `/epic ${name}` }]])
+    assert.equal(existsSync(Window.handoffFile(SESSION)), false)
+  } finally {
+    delete process.env.SPELL_CLAUDE_HOME
+    rmSync(home, { recursive: true, force: true })
+    server.close()
+  }
+})
+
+test("a move promised, never made:  the next worktree command says so, and clears the record", async () => {
+  const name = `test-missed-${process.pid}`
+  const to = join(repo, "workspaces", "ongoing", `${name}.code-workspace`)
+  mkdirSync(Window.handoffs, { recursive: true })
+  writeFileSync(Window.handoffFile(SESSION), JSON.stringify({ sessionId: SESSION, to, show: null }))
+  try {
+    // the hook could still run:  the record may be this turn's own, so it's left alone
+    assert.equal((await mainWith(["close", name])).err, "")
+    assert.equal(existsSync(Window.handoffFile(SESSION)), true)
+    // the hook can't run:  the move never will
+    pluginListsAt(join(claudeHome, "gone-spell-epic"))
+    const { err } = await mainWith(["close", name])
+    assert.match(err, new RegExp(`was to move to ⎇ ${name}'s window when its last turn ended, and didn't`))
+    assert.match(err, new RegExp(`\`epic window launch ${name}\``))
+    assert.equal(existsSync(Window.handoffFile(SESSION)), false)
+    assert.equal(existsSync(join(Window.handoffs, `${SESSION}.missed.json`)), true)
+    assert.match(readFileSync(join(Window.handoffs, `${SESSION}.log`), "utf8"), /missed:  the move to .* never started/)
+    // said once:  nothing left to say
+    assert.equal((await mainWith(["close", name])).err, "")
+  } finally {
+    rmSync(join(claudeHome, "settings.json"), { force: true })
+    rmSync(join(claudeHome, "plugins"), { recursive: true, force: true })
+  }
+})
+
+test("a BROKEN worktree (git no longer knows it):  the main checkout's settings, the move recorded to its window file, the fix said", () => {
+  // r20:  solid-17's `.git` named `<main>/.git/worktrees/solid-17`, gone;  `CONFIG` is read once, so in a child process
+  const top = mkdtempSync(join(tmpdir(), "window-broken-"))
+  const main = join(top, "repo")
+  mkdirSync(join(main, ".git", "worktrees"), { recursive: true })
+  mkdirSync(join(main, ".epic"))
+  writeFileSync(join(main, ".epic", "config.json5"), '{ "worktreesFolder": "../repo.worktrees" }')
+  const broken = join(top, "repo.worktrees", "solid-17")
+  mkdirSync(broken, { recursive: true })
+  writeFileSync(join(broken, ".git"), `gitdir: ${join(main, ".git", "worktrees", "solid-17")}\n`)
+  // the epic's own worktree, a healthy one, beside it
+  const gitdir = join(main, ".git", "worktrees", "elemental-spell")
+  mkdirSync(gitdir)
+  writeFileSync(join(gitdir, "commondir"), "../..\n")
+  mkdirSync(join(top, "repo.worktrees", "elemental-spell"))
+  writeFileSync(join(top, "repo.worktrees", "elemental-spell", ".git"), `gitdir: ${gitdir}\n`)
+  const registry = join(top, "registry")
+  mkdirSync(join(registry, "hooks-seen"), { recursive: true })
+  writeFileSync(join(registry, "hooks-seen", SESSION), "")
+  const code =
+    "const { Window } = await import(process.env.WINDOW_SCRIPT);" +
+    'await Window.main(["open", "elemental-spell", "--no-open"]);' +
+    'await Window.main(["handoff", "elemental-spell"]);' +
+    'console.log(JSON.stringify({ file: Window.worktreeFile("elemental-spell"), ' +
+    'record: JSON.parse((await import("node:fs")).readFileSync(Window.handoffFile(process.env.CLAUDE_CODE_SESSION_ID), "utf8")) }))'
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", code], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      EPIC_CHECKOUT: broken,
+      CLAUDE_CODE_SESSION_ID: SESSION,
+      SPELL_EPIC_WINDOWS_DIR: registry,
+      SPELL_WINDOWS_DIR: join(top, "old-registry"),
+      WINDOW_SCRIPT: join(import.meta.dirname, "..", "src", "window.mjs")
+    }
+  })
+  try {
+    assert.equal(run.status, 0, run.stderr)
+    const { file, record } = JSON.parse(run.stdout.trim().split("\n").at(-1))
+    // the main checkout's windows folder (the default content folder's, beside it), never one beside the broken
+    // worktree:  before P26, `repo.worktrees/spell-app-dev/windows/...`
+    const windows = join(realpathSync(top), "spell-app-dev", "windows")
+    assert.equal(file, join(windows, "ongoing", "elemental-spell.code-workspace"))
+    assert.equal(record.to, file)
+    assert.equal(existsSync(file), true)
+    assert.match(run.stderr, /solid-17 is a broken worktree:  git no longer knows it/)
+    assert.match(run.stderr, /git worktree repair/)
+  } finally {
+    rmSync(top, { recursive: true, force: true })
+  }
+})
+
+test("brokenWorktreeLines():  nothing for a healthy checkout;  for a broken one, what it is and the fix", () => {
+  assert.deepEqual(brokenWorktreeLines(undefined), [])
+  assert.deepEqual(brokenWorktreeLines({ root: "/r", main: "/r" }), [])
+  const lines = brokenWorktreeLines({ root: "/w/x", main: "/m", worktree: "x", missingGitDir: "/m/.git/worktrees/x" })
+  assert.match(lines[0], /\/w\/x is a broken worktree.*\/m\/\.git\/worktrees\/x, gone/)
+  assert.match(lines.join("\n"), /fix, from \/m:  `git worktree repair \/w\/x`/)
+})
+
+/** Mark session `id` as one whose hooks run, as its prompt hook does (`SessionMoves.sawHooks()`). */
+function sawHooks(id) {
+  mkdirSync(join(dir, "hooks-seen"), { recursive: true })
+  writeFileSync(join(dir, "hooks-seen", id), "")
+}
+
+/**
+ * Claude Code's plugin lists in the temp `claudeHome`, its marketplace and its hooks' folder at `folder`
+ * (r20:  both named a folder that was gone).
+ */
+function pluginListsAt(folder) {
+  const marketplace = { source: { source: "directory", path: folder } }
+  writeFileSync(
+    join(claudeHome, "settings.json"),
+    JSON.stringify({ extraKnownMarketplaces: { "spell-epic": marketplace } })
+  )
+  mkdirSync(join(claudeHome, "plugins"), { recursive: true })
+  const known = { "spell-epic": { ...marketplace, installLocation: folder } }
+  writeFileSync(join(claudeHome, "plugins", "known_marketplaces.json"), JSON.stringify(known))
+  const installed = { version: 2, plugins: { "spell-epic@spell-epic": [{ installPath: folder }] } }
+  writeFileSync(join(claudeHome, "plugins", "installed_plugins.json"), JSON.stringify(installed))
+}
+
+/** `Window.main(argv)` as session `SESSION`, its output caught:  `{ code, out, err }`. */
+async function mainWith(argv) {
+  const out = []
+  const err = []
+  const { log, error } = console
+  console.log = (...line) => out.push(line.join(" "))
+  console.error = (...line) => err.push(line.join(" "))
+  process.env.CLAUDE_CODE_SESSION_ID = SESSION
+  try {
+    const code = await Window.main(argv)
+    return { code, out: out.join("\n"), err: err.join("\n") }
+  } finally {
+    Object.assign(console, { log, error })
+    delete process.env.CLAUDE_CODE_SESSION_ID
+  }
+}
 
 /** Write a registry entry for `pid` with `folders`. */
 function register(pid, folders) {

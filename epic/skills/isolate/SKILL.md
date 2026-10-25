@@ -143,6 +143,9 @@ repos cloned in it, its `.epic/config.json5`'s `"repos"`;  epic `epic-engine` P1
    - A doc shown from here on (`epic open`) waits for the move,
      then shows beside the session in the new window.
    - It fails:  say so in one line, and do "Continue" now, in this window.
+     - "this session can't move" (exit 1:  the end-of-turn hook won't run, epic `epic-engine` P26):  NO turn end
+       for a move that won't happen.  Give Owen its `fix:` line in one line, then do "Continue" in this window, or,
+       if he'd rather work there, `epic window launch <name>` (a new session in its window).
 6. END THE TURN now, so the move happens at once.
    - Nothing else this turn:  no install, no exploring, no questions.
    - One line:  "isolated in worktree `<name>` (branch `<name>`);  moving to `⎇ <name>`:
@@ -166,8 +169,10 @@ After step 3, when Owen picked "Stay in this window":  no `open`, no `handoff`, 
 ## Continue:  the first turn in the new window
 
 The turn after step 6, whatever Owen sends (`continue`, typed in by the move, or anything else):
+0. The prompt hook says this session "was to move ... and didn't" (the end-of-turn hook never ran):  the session is
+   still in the OLD window.  Say so in one line with its fix, and carry on here (or `epic window launch <name>`).
 1. Old tab still open in the old window (its title didn't match):  say so in one line, close it by hand.
-   - The log is `~/.spell/windows/handoffs/<session id>.log`.
+   - The log is `~/.spell-epic/windows/handoffs/<session id>.log`.
    - Only after a move:  "Stay" skips this.
 2. No `node_modules/` at the worktree's root:  run the install command, `epic config installCommand`.
    - In spell-app, `yarn install`:  a few seconds.

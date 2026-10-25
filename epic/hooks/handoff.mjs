@@ -20,6 +20,9 @@
  *   - ALWAYS `cwd`, never one the session inherited:  a window could hand its sessions the checkout that opened it
  *     (epic `epic-engine` P9).
  * - Never fails the turn:  every error exits 0 (it's logged, or written to stderr).
+ * - Not run at all (the plugin's hooks failing, r20):  the record waits, `<session id>.json`.
+ *   `handoff` and `launch --move` check first that it will run, and the prompt hook says a record still waiting at
+ *   the next prompt (`SessionMoves`, epic `epic-engine` P26).
  */
 import { spawn } from "node:child_process"
 import { existsSync, openSync, readFileSync, renameSync } from "node:fs"
