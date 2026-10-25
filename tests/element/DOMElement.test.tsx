@@ -248,116 +248,30 @@ describe("DOMElement attributes", () => {
 ////////////////
 // ## Old names
 //
-// `AttributeSpec.replaces`:  an attribute's old names, still read (epic `ui-gaps` P2).
+// `AttributeSpec.replaces`:  an attribute's old names, a record for `spell ui rename` (epic `ui-gaps`).
+// They worked from P2 until P13;  now they do nothing.
 ////////////////
 
-describe("DOMElement old names", () => {
-  /** A `color` that replaces the old switches `primary` / `secondary`, and an old plain name, `tint`. */
+describe("DOMElement old names, gone", () => {
+  /** A `color` that replaced the old switch `primary` and an old plain name, `tint`. */
   const COLOR = attribute("color", "enum", {
     values: ["primary", "secondary", "red"],
-    replaces: ["tint", { from: "primary", value: "primary" }, { from: "secondary", value: "secondary" }]
+    replaces: ["tint", { from: "primary", value: "primary" }]
   })
 
-  test("an old switch sets the new attribute's value, and leaves the markup as written", async () => {
-    const { tag } = definedTag("old-switch", [COLOR])
-    const host = await renderTag(tag, "primary")
-    expect(host.color).toBe("primary")
-    expect(shown(host)).toBe("string:primary")
-    expect(host.hasAttribute("color")).toBe(false)
-  })
-
-  test("an old plain name passes its text on, converted as the new attribute's", async () => {
-    const { tag } = definedTag("old-plain", [COLOR])
-    const host = await renderTag(tag, `tint="red"`)
-    expect(host.color).toBe("red")
-  })
-
-  test("the NEW name wins when both are written", async () => {
-    const { tag } = definedTag("old-and-new", [COLOR])
-    const host = await renderTag(tag, `primary color="secondary"`)
-    expect(host.color).toBe("secondary")
-    host.setAttribute("primary", "")
-    expect(host.color).toBe("secondary")
-  })
-
-  test("an old switch turned off clears ONLY the value it set", async () => {
-    const { tag } = definedTag("old-off", [COLOR])
-    const host = await renderTag(tag, "primary")
-    host.removeAttribute("primary")
+  test("an old name does nothing:  the attribute keeps its default", async () => {
+    const { tag } = definedTag("old-gone", [COLOR])
+    const host = await renderTag(tag, `primary tint="red"`)
     expect(host.color).toBe(undefined)
-    host.setAttribute("primary", "")
-    host.setAttribute("secondary", "")
-    host.removeAttribute("primary")
-    expect(host.color).toBe("secondary")
+    expect(shown(host)).toBe("undefined:undefined")
   })
 
-  test("notes each old name ONCE per page, naming what to write", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    // a name of its own:  the notes are page-wide, so another test's old name may be noted already
-    const { tag } = definedTag("old-note", [
-      attribute("look", "enum", { values: ["raised"], replaces: [{ from: "raised", value: "raised" }] })
-    ])
-    await renderTag(tag, "raised")
-    await renderTag(tag, "raised")
-    const notes = warn.mock.calls.filter(([text]) => String(text).includes("raised is an old name"))
-    expect(notes).toHaveLength(1)
-    expect(String(notes[0]![0])).toContain(`write look="raised"`)
-    warn.mockRestore()
-  })
-
-  test("an old name's values map onto the new ones;  other text passes as it is", async () => {
-    const { tag } = definedTag("old-values", [
-      attribute("attach", "enum", {
-        values: ["both", "top", "bottom"],
-        replaces: [{ from: "attached", value: "both", values: { up: "top" } }]
-      })
-    ])
-    const host = await renderTag(tag, "attached")
-    expect(host.attach).toBe("both")
-    host.setAttribute("attached", "up")
-    expect(host.attach).toBe("top")
-    host.setAttribute("attached", "bottom")
-    expect(host.attach).toBe("bottom")
-    host.removeAttribute("attached")
-    expect(host.attach).toBe(undefined)
-  })
-
-  test("on an attribute of several words, each old switch adds and removes its own", async () => {
-    const { tag } = definedTag("old-words", [
-      attribute("look", "multiple", {
-        values: ["basic", "very-basic", "circular"],
-        replaces: [
-          { from: "basic", value: "basic", values: { very: "very-basic" } },
-          { from: "circular", value: "circular" }
-        ]
-      })
-    ])
-    const host = await renderTag(tag, "basic circular")
-    expect(host.look).toBe("basic circular")
-    host.setAttribute("basic", "very")
-    expect(host.look).toBe("circular very-basic")
-    host.removeAttribute("circular")
-    expect(host.look).toBe("very-basic")
-  })
-
-  test("an old switch named like a new attribute is the old one written bare, the new one with text", async () => {
-    const { tag } = definedTag("old-same-name", [
-      attribute("look", "multiple", { values: ["link"], replaces: [{ from: "link", value: "link" }] }),
-      attribute("link", "string")
-    ])
-    const host = await renderTag(tag, "link")
-    expect([host.look, host.link]).toEqual(["link", undefined])
-    host.setAttribute("link", "help.html")
-    expect(host.link).toBe("help.html")
-    host.removeAttribute("link")
-    expect([host.look, host.link]).toEqual([undefined, undefined])
-  })
-
-  test("observes the old names, beside the attributes", () => {
-    const { Class } = definedTag("old-observed", [COLOR])
-    expect((Class as unknown as { observedAttributes: string[] }).observedAttributes).toEqual(
-      expect.arrayContaining(["color", "tint", "primary", "secondary"])
-    )
+  test("observes only the attributes, not the old names", () => {
+    const { Class } = definedTag("old-unobserved", [COLOR])
+    const observed = (Class as unknown as { observedAttributes: string[] }).observedAttributes
+    expect(observed).toContain("color")
+    expect(observed).not.toEqual(expect.arrayContaining(["tint"]))
+    expect(observed).not.toEqual(expect.arrayContaining(["primary"]))
   })
 })
 

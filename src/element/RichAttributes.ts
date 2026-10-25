@@ -86,8 +86,7 @@ export class RichAttributes {
    * - Never a vocabulary attribute, nor anything of `Base`'s or the browser's.
    */
   static isScriptApi(element: Element, name: string, Base: Function, definition?: E.ElementDefinition): boolean {
-    // an old name (`collapsed`) is the old-name mechanism's, even where a property keeps it for script
-    if (!definition || definition.attributeNamed(name) || definition.oldAttributeNamed(name)) return false
+    if (!definition || definition.attributeNamed(name)) return false
     const property = camelCase(name)
     let prototype = Object.getPrototypeOf(Object.getPrototypeOf(element) as object) as object | null
     while (prototype && prototype !== Base.prototype) {
