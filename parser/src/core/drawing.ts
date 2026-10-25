@@ -135,14 +135,14 @@ export const drawingMethods = defineCoreModule({
   /**
    * Mount `app`'s drawing into `element` -- replacing what was there -- and return how to take it down again.
    * - What `App.start()` does, into `core.appElement()`.
-   * - SIDE EFFECT:  `element.spellRoot` is the mounted app, so a runner can `unmount()` it before running a program
-   *   again (`runCompiled()`).
+   * - SIDE EFFECT:  `element.spellRoot` is the mounted app:
+   *   so a runner can `unmount()` it before running a program again (`runCompiled()`).
    * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
    */
   mountApp(app: CanDraw, element: HTMLElement): MountedApp {
     ;(element as AppElement).spellRoot?.unmount()
-    // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect), whose owner would
-    // otherwise own the app's drawing -- and hold or re-run it with the host's
+    // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect),
+    // whose owner would otherwise own the app's drawing -- and hold or re-run it with the host's
     const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))
     const stopUndoKeys = listenForUndoKeys(element)
     const mounted: MountedApp = {
@@ -168,8 +168,8 @@ Object.assign(core, drawingMethods)
  * - So its drawing neither re-runs when the card's reads change, nor dies with the card's errors:
  *   the card's drawing re-runs by itself, inside its boundary.
  * - What compiled TypeScript (`ts/solid`) and hand-written classes write.
- *   - Both targets draw a thing with `core.drawThing(card)`:  javascript's `draw()`, with no decorators, gets the
- *     same boundary there.
+ *   - Both targets draw a thing with `core.drawThing(card)`:
+ *     javascript's `draw()`, with no decorators, gets the same boundary there.
  *   - ONE boundary, `drawInBoundary()`, for both targets.
  * - SIDE EFFECT:  marks the method it returns (`isDrawn()`), so `drawThing()` calls it straight:
  *   no second boundary around it.

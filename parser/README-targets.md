@@ -59,7 +59,7 @@ The other three are for where your code has to live:  a typed codebase, a librar
 | `js/solid`:  JavaScript on Solid | what the editor, the runners and `spell run` run;  draws into the page;  compiled for every project, whatever its file asks for | no types:  the snapshots and the runs are all that check it |
 | `ts/solid`:  TypeScript on Solid | the same program as a Solid developer writes it:  types where Spell knows them, standard decorators, JSX;  `tsc` checks it | a build before it runs;  a program that draws can't open in a browser from `spell run` yet |
 | `ts/lib`:  a TypeScript library | a project's classes in a single `.lib.ts` file, for code that isn't Spell to import;  the core without Solid | no drawing and no top-level steps:  it never runs on its own |
-| `py`:  Python | Python as a person writes it:  PEP 8's names, `range()`, `elif`, `async def` only where it waits;  a program that draws becomes a web app | Python 3.12 and uv;  thinner type hints than TypeScript's;  36 of the core's names not ported yet |
+| `py`:  Python | Python as a person writes it:  PEP 8's names, `range()`, `elif`, `async def` only where it waits;  a program that draws becomes a web app | Python 3.12 and uv;  thinner type hints than TypeScript's;  44 of the core's names not ported yet |
 
 🌱 WebAssembly is the fifth, and not here yet (below, "Coming").
 
@@ -355,7 +355,7 @@ The checks:
 
 The cost, beyond Python and uv:
 - **Its type hints are thinner than TypeScript's:**  where TypeScript says `rank: Rank`, Python says `rank: Any`.
-- 36 of the JavaScript core's names aren't in `spell_core` yet, most of them a browser's own (below).
+- 44 of the JavaScript core's names aren't in `spell_core` yet, most of them a browser's own (below).
 - Two test projects of the nine have no Python snapshot yet:  the to-do app (below), and Solitario,
   which compiles to Python but has no snapshot pinning it.
 - A kind of node the Python writer can't write yet stops the compile, naming the kind.
@@ -364,15 +364,18 @@ The cost, beyond Python and uv:
 <summary>What isn't Python yet</summary>
 
 [not_ported_yet.json5](src/py/core/not_ported_yet.json5) lists the JavaScript core's names `spell_core` doesn't
-have, grouped by why (36 names):
+have, grouped by why (44 names):
 
 | Why | Names |
 | --- | --- |
 | a browser's only:  a view's element, a page's markup, its shadow root | 11 |
 | pauses and events Python's runtime hasn't needed | 4 |
+| a page's drag handlers:  the page calls them;  a Python program's page sends them to its things | 5 |
 | carrying things over a recompile:  the page's runners only | 3 |
 | an element's id on the page | 1 |
 | what the lookups search:  Python's take it on each call | 1 |
+| running a project's tests from a runner:  Python's tests run under pytest | 2 |
+| remembered props:  a Python program keeps none yet | 1 |
 | not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 16 |
 
 And the [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:

@@ -95,8 +95,8 @@ export function noteSetting(target: object, property: string, value: unknown): v
 }
 
 /**
- * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`:  `List.writeItems()` calls it, for every
- * change to a list.
+ * SIDE EFFECT:  `list`'s items are about to change from `before` to `after`.
+ * - `List.writeItems()` calls it, for every change to a list.
  * - An undoable action running:  the run's undo history records it (`UndoHistory.noteItems()`, `undoing.ts`).
  * - A `while` handler's put-back leaves lists as they are:  see `recordingSettings()`.
  */

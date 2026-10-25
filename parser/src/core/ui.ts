@@ -4,8 +4,8 @@ import { defineCoreModule } from "./core.types"
 /**
  * Assembled `core` UI-interaction methods:
  * - time (`pauseFor`)
- * - talking to the person running the program:  `notify`, `alert`, `confirm`, `prompt` (spell's `rules/UI/`), on
- *   Spell UI's toasts and dialogs
+ * - talking to the person running the program, on Spell UI's toasts and dialogs:
+ *   `notify`, `alert`, `confirm`, `prompt` (spell's `rules/UI/`)
  * - stylesheet installation (`installStyles`)
  * - Drawing (`h()`, `drawThing()` ...) is `drawing.ts`.
  */
@@ -143,8 +143,8 @@ const UNDO_KEYS = [
 const NON_TEXT_INPUTS = new Set(["button", "checkbox", "radio", "range", "reset", "submit", "color", "file", "image"])
 
 /**
- * ⌘Z and ⇧⌘Z undo and redo the running program's history while `element`, its app's, has the focus, or nothing
- * does (epic `prefs-and-undo` P6).  Returns how to stop.
+ * ⌘Z and ⇧⌘Z undo and redo the running program's history (epic `prefs-and-undo` P6).  Returns how to stop.
+ * - While `element`, its app's, has the focus, or nothing does.
  * - Through the page's Spell UI keyboard registry (`UI.keyboard`), in its page scope:
  *   a modal open over the app keeps its own keys (Q19).
  * - A text field keeps its own ⌘Z:  the key passes on to it.  So does a key with nothing to undo.

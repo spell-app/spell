@@ -12,10 +12,9 @@
  * game.undo()         // the card faces as it did;  ⌘Z does the same
  * ```
  *
- * - ONE history per run, `core.RUNTIME.history`:
- *   a new run starts with none, and loading saved state clears it (`core.fromJSON()`, `Loader.load()`):
- *   the person's document changed (Q3).
- * - Only what an action declared undoable changes is recorded (Q2), `Thing.declareAction()`:
+ * - ONE history per run, `core.RUNTIME.history`:  a new run starts with none.
+ *   - Loading saved state clears it (`core.fromJSON()`, `Loader.load()`):  the person's document changed (Q3).
+ * - Only what an undoable action changes is recorded (Q2):  one declared with `Thing.declareAction()`.
  *   - everything it sets, and everything it adds to or takes from a list, is ONE step
  *   - however long it waits, and whatever it calls:  another action it calls joins its step
  *   - undo and redo put the changes back at once:  nothing runs again, nothing's waited on
@@ -24,15 +23,18 @@
  *   - for each list:  its items before the step and after it -- the same things, not copies
  * - Left out (Q10):
  *   - a prop declared `undoable: false`, e.g. a selection
- *   - what an action declared `cantBeUndone` changes;  with `"clears history"` it also forgets every step once
- *     it's done, e.g. a new game
- * - Every property write comes through `noteSetting()` (`core.ts`), every list change through `noteItems()`:
- *   this history records them, and so does a `while` handler's put-back (`recordingSettings()`).
+ *   - what an action declared `cantBeUndone` changes
+ *     - with `"clears history"`, it also forgets every step once it's done, e.g. a new game
+ * - Every change is noted in one place, which this history hears from:
+ *   - each property write, in `noteSetting()` (`core.ts`):
+ *     a `while` handler's put-back hears of those too (`recordingSettings()`)
+ *   - each list change, in `noteItems()`
  * - The Edit menu's titles are in the program's language:  the core's messages `undo`, `undo-step` ...
  * - Built on the kit's generic `UndoStack`.
  * - Imports only `spell/util` and the core's own `core.ts`:  `Thing.ts` and `List.ts` import it, under the model too.
- * - The spell that declares an action waits for epic `elemental-spell`, whose P10 (Actions and Menus) may take
- *   `declareAction()` over:  it would call `UndoHistory.run()` itself (decision Q21).
+ * - The spell that declares an action waits for epic `elemental-spell`.
+ *   - Its P10 (Actions and Menus) may take `declareAction()` over,
+ *     calling `UndoHistory.run()` itself (decision Q21).
  */
 import { schemaOf, UndoStack, type UndoRecord } from "spell/util"
 
@@ -81,8 +83,8 @@ export class UndoHistory extends UndoStack {
   /**
    * Run `act`, an action, as `info` declares it -- see `ActionInfo`.  Returns what `act` returns.
    * - `undoneAs`:  ONE step, open until `act` returns, or until its promise settles (`transaction()`).
-   * - `cantBeUndone`:  nothing it changes is recorded, until it's done;  then `"clears history"` forgets every step,
-   *   even if it threw.
+   * - `cantBeUndone`:  nothing it changes is recorded until it's done.
+   *   Then `"clears history"` forgets every step, even if it threw.
    * - Both kinds count work begun while they wait as theirs:  a click while a deal waits joins the deal.
    */
   run<T>(info: ActionInfo, act: () => T): T {
@@ -191,8 +193,8 @@ export class UndoHistory extends UndoStack {
  * Make `Class`'s method `name` an action:  ONE undo step, or one that can't be undone -- see `ActionInfo`.
  * - What `Thing.declareAction()` and `List.declareAction()` do.
  *   - In a static block AFTER the method:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`.
- * - SIDE EFFECT:  replaces the method on `Class.prototype` with one that runs it through the history
- *   (`UndoHistory.run()`).
+ * - SIDE EFFECT:  replaces the method on `Class.prototype`
+ *   with one that runs it through the history (`UndoHistory.run()`).
  *   - A subclass that overrides it declares it again;  its `super.turnOver()` joins its step.
  * - No program running:  the method just runs.
  * - throws `TypeError` if `name` isn't a method of `Class`, or `info` says neither kind, or both

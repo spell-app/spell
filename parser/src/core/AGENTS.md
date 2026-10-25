@@ -1,7 +1,7 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/core/` of the `spell-parser` package (`spell-parser/core`).
+This file guides AI coding agents (Claude Code, Codex, and others) working in this folder:
+the core, `spell-parser/core` (its `src/core/`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -152,10 +152,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Tests at run time
 
-- A `to test ...` compiles to a function the program exports, running `core.test()`:
-  `export function testCardSetup() { return core.test("test card setup", function testCardSetup() { ... }) }`.
-  - Each `... should be ...` in it is a `core.expect()`, called with the spell it was written as:
-    `core.expect(it.rank, "its rank", "queen", "queen")`.
+- Each `to test ...` compiles to a function the program exports, which runs `core.test()`.
+  - Each check in it (`... should be ...`) calls `core.expect()` with the spell it was written as:
+
+    ```js
+    export function testCardSetup() {
+      return core.test("test card setup", function testCardSetup() {
+        // ...
+        core.expect(it.rank, "its rank", "queen", "queen")
+      })
+    }
+    ```
 - How each test went is in `core.testResults()`, kept per run (`core.RUNTIME`), in [tests.ts](tests.ts):
   - its checks, each with the spell it was written as (`TestCheck`):
     so the language server finds a failed one's line with no line numbers in the compiled code
@@ -210,7 +217,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A property's plain list is its items, a JSON array.
   - `new Loader({ entryFor }).load(key)`:  each entry made once, however many references name it.
     - A thing written whole inside one is found by its key (`index()`).
-  - The keys are `refOf`'s:  the people store's carry each person's org, `Person#matt@spell` (its `placeOf`).
+  - The keys are `refOf`'s.
+    - The people store's carry each person's org, its `placeOf`:  `Person#matt@spell`.
   - VERSIONS (P6):  a type's version is the highest its steps name, 1 with none (`versionOf()`):
     - `a person version 2 renames name to names` => `Person.v2RenamesName = "names"`
     - `a person version 3 drops nickname` => `Person.v3DropsNickname = true`
@@ -245,39 +253,65 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Remembered props
 
-- A prop declared `remembered: true` keeps its value from one run to the next ([remembered.ts](remembered.ts), epic
-  `prefs-and-undo` P8):  `this.declareProp("theme", { oneOf: THEMES, remembered: true })`.
-  - Kept in the person's preferences, a `PrefStore` named for the project's id (`spell/util/persist`).
-  - The runner says which, after `resetRuntime()` and before the program loads:  `await core.remember(projectId)`.
-    - spell-app's `runCompiled()`, given `projectId` (the editor, `<spell-viewer>`);  its tests never remember.
-  - Read whole as the run starts, so a store that must be waited on (the page server's) reads at once after.
-- Keys:  an app's by name (`@owen/solitaire:theme`);  any other thing's under the id the program chose,
-  `@owen/solitaire:main.theme` (`Thing.rememberedKeyFor()`, `hasChosenId()`).
-  - A made-up id is new each run:  such a thing's remembered prop isn't kept, said once on the console.
-- Only text, numbers and choices;  a value its prop no longer allows starts afresh, said once.
+- A prop declared `remembered: true` keeps its value from one run to the next
+  ([remembered.ts](remembered.ts), epic `prefs-and-undo` P8):
+
+  ```ts
+  this.declareProp("theme", { oneOf: THEMES, remembered: true })
+  ```
+
+  - Kept in the person's preferences:  a `PrefStore` named for the project's id (`spell/util/persist`).
+  - The runner names the project after `resetRuntime()`, before the program loads:  `await core.remember(projectId)`.
+    - spell-app's `runCompiled()` does, when it's handed the project's id:  the editor and `<spell-viewer>` hand it one.
+    - Its tests never remember.
+  - The store is read whole as the run starts:
+    so one that must be waited on (the page server's) answers every read at once after that.
+- The keys:
+  - an app's prop, by its name:  `@owen/solitaire:theme`
+  - any other thing's, under the id the program chose:  `@owen/solitaire:main.theme`
+  - Worked out by `Thing.rememberedKeyFor()`, with `hasChosenId()`.
+  - A made-up id is new each run:  such a thing's remembered prop isn't kept, and the console says so once.
+- Only text, numbers and choices are kept.
+  - A kept value its prop no longer allows starts afresh, said once on the console.
 - Nothing called `core.remember()` (tests, `spell run`):  a remembered prop is a plain one.
 - The compiler writes no `remembered` yet:  its spell waits for epic `elemental-spell`.
 
 ## Undo and redo
 
-- A running program's undo history ([undoing.ts](undoing.ts), epic `prefs-and-undo` P6):  `core.RUNTIME.history`, an
-  `UndoHistory` on the kit's `UndoStack`.
+- A running program keeps an undo history, `core.RUNTIME.history`
+  ([undoing.ts](undoing.ts), epic `prefs-and-undo` P6).
+  - An `UndoHistory`, built on the kit's `UndoStack`.
   - One per run;  loading saved state clears it (`core.fromJSON()`, `Loader.load()`).
-- Only an action declared undoable is recorded:  `static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }`
-  on a `Thing` or a `List`, after the method.
-  - It's ONE step, however long it waits:  what it calls, and work begun while it waits, join it.
-  - `{ cantBeUndone: "keeps history" | "clears history" }`:  left out, and the second forgets every step once done.
-  - A prop declared `undoable: false` (a selection) is left out of every step.
-- What a step keeps:  each prop's value before its first change and after its last;  each list's items before and after
-  (the same things, not copies).  Undo and redo set them back through the setters:  nothing runs again.
-- Every property write comes through `noteSetting()` (`core.ts`), every list change through `noteItems()`
-  (`List.writeItems()`):  the ONE place each is noted, for the history, a `while`'s put-back and `core.remote`.
-- `App`:  `undo()`, `redo()`, and live `canUndo`, `canRedo`, `undoTitle`, `redoTitle` (the core's messages `undo`,
-  `undo-step` ..., in the program's language).
-- ⌘Z and ⇧⌘Z ([ui.ts](ui.ts)'s `listenForUndoKeys()`, from `core.mountApp()`):  through the page's Spell UI keyboard
-  registry, while the app has the focus or nothing does;  a text field and a modal keep their own.
-- The compiler writes no `declareAction()` yet:  its spell waits for epic `elemental-spell`, whose P10 (Actions and
-  Menus) may take it over by calling `UndoHistory.run()` (decision Q21).
+- Only an action declared undoable is recorded:  on a `Thing` or a `List`, in a static block after its method.
+
+  ```ts
+  static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }
+  ```
+
+  - It's ONE step, however long it waits:
+    what it calls, and work begun while it waits, join it.
+  - `{ cantBeUndone: "keeps history" | "clears history" }`:  left out of the history.
+    - The second forgets every step, once the action is done.
+  - A prop declared `undoable: false` (a selection, say) is left out of every step.
+- What a step keeps:
+  - each prop's value before its first change, and after its last
+  - each list's items before and after:  the same things, not copies
+  - Undo and redo set them back through the setters:  nothing runs again.
+- Each change is noted in ONE place:
+  - every property write:  `noteSetting()` (`core.ts`)
+    - for the history, a `while` handler's put-back, and a program running elsewhere (`core.remote`)
+  - every list change:  `noteItems()`, from `List.writeItems()`
+    - for the history only
+- `App` shows the history to people:
+  - `undo()`, `redo()`
+  - `canUndo`, `canRedo`:  live
+  - `undoTitle`, `redoTitle`:  live, in the program's language
+    - the core's messages `undo`, `undo-step` ...
+- ⌘Z and ⇧⌘Z go through the page's Spell UI keyboard registry, while the app has the focus or nothing does.
+  - `listenForUndoKeys()`, in [ui.ts](ui.ts), started by `core.mountApp()`.
+  - A text field and a modal keep their own.
+- The compiler writes no `declareAction()` yet:  its spell waits for epic `elemental-spell`.
+  - Its P10 (Actions and Menus) may take it over, by calling `UndoHistory.run()` (decision Q21).
 
 ## The Python core
 

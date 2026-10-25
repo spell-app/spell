@@ -1,6 +1,6 @@
 /**
- * What a running program remembers from one run to the next:  its props declared `remembered`
- * (epic `prefs-and-undo` P8).
+ * What a running program remembers from one run to the next (epic `prefs-and-undo` P8):
+ * its props declared `remembered`.
  *
  * ```ts
  * class Solitaire extends App {
@@ -13,7 +13,8 @@
  * ```
  *
  * - Kept in the person's preferences:  a `PrefStore` named for the project's id.
- *   Whoever runs the program says which, and where (`core.remember()`):  the browser's storage unless it says otherwise.
+ *   Whoever runs the program says which, and where (`core.remember()`):
+ *   the browser's storage, unless it says otherwise.
  * - An app's are kept by name, `theme`;  any other thing's under its id, `main.theme`:
  *   only with an id the program chose -- see `Thing.rememberedKeyFor()`.
  * - Only text, numbers and choices are kept:  a thing or a list isn't, said once on the program's console.

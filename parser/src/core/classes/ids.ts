@@ -25,7 +25,7 @@ export function newThingId(thing: object): string {
   return `${kind}-${randomBase36(ID_LENGTH)}`
 }
 
-/** The id `ID_PROP` made up for each thing:  a different one there now was chosen (`hasChosenId()`). */
+/** The id `ID_PROP` made up for each thing:  if its id is a different one now, it was chosen (`hasChosenId()`). */
 const madeIds = new WeakMap<object, string>()
 
 /**

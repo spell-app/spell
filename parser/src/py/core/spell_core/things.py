@@ -109,8 +109,8 @@ def prop(
       or a function giving them, for a list on a class defined after this one:  `lambda: Deck.SUITS`.
     - `default`:  its value while it's unset.
       - NOT stored, so `to_json()` leaves it out
-      - none:  its first choice (`one_of`), else its type's:  `number` 0, `text` "", `choice` False;
-        a class's type has none (`Prop.default_value()`)
+      - none given:  its first choice (`one_of`), else its type's:  `number` 0, `text` "", `choice` False
+        - a property whose type is a class has none:  `None` (`Prop.default_value()`)
     - `init`:  makes its value the first time it's read, once per thing, e.g. `init=Deck`.
       - stored, so `to_json()` writes it
     - `item_type`:  the class a LIST property holds, or its name, e.g. `"Task"` for `as a new list of tasks`.

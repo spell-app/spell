@@ -7,8 +7,8 @@ import { View } from "./View"
 
 /**
  * `App`:  a `View` that draws a whole application -- what `a game is an app` extends.
- * - Its element is named for its project and `app`, not its class:  `<solitaire-app>` (epic `elemental-spell` Q62),
- *   which `<spell-viewer>` places inside itself when the app starts.
+ * - Its element is named for its project and `app`, not its class (epic `elemental-spell` Q62):
+ *   `<solitaire-app>`, which `<spell-viewer>` places inside itself when the app starts.
  * - Its element shows its drawing as its CHILDREN, not in its shadow root (`drawsInItsChildren`):
  *   so the project's `.css` files, installed where the app mounts (`core.domRoot()`), still reach its board.
  * - Set the `draw` method (e.g. via a spell-compiled `to draw`) and start things with `start the game`.
@@ -70,8 +70,8 @@ export class App extends View {
   }
 
   /**
-   * Mount this app's drawing into `core.appElement()` (`core.mountApp()`), creating a
-   * `core.REACT_APP_ROOT_ID` container `div` if there's none.
+   * Mount this app's drawing into `core.appElement()` (`core.mountApp()`),
+   * creating a `core.REACT_APP_ROOT_ID` container `div` if there's none.
    * - On a page that defines elements, that's our element, `<solitaire-app>`, our drawing inside it.
    * - Compiles from `start the game` -- see `rules/draw/StartApp.ts` (a method call on the app instance, not a global).
    * - Starting again replaces the app drawn there.

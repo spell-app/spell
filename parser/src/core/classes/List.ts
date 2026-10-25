@@ -26,12 +26,12 @@ import { ID_PROP } from "./ids"
  * `List`: our array concept -- what `a deck is a list` extends.
  * - Counted from 0, as an array is (epic `python-target` P23):
  *   spell code counting from 1 is turned into indexes as it compiles -- see `positions.ts`.
- * - Backed by reactive `items` state rather than a raw JS array, so mutations (`add`, `setItem`, ...)
- *   trigger re-renders of anything observing this `List`.
+ * - Backed by reactive `items` state rather than a raw JS array,
+ *   so mutations (`add`, `setItem`, ...) trigger re-renders of anything observing this `List`.
  * - Copy on write:  each mutation sets `items` to a NEW array --
  *   a spell cell notifies on a new value, never on a change made in place.
- * - Delegates JS collection duck-typing (`itemCount`, `getKeys`, `getItem`, ...) to `core`'s
- *   generic collection methods -- see `CollectionLike` in `collection-core.ts`.
+ * - Delegates JS collection duck-typing (`itemCount`, `getKeys`, `getItem`, ...)
+ *   to `core`'s generic collection methods -- see `CollectionLike` in `collection-core.ts`.
  * - Has its own list methods for hand-written TypeScript, e.g. `pile.filter(...)`, `pile.lastItem`:
  *   each calls its `core` twin -- see "List methods" below.
  * - Iterable:  `for (const card of pile)`.
@@ -587,10 +587,12 @@ export class List<T = unknown> extends Observable<Record<string, unknown>, { ite
   }
 
   /**
-   * Make `next` our items -- EVERY change to them comes here, so an exclusive list keeps its family's owners:
-   * - an item going out, no longer anywhere in `next`, has no owner (epic page D8)
-   * - an item coming in is ours, THEN leaves the list of our family that held it --
-   *   in that order, so its owner changes once:  a reader never sees it ownerless mid-move
+   * Make `next` our items:  EVERY change to them comes here.
+   * - Noted first (`noteItems()`):  the undo history records it while an undoable action runs.
+   * - An exclusive list keeps its family's owners here:
+   *   - an item going out, no longer anywhere in `next`, has no owner (epic page D8)
+   *   - an item coming in is ours, THEN leaves the list of our family that held it --
+   *     in that order, so its owner changes once:  a reader never sees it ownerless mid-move
    * - SIDE EFFECT:  the list it left changes too, and readers of each item's owner re-run
    */
   private writeItems(next: T[]): void {

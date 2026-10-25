@@ -7,8 +7,8 @@ import { RememberedValues } from "./remembered"
 import { UndoHistory } from "./undoing"
 
 /**
- * Class backing `core.RUNTIME` -- a live per-project state bag (see `SpellRuntimeState`) that's
- * also eventful:  a program's events are ITS runtime's, so they end with it.
+ * Class backing `core.RUNTIME`:  a live per-project state bag (see `SpellRuntimeState`),
+ * and eventful too:  a program's events are ITS runtime's, so they end with it.
  * - Reach them through `on()` / `trigger()` (below), which find the CURRENT runtime.
  * - Programs compiled before those still call `core.RUNTIME.on(...)` / `.trigger(...)` -- the same lists.
  */
@@ -24,8 +24,8 @@ export class SpellRuntime extends Eventful() {
  * - `Payload`:  what the event brings, e.g. `on<{ card: Card }>("card-click", ({ card }) => card.play())`.
  *   Types only:  nothing checks it.
  * - `eventType` is case-insensitive.
- * - On the CURRENT `core.RUNTIME`, found as it's called:  a new one is made each time a program starts, so a
- *   listener ends with its run.
+ * - On the CURRENT `core.RUNTIME`, found as it's called:
+ *   a new one is made each time a program starts, so a listener ends with its run.
  * - throws if no program is running (`resetRuntime()` not called yet).
  */
 export function on<Payload extends object = object>(eventType: string, callback: EventCallback<Payload>): void {
@@ -43,8 +43,8 @@ export function once<Payload extends object = object>(eventType: string, callbac
 }
 
 /**
- * Trigger `event` in the running program -- `trigger card-click with the card` =>
- * `trigger("card-click", { card: this })`.
+ * Trigger `event` in the running program:
+ * `trigger card-click with the card` => `trigger("card-click", { card: this })`.
  * - `props` are copied onto the event, so a listener reads `event.card`.
  * - Returns what each listener returned, in the order they were added.
  * - Nothing running:  nobody hears it, `[]`.  NEVER throws:  `core.console` triggers its lines before then.
@@ -92,8 +92,9 @@ export const runtimeMethods = defineCoreModule({
 
   /**
    * Global runtime state root.
-   * - Typed as always set:  every runner calls `resetRuntime()` before a program runs (`runCompiled()`, the
-   *   `cli`'s `runProject.ts`, tests), so compiled spell reads it bare, e.g. `core.RUNTIME.trigger(...)`.
+   * - Typed as always set:  every runner calls `resetRuntime()` before a program runs,
+   *   so compiled spell reads it bare, e.g. `core.RUNTIME.trigger(...)`.
+   *   - The runners:  `runCompiled()`, the `cli`'s `runProject.ts`, tests.
    * - NOTE:  `undefined` until then, or after `clearRuntime()`:  `getRuntimeState()` / `clearRuntimeState()` check.
    */
   RUNTIME: undefined as unknown as SpellRuntimeState,
@@ -101,6 +102,7 @@ export const runtimeMethods = defineCoreModule({
   /**
    * Reset `core.RUNTIME`, e.g. when a project starts or a test is run.
    * Returns the new runtime.
+   * - The new one's undo history is empty, and it remembers nothing until `core.remember()`.
    * - SIDE EFFECT:  forgets the last run's things too -- see `core.things`.
    */
   resetRuntime(): SpellRuntimeState {
@@ -111,8 +113,8 @@ export const runtimeMethods = defineCoreModule({
   },
 
   /**
-   * Remember the running program's `remembered` props from run to run, under `name`, its project's id
-   * (epic `prefs-and-undo` P8).
+   * Remember the running program's `remembered` props from run to run (epic `prefs-and-undo` P8),
+   * under `name`, its project's id.
    * - e.g. `await core.remember("@owen/solitaire")`:  its app's `theme` is kept at `@owen/solitaire:theme`
    * - Reads what the last run kept, so call it after `resetRuntime()`, before the program starts.
    * - `place`:  where they're kept;  the browser's storage unless the host says otherwise
@@ -181,9 +183,10 @@ export const runtimeMethods = defineCoreModule({
   /**
    * Start a conceptual process by `name`.
    * - Compiles from spell `start process X` / `start animation X` (see `rules/async/StartProcess.ts`).
-   * - `exclusively`: pass `'EXCLUSIVE'` to flag it exclusive -- this unconditionally (re)flags the
-   *   process, so exclusive callers MUST check `processIsRunning()` first if they want re-entry guarded
-   *   (compiled `start exclusive process X` does this for you).
+   * - `exclusively`:  pass `'EXCLUSIVE'` to flag it exclusive.
+   *   - It always (re)flags the process:
+   *     so an exclusive caller MUST check `processIsRunning()` first, to guard against re-entry.
+   *   - Compiled `start exclusive process X` does this for you.
    * - Non-exclusive calls instead bump a running count.
    */
   startProcess(name: string, exclusively?: "EXCLUSIVE"): void {
