@@ -276,7 +276,7 @@ the next, as text sits under a `##` heading;  a member before any group is in no
   each run of text and holes gets a `<span>` of its own to hide.
 - A Spell UI element takes its plain `hidden`:  its host has no box of its own, where the browser's until-found
   would draw it all the same.
-- Code spell writes the same tags, in its markup:  the same program.  Spanish says `<si ...>`, `<si no>`.
+- Plain Spell writes the same tags, in its markup:  the same program.  Spanish says `<si ...>`, `<si no>`.
 - A branch in no element is an error that says to write `if ...` on a line of its own.
 
 **`<html>` blocks:**  markup drawn exactly as written, `<ui-button color="primary">`, `<div>` the web's own, in a drawing
