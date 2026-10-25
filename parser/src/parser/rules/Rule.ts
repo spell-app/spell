@@ -450,6 +450,16 @@ export abstract class Rule<
   /** Tests for this rule. */
   declare tests: P.RuleTests | undefined
 
+  /**
+   * The rules inside this one, as its syntax built them:  none for a leaf, e.g. a `Keyword` or a `{subrule}`.
+   * - `Sequence`, `Choice`:  its `rules`;  `Repeat`:  the rule it repeats, then its delimiter, if any.
+   * - Every rule inside, at any depth:  walk this, e.g. the translator's and the language server's keyword list.
+   * - What a rule can START with is `P.leadingRules()`.
+   */
+  get childRules(): Rule[] {
+    return []
+  }
+
   ////////////////
   // ## Matching behavior
   ////////////////

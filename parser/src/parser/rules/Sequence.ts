@@ -38,6 +38,11 @@ export class Sequence<
     if (first instanceof P.Subrule && first.zeroWidthRule) this.leadingZeroWidth = first.zeroWidthRule
   }
 
+  /** Our rules, in order. */
+  get childRules(): P.Rule[] {
+    return this.rules
+  }
+
   /** Our first rule's, if it takes no tokens (`Rule.zeroWidth`):  `test()` asks it first. */
   declare leadingZeroWidth: P.Rule | undefined
 

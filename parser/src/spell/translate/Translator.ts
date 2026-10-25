@@ -1323,25 +1323,18 @@ function literalAlternatives(rule: P.Rule): string[] {
 /** Every rule inside `rule`, itself too, into `into`. */
 function collectRules(rule: P.Rule, into: Set<P.Rule>): void {
   into.add(rule)
-  for (const child of childRules(rule)) collectRules(child, into)
-}
-
-/** `rule`'s rules, as its syntax built them. */
-function childRules(rule: P.Rule): P.Rule[] {
-  if (rule instanceof P.Repeat) return [rule.rule, rule.delimiter].filter(Boolean) as P.Rule[]
-  if (rule instanceof P.Sequence || rule instanceof P.Choice) return rule.rules ?? []
-  return []
+  for (const child of rule.childRules) collectRules(child, into)
 }
 
 /** Is `inner` `rule`, or inside it? */
 function contains(rule: P.Rule, inner: P.Rule): boolean {
-  return rule === inner || childRules(rule).some((child) => contains(child, inner))
+  return rule === inner || rule.childRules.some((child) => contains(child, inner))
 }
 
 /** The first rule in `rule`'s syntax (itself included) that passes `test`. */
 function findRule(rule: P.Rule, test: (rule: P.Rule) => boolean): P.Rule | undefined {
   if (test(rule)) return rule
-  for (const child of childRules(rule)) {
+  for (const child of rule.childRules) {
     const found = findRule(child, test)
     if (found) return found
   }
@@ -1355,7 +1348,7 @@ function hasSlot(rule: P.Rule): boolean {
 
 /** Does `rule` name any group inside it, by a name of its own (`name:`)? */
 function hasNamedGroups(rule: P.Rule): boolean {
-  return childRules(rule).some((child) => !!findRule(child, (each) => !!each.matchGroup))
+  return rule.childRules.some((child) => !!findRule(child, (each) => !!each.matchGroup))
 }
 
 /** The groups `rule` fills:  each named one inside it, and each subrule's (by its rule's name). */
@@ -1364,7 +1357,7 @@ function namedGroupsIn(rule: P.Rule): string[] {
   const visit = (each: P.Rule) => {
     if (each.matchGroup) names.push(each.matchGroup)
     else if (each instanceof P.Subrule && !each.zeroWidthRule) names.push(BODY_KEYWORDS[each.rule] ? "body" : each.rule)
-    if (!each.matchGroup) childRules(each).forEach(visit)
+    if (!each.matchGroup) each.childRules.forEach(visit)
   }
   visit(rule)
   return names
@@ -1383,7 +1376,7 @@ function saysWords(rule: P.Rule, text: string): boolean {
     if (each instanceof P.Literal) alternativesOf(each.literal).forEach((word) => words.add(word))
     else if (each instanceof P.Literals)
       each.literals.forEach((literal) => alternativesOf(literal.literal).forEach((word) => words.add(word)))
-    childRules(each).forEach(visit)
+    each.childRules.forEach(visit)
   }
   visit(rule)
   if (!words.size) return false

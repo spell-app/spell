@@ -43,6 +43,11 @@ export class Repeat<
     super(props instanceof Rule ? { rule: props } : props)
   }
 
+  /** The rule that repeats, then its delimiter, if any:  a delimiter's words are part of the syntax too. */
+  get childRules(): P.Rule[] {
+    return this.delimiter ? [this.rule, this.delimiter] : [this.rule]
+  }
+
   /** We match at least once, so can only start where `rule` could. */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
     if (start >= tokens.length) return false
