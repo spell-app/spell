@@ -76,6 +76,14 @@ export const tabVocabulary = {
         "Its old name is `attached`."
     },
     {
+      name: "parent",
+      group: "layout",
+      kind: "string",
+      description:
+        'Id of the `<ui-tabs>` this pane belongs to, when it\'s written outside them (`parent="types"`):  ' +
+        "it joins them, in page order, as if nested there."
+    },
+    {
       name: "appearance",
       group: "appearance",
       kind: "multiple",

@@ -19,6 +19,7 @@ import tabCSS from "./UITab.css?inline"
  *     and a Tab stop (`tabindex="0"`, unless the page set one),
  *     so keyboard users reach content with no control in it.
  * - Alone (no `<ui-tabs>`):  shown while its own `selected` (or `active`) is set.
+ * - `parent="<id>"`:  written outside its `<ui-tabs>`, it moves in, as if nested there (`ParentLink`).
  * - Hidden panes are DOM elements with `display: none`:  out of the layout and the accessibility tree.
  * - `disabled`:  its tab can't be selected;  the pane itself is unusable, the base class's way
  *   (`elementSetup.disabled`:  its content inert and dimmed, `aria-disabled`).
@@ -82,6 +83,22 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
       domElement.removeAttribute("tabindex")
       this.tabIndexIsOurs = false
     }
+  }
+
+  ////////////////
+  // ## Parent
+  ////////////////
+
+  /** `parent`:  written elsewhere on the page, it joins the `<ui-tabs>` with that id (`ParentLink`). */
+  private readonly parentLink = new E.ParentLink({
+    domElement: this.domElement,
+    attribute: this.elementDefinition.localAttribute("parent")
+  })
+
+  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
+  @E.onChange("isConnected", "parent")
+  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
+    return isConnected ? this.parentLink.follow(parent) : undefined
   }
 
   ////////////////

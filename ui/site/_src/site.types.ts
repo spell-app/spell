@@ -8,5 +8,8 @@
 /** The page's own content box:  what a page file holds besides its `<head>`, and what the router swaps. */
 export const PAGE_MAIN = "main#main"
 
-/** `localStorage` key prefix of a page's folds (`SiteSections`), + the page's path:  `{ [section id]: folded }`. */
+/**
+ * `localStorage` key prefix of a page's closed sections (`SiteSections`), + the page's path:  `{ [section id]: closed }`.
+ * - Its old word, "folds", stays:  readers keep the sections they closed.
+ */
 export const FOLDS_KEY = "spell-ui-site:folds:"

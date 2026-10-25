@@ -24,7 +24,9 @@
  *   transition (`allow-discrete`) keeps it in the top layer;  `reset.css` shortens it under reduced motion.
  * - Colours:  `color` remaps (`colors.css`) fill the box and arrow with `--ui-color` and write
  *   `--ui-color-on`;  the arrow's edge takes `--ui-color` too, so it disappears into a coloured box (no per-hue
- *   rules).  `inverted` swaps in the opposite scheme's ink, and a coloured inverted popup the hue's `-inverted`
+ *   rules).  Uncoloured, the arrow's edge is the box's border colour (`--ui-popup-border-color`), unless
+ *   `--ui-popup-arrow-edge` says otherwise:  a theme's rim runs on round the arrow (Owen, 2026-10-25:  "Arrow tip
+ *   border doesn't match shading on tooltip").  `inverted` swaps in the opposite scheme's ink, and a coloured inverted popup the hue's `-inverted`
  *   variant (Fomantic's "light" hue).  The DOM element resets the remap and `--ui-scale`, so a popup opened from inside
  *   a red message or a large button isn't red or large.
  * - Public tokens (`--ui-popup-*`, the theming surface) are NEVER declared here:  the token block reads each
@@ -103,7 +105,8 @@
     --_ui-popup-arrow-size: var(--ui-popup-arrow-size, 0.71428em);
     --_ui-popup-arrow-edge-distance: var(--ui-popup-arrow-edge-distance, 1em);
     --_ui-popup-arrow-offset: var(--ui-popup-arrow-offset, calc(var(--_ui-popup-arrow-size) / -2 + 0.05em));
-    --_ui-popup-arrow-edge: var(--ui-popup-arrow-edge, var(--ui-border-color-strong));
+    /* the box's own rim by default, so a themed rim (a glass theme's white one) runs on round the arrow */
+    --_ui-popup-arrow-edge: var(--ui-popup-arrow-edge, var(--_ui-popup-border-color));
     --_ui-popup-distance: var(--ui-popup-distance, var(--_ui-popup-arrow-size));
     --_ui-popup-inverted-background: var(--ui-popup-inverted-background, var(--ui-ink));
     --_ui-popup-inverted-color: var(--ui-popup-inverted-color, var(--ui-surface));

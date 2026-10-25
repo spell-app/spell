@@ -7,7 +7,7 @@
     <title>Section | Spell UI</title>
     <meta
       name="description"
-      content="A section is a titled block of content that can fold away and keep its title in view."
+      content="A section is a titled block of content that can close and keep its title in view."
     />
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -42,7 +42,7 @@
             Section
             <ui-label color="yellow" size="small">In progress</ui-label>
             <ui-header
-              >A section is a titled block of content that can fold away and keep its title in view.</ui-header
+              >A section is a titled block of content that can close and keep its title in view.</ui-header
             >
           </ui-header>
           <ui-docs-themes for="ui-section" show="theme" compact class="site-themes"></ui-docs-themes>
@@ -72,13 +72,13 @@
 
               <ui-section id="examples-types-collapsible" label="Collapsible" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A `collapsible` section folds and unfolds when its title is activated.  `collapsed` starts it folded."
+                  description="A `collapsible` section closes and opens when its title is activated.  `collapsed` starts it closed."
                 >
                   <ui-section label="Release notes" level="4" collapsible>
-                    <p>Open by default: activate the title to fold it.</p>
+                    <p>Open by default: activate the title to close it.</p>
                   </ui-section>
                   <ui-section label="Older releases" level="4" collapsible collapsed>
-                    <p>Folded at the start: only the title shows until it is activated.</p>
+                    <p>Closed at the start: only the title shows until it is activated.</p>
                   </ui-section>
                 </ui-docs-example>
               </ui-section>
@@ -114,19 +114,19 @@
             <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
               <ui-section id="examples-groups-collapsing" label="Collapsing" sticky collapsible dividing>
                 <ui-docs-example
-                  description='`<ui-sections collapsing>`:  every section in it folds, sub-sections included, with no `collapsible` on each;  folded ones stack with no space between.  An open one sits flush under the title above and keeps its space below.  `collapsible="false"` opts a section out.'
+                  description='`<ui-sections collapsing>`:  every section in it can close, sub-sections included, with no `collapsible` on each;  closed ones stack with no space between.  An open one sits flush under the title above and keeps its space below.  `collapsible="false"` opts a section out.'
                 >
                   <ui-sections collapsing>
                     <ui-section label="Overview" level="4" dividing collapsed><p>What the project is.</p></ui-section>
                     <ui-section label="Install" level="4" dividing collapsed><p>How to get it.</p></ui-section>
                     <ui-section label="Configure" level="4" dividing>
-                      <p>Open:  its sub-sections fold too.</p>
+                      <p>Open:  its sub-sections close too.</p>
                       <ui-section label="Options" collapsed><p>Every option.</p></ui-section>
                       <ui-section label="Defaults" collapsed><p>What you get as is.</p></ui-section>
                     </ui-section>
                     <ui-section label="Deploy" level="4" dividing collapsed><p>Ship it.</p></ui-section>
                     <ui-section label="Changelog" level="4" dividing collapsible="false">
-                      <p>Opted out:  never folds.</p>
+                      <p>Opted out:  never closes.</p>
                     </ui-section>
                   </ui-sections>
                 </ui-docs-example>
@@ -153,6 +153,22 @@
                     <ui-section label="First" level="4" dividing><p>As usual.</p></ui-section>
                     <ui-section label="Second" level="4" dividing><p>The usual space between them.</p></ui-section>
                   </ui-sections>
+                </ui-docs-example>
+              </ui-section>
+
+              <ui-section id="examples-groups-flat-markup" label="Flat markup" sticky collapsible dividing>
+                <ui-docs-example>
+                  <p slot="description">
+                    A section can be written outside the one it belongs in:  <code>parent</code> names that
+                    section's id (or a <code>&lt;ui-sections&gt;</code> group's), and it nests there, in page order.
+                  </p>
+                  <ui-section id="demo-setup" label="Setup" level="4" dividing>
+                    <p>The outer section's own content.</p>
+                  </ui-section>
+                  <ui-section parent="demo-setup" label="Install" collapsible><p>Nested under Setup.</p></ui-section>
+                  <ui-section parent="demo-setup" label="Configure" collapsible collapsed>
+                    <p>Nested too, and closed.</p>
+                  </ui-section>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -198,7 +214,7 @@
 
               <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
                 <ui-docs-example
-                  description="The `actions` slot holds controls at the right of the title bar.  They are not part of the fold button:  activating one never folds the section."
+                  description="The `actions` slot holds controls at the right of the title bar.  They are not part of the open / close button:  activating one never closes the section."
                 >
                   <ui-section label="Members" level="4" collapsible dividing>
                     <ui-button slot="actions" size="mini" icon="user plus" appearance="basic">Invite</ui-button>
@@ -209,7 +225,7 @@
 
               <ui-section id="examples-content-end-chevron" label="End chevron" sticky collapsible dividing>
                 <ui-docs-example
-                  description='`fold-icon="end"` moves the fold chevron to the far end of the title bar, after the badge and actions, as an inspector draws it.  A click on it folds the section too;  the title is still the button.'
+                  description='`fold-icon="end"` moves the open / close chevron to the far end of the title bar, after the badge and actions, as an inspector draws it.  A click on it closes the section too;  the title is still the button.'
                 >
                   <ui-section label="Variants" level="4" collapsible fold-icon="end" dividing>
                     <ui-button slot="actions" size="mini" icon="copy" appearance="basic">Copy</ui-button>
@@ -220,13 +236,13 @@
 
               <ui-section id="examples-content-chevron-turn" label="Chevron turn" sticky collapsible dividing>
                 <ui-docs-example
-                  description="The chevron points down while open, and turns toward the title while folded.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while folded, as the Spell Brand theme does.  Right to left, each turn is negated."
+                  description="The chevron points down while open, and turns toward the title while closed.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while closed, as the Spell Brand theme does.  Right to left, each turn is negated."
                 >
                   <div style="--ui-section-fold-icon-rotate: 180deg; --ui-section-fold-icon-folded-rotate: 0deg">
                     <ui-section label="Open" level="4" collapsible fold-icon="end" dividing>
                       <p>The chevron points up.</p>
                     </ui-section>
-                    <ui-section label="Folded" level="4" collapsible collapsed fold-icon="end" dividing>
+                    <ui-section label="Closed" level="4" collapsible collapsed fold-icon="end" dividing>
                       <p>The chevron points down.</p>
                     </ui-section>
                   </div>
@@ -235,7 +251,7 @@
 
               <ui-section id="examples-content-info-tip" label="Info tip" sticky collapsible dividing>
                 <ui-docs-example
-                  description='`description` is a tip about the section, shown under the title bar while the pointer is on the title or its fold button has keyboard focus;  it describes the title for screen readers.  `slot="description"` takes a rich one:  bold words, line breaks.'
+                  description='`description` is a tip about the section, shown under the title bar while the pointer is on the title or its open / close button has keyboard focus;  it describes the title for screen readers.  `slot="description"` takes a rich one:  bold words, line breaks.'
                 >
                   <ui-section label="Theme" level="4" description="The look of an app:  its colours, fonts and shapes." collapsible dividing>
                     <p>Give it a name, then adjust the sections below.</p>
@@ -251,7 +267,7 @@
                 <ui-docs-example description='`slot="label"` is the rich version of `label`:  code, links, emphasis.'>
                   <ui-section level="4">
                     <span slot="label">The <code>collapsed</code> attribute</span>
-                    <p>Set it to fold the section from code.</p>
+                    <p>Set it to close the section from code.</p>
                   </ui-section>
                 </ui-docs-example>
               </ui-section>
@@ -275,10 +291,10 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-collapsed" label="Collapsed" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A collapsed section shows only its title.  Its content stays in the page, hidden until found (see Folding, on the Usage tab)."
+                  description="A collapsed section shows only its title.  Its content stays in the page, hidden until found (see Opening and closing, on the Usage tab)."
                 >
                   <ui-section label="Advanced options" level="4" collapsible collapsed dividing>
-                    <p>Hidden until the section unfolds.</p>
+                    <p>Hidden until the section opens.</p>
                   </ui-section>
                 </ui-docs-example>
               </ui-section>
@@ -292,7 +308,7 @@
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A `disabled` section is dimmed and inert, and can't be folded.">
+                <ui-docs-example description="A `disabled` section is dimmed and inert, and can't be closed.">
                   <ui-section label="Archived" level="4" collapsible disabled>
                     <p>Nothing here can be used.</p>
                   </ui-section>
@@ -453,7 +469,7 @@
             <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Reach for a section when content needs a TITLE that means something to the page outline, and maybe folding or a
+                  Reach for a section when content needs a TITLE that means something to the page outline, and maybe closing or a
                   title that stays in view. Its neighbours:
 
                   | You want                                                     | Use                            |
@@ -461,11 +477,11 @@
                   | a box or group of content, no title                          | [segment](ui-segment.html)     |
                   | a heading on its own, styled                                 | [header](ui-header.html)       |
                   | several panels where opening one may close the others        | [accordion](ui-accordion.html) |
-                  | a titled block that can fold, stick, or both, in the outline | `<ui-section>`                 |
-                  | a run of titled blocks that all fold, packed tight           | `<ui-sections collapsing>`     |
+                  | a titled block that can close, stick, or both, in the outline | `<ui-section>`                 |
+                  | a run of titled blocks that all close, packed tight           | `<ui-sections collapsing>`     |
                   | content that sticks, without a title of its own              | [sticky](ui-sticky.html)       |
 
-                  An accordion's titles are buttons, not headings, and its panels are one group; each section folds on its own and
+                  An accordion's titles are buttons, not headings, and its panels are one group; each section closes on its own and
                   its title IS a heading. A section borrows Fomantic's looks for its box: `dividing` and `block` from the header,
                   the `bordered` and `raised` looks, `attach` and `padding` from the segment, the `styled` look from the accordion.
                 </script>
@@ -486,21 +502,21 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-folding" label="Folding" sticky collapsible dividing>
+            <ui-section id="usage-opening-and-closing" label="Opening and closing" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `collapsible` makes the title fold and unfold the content.
+                  `collapsible` makes the title close and open the content.
 
-                  - `collapsed` is CONTROLLED, as the accordion's `open` is:  writing it folds or unfolds, and fires nothing.
+                  - `collapsed` is CONTROLLED, as the accordion's `open` is:  writing it closes or opens, and fires nothing.
                   - When the USER activates the title, the cancelable `ui-opening` / `ui-closing` go first,
                     with `{ open, section, originalEvent }`. `preventDefault()` keeps things as they were.
-                  - It folds with a height transition where the browser can animate to `auto` (`interpolate-size`);
+                  - It opens and closes with a height transition where the browser can animate to `auto` (`interpolate-size`);
                     with reduced motion it snaps.
 
-                  A folded section's content is `hidden="until-found"`:  it stays in the page.
+                  A closed section's content is `hidden="until-found"`:  it stays in the page.
 
-                  - So find-in-page (Ctrl / Cmd + F) finds text inside it, and unfolds the section to show the match.
-                  - That unfolding fires `ui-opening` with `cancelable: false`:
+                  - So find-in-page (Ctrl / Cmd + F) finds text inside it, and opens the section to show the match.
+                  - That opening fires `ui-opening` with `cancelable: false`:
                     the browser has already revealed the match, so it can't be vetoed.
                 </script>
               </ui-markdown>
@@ -510,7 +526,7 @@
                   section.addEventListener("ui-closing", (event) => {
                     if (hasUnsavedChanges) event.preventDefault() // stays open
                   })
-                  section.collapsed = false // unfold from code:  no event
+                  section.collapsed = false // open from code:  no event
                 </script>
               </ui-code>
             </ui-section>
@@ -521,8 +537,8 @@
                   `source` names an HTML file whose `<body>` becomes the content.
                   So a long page can ship as titles alone, and load each body when it's read.
 
-                  - It's fetched the FIRST time the section unfolds:
-                    by a click, by the page removing `collapsed` (a `#id` link), or at once when it starts unfolded.
+                  - It's fetched the FIRST time the section opens:
+                    by a click, by the page removing `collapsed` (a `#id` link), or at once when it starts open.
                   - The body goes in the section's LIGHT DOM, so the page's CSS styles it.
                     Whatever was there (except slotted title pieces) is a placeholder it replaces.
                   - `select` takes only the first match of a CSS selector.
@@ -531,15 +547,15 @@
 
                   While it loads, and after:
 
-                  - The content stays closed while the body is on its way, so the section unfolds once, onto the real content.
+                  - The content stays closed while the body is on its way, so the section opens once, onto the real content.
                   - A slow file (over 300 ms) shows the placeholder under the `loading` look instead.
                   - `ui-loaded` fires once the body is in (`:state(loaded)`).
                   - A failure fires the cancelable `ui-error`, and shows an error line (`:state(error)`).
-                    Unfolding again tries again.
-                  - `load()` fetches it now, folded or not;  `reload()` fetches it again past the cache, and replaces it.
+                    Opening again tries again.
+                  - `load()` fetches it now, closed or not;  `reload()` fetches it again past the cache, and replaces it.
                 </script>
               </ui-markdown>
-              <ui-docs-example description="Unfold Chapter 2:  its content comes from `examples/chapter.html`.">
+              <ui-docs-example description="Open Chapter 2:  its content comes from `examples/chapter.html`.">
                 <ui-section label="Chapter 1" level="4" collapsible><p>Written in the page.</p></ui-section>
                 <ui-section label="Chapter 2" level="4" source="examples/chapter.html" collapsible collapsed>
                   <p>Loading chapter 2…</p>
@@ -549,7 +565,7 @@
                 <script type="text/plain">
                   const section = document.querySelector("ui-section[source]")
                   section.addEventListener("ui-loaded", (event) => console.log("loaded", event.detail.source))
-                  await section.load() // fetch and insert now, still folded
+                  await section.load() // fetch and insert now, still closed
                   await section.reload() // the file changed:  fetch it again and replace the content
                 </script>
               </ui-code>
@@ -589,8 +605,8 @@
 
                   - `label`, `hint`, `description`, `icon` and `badge` each have an attribute for plain text,
                     and a slot for rich markup;  the slot wins.
-                  - `actions` has no attribute:  its controls sit at the right of the title bar, OUTSIDE the fold button.
-                    So clicking one never folds the section, and they stay visible while it's folded.
+                  - `actions` has no attribute:  its controls sit at the right of the title bar, OUTSIDE the open / close button.
+                    So clicking one never closes the section, and they stay visible while it's closed.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -598,11 +614,11 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  - `ui-opening` (cancelable) -- the user is unfolding the section: `{ open: true, section, originalEvent }`. Not
-                    cancelable when find-in-page unfolds it.
-                  - `ui-closing` (cancelable) -- the user is folding the section: `{ open: false, section, originalEvent }`.
+                  - `ui-opening` (cancelable) -- the user is opening the section: `{ open: true, section, originalEvent }`. Not
+                    cancelable when find-in-page opens it.
+                  - `ui-closing` (cancelable) -- the user is closing the section: `{ open: false, section, originalEvent }`.
                   - Writing `collapsed` fires neither.
-                  - `ui-opened` / `ui-closed` -- it has unfolded or folded, by any route: the user, `collapsed`, find-in-page.
+                  - `ui-opened` / `ui-closed` -- it has opened or closed, by any route: the user, `collapsed`, find-in-page.
                   - `ui-loading` / `ui-loaded` -- a `source` body is on its way, then in place.
 
                   The old names are gone:  `ui-opening` / `ui-closing` / `ui-loaded` are `ui-opening` / `ui-closing` /
@@ -624,11 +640,11 @@
                   <tbody>
                     <tr>
                       <td>Tab / Shift + Tab</td>
-                      <td>Move to the fold button, then the actions, then the content</td>
+                      <td>Move to the open / close button, then the actions, then the content</td>
                     </tr>
                     <tr>
                       <td>Enter / Space</td>
-                      <td>Fold or unfold the focused section</td>
+                      <td>Close or open the focused section</td>
                     </tr>
                   </tbody>
                 </table>
@@ -639,11 +655,11 @@
               <ui-markdown>
                 <script type="text/markdown">
                   - The title is a real heading, so sections appear in the page outline and screen readers can jump between them.
-                  - With `collapsible`, the heading CONTAINS the fold button (`<hN><button aria-expanded>`), as the APG accordion
-                    pattern does: the heading stays in the outline, and the button says whether the content is shown. The fold
-                    icon is decoration; the button's tooltip says "Fold" or "Unfold" (translatable).
+                  - With `collapsible`, the heading CONTAINS the open / close button (`<hN><button aria-expanded>`), as the APG accordion
+                    pattern does: the heading stays in the outline, and the button says whether the content is shown. The chevron
+                    is decoration; the button's tooltip says "Close this section" or "Open this section" (translatable).
                   - The actions are outside the button, so each one is its own tab stop with its own name.
-                  - Find-in-page reaches folded content and unfolds it.
+                  - Find-in-page reaches closed content and opens it.
                   - `loading` sets `aria-busy` and announces "Loading…"; `disabled` makes the section inert.
                   - Color is never the only signal: say in the title what a colored section means.
                 </script>
@@ -662,9 +678,9 @@
                   <ui-section
                     label="Details"
                     collapsible
-                    collapsed={folded}
-                    onui-opened={() => setFolded(false)}
-                    onui-closed={() => setFolded(true)}
+                    collapsed={closed}
+                    onui-opened={() => setClosed(false)}
+                    onui-closed={() => setClosed(true)}
                   >
                     ...
                   </ui-section>
@@ -677,9 +693,9 @@
                   <ui-section
                     label="Details"
                     collapsible
-                    :collapsed="folded"
-                    @ui-opened="folded = false"
-                    @ui-closed="folded = true"
+                    :collapsed="closed"
+                    @ui-opened="closed = false"
+                    @ui-closed="closed = true"
                   >
                     ...
                   </ui-section>
@@ -692,8 +708,8 @@
                   <ui-section
                     label="Details"
                     collapsible
-                    collapsed={folded()}
-                    on-ui-closed={() => setFolded(true)}
+                    collapsed={closed()}
+                    on-ui-closed={() => setClosed(true)}
                   >
                     ...
                   </ui-section>
@@ -757,7 +773,7 @@
                 <script type="text/plain">
                   ui-section {
                     --ui-section-scrolling-height: 20em;
-                    /* chevron up while open, down while folded */
+                    /* chevron up while open, down while closed */
                     --ui-section-fold-icon-rotate: 180deg;
                     --ui-section-fold-icon-folded-rotate: 0deg;
                   }

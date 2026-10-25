@@ -105,7 +105,7 @@ export class UIPropertyGroup extends UIPanel {
    */
   protected get extraClass(): string | undefined {
     const state = this.isError ? ERROR : (this.attributes.state ?? undefined)
-    const loose = this.parent instanceof UIPanel ? undefined : LOOSE
+    const loose = this.enclosingSection instanceof UIPanel ? undefined : LOOSE
     const words = new Set([...(super.extraClass ?? "").split(" "), BAND, loose, GROUP, state])
     return [...words].filter(Boolean).join(" ")
   }

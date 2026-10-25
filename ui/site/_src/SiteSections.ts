@@ -14,7 +14,7 @@ import { FOLDS_KEY } from "./site.types"
 /****************
  * ### `SiteSections`
  * The page side of the site's nested `<ui-section>`s (written into the pages by `yarn site:sections`):
- * where their titles stick, the viewer's folds, and LANDING on a `#hash`.
+ * where their titles stick, which sections the viewer closed, and LANDING on a `#hash`.
  * - ONE per page (`SiteSections.instance`), following whichever `main` the router shows (`show()`).
  * - Sticky:  the page header's title line sticks under the top bar, and the tabs' bar under it
  *   (`site.css`, "The page header" and "Sections and tabs").
@@ -25,14 +25,14 @@ import { FOLDS_KEY } from "./site.types"
  *   - The same line goes on `main` as `--site-sections-top`,
  *     for the browser's own anchor scrolling (`scroll-margin-top`).
  *   - A page's own sticky bar (`PAGE_BAR`) stacks between.
- * - Folds:  remembered per page, in `localStorage` through `PrefStore`
- *   (`FOLDS_KEY` + the path:  `{ [section id]: folded }`).
+ * - Closed sections:  remembered per page, in `localStorage` through `PrefStore`
+ *   (`FOLDS_KEY` + the path:  `{ [section id]: closed }`).
  *   - The viewer's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
  *   - Everything else starts OPEN.
- *   - An unfold made by a landing, or by find-in-page, is never saved.
+ *   - An opening made by a landing, or by find-in-page, is never saved.
  * - Landing (`land()`), through Spell UI's `HashLanding`, by the site's rules (`landingRules()`):
  *   - the target's pane selected (the first word of a section id IS its tab:  `#usage-keyboard`)
- *   - every section around it (and itself) unfolded without animation
+ *   - every section around it (and itself) opened without animation
  *   - then scrolled so its title sits just below the stuck ones
  *   - once more as the page settles, unless the viewer scrolled, clicked or typed meanwhile
  *   - The site lands every hash itself:  `<ui-docs-toc>` and `<ui-docs-api>` leave them to it, so a page opened at
@@ -101,6 +101,12 @@ export class SiteSections {
       main.classList.toggle(HEAD_STUCK, scrollY > 0)
       const bar = SiteSections.barOf(main)
       if (!bar) return
+      // tabs that scroll away with the page (phones):  never stuck, never leaving
+      if (!SiteSections.sticks(bar)) {
+        if (main.style.getPropertyValue(TABS_LEAVE)) main.style.removeProperty(TABS_LEAVE)
+        main.classList.remove(TABS_STUCK)
+        return
+      }
       // how far the joined toolbar has moved up from where it sticks:  0 until its pane ends
       const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
       const part = pageBar?.matches(JOINED_BAR)
@@ -134,14 +140,14 @@ export class SiteSections {
   }
 
   /**
-   * `main` is the page shown (its first load, or a swap):  restore its folds, set the sticky offsets,
+   * `main` is the page shown (its first load, or a swap):  restore its closed sections, set the sticky offsets,
    * and again once its `<ui-root>` is ready (the tabs' bar has drawn).
-   * - `isFirst`:  before the sections are defined, so a restored fold just starts folded.
-   *   After a swap they have drawn, so it folds without its animation.
+   * - `isFirst`:  before the sections are defined, so a restored close just starts closed.
+   *   After a swap they have drawn, so it closes without its animation.
    */
   show(main: HTMLElement, { isFirst = false }: { isFirst?: boolean } = {}): void {
     this.main = main
-    this.restoreFolds(main, { isInstant: !isFirst })
+    this.restoreClosed(main, { isInstant: !isFirst })
     SiteSections.splitSubtitle(main)
     this.measure()
     TocIndex.whenReady(main, () => {
@@ -160,7 +166,8 @@ export class SiteSections {
    * Set every top-level section's `offset`, and `main`'s `--site-sections-top`, to the line below the stuck bars:
    * - `--site-top`
    * - plus the masthead's title line (its height on `main` as `--site-head-height`)
-   * - plus, when the page has tabs, the tabs' bar and its band above and below
+   * - plus, when the page has tabs that stick, the tabs' bar and its band above and below
+   *   - on a phone they scroll away with the page (`site.css`), so the titles stick right under the page header
    */
   private measure(): void {
     const main = this.main
@@ -182,13 +189,15 @@ export class SiteSections {
     // the joined panel is drawn by the toolbar's box reaching up behind the track (`--site-tabs-track`)
     const track = `${Math.round(trackHeight)}px`
     if (main.style.getPropertyValue(TABS_TRACK) !== track) main.style.setProperty(TABS_TRACK, track)
-    let top = bar ? trackBottom + band + gap : siteTop
+    const tabsStick = !!bar && SiteSections.sticks(bar)
+    let top = tabsStick ? trackBottom + band + gap : siteTop
     // a page's own sticky bar:
     // the section toolbar under the tabs is the panel's lower half, stuck right under the track;
     // another (the kitchen sink's theme picker) sticks below the panel;  the titles below either
+    // - NOT the section toolbar under tabs that don't stick:  it scrolls away with them
     const pageBar = main.querySelector<HTMLElement>(PAGE_BAR)
-    if (pageBar) {
-      const isJoined = !!bar && pageBar.matches(JOINED_BAR)
+    const isJoined = !!bar && !!pageBar?.matches(JOINED_BAR)
+    if (pageBar && (tabsStick || !isJoined)) {
       const at = isJoined ? trackBottom : top
       SiteSections.setOffset(pageBar, String(Math.round(at)))
       top = at + SiteSections.heightOf(pageBar) + (isJoined ? gap : 0)
@@ -230,12 +239,12 @@ export class SiteSections {
   }
 
   ////////////////
-  // ## Folds
+  // ## Open and closed
   ////////////////
 
-  /** Fold or unfold `main`'s sections as the viewer left them on this page;  `isInstant`:  without the animation. */
-  private restoreFolds(main: HTMLElement, { isInstant }: { isInstant: boolean }): void {
-    const saved = SiteSections.readFolds()
+  /** Open or close `main`'s sections as the viewer left them on this page;  `isInstant`:  without the animation. */
+  private restoreClosed(main: HTMLElement, { isInstant }: { isInstant: boolean }): void {
+    const saved = SiteSections.readClosed()
     let hasChanged = false
     for (const section of SiteSections.pageSections(main)) {
       if (!section.hasAttribute("collapsible") || !(section.id in saved)) continue
@@ -248,36 +257,36 @@ export class SiteSections {
   }
 
   /**
-   * The viewer folded or unfolded a section:  remember it.
+   * The viewer opened or closed a section:  remember it.
    * - Not ours:
    *   - another element's, demo sections inside examples, a vetoed toggle
-   *   - a `ui-opening` that can't be cancelled (find-in-page's reveal:  never saved, as a landing's unfold isn't)
+   *   - a `ui-opening` that can't be cancelled (find-in-page's reveal:  never saved, as a landing's opening isn't)
    */
   private onToggle(event: CustomEvent<{ open: boolean }>): void {
     const section = event.target as HTMLElement
     if (section.localName !== SECTION_TAG || !section.id || !this.main?.contains(section)) return
     if (!event.cancelable || event.defaultPrevented || section.parentElement?.closest(NOT_PAGE)) return
-    const saved = SiteSections.readFolds()
+    const saved = SiteSections.readClosed()
     saved[section.id] = !event.detail.open
-    SiteSections.writeFolds(saved)
+    SiteSections.writeClosed(saved)
   }
 
-  /** Unfold every section around `target` (and `target`, a section), without the animation;  true if any was. */
-  private static unfold(main: HTMLElement, target: Element): boolean {
-    let hasUnfolded = false
+  /** Open every section around `target` (and `target`, a section), without the animation;  true if any was. */
+  private static openAround(main: HTMLElement, target: Element): boolean {
+    let hasOpened = false
     for (
       let section: Element | undefined = target.closest(SECTION_TAG) ?? undefined;
       section && main.contains(section);
     ) {
       if (section.hasAttribute(COLLAPSED)) {
-        if (!hasUnfolded) SiteSections.instantly(main)
+        if (!hasOpened) SiteSections.instantly(main)
         // controlled:  writing it announces nothing, so it isn't saved
         section.removeAttribute(COLLAPSED)
-        hasUnfolded = true
+        hasOpened = true
       }
       section = SiteSections.sectionAround(section)
     }
-    return hasUnfolded
+    return hasOpened
   }
 
   ////////////////
@@ -288,7 +297,7 @@ export class SiteSections {
    * Land on `hash` in `main`, if it names something there.
    * - False when it doesn't (or names a pane:  the tabs show it themselves),
    *   so the caller can scroll to the top instead.
-   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the folds have drawn (`HashLanding`).
+   * - The scroll happens once `<ui-root>` is ready, the pane has swapped in and the opened sections have drawn (`HashLanding`).
    * - `scroll`:  `"jump"` (a page arriving at its address) or `"glide"` (a link on the page)
    *   - glide:  a smooth scroll, the stuck bars staying put;  a jump all the same under reduced motion
    */
@@ -364,7 +373,7 @@ export class SiteSections {
         const pane = tabs && TocIndex.paneOf(tabs, holder)
         const hasSwapped = !!tabs && !!pane && TocIndex.shownPane(tabs) !== pane
         if (hasSwapped) (tabs as HTMLElement & { value?: string }).value = TocIndex.paneValue(tabs, pane)
-        return SiteSections.unfold(main, holder) || hasSwapped
+        return SiteSections.openAround(main, holder) || hasSwapped
       },
       lineFor: (target) => this.lineFor(target),
       topOf: (target) => SiteSections.boxOf(target)?.top
@@ -457,6 +466,11 @@ export class SiteSections {
     return section.shadowRoot?.querySelector('[part~="title"]')?.getBoundingClientRect().height ?? 0
   }
 
+  /** Whether the tabs' bar sticks:  not on a phone, where it scrolls away with the page (`site.css`). */
+  private static sticks(bar: HTMLElement): boolean {
+    return getComputedStyle(bar).position === "sticky"
+  }
+
   /** The page's tabs (`#site-tabs`), if any. */
   private static tabsOf(main: HTMLElement): HTMLElement | undefined {
     return main.querySelector<HTMLElement>("ui-tabs#site-tabs") ?? undefined
@@ -496,21 +510,21 @@ export class SiteSections {
     if (element.getAttribute(OFFSET) !== offset) element.setAttribute(OFFSET, offset)
   }
 
-  /** Folds and unfolds in `main` skip their animation for a few frames:  a landing measures right after. */
+  /** Opening and closing in `main` skip their animation for a few frames:  a landing measures right after. */
   private static instantly(main: HTMLElement): void {
     main.style.setProperty(SECTION_DURATION, "0s")
-    void nextFrame(UNFOLD_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
+    void nextFrame(OPEN_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
   }
 
-  /** This page's saved folds, `{}` when none. */
-  private static readFolds(): Record<string, boolean> {
+  /** This page's saved closed sections, `{}` when none. */
+  private static readClosed(): Record<string, boolean> {
     const saved = PrefStore.getAt(FOLDS_KEY + location.pathname)
     return saved && typeof saved === "object" ? (saved as Record<string, boolean>) : {}
   }
 
-  /** Save this page's folds, as JSON;  where storage is blocked, for this page only. */
-  private static writeFolds(folds: Record<string, boolean>): void {
-    PrefStore.setAt(FOLDS_KEY + location.pathname, folds)
+  /** Save this page's closed sections, as JSON;  where storage is blocked, for this page only. */
+  private static writeClosed(closed: Record<string, boolean>): void {
+    PrefStore.setAt(FOLDS_KEY + location.pathname, closed)
   }
 }
 
@@ -533,8 +547,8 @@ type DrawnFound = {
 /** An API section's table (`yarn site:sections` writes one per kind):  its rows' ids start with its section's. */
 const API_SECTION = "ui-docs-api[only]"
 
-/** Frames a section takes to draw what an unfold revealed:  its animation stays off that long (`instantly()`). */
-const UNFOLD_FRAMES = 3
+/** Frames a section takes to draw what an opening revealed:  its animation stays off that long (`instantly()`). */
+const OPEN_FRAMES = 3
 
 /** Gap between the stuck titles and a target that isn't a section (an example, a heading), px. */
 const GAP = 8
@@ -585,7 +599,7 @@ const NOT_PAGE = "ui-docs-example, ui-docs-tokens, template"
 /** The section tag. */
 const SECTION_TAG = "ui-section"
 
-/** A section's folded attribute (controlled:  writing it announces nothing). */
+/** A section's closed attribute (controlled:  writing it announces nothing). */
 const COLLAPSED = "collapsed"
 
 /** The sticky offset attribute of a section or `<ui-sticky>`, px. */
@@ -594,7 +608,7 @@ const OFFSET = "offset"
 /** `main`'s custom property:  the line below the stuck bar, for anchor scrolling (`site.css`). */
 const SECTIONS_TOP = "--site-sections-top"
 
-/** `<ui-section>`'s fold duration token:  `0s` while folds go instantly. */
+/** `<ui-section>`'s open / close duration token:  `0s` while they go instantly. */
 const SECTION_DURATION = "--ui-section-duration"
 
 /** A tag name, as `<ui-docs-api>` gives each tag's header its id (`ui-or`). */

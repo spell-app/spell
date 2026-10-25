@@ -43,7 +43,7 @@ import apiCSS from "./UIDocsApi.css?inline"
  *   What the tables hold comes from `ApiModel`.
  * - `family`:  each tag in its own `<section part="tag">`, under a `dividing` `<ui-header>`
  *   whose id is the tag and whose text links to itself.
- *   - The link is an `<a>` INSIDE the heading, not `<ui-header href>` (its `<a role="heading">` fails axe).
+ *   - The link is an `<a>` INSIDE the heading, not `<ui-header link>` (its `<a role="heading">` fails axe).
  *   - Fragment links can't reach ids inside a shadow root, so the component lands on `location.hash` itself
  *     (`HashLanding`):  once its tables are drawn, and on every `hashchange` while connected;
  *     unless the page lands its hashes itself (the site).

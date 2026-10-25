@@ -525,7 +525,7 @@ export type SourceEventName = (typeof SourceEvent)[keyof typeof SourceEvent]
 // ## Dropdown
 ////////////////
 
-/** A header or divider row of a dropdown menu (from `<ui-item type="header|divider">`). */
+/** A header or divider row of a dropdown menu (from `<ui-item kind="header|divider">`). */
 export type MenuSeparator = {
   type: "header" | "divider"
   /** header text */

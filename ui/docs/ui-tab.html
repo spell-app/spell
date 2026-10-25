@@ -125,6 +125,18 @@
                   </ui-tabs>
                 </ui-docs-example>
               </ui-section>
+
+              <ui-section id="examples-types-flat-markup" label="Flat markup" sticky collapsible dividing>
+                <ui-docs-example>
+                  <p slot="description">
+                    A pane can be written outside its tabs:  <code>parent</code> names the tabs' id, and the pane
+                    joins them, in page order, as if it were nested there.
+                  </p>
+                  <ui-tabs id="demo-pet-types" appearance="tabular" attach="top" aria-label="Flat markup demo"></ui-tabs>
+                  <ui-tab parent="demo-pet-types" label="Cats">Cats pane, written after the tabs.</ui-tab>
+                  <ui-tab parent="demo-pet-types" label="Dogs">Dogs pane, written after the tabs.</ui-tab>
+                </ui-docs-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
@@ -602,7 +614,7 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-tabs tabular attached value={tab} onui-changed={(e) => setTab(e.detail.value)}>
+                  <ui-tabs appearance="tabular" attach="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -611,7 +623,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-tabs tabular attached :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
+                  <ui-tabs appearance="tabular" attach="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
                     <ui-tab label="Bio" value="bio">...</ui-tab>
                   </ui-tabs>
                 </script>
@@ -621,8 +633,8 @@
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
                   <ui-tabs
-                    tabular
-                    attached
+                    appearance="tabular"
+                    attach="top"
                     value={tab()}
                     on-ui-changing={(e) => setTab(e.detail.value)}
                   >

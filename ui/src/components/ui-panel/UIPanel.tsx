@@ -46,7 +46,7 @@ export class UIPanel extends UISection {
 
   /** `panel`, and `sub` inside another panel. */
   protected get extraClass(): string | undefined {
-    const sub = this.parent instanceof UIPanel ? SUB_PANEL : undefined
+    const sub = this.enclosingSection instanceof UIPanel ? SUB_PANEL : undefined
     return [super.extraClass, PANEL, sub].filter(Boolean).join(" ")
   }
 }

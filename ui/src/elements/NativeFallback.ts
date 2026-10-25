@@ -2,6 +2,7 @@
 import { lazy, proto } from "spell-ui/util"
 import { E } from "spell-ui/core"
 
+// spell ui rename: leave this file (its docs are about the old names it still reads)
 /****************
  * ### `NativeFallback`
  * The base class of the form controls' fallbacks:

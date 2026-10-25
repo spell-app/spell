@@ -55,7 +55,7 @@
             <!--
               EXAMPLES:  Fomantic's message page, section by section, in its order (Types, States, Variations), plus our own
               extras (Content, Centered, Inverted).  A slotted `<ui-header>` styles itself for the message it sits in;  the
-              `header` attribute is the shorthand.
+              `heading` attribute is the shorthand.
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-message" label="Message" sticky collapsible dividing>
@@ -71,7 +71,7 @@
               </ui-section>
 
               <ui-section id="examples-types-list-message" label="List Message" sticky collapsible dividing>
-                <ui-docs-example description="A message with a list.  `header` is the shorthand for a header.">
+                <ui-docs-example description="A message with a list.  `heading` is the shorthand for a header.">
                   <ui-message heading="New Site Features">
                     <ul>
                       <li>You can now have cover images on blog pages</li>
@@ -358,7 +358,7 @@
                 <script type="text/markdown">
                   The content is whatever you slot: paragraphs, a list, a `<ui-header>`, plain text.
 
-                  - `header` is the shorthand for a header above the content; a slotted `<ui-header>` is the rich version.
+                  - `heading` is the shorthand for a header above the content; a slotted `<ui-header>` is the rich version.
                   - `icon` names an icon shown large beside the content; the `icon` slot takes any markup (a spinning
                     `<ui-icon loading>`).
                   - `state` picks the consequence (`positive`, `success`, `negative`, `error`, `warning`, `info`); `color` any hue.
@@ -457,7 +457,7 @@
                   <Show when={shown()}>
                     <ui-message
                       dismissible
-                      header="Saved"
+                      heading="Saved"
                       on-ui-closing={(event) => {
                         event.preventDefault()
                         setShown(false)

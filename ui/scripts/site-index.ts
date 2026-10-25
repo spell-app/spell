@@ -1,7 +1,7 @@
 /**
  * `yarn site:index [--check]`:  write the component index, `docs/components.html`'s card grid (the site's pages,
  * `SITE_PAGES`), from the site's data (`docs/__data/components.json5`).
- * - One section per topic (`<ui-header level="2" dividing>`), each a `<ui-cards>` of `<ui-card href header meta
+ * - One section per topic (`<ui-header level="2" dividing>`), each a `<ui-cards>` of `<ui-card link heading meta
  *   description>`:  every COMPONENT tag, under EACH of its topics, A-Z.  The same groups and links as the sidebar's
  *   Topics view, because both come from `NavIndex`.
  * - Static markup, not a doc-only element:  `<ui-cards>` / `<ui-card>` already draw it, and a generated page needs no
@@ -73,8 +73,8 @@ class ComponentIndexWriter {
     const family = this.data.families[tag.folder]
     const status = family?.pages?.[tag.tag]?.status ?? family?.status ?? "done"
     const attributes = [
-      `href="${escapeHTML(ComponentIndexWriter.href(tag))}"`,
-      `header="${escapeHTML(tag.name)}"`,
+      `link="${escapeHTML(ComponentIndexWriter.href(tag))}"`,
+      `heading="${escapeHTML(tag.name)}"`,
       `meta="${escapeHTML(`<${tag.tag}>`)}"`,
       ...(tag.description ? [`description="${escapeHTML(withoutTicks(tag.description))}"`] : []),
       ...(status === "done" ? [] : [`extra="${STATUS_TEXT[status] ?? status}"`])

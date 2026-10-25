@@ -25,6 +25,7 @@ import sectionCSS from "./UISection.css?inline"
  * - *Level*:  `level`, else the enclosing section's level + 1 (at most `h6`), else 2.
  *   - The enclosing section is found through `PartContext` with no barriers,
  *     so a section in a segment in a section still nests.
+ *   - `parent="<id>"`:  written outside the section (or group) it belongs in, it moves in (`ParentLink`).
  *   - Its level, depth and sticky stack are read from the enclosing section's component,
  *     so they follow its attributes, and a move to another section.
  *
@@ -42,7 +43,7 @@ import sectionCSS from "./UISection.css?inline"
  * - *Groups*:  without its own `collapsible` attribute,
  *   a section folds when its nearest `<ui-sections>` is `collapsing`
  *   (around it, or around an enclosing section).
- *   - The group owns `section` parts too, so `parent` climbs through it.
+ *   - The group owns `section` parts too, so `enclosingSection` climbs through it.
  *
  * - `description` / `slot="description"`:  a CSS tooltip under the title bar (`role="tooltip"`).
  *   - Shown while the pointer is on the heading or the end chevron, or the fold button has keyboard focus.
@@ -111,10 +112,22 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
    *   a section in a group in a section is still nested.
    */
   @E.derived
-  get parent(): UISection | undefined {
+  get enclosingSection(): UISection | undefined {
     let owner = this.context.ownerComponent<UISection | UISections>()
     while (owner instanceof UISections) owner = owner.context.ownerComponent<UISection | UISections>()
     return owner instanceof UISection ? owner : undefined
+  }
+
+  /** `parent`:  written elsewhere on the page, it nests in the section (or group) with that id (`ParentLink`). */
+  private readonly parentLink = new E.ParentLink({
+    domElement: this.domElement,
+    attribute: this.elementDefinition.localAttribute("parent")
+  })
+
+  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
+  @E.onChange("isConnected", "parent")
+  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
+    return isConnected ? this.parentLink.follow(parent) : undefined
   }
 
   /** Nearest `<ui-sections>` group's component, directly or through enclosing sections, or `undefined`. */
@@ -127,7 +140,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** Inside another section, through any group (`:state(nested)`;  the part's own `in-section` counts only a direct one). */
   @E.cssState("nested")
   get isNested(): boolean {
-    return !!this.parent
+    return !!this.enclosingSection
   }
 
   /** Directly in a `<ui-sections>` group (`:state(in-group)`;  also the part's own `in-sections`). */
@@ -140,13 +153,13 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   get headingLevel(): number {
     const own = Number(this.level)
     if (Number.isInteger(own) && own >= 1 && own <= MAX_LEVEL) return own
-    const parent = this.parent
+    const parent = this.enclosingSection
     return parent ? Math.min(parent.headingLevel + 1, MAX_LEVEL) : TOP_LEVEL
   }
 
   /** Nesting depth:  0 at the top. */
   get depth(): number {
-    const parent = this.parent
+    const parent = this.enclosingSection
     return parent ? parent.depth + 1 : 0
   }
 
@@ -261,7 +274,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
 
   /** Pixels from the scroll container's top where the title sticks:  `offset` at the top, else the stack above. */
   get stickTop(): number {
-    const parent = this.parent
+    const parent = this.enclosingSection
     return parent ? parent.innerStackTop : (this.offset ?? 0)
   }
 
@@ -525,7 +538,9 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             part={this.partForName("toggle")}
             aria-expanded={this.isCollapsible ? this.disclosure.ariaExpanded : undefined}
             aria-controls={this.isCollapsible ? CONTENT_ID : undefined}
-            title={this.isCollapsible ? this.translationForKey(this.isFolded ? "unfold" : "fold") : undefined}
+            title={
+              this.isCollapsible ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined
+            }
             disabled={this.isCollapsible && this.disabled ? true : undefined}
             aria-describedby={this.hasDescription && this.isCollapsible ? TIP_ID : undefined}
             onClick={this.onToggleClick}
@@ -572,7 +587,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
         class={FOLD_ICON_CLASS}
         part={this.partForName("fold-icon")}
         aria-hidden="true"
-        title={onClick ? this.translationForKey(this.isFolded ? "unfold" : "fold") : undefined}
+        title={onClick ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined}
         onClick={onClick}
       >
         {this.foldGlyph.svg}

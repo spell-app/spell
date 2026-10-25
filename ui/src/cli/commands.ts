@@ -4,13 +4,14 @@
  * - `spell ssr <pages...>`:  `ui-*` pages as plain HTML, Spell UI's server render
  * - `spell pack create | add | build | check`:  component packs, built on the kit's pack tooling
  * - `spell design build | bundle | check | pull | changed | pushed | state`:  Spell's claude.ai design system
+ * - `spell ui rename [--write] <paths...>`:  old attribute names rewritten into their new ones (epic `ui-gaps` P6)
  * - Loads fast:  each action imports its command's file when it runs (`src/cli/`, `spell-ui/cli/...`).
  * - NOTE: the kit's `spell commands` reads this file's TEXT, for each `spell.command(...)` and `<group>.command(...)`
  *   call:  keep each command's name a literal at its call, and each group a `const`.
  */
 import { CLI } from "spell/cli"
 
-import type { IconsOptions, PackOptions, SsrOptions } from "spell-ui/cli/cli.types"
+import type { IconsOptions, PackOptions, RenameOptions, SsrOptions } from "spell-ui/cli/cli.types"
 
 /** The `spell` program a command list adds to:  commander's `Command`. */
 type Program = Parameters<CLI.CommandList>[0]
@@ -43,6 +44,24 @@ const uiCommands: CLI.CommandList = (spell) => {
       CLI.runCommand(async () =>
         (await import("spell-ui/cli/ssrCommand")).ssrCommand(pages, command.optsWithGlobals<SsrOptions>())
       )
+    )
+
+  ////////////////
+  // ## Old names
+  ////////////////
+
+  const ui = spell.command("ui").description("Spell UI's own upkeep -- rename")
+
+  ui.command("rename")
+    .description(
+      'old attribute names rewritten into their new ones (primary => color="primary") -- a dry run without --write'
+    )
+    .argument("<paths...>", "pages, code, or folders of them")
+    .option("--write", "rewrite the files;  without it, list what it would change (exit 1 when there's something)")
+    .option("--quiet", "print only the total")
+    .option("--markup-only", "only tags a browser draws, never escaped markup:  pages that quote old names on purpose")
+    .action((paths: string[], options: RenameOptions) =>
+      CLI.runCommand(async () => (await import("spell-ui/cli/renameCommand")).renameCommand(paths, options))
     )
 
   ////////////////

@@ -20,7 +20,7 @@ import sectionCSS from "./UISection.css?inline"
  *   through the inherited `--_ui-sections-stack` switch, which a nested plain group resets.
  * - It owns `section` parts (`ownsParts`), so a section's `PartContext` stops here.
  *   Its own `context` finds the section (or group) around it,
- *   which `UISection.parent` climbs to, so levels and sticky stacks carry through.
+ *   which `UISection.enclosingSection` climbs to, so levels and sticky stacks carry through.
  ****************/
 export class UISections extends E.UIComponent<typeof sectionsVocabulary> {
   @E.proto static vocabulary = sectionsVocabulary

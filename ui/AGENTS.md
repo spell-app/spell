@@ -125,7 +125,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   on `spell/element`'s half ([the kit's element AGENTS.md](../src/element/AGENTS.md)).
   - the kit's element's:  `UIComponent`, `DOMElement`, `ElementDefinition`, `Reactive`, `Cell`, `SlotContent`,
     `PartContext`, `OwnerContext`, `HotDefinitions`
-  - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `Shorthand`, `NativeFallback`
+  - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `Shorthand`, `NativeFallback`,
+    `ParentLink` (the `parent` attribute:  an element joining the container with that id)
   - on Solid:
     - `FormComponent` + `DOMFormControl` (form controls)
     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker),

@@ -7,7 +7,7 @@
  *   - `<div class="heading">`:  the `<ui-header part="header">` (only when there is a header)
  *   - `<div class="description" part="description">` around the `description` slot (only when there is one)
  *   - `<div class="frame">`:
- *     - the `<ui-button part="toggle">`, centred on its top right corner (a bare example's:  over the corner, inside)
+ *     - the `<ui-button part="toggle">`, inside its top right corner, just in from its rim (a bare example's:  further in)
  *     - the `<ui-segment part="demo">`, around the default slot
  *     - while open, the `<ui-segment part="code">` holding the `<ui-code part="source">`
  *   - the header and description sit on the page, outside the frame:
@@ -51,6 +51,8 @@
      * about what centres it beside one line of text.
      */
     --_ui-docs-example-toggle-inset: var(--ui-docs-example-toggle-inset, 0.8em);
+    /* A framed example's code button:  in from its frame's top and right edges, just inside its rim. */
+    --_ui-docs-example-toggle-corner: var(--ui-docs-example-toggle-corner, 6px);
     /* Space between the header, description and example. */
     --_ui-docs-example-gap: var(--ui-docs-example-gap, 0.5em);
     /* The frame round an example:  a faint see-through card, so it never runs into the prose round it. */
@@ -136,15 +138,13 @@
       var(--ui-shadow-subtle, 0 0 #0000);
   }
   /*
-   * a framed example's button sits ON the frame's top right corner, half above and half outside it:  the example takes no room
-   * for it, so its sides and top keep the same space (Owen, 2026-10-25:  "make the "code" icon float above the
-   * top-right of the panel and don't take space for it in the content")
+   * a framed example's button sits INSIDE the frame's top right corner, just inside its rim, over the example:  the example
+   * takes no room for it (Owen, 2026-10-25:  "Move this back into the INSIDE upper-right corner of the box, position
+   * absolute.  just inside the white border around the panel";  centred on the corner, before)
    */
   .ui.example:not(.bare) > .frame > [part~="toggle"] {
-    inset-block-start: 0;
-    inset-inline-end: 0;
-    /* centred on the corner itself (Owen, 2026-10-25:  "over actual top-right corner") */
-    translate: 50% -50%;
+    inset-block-start: var(--_ui-docs-example-toggle-corner);
+    inset-inline-end: var(--_ui-docs-example-toggle-corner);
   }
   .frame > [part~="toggle"]:hover,
   .frame > [part~="toggle"]:focus-within,
