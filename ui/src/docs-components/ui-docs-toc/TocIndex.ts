@@ -1,5 +1,5 @@
 // `spell-ui/util` by name, never the `spell-ui/core` entry:  node scripts load this file (see the class docs)
-import { beforeNextPaint } from "spell-ui/util"
+import { beforeNextPaint, slug } from "spell-ui/util"
 import * as UIT from "spell-ui/components/components.types"
 import {
   TOC_ENTRY_ATTRIBUTE,
@@ -205,16 +205,14 @@ export class TocIndex {
     else root.addEventListener("ui-ready", () => beforeNextPaint(then), { once: true })
   }
 
-  /** `text` as an id:  lowercase words joined by `-`, e.g. `Labeled Icon` => `labeled-icon`. */
+  /**
+   * `text` as a section's id:  the kit's id slug (`slug()`), `section` when nothing is left.
+   * - e.g. `Labeled Icon` => `labeled-icon`, `Émphasis & More!` => `emphasis-more`
+   * - EXCEPT an apostrophe, which splits words here (`Spell UI's own` => `spell-ui-s-own`),
+   *   where the kit's drops it:  the docs pages' saved section ids were made so, and links point at them.
+   */
   static slug(text: string): string {
-    return (
-      text
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[̀-ͯ]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "section"
-    )
+    return slug(text.replace(/['’]/g, " "), { fallback: "section" })
   }
 
   /** `element`'s id, giving it one first if it has none (SIDE EFFECT). */

@@ -223,6 +223,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `StubOwner`:  stand-in owners (card, feed ...)
   - `MemberClashes`:  a set's vocabulary attributes named like a base's member;  every set's tests run it over their own
   - `PerfRun` (the dropdown benchmark), `fallback.cases.ts`, `dictionary.es.ts`
+  - `Painted`:  a CSS colour as the browser paints it, and its luminance (the maths, the kit's `spell/util/color`)
   - `VisualOpen` + `test.types.ts`:  the visual tests' hooks
   - `visual/baselines/`:  the screenshots (`yarn test:visual`)
   - `fixtures/`:  files the tests load (component packs, sources, an icon pack)
@@ -254,7 +255,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - the site bundle's build, `site-bundle.ts`, watched by `site-dev.ts`
   - `site-check.ts`, `tokens-alias.ts`, `design-build.ts`
   - What several scripts share:
-    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  write-or-`--check`, `vp fmt`, markup escaping
+    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  write-or-`--check`, `vp fmt`, a page's status words
+      (escaping markup:  the kit's `escapeHTML()`, `spell/util/string`)
       - in `src/tools/` since epic `repo-split` P14:  a test reads it too, and only `src/` is imported
     - data:  `iconExtras.ts`, a camelCase helper file here, run by none
   - A class other code uses lives in `src/tools/` (PascalCase), and its script here is a few lines:

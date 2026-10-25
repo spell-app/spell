@@ -92,7 +92,7 @@ export class CalendarText {
         minute = Number(clock[2])
         rest = rest.replace(clock[0], " ")
       } else if (period) {
-        const bare = new RegExp(`(\\d{1,2})\\s*${CalendarText.escape(period[0])}`).exec(rest)
+        const bare = new RegExp(`(\\d{1,2})\\s*${E.escapeRegExp(period[0])}`).exec(rest)
         if (bare) hour = Number(bare[1])
       }
       if (period && hour !== undefined) {
@@ -216,12 +216,7 @@ export class CalendarText {
 
   /** `name` as a whole word (not inside a longer word), any script. */
   private static word(name: string): RegExp {
-    return new RegExp(`(?<!\\p{L})${CalendarText.escape(name)}(?!\\p{L})`, "u")
-  }
-
-  /** `text` safe inside a `RegExp`. */
-  private static escape(text: string): string {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    return new RegExp(`(?<!\\p{L})${E.escapeRegExp(name)}(?!\\p{L})`, "u")
   }
 }
 

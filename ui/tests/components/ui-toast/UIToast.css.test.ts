@@ -6,6 +6,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { toastVocabulary } from "spell-ui/components/ui-toast/UIToast.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import toastCSS from "spell-ui/components/ui-toast/UIToast.css?inline"
 import toastRaw from "spell-ui/components/ui-toast/UIToast.css?raw"
@@ -129,8 +130,8 @@ describe("UIToast.css examples", () => {
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
     const inverted = getComputedStyle(root.querySelector('.ui.inverted.toast[class="ui inverted toast compact"]')!)
     expect(inverted.colorScheme).toBe("dark")
-    expect(luminance(inverted.backgroundColor)).toBeLessThan(0.3)
-    expect(luminance(inverted.color)).toBeGreaterThan(0.6)
+    expect(Painted.luminance(inverted.backgroundColor)).toBeLessThan(0.07)
+    expect(Painted.luminance(inverted.color)).toBeGreaterThan(0.3)
   })
 
   it("places the icon beside the content and the close icon top right", () => {
@@ -238,12 +239,3 @@ describe("UIToast.css tokens", () => {
 ////////////////
 // ## Helpers
 ////////////////
-
-/** Relative luminance (0..1) of a computed colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
-}

@@ -4,6 +4,7 @@ import { dirname, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import { styleText } from "node:util"
 
+import { kb } from "spell/util/number"
 import { CLI } from "spell/cli"
 
 import type { SsrOptions, StaticMessage, StaticSheetJob } from "./cli.types"
@@ -94,7 +95,7 @@ export async function ssrCommand(args: string[], options: SsrOptions = {}): Prom
     const { html, css, unrendered, dropped } = reply.result
     write(page.output, html)
     const notes = [size(html)]
-    if (css) notes.push(`inline css ${size(css.text)}${minify ? ` from ${kB(css.fullSize)}` : ""}`)
+    if (css) notes.push(`inline css ${size(css.text)}${minify ? ` from ${kb(css.fullSize)}` : ""}`)
     CLI.out(CLI.relativePath(page.output))
     CLI.err(`${CLI.relativePath(page.input)} -> ${CLI.relativePath(page.output)}  ${color("dim", notes.join(", "))}`)
     if (dropped.length) CLI.err(color("dim", `  removed scripts:  ${dropped.join(", ")}`))
@@ -106,7 +107,7 @@ export async function ssrCommand(args: string[], options: SsrOptions = {}): Prom
     if (reply.kind !== "stylesheet") continue
     const { path, result } = reply
     write(path, `${coverageLine(result.coverage)}\n${result.text}`)
-    const from = minify ? ` from ${kB(result.fullSize)}` : ""
+    const from = minify ? ` from ${kb(result.fullSize)}` : ""
     const count = sheets.get(path)?.pages.length ?? 0
     const pagesNote = `${count} page${count === 1 ? "" : "s"} this run, ${result.coverage.tags.length} tags in all`
     CLI.out(CLI.relativePath(path))
@@ -251,14 +252,9 @@ function write(path: string, text: string) {
   writeFileSync(path, text)
 }
 
-/** `text`'s size, e.g. `12.3 kB`. */
+/** `text`'s size, e.g. `12.3 KB`. */
 function size(text: string): string {
-  return kB(Buffer.byteLength(text))
-}
-
-/** `bytes` as kilobytes, e.g. `12.3 kB`. */
-function kB(bytes: number): string {
-  return `${(bytes / 1000).toFixed(1)} kB`
+  return kb(Buffer.byteLength(text))
 }
 
 /** `text` in `style`, when stderr shows colour (node's `styleText()`:  every line here but the paths goes there). */

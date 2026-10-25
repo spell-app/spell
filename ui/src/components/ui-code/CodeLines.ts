@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import { E } from "spell-ui/core"
 
 /****************
  * ### `CodeLines`
@@ -11,9 +11,9 @@ import type { E } from "spell-ui/core"
  * - STATIC and instance-free:  pure functions over strings.
  ****************/
 export class CodeLines {
-  /** `text` safe as HTML text. */
+  /** `text` safe as HTML text:  the kit's `escapeHTML()`, kept here as the family's API. */
   static escape(text: string): string {
-    return text.replace(/[&<>"']/g, (char) => ESCAPES[char]!)
+    return E.escapeHTML(text)
   }
 
   /**
@@ -62,15 +62,6 @@ export class CodeLines {
     if (line !== open.join("") || !lines.length) lines.push(line + CLOSE.repeat(open.length))
     return lines
   }
-}
-
-/** HTML escapes. */
-const ESCAPES: Readonly<Record<string, string>> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;"
 }
 
 /** The tokens `split()` cares about:  span tags and newlines. */

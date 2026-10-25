@@ -4,6 +4,7 @@ import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { localDate } from "spell/util/time"
 
 import { DesignBrand } from "./DesignBrand.ts"
 import { DesignComponents } from "./DesignComponents.ts"
@@ -239,7 +240,7 @@ export class DesignExport {
           return [main, `${path ?? COMPONENTS}/${folder}/`]
         })
       ),
-      synced: this.now.toISOString().slice(0, 10)
+      synced: localDate(this.now)
     }
   }
 

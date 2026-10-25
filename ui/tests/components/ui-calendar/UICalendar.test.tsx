@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
+import { localDate } from "spell/util/time"
 import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -254,9 +255,7 @@ describe("<ui-calendar> views", () => {
     expect(today()!.textContent).toBe("Today")
     today()!.click()
     await ElementFixture.tick()
-    const now = new Date()
-    const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
-    expect(host.value).toBe(iso)
+    expect(host.value).toBe(localDate())
   })
 })
 

@@ -58,6 +58,12 @@ describe("SearchMatcher.search()", () => {
     expect(new SearchMatcher().search(source, "cafe")).toHaveLength(0)
     expect(new SearchMatcher({ ignoreDiacritics: true }).search(source, "cafe")).toHaveLength(1)
   })
+
+  test("takes a query with `-` or `/` (`-` threw:  `\\-` is no escape in a unicode RegExp)", () => {
+    const source = [{ title: "Drop-down menu" }, { title: "Yes/no" }]
+    expect(new SearchMatcher().search(source, "drop-d").map((result) => result.title)).toEqual(["Drop-down menu"])
+    expect(new SearchMatcher().search(source, "yes/").map((result) => result.title)).toEqual(["Yes/no"])
+  })
 })
 
 describe("SearchMatcher.categorize()", () => {

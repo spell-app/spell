@@ -88,7 +88,7 @@ describe("spell ssr", () => {
     expect(css).toContain("@layer")
     expect(css).toContain(":where(")
     expect(css).not.toMatch(/\n\s*\n/)
-    expect(run.stderr).toMatch(/ui\.static\.css {2}[\d.]+ kB from [\d.]+ kB/)
+    expect(run.stderr).toMatch(/ui\.static\.css {2}[\d.]+ KB from [\d.]+ KB/)
     expect(readCoverage(resolve(TEMP, "ui.static.css"))!.tags).toEqual(
       expect.arrayContaining(["ui-button", "ui-card", "ui-modal", "ui-segment"])
     )

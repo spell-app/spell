@@ -1,4 +1,4 @@
-import { proto } from "spell-ui/util"
+import { proto, withoutAccents } from "spell-ui/util"
 import type {
   AttributeSpec,
   ComponentDefiner,
@@ -382,7 +382,7 @@ export class Vocabulary {
     if (spec.kind === "keyOrValueAndKey") add(ValueSets.get("booleans"), dictionary.values?.booleans)
     // the unaccented spellings, after every real name:  never in the way of one
     for (const [name, value] of [...forward]) {
-      const plain = Vocabulary.withoutAccents(name)
+      const plain = withoutAccents(name)
       if (!forward.has(plain)) forward.set(plain, value)
     }
     return { forward, inverse }
@@ -396,11 +396,6 @@ export class Vocabulary {
         inverse.set(value, name)
       }
     }
-  }
-
-  /** `text` without its accents:  `pequeño` => `pequeno`, `móvil` => `movil`. */
-  private static withoutAccents(text: string): string {
-    return text.normalize("NFD").replace(ACCENTS, "")
   }
 
   /**
@@ -477,9 +472,6 @@ type ValuesProps = {
   /** a shared attribute (`SharedVocabulary`) the tag takes, not one of its own */
   isShared: boolean
 }
-
-/** Combining marks, once `normalize("NFD")` has split them off their letters. */
-const ACCENTS = /\p{M}/gu
 
 /** What Spell UI's own event names start with (`ui-changed`):  they take a translated tag's prefix. */
 const UI_EVENT_PREFIX = "ui-"
