@@ -284,6 +284,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):
         by process, never a pid file;  never a live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell/server/page/prune`)
+    - `LeftoverFolders`:  a removed worktree's folder git couldn't delete (its window's language servers still writing
+      into it, r22), finished off by `epic worktree remove`:  deleted, else moved to the epic home's `trash/`, which the
+      `SessionStart` hook sweeps;  plain `node` loads it by path
     - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
       checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
       - a `copy` patch puts `main`'s file where it isn't tracked yet, git-excluded;  a `run` patch runs once per checkout
