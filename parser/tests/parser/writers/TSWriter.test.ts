@@ -241,6 +241,21 @@ describe("TSWriter", () => {
     expect(writer.write(element)).toBe(`<th class="left" colspan="2">{core.drawThing(theStock)}</th>`)
   })
 
+  test("text beside a value keeps its spaces, one child a line:  `Clicked {count} times` draws `Clicked 0 times`", () => {
+    const count = new P.ASTJSXExpression(match, { expression: new P.ASTVariableExpression(match, { name: "count" }) })
+    const button = (children: Array<P.ASTJSXExpression | P.ASTJSXText>) =>
+      new P.ASTJSXElement(match, { tagName: "ui-button", children })
+    const text = (value: string) => new P.ASTJSXText(match, { value })
+    // inline, the spaces are kept as they are;  a line's ends would lose them, so there they're strings
+    expect(writer.write(button([text("Clicked "), count, text(" times")]))).toBe(
+      `<ui-button>Clicked {count} times</ui-button>`
+    )
+    const long = text(" times, and that's a lot of times to have clicked a button that only counts up")
+    expect(writer.write(button([text("Clicked "), count, long]))).toBe(
+      `<ui-button>\n  {"Clicked "}\n  {count}\n  {${JSON.stringify(long.value)}}\n</ui-button>`
+    )
+  })
+
   test("a list's items draw as javascript draws them, `core.drawItems()`:  a viewable list's are its element's children", () => {
     const drawItems = new P.ASTCoreMethodInvocation(match, {
       methodName: "drawItems",

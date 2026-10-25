@@ -1272,7 +1272,7 @@ export class TSWriter extends JSWriter {
     const isShort = !written.some((child) => child.startsWith("<")) && !inline.includes("\n")
     // a source map's marks take no room on the line:  see `P.SourceMarks`
     if (isShort && P.SourceMarks.widthOf(open + inline) < JSX_LINE) return `${open}>${inline}</${tag}>`
-    return `${open}>\n${indented(written.join("\n"))}\n</${tag}>`
+    return `${open}>\n${indented(this.jsxLines(children).join("\n"))}\n</${tag}>`
   }
 
   /** A fragment, `<>...</>`, as is:  its children as an element's, `<></>` for none. */
@@ -1282,7 +1282,22 @@ export class TSWriter extends JSWriter {
     const inline = written.join("")
     const isShort = !written.some((child) => child.startsWith("<")) && !inline.includes("\n")
     if (!written.length || (isShort && P.SourceMarks.widthOf(inline) < JSX_LINE)) return `<>${inline}</>`
-    return `<>\n${indented(written.join("\n"))}\n</>`
+    return `<>\n${indented(this.jsxLines(children).join("\n"))}\n</>`
+  }
+
+  /**
+   * An element's children, one a line, as `jsxChild()` writes each.
+   * - Text with a space at either end is written as a string, `{" times"}`:
+   *   JSX drops the spaces at a line's ends, so `Clicked {count} times` would draw "Clicked 0times".
+   */
+  private jsxLines(children: P.ASTExpression[]): string[] {
+    return children
+      .map((child) =>
+        child instanceof P.ASTJSXText && /^\s|\s$/.test(child.value) && child.value.trim()
+          ? `{${JSON.stringify(child.value)}}`
+          : this.jsxChild(child)
+      )
+      .filter(Boolean)
   }
 
   /** A value in JSX:  just the expression -- Solid's compiler makes it live. */
