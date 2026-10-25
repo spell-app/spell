@@ -1102,9 +1102,12 @@ In `tools/`:
       - its icon centred by the menu:  measured 0px off (the old `<ui-icon>` cells sat 1.8px left of centre)
       - icons only:  every button the same width
     - Give every top-level section an icon:  without one, the button shows its number.
-    - Titles that don't all fit end in `...`.
-      - When each would get under 50px, they go:  icons only, the title as the button's tooltip (`fitTitles()`).
+    - Titles that don't all fit end in `...`, the longest giving way first (`titleFit()`).
+      - When one would be cut under 50px, they all go:  icons only, the title as the button's tooltip (`fitTitles()`).
+        - So never a stub like "6 W..." (epic `epic-engine` I133).
       - The row scrolls sideways if even that doesn't fit, never the page.
+      - Guides, details pages and Epic UI's band all fit their titles so (I132, I133);
+        only the segmented toolbar under Spell UI's page tabs keeps its titles whole and scrolls (epic `debut`).
     - The spell syntax guide adds Expand all and Collapse all at the band's right (`spell-syntax.js`, Owen 2026-10-12):
       appended to the menu, after its items, which scroll under them;  kept when the toolbar is built anew.
     - A page without a sticky page header:  the last row of its filter bar.

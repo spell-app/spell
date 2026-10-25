@@ -1837,7 +1837,7 @@ function buildNavigation(main, outline, counts) {
  *     (`titledItems()`, `spell-doc-toolbar.js`, which Epic UI's pages build theirs with too)
  *   - a red badge:  how many of its items need Owen (`counts`, `attention`);  none, none
  * - titles too long for the row end in `...`
- *   - when each would get under 50px, they go (`fitTitles()`):
+ *   - when one would be cut under 50px, they go (`fitTitles()`):
  *     the buttons show their marks only, the title as their tooltip
  *   - still too wide, the row scrolls sideways
  * - where:  the last row of the sticky page header (`ui-sticky.spell-h1 > header.spell-page-head`),

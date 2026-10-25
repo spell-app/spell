@@ -248,13 +248,14 @@
   gap: 10px;
 }
 /*
- * a `<ui-toolbar>` scrolls instead (`fitsTitles()`):  every title whole, `‹` / `›` showing what's past either end;
- * but not Epic UI's band, which fits its titles as above (epic `epic-engine` I132:  its row ran off the page's right)
+ * a SEGMENTED toolbar, under a page's tabs (Spell UI's components pages), scrolls instead (`fitsTitles()`):  every
+ * title whole, `‹` / `›` showing what's past either end;  a guide's and Epic UI's band fit theirs as above (epic
+ * `epic-engine` I132, I133:  their rows ran off the page's right, or scrolled)
  */
-ui-toolbar.spell-toolbar-titled:is(.spell-toolbar-segmented, :not(.spell-site-toolbar > *)) > ui-item::part(item) {
+.spell-toolbar-titled.spell-toolbar-segmented > ui-item::part(item) {
   flex: none;
 }
-ui-toolbar.spell-toolbar-titled:is(.spell-toolbar-segmented, :not(.spell-site-toolbar > *)) .spell-toolbar-label {
+.spell-toolbar-titled.spell-toolbar-segmented .spell-toolbar-label {
   overflow: visible;
 }
 /* the marks only:  every button the same width, as an epic page's (and as wide as they were before the menu) */
