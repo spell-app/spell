@@ -31,6 +31,7 @@ import {
   FILTER_KEY,
   FILTER_STATES,
   ITEMS,
+  PHASES,
   ITEM_KINDS,
   NEW_HERE,
   NUMBERED_BLOCKS,
@@ -252,15 +253,16 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   readonly hidden = createMemo(() => this.itemStates().filter((it) => !this.showing().has(it.state)))
 
   /**
-   * Its items, read again whenever one folds, unfolds, or is hidden by its own `hidden`:  the run ends follow.
+   * Its items (or the Phases section's phases, I96), read again whenever one folds, unfolds, or is hidden by its own
+   * `hidden`:  the run ends follow.
    * - A NEW list on every change, so `runEnds` reads each item's `open` again.
    * - `subtree`:  an item's `open` is ITS attribute, not this element's
    */
   @E.watches({ childList: true, subtree: true, attributeFilter: RUN_ATTRIBUTES })
   get runItems(): readonly Element[] {
     void this.slots.filledSlots
-    if (!this.holdsItems() || isServer) return NOTHING_COUNTED
-    return Array.from(this.domElement.querySelectorAll(ITEMS))
+    if (!this.hasRuns() || isServer) return NOTHING_COUNTED
+    return Array.from(this.domElement.querySelectorAll(this.holdsItems() ? ITEMS : PHASES))
   }
 
   /**
@@ -270,6 +272,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - a run ends at the last item showing, and at each unfolded item (its details follow its line)
    * - so an unfolded item right after another is a run of its own:  rounded top and bottom
    * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
+   * - the Phases section's phases the same (Owen, 2026-10-24, epic `epic-engine` I96:  "showed the white corners at
+   *   the bottom above P29"):  their title rows, the open ones' bodies between them
    */
   readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
     const hidden = new Set(this.hidden().map((it) => it.item))
@@ -359,7 +363,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           </Show>
           <Show when={this.hidden().length}>{this.hiddenNote()}</Show>
           {/* the runs' rounded ends, by id:  nothing in the doc changes */}
-          <Show when={this.holdsItems()}>
+          <Show when={this.hasRuns()}>
             <style>{this.runRules()}</style>
           </Show>
           {/* Claude's status cards (P13):  at the end of its body, above the note box */}
@@ -517,6 +521,14 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     const ruleFor = (items: Element[], declarations: string) => {
       const selectors = items.filter((item) => item.id).map((item) => `::slotted(#${CSS.escape(item.id)})`)
       return selectors.length ? `${selectors.join(", ")} { ${declarations} }` : ""
+    }
+    if (!this.holdsItems()) {
+      // phases (I96):  `<epic-phase>` rounds its title row by its own tokens;  a folded run's last drops its rule
+      // below, a straight line under rounded corners
+      return [
+        ruleFor(tops, `${PHASE_TOP_RADIUS}: var(--_epic-run-radius);`),
+        ruleFor(bottoms, `${PHASE_BOTTOM_RADIUS}: var(--_epic-run-radius); border-bottom: none;`)
+      ].join("\n")
     }
     return [
       ruleFor(tops, `${TOP_RADIUS}: var(--_epic-run-radius); border-top: none;`),
@@ -775,6 +787,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   // ## Helpers
   ////////////////
 
+  /** Its children are drawn as runs:  an item section's items, the Phases section's phases (I96). */
+  private hasRuns(): boolean {
+    return this.kind === "phases" || this.holdsItems()
+  }
+
   /** A kind that holds items (Questions ... To test). */
   private holdsItems(): boolean {
     return (ITEM_KINDS as readonly string[]).includes(this.kind ?? "")
@@ -869,6 +886,10 @@ const NOTHING_COUNTED: readonly Element[] = []
 /** `<epic-item>`'s tokens for its line's rounded corners, top and bottom (`runRules()`). */
 const TOP_RADIUS = "--epic-item-top-radius"
 const BOTTOM_RADIUS = "--epic-item-bottom-radius"
+
+/** `<epic-phase>`'s, for its title row's (`runRules()`, I96). */
+const PHASE_TOP_RADIUS = "--epic-phase-top-radius"
+const PHASE_BOTTOM_RADIUS = "--epic-phase-bottom-radius"
 
 /** Class of the To test section's Start testing. */
 const START_TESTING = "start-testing"

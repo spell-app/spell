@@ -34,6 +34,19 @@
     border-end-start-radius: var(--epic-phase-radius, 8px);
     border-end-end-radius: var(--epic-phase-radius, 8px);
   }
+  /*
+   * the title rows as RUNS, as an item list's lines (epic `epic-engine` I96;  Owen, 2026-10-24:  "showed the white
+   * corners at the bottom above P29"):  the Phases section hands each phase its corners (`EpicSection.runRules()`),
+   * rounded at a run's top (the first phase, the one after an open phase) and bottom (the last);  square while stuck
+   */
+  ui-section:not(:state(stuck))::part(title) {
+    border-start-start-radius: var(--epic-phase-top-radius, 0px);
+    border-start-end-radius: var(--epic-phase-top-radius, 0px);
+  }
+  :host(:not(:state(open))) ui-section:not(:state(stuck))::part(title) {
+    border-end-start-radius: var(--epic-phase-bottom-radius, 0px);
+    border-end-end-radius: var(--epic-phase-bottom-radius, 0px);
+  }
 
   .icon.todo {
     color: var(--ui-grey-text, var(--ui-text-muted));

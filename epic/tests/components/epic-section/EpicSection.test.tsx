@@ -534,6 +534,31 @@ describe("<epic-section> runs of item lines, rounded at their ends", () => {
   })
 })
 
+// epic `epic-engine` I96, Owen, 2026-10-24:  "showed the white corners at the bottom above P29"
+describe("<epic-section kind=phases> runs of phase title rows", () => {
+  test("P2 open:  P1 rounded on top, P2's title at the bottom, P3 on top, P4 at the bottom;  no rule under P4", async () => {
+    const phases = [1, 2, 3, 4]
+      .map(
+        (n) =>
+          `<epic-phase id="p${n}" title="Phase ${n}" status="todo"${n === 2 ? " open" : ""}><p>Body ${n}.</p></epic-phase>`
+      )
+      .join("")
+    const host = await render(`<epic-section id="phases" kind="phases" open>${phases}</epic-section>`)
+    await ElementFixture.tick()
+    const ends: Record<string, string> = {}
+    for (const phase of host.querySelectorAll("epic-phase")) {
+      const section = phase.shadowRoot!.querySelector("ui-section")!
+      const title = getComputedStyle(section.shadowRoot!.querySelector("[part~='title']")!)
+      const top = parseFloat(title.borderTopLeftRadius) > 0 && parseFloat(title.borderTopRightRadius) > 0
+      const bottom = parseFloat(title.borderBottomLeftRadius) > 0 && parseFloat(title.borderBottomRightRadius) > 0
+      ends[phase.id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
+    }
+    expect(ends).toEqual({ p1: "top", p2: "bottom", p3: "top", p4: "bottom" })
+    expect(getComputedStyle(host.querySelector("#p4")!).borderBottomStyle).toBe("none")
+    expect(getComputedStyle(host.querySelector("#p3")!).borderBottomStyle).not.toBe("none")
+  })
+})
+
 // Owen, 2026-10-19:  "always show the full title, wrapped" (J183's "ellipsis when collapsed" before)
 
 describe("<epic-section> title, folded and open", () => {

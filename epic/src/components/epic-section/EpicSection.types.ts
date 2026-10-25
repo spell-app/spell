@@ -248,8 +248,11 @@ export const COUNT_ATTRIBUTES = ["status", "state"]
 /** Its items, by themselves:  their runs (`EpicSection.runEnds`). */
 export const ITEMS = ":scope > epic-item"
 
+/** The Phases section's phases, by themselves:  their title rows' runs too (`EpicSection.runEnds`, I96). */
+export const PHASES = ":scope > epic-phase"
+
 /**
- * The attributes of an item that change where its list's runs start and end (`EpicSection.runEnds`):
+ * The attributes of an item (or a phase) that change where its list's runs start and end (`EpicSection.runEnds`):
  * - `open`:  unfolded, its details between its line and the next item's
  * - `hidden`:  not drawn at all
  */

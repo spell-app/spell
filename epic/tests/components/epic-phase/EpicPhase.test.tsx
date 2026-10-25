@@ -57,7 +57,9 @@ describe("<epic-phase>", () => {
       label: "Under way"
     })
     expect(host.matches(":state(open)")).toBe(false)
-    expect(getComputedStyle(host).borderBottomWidth).toBe("1px")
+    // folded, a rule below;  but the last phase, its run's rounded bottom, has none (I96)
+    expect(getComputedStyle(host.previousElementSibling!).borderBottomWidth).toBe("1px")
+    expect(getComputedStyle(host).borderBottomWidth).toBe("0px")
   })
 
   test("open, it shows its fields through its slot;  nested in a section, its children get the stack", async () => {
