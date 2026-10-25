@@ -64,7 +64,7 @@ describe("<epic-state-filter>", () => {
   })
 
   // epic `epic-engine` P43 (Owen, 2026-10-25:  "a blue badge with dotted outline to the left")
-  test("`marked`:  a solid dark blue badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
+  test("`marked`:  a solid blue badge first, left of the chips, not a button;  alone when no chip is left;  axe", async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="open:2 recent:1" shown="recent" marked="3"></epic-state-filter>`
     )
