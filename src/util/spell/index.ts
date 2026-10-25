@@ -28,6 +28,7 @@ export * from "./json"
 export * from "./array"
 export * from "./paths"
 export * from "./die"
+export * from "./safely"
 export * from "./CustomError"
 
 export * from "./abortableFetch"
