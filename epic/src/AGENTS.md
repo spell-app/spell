@@ -424,6 +424,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     add it to Spell UI's `packModules` AND to `PACK_MODULES`, in the kit's
     [packModules.ts](../../src/element-tools/packModules.ts).
 - Every tag starts `epic-`:  `<ui-root>` knows the pack's tags by that prefix.
+- What an element, a form or the docs runtime keeps in the browser goes through the kit's `PrefStore`
+  (epic `prefs-and-undo` P4):  `spell/util/persist/PrefStore`, by file, never the persist barrel.
+  - Keys named whole (`spell-folds:<path>`), byte for byte:  `PrefStore.getAt()` / `setAt()`;  a class handed a
+    `Storage` for its tests keeps it, through a `StoragePlace` over it.
+  - A key needs a store's name before its first colon:  the four that had none were renamed, their old values moved
+    once (`PrefStore.moveOldKey()`):  `spell-epics:sort`, `spell-epics:sagas`, `spell-epics:new-epic-draft`,
+    `spell-epics:send-countdown`;  a page-named filter is under `spell-filter:` too.
+  - Stays raw:  [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle, and
+    [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright.
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -639,7 +648,7 @@ The shared folders:
     - Each group is a small heading with its count;  cards are alphabetical by title within each.
     - Or newest first:  the page header's sort buttons, A–Z and Date (`<epic-sort>`;  Owen, 2026-10-13).
       - They sort the cards inside each group by title, or by when each was last worked on.
-      - Remembered in this browser (`spell-epics-sort`).
+      - Remembered in this browser (`spell-epics:sort`;  `spell-epics-sort` before epic `prefs-and-undo` P4, moved once).
     - A group with no card showing isn't drawn (hidden by a saga chip, or by the runtime's state chips).
     - On the page server, the running epics' route module adds the running epics' cards
       ([runningRoutes.ts](list/runningRoutes.ts), `RunningEpics`), and marks every card `running` and `favorite`
@@ -677,7 +686,7 @@ The shared folders:
         then "No saga", each with its count.
         - A saga no epic names gets no chip (epic `epic-engine` P3:  its chip could only show nothing).
       - A click shows only that saga's epics, by the state chips' rule (`StateFilter.nextShown()`).
-        - remembered in this browser (`spell-epics-sagas`), for every Epics page
+        - remembered in this browser (`spell-epics:sagas`), for every Epics page
       - The groups count only the cards that show.
       - each card carries its saga in attributes (`saga`, `saga-title`, `saga-purpose`), for the list and the page
         server

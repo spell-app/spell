@@ -245,6 +245,16 @@ export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 /** The attributes of a counted child that change its count or its state:  a change re-counts. */
 export const COUNT_ATTRIBUTES = ["status", "state"]
 
+/** Its items, by themselves:  their runs (`EpicSection.runEnds`). */
+export const ITEMS = ":scope > epic-item"
+
+/**
+ * The attributes of an item that change where its list's runs start and end (`EpicSection.runEnds`):
+ * - `open`:  unfolded, its details between its line and the next item's
+ * - `hidden`:  not drawn at all
+ */
+export const RUN_ATTRIBUTES = ["open", "hidden"]
+
 /**
  * Where an item stands, in the filter's order:  its state, its chip's colour, its texts' keys (the tooltip's words).
  * - the same seven as `<epic-item state>` (`EpicItem.types.ts` `ITEM_STATES`), in the old runtime's filter order,

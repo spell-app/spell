@@ -1,4 +1,6 @@
 import { E } from "spell/element"
+// Import directly:  the persist barrel would bring the database and server places too
+import { PrefStore } from "spell/util/persist/PrefStore"
 
 /****************
  * ### `SeenReplies`
@@ -35,11 +37,7 @@ export class SeenReplies {
     const read = SeenReplies.read()
     if ((read[itemId] ?? "") >= at) return
     read[itemId] = at
-    try {
-      localStorage.setItem(SeenReplies.key(), JSON.stringify(read))
-    } catch (ignored) {
-      console.error(ignored)
-    }
+    PrefStore.setAt(SeenReplies.key(), read)
     this.seenItem = itemId
     this.seenAt = at
   }
@@ -78,12 +76,8 @@ export class SeenReplies {
 
   /** This page's store:  `{ [item id]: time seen }`;  `{}` when there's none, or it won't read. */
   private static read(): Record<string, string> {
-    try {
-      const parsed: unknown = JSON.parse(localStorage.getItem(SeenReplies.key()) ?? "{}")
-      return parsed && typeof parsed === "object" ? (parsed as Record<string, string>) : {}
-    } catch {
-      return {}
-    }
+    const kept = PrefStore.getAt(SeenReplies.key())
+    return kept && typeof kept === "object" ? (kept as Record<string, string>) : {}
   }
 
   /** This page's key. */
