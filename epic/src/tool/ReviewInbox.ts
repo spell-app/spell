@@ -51,6 +51,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       - sent at once with whatever else is unsent;  `epic inbox apply` moves the page on a stage
  *     - a phase's Defer, while the phases are agreed (P29):  `{ action: "defer" }`, applied by moving the phase after
  *       the others, still to do
+ *     - a CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30), under its id (`CHANGE_ID`):
+ *       `{ action: "accept" }` (the change stands:  `inbox apply` marks it `accepted`, the orange goes, its chip
+ *       stays) or `{ action: "reopen" }` (`inbox apply` reopens the question it names;  the mark stays orange)
+ *       - only a change takes them, and a change takes nothing else;  `accept` without a `stage` is a change's
  *   - `drafts`:  `{ [id]: { action, note, at } }`, a note box's text as Owen types it (`setDraft()`),
  *     until the mark that uses it;  never sent or counted
  *   - `urgency`:  `{ [id]: { calm, at } }`, Owen's click on an open judgement call's or issue's id chip
@@ -337,6 +341,7 @@ export class ReviewInbox {
     if (checked && (checked.action === "new") !== NEW_ID.test(key))
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
+    if (checked) checkChangeMark(key, checked)
     if (!checked || !ReviewInbox.isImmediate(checked)) this.now = this.now.filter((each) => each.id !== key)
     if (checked) this.marks[key] = checked
     else delete this.marks[key]
@@ -796,7 +801,8 @@ export class ReviewInbox {
    *   which of the item's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
    * - `accept` (the page header's stage button, epic `epic-engine` P29):  `stage`, the stage it ends, one of
-   *   `ACCEPT_STAGES`
+   *   `ACCEPT_STAGES`;  none:  a change mark's Accept (P30), `{ action: "accept" }`
+   * - `reopen` (a change mark's Reopen, P30):  the action alone
    * - `test` (a test run's answer, epic `epic-engine` P4):  `result` one of `TEST_RESULTS`;
    *   `note` trimmed, kept only when there is one;  `shot` kept when given, a screenshot in the epic's `tests/`
    *   (`tests/v3-20261019-1432.png`:  `TEST_SHOT`)
@@ -825,6 +831,8 @@ export class ReviewInbox {
     if (action === "pick") return { action, pick: toLetter(pick), ...toChoices(choices) }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
+      // a change mark's Accept (epic `epic-engine` P30):  no stage
+      if (stage === undefined || stage === null) return { action }
       if (!(ACCEPT_STAGES as readonly unknown[]).includes(stage))
         throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
       return { action, stage: stage as PageStage }
@@ -876,11 +884,20 @@ export class ReviewInbox {
    * - every phase, `<epic-phase id>`, and the summary, `summary` while the doc has an `<epic-summary>`
    *   (epic `airplane` P2:  notes on them too)
    * - the stage button's, `stage`, while `<epic-page stage>` is a stage one ends (`ACCEPT_STAGES`, epic `epic-engine` P29)
+   * - every change mark waiting for Accept (`ch3`, epic `epic-engine` P30):  listed in its host's `to-accept` (the
+   *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
    */
   static itemIds(html: string): Set<string> {
     const ids = new Set<string>()
-    for (const [tag, name] of html.matchAll(/<(epic-item|epic-section|epic-phase|epic-summary|epic-page)\b[^>]*>/g)) {
+    const tags = /<(epic-item|epic-section|epic-phase|epic-summary|epic-page|epic-change)\b[^>]*>/g
+    for (const [tag, name] of html.matchAll(tags)) {
+      for (const change of /\sto-accept="([^"]*)"/.exec(tag)?.[1]?.split(/\s+/) ?? []) if (change) ids.add(change)
+      if (name === "epic-change") {
+        const id = /\sid="([^"]+)"/.exec(tag)?.[1]
+        if (id && !/\saccepted[\s=>]/.test(tag)) ids.add(id.toLowerCase())
+        continue
+      }
       if (name === "epic-page") {
         const stage = /\sstage="([^"]*)"/.exec(tag)?.[1]
         if ((ACCEPT_STAGES as readonly string[]).includes(stage ?? "")) ids.add(STAGE_ID)
@@ -1053,6 +1070,7 @@ export const INBOX_VERSION = 1
  * - `test`:  a test's answer from the page's test run (epic `epic-engine` P4):  `result`, maybe `note` and `shot`
  * - `accept`:  the page header's stage button (epic `epic-engine` P29):  the stage it ends (`stage`), under `STAGE_ID`
  * - `defer`:  a phase's Defer while the phases are agreed (P29):  after the others, still to do
+ * - `accept` with no `stage`, and `reopen`:  a change mark's buttons (`<epic-change>`, P30), under its id
  */
 export const ACTIONS = [
   "approve",
@@ -1066,7 +1084,8 @@ export const ACTIONS = [
   "new",
   "test",
   "accept",
-  "defer"
+  "defer",
+  "reopen"
 ] as const
 /** One of `ACTIONS`. */
 export type MarkAction = (typeof ACTIONS)[number]
@@ -1095,6 +1114,12 @@ export const SUMMARY_ID = "summary"
  * not an item's;  markable while the page is in a stage that ends with it (`itemIds()`).
  */
 export const STAGE_ID = "stage"
+
+/**
+ * A change mark's id, its key in the inbox (`<epic-change id="ch3">`, epic `epic-engine` P30):  `ch` and a number,
+ * given by the epic tool (`PlanDoc.updateChanges()`).
+ */
+export const CHANGE_ID = /^ch\d+$/
 
 /** The stages a stage button ends:  every stage but `building`. */
 export const ACCEPT_STAGES = PageStages.ALL.filter(PageStages.isPlanning)
@@ -1170,6 +1195,21 @@ const CALM_ID = /^[ij]\d+$/
 ////////////////
 // ## Helpers
 ////////////////
+
+/**
+ * A change mark (`CHANGE_ID`) takes only its two buttons' marks, and they go on nothing else (epic `epic-engine` P30):
+ * an `InboxError` otherwise.
+ * - `accept` with a `stage` is the stage button's, under `STAGE_ID`;  without one there, it asks which stage
+ */
+function checkChangeMark(key: string, mark: CheckedMark) {
+  const forChange = mark.action === "reopen" || (mark.action === "accept" && mark.stage === undefined)
+  if (CHANGE_ID.test(key) && !forChange)
+    throw new InboxError(`a change takes Accept or Reopen, not ${mark.action}:  ${key}`)
+  if (CHANGE_ID.test(key) || !forChange) return
+  if (key === STAGE_ID) throw new InboxError(`accept which stage?  ${ACCEPT_STAGES.join(" | ")}`)
+  const what = mark.action === "accept" ? "Accept with no stage" : "Reopen"
+  throw new InboxError(`only a change (ch3 ...) takes ${what}:  ${key}`)
+}
 
 /** Is `action` one of `ACTIONS`? */
 function isAction(action: unknown): action is MarkAction {

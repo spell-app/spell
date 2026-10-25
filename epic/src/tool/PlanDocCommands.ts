@@ -183,6 +183,8 @@ export class PlanDocCommands {
           if (!plan.setStage(stage)) this.print(`already ${stage}`)
           else this.print(`${name}:  ${stage}`)
         })
+      case "change":
+        return this.changeMarks(file, flags)
       case "standing":
         return this.edit(file, (plan) => {
           const value = rest[0] ?? "on"
@@ -531,6 +533,41 @@ export class PlanDocCommands {
       )
     })
     this.tests.saveExample(file, fields.example)
+  }
+
+  /**
+   * `change <name> [--for <item id>]`:  the CHANGE MARKS (`<epic-change>`, epic `epic-engine` P30), after Claude
+   * wrote them by hand into the Overview's or a phase's text (a part, or a command's HTML).
+   * - stamps them, as every edit does (`PlanDoc.updateChanges()`):  each new one's id (`ch3`), time and answer
+   * - `--for q13`:  first, the marks that name no item take that one;  refused for an id the doc has no item for
+   * - then prints each, waiting first:  `CH3  Q13  waiting  "todos fold into it" (Q13)  in o2`, and how many wait
+   */
+  private async changeMarks(file: string, flags: Flags): Promise<void> {
+    const given = flags.for
+    const item = given === undefined ? undefined : need(given === true ? undefined : given, "--for <item id>")
+    const named = await this.edit(file, (plan) => {
+      if (!item) return 0
+      const id = plan.item(item).id
+      const bare = plan.changes.filter((change) => !change.getAttribute("item"))
+      for (const change of bare) Markup.set<"epic-change">(change, { item: id })
+      if (bare.length)
+        plan.log(`${bare.length} change mark${bare.length === 1 ? "" : "s"} named for ${id.toUpperCase()}`)
+      return bare.length
+    })
+    if (named) this.print(`${named} named for ${item!.toUpperCase()}`)
+    const plan = this.read(file)
+    const rows = plan.changes.map((change) => ({
+      change,
+      facts: plan.describeItem(change.id)!,
+      host: change.parentElement?.closest("[id]")?.id ?? ""
+    }))
+    rows.sort((a, b) => Number(a.facts.status !== "waiting") - Number(b.facts.status !== "waiting"))
+    for (const { change, facts, host } of rows) {
+      const item = (change.getAttribute("item") ?? "?").toUpperCase()
+      this.print(`${facts.id.padEnd(5)} ${item.padEnd(4)} ${facts.status.padEnd(8)} ${facts.title}  in ${host}`)
+    }
+    const waiting = rows.filter((row) => row.facts.status === "waiting").length
+    this.print(`${waiting} change${waiting === 1 ? "" : "s"} to accept (${rows.length} marked)`)
   }
 
   /**
@@ -1010,6 +1047,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   stage <name> overview|phases|building            the page's stage:  what it shows (overview:  the Overview,
                                                    Questions and Todos;  phases:  the Phases too;  building:
                                                    everything);  no stage reads as building;  logged
+  change <name> [--for <item id>]                  stamp the change marks written by hand (<epic-change item>:
+                                                   id, time, answer;  every edit does too), list those waiting;
+                                                   --for:  the item of the marks that name none
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests

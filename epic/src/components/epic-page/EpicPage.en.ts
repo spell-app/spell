@@ -193,8 +193,14 @@ export const epicPageVocabulary = {
     {
       name: "status",
       description:
-        "The header's right side:  Send and its countdown (while reviewed), the bedtime label, the step label, the git " +
-        "toggle."
+        "The header's right side:  the changes to accept, Send and its countdown (while reviewed), the bedtime label, " +
+        "the step label, the git toggle."
+    },
+    {
+      name: "changes",
+      description:
+        "The changes to accept (`<epic-change>` marks waiting for Owen's Accept, epic `epic-engine` P30):  an orange " +
+        "label with how many, before Send;  a click lands on the first."
     },
     {
       name: "state",
@@ -377,6 +383,18 @@ export const epicPageVocabulary = {
       description: "The stage button's tooltip:  what's open;  a reminder, never a lock."
     },
     { key: "nothingOpen", text: "no questions open", description: "The stage button's tooltip:  nothing open." },
+    { key: "changesOne", text: "1 change to accept", description: "The change marks waiting for Accept:  one." },
+    {
+      key: "changesMany",
+      text: "{count} changes to accept",
+      description:
+        "The change marks waiting for Accept (`<epic-change>`):  the stage button's tooltip, the header's label."
+    },
+    {
+      key: "changesTip",
+      text: "{changes}:  the next, {next}",
+      description: "The header's changes label's tooltip:  how many, and where a click goes."
+    },
     {
       key: "acceptSends",
       text: "sends {count} unsent with it",

@@ -119,8 +119,20 @@ export function isAirplane(): boolean {
  * - a todo (Owen, 2026-10-09):  `next` (the plane:  do it in the next phase), Revisit, `drop` (the x:  drop it)
  * - an open phase while the phases are agreed (epic `epic-engine` P29):  Looks good (`approve`), `defer` (after the
  *   others, still to do)
+ * - a CHANGE MARK (`<epic-change>`, epic `epic-engine` P30):  `accept` (the change stands:  the orange goes, the chip
+ *   stays), `reopen` (its question is talked over again)
  */
-export const REVIEW_ACTIONS = ["approve", "revisit", "todo", "details", "next", "drop", "defer"] as const
+export const REVIEW_ACTIONS = [
+  "approve",
+  "revisit",
+  "todo",
+  "details",
+  "next",
+  "drop",
+  "defer",
+  "accept",
+  "reopen"
+] as const
 
 /** One of `REVIEW_ACTIONS`. */
 export type ReviewAction = (typeof REVIEW_ACTIONS)[number]
@@ -136,6 +148,12 @@ export const SUMMARY_ID = "summary"
  * As `ReviewInbox`'s `STAGE_ID`:  a copy, since that module is node-only.
  */
 export const STAGE_ID = "stage"
+
+/**
+ * A change mark's id, its inbox key (`<epic-change id="ch3">`, epic `epic-engine` P30):  `ch` and a number.
+ * As `ReviewInbox`'s `CHANGE_ID`:  a copy, since that module is node-only.
+ */
+export const CHANGE_ID = /^ch\d+$/
 
 /** What a new item from the page may be:  as `ReviewInbox`'s `NEW_KINDS` (a copy:  that module is node-only). */
 export const NEW_KINDS = ["todo", "question", "issue", "test"] as const

@@ -5,6 +5,7 @@ import { epicReplyVocabulary } from "spell-epic/components/epic-answer/EpicReply
 import { epicAsideVocabulary } from "spell-epic/components/epic-aside/EpicAside.en"
 import { epicAskVocabulary } from "spell-epic/components/epic-ask/EpicAsk.en"
 import { epicCardsVocabulary } from "spell-epic/components/epic-cards/EpicCards.en"
+import { epicChangeVocabulary } from "spell-epic/components/epic-change/EpicChange.en"
 import { epicChoiceRowVocabulary } from "spell-epic/components/epic-choice-rows/EpicChoiceRow.en"
 import { epicChoiceRowsVocabulary } from "spell-epic/components/epic-choice-rows/EpicChoiceRows.en"
 import { epicChoicesBarVocabulary } from "spell-epic/components/epic-choices-bar/EpicChoicesBar.en"
@@ -92,6 +93,8 @@ export class Definitions {
     "epic-code": epicCodeVocabulary,
     // a link to a saga, an epic, a phase or an item (epic `epic-workflow` P15), anywhere prose goes
     "epic-link": epicLinkVocabulary,
+    // a change mark (epic `epic-engine` P30):  words an answer changed, in the text itself
+    "epic-change": epicChangeVocabulary,
     // the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12):  details and choice pages
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,

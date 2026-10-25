@@ -616,3 +616,93 @@ test("apply:  a phase's sent Defer moves it after the others, still to do;  its 
   expect(printed.join("\n")).toContain("P-ONE  deferred:  after the other phases, now P3, still to do")
   expect(printed.join("\n")).toContain("P-TWO  approved")
 })
+
+////////////////
+// ## Change marks (epic `epic-engine` P30)
+////////////////
+
+/** The scratch doc with Q1 decided, and the Overview's Structure rewritten by its answer:  one mark, by hand. */
+function docWithChange(): PlanDoc {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const q = plan.addItem("question", "Where do caveats go?")
+  plan.decide(q, "One list, Caveats")
+  plan.document.querySelector("#o1 > p")!.innerHTML =
+    `What goes where:  <epic-change item="${q}">one list, Caveats;  todos fold into it</epic-change>.`
+  return plan
+}
+
+test("a change mark written by hand is STAMPED on the next edit:  its id, time and answer, and its host's to-accept", async () => {
+  writeFileSync(file, docWithChange().toString())
+  await commands().run(["change", "x"])
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  const change = plan.document.querySelector("epic-change")!
+  expect({
+    id: change.id,
+    item: change.getAttribute("item"),
+    answer: change.getAttribute("answer"),
+    stamped: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(change.getAttribute("at") ?? ""),
+    toAccept: plan.document.querySelector("#o1")!.getAttribute("to-accept")
+  }).toEqual({ id: "ch1", item: "q1", answer: "One list, Caveats", stamped: true, toAccept: "ch1" })
+  expect(printed.join("\n")).toContain("CH1   Q1   waiting")
+  expect(printed.join("\n")).toContain("1 change to accept (1 marked)")
+  // the review routes take its marks from the skeleton's text alone
+  expect(ReviewInbox.itemIds(readFileSync(file, "utf8")).has("ch1")).toBe(true)
+})
+
+test("change --for names the marks written with no item;  lint (check) fails one naming no item, or not stamped", async () => {
+  const plan = docWithChange()
+  plan.document.querySelector("epic-change")!.removeAttribute("item")
+  writeFileSync(file, plan.toString())
+  await commands().run(["change", "x", "--for", "Q1"])
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).document.querySelector("epic-change")!.getAttribute("item")).toBe(
+    "q1"
+  )
+  const broken = docWithChange()
+  broken.document.querySelector("epic-change")!.setAttribute("item", "q9")
+  expect(broken.check()).toEqual(
+    expect.arrayContaining([
+      'change "one list, Caveats; todos fold into it" names Q9:  no such item',
+      expect.stringMatching(/^change "one list.*" has no id:  `epic change <name>` stamps it/)
+    ])
+  )
+})
+
+test("apply:  a change's sent Accept makes it accepted (no longer to accept), its chip's answer kept;  Reopen reopens its question", async () => {
+  const plan = docWithChange()
+  plan.updateStates()
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("ch1", { action: "accept" }, T1)
+    inbox.markSent(T2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  let after = PlanDoc.parse(readFileSync(file, "utf8"))
+  const change = after.findChange("ch1")!
+  expect([change.hasAttribute("accepted"), change.getAttribute("answer")]).toEqual([true, "One list, Caveats"])
+  expect(after.document.querySelector("#o1")!.hasAttribute("to-accept")).toBe(false)
+  expect(printed.join("\n")).toContain("CH1  accepted:  Q1's change stands")
+  expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
+  // an accepted change takes no more marks from the page:  it's off the skeleton's list
+  expect(ReviewInbox.itemIds(readFileSync(file, "utf8")).has("ch1")).toBe(false)
+
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark("ch1", { action: "reopen" }, T2)
+    inbox.markSent(T3)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.findItem("q1")!.getAttribute("status")).toBe("open")
+  expect(after.findChange("ch1")!.hasAttribute("accepted")).toBe(false)
+  expect(printed.join("\n")).toContain("CH1  reopened Q1, was decided;  the change waits")
+})
+
+test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere else;  the stage's Accept still needs its stage", () => {
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.setMark("ch2", { action: "accept" }, T1)).toMatchObject({ action: "accept" })
+  expect(inbox.setMark("ch2", { action: "reopen" }, T1)).toMatchObject({ action: "reopen" })
+  expect(() => inbox.setMark("ch2", { action: "approve" }, T1)).toThrow("a change takes Accept or Reopen, not approve")
+  expect(() => inbox.setMark("q1", { action: "reopen" }, T1)).toThrow("only a change (ch3 ...) takes Reopen")
+  expect(() => inbox.setMark("stage", { action: "accept" }, T1)).toThrow("accept which stage?")
+  expect(inbox.setMark("stage", { action: "accept", stage: "overview" }, T1)).toMatchObject({ stage: "overview" })
+})

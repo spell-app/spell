@@ -36,8 +36,10 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `closed`:  a closed thread's Reopen (`CLOSED_BUTTONS`)
  * - `proposal`:  an open phase while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine`
  *   P29):  Looks good and Defer (`PROPOSAL_BUTTONS`);  its note box a part's
+ * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Accept and Reopen (`CHANGE_BUTTONS`);
+ *   no note box
  */
-export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal"] as const
+export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal", "change"] as const
 
 /** One of `REVIEW_KINDS`. */
 export type ReviewKind = (typeof REVIEW_KINDS)[number]
@@ -72,13 +74,24 @@ export type ReviewButtonSpec = {
    * what it does (`ReviewClient.press()`;  `details` is Do Now, the inbox's name for an immediate request;
    * `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "details" | "next" | "drop" | "defer"
+  action: "approve" | "todo" | "revisit" | "details" | "next" | "drop" | "defer" | "accept" | "reopen"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
   icon: string
   /** its name:  the plain tooltip */
-  label: "approve" | "todo" | "revisit" | "doNow" | "next" | "revisitNote" | "drop" | "looksGood" | "defer"
+  label:
+    | "approve"
+    | "todo"
+    | "revisit"
+    | "doNow"
+    | "next"
+    | "revisitNote"
+    | "drop"
+    | "looksGood"
+    | "defer"
+    | "acceptChange"
+    | "reopenChange"
   /** what it does, for a screen reader */
   tip:
     | "approveTip"
@@ -90,6 +103,8 @@ export type ReviewButtonSpec = {
     | "dropTip"
     | "looksGoodTip"
     | "deferTip"
+    | "acceptChangeTip"
+    | "reopenChangeTip"
 }
 
 /**
@@ -139,6 +154,17 @@ export const PROPOSAL_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "defer", color: "grey", icon: "clock", label: "defer", tip: "deferTip" }
 ]
 
+/**
+ * A change mark's buttons (`<epic-change>`, epic `epic-engine` P30;  Q13, B), drawn over its chip on hover or focus:
+ * - Accept (`accept`, green:  decided):  the change stands;  `inbox apply` clears its orange, its chip stays
+ * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it, the words stay
+ *   orange until it's answered again
+ */
+export const CHANGE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "accept", color: "green", icon: "check", label: "acceptChange", tip: "acceptChangeTip" },
+  { action: "reopen", color: "blue", icon: "history", label: "reopenChange", tip: "reopenChangeTip" }
+]
+
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
@@ -146,7 +172,8 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   part: PART_BUTTONS,
   thread: [],
   closed: [],
-  proposal: PROPOSAL_BUTTONS
+  proposal: PROPOSAL_BUTTONS,
+  change: CHANGE_BUTTONS
 }
 
 /**
@@ -258,7 +285,8 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   part: NOTE_BUTTONS,
   thread: [],
   closed: [],
-  proposal: NOTE_BUTTONS
+  proposal: NOTE_BUTTONS,
+  change: []
 }
 
 ////////////////
@@ -371,6 +399,8 @@ export const REVIEW_NAME_TEXTS = [
   { key: "drop", text: "Drop it", description: "A todo's review button (the x):  its name." },
   { key: "looksGood", text: "Looks good", description: "A phase's review button while the phases are agreed." },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
+  { key: "acceptChange", text: "Accept", description: "A change mark's button:  its name." },
+  { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
 
@@ -409,6 +439,16 @@ export const REVIEW_TEXTS = [
     key: "deferTip",
     text: "Later:  after the other phases, still to do, once Claude applies it",
     description: "A phase's review button while the phases are agreed:  what Defer does."
+  },
+  {
+    key: "acceptChangeTip",
+    text: "The change stands:  the orange goes, the chip stays, once Claude applies it",
+    description: "A change mark's button:  what Accept does."
+  },
+  {
+    key: "reopenChangeTip",
+    text: "Talk the question over again:  it opens, the words stay orange",
+    description: "A change mark's button:  what Reopen does."
   },
   {
     key: "waiting",

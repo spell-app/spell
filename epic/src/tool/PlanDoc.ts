@@ -61,7 +61,7 @@ import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
-import { STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
+import { CHANGE_ID, STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -901,9 +901,15 @@ export class PlanDoc extends PlanReader {
   /**
    * Item `id` as the inbox shows it;  what takes notes as an item does too (`reviewPart()`):
    * an Overview sub-section (`o3`, Q14), kind `overview`;  a phase (`p-epic-migrate`), kind `phase`, its status;
-   * the summary (`summary`), kind `summary`, its own text the title (epic `airplane` P2).
+   * the summary (`summary`), kind `summary`, its own text the title (epic `airplane` P2);  a change mark (`ch3`,
+   * epic `epic-engine` P30), kind `change`, its words and question the title, `waiting` or `accepted`.
    */
   describeItem(id: string): ItemDescription | null {
+    const change = this.findChange(id)
+    if (change) {
+      const status = change.hasAttribute("accepted") ? "accepted" : "waiting"
+      return { id: String(id).toUpperCase(), kind: "change", status, title: changeTitle(change) }
+    }
     if (String(id).toLowerCase() === STAGE_ID) {
       const stage = this.stage
       return {
@@ -966,11 +972,14 @@ export class PlanDoc extends PlanReader {
    * - `accept`, the page header's stage button (`stage`, epic `epic-engine` P29) (`applyAccept()`):  the page moves
    *   on from the stage it ended, `overview` -> `phases` -> `building`;  dropped when the page has moved on already
    * - `defer`, a phase's Defer while the phases are agreed (P29):  moved after the other phases, still to do
+   * - `accept` / `reopen` on a change mark (`ch3`, epic `epic-engine` P30;  `applyChange()`):  the change stands
+   *   (`accepted`), or its question opens again
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
    */
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
+    if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
     const part = this.reviewPart(mark.id)
     if (part) {
       const result = this.applyToPart(part, mark)
@@ -1581,6 +1590,7 @@ export class PlanDoc extends PlanReader {
    * - each item's `state` (`itemState()`):  what the page colours its id chip by
    * - each phase's "To review" field (`updateToReview()`)
    * - how many plan changes each phase holds (`updateChangeCounts()`)
+   * - the change marks:  new ones given their id, time and answer, each host's `to-accept` (`updateChanges()`)
    */
   updateStates(): number {
     let changed = 0
@@ -1598,6 +1608,7 @@ export class PlanDoc extends PlanReader {
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
     if (this.updateChangeCounts()) changed++
+    changed += this.updateChanges()
     return changed
   }
 
@@ -1836,7 +1847,8 @@ export class PlanDoc extends PlanReader {
 
   /**
    * Structural problems, as text:  duplicate ids, `#id` links to nowhere (a link in an Original Discussion is
-   * history:  skipped), phases without a valid status, and what `Markup.validate()` finds.
+   * history:  skipped), phases without a valid status, change marks naming no item or not stamped
+   * (`changeProblems()`), and what `Markup.validate()` finds.
    */
   check(): string[] {
     const problems: string[] = []
@@ -1849,6 +1861,7 @@ export class PlanDoc extends PlanReader {
     }
     for (const phase of this.phases)
       if (!isPhaseStatus(phase.status)) problems.push(`P${phase.n} has status "${phase.status}"`)
+    problems.push(...this.changeProblems())
     for (const problem of Markup.validate(this.document)) {
       // duplicate ids are counted above, once each
       if (problem.kind !== "duplicate id") problems.push(`${problem.kind}:  ${problem.where} ${problem.message}`)
@@ -2039,6 +2052,129 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * A change mark's button (`<epic-change id="ch3">`, epic `epic-engine` P30;  Q13, B), as Owen pressed it:
+   * - `accept`:  the change stands.  It's `accepted` now:  the orange goes, the words and the Q&A chip stay for good.
+   * - `reopen`:  the question it names opens again (red, Owen's to talk over), and the mark stays orange until
+   *   it's answered again and the words rewritten
+   * - the mark gone from the doc (rewritten meanwhile):  dropped (`gone`);  accepted already:  nothing more to do
+   * - logs it (`CH3 accepted:  Q13's change stands`)
+   */
+  private applyChange({ id, action }: PlanMark): MarkResult {
+    const change = this.findChange(id)
+    const label = String(id).toUpperCase()
+    if (!change) return { applied: false, gone: true, left: `${label}:  no such change any more:  dropped` }
+    const item = (change.getAttribute("item") ?? "").toUpperCase()
+    if (action === "accept") {
+      if (change.hasAttribute("accepted")) return { applied: true, did: "accepted already" }
+      Markup.set<"epic-change">(change, { accepted: PlanTime.clockTime(this.now) })
+      const did = `accepted:  ${item}'s change stands`
+      this.log(`${label} ${did}`)
+      return { applied: true, did }
+    }
+    if (action === "reopen") {
+      const question = this.findItem(item)
+      if (!question) return { applied: false, left: `${label}:  its question ${item} isn't on the page` }
+      const was = question.getAttribute("status") ?? "open"
+      if (was !== "open") {
+        // open, red, Owen's to answer again:  `setItem()` would keep an answered question decided.
+        // Its answer stays, readable, until he answers again
+        Markup.set<"epic-item">(question, { status: "open" })
+        if (QUESTION_ID.test(question.id)) this.placeQuestion(question)
+        this.stamp(question)
+        this.markUpdate(question)
+      }
+      const did = `reopened ${item}${was === "open" ? " (open already)" : `, was ${was}`};  the change waits`
+      this.log(`${label} ${did}`)
+      return { applied: true, did }
+    }
+    return { applied: false, left: `${label}:  a change takes Accept or Reopen, not ${action}` }
+  }
+
+  ////////////////
+  // ## Change marks (epic `epic-engine` P30)
+  ////////////////
+
+  /** Every change mark in the doc, `<epic-change>`, in page order. */
+  get changes(): Element[] {
+    return Array.from(this.document.querySelectorAll(CHANGE_TAG))
+  }
+
+  /** The change mark with id `id` (`ch3`, any case), or `null`. */
+  findChange(id: string): Element | null {
+    const key = String(id).toLowerCase()
+    if (!CHANGE_ID.test(key)) return null
+    const element = this.document.getElementById(key)
+    return element?.localName === CHANGE_TAG ? element : null
+  }
+
+  /**
+   * Bring the change marks up to date, as every edit does (`updateStates()`);  returns how many things changed.
+   * - a mark Claude wrote by hand (`<epic-change item="q13">`) is STAMPED:
+   *   - `id`:  the next free `ch<N>`, never one used before in the doc (`CHANGE_ID`:  its inbox key)
+   *   - `at`:  now
+   *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
+   *     months later, whatever the question says by then
+   * - each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting
+   *   for Accept, in `to-accept` (`ch3 ch5`;  none:  no attribute)
+   *   - the SKELETON's, as `part-ids` is:  the page counts and finds them, and the review routes take their marks
+   *     (`ReviewInbox.itemIds()`), with the bodies not loaded
+   */
+  updateChanges(): number {
+    let changed = 0
+    const changes = this.changes
+    let next = Math.max(0, ...changes.map((change) => Number(CHANGE_ID.test(change.id) ? change.id.slice(2) : 0))) + 1
+    const now = PlanTime.clockTime(this.now)
+    for (const change of changes) {
+      const data: Partial<EpicData<"epic-change">> = {}
+      if (!CHANGE_ID.test(change.id)) data.id = `ch${next++}`
+      if (!change.hasAttribute("at")) data.at = now
+      const answer = change.hasAttribute("answer") ? undefined : this.answerOf(change.getAttribute("item") ?? "")
+      if (answer) data.answer = answer
+      if (!Object.keys(data).length) continue
+      Markup.set<"epic-change">(change, data)
+      changed++
+    }
+    const waiting = new Map<Element, string[]>()
+    for (const change of this.changes) {
+      if (change.hasAttribute("accepted")) continue
+      const host = change.parentElement?.closest(CHANGE_HOSTS)
+      if (host) waiting.set(host, [...(waiting.get(host) ?? []), change.id])
+    }
+    for (const host of this.document.querySelectorAll(CHANGE_HOSTS)) {
+      const ids = waiting.get(host)?.join(" ")
+      if ((host.getAttribute("to-accept") ?? undefined) === ids) continue
+      Markup.set<"epic-section">(host, { toAccept: ids })
+      changed++
+    }
+    return changed
+  }
+
+  /** Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none. */
+  private answerOf(id: string): string | undefined {
+    const item = id ? this.findItem(id) : null
+    const answer = PlanMarkup.squeeze(item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
+    if (!answer) return undefined
+    return answer.length > ANSWER_MAX ? `${answer.slice(0, ANSWER_MAX - 1).trimEnd()}…` : answer
+  }
+
+  /**
+   * What's wrong with the change marks, as `check()` reports it:
+   * - one naming no item on the page (`item`)
+   * - one not stamped yet (no id):  written by hand, with no `epic` command since (`epic change <name>` stamps it)
+   */
+  private changeProblems(): string[] {
+    const problems: string[] = []
+    for (const change of this.changes) {
+      const item = change.getAttribute("item")
+      const words = PlanMarkup.squeeze(change.textContent ?? "").slice(0, 40)
+      if (item && !this.findItem(item)) problems.push(`change "${words}" names ${item.toUpperCase()}:  no such item`)
+      if (!CHANGE_ID.test(change.id))
+        problems.push(`change "${words}" has no id:  \`epic change <name>\` stamps it (any epic edit does)`)
+    }
+    return problems
+  }
+
+  /**
    * A new todo, "Follow up:  <title>", linking back to what it's from (`from`:  its label, link and what it is),
    * Owen's note in his words;  its id.
    */
@@ -2212,4 +2348,28 @@ function promptHTML(prompt: string | null | undefined): string {
     .filter((paragraph) => paragraph.trim())
     .map((paragraph) => `<p>${PlanMarkup.text(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
     .join("")
+}
+
+/** A change mark's tag (epic `epic-engine` P30). */
+const CHANGE_TAG = "epic-change"
+
+/**
+ * The hosts whose `to-accept` lists the change marks waiting inside them:  the body hosts of a split doc
+ * (`EpicParts`), the nearest one holding each mark.
+ */
+const CHANGE_HOSTS = [
+  "epic-overview > epic-section[kind='overview-part']",
+  "epic-section[kind='phases'] > epic-phase",
+  "epic-section > epic-item",
+  "epic-page > epic-section[kind='log']"
+].join(", ")
+
+/** The longest answer a change mark's chip keeps (`answer`):  a line or two. */
+const ANSWER_MAX = 160
+
+/** A change mark as `epic inbox` lists it:  its first words, then its question (`"todos fold into ..." (Q16)`). */
+function changeTitle(change: Element): string {
+  const words = PlanMarkup.squeeze(change.textContent ?? "")
+  const short = words.length > 50 ? `${words.slice(0, 49).trimEnd()}…` : words
+  return `"${short}" (${(change.getAttribute("item") ?? "?").toUpperCase()})`
 }

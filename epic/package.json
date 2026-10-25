@@ -255,6 +255,11 @@
       "types": "./dist-types/src/components/epic-run/index.d.ts",
       "default": "./src/components/epic-run/index.ts"
     },
+    "./components/epic-change": {
+      "spell-epic-source": "./src/components/epic-change/index.ts",
+      "types": "./dist-types/src/components/epic-change/index.d.ts",
+      "default": "./src/components/epic-change/index.ts"
+    },
     "./*": {
       "spell-epic-source": [
         "./src/*.ts",

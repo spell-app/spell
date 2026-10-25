@@ -1139,6 +1139,33 @@ describe("<epic-page> stages", () => {
     await expectAccessible(host)
   })
 
+  // epic `epic-engine` P30:  the change marks waiting for Accept, counted from the skeleton's lists and the page
+  test("the changes to accept:  an orange label before Send, linking to the first;  counted in the stage button's tooltip;  an Accept pressed takes one off", async () => {
+    const routes = new FakeRoutes()
+    await adoptClient(routes)
+    const html = stagedPage("overview")
+      .replace(`<epic-phase id="p-one"`, `<epic-phase id="p-one" to-accept="ch2"`)
+      .replace(
+        `<p slot="summary">Two sentences.</p>`,
+        `<p slot="summary">Two sentences.</p><epic-section id="o1" kind="overview-part" title="Why">` +
+          `<p><epic-change id="ch1" item="q1">changed</epic-change> and ` +
+          `<epic-change id="ch5" item="q1" accepted="2026-10-24 19:00">old</epic-change></p></epic-section>`
+      )
+    const host = await render(html)
+    const label = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="changes"]')
+    await vi.waitFor(() => expect(label()?.textContent?.trim()).toBe("2"))
+    expect([label()!.getAttribute("href"), label()!.getAttribute("color"), label()!.title]).toEqual([
+      "#ch1",
+      "orange",
+      "2 changes to accept:  the next, CH1"
+    ])
+    expect(plane(host).title).toContain("2 changes to accept")
+    routes.inbox.marks.ch1 = { action: "accept", at: new Date().toISOString() }
+    await ReviewClient.forPage().refresh()
+    await vi.waitFor(() => expect(label()?.getAttribute("href")).toBe("#ch2"))
+    expect(label()!.title).toBe("1 change to accept:  the next, CH2")
+  })
+
   test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {
     await adoptClient(new FakeRoutes())
     const host = await render(stagedPage("phases"))

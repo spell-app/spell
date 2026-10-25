@@ -370,6 +370,26 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
+   * The CHANGE MARKS waiting for Owen's Accept (`<epic-change>`, epic `epic-engine` P30), by id, in page order;
+   * `[]` for none.
+   * - the skeleton's lists first (each body host's `to-accept`, written by the epic tool):  a body not loaded counts
+   * - and any mark in the page itself, not accepted (a doc in one file has no lists)
+   * - less those Owen has pressed Accept on (its mark in the inbox):  pressed, it's done as far as he's concerned
+   * - read again on every layout change and inbox change
+   */
+  readonly changesToAccept = createMemo((): string[] => {
+    this.signals.layout.get()
+    this.review.reviewing()
+    const ids = new Set<string>()
+    for (const element of this.domElement.querySelectorAll(CHANGES_WAITING)) {
+      if (element.localName === CHANGE_TAG) ids.add(element.id)
+      else for (const id of (element.getAttribute("to-accept") ?? "").split(/\s+/)) if (id) ids.add(id)
+    }
+    const marks = this.review.client?.inbox.marks ?? {}
+    return [...ids].filter((id) => marks[id]?.action !== "accept")
+  })
+
+  /**
    * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):  its words, its tooltip,
    * and whether it was pressed (its mark, `stage`, in the inbox);  `undefined` once building, or not reviewed.
    * - the tooltip says what's still open:  the open questions ("2 questions open"), a reminder, never a lock
@@ -383,6 +403,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const accepted = mark?.action === "accept" && mark.stage === stage
     const texts = STAGE_TEXTS[stage]
     const open = this.domElement.querySelectorAll(OPEN_QUESTIONS).length
+    const changes = this.changesToAccept().length
     const unsent = client.unsentMarkCount + client.unsentCommentCount - (accepted && !client.isSent(mark) ? 1 : 0)
     const still = open
       ? this.translationForKey(open === 1 ? "openQuestionsOne" : "openQuestionsMany", { count: open })
@@ -392,6 +413,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       : [
           this.translationForKey(texts.tip),
           still,
+          changes ? this.translationForKey(changes === 1 ? "changesOne" : "changesMany", { count: changes }) : "",
           unsent ? this.translationForKey("acceptSends", { count: unsent }) : ""
         ]
           .filter(Boolean)
@@ -646,6 +668,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             </button>
           </h1>
           <span class={STATUS} part={this.partForName("status")}>
+            <Show when={this.changesToAccept().length}>{this.changesLabel()}</Show>
             <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
             <Show when={this.bedtime}>
               {(phases) => (
@@ -899,6 +922,30 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
     this.pickState(event.detail.state)
+  }
+
+  /**
+   * The changes to accept (epic `epic-engine` P30), before Send:  an orange label with how many, linking to the first
+   * (`#ch3`:  the runtime lands there, loading its part), so Owen finds them in a long page.
+   * - orange:  changed since he looked (T55);  gone once none waits
+   */
+  private changesLabel(): JSX.Element {
+    const ids = () => this.changesToAccept()
+    const words = () =>
+      this.translationForKey(ids().length === 1 ? "changesOne" : "changesMany", { count: ids().length })
+    return (
+      <ui-label
+        part={this.partForName("changes")}
+        basic=""
+        color="orange"
+        icon="pen"
+        href={`#${ids()[0]}`}
+        title={this.translationForKey("changesTip", { changes: words(), next: ids()[0]!.toUpperCase() })}
+        aria-label={words()}
+      >
+        {ids().length}
+      </ui-label>
+    )
   }
 
   /**
@@ -1389,6 +1436,12 @@ const STAGE_TEXTS = {
 
 /** The open questions:  what the stage button's tooltip counts (epic `epic-engine` P29). */
 const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[status="open"]'
+
+/** A change mark's tag (epic `epic-engine` P30). */
+const CHANGE_TAG = "epic-change"
+
+/** What says a change waits for Accept:  a body host's list (`to-accept`), or a mark in the page not accepted. */
+const CHANGES_WAITING = `[to-accept], ${CHANGE_TAG}[id]:not([accepted])`
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */
 const AIRPLANE_LAND = "/airplane land"

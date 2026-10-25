@@ -78,7 +78,7 @@ export const TODO = "todo"
  * The attributes a step label or a number depends on:  a change bumps the page's layout.
  * - `stage`, the page's own (epic `epic-engine` P29):  which sections show, and a phase's review pills
  */
-export const LAYOUT_ATTRIBUTES = ["status", "state", "title", "kind", "commits", "stage"]
+export const LAYOUT_ATTRIBUTES = ["status", "state", "title", "kind", "commits", "stage", "to-accept", "accepted"]
 
 /** `localStorage` key prefix of the commits toggle, per page path. */
 export const COMMITS_KEY = "epic-commits:"

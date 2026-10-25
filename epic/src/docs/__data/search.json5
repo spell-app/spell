@@ -258,6 +258,43 @@
       ]
     },
     {
+      "path": "epic-change.html",
+      "title": "<epic-change>",
+      "summary": "The <epic-change> element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&A chip, Accept and Reopen.",
+      "tag": "epic-change",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "4-attributes",
+          "title": "4. Attributes"
+        },
+        {
+          "id": "parts",
+          "title": "Parts and states",
+          "parent": 3
+        },
+        {
+          "id": "5-how-it-looks",
+          "title": "5. How it looks"
+        },
+        {
+          "id": "6-written-by",
+          "title": "6. Written by"
+        }
+      ]
+    },
+    {
       "path": "epic-choice-row.html",
       "title": "<epic-choice-row>",
       "summary": "One row of a choice page: a use site, and the box holding Claude's recommendation.",

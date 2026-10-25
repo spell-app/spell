@@ -688,6 +688,38 @@ easily"), `components/epic-update/`:
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.
 
+## Change marks
+
+A CHANGE MARK (epic `epic-engine` P30;  Q13, B), `components/epic-change/`:  the words an answer changed, marked in the
+text itself, where an `<epic-update>` only said a block changed.
+
+```html
+<p>Now there is <epic-change item="q16">one list, Caveats, and todos fold into it</epic-change>.</p>
+```
+
+- Claude writes it by hand, with `item` alone, around the changed or new words, as it rewrites the Overview or a phase
+  from an answer:  in a part file, or in the HTML a command takes (`update ... --changes`, `details --file`).
+  - the words, not the paragraph (Q13's option C lost):  one mark per change
+  - `item`:  the question (or any item) whose answer made it, any case;  `check` fails one naming no item
+- The tool STAMPS it on every edit (`PlanDoc.updateChanges()`, from `updateStates()`):
+  - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
+  - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
+    has one, so the chip still says why months later
+  - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
+    `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
+- Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting, in the
+  skeleton:  `to-accept="ch1 ch3"`.  The page counts and finds them with the body not loaded;  the review routes take
+  their marks from it (`ReviewInbox.itemIds()`).
+- On the page:  the words on an orange ground, a folded chip naming the item (`Q16`;  unfolded, its title and the
+  answer), Accept and Reopen under the chip on hover while reviewed (`<epic-review buttons="change">`).
+  - Accept:  `{ action: "accept" }` under its id;  `inbox apply` writes `accepted="2026-10-24 19:02"`:  no orange,
+    the chip stays for good, off its host's `to-accept`
+  - Reopen:  `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its
+    answer kept), and the mark stays orange:  answered again, Claude rewrites the words with a new mark
+  - the page header counts the waiting ones (an orange label before Send, landing on the next), and so does the stage
+    button's tooltip (Accept Overview, Accept Phases)
+- The `<epic-update>` blocks written before stay as they are.  No migration step:  a new element, nothing old changes.
+
 ## Migrations
 
 Named, dated, idempotent steps that bring an older page's markup up to today's, by page KIND

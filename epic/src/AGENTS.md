@@ -120,6 +120,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `<epic-review>`:  the review controls drawn by items, sections (Overview parts), phases and the Overview
         - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-overview>` (keyed `summary`, on its title row:  epic
           `epic-engine` I55;  `<epic-summary>` drew them under its lede before)
+      - `<epic-change>` (epic `epic-engine` P30):  a change mark's Accept and Reopen, keyed by its id (`ch3`),
+        its own `<epic-review buttons="change">` under its chip
       - `<epic-new-item>`:  the page's toolbar button, and the Todos and Questions sections' New todo / question
       - `<epic-option>`'s Choose pill
       - `<epic-test-run>` (epic `epic-engine` P4):  a test run's answers (`answerTest()`), screenshots (`saveShot()`)
@@ -1332,6 +1334,12 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - A question's pick with a remark is ONE revisit mark carrying `pick`:
       `{ action: "revisit", when, note, pick }`.
     - It's talked over, never applied by itself.
+  - A CHANGE MARK's buttons (`<epic-change id="ch3">`, epic `epic-engine` P30):  Accept or Reopen, under its id
+    - `{ action: "accept" }` (no `stage`:  the header's stage button's carries one) or `{ action: "reopen" }`;
+      only a change takes them, and a change takes nothing else
+    - markable while its host's `to-accept` lists it (the skeleton's), or it's in the page not `accepted`
+    - `epic inbox apply` makes Accept `accepted` (the orange goes, the chip stays) and reopens the question for
+      Reopen:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Change marks"
   - A new todo or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.

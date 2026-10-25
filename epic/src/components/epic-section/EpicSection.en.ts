@@ -85,6 +85,14 @@ export const epicSectionVocabulary = {
       format: "ids",
       description: "The ids inside its part file:  a link to one loads the body first, then lands."
     },
+    {
+      name: "to-accept",
+      kind: "string",
+      format: "ids",
+      description:
+        "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
+        "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+    },
     FOLD_OPEN_ATTRIBUTE
   ],
   events: [

@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  502bc3c60661de7b
+// sources:  c2ad7625ce253e8c
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -11,6 +11,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details"]},
   "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite"]},
   "epic-cards": {"folder":"epic-cards","skeleton":{"height":"2em"},"attributes":["saga"]},
+  "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","accepted"]},
   "epic-choice-row": {"folder":"epic-choice-rows","attributes":["name","file","line","purpose","note","current","recommended"]},
   "epic-choice-rows": {"folder":"epic-choice-rows","skeleton":{"height":"8em"},"attributes":["stacked","no-file","blank","noun","reorder"]},
   "epic-choices": {"folder":"epic-choices","attributes":["chosen"]},
@@ -21,7 +22,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-event": {"folder":"epic-event","attributes":["at","icon"]},
   "epic-field": {"folder":"epic-phase","attributes":["name","label"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","bedtime","overnight","calm","failed","source","part-ids","commits","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","bedtime","overnight","calm","failed","source","part-ids","commits","to-accept","open"]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
   "epic-more": {"folder":"epic-answer","attributes":[]},
@@ -33,14 +34,14 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
   "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","title","status","estimate","source","part-ids","commits","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","title","status","estimate","source","part-ids","commits","to-accept","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
-  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","open"]},
+  "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","manual"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},

@@ -117,7 +117,9 @@ describe("Definitions.all", () => {
       "epic-aside",
       "epic-code",
       // a link to a saga, an epic, a phase or an item (P15 of `epic-workflow`)
-      "epic-link"
+      "epic-link",
+      // a change mark, around the words an answer changed (epic `epic-engine` P30)
+      "epic-change"
     ])
     expect({
       item: placesOf("epic-item", "epic-question"),

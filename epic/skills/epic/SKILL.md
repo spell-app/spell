@@ -418,7 +418,14 @@ The filling goes to a background agent, `<name>-plan-doc`, as if Owen had typed 
          the text says who, the block shows when.
        - E.g. `--summary "Tab labelled App/UI, right after App"`.
      - Then `update <name>#P<N> --changes ...` (or `--goal` ...), to make the fields say the new plan.
-   - Changed a prose block:  put an `<epic-update>` right AFTER it.
+   - An ANSWER rewrote the Overview's or a phase's words (epic `epic-engine` P30;  Q13, B):  mark the changed words
+     themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them (no `<epic-update>`).
+     - The words, not the block:  one mark per change, the question's id alone.
+     - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists what waits;
+       `epic lint` fails one not stamped, or naming no item.
+     - Owen accepts each on the page (the orange goes, the `Q16` chip stays) or reopens its question;
+       `inbox apply` writes both.  Rules:  `plan-doc.md`, "Change marks".
+   - Changed a prose block any other way:  put an `<epic-update>` right AFTER it.
 
      ```html
      <epic-update at="YYYY-MM-DD HH:MM" summary="what changed, one line" phase="N"><p>why</p></epic-update>
@@ -1204,6 +1211,8 @@ commits <name> --backfill                           every phase / item commit (`
 update <name> --standing [on|off]                   a standing epic:  each phase merges on its own, never done
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
+change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list those
+                                                    waiting for Owen's Accept;  --for:  the item of marks naming none
 log <name> "text"                                   timestamped line in the doc's log
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview

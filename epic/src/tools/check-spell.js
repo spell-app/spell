@@ -423,7 +423,8 @@ function inspectPage(nav) {
   const undefinedTags = Object.keys(elements).filter((tag) => !customElements.get(tag))
   // the toolbar's entries:  the top-level sections (an epic page's blocks), or the h2s heading a sticky section
   const top = "main > ui-section[id], main epic-page > :is(epic-overview, epic-section, epic-phase)[id]"
-  const sections = [...document.querySelectorAll(top)]
+  // only what SHOWS:  an epic page's stage hides sections (epic `epic-engine` P29), and the toolbar lists none of them
+  const sections = [...document.querySelectorAll(top)].filter((section) => section.getClientRects().length > 0)
   const topLevel = (
     sections.length ? sections : [...document.querySelectorAll("main section.s2 > ui-sticky > h2[id]")]
   ).map((element) => element.id)
