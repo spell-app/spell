@@ -28,10 +28,10 @@
   :host {
     display: block;
     /*
-     * Its tables stack by their OWN width (a narrow docs column), unless the page says `page`
-     * (`<ui-root stack-with="page">`):  the table's own region token, as a page would set it.
+     * Its tables NEVER stack, whatever the page says (`--ui-stack-with`):  too wide for their column,
+     * they scroll sideways in `<ui-table>`'s own scroller.  The table's own region token, as a page would set it.
      */
-    --ui-table-stack-by: var(--ui-stack-with, container);
+    --ui-table-stack-by: none;
   }
 
   .ui.tokens {
@@ -94,7 +94,7 @@
     line-height: var(--ui-line-height);
   }
 
-  /* Default cell:  the swatch beside the value;  long values wrap anywhere (`light-dark(oklch(...), ...)`). */
+  /* Default cell:  the swatch beside the value;  long values wrap between words (`light-dark(oklch(...), ...)`). */
   .default {
     display: inline-flex;
     align-items: center;
@@ -118,7 +118,11 @@
     padding: 0.1em 0.3em;
     border-radius: var(--ui-radius-s);
     background: var(--_ui-docs-tokens-code-background);
-    overflow-wrap: anywhere;
+    /*
+     * between words, a word longer than its cell anywhere;  NOT `anywhere`, which let a phone's table squeeze the
+     * Default column to two letters a line:  the table never stacks, it scrolls sideways (epic `debut` J64)
+     */
+    overflow-wrap: break-word;
   }
   /* Names stay whole:  a break at every hyphen made a 3-line name of a narrow first column. */
   code.name {

@@ -10409,7 +10409,7 @@
       "name": "::part(scroller)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-root>`:  With `width` / `height` / `fixed`:  the region around the content that scrolls (a tab stop, named by the host's `aria-label`, else \"Content\").\n- `<ui-table>`:  Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`."
+        "value": "Part of:\n\n- `<ui-root>`:  With `width` / `height` / `fixed`:  the region around the content that scrolls (a tab stop, named by the host's `aria-label`, else \"Content\").\n- `<ui-table>`:  Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, and sideways, its height uncapped, while a table that doesn't stack is wider than it."
       }
     },
     {

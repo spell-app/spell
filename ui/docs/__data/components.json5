@@ -29763,7 +29763,7 @@
         {
           "name": "unstackable",
           "kind": "keyOnly",
-          "description": "Never stacks rows into blocks, even on a viewport below 768px."
+          "description": "Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead."
         },
         {
           "name": "padding",
@@ -29818,7 +29818,7 @@
             "container",
             "none"
           ],
-          "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`)."
+          "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`)."
         },
         {
           "name": "scrolling",
@@ -30060,7 +30060,7 @@
       "parts": [
         {
           "name": "scroller",
-          "description": "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`."
+          "description": "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, and sideways, its height uncapped, while a table that doesn't stack is wider than it."
         }
       ],
       "states": [
@@ -36511,6 +36511,11 @@
           "key": "setToken",
           "text": "Set {token}",
           "description": "Accessible name of a token's input."
+        },
+        {
+          "key": "tryTable",
+          "text": "Try {table}",
+          "description": "Accessible name of a playground's table, when it scrolls:  apart from the same group's table elsewhere."
         },
         {
           "key": "noTokens",

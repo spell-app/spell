@@ -58,8 +58,8 @@ import apiCSS from "./UIDocsApi.css?inline"
  *     This element only FLASHES the row the hash names (`landedId`), when its tables are drawn and on `hashchange`.
  * - Descriptions:  `` `code` `` spans become `<code>` (`InlineCode`), as text nodes, never HTML.
  * - Values:  compact `<ui-labels size="mini">`;  hues painted in their own colour, a numeric run as one label.
- * - Phone width:  every table is `stackable` by its OWN width (`stack-by="container"`):
- *   rows become blocks in a narrow column, whatever the viewport.
+ * - NEVER stacks (`stack-by="none"`;  Owen, 2026-10-25:  a table never stacks, epic `debut` J64):
+ *   too wide for its column (phone width), it scrolls sideways in `<ui-table>`'s own scroller, a focusable region.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet, which never reaches a table inside this shadow root.
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
@@ -256,14 +256,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
             {this.inline(section.note ? this.translationForKey(section.note) : "")}
           </p>
         </Show>
-        <ui-table
-          part={this.partForName("table")}
-          celled=""
-          padding="compact"
-          definition=""
-          stackable=""
-          stack-by="container"
-        >
+        <ui-table part={this.partForName("table")} celled="" padding="compact" definition="" stack-by="none">
           <table aria-label={owner.label(this.translationForKey(section.id))}>
             <thead>
               <tr>

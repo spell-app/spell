@@ -184,12 +184,14 @@ describe("<ui-docs-api tag>", () => {
     expect([...tablesOf(other).keys()]).toEqual(["Parts"])
   })
 
-  it("draws Fomantic's compact celled definition tables, stacking by their own width", async () => {
+  // a table never stacks (epic `debut` J64):  too wide, it scrolls sideways in `<ui-table>`'s own box
+  it("draws Fomantic's compact celled definition tables, never stacked", async () => {
     const host = await render(`<ui-docs-api tag="x-or"></ui-docs-api>`)
     const table = host.shadowRoot!.querySelector("ui-table")!
-    for (const name of ["celled", "definition", "stackable"]) expect(table.hasAttribute(name)).toBe(true)
+    for (const name of ["celled", "definition"]) expect(table.hasAttribute(name)).toBe(true)
+    expect(table.hasAttribute("stackable")).toBe(false)
     expect(table.getAttribute("padding")).toBe("compact")
-    expect(table.getAttribute("stack-by")).toBe("container")
+    expect(table.getAttribute("stack-by")).toBe("none")
     const native = table.querySelector("table")!
     expect(native.classList.contains("definition")).toBe(true)
     expect(native.getAttribute("aria-label")).toBe("Parts of <x-or>")

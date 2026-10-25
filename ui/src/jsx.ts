@@ -30444,7 +30444,7 @@ export interface UITableAttributes {
    */
   "prop:appearance"?: string
   /**
-   * Never stacks rows into blocks, even on a viewport below 768px.
+   * Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.
    * - takes:  flag (present / absent)
    */
   unstackable?: boolean | ""
@@ -30496,7 +30496,7 @@ export interface UITableAttributes {
    */
   "prop:stackable"?: boolean | "" | "tablet"
   /**
-   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
+   * What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).
    * - takes:  `viewport` · `container` · `none`
    */
   "stack-by"?: "viewport" | "container" | "none"

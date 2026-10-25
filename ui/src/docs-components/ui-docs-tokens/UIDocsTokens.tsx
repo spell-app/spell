@@ -39,9 +39,8 @@ import tokensCSS from "./UIDocsTokens.css?inline"
  *   - An empty input removes the token.
  * - Events:  the inner `<ui-input>`s' `ui-input` / `ui-changed` stop here;
  *   the element's own `ui-input` (`{ token, value }`) and `ui-reset` (`{ tokens }`) say what the playground did.
- * - Phone width:  every table is `stackable` by its OWN width
- *   (the sheet sets `--ui-table-stack-by: container` on the DOM element),
- *   or by the screen's when the page-wide `--ui-stack-with` says `page` (`<ui-root stack-with="page">`).
+ * - NEVER stacks (the sheet sets `--ui-table-stack-by: none` on the DOM element;  epic `debut` J64):
+ *   too wide for its column (phone width), a table scrolls sideways in `<ui-table>`'s own scroller, a focusable region.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet,
  *   which never reaches a table inside this shadow root (as in `<ui-docs-api>`).
@@ -343,7 +342,13 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
   private table(table: TokenTable): JSX.Element {
     const isDescribed = table.rows.some((row) => row.description)
     const grid = (
-      <ui-table part={this.partForName("table")} celled="" padding="compact">
+      <ui-table
+        part={this.partForName("table")}
+        celled=""
+        padding="compact"
+        // too wide, it scrolls in a region (`<ui-table>`):  a playground's apart from the same group's table elsewhere
+        aria-label={this.tryLabel(table)}
+      >
         <table>
           <Show when={table.title ?? this.caption}>
             <caption class={table.title ? VISUALLY_HIDDEN_CLASS : undefined}>{table.title ?? this.caption}</caption>
@@ -380,6 +385,16 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
         {grid}
       </section>
     )
+  }
+
+  /**
+   * A playground's table's name, `Try Typography`:  the region it scrolls in when too wide is named by it,
+   * apart from the same group's table in a plain `<ui-docs-tokens>` (the theming page has both).
+   * - Without a playground:  none, so the region takes the table's caption.
+   */
+  private tryLabel(table: TokenTable): string | undefined {
+    const title = table.title ?? this.caption
+    return this.playground && title ? this.translationForKey("tryTable", { table: title }) : undefined
   }
 
   /** One token's row:  name, default (and swatch), description (`isDescribed`), and the playground's input. */

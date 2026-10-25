@@ -31392,7 +31392,7 @@
             },
             {
               "name": "unstackable",
-              "description": "Never stacks rows into blocks, even on a viewport below 768px.",
+              "description": "Never stacks rows into blocks, even on a viewport below 768px:  wider than its box, it scrolls sideways in it instead.",
               "type": {
                 "text": "boolean"
               },
@@ -31424,7 +31424,7 @@
             },
             {
               "name": "stack-by",
-              "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).",
+              "description": "What `stackable` measures:  the `viewport` (Fomantic's way, the default), the table's own width (`container`:  a table in a narrow column of a wide screen), or nothing (`none`:  it never stacks, as `unstackable`, and scrolls sideways when too wide).  Also a token for a whole region or page:  `--ui-table-stack-by: container` (or `none`);  the attribute wins.  Neither:  the page-wide `--ui-stack-with` (`<ui-root stack-with>`;  `page` ~== `viewport`).",
               "type": {
                 "text": "\"viewport\" | \"container\" | \"none\""
               },
@@ -31611,7 +31611,7 @@
           "cssParts": [
             {
               "name": "scroller",
-              "description": "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`."
+              "description": "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, and sideways, its height uncapped, while a table that doesn't stack is wider than it."
             }
           ],
           "cssStates": [

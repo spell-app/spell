@@ -176,15 +176,20 @@ describe("<ui-docs-tokens family>", () => {
     }).toEqual({ header: "th", default: "0.5em", code: "radius" })
     expect(host.shadowRoot!.querySelector("[part~=search]")).toBeNull()
     expect(host.shadowRoot!.querySelector("[part~=playground]")).toBeNull()
+    expect(host.shadowRoot!.querySelector("ui-table")!.hasAttribute("aria-label")).toBe(false)
   })
 
-  it("stacks its tables by their own width, unless the page-wide token says `page`", async () => {
-    const host = await render(`<ui-docs-tokens family="x-button"></ui-docs-tokens>`)
+  // a table never stacks (epic `debut` J64):  too wide, it scrolls sideways in `<ui-table>`'s own box
+  it("NEVER stacks its tables, whatever the page says;  too narrow, they scroll sideways in their own box", async () => {
+    const host = await render(`<div style="width: 160px"><ui-docs-tokens family="x-button"></ui-docs-tokens></div>`)
     const table = host.shadowRoot!.querySelector("ui-table")!
-    expect(getComputedStyle(table).getPropertyValue("--ui-table-stack-by").trim()).toBe("container")
+    expect(getComputedStyle(table).getPropertyValue("--ui-table-stack-by").trim()).toBe("none")
     expect(tablesOf(host)[0]!.classList.contains("table")).toBe(true) // the table sheet reaches it in here
+    expect(getComputedStyle(tablesOf(host)[0]!.querySelector("td")!).display).toBe("table-cell")
+    const scroller = table.shadowRoot!.querySelector("[part~=scroller]")!
+    expect([scroller.classList.contains("sideways"), scroller.getAttribute("role")]).toEqual([true, "region"])
     host.style.setProperty("--ui-stack-with", "page")
-    expect(getComputedStyle(table).getPropertyValue("--ui-table-stack-by").trim()).toBe("page")
+    expect(getComputedStyle(table).getPropertyValue("--ui-table-stack-by").trim()).toBe("none")
   })
 
   it("gives colour rows a LIVE swatch:  the default, then whatever the page sets", async () => {
@@ -304,6 +309,11 @@ describe("<ui-docs-tokens playground>", () => {
     expect(inputs[0]!.getAttribute("placeholder")).toBe("0.5em")
     expect(inputs[0]!.getAttribute("aria-label")).toBe("Set --x-button-radius")
     expect(host.shadowRoot!.querySelector("[part~=reset]")!.hasAttribute("disabled")).toBe(true)
+  })
+
+  it("names its table apart from a plain table of the same tokens:  the region it scrolls in takes the name", async () => {
+    const host = await playground(`caption="Button tokens"`)
+    expect(host.shadowRoot!.querySelector("ui-table")!.getAttribute("aria-label")).toBe("Try Button tokens")
   })
 
   it("starts a colour input at the token's current colour", async () => {
