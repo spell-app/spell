@@ -12,15 +12,15 @@
 @layer ui.components.epic-status.variations;
 
 @layer ui.components.epic-status.variations {
+  /* a white card, its state's colour in its rule and words only (Owen, 2026-10-25:  calmer cards) */
   .status {
-    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 55%, transparent);
+    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 35%, transparent);
   }
   .status.underway {
-    --_epic-card-fill: var(--ui-blue-background, light-dark(#e8f1fc, #14243a));
     --_epic-card-accent: var(--ui-blue-text, var(--ui-blue, #1a67e0));
   }
   .status.done {
-    --_epic-card-fill: var(--ui-green-background, light-dark(#e6f6ec, #13301f));
+    --_epic-card-fill: color-mix(in oklab, var(--ui-green, #21ba45) 5%, light-dark(#fff, Canvas));
     --_epic-card-accent: var(--ui-green-text, var(--ui-green, #00853a));
   }
   /* noted:  Owen's choice recorded, nothing built yet:  OUTLINED green on the page's surface, the fill rule's
@@ -53,12 +53,9 @@
     margin-bottom: var(--epic-part-gap, 8px);
   }
   :host(:state(in-thread)) {
-    --_epic-thread-fill: var(
-      --epic-thread-fill,
-      color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2))
-    );
+    --_epic-thread-fill: var(--epic-thread-fill, color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent));
     margin-top: 0;
-    padding: 3px 6px;
+    padding: 4px 6px;
     background: var(--_epic-thread-fill);
   }
   :host(:state(thread-end)) {
@@ -68,16 +65,17 @@
   }
   .status.line {
     --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 35%, transparent);
-    padding: 3px 10px;
-    border-radius: 6px;
-    background: color-mix(in oklab, var(--_epic-card-accent) 8%, var(--ui-surface, Canvas));
+    padding: 4px 10px;
+    /* rounded, not a pill:  a line that wraps stays a tidy box */
+    border-radius: 12px;
+    background: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
     font-size: 0.9em;
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
   /* noted:  recorded, nothing built:  outlined, on the page's ground (the fill rule) */
   .status.line.noted {
-    background: var(--ui-surface, Canvas);
+    background: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
   }
   .mark,
   .steps,

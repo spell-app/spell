@@ -22,9 +22,10 @@
     margin-top: 10px;
   }
 
+  /* history:  quiet, a dashed rule round it, no fill (Owen, 2026-10-25:  calmer cards) */
   .original {
-    border-radius: 12px;
-    background: var(--epic-aside, var(--ui-accent-background, light-dark(#faf5ea, #2c2152)));
+    border: 1px dashed var(--epic-rule, var(--ui-border-color, light-dark(#d9d5e6, #3a3a44)));
+    border-radius: 10px;
   }
   .toggle {
     display: flex;
@@ -35,8 +36,8 @@
     border: none;
     border-radius: 12px;
     background: none;
-    color: var(--ui-text-dark, inherit);
-    font: 600 1em / 1.35 var(--ui-font-family-heading, inherit);
+    color: var(--ui-text-muted, GrayText);
+    font: 600 0.9em / 1.35 var(--ui-font-family-heading, inherit);
     text-align: start;
     cursor: pointer;
   }

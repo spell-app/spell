@@ -1,10 +1,12 @@
 /*
  * `<epic-answer>` (EpicAnswer.tsx), `<epic-reply>` (EpicReply.tsx), `<epic-more>` (EpicMore.tsx):
  * an item's answer, reply and More Details cards.
- * ONE card shape (a heading band, then the slotted body), three fills:
- * - answer:  warm (the brand's ivory, as the rail:  `--ui-brown-*`):  Owen's voice
- * - reply:  violet (Claude's), or ivory (Owen's, `.owen`:  his voice, as the answer)
- *   - its band a flex row, the date at its right (`.dated`)
+ * ONE card shape (a heading line, then the slotted body), calm (Owen, 2026-10-25:  "answer/reply cards are really
+ * ugly, try to spiff them up"):  a white card, a 1px rule and one line of shadow, on the drawer's light body
+ * - the answer:  a quiet line, no card (I111)
+ * - a reply:  who said it first, as a small round mark and their name;  the date quiet at the right (`.dated`)
+ *   - Claude's:  white, its mark Claude's terracotta
+ *   - Owen's (`.owen`):  his violet, faint, as his comment box;  its mark violet
  * - More Details:  plain, its heading a small muted eyebrow that folds it
  * - every card folds, the folded box `hidden="until-found"`:
  *   - the answer, a reply and a status card by their band, the chevron first
@@ -21,8 +23,9 @@
 @layer ui.components.epic-answer.types {
   :host {
     --_epic-card-ink: var(--ui-text-color, CanvasText);
-    --_epic-card-fill: var(--ui-brown-background, light-dark(#f7efe2, #2c2152));
-    --_epic-card-accent: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    /* a white card on the drawer;  in the dark, a step up from the page */
+    --_epic-card-fill: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
+    --_epic-card-accent: var(--ui-text-muted, GrayText);
     display: block;
     margin-top: var(--epic-part-gap, 8px);
   }
@@ -38,12 +41,9 @@
    * - its ground:  `--epic-thread-fill`, which the item's details set (inherited through the slot), else the same mix
    */
   :host(:state(in-thread)) {
-    --_epic-thread-fill: var(
-      --epic-thread-fill,
-      color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2))
-    );
+    --_epic-thread-fill: var(--epic-thread-fill, color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent));
     margin-top: 0;
-    padding: 3px 6px;
+    padding: 4px 6px;
     background: var(--_epic-thread-fill);
   }
   :host(:state(thread-start)) {
@@ -66,9 +66,10 @@
     padding: 2px 4px;
   }
 
-  /* Claude's newest reply, not seen yet:  an orange edge (changed since you looked), and NEW in its band */
+  /* Claude's newest reply, not seen yet:  an orange rule (changed since you looked), and NEW by its name */
   .reply.new {
-    border-inline-start: 3px solid var(--ui-orange, #f2711c);
+    border-color: color-mix(in oklab, var(--ui-orange, #f2711c) 55%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-orange, #f2711c) 25%, transparent);
   }
   .reply.new .who {
     flex: 0 1 auto;
@@ -76,8 +77,8 @@
   .new-tag {
     flex: none;
     align-self: center;
-    padding: 0 5px;
-    border-radius: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
     background: var(--ui-orange, #f2711c);
     color: var(--ui-orange-on, #fff);
     font-size: 0.75em;
@@ -91,20 +92,22 @@
   .reply,
   .more,
   .status {
-    --_epic-card-band: color-mix(in oklab, var(--_epic-card-accent) 12%, var(--_epic-card-fill));
-    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 24%, transparent);
+    /* no band:  the heading sits on the card;  one quiet rule round it, one line of shadow under it */
+    --_epic-card-band: transparent;
+    --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));
     overflow: hidden;
     border: 1px solid var(--_epic-card-rule);
     border-radius: 10px;
     background: var(--_epic-card-fill);
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.05), rgb(0 0 0 / 0.35));
     color: var(--_epic-card-ink);
   }
   .header {
-    padding: 4px 10px;
+    padding: 6px 10px 2px;
     background: var(--_epic-card-band);
-    /* the accent, deepened toward the ink:  4.5:1 on the band in both schemes (axe) */
-    color: color-mix(in oklab, var(--_epic-card-accent) 70%, var(--_epic-card-ink));
-    font-size: 0.9em;
+    /* the accent, deepened toward the ink:  4.5:1 on the card in both schemes (axe) */
+    color: color-mix(in oklab, var(--_epic-card-accent) 75%, var(--_epic-card-ink));
+    font-size: 0.85em;
     font-weight: 600;
     line-height: 1.4;
     overflow-wrap: anywhere;
@@ -123,9 +126,27 @@
   .date {
     flex: none;
     margin-inline-start: auto;
+    color: var(--ui-text-muted, GrayText);
+    font-size: 0.92em;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  /* who said it:  a small round mark with their initial, before their name (`--_epic-who-mark`, `--_epic-who-initial`) */
+  .reply .who::before {
+    content: var(--_epic-who-initial, "C");
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin-inline-end: 6px;
+    border-radius: 50%;
+    background: var(--_epic-who-mark);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: 1px;
   }
   .header[hidden] {
     display: none;
@@ -134,7 +155,7 @@
     font-weight: 400;
   }
   .body {
-    padding: 6px 10px 8px;
+    padding: 4px 10px 10px;
   }
   /* folded by its band (`fold.button()`, `Fold.css`):  `until-found` keeps it findable, so drawn as nothing */
   [hidden="until-found"] {
@@ -227,17 +248,20 @@
 }
 
 @layer ui.components.epic-answer.variations {
+  /* Claude's:  white, its name and mark Claude's terracotta */
   .reply {
-    --_epic-card-fill: var(--ui-violet-background, light-dark(#eaeaff, #2a2747));
+    --_epic-who-mark: light-dark(#c96442, #d97757);
+    --_epic-card-accent: light-dark(#a8502f, #e59a7c);
+  }
+  /* Owen's voice:  his violet, faint, as his comment box (I111) */
+  .reply.owen {
+    --_epic-who-initial: "O";
+    --_epic-who-mark: var(--ui-violet, #6550ca);
+    --_epic-card-fill: color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, Canvas));
+    --_epic-card-rule: color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent);
     --_epic-card-accent: var(--ui-violet-text, var(--ui-violet, #6550ca));
   }
-  /* Owen's voice:  the ivory of his answer card and note box (decision Q20) */
-  .reply.owen {
-    --_epic-card-fill: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
-    --_epic-card-accent: var(--ui-brown-text, light-dark(#534323, #eaddc4));
-  }
   .more {
-    --_epic-card-fill: var(--ui-surface, Canvas);
-    --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
+    --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));
   }
 }

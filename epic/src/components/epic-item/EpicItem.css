@@ -333,7 +333,8 @@
    *   deeper than Owen's ivory cards, so his reply still reads as a card on it
    */
   .details {
-    --epic-thread-fill: color-mix(in oklab, var(--ui-brown-text, #534323) 9%, var(--ui-brown-background, #f7efe2));
+    /* faint grey, no brown (Owen, 2026-10-25:  calmer cards):  white cards stand on it */
+    --epic-thread-fill: color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent);
     display: flex;
     flex-direction: column;
     padding: 6px 6px 10px var(--_epic-item-indent);

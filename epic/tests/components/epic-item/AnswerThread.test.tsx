@@ -207,7 +207,9 @@ describe("<epic-item>'s thread, drawn", () => {
       claudes: claudes.matches(":state(new)"),
       tag: tag()?.textContent
     }).toEqual({ owens: false, claudes: true, tag: "NEW" })
-    expect(getComputedStyle(claudes.shadowRoot!.querySelector("[part~='base']")!).borderLeftWidth).toBe("3px")
+    // its card's rule orange (I116:  a 1px orange rule and ring, where a 3px edge was), not Owen's
+    const rule = (reply: Element) => getComputedStyle(reply.shadowRoot!.querySelector("[part~='base']")!).borderTopColor
+    expect(rule(claudes)).not.toBe(rule(owens))
     claudes.scrollIntoView()
     await expect.poll(() => claudes.matches(":state(new)"), { timeout: 4000 }).toBe(false)
     expect(JSON.parse(localStorage.getItem(SEEN_KEY)!)).toEqual({ q16: "2026-10-24 15:34" })
