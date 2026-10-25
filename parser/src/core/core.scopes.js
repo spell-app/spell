@@ -277,11 +277,18 @@
       ]
     },
     {
-      path: "type:TwoSidedView",
-      super: "type:View"
+      path: "type:TwoSidedView", line: [4, 23],
+      super: "type:View",
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/TwoSidedView.spell"
     },
-    { path: "type:TwoSidedView/property:direction" },
-    { path: "type:TwoSidedView/enumeration:Directions" },
+    {
+      path: "type:TwoSidedView/property:direction", line: 7,
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/TwoSidedView.spell"
+    },
+    {
+      path: "type:TwoSidedView/enumeration:Directions", line: 7,
+      uri: "file:///Users/owen/www/spell.worktrees/elemental-spell/spell-parser/src/core/templates/TwoSidedView.spell"
+    },
     {
       path: "type:ViewableList",
       super: "type:List"

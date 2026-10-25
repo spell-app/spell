@@ -20,8 +20,8 @@ import {
  *   - `Deck`:  a template with nothing inside, a list template, bodies on a tag's own line.
  *   - `Scores`:  a page template, an app, a test.
  *   - `DoubleSidedView`:  o1's two sided view, renamed:  two sided view is spell's own template now (J35).
- *   - `Solitaire`:  o1's app, page template and page, without what later phases build (its menus, P10;
- *     the original target, P9;  `<for each>` in a drawing, C28).
+ *   - `Solitaire`:  o1's app, page template and page, its game menu (P10) as its menu bar, a toolbar and a right
+ *     click's menu;  without what later phases build (the original target, P9;  `<for each>` in a drawing, C28).
  * - A spellx drawing names components bare, `<text>`;  its twin, `<ui-text>`:  the tests' pack says which
  *   (`registerTestComponentPack()`;  spell-app registers Spell UI's).
  *   - `Carta.es`, `Ficha.es`:  Spanish, the card and a tile with an app.
@@ -260,16 +260,98 @@ describe("spellx:  a third style of spell", () => {
       expect(unclosed.errors).toEqual(['2:1 <acción> nunca se cierra:  termínalo con "</>"'])
     })
 
-    test("a tag spellx can't read yet:  a menu (P10)", () => {
-      const { errors } = compiledText([
-        '<spell-app "game">',
+    test("a menu:  one line naming its actions, the app's menu bar a line ending its body (P10)", () => {
+      const { code, errors } = compiledText([
+        '<spell-app "game" menu-bar="GameMenu">',
+        '\t<action "go">',
+        "\t\tprint 1",
+        "\t</action>",
         '\t<menu "GameMenu">',
         '\t\t<action "go" />',
+        '\t\t<action "-" />',
+        '\t\t<action "undo" />',
         "\t</menu>",
         "</spell-app>"
       ])
-      expect(errors[0]).toBe("2:1 <menu> can't be read yet:  it comes with a later version of spellx")
+      expect(errors).toEqual([])
+      expect(code).toContain('static menuBar = "GameMenu"')
+      expect(code).toContain('core.describeMenu(Game, "GameMenu", { items: ["go", "-", "undo"] })')
+      // Spanish:  the app's own undo by its Spanish name
+      const es = compiledText(
+        [
+          '<encanto-aplicación "juego" barra-de-menú="MenúDelJuego">',
+          '\t<acción "ir">',
+          "\t\timprimir 1",
+          "\t</acción>",
+          '\t<menú "MenúDelJuego">',
+          '\t\t<acción "ir" />',
+          '\t\t<acción "deshacer" />',
+          "\t</menú>",
+          "</encanto-aplicación>"
+        ],
+        { path: "/prueba.es.spellx" }
+      )
+      expect(es.errors).toEqual([])
+      expect(es.code).toContain('static menuBar = "MenúDelJuego"')
+      expect(es.code).toMatch(/core\.describeMenu\(\w+, "MenúDelJuego", \{ items: \["ir", "undo"\] \}\)/)
     })
+  })
+
+  // epic `elemental-spell` P12:  what the converter writes, `SX.SpellxWriter`
+  describe("a <spell> chunk:  code spell, as written", () => {
+    test("its lines read where the chunk is:  a member in a template, a function and its call at the top", () => {
+      const spellx = compiledText([
+        '<spell-thing "card">',
+        '\t<property "suit" one-of="clubs, hearts" />',
+        "\t<spell>",
+        '\t\t- "values" as one of 1, 2',
+        "\t</spell>",
+        "</spell-thing>",
+        "",
+        "<spell>",
+        "\tto shout (word as text)",
+        "\t\tprint word",
+        '\tshout "hi"',
+        "</spell>"
+      ])
+      const spell = compiledText(
+        [
+          'a "card" is a thing where:',
+          '\t- its "suit" is one of clubs, hearts',
+          '\t- "values" as one of 1, 2',
+          "",
+          "to shout (word as text)",
+          "\tprint word",
+          'shout "hi"'
+        ],
+        { path: "/test.spell" }
+      )
+      expect(spellx.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+    })
+
+    test("a function in a chunk is called from above it, as in code spell", () => {
+      const { code, errors } = compiledText([
+        '<spell-thing "card">',
+        '\t<action "deal it">play the card</>',
+        "</spell-thing>",
+        "<spell>",
+        "\tto play a card",
+        "\t\tprint 1",
+        "</spell>"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toContain("return this.play()")
+    })
+  })
+
+  test("a comment after a line's closer is the member's docstring, as after its twin", () => {
+    const { code, errors } = compiledText(
+      ['<spell-thing "card">', '\t<property "value">1</>\t// ace = 1', "</spell-thing>"],
+      { keepDocs: true }
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain("/** ace = 1 */")
   })
 })
 

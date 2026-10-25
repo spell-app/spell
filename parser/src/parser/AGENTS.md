@@ -65,6 +65,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `PY.PyWriter`, on `P.ProgramWriter`
     - `PY.ElementsWriter`, on `P.JSWriter`
   - [jsShapes.ts](writers/jsShapes.ts):  the pure helpers every program writer shares, `P.jsShapes`
+  - `P.SourceMarks`:  a source map made as code is written (epic `elemental-spell` P14):  marks `Writer.write()`
+    puts in, taken out again once the code is finished;  see "Compile" in [PARSING.md](../spell/PARSING.md)
   - `P.jsText`:  javascript's and TypeScript's punctuation
 - No UI framework, no JSX, no DOM.
   - Node tools run the parser's SOURCE through `tsx` / esbuild / Vite's oxc,

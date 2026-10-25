@@ -999,6 +999,7 @@ export class TSWriter extends JSWriter {
     "endDragOver",
     "entry",
     "extraClass",
+    "fillActionMenus",
     "formIsDisabled",
     "gliding",
     "handedThing",
@@ -1031,6 +1032,7 @@ export class TSWriter extends JSWriter {
     "isVisible",
     "keepThingAndElementAgreeing",
     "loadSpellUIFamilies",
+    "menuBar",
     "missingText",
     "moveDelay",
     "moveHere",
@@ -1041,6 +1043,7 @@ export class TSWriter extends JSWriter {
     "onConnect",
     "onDisconnect",
     "onDragEnd",
+    "onChildrenDrawn",
     "onClickToSelect",
     "onDragEnter",
     "onDragLeave",
@@ -1259,7 +1262,8 @@ export class TSWriter extends JSWriter {
     if (!written.length) return `${open} />`
     const inline = written.join("")
     const isShort = !written.some((child) => child.startsWith("<")) && !inline.includes("\n")
-    if (isShort && open.length + inline.length < JSX_LINE) return `${open}>${inline}</${tag}>`
+    // a source map's marks take no room on the line:  see `P.SourceMarks`
+    if (isShort && P.SourceMarks.widthOf(open + inline) < JSX_LINE) return `${open}>${inline}</${tag}>`
     return `${open}>\n${indented(written.join("\n"))}\n</${tag}>`
   }
 
@@ -1269,7 +1273,7 @@ export class TSWriter extends JSWriter {
     const written = children.map((child) => this.jsxChild(child)).filter(Boolean)
     const inline = written.join("")
     const isShort = !written.some((child) => child.startsWith("<")) && !inline.includes("\n")
-    if (!written.length || (isShort && inline.length < JSX_LINE)) return `<>${inline}</>`
+    if (!written.length || (isShort && P.SourceMarks.widthOf(inline) < JSX_LINE)) return `<>${inline}</>`
     return `<>\n${indented(written.join("\n"))}\n</>`
   }
 

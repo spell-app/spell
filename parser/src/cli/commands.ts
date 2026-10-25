@@ -4,7 +4,8 @@
  * and `spell translate check|fix`, for the language packs (epic `spanish` P7);
  * and `spell translate`, a project into another language (epic `spanish` P24):  its work behind the hook, as it
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
- * `translateTimes.ts`), the same way.
+ * `translateTimes.ts`), the same way;
+ * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12).
  * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
  *   - Without spell-app, each says so and exits 2.
@@ -236,6 +237,20 @@ export default function languageCommands(spell: Command): void {
     .action((projects: string[], _options, command: Command) =>
       language("translateTime", projects, command, { needsTo: true })
     )
+
+  // spellx, spell's tag-shaped form:  a file or project written as it (epic `elemental-spell` P12)
+  const spellx = spell.command("spellx").description("spellx, the tag-shaped form of a .spell file")
+
+  spellx
+    .command("convert")
+    .description(
+      "write each .spell file as spellx, the same program in tags:  Card.spell => Card.spellx beside it, " +
+        "Carta.es.spell => Carta.es.spellx -- never in the test projects"
+    )
+    .argument("[projects...]", PROJECTS_ARG)
+    .option("--dry-run", "write nothing:  print each .spellx file instead")
+    .addHelpText("after", PROJECT_HELP)
+    .action((projects: string[], _options, command: Command) => language("spellxConvert", projects, command))
 }
 
 /**

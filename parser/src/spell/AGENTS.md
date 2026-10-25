@@ -136,7 +136,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
       `elemental-spell` P4):
 
       ```text
-      <Project>.spell.js  .spell.tsx  .spell.py  .elements.spell.js  .scopes.js  .declarations.json5  .en.js
+      <Project>.spell.js  .spell.js.map  .spell.tsx  .spell.py  .elements.spell.js  .scopes.js  .declarations.json5  .en.js
       ```
 
     - The rest goes beside its source:  `.lib.ts`, `.app.py`.

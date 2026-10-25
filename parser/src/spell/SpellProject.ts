@@ -328,6 +328,36 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Where statement `node` came from, for its source map:  its file, and its first token's line and column --
+   * see `P.SourceMarks`.
+   * - Statements only (`P.ASTStatement`, not a group of them):  an expression's written text is sometimes compared,
+   *   which a mark in it would change.
+   */
+  static sourcePlaceOf(node: P.ASTNode): P.SourcePlace | undefined {
+    if (!(node instanceof P.ASTStatement) || node instanceof P.ASTStatementGroup) return undefined
+    const { match } = node
+    const path = match?.getScopeOfType(P.FileScope)?.path
+    const line = match?.line
+    const column = match?.char
+    if (!path || line === undefined || column === undefined) return undefined
+    return { path, line, column }
+  }
+
+  /**
+   * File for `target`'s source map, beside its output in our build folder, e.g. `Solitaire.spell.js.map` (epic
+   * `elemental-spell` P14):  each line of its code back to the `.spell` / `.spellx` line it came from.
+   * - Written for a javascript-family target only (`P.JSWriter` and its subclasses):  see `P.SourceMarks`.
+   */
+  sourceMapFileFor(target: SP.Target): SP.SpellJSFile {
+    return new SP.SpellJSFile(this.getFileLocation(`${this.outputFileFor(target).location.file}.map`)!.path)
+  }
+
+  /** Each of our spell files' text, by its path:  what a source map carries (`sourcesContent`). */
+  private get sourceTexts(): Map<string, string | undefined> {
+    return new Map(this.spellFiles.map((file) => [file.path, file.contents ?? undefined] as const))
+  }
+
+  /**
    * File for `target`'s own words in language `lang`, e.g. `Solitaire.py.en.json5`:  in our build folder, beside its output.
    * - One per language, as `wordsFileFor()`.
    * - `undefined` for a target with none (`SP.Target.wordsSuffix`).
@@ -525,16 +555,37 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                     })
                   }
                   const header = this.importHeader(target.writer)
-                  const marked = SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
-                    listsStartAt: this.contents?.listsStartAt
-                  })
+                  // a source map as it's written, for a javascript-family target -- see `P.SourceMarks`
+                  const sourceMarks =
+                    target.writer instanceof P.JSWriter ? new P.SourceMarks(SpellProject.sourcePlaceOf) : undefined
+                  const combine = () =>
+                    SpellProject.combineCompiled(parts, target.writer, header, this.scope, {
+                      listsStartAt: this.contents?.listsStartAt
+                    })
+                  const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
                   // each declaring statement's marker comes out, into our declarations -- see `SP.SpellDeclarations`
-                  const { code, declarations } = SP.SpellDeclarations.split(marked, this.scope!, {
+                  const split = SP.SpellDeclarations.split(marked, this.scope!, {
                     version,
                     exports,
                     languages
                   })
-                  this.outputFileFor(target).contents = code
+                  const { declarations } = split
+                  let { code } = split
+                  const outputFile = this.outputFileFor(target)
+                  if (sourceMarks) {
+                    const mapped = sourceMarks.extract(code, {
+                      file: outputFile.location.file,
+                      sources: this.sourceTexts,
+                      // each source by its name in the project, e.g. `Card.spell`:  its text is in the map
+                      nameOf: (path) => SP.SpellLocation.filePathOf(path)?.replace(/^\//, "") || path
+                    })
+                    code = mapped.code
+                    this.sourceMapFileFor(target).contents = JSON.stringify(mapped.map)
+                  }
+                  // the file points dev tools at its map, beside it in our build folder;  `compiled` stays without
+                  outputFile.contents = sourceMarks
+                    ? `${code.trimEnd()}\n//# sourceMappingURL=${outputFile.location.file}.map\n`
+                    : code
                   // a target with words of its own, keyed by its names, e.g. Python's `move_to_pile`:  one per language
                   for (const lang of SP.SpellDeclarations.languagesOf(declarations)) {
                     const wordsFile = this.targetWordsFileFor(target, lang)
@@ -600,6 +651,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
               if (!this.saveCompiled) return this.outputFile.contents
               await this.declarationsFile.save(undefined)
               for (const wordsFile of this.wordsFiles) await wordsFile.save(undefined)
+              for (const target of this.targets) {
+                const map = this.sourceMapFileFor(target)
+                if (map.contents) await map.save(undefined)
+              }
               for (const target of this.targets.slice(1)) {
                 await this.outputFileFor(target).save(undefined)
                 for (const lang of this.wordsLanguages) await this.targetWordsFileFor(target, lang)?.save(undefined)

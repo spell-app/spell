@@ -23,6 +23,8 @@ import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
 import { DrawPart } from "./DrawPart"
 import { HasParts } from "./HasParts"
+import { DefineMenu } from "./DefineMenu"
+import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -1735,6 +1737,126 @@ classes.addRule(HasParts, {
 // ... and in the sentence style:  `a card has parts "front" and "back"`
 classes.addRule(HasParts, {
   syntax: "(a|an) {type:singular_type} has (the)? parts [parts:{part:text} (,|and)]"
+})
+
+// a template's menu of its actions (epic `elemental-spell` P10):  `- its "game menu" is a menu of "deal" and "undo"`
+classes.addRule(DefineMenu, {
+  syntax: "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "each item names an action of the template, or the app's undo and redo;  `-` a line between",
+          input: [
+            "a game is an app where:",
+            "\t- to deal:",
+            '\t\t- undone as "Deal"',
+            "\t\tnotify 1",
+            "\t- to turn the top card over:",
+            "\t\tnotify 2",
+            '\t- its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"'
+          ],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
+            "  }",
+            "",
+            "  deal() {",
+            "    core.notify(1)",
+            "  }",
+            "}",
+            'core.describeAction(Game, "deal", { title: "deal", undoneAs: "Deal" })',
+            '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            "  turnTheTopCardOver() {",
+            "    core.notify(2)",
+            "  }",
+            "",
+            "  deal() {",
+            "    core.notify(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "",
+            "  turnTheTopCardOver() {",
+            "    return this.currentThing?.turnTheTopCardOver()",
+            "  }",
+            "",
+            "  deal() {",
+            "    return this.currentThing?.deal()",
+            "  }",
+            "}",
+            "core.useElement(Game, GameElement)",
+            'core.describeAction(Game, "deal", { title: "deal", undoneAs: "Deal" })',
+            '// - its "game menu" is a menu of "deal", "turn the top card over", "-", "undo" and "redo"',
+            'core.describeMenu(Game, "gameMenu", { items: ["deal", "turnTheTopCardOver", "-", "undo", "redo"] })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... with the subject left out:  `- "game menu" is a menu of "deal" and "undo"`
+classes.addRule(DefineMenu, {
+  syntax: "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+})
+
+// which of an app's menus is its menu bar (epic `elemental-spell` P10):  `- its menu bar is "game menu"`
+classes.addRule(MenuBar, {
+  syntax: "{type:subject_its} menu bar is {menu:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["a game is an app where:", '\t- its menu bar is "game menu"'],
+          js: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            '  static menuBar = "game menu"',
+            "}"
+          ],
+          ts: [
+            "export class Game extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            '  static menuBar = "game menu"',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a game, drawn in its own element, e.g. by `draw the game`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its game's properties;  its methods call its game's.",
+            " * - What every view's element does, e.g. drawing its game, is `SpellElement`'s.",
+            " */",
+            "export class GameElement extends SpellElement<Game> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "game", [])',
+            "}",
+            "core.useElement(Game, GameElement)"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // placing a part in a drawing:  `draw its front`

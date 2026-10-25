@@ -51,6 +51,9 @@ export class SpellxTokenizer extends P.Tokenizer {
       this.frames = []
       return tokens
     }
+    // a `<spell>` chunk is code spell where it sits:  its tag goes, its lines join the block around it
+    const groupLines = this.breakIntoIndentedBlocks
+    this.breakIntoIndentedBlocks = (tokens: P.Token[]) => groupLines(tokens).map(unwrapCode)
   }
 
   /** The tags open at the line being read, outermost first. */
@@ -157,6 +160,8 @@ export class SpellxTokenizer extends P.Tokenizer {
       const kind = templates[lower.slice(prefix.length + 1)]
       if (kind) return { category: "template", kind, word: first, wordEnd }
     }
+    // a chunk of code spell, as written:  the bare prefix (epic `elemental-spell` P12)
+    if (lower === prefix) return { category: "code", kind: "code", word: first, wordEnd }
     if (declarations[lower]) return { category: "declaration", kind: declarations[lower]!, word: first, wordEnd }
     if (notes[lower]) return { category: "note", kind: notes[lower]!, word: first, wordEnd }
     // the longest handler or control word written here
@@ -195,7 +200,7 @@ export class SpellxTokenizer extends P.Tokenizer {
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
     if (!owner || owner.category === "template") return true
-    if (owner.category === "note") return false
+    if (owner.category === "note" || owner.category === "code") return false
     if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
@@ -261,7 +266,9 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (word.category === "unknown") return [this.unknownWordError(word)]
     if (word.category === "template" && owner)
       return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
-    if (word.category !== "template" && word.category !== "note" && !owner)
+    if (word.category === "code" && owner && owner.category !== "template")
+      return [this.message("spellx-nested-template", { tag, outer: `<${owner.word}>` })]
+    if (word.category !== "template" && word.category !== "note" && word.category !== "code" && !owner)
       return [this.message("spellx-outside-template", { tag, template: `<${this.words.prefix}-view>` })]
     return []
   }
@@ -438,14 +445,19 @@ export class SpellxTokenizer extends P.Tokenizer {
   /**
    * The closer ending the line from `start` to `lineEnd`:  `...jack, queen or king</>`.
    * - Only one spellx closes:  `</>`, or a spellx word's;  a line of markup ending `</ui-text>` is markup.
+   * - A comment may follow it, as on any line of spell:  `<property "value">its rank</>   // ace = 1`
+   *   (epic `elemental-spell` P12).
    */
   private closerEnding(text: string, start: number, lineEnd: number): Closer | undefined {
     const line = text.slice(start, lineEnd).trimEnd()
-    const at = line.lastIndexOf("</")
-    if (at < 0) return undefined
-    const closer = this.readCloser(text, start + at)
-    if (!closer || at + closer.raw.length !== line.length) return undefined
-    return !closer.word || this.isSpellxWord(closer.word) ? closer : undefined
+    for (let at = line.lastIndexOf("</"); at >= 0; at = at ? line.lastIndexOf("</", at - 1) : -1) {
+      const closer = this.readCloser(text, start + at)
+      if (!closer) continue
+      const after = line.slice(at + closer.raw.length)
+      if (after && !TRAILING_COMMENT.test(after)) continue
+      return !closer.word || this.isSpellxWord(closer.word) ? closer : undefined
+    }
+    return undefined
   }
 
   /**
@@ -575,6 +587,8 @@ export class SpellxTokenizer extends P.Tokenizer {
     if (lower === tag.word.toLowerCase() || lower === firstWordOf(tag.word)) return true
     const { prefix, templates, declarations, notes, handlers, controls } = this.words
     switch (tag.category) {
+      case "code":
+        return lower === prefix
       case "template":
         return lower.startsWith(`${prefix}-`) && templates[lower.slice(prefix.length + 1)] === tag.kind
       case "declaration":
@@ -645,6 +659,29 @@ type TagWord = {
   kind: string
   word: string
   wordEnd: number
+}
+
+/**
+ * `block` with each CODE CHUNK in it unwrapped (epic `elemental-spell` P12):  a `<spell>` line goes, and the lines
+ * of its body join `block` in its place, so they parse as the code spell they are, at that level.
+ * - A file's top level:  its functions, tests and starting code;  a template's:  members with no tag of their own.
+ * - Its closer stays, as a closer line, which compiles to nothing.
+ * - SIDE EFFECT:  changes `block` (and the blocks in it) in place;  returns it.
+ */
+function unwrapCode(block: P.BlockToken): P.BlockToken {
+  const items = block.tokens
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index]
+    if (item instanceof P.BlockToken) unwrapCode(item)
+    if (!(item instanceof P.LineToken)) continue
+    const [head] = item.tokens
+    if (!(head instanceof SP.SpellxTagToken) || head.tag.category !== "code") continue
+    const next = items[index + 1]
+    const body = next instanceof P.BlockToken ? unwrapCode(next).tokens : []
+    items.splice(index, next instanceof P.BlockToken ? 2 : 1, ...body)
+    index += body.length - 1
+  }
+  return block
 }
 
 /** A tag open while a file is tokenized. */
@@ -741,6 +778,9 @@ const WORD_START = /^\p{L}/u
 const ATTRIBUTE_NAME = /^[\p{L}\p{M}\d_:.@-]+/u
 
 /** A closer:  `</>`, or `</word>`, spaces allowed before its `>`. */
+/** A comment after a line's closer:  `</>   // ace = 1`. */
+const TRAILING_COMMENT = /^\s+\/\//
+
 const CLOSER = /^<\/([\p{L}\p{M}\d_-]*)[ \t]*>/u
 
 /** The most words a handler's or control's word has:  `de lo contrario si`. */

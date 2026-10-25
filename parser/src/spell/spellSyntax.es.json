@@ -5033,6 +5033,61 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DefineMenu",
+          "ruleNames": ["define_menu"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineMenu.ts",
+          "line": 20,
+          "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]",
+              "example": "una partida es una aplicación donde:\n\t- su \"menú del juego\" es un menú de \"deshacer\", \"-\" y \"rehacer\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\ncore.describeMenu(Partida, \"menúDelJuego\", { items: [\"undo\", \"-\", \"redo\"] })"
+                },
+                "ts": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n}\n\nexport class PartidaElement extends SpellElement<Partida> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"partida\", [])\n}\ncore.useElement(Partida, PartidaElement)\ncore.describeMenu(Partida, \"menúDelJuego\", { items: [\"undo\", \"-\", \"redo\"] })"
+                },
+                "py": {
+                  "code": "class Partida(App):\n    element_tag = \"syntax-block-app\"\n\ncore.describe_menu(Partida, \"menú_del_juego\", {\"items\": [\"undo\", \"-\", \"redo\"]})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MenuBar",
+          "ruleNames": ["menu_bar"],
+          "internal": false,
+          "file": "src/spell/rules/classes/MenuBar.ts",
+          "line": 14,
+          "purpose": "Which of an app's menus is its MENU BAR (epic `elemental-spell` P10, Q34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} barra de (menú|menu) es {menu:text}",
+              "example": "una partida es una aplicación donde:\n\t- su barra de menú es \"menú del juego\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static menuBar = \"menú del juego\"\n}"
+                },
+                "ts": {
+                  "code": "export class Partida extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static menuBar = \"menú del juego\"\n}\n\nexport class PartidaElement extends SpellElement<Partida> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"partida\", [])\n}\ncore.useElement(Partida, PartidaElement)"
+                },
+                "py": {
+                  "code": "class Partida(App):\n    element_tag = \"syntax-block-app\"\n\n    menu_bar = \"menú del juego\""
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "QuotedPropertyFormula",
           "ruleNames": ["quoted_property_formula"],
           "internal": false,

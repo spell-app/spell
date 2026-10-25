@@ -4983,6 +4983,61 @@
           "aliases": ["statement"]
         },
         {
+          "className": "DefineMenu",
+          "ruleNames": ["define_menu"],
+          "internal": false,
+          "file": "src/spell/rules/classes/DefineMenu.ts",
+          "line": 20,
+          "purpose": "A template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]",
+              "example": "a game is an app where:\n\t- to deal:\n\t\t- undone as \"Deal\"\n\t\tnotify 1\n\t- to turn the top card over:\n\t\tnotify 2\n\t- its \"game menu\" is a menu of \"deal\", \"turn the top card over\", \"-\", \"undo\" and \"redo\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\ncore.describeAction(Game, \"deal\", { title: \"deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                },
+                "ts": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  turnTheTopCardOver() {\n    core.notify(2)\n  }\n\n  deal() {\n    core.notify(1)\n  }\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n\n  turnTheTopCardOver() {\n    return this.currentThing?.turnTheTopCardOver()\n  }\n\n  deal() {\n    return this.currentThing?.deal()\n  }\n}\ncore.useElement(Game, GameElement)\ncore.describeAction(Game, \"deal\", { title: \"deal\", undoneAs: \"Deal\" })\ncore.describeMenu(Game, \"gameMenu\", { items: [\"deal\", \"turnTheTopCardOver\", \"-\", \"undo\", \"redo\"] })"
+                },
+                "py": {
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    def turn_the_top_card_over(self) -> None:\n        core.notify(2)\n\n    def deal(self) -> None:\n        core.notify(1)\n\ncore.describe_action(Game, \"deal\", {\"title\": \"deal\", \"undone_as\": \"Deal\"})\ncore.describe_menu(Game, \"game_menu\", {\"items\": [\"deal\", \"turn_the_top_card_over\", \"-\", \"undo\", \"redo\"]})"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} {menu:quoted_member} is a menu of [items:{item:text} (,|and)]"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MenuBar",
+          "ruleNames": ["menu_bar"],
+          "internal": false,
+          "file": "src/spell/rules/classes/MenuBar.ts",
+          "line": 14,
+          "purpose": "Which of an app's menus is its MENU BAR (epic `elemental-spell` P10, Q34).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_its} menu bar is {menu:text}",
+              "example": "a game is an app where:\n\t- its menu bar is \"game menu\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static menuBar = \"game menu\"\n}"
+                },
+                "ts": {
+                  "code": "export class Game extends App {\n  static elementTag = core.defineElement(this, \"syntax_block\", \"App\")\n\n  static menuBar = \"game menu\"\n}\n\nexport class GameElement extends SpellElement<Game> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-app\", \"game\", [])\n}\ncore.useElement(Game, GameElement)"
+                },
+                "py": {
+                  "code": "class Game(App):\n    element_tag = \"syntax-block-app\"\n\n    menu_bar = \"game menu\""
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "QuotedPropertyFormula",
           "ruleNames": ["quoted_property_formula"],
           "internal": false,

@@ -1764,28 +1764,36 @@ export class ASTPropertyRules extends ASTStatement {
  * - e.g. `- it sends "flipped" with a side as a direction` =>
  *   `core.describeEvent(Card, "flipped", { params: { side: "direction" } })`
  * - `type` (required) is its class, as a TypeExpression or bare name.
- * - `describes` (required):  `"action"` or `"event"`.
+ * - `describes` (required):  `"action"`, `"event"` or `"menu"` (epic `elemental-spell` P10:
+ *   `core.describeMenu(Game, "gameMenu", { items: ["deal", "-", "undo"] })`).
  * - `name` (required):  an action's METHOD, by spell's name (`turn_over`), which each writer names its own way;
  *   an event's name as text (`flipped`).
  * - `description` (required):  its fields by spell's names (`enabled_when`), each writer naming them its own way:
  *   - text, or a list of text, e.g. `title`, `shortcuts`
  *   - a MEMBER of the class (`{ member: "turn_over_is_enabled" }`), named as the writer names members
  *   - a map of text to text, e.g. an event's `params`
+ *   - a list of MEMBERS (`{ members: ["deal", "-", "undo"] }`), each named as the writer names members, `-` kept:
+ *     a menu's items
  * - Always written from outside its class, after it, as `ASTPropertyRules` is:  NOT a ClassMember.
  */
 export type ASTTypeDescriptionProps = Prettify<{
   type: string | ASTTypeExpression
-  describes: "action" | "event"
+  describes: "action" | "event" | "menu"
   name: string
   description: Record<string, ASTDescriptionValue>
 }>
 
 /** One field of an `ASTTypeDescription`'s description:  text, a list of text, a member, or a map of text. */
-export type ASTDescriptionValue = string | string[] | { member: string } | Record<string, string>
+export type ASTDescriptionValue =
+  | string
+  | string[]
+  | { member: string }
+  | { members: string[] }
+  | Record<string, string>
 
 export class ASTTypeDescription extends ASTStatement {
   declare type: ASTTypeExpression
-  declare describes: "action" | "event"
+  declare describes: "action" | "event" | "menu"
   declare name: string
   declare description: Record<string, ASTDescriptionValue>
   constructor(match: P.AnyMatch, props: ASTTypeDescriptionProps) {
@@ -1793,7 +1801,7 @@ export class ASTTypeDescription extends ASTStatement {
     if (typeof this.type === "string") this.type = new ASTTypeExpression(match, { name: this.type })
     this.assertType("type", ASTTypeExpression)
     this.assertType("name", "string")
-    this.assert(["action", "event"].includes(this.describes), `ASTTypeDescription: unknown kind '${this.describes}'`)
+    this.assert(["action", "event", "menu"].includes(this.describes), `ASTTypeDescription: unknown kind '${this.describes}'`)
   }
 }
 

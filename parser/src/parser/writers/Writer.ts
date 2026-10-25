@@ -1,5 +1,7 @@
 import type { P } from "spell-parser/parser"
 
+import { SourceMarks } from "./SourceMarks"
+
 /****************
  * ### `Writer`
  * Writes a spell tree (`P.ASTNode`s) as one `Output` per node:  a target's code (`P.JSWriter`, `Output` a `string`),
@@ -30,7 +32,9 @@ export abstract class Writer<Output = string> {
    * - throws if no method writes `node`'s class or any class it extends
    */
   write(node: P.ASTNode): Output {
-    return this.methodFor(node, "").call(this, node)
+    const output = this.methodFor(node, "").call(this, node)
+    // a source map's mark on a statement, while one is being made (`SourceMarks.during()`)
+    return SourceMarks.mark(output, node) as Output
   }
 
   /**
@@ -40,7 +44,7 @@ export abstract class Writer<Output = string> {
    * - throws if no `...AsMember` method writes `member`'s class or any class it extends
    */
   writeAsMember(member: P.ASTClassMember): Output {
-    return this.methodFor(member, "AsMember").call(this, member)
+    return SourceMarks.mark(this.methodFor(member, "AsMember").call(this, member), member) as Output
   }
 
   ////////////////

@@ -103,6 +103,8 @@ export const spanishWords: SP.LanguageWords = {
   listOfWord: "de",
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /(ando|iendo|yendo)$/,
+  // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)
+  appActions: { deshacer: "undo", rehacer: "redo" },
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
   retiredTypeWords: {
@@ -214,6 +216,9 @@ export const spanishWords: SP.LanguageWords = {
       draw: "para dibujar eso :",
       drawPart: "para dibujar su {words} :",
       placePart: "dibujar su {words}",
+      menu: "su {name} es un menú de",
+      menuAnd: "y",
+      menuBar: "su barra de menú es {quoted menu-bar}",
       handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
       controls: {
         if: "si {phrase}",

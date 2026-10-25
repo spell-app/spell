@@ -4,13 +4,16 @@
  *   - `- to turn it over:` then `- shortcut meta+T`, `- enabled when it is face down`, `- undone as "Turn Card"`
  * - each EVENT a template sends, with its parameters:  `- it sends "flipped" with a side as a direction`
  * - Compiled spell writes them after the class:  `core.describeAction(Card, "turnOver", { ... })`.
- * - Nothing RUNS from them yet:  the event phase (P9) and the actions phase (P10) read them,
- *   through `actionsOf()` and `eventsOf()`.
+ * - What reads them:  the event phase (P9), and the actions' one way to run (`acting.ts`, P10), through
+ *   `actionsOf()` and `eventsOf()`.
+ * - An action `undone as` something is ONE undo step:  `describeAction()` declares it so (`declareAction()`,
+ *   `undoing.ts`, C11).
  * - Kept per class, and inherited:  a joker has a card's actions, and may describe one again.
  * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
  */
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
+import { declareAction } from "./undoing"
 
 export const describedMethods = defineCoreModule({
   /**
@@ -20,6 +23,12 @@ export const describedMethods = defineCoreModule({
    */
   describeAction(Class: Function, name: string, description: ActionDescription): void {
     ownDescriptions(ACTIONS, Class).set(name, description)
+    // `undone as "Turn Card"`:  ONE undo step, through the run's history (C11)
+    const method = (Class.prototype as Record<string, unknown>)[name]
+    if (description.undoneAs !== undefined && typeof method === "function" && !UNDOABLE.has(method)) {
+      declareAction(Class, name, { undoneAs: description.undoneAs })
+      UNDOABLE.add((Class.prototype as Record<string, unknown>)[name] as Function)
+    }
   },
 
   /**
@@ -54,6 +63,7 @@ Object.assign(core, describedMethods)
  * - `icon`:  its icon's name, if it says one
  * - `enabledWhen`, `selectedWhen`:  the name of the class's getter that says so, e.g. `turnOverIsEnabled`
  * - `undoneAs`:  its undo's name, e.g. `Turn Card`, as the Edit menu says `Undo Turn Card`
+ * - `titleFrom`:  the name of the class's getter whose text is its title NOW, e.g. the app's `undoTitle`
  */
 export type ActionDescription = {
   title: string
@@ -62,6 +72,7 @@ export type ActionDescription = {
   enabledWhen?: string
   selectedWhen?: string
   undoneAs?: string
+  titleFrom?: string
 }
 
 /**
@@ -71,6 +82,9 @@ export type ActionDescription = {
 export type EventDescription = {
   params?: Record<string, string>
 }
+
+/** The methods `describeAction()` made undoable already:  a sub-class describing one again doesn't wrap it twice. */
+const UNDOABLE = new WeakSet<Function>()
 
 /** Each class's own action descriptions, by method name. */
 const ACTIONS = new WeakMap<Function, Map<string, ActionDescription>>()

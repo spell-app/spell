@@ -56,6 +56,7 @@ import { carryMethods } from "./carry"
 import { classesMethods } from "./classes"
 import { describedMethods } from "./described"
 import { sendingMethods, send } from "./sending"
+import { actingMethods } from "./acting"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -81,7 +82,8 @@ const CORE_MODULES: Record<string, object> = {
   carry: carryMethods,
   classes: classesMethods,
   described: describedMethods,
-  sending: sendingMethods
+  sending: sendingMethods,
+  acting: actingMethods
 }
 
 /**

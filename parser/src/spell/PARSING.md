@@ -1157,6 +1157,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     controls;  in a drawing, those and a placed part;  in a menu, its actions (`isTagHere()`).
   - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
     else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
+  - A `<spell>` chunk (the bare prefix, `<encanto>` in Spanish;  epic `elemental-spell` P12) is code spell as written:
+    `breakIntoIndentedBlocks()` takes its tag line out and puts its body's lines in its place (`unwrapCode()`),
+    so they parse at the level the chunk is at:  a member among a template's, a function at the top.
+    Its closer stays, and compiles to nothing.
+  - A line's closer may have a comment after it, `<property "value">1</>   // ace = 1`:
+    the twin keeps it after its inline body, so it's the member's docstring, as on the twin line.
 - [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
   - The twin's words are the LANGUAGE's, in its words file (`spellx.twins`), with slots:
     `its {name} is one of {one-of}`, `to {words} :`, `on {phrase} :`.
@@ -1169,7 +1175,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A `description=`, or a leading `<description>` note, becomes trailing comments on the twin line:
     `BlockLine` pops them all, and `Block.getDocComments()` makes them the docstring.
   - Closers parse as `spellx_closer` ([SpellxCloser.ts](rules/statements/SpellxCloser.ts)), which compiles to nothing.
-  - A tag spellx can't read yet (`<menu>`, P10) is the line's error, `spellx-not-yet`, with its block.
+  - A `<menu "game menu">` is ONE line, its `<action>`s quoted after it:
+    `its "game menu" is a menu of "deal" , "-" and "undo"` (`define_menu`), its block swallowed (P10).
+    An app tag's `menu-bar=` is a line ending its body, `- its menu bar is "game menu"` (`menu_bar`).
+  - A tag spellx can't read yet is the line's error, `spellx-not-yet`, with its block.
 - A spellx DRAWING's markup (epic `elemental-spell` P7):
   - `</>` closes any element there (`Tokenizer.emptyEndTagCloses`, on for the spellx tokenizer only), and a tag's
     name may hold any letter (`<botón>`).
@@ -1182,6 +1191,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - Code spell's drawings are untouched.
 - The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
   file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
+  - A `<spell>` chunk's lines are in it as written:  at the top, and among a template's members;
+    under a type written as code, its bulleted members.
+- The way back, a `.spell` file written as spellx, is `SX.SpellxWriter` (`spell spellx convert`, P12):
+  rule by rule over the parse, each declaration as the tag whose twin it is, the rest in `<spell>` chunks.
 - Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
   a `.es.spellx` file is a Spanish code-spell file's twin, its words the language's.
 - Its tests:  each pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same and has no
@@ -1782,6 +1795,19 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - `ASTNode.compile()` is `P.JSWriter.instance.write(node)`.
   - Each writer has one method per AST class, named for it:  `ASTIfStatement(node)`.
   - NEVER write output in an AST class.
+- Each javascript-family target (`js/solid`, `ts/solid`, `ts/lib`) gets a SOURCE MAP (epic `elemental-spell` P14):
+  `<Project>.spell.js.map` in the build folder, beside its code, which ends `//# sourceMappingURL=<file>.map`.
+  - Made as the code is written:  inside `P.SourceMarks.during()`, `P.Writer.write()` puts an inline mark at the end
+    of each statement's first code line (`SP.SpellProject.sourcePlaceOf()`:  its file, line and column).
+  - `SpellDeclarations.split()` and the writer's `module()` run with the marks in;  `extract()` takes them out
+    again, so the code is EXACTLY what it is with no map, and each marked line becomes a mapping.
+    spell-app's `sourceMaps.test.ts` checks that for every fixture, both targets.
+  - A writer that lays a line out by its length measures it without marks (`P.SourceMarks.widthOf()`).
+  - The map names each file by its name in the project (`Card.spell`) and carries its text (`sourcesContent`).
+  - Code run from somewhere the map file can't be reached (the editor's `blob:` URL, `spell run`'s temp file)
+    carries it inline:  `P.SourceMarks.inline()`.
+  - A `.spellx` file's positions are its own (Q69), so its map points at its `.spellx` lines.
+  - Not the Python target, yet.
 - A file's classes come before its running code (P15):  `SP.hoistClassDeclarations()`, from `Block.getAST()`.
   - So a line can make a thing of a type declared further down:
     `set the stock to a new stock pile` above `a stock pile is a pile`.

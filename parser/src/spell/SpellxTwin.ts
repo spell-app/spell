@@ -67,16 +67,30 @@ export class SpellxTwin {
     const language = parser.language ?? SP.Language.default
     const twinText = (line: P.LineToken) =>
       SpellxTwin.for(language, parser, line, undefined)?.line.tokens.join("").trim()
+    // a line of a `<spell>` chunk, as written (epic `elemental-spell` P12):  a function, a member written as code
+    const codeText = (line: P.LineToken) => {
+      const [first] = line.tokens
+      if (!first || first instanceof SP.SpellxTagToken || first instanceof SP.SpellxCloserToken) return undefined
+      if (first instanceof SP.SpellxProseToken) return undefined
+      return line.tokens.join("").trim() || undefined
+    }
     const lines: string[] = []
+    let inTemplate = false
     for (const item of root?.tokens ?? []) {
       if (item instanceof P.LineToken) {
         const twin = twinText(item)
-        if (twin) lines.push(twin)
+        inTemplate = !!twin
+        const line = twin ?? codeText(item)
+        if (line) lines.push(line)
         continue
       }
       for (const member of item.tokens) {
-        const twin = member instanceof P.LineToken ? twinText(member) : undefined
+        if (!(member instanceof P.LineToken)) continue
+        const twin = inTemplate ? twinText(member) : undefined
+        const code = twin ? undefined : codeText(member)
         if (twin) lines.push(`\t- ${twin}`)
+        // a template's member written as code;  under a type written as code, its bulleted members only
+        else if (code && (inTemplate || code.startsWith("- "))) lines.push(`\t${code}`)
       }
     }
     return lines.join("\n")
@@ -135,7 +149,10 @@ export class SpellxTwin {
   // ## By tag
   ////////////////
 
-  /** A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body. */
+  /**
+   * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
+   * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
+   */
   private template(): SpellxTwinLine {
     const { kind } = this.tag
     const singleton = kind === "page" || kind === "app"
@@ -144,7 +161,8 @@ export class SpellxTwin {
       : this.attribute("aka")
         ? this.words.templateAka
         : this.words.template
-    return this.lineAndBlock(this.expand(shape))
+    const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
+    return this.lineAndBlock(this.expand(shape), [], menuBar)
   }
 
   /** A member:  a property, an alias, an action, a drawing, an event or a test. */
@@ -165,10 +183,32 @@ export class SpellxTwin {
         return this.lineAndBlock(this.expand(tag.name ? words.drawPart : words.draw))
       case "event":
         return this.lineAndBlock(this.event())
+      case "menu":
+        return this.menu()
       default:
-        // a menu:  P10's (Q34, Q41)
         return this.skipped(this.language.parserMessage("spellx-not-yet", { tag: `<${tag.word}>` }))
     }
+  }
+
+  /**
+   * A menu, ONE line naming its actions (Q34, Q41):  `<menu "game menu">` holding `<action "deal" />`,
+   * `<action "-" />` and `<action "undo" />` is `its "game menu" is a menu of "deal" , "-" and "undo"`.
+   * - Its block is the line's:  nothing left to parse under it.
+   */
+  private menu(): SpellxTwinLine {
+    const tokens = this.expand(this.words.menu)
+    const items = (this.block?.tokens ?? []).flatMap((item) => {
+      const head = item instanceof P.LineToken ? item.tokens[0] : undefined
+      if (!(head instanceof SP.SpellxTagToken) || head.tag.kind !== "action" || !head.tag.name) return []
+      return [head.tag.name.quoted ?? this.quote(head.tag.name)]
+    })
+    items.forEach((item, index) => {
+      if (index) tokens.push(...this.synthetic(index === items.length - 1 ? this.words.menuAnd : ","))
+      tokens.push(item)
+      spaceAfter(tokens)
+    })
+    const line = new P.LineToken({ ...this.line.record, tokens })
+    return { line, takesNextItem: !!this.block, swallowsNextItem: !!this.block }
   }
 
   /**
@@ -222,7 +262,7 @@ export class SpellxTwin {
 
   /**
    * A tag with no twin:  its line and body are left out, `message` saying why (no message:  its token says).
-   * - A word spellx doesn't know, a menu (P10).
+   * - A word spellx doesn't know.
    */
   private skipped(message?: string): SpellxTwinLine {
     if (message) SP.addSpellxError(this.head, message)
@@ -302,10 +342,19 @@ export class SpellxTwin {
     return { description, rest: items.slice(taken) }
   }
 
-  /** What follows the head on its own line, before any closer ending it:  `if its rank is jack ...`. */
+  /**
+   * What follows the head on its own line, before any closer ending it:  `if its rank is jack ...`.
+   * - A comment after the closer stays, after the body:  `its rank</>   // ace = 1`.
+   */
   private get inlineBody(): P.Token[] {
     const rest = this.line.tokens.slice(1)
-    return rest.at(-1) instanceof SP.SpellxCloserToken ? rest.slice(0, -1) : rest
+    let closer = rest.length - 1
+    while (closer >= 0 && !(rest[closer] instanceof SP.SpellxCloserToken)) closer--
+    if (closer < 0) return rest
+    const after = rest.slice(closer + 1)
+    return after.every((token) => token instanceof P.CommentToken || token instanceof P.WhitespaceToken)
+      ? [...rest.slice(0, closer), ...after]
+      : rest
   }
 
   ////////////////

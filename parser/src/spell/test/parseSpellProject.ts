@@ -63,17 +63,35 @@ export function parseSpellProject(
  *   - a class member's in its class's body
  * - `code`:  that, markers out, as its `<Project>.spell.js`
  * - `declarations`:  as its `<Project>.declarations.json5`, read back as another project would
+ * - `map`:  with `options.sourceMap`, its source map, marks made as it was written (`P.SourceMarks`);  `code`
+ *   is then the code with the marks taken out again, which must be what it is without them
  */
 export function compiledSpellProject(
   files: SpellSourceFile[],
-  options: { version?: string; exports?: string[]; parentScope?: P.Scope; languages?: string[] } = {}
+  options: {
+    version?: string
+    exports?: string[]
+    parentScope?: P.Scope
+    languages?: string[]
+    sourceMap?: boolean
+  } = {}
 ) {
   const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const marked = SP.SpellProject.combineCompiled(parts)
+  const sourceMarks = options.sourceMap ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf) : undefined
+  const combine = () => SP.SpellProject.combineCompiled(parts)
+  const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
   const languages = [...new Set(languagesOf(files).map((language) => language.lang))]
-  const { code, declarations } = SP.SpellDeclarations.split(marked, scope, { languages, ...options })
-  return { marked, code, declarations: SP.SpellDeclarations.read(JSON.stringify(declarations))! }
+  const split = SP.SpellDeclarations.split(marked, scope, { languages, ...options })
+  const mapped = sourceMarks?.extract(split.code, {
+    sources: new Map(files.map(({ path, contents }) => [path, contents] as const))
+  })
+  return {
+    marked,
+    code: mapped?.code ?? split.code,
+    map: mapped?.map,
+    declarations: SP.SpellDeclarations.read(JSON.stringify(split.declarations))!
+  }
 }
 
 /**

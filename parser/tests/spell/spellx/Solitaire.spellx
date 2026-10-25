@@ -1,7 +1,7 @@
 <spell-thing "card" />
 <spell-thing "column" template="list of cards" />
 
-<spell-app "solitaire">
+<spell-app "solitaire" menu-bar="GameMenu">
 	Klondike solitaire:  deal seven columns, then build four foundations, ace to king, one suit each.
 
 	<property "columns" description="The seven piles cards are played on">a new list of columns</>
@@ -14,14 +14,21 @@
 		set its moves to its moves - 1
 	</action>
 
+	<menu "GameMenu">
+		<action "start a new game" />
+		<action "-" />
+		<action "undo the last move" />
+		<action "redo" />
+	</menu>
+
 	<on mouse down>
 		<comment>A press a card passed on.</>
 		print "pressed"
 	</>
 
 	<draw>
-		<toolbar />
-		<text>{its moves} moves</text>
+		<toolbar menu="GameMenu" />
+		<text context-menu="GameMenu">{its moves} moves</text>
 		<for each column in its columns>
 			<segment>{draw the column}</segment>
 		</>

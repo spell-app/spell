@@ -2157,6 +2157,156 @@
       "description": "The mouse and keys, readable anywhere:  `the shift key is down` is `core.input.shiftKey` -- see `input.ts`."
     },
     {
+      "kind": "method",
+      "name": "runAction",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "way"
+        }
+      ],
+      "description": "Run action `name` on `thing`, the ONE way every key, click and menu item runs one:  see the module's docs."
+    },
+    {
+      "kind": "method",
+      "name": "isActionEnabled",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Is action `name` enabled on `thing` now:  its `enabled when` says yes, or it has none."
+    },
+    {
+      "kind": "method",
+      "name": "isActionSelected",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Is action `name` selected on `thing` now (its menu item ticked):  its `selected when` says so.  Live."
+    },
+    {
+      "kind": "method",
+      "name": "actionTitle",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Action `name`'s title on `thing`, as people read it:  its description's, its live title's (`Undo Turn Card`), else its method's name in words."
+    },
+    {
+      "kind": "method",
+      "name": "onActionRun",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "listener"
+        }
+      ],
+      "description": "Listen for every action run through `runAction()`.  Returns how to stop."
+    },
+    {
+      "kind": "method",
+      "name": "runShortcut",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "focused"
+        },
+        {
+          "name": "key"
+        },
+        {
+          "name": "isMac"
+        }
+      ],
+      "description": "Run the action key `key` is a shortcut for:  the first ENABLED one, starting at `focused` and going up its chain to the app (Q35 B).  True if one ran:  the page then keeps the key from anything else."
+    },
+    {
+      "kind": "method",
+      "name": "describeMenu",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "Class"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "description"
+        }
+      ],
+      "description": "Describe class `Class`'s menu `name`, e.g. `gameMenu`:  what compiled spell writes after the class, for `- its \"game menu\" is a menu of \"deal\" and \"undo\"`.  Its items are method names;  `-` is a line between groups."
+    },
+    {
+      "kind": "method",
+      "name": "menusOf",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "Every menu class `Class` describes, its own and its super-classes', by name as matched (`gamemenu`)."
+    },
+    {
+      "kind": "method",
+      "name": "menuOf",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "thing"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Menu `name` (`game menu`, `gameMenu` or `GameMenu`) for `thing`:  the first of `thing`, then up its chain to the app (Q41:  a card's context menu may be its game's), that has it.  Its items ready to draw (`MenuItem`), each on the thing that has the menu;  `undefined` if none has it."
+    },
+    {
+      "kind": "method",
+      "name": "menuBarOf",
+      "of": "core",
+      "module": "acting",
+      "params": [
+        {
+          "name": "app"
+        }
+      ],
+      "description": "The app's MENU BAR, ready to draw:  the menu its class names, `static menuBar = \"game menu\"` (`- its menu bar is \"game menu\"`, spellx's `menu-bar=`).  `undefined` when it names none."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"

@@ -8,6 +8,7 @@ core.actions_of(Card)["turn_over"]["shortcuts"]  # ["meta+T"]
 - The twin of the JavaScript core's `described.ts`.
 - Each action's description:  its title, shortcuts, when it's enabled or selected (a getter's name), its undo's name.
 - Each event a template sends, with its parameters.
+- Each menu of a template's actions:  its items' method names, `-` a line between groups (P10).
 - Nothing runs from them yet:  the event and actions phases read them.
 - Kept per class, and inherited:  a joker has a card's actions, and may describe one again.
 - A class's facts, not one run's:  kept beside the class, whichever `core` describes it.
@@ -21,6 +22,9 @@ _ACTIONS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictiona
 
 # Each class's own event descriptions, by name
 _EVENTS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
+
+# Each class's own menus, by name (epic elemental-spell P10)
+_MENUS: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]" = WeakKeyDictionary()
 
 
 class DescribedMethods:
@@ -45,6 +49,14 @@ class DescribedMethods:
     def events_of(self, cls: type) -> dict[str, dict[str, Any]]:
         """Every event class `cls`'s things send, its own and its super-classes', by name:  its own win."""
         return _described_by(_EVENTS, cls)
+
+    def describe_menu(self, cls: type, name: str, description: dict[str, Any]) -> None:
+        """Describe class `cls`'s menu `name`, e.g. `game_menu`:  `{"items": ["deal", "-", "undo"]}`."""
+        _MENUS.setdefault(cls, {})[name] = description
+
+    def menus_of(self, cls: type) -> dict[str, dict[str, Any]]:
+        """Every menu class `cls` describes, its own and its super-classes', by name:  its own win."""
+        return _described_by(_MENUS, cls)
 
 
 def _described_by(store: "WeakKeyDictionary[type, dict[str, dict[str, Any]]]", cls: type) -> dict[str, dict[str, Any]]:

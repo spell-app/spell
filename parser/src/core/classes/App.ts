@@ -2,6 +2,7 @@
  * Base classes for spell.
  */
 import { core } from "spell-parser/core/core"
+import { describedMethods } from "spell-parser/core/described"
 // Import directly to avoid circular import
 import { View } from "./View"
 
@@ -76,6 +77,23 @@ export class App extends View {
   /** The Edit menu's redo item:  `Redo Turn Card`, or `Redo`.  Live. */
   get redoTitle(): string {
     return core.RUNTIME.history.redoTitle
+  }
+
+  // `undo` and `redo` are the app's own ACTIONS (epic `elemental-spell` P10):  a menu names them, `- its "edit menu" is
+  // a menu of "undo" and "redo"`, and draws them with their live titles, greyed out with nothing to undo
+  static {
+    describedMethods.describeAction(this, "undo", {
+      title: "undo",
+      titleFrom: "undoTitle",
+      shortcuts: ["meta+Z"],
+      enabledWhen: "canUndo"
+    })
+    describedMethods.describeAction(this, "redo", {
+      title: "redo",
+      titleFrom: "redoTitle",
+      shortcuts: ["meta+shift+Z"],
+      enabledWhen: "canRedo"
+    })
   }
 
   /**

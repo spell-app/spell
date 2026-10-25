@@ -44,6 +44,9 @@ import { Naming } from "./Naming"
  *   - one class body per type:  members written anywhere in the project go inside their class
  * - `JSWriter.instance` is the one `ASTNode.compile()` uses:  it knows no project.
  ****************/
+/** Core's method for each kind of `P.ASTTypeDescription`. */
+const DESCRIBERS = { action: "describeAction", event: "describeEvent", menu: "describeMenu" } as const
+
 export class JSWriter extends ProgramWriter {
   /** The writer `ASTNode.compile()` uses:  it knows no project -- see `forProject()`. */
   static readonly instance = new JSWriter()
@@ -1330,21 +1333,24 @@ export class JSWriter extends ProgramWriter {
    * - Fields and members by our names:  `enabledWhen: "turnOverIsEnabled"`.
    */
   ASTTypeDescription(node: P.ASTTypeDescription): string {
-    const method = node.describes === "action" ? "describeAction" : "describeEvent"
-    const name = this.quoted(node.describes === "action" ? this.nameOf(node.name) : node.name)
+    const method = DESCRIBERS[node.describes]
+    const name = this.quoted(node.describes === "event" ? node.name : this.nameOf(node.name))
     const fields = Object.entries(node.description).map(([key, value]) => {
       return `${this.nameOf(key, "property")}: ${this.descriptionValue(value)}`
     })
     const description = fields.length ? `{ ${fields.join(", ")} }` : "{}"
     const code = `core.${method}(${this.write(node.type)}, ${name}, ${description})`
-    // an event's one line says it;  an action's spell is the method just above
-    return node.describes === "event" ? this.withSpell(node, code) : code
+    // an event's and a menu's one line says it;  an action's spell is the method just above
+    return node.describes === "action" ? code : this.withSpell(node, code)
   }
 
   /** One field of a type's description as javascript -- see `P.ASTDescriptionValue`. */
   protected descriptionValue(value: P.ASTDescriptionValue): string {
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
+    if ("members" in value && Array.isArray(value.members)) {
+      return `[${value.members.map((item) => this.quoted(item === "-" ? item : this.nameOf(item))).join(", ")}]`
+    }
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))
     const entries = Object.entries(value as Record<string, string>).map(([key, text]) => {
       const written = jsText.isLegalIdentifier(key) ? key : this.quoted(key)

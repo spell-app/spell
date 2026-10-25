@@ -171,6 +171,34 @@ for (const { node, depth } of file.walk()) ...
 
 </details>
 
+### From a `.spell` file
+
+`spell spellx convert` writes a `.spell` file, or each in a project, as spellx:  the same program, laid out in tags.
+
+```sh
+spell spellx convert @spell/examples/Solitaire --dry-run
+```
+
+- `Card.spell` becomes `Card.spellx`, beside it;  `Carta.es.spell` becomes `Carta.es.spellx`, in Spanish spellx.
+  The `.spell` file stays:  move one of the two out, or the project declares everything twice.
+- `--dry-run` prints each file instead of writing it.  Nothing is written inside the test projects.
+- Each declaration becomes its tag:  a template, and inside it `<property>`, `<alias>`, `<action>`, `<draw>`,
+  `<event>`, `<test>`, `<on ...>`.
+  - A property's own aliases become its `alias=`, an action's details its attributes.
+  - A lone comment line just above a member becomes its `description=`.
+- What has no tag stays as written, inside a `<spell>` chunk:  a file's functions, its tests, its starting lines.
+  A chunk's lines read exactly where the chunk is, as if the tags weren't there.
+
+```text
+<spell>
+	to play a card
+		if the pile of the card is the stock of the solitaire
+			play from the stock
+</spell>
+```
+
+- From code:  `SX.SpellxWriter.write({ text, match, scope })`, given the parsed file.
+
 ## The edges
 
 **Real today:**  a `.spellx` file compiles and runs, English and Spanish, to exactly what its plain Spell twin does;
@@ -181,14 +209,17 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - A name is one of the project's own views first (`<card>`, its `<solitaire-card>`), then the first of the project's
   packs that has it:  its project file's `"packs"`, Spell UI's alone unless it says more.
 - There's no plain HTML:  `<div>` is an error naming the packs it looked in.
+  - So a converted drawing's `<div>` is an error, and its `<button>` becomes Spell UI's.
 - `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
 - Plain Spell is untouched:  its drawings name tags as before.
 
 **Not yet:**
 - A control (`<if ...>`) inside an element:  write it on a line of its own in the drawing.
-- `<menu>`:  read into the tree, but an error when compiled, until menus come.
+- `<menu "GameMenu">`:  its `<action "deal" />`s, `<action "-" />` a line between groups;
+  it reads as `its "GameMenu" is a menu of "deal", "-" and "undo"`.
+  An app's `menu-bar="GameMenu"` reads as `- its menu bar is "GameMenu"`.
 - A Spanish handler whose event has an article, `<al presionar el ratón>`:  `<al clic>` reads.
-- The editor's colours and hover inside a tag's head, and the way back, from a `.spell` file to `.spellx`.
+- The editor's colours and hover inside a tag's head.
 
 ## Where things are
 
@@ -200,6 +231,7 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 | [spellx.types.ts](src/spellx/spellx.types.ts) | the tree's nodes, spans and diagnostics |
 | [SpellxView.ts](src/spellx/SpellxView.ts) | a file's tree, built from its tokens |
 | [SpellxFile.ts](src/spellx/SpellxFile.ts) | a file's tree:  `walk()`, `toOutline()`, `positionOf()` |
+| [SpellxWriter.ts](src/spellx/SpellxWriter.ts) | a `.spell` file written as spellx, `spell spellx convert` |
 | [Language.ts](src/spell/languages/Language.ts) | `SpellxWords`, the shape of a language's spellx words |
 | [en/words.ts](src/spell/languages/en/words.ts), [es/words.ts](src/spell/languages/es/words.ts) | each language's words, its `spellx` table:  the tags, and each tag's twin (`twins`) |
 | [en/parserMessages.ts](src/spell/languages/en/parserMessages.ts) | the messages, the `spellx-*` keys |

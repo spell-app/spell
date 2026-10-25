@@ -383,6 +383,11 @@ export type LanguageWords = {
    */
   ongoingEventName: RegExp
   /**
+   * The app's own actions, as a menu names them, by their method (epic `elemental-spell` P10):
+   * `{ deshacer: "undo", rehacer: "redo" }` -- see `define_menu`.
+   */
+  appActions: Record<string, string>
+  /**
    * How the kind of a property's values is named, its `{type}` and `{property}` filled in (epic `spanish` P22):
    * English's `{type} {property}`, `card suit`;  Spanish's `{property} de {type}`, `palo de carta`.
    * - See `Language.propertyKindName()`.
@@ -532,6 +537,15 @@ export type SpellxTwinWords = {
   drawPart: string
   /** A part placed in a drawing:  `draw its {words}`. */
   placePart: string
+  /**
+   * A menu, its `<action>`s quoted after it (epic `elemental-spell` P10):  `its {name} is a menu of`,
+   * then `"deal" , "-" and "undo"`.
+   */
+  menu: string
+  /** The words between a menu's items:  the last pair's, `and`. */
+  menuAnd: string
+  /** An app's menu bar, its tag's `menu-bar=`:  a line ending its body, `its menu bar is {quoted menu-bar}`. */
+  menuBar: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
   handlers: Record<string, string>
   /** A control, by its kind:  `{ if: "if {phrase}", otherwise: "otherwise" }`. */

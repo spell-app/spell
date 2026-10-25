@@ -32,6 +32,8 @@ import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
 import { DrawPart } from "./DrawPart"
 import { HasParts } from "./HasParts"
+import { DefineMenu } from "./DefineMenu"
+import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -1816,6 +1818,97 @@ classesEs.addRule(HasParts, {
 // ... y en el estilo de oraciones:  `una carta tiene las partes "frente" y "dorso"`
 classesEs.addRule(HasParts, {
   syntax: `${A} {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]`
+})
+
+// el menú de una plantilla, de sus acciones (épica `elemental-spell` P10):
+// `- su "menú del juego" es un menú de "repartir" y "deshacer"`
+classesEs.addRule(DefineMenu, {
+  syntax: "{type:subject_its} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "las acciones de la propia aplicación por su nombre en español:  `deshacer`, `rehacer`",
+          input: [
+            "una partida es una aplicación donde:",
+            '\t- su "menú del juego" es un menú de "deshacer", "-" y "rehacer"'
+          ],
+          js: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            '// su "menú del juego" es un menú de "deshacer", "-" y "rehacer"',
+            'core.describeMenu(Partida, "menúDelJuego", { items: ["undo", "-", "redo"] })'
+          ],
+          ts: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a partida, drawn in its own element, e.g. by `draw the partida`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its partida's properties;  its methods call its partida's.",
+            " * - What every view's element does, e.g. drawing its partida, is `SpellElement`'s.",
+            " */",
+            "export class PartidaElement extends SpellElement<Partida> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "partida", [])',
+            "}",
+            "core.useElement(Partida, PartidaElement)",
+            '// su "menú del juego" es un menú de "deshacer", "-" y "rehacer"',
+            'core.describeMenu(Partida, "menúDelJuego", { items: ["undo", "-", "redo"] })'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... sin el sujeto:  `- "menú del juego" es un menú de "repartir" y "deshacer"`
+classesEs.addRule(DefineMenu, {
+  syntax: "{type:subject_implied} {menu:quoted_member} es un (menú|menu) de [items:{item:text} (,|y)]"
+})
+
+// cuál de los menús de una aplicación es su barra de menú (épica `elemental-spell` P10):
+// `- su barra de menú es "menú del juego"`
+classesEs.addRule(MenuBar, {
+  syntax: "{type:subject_its} barra de (menú|menu) es {menu:text}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["una partida es una aplicación donde:", '\t- su barra de menú es "menú del juego"'],
+          js: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            '  static menuBar = "menú del juego"',
+            "}"
+          ],
+          ts: [
+            "export class Partida extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "",
+            '  static menuBar = "menú del juego"',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a partida, drawn in its own element, e.g. by `draw the partida`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its partida's properties;  its methods call its partida's.",
+            " * - What every view's element does, e.g. drawing its partida, is `SpellElement`'s.",
+            " */",
+            "export class PartidaElement extends SpellElement<Partida> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "partida", [])',
+            "}",
+            "core.useElement(Partida, PartidaElement)"
+          ]
+        }
+      ]
+    }
+  ]
 })
 
 // poner una parte en un dibujo:  `dibujar su frente`

@@ -286,7 +286,18 @@ Its first line is how you call it, with each blank's type in brackets:
   - They're the template's data, kept beside the class:
     `core.describeAction(Card, "turnOver", { title: "turn it over", shortcuts: ["meta+T"], ... })`,
     each condition a getter of its own, `turnOverIsEnabled`.
-  - Nothing runs from them yet:  menus, buttons and keys that run an action come later.
+  - Its shortcut runs it while it's enabled, from the focused thing up to the app;
+    run any way, an action `undone as "Turn Card"` is one undo step, and the app's undo then reads `Undo Turn Card`.
+  - A template's MENU lists its actions, and the app's own `undo` and `redo`, `"-"` a line between groups:
+
+    ```spell
+    solitaire is an app where:
+    	- its "game menu" is a menu of "deal", "-", "undo" and "redo"
+    	- its menu bar is "game menu"
+    ```
+
+    - The page draws it as the app's menu bar, as a toolbar (`<ui-toolbar menu="game menu" />`), and as a right
+      click's menu (`context-menu="game menu"` on any element of a drawing), each item a `<ui-action>`.
 
 ### Lists count from 1, and `where`
 

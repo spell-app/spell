@@ -15,14 +15,16 @@ solitaire is an app where:
 		- shortcut meta+Z
 		- enabled when its moves > 0
 		set its moves to its moves - 1
+	- its "GameMenu" is a menu of "start a new game", "-", "undo the last move" and "redo"
 	- on mouse down:
 		// A press a card passed on.
 		print "pressed"
 	- to draw it:
-		<ui-toolbar />
-		<ui-text>{its moves} moves</ui-text>
+		<ui-toolbar menu="GameMenu" />
+		<ui-text context-menu="GameMenu">{its moves} moves</ui-text>
 		for each column in its columns
 			<ui-segment>{draw the column}</ui-segment>
+	- its menu bar is "GameMenu"
 
 a "score page" is a page where:
 	// A page that lists games, best first.

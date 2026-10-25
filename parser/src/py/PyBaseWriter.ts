@@ -1490,14 +1490,14 @@ export class PyBaseWriter extends P.ProgramWriter {
    * - Fields and members by Python's names:  `"enabled_when": "turn_over_is_enabled"`.
    */
   ASTTypeDescription(node: P.ASTTypeDescription): string {
-    const method = node.describes === "action" ? "describe_action" : "describe_event"
-    const name = this.quoted(node.describes === "action" ? this.nameOf(node.name) : node.name)
+    const method = { action: "describe_action", event: "describe_event", menu: "describe_menu" }[node.describes]
+    const name = this.quoted(node.describes === "event" ? node.name : this.nameOf(node.name))
     const fields = Object.entries(node.description).map(([key, value]) => {
       return `${this.quoted(this.nameOf(key, "property"))}: ${this.descriptionValue(value)}`
     })
     const code = `core.${method}(${this.write(node.type)}, ${name}, {${fields.join(", ")}})`
-    // an event's one line says it;  an action's spell is the method just above
-    return node.describes === "event" ? this.withSpell(node, code) : code
+    // an event's and a menu's one line says it;  an action's spell is the method just above
+    return node.describes === "action" ? code : this.withSpell(node, code)
   }
 
   /** One field of a type's description as Python -- see `P.ASTDescriptionValue`. */
@@ -1505,6 +1505,9 @@ export class PyBaseWriter extends P.ProgramWriter {
     if (typeof value === "string") return this.quoted(value)
     if (Array.isArray(value)) return `[${value.map((item) => this.quoted(item)).join(", ")}]`
     if ("member" in value && typeof value.member === "string") return this.quoted(this.nameOf(value.member))
+    if ("members" in value && Array.isArray(value.members)) {
+      return `[${value.members.map((item) => this.quoted(item === "-" ? item : this.nameOf(item))).join(", ")}]`
+    }
     const entries = Object.entries(value as Record<string, string>)
     return `{${entries.map(([key, text]) => `${this.quoted(key)}: ${this.quoted(text)}`).join(", ")}}`
   }
