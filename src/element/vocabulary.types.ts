@@ -158,14 +158,6 @@ export type AttributeSpec = {
 }
 
 /**
- * What a value IS, as a form edits it.
- * - `text`, `number`, `boolean`, `date`:  one value of that type
- * - `choice`:  one of `values` (or `choicesFrom`'s)
- * - `list`:  many, each `of` a type
- * - `thing`:  a nested thing, with its own `attributesOf`
- * - `data`:  anything else (JSON), edited as text
- */
-/**
  * The sections an inspector shows a tag's attributes in, in this order (`ATTRIBUTE_GROUPS`):
  * - name:  what it's called (`name`, `label`, `title`)
  * - content:  what it shows (`icon`, `description`, `image`)
@@ -191,7 +183,16 @@ export const ATTRIBUTE_GROUPS = [
 /** One of them. */
 export type AttributeGroup = (typeof ATTRIBUTE_GROUPS)[number]
 
-export type ValueType = "text" | "number" | "boolean" | "date" | "choice" | "list" | "thing" | "data"
+/**
+ * What a value IS, as a form edits it.
+ * - `text`, `number`, `boolean`, `date`:  one value of that type
+ * - `choice`:  one of `values` (or `choicesFrom`'s)
+ * - `icon`:  an icon's name (`star`, `address book`), picked from a grid of glyphs (`<ui-icon-picker>`)
+ * - `list`:  many, each `of` a type
+ * - `thing`:  a nested thing, with its own `attributesOf`
+ * - `data`:  anything else (JSON), edited as text
+ */
+export type ValueType = "text" | "number" | "boolean" | "date" | "choice" | "icon" | "list" | "thing" | "data"
 
 /**
  * What a property editor reads (`<ui-property-editor schema>`):  a thing's name and its attributes.
