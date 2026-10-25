@@ -72,7 +72,8 @@ As WWOD §4, plus:
   `spell/cli`, `spell/server`, `spell/util/node/json5`;  same-folder peers `./peer`.
   - The kit's own TypeScript programs read those names as its SOURCE (`spell-source`), never its declarations:
     the kit's AGENTS.md, "Imports across repos".
-- `cli` uses `server` and util's json5.  Nothing else in the kit imports it.
+- `cli` uses `server`, util's json5 and util's generic files, by file (`spell/util/string`, `spell/util/number`).
+  Nothing else in the kit imports it.
 
 ## Tests
 

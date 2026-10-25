@@ -4,7 +4,8 @@
  * - An EXAMPLE is a command a page prints, and what it printed:  an `sh` block, then, right after it, a fold whose
  *   summary is `Output`, holding a `text` block.  It runs from its page's repo root, and must print what the fold says.
  * - A command with no Output fold is never run:  installs, clones, servers.
- * - Node 24 runs it as is (its types stripped):  node's own modules only, `import type` for types.
+ * - Node 24 runs it as is (its types stripped):  node's own modules only (and util's standalone `spell/util/string.ts`),
+ *   `import type` for types.
  *
  * ````markdown
  * ```sh
@@ -40,6 +41,8 @@ import { spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, writeFileSync, chmodSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, relative, resolve } from "node:path"
+
+import { escapeRegExp, indented } from "spell/util/string.ts"
 
 import { ReadmeCheck } from "./readme-check.ts"
 
@@ -167,8 +170,8 @@ export class ReadmeTest {
       console.log(`${ok ? "✓" : "✗"} ${example.page}:${example.line}  ${firstLine(example.commands)}`)
       if (ok) continue
       failed++
-      console.log(indent(`expected:\n${indent(tidyLines(example.expected).join("\n"))}`))
-      console.log(indent(`printed:\n${indent(tidyLines(printed).join("\n"))}`))
+      console.log(indented(`expected:\n${indented(tidyLines(example.expected).join("\n"), 2)}`, 2))
+      console.log(indented(`printed:\n${indented(tidyLines(printed).join("\n"), 2)}`, 2))
     }
     console.log(`${examples.length - failed} of ${examples.length} examples pass, on ${pages.length} pages`)
     return failed ? 1 : 0
@@ -261,11 +264,6 @@ function linePattern(line: string): RegExp {
   return new RegExp(`^${line.split("...").map(escapeRegExp).join(".*")}$`)
 }
 
-/** `text` with every regular expression character escaped. */
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
-
 /** `text` without terminal colour codes. */
 function stripColours(text: string): string {
   // oxlint-disable-next-line no-control-regex -- the escape character starts every colour code
@@ -275,14 +273,6 @@ function stripColours(text: string): string {
 /** `text`'s first line. */
 function firstLine(text: string): string {
   return text.split("\n")[0]
-}
-
-/** `text`, each line indented two spaces. */
-function indent(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => `  ${line}`)
-    .join("\n")
 }
 
 if (import.meta.main) process.exitCode = new ReadmeTest().main(process.argv.slice(2))

@@ -88,11 +88,13 @@ Each folder of `src/` links to its own `AGENTS.md`:  read it before working ther
 - Which folder may use which:
   - `toolchain` and `util` are the bottom:  every config uses the toolchain.
   - `server` uses node, `json5`, linkedom, oxfmt (`formatHTML()`, loaded when it runs), util's json5, util's
-    `persist/` (the site header's preferences) and the toolchain's format settings.
+    `persist/` (the site header's preferences), util's generic `string` and `time`, and the toolchain's format
+    settings.
   - `element` uses util's generic files, one by one, and Solid.
   - `element-tools` uses `element`'s node-safe leaves (`SkeletonText`, the vocabulary types), server, Vite and `tsx`.
   - `test-helpers` use the DOM, Solid and `element`.
-  - `cli` uses server and util's json5;  nothing in the kit imports `cli`.
+  - `cli` uses server, util's json5 and util's generic files (`spell/util/string`, `spell/util/number`);
+    nothing in the kit imports `cli`.
     - It names no child repo in its code:
       each one hands it its commands, by its `package.json` (`"spell": { "commands", "hooks" }`).
   - Nothing in the kit imports a child repo:  every arrow points down.

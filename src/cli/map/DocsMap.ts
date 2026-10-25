@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, extname, join, posix } from "node:path"
 
+import { slug } from "spell/util/string"
 import { contentFolderOf } from "spell/server/contentFolder"
 
 import { MAP_FOLDER, MAP_ORIGIN, type MapGraph, type MapLink, type MapNode, type MappedRepo } from "./map.types"
@@ -126,9 +127,13 @@ const CODE_NAME = /^<?[\w$@.:/#-]{2,80}(\(\))?>?$/
 function sectionsOf(text: string, path: string): Array<{ id?: string; title: string; text: string }> {
   const marks: Array<{ at: number; id: string; title: string; part?: string }> = []
   for (const match of text.matchAll(HTML_HEADING))
-    marks.push({ at: match.index!, id: attribute(match[0], "id") ?? slug(plain(match[2]!)), title: plain(match[2]!) })
+    marks.push({
+      at: match.index!,
+      id: attribute(match[0], "id") ?? slug(plain(match[2]!), { as: "github" }),
+      title: plain(match[2]!)
+    })
   for (const match of text.matchAll(MD_HEADING))
-    marks.push({ at: match.index!, id: slug(match[2]!), title: match[2]!.trim() })
+    marks.push({ at: match.index!, id: slug(match[2]!, { as: "github" }), title: match[2]!.trim() })
   for (const match of text.matchAll(TITLED_ELEMENT)) {
     const id = attribute(match[0], "id")
     const title = attribute(match[0], "title") ?? attribute(match[0], "header")
@@ -238,15 +243,6 @@ function plain(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
-}
-
-/** A heading's anchor, from its text:  `How it works` => `how-it-works`. */
-function slug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w]+/g, "-")
-    .replace(/^-|-$/g, "")
 }
 
 /** The files git tracks in the repo at `root`, from its root;  none when it isn't one. */

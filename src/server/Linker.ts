@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { parseHTML } from "linkedom"
 
+import { escapeHTML, slug } from "spell/util/string"
 import type { SRV } from "spell/server"
 
 import { contentFolderOf } from "./contentFolder"
@@ -163,7 +164,7 @@ export class Linker {
       let href = URL_START.test(dest) ? dest : relative(pageDir, this.virtual(dest)) || "."
       if (isDir(dest) && !href.endsWith("/")) href += "/"
       out.push(text.slice(last, m.index))
-      out.push(`<a href="${escapeAttribute(href)}" target="${this.targetFor(dest)}">${m[0]}</a>`)
+      out.push(`<a href="${escapeHTML(href)}" target="${this.targetFor(dest)}">${m[0]}</a>`)
       last = m.index + m[0].length
       linked++
     }
@@ -514,19 +515,6 @@ const ALIAS = /^#([\w-]+)\/(.+)$/
 ////////////////
 // ## Helpers
 ////////////////
-
-/** `text` lower-cased, every run of non-alphanumerics a single `-`, none at the ends. */
-function slug(text: string): string {
-  return text
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase()
-}
-
-/** `text` safe inside a double-quoted attribute. */
-function escapeAttribute(text: string): string {
-  return text.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-}
 
 /**
  * Add every file under `dir` to `index`:

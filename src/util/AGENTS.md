@@ -20,7 +20,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `@resets("name")`, on an accessor:  each write to it drops that kept value too
       - e.g. `@E.resets("load") static accessor url`
   - `class.ts` -- `hasOwnProp` ...
-  - `string.ts` -- case conversion, `numberToWord`, `suggest`
+  - `string.ts` -- case conversion, `numberToWord`, `suggest`;
+    and the small text helpers every repo wrote by hand (epic `coherence` I4):
+    - `slug(text, { as, fallback })`:  an id's slug (accents and apostrophes dropped), or GitHub's heading anchor
+      (`as: "github"`, accented letters kept)
+    - `withoutAccents(text, { keep })`, `escapeRegExp()`, `escapeHTML()`, `dedent()`, `indented(text, indent)`
+  - `number.ts` -- `clamp()`, and `kb()`:  a size in KB, of 1024 bytes
+  - `time.ts` -- LOCAL dates and times (epic `coherence` I5):  `localDate()`, `clockTime()`, `compactTime()`,
+    `localTime()` / `localMinutes()` with the offset, `localMidnight()`
+    - never `toISOString().slice(0, 10)` for a day:  that's the UTC date, tomorrow in California from 5pm
+  - `color.ts` -- colour maths (epic `coherence` I13):  OKLCH <-> sRGB, fitting into sRGB (`clipped()`,
+    `toGamut()`), luminance, contrast;  one shape each (`Rgb`, `Oklch`), hex in and out
+  - `string.ts`, `number.ts`, `time.ts` and `color.ts` import nothing, so plain `node` loads them too,
+    with their extension (`spell/util/time.ts`)
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`
 - It sits UNDER every other package, and imports NONE of them.

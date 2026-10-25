@@ -7,7 +7,7 @@
  *   - the TypeScript writer (`P.TSWriter`, in `parser`, which can't import either) writes each view's element class
  */
 
-import { camelCase, kebabCase } from "spell/util/string"
+import { camelCase, kebabCase, withoutAccents } from "spell/util/string"
 
 /**
  * Tag of the element for class `className` in project `project`:
@@ -42,10 +42,7 @@ const DRAWABLE_WORD = /^(drawables?|dibujables?)$/
 
 /** `name` as a tag's words:  kebab-case, lowercase, only letters, digits and single dashes, accents dropped. */
 function tagWords(name: string): string {
-  return kebabCase(name.replace(/_/g, "-"))
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{M}+/gu, "")
+  return withoutAccents(kebabCase(name.replace(/_/g, "-")).toLowerCase())
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^[^a-z]+|-+$/g, "")

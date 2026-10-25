@@ -2,8 +2,8 @@
  * `tools/readme-check.ts`:  the README check, the one Markdown check every repo's pages get
  * (`yarn readme:check` at the kit's root;  epic `readme` P8).
  * - oxfmt skips Markdown (the toolchain's `fmtConfig` ignores `**\/*.md`), so this is what keeps the pages true.
- * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts`'s rules, so node's own modules only,
- *   `import type` for types, no `enum` or parameter property.
+ * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts`'s rules, so node's own modules only
+ *   (and util's standalone `spell/util/string.ts`), `import type` for types, no `enum` or parameter property.
  *
  * ```sh
  * yarn readme:check               # every page:  README.md and README-*.md at the root of the kit and each child repo
@@ -15,6 +15,8 @@
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
+
+import { slug } from "spell/util/string.ts"
 
 /****************
  * ### `ReadmeCheck`
@@ -526,10 +528,7 @@ export function slugFor(heading: string): string {
             .replace(/(^|[^\w])_(.+?)_(?=[^\w]|$)/g, "$1$2")
     )
     .join("")
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{M}\p{N}\p{Pc}\- ]/gu, "")
-    .replace(/ /g, "-")
+  return slug(text, { as: "github" })
 }
 
 if (import.meta.main) process.exitCode = new ReadmeCheck().main(process.argv.slice(2))

@@ -13,7 +13,8 @@
  *   them out on purpose);  history elements' links are plumbing, so they're fixed too.
  * - Asset addresses (`<link>`, `<script>`, `src=`) are `epic migrate`'s:  its `engine-asset-paths` step (I63).
  * - Idempotent:  a second run changes nothing.
- * - Node 24 runs it as is (its types stripped):  node's own modules only, as `tools/repos.ts`.
+ * - Node 24 runs it as is (its types stripped):  node's own modules only, as `tools/repos.ts`,
+ *   and util's standalone `spell/util/string.ts`.
  *
  * ```sh
  * node tools/content-links.ts                 # dry run:  what it would change, per file, and what it left
@@ -24,6 +25,8 @@
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { slug } from "spell/util/string.ts"
 
 ////////////////
 // ## Layout
@@ -333,11 +336,7 @@ const REPOS = ["spell-parser", "spell-ui", "spell-brand", "spell-epic", "spell-a
 
 /** The tab name the link check gives kit-relative `rel`:  `Linker.targetFor()`'s formula. */
 export function targetFor(rel: string): string {
-  const slug = rel
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase()
-  return `src-${slug.slice(0, 80)}`
+  return `src-${slug(rel).slice(0, 80)}`
 }
 
 ////////////////

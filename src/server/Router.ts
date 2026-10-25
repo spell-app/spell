@@ -1,3 +1,4 @@
+import { escapeRegExp } from "spell/util/string"
 import type { Handler, Next, RouteParams } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Reply } from "./Reply"
@@ -184,7 +185,7 @@ export function compilePattern(pattern: string): (path: string) => RouteParams |
       } else if (segment === "*") {
         names.push("0")
         source += "(?:/(.*))?"
-      } else source += `/${segment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`
+      } else source += `/${escapeRegExp(segment)}`
     }
   }
   const regex = new RegExp(`^${source}/?$`, "i")

@@ -129,6 +129,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - util's json5
     - util's `persist/`, for the site header's preferences:
       `spell/util/persist`, never the `spell/util` barrel, which would bundle lodash into every page
+    - util's generic small helpers, by file for the same reason:  `spell/util/string` (slugs, escaping),
+      `spell/util/time` (a run's stamp)
     - the toolchain's format settings
   - So anything node-side may import it:
     ui's tools and site, spaces' node server, cli, app, epics, goals, the VS Code extension.
