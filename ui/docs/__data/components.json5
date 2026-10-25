@@ -11748,7 +11748,11 @@
         },
         {
           "name": "grid",
-          "description": "The grid of glyphs (`role=listbox`)."
+          "description": "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
+        },
+        {
+          "name": "heading",
+          "description": "A group's heading in the grid;  the one at the grid's top stays there as it scrolls."
         },
         {
           "name": "cell",
@@ -11816,6 +11820,11 @@
           "key": "noIconsMatch",
           "text": "No icons match",
           "description": "The grid's message when the search finds nothing."
+        },
+        {
+          "key": "otherIcons",
+          "text": "Other",
+          "description": "The heading of the grid's last group:  the icons in none of Font Awesome's categories."
         }
       ],
       "mainTag": "ui-icon-picker",
@@ -34372,7 +34381,12 @@
           "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
         }
       ],
-      "slots": [],
+      "slots": [
+        {
+          "name": "end",
+          "description": "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+        }
+      ],
       "events": [
         {
           "name": "ui-changed",
@@ -38436,6 +38450,16 @@
           "name": "--ui-icon-picker-none-color",
           "default": "var(--ui-text-light)",
           "type": "color"
+        },
+        {
+          "name": "--ui-icon-picker-heading-color",
+          "default": "var(--ui-text-light)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-icon-picker-heading-size",
+          "default": "0.8125em",
+          "type": "length"
         }
       ]
     },

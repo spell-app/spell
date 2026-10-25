@@ -12,6 +12,7 @@
  *       - a `.divider`, then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
  *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
+ *       - the `end` slot's rows, the page's own
  *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
  *     Then its tooltip
@@ -168,6 +169,37 @@
     height: 1px;
     margin: 0.375em 0.5em;
     background: var(--ui-border-color);
+  }
+  /* The `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
+  .panel > slot::slotted(*) {
+    /* a theme's row's columns:  its icon where a row's check is, its words where its name is */
+    display: grid;
+    grid-template-columns: 1.125em minmax(0, 1fr);
+    column-gap: 0.5em;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.5em 0.625em;
+    border: 0;
+    border-radius: calc(var(--_ui-docs-themes-overlay-radius) - 0.375em);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  /* the divider above the first, as `.divider` draws one:  inset 0.5em, 0.375em from what's above and below */
+  .panel > slot::slotted(:first-child) {
+    margin-block-start: 0.375em;
+    padding-block-start: calc(0.5em + 0.375em);
+    background-image: linear-gradient(var(--ui-border-color), var(--ui-border-color));
+    background-position: center top;
+    background-size: calc(100% - 1em) 1px;
+    background-repeat: no-repeat;
+  }
+  .panel > slot::slotted(:hover) {
+    background-color: var(--ui-surface-muted);
   }
 
   /* Light | Dark | Auto:  three keys on a sunken track, the chosen one raised. */

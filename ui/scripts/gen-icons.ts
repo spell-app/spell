@@ -4,8 +4,11 @@
  * - `fa7-free/`:  FA's `solid/` and `regular/` SVGs, plus the brand extras (`scripts/iconExtras.ts`);  the default
  * - `fa7-brands/`:  FA's `brands/` SVGs
  * - `fomantic/`:  no SVGs;  an index whose entries point at the two folders above, named by Fomantic
- * - also `src/icons/data/search.json`, solid search terms for the docs icon browser
+ * - also `src/icons/data/search.json` (`IconSearchFile`):  Font Awesome's search terms and categories,
+ *   for `<ui-icon-picker>` and the docs icon browser
  * - MUST run in a worktree while tests run elsewhere:  it deletes and rewrites every pack folder.
+ * - `--search-only`:  rewrites `search.json` alone, from the same release, and leaves the packs as they are.
+ *   It needs no Fomantic clone (below), so a fresh checkout can run it.
  * - The SVGs are FA's files BYTE FOR BYTE, licence comment included (FA's IP:  the attribution stays), in FA's own
  *   layout (`<style>/<name>.svg`), so a pack's `base` can point at jsDelivr's copy of the same package.
  * - Downloads (and caches under the OS temp dir, NOT the repo) the pinned package tarball, `FA_VERSION`;
@@ -26,6 +29,7 @@ import { IconName } from "spell-ui/icons/IconName"
 import { environment } from "spell-ui/tools/environment"
 import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
+import type { IconSearchFile, IconSearchFileCategory } from "spell-ui/icons"
 import type { IconPackReport } from "spell-ui/tools/tools.types"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 
@@ -53,9 +57,13 @@ class IconGenerator {
   private readonly packageDir =
     environment.fontAwesomeDir ?? path.join(tmpdir(), `spell-ui-fontawesome-free-${FA_VERSION}`)
 
-  /** Runs the full pipeline and prints what it built. */
+  /** Runs the full pipeline and prints what it built;  `--search-only`:  `search.json` alone. */
   async run() {
     const metadata = await this.loadMetadata()
+    if (process.argv.includes(SEARCH_ONLY)) {
+      this.writeSearchFile(metadata)
+      return
+    }
     const byStyle = IconGenerator.byStyle(metadata)
     // NOTE: wiped first so an icon Font Awesome drops doesn't linger
     rmSync(this.packsDir, { recursive: true, force: true })
@@ -68,9 +76,7 @@ class IconGenerator {
     const brands = await this.brandsPack(byStyle, faAliases)
     const fomanticPack = await this.fomanticPack(fomantic.names, byStyle)
 
-    const search = IconGenerator.searchIndex(metadata)
-    mkdirSync(this.dataDir, { recursive: true })
-    writeFileSync(path.join(this.dataDir, "search.json"), JSON.stringify(search))
+    this.writeSearchFile(metadata)
 
     for (const report of [free, brands, fomanticPack]) IconGenerator.print(report)
     Terminal.out(`\n  fomantic:  ${Object.keys(fomantic.names).length} names;  dropped ${fomantic.dropped.length}:`)
@@ -123,6 +129,25 @@ class IconGenerator {
     for (const name of names) {
       copyFileSync(path.join(this.packageDir, "package/svgs", style, `${name}.svg`), path.join(target, `${name}.svg`))
     }
+  }
+
+  /** Font Awesome's categories, from the same release:  its `metadata/categories.yml`. */
+  private loadCategories(): FaCategory[] {
+    return IconGenerator.parseCategories(
+      readFileSync(path.join(this.packageDir, "package/metadata/categories.yml"), "utf8")
+    )
+  }
+
+  /** Writes `src/icons/data/search.json`, and prints its size. */
+  private writeSearchFile(metadata: FaMetadata) {
+    const search = IconGenerator.searchFile(metadata, this.loadCategories())
+    const text = JSON.stringify(search)
+    mkdirSync(this.dataDir, { recursive: true })
+    writeFileSync(path.join(this.dataDir, "search.json"), text)
+    Terminal.out(
+      `  src/icons/data/search.json:  ${Buffer.byteLength(text)} bytes;  ` +
+        `${Object.keys(search.terms).length} icons' terms, ${search.categories.length} categories`
+    )
   }
 
   ////////////////
@@ -354,24 +379,66 @@ class IconGenerator {
   }
 
   /**
-   * Solid-only `name -> search terms`, capped at `SEARCH_TERMS_CAP` per icon.
-   * - throws past `SEARCH_BUDGET`, rather than silently shipping a heavier docs page
+   * `search.json`'s content (`IconSearchFile`):  search terms by file name, and the categories.
+   * - Terms:  every solid icon's, and every icon a category lists (a few brands:  `youtube` is in Film + Video),
+   *   capped at `SEARCH_TERMS_CAP` each;  an empty list for one with none, so each category's icons are keys.
+   * - Categories:  only their FREE icons, and only those with any;  each icon as a place in the terms' key list,
+   *   written as the gap from the one before (`IconSearchFileCategory`).
+   * - throws past `SEARCH_BUDGET`, rather than silently shipping a heavier picker
    */
-  private static searchIndex(metadata: FaMetadata): Record<string, string[]> {
+  private static searchFile(metadata: FaMetadata, categories: readonly FaCategory[]): IconSearchFile {
+    const listed = new Set(categories.flatMap((category) => category.icons).filter((name) => name in metadata))
     const terms: Record<string, string[]> = {}
     for (const [name, entry] of Object.entries(metadata)) {
-      if (!entry.free.includes("solid")) continue
-      const list = entry.search?.terms?.slice(0, SEARCH_TERMS_CAP)
-      if (list?.length) terms[name] = list
+      if (!entry.free.includes("solid") && !listed.has(name)) continue
+      const list = entry.search?.terms?.slice(0, SEARCH_TERMS_CAP) ?? []
+      if (list.length || listed.has(name)) terms[name] = list
     }
-    const bytes = Buffer.byteLength(JSON.stringify(terms))
+    // the places as the READER will see them:  `Object.keys()` of the parsed file, which puts `0` ... `9` first
+    const placeOf = new Map(Object.keys(terms).map((name, place) => [name, place]))
+    const written: IconSearchFileCategory[] = []
+    for (const { id, label, icons } of categories) {
+      const places = icons.flatMap((name) => placeOf.get(name) ?? []).sort((a, b) => a - b)
+      if (places.length) written.push({ id, label, icons: places.map((place, at) => place - (places[at - 1] ?? 0)) })
+    }
+    const file: IconSearchFile = { terms, categories: written }
+    const bytes = Buffer.byteLength(JSON.stringify(file))
     if (bytes > SEARCH_BUDGET) {
       throw new Error(
-        `IconGenerator.searchIndex():  search.json would be ${bytes} bytes, over its ${SEARCH_BUDGET} budget;  ` +
+        `IconGenerator.searchFile():  search.json would be ${bytes} bytes, over its ${SEARCH_BUDGET} budget;  ` +
           `lower SEARCH_TERMS_CAP`
       )
     }
-    return terms
+    return file
+  }
+
+  /**
+   * Font Awesome's `categories.yml`, read line by line:  it's always the same four kinds of line,
+   * so this needs no YAML library.
+   * - `<id>:`, then `  icons:`, its icons as `    - <name>`, then `  label: <label>`
+   * - a value YAML would misread is quoted:  `- 'n'`, `- '0'`
+   * - throws on any other line, rather than drop a category silently
+   */
+  private static parseCategories(text: string): FaCategory[] {
+    const categories: FaCategory[] = []
+    for (const line of text.split("\n")) {
+      const category = categories.at(-1)
+      const [, id] = /^([a-z0-9-]+):$/.exec(line) ?? []
+      const [, icon] = /^ {4}- (.+)$/.exec(line) ?? []
+      const [, label] = /^ {2}label: (.+)$/.exec(line) ?? []
+      if (id) categories.push({ id, label: id, icons: [] })
+      else if (icon && category) category.icons.push(IconGenerator.unquote(icon))
+      else if (label && category) category.label = IconGenerator.unquote(label)
+      else if (line.trim() && line !== "  icons:") {
+        throw new Error(`IconGenerator.parseCategories():  can't read categories.yml's line "${line}"`)
+      }
+    }
+    return categories
+  }
+
+  /** A YAML scalar without its quotes:  `'n'` => `n`. */
+  private static unquote(value: string): string {
+    return value.replace(/^(["'])(.*)\1$/, "$2")
   }
 
   /** One pack's summary line, and any icon left without a name. */
@@ -437,11 +504,17 @@ const FOMANTIC_MAPS: { name: string; stripOutlineSuffix: boolean }[] = [
   { name: "icon-brand-aliases-map", stripOutlineSuffix: false }
 ]
 
-/** Solid search terms kept per icon, to fit `search.json`'s budget -- see `notes/icons.md`. */
+/** Search terms kept per icon, to fit `search.json`'s budget -- see `notes/icons.md`. */
 const SEARCH_TERMS_CAP = 5
 
-/** `search.json`'s size budget, in bytes (100 KB). */
-const SEARCH_BUDGET = 100_000
+/**
+ * `search.json`'s size budget, in bytes (115 KB):  its terms ~100 KB, its categories ~15 KB.
+ * - A picker loads it as it opens, so it stays one file, and small.
+ */
+const SEARCH_BUDGET = 115_000
+
+/** The flag that writes `search.json` alone (`run()`). */
+const SEARCH_ONLY = "--search-only"
 
 ////////////////
 // ## Font Awesome metadata shape
@@ -469,6 +542,9 @@ type FaIconEntry = {
 
 /** Font Awesome metadata, keyed by canonical (kebab-case) icon name. */
 type FaMetadata = Record<string, FaIconEntry>
+
+/** One category of `metadata/categories.yml`:  its id, its label, and its icons' names, Pro ones too. */
+type FaCategory = { id: string; label: string; icons: string[] }
 
 /**
  * The Font Awesome Free styles, and the folders their SVGs live in.
