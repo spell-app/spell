@@ -1,7 +1,7 @@
 # Spell
 
 ```spell
-a "card" is a drawable thing:
+a "card" is a view:
 	- its "suit" is one of clubs, diamonds, hearts or spades
 	- its "color" is:
 		red if its suit is diamonds or hearts
@@ -28,7 +28,7 @@ To the compiler, it's a class called `Card`, and each bullet became a member of 
 - `isAFaceCard`, a question the card answers yes or no
 - `isARank(rank)` and `isTheRankOfSuit(rank, suit)`, from the two sentences with blanks in them:
   each blank is named after a property, so the compiler wrote the method bodies too
-- and `drawable` makes each card an element of its own on the page, `<solitaire-card>`
+- and `view` makes each card an element of its own on the page, `<solitaire-card>`
 
 The quotes mark new words, which the parser learns as it reads.
 From here on, a program can say `if the card is a queen`, and that compiles to `if (card.isARank("queen"))`.
@@ -36,16 +36,16 @@ From here on, a program can say `if the card is a queen`, and that compiles to `
 <details>
 <summary>What those sentences compile to, in JavaScript, TypeScript and Python</summary>
 
-The whole output, unchanged, for a project named `solitaire` (hence `<solitaire-card>`):
+The whole output, unchanged, for an app named `solitaire` (hence `<solitaire-card>`):
 `spell compile --stdout`, and the same with `--target ts/solid` and `--target py`.
 
 <details>
 <summary>JavaScript</summary>
 
 ```js
-import { core, Thing, List, App, Drawable, DrawableList } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList } from "@spell/core"
 
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
@@ -85,13 +85,13 @@ export class Card extends Drawable {
 <summary>TypeScript</summary>
 
 ```ts
-import { core, Thing, List, App, Drawable, DrawableList, prop } from "@spell/core"
+import { core, Thing, List, App, View, ViewableList, prop } from "@spell/core"
 import { E, SpellElement } from "@spell/elements"
 
 export type Suit = (typeof Card.Suits)[number]
 export type Rank = (typeof Card.Ranks)[number]
 
-export class Card extends Drawable {
+export class Card extends View {
   static elementTag = core.defineElement(this, "solitaire")
 
   // - its "suit" is one of clubs, diamonds, hearts or spades
@@ -165,10 +165,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from spell_core import Drawable, prop
+from spell_core import View, prop
 
 
-class Card(Drawable):
+class Card(View):
     # - its "suit" is one of clubs, diamonds, hearts or spades
     SUITS = ("clubs", "diamonds", "hearts", "spades")
     suit = prop(one_of=SUITS)
@@ -209,11 +209,11 @@ What to notice:
 - **Python gets Python's names, and Python's words.**
   `is_a_face_card` and `is_the_rank_of_suit`, a `SUITS` tuple, `@property` on the color;
   and `core.includes(["diamonds", "hearts"], this.suit)` became `self.suit in ["diamonds", "hearts"]`.
-  `spell_core` comes in only for what Python has no word of its own for:  `Drawable` and `prop`.
-- **One word, `drawable`, wrote a second class.**  In TypeScript, `CardElement` is the `<solitaire-card>` tag:
+  `spell_core` comes in only for what Python has no word of its own for:  `View` and `prop`.
+- **One word, `view`, wrote a second class.**  In TypeScript, `CardElement` is the `<solitaire-card>` tag:
   its vocabulary lists its attributes, its methods ask its card,
   and the `declare module` block at the end teaches JSX the tag.
-  The `solitaire` in the tag is the project's name.
+  The `solitaire` in the tag is the app's name.
 - **The types thin out at the edges.**
   Python's `color` comes out `-> Any`, and so do its blanks, where TypeScript says `Rank` and `Suit`;
   and JSX takes any attribute at all on `<solitaire-card>` (`[attribute: string]: unknown`).
@@ -264,7 +264,7 @@ attributes, properties and events on the outside, a component behind it drawing 
   and each element is its own error boundary.
 - [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md) is about sixty families of these, on [the kit's element framework](README-element.md).
   A page imports ONE, `<ui-root>`, and it loads each of the others the first time the page uses it.
-- Your program's things are elements too:  that `drawable` card draws as its own `<solitaire-card>`.
+- Your program's things are elements too:  that card is a `view`, so it draws as its own `<solitaire-card>`.
 - The catch:  Spell UI isn't on npm yet (below, "Coming").
 
 ### The packages are source, all the way down
@@ -820,8 +820,8 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [spell-parser/README-parser.md](https://github.com/spell-app/spell-parser/blob/main/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
 | [spell-parser/README-rulex.md](https://github.com/spell-app/spell-parser/blob/main/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |
 | [spell-parser/README-markdown.md](https://github.com/spell-app/spell-parser/blob/main/README-markdown.md) | <ul><li>Markdown on Spell's parser:  a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, but slower and bigger than marked;  who draws with it</li><li>the spec as its scoreboard</li></ul> |
-| [spell-parser/README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  types, phrases, actions, lists, drawing, events, tests</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
-| [spell-parser/README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a type is a class, and the class is the core's</li><li>its pieces:  one object, built as it loads</li><li>three things a reader trips on, the Python runtime beside it</li><li>who may import it:  one copy per running app</li></ul> |
+| [spell-parser/README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [spell-parser/README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's</li><li>its pieces:  one object, built as it loads</li><li>three things a reader trips on, the Python runtime beside it</li><li>who may import it:  one copy per running app</li></ul> |
 | [spell-parser/README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md) | <ul><li>one program, four targets, and what each costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it;  a library for code that isn't Spell</li><li>Python in Python's own words;  choosing a target</li><li>🌱 WebAssembly, and a program on node mirrored in the page</li></ul> |
 | [spell-parser/README-spanish.md](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md) | <ul><li>Spell in Spanish:  Solitario beside Solitaire, line for line</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  keeping them in step</li><li>the edges</li></ul> |
 | [spell-ui/README.md](https://github.com/spell-app/spell-ui/blob/main/README.md) | <ul><li>Spell UI, by contrast with other component libraries</li><li>thirty seconds, two ways;  `<ui-root>`, the top of every page</li><li>component packs;  the 62 families;  other ways to load</li><li>what it costs and assumes;  working on it</li><li>every page of Spell UI</li></ul> |

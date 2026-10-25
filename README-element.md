@@ -73,7 +73,7 @@ the browser upgrades every one on the page the moment the class is defined, the 
 
 This is the kit's element framework, `spell/element` (namespace `E`), and every set of elements in Spell is
 written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-app>` and `<spell-editor>`,
-and the element a Spell program draws each drawable thing in, like `<solitaire-card>`.
+and the element a Spell program draws each view in, like `<solitaire-card>`.
 Its build tools and the test helpers every set's tests use sit beside it, on this page too.
 
 - Code:  [src/element/](src/element/)
@@ -670,7 +670,7 @@ How it works:
 | --- | --- | --- |
 | Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell-ui/blob/main/README.md) |
 | spell-epic | a pack, prefix `epic-`:  every epic page loads it | 36 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md) |
-| spell-app | a root subclass, `<spell-app>`, loading its own tags;  `<spell-editor>`;  each drawable thing's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md) |
+| spell-app | a root subclass, `<spell-app>`, loading its own tags;  `<spell-editor>`;  each view's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md) |
 
 - Spell UI's core re-exports this whole framework, plus its own pieces:
   `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...

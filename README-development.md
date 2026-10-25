@@ -231,7 +231,7 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
 ```
 
 _Real lines, from [the router's test](tests/server/Router.test.ts),
-[the kit's tag names for drawable things](src/util/spell/drawable.ts)
+[the kit's tag names for views](src/util/spell/view.ts)
 and [Spell UI's label](https://github.com/spell-app/spell-ui/blob/main/src/components/ui-label/UILabel.tsx)._
 
 - The other repos' files go the same way:  `spell-ui/components/ui-button`, `spell-parser/spell`.

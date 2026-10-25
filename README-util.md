@@ -437,7 +437,7 @@ so the editor and the command line load a project the same way, from a server or
 | `Logger` | named, levelled logging:  `new Logger({ prefix: "Foo", level: Logger.INFO })`, from `OFF` through `ERROR`, `WARN` (the default), `INFO` to `DEBUG`, the prefix in colour |
 | `CustomError`, `UIError` | errors that carry their context in `props` (`activity`, `context`, `params`, the original `error`), as `die()`'s above |
 | `assert.string()`, `.number()`, `.boolean()` | narrow a value, or throw a `TypeError` |
-| `elementTagFor()` | a drawable thing's tag:  `elementTagFor("Solitaire", "Card")` is `"solitaire-card"`, the same in the runtime, the editor and the TypeScript writer |
+| `elementTagFor()` | a view's tag:  `elementTagFor("Solitaire", "Card")` is `"solitaire-card"`, the same in the runtime, the editor and the TypeScript writer |
 
 ## Node only:  JSON5 with its comments kept
 
@@ -527,7 +527,7 @@ And when you're in there:
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |
 | [persist/](src/util/persist/) | values kept across visits:  `PrefStore`;  where it keeps them, `PrefPlace`:  `StoragePlace`, and the waited-on `WaitedOnPlace`, `DatabasePlace` and `ServerPlace`;  `MemoryStorage`, `values.ts` (`textForValue()`, `valueForText()`, `defaultFor()`, `isAllowed()`), `persist.types.ts` (the server's protocol too) |
-| [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `drawable`, `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
+| [`spell/`](src/util/spell/) | Spell's own:  `Observable`, `Derivative`, `Loadable`, `LoadableFile`, `Task`, `TaskList`, `$fetch`, `abortableFetch`, `ResponseErrors`, `CustomError`, `Logger`, `assert`, `die`, `Assertable`, `spellDecorators` (`@thing`), `view` (`elementTagFor()`, `viewAttributeFor()`), `json` (`parseJSON()`, `parseJSON5()`), `paths` (`getPath()`, `setPath()`), `array` (`itemsWithHighest()`), `string` (`typeCase()`, `instanceCase()`, `singularize()`, `pluralize()`), `constants` (`KnownFormat`, `TaskStatus`, `CONFIRM`, `PACKAGE_VERSION` ...) |
 | [node/json5.ts](src/util/node/json5.ts) | JSON5 written with its comments kept (node only) |
 | [vitest.config.ts](vitest.config.ts) | the kit's tests:  util's two projects, `util` (a browser) and `util:node` |
 

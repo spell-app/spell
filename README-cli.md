@@ -313,7 +313,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts the editor pages right:  drops gone properties, adds new ones, fixes controls that don't fit |
+| `spell lint --fix` | puts right what it can:  each retired word (`drawable thing` => `view`), and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -624,7 +624,7 @@ each language pack registers every rule again, with its own words.
 - Each fix-up is kept in the record, so `--update` writes the same line again without asking;
   a line kept as it was (a hand edit) is never sent.
 - `<ui-*>` tags, their attributes and values become Spell UI's in that language (`<es-texto color="rojo">`),
-  and a style sheet's selectors with them;  the project's own drawable things follow its types' new names.
+  and a style sheet's selectors with them;  the app's own views follow its templates' new names.
 - A project it imports keeps its own words (`increment el contador`):
   the other language's grammar reads them as the import declares them.
 
