@@ -25,6 +25,7 @@ import {
   TEST_START
 } from "spell-epic/components/epic-test-run/EpicTestRun.types"
 import { SEND_ASKED, type SendAskedDetail } from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
+import { CHANGE_ANSWERED } from "spell-epic/components/epic-change/EpicChange.types"
 
 import { Clipboard } from "./Clipboard"
 import { epicPageVocabulary } from "./EpicPage.en"
@@ -962,14 +963,57 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         part={this.partForName("changes")}
         basic=""
         color="orange"
-        icon="pen"
+        icon="highlighter"
         href={`#${ids()[0]}`}
+        onClick={(event: MouseEvent) => {
+          event.preventDefault()
+          this.showChanges()
+        }}
         title={this.translationForKey("changesTip", { changes: words(), next: ids()[0]!.toUpperCase() })}
         aria-label={words()}
       >
         {ids().length}
       </ui-label>
     )
+  }
+
+  /**
+   * Show every change waiting (Owen, 2026-10-25:  "Clicking that should expand everything that I have to look at"):
+   * each block holding one unfolds (its part loads), and its parents with it;  then the page lands on the first.
+   */
+  @E.untracked
+  private showChanges() {
+    for (const host of this.domElement.querySelectorAll("[to-accept]")) {
+      for (let at: Element | null = host; at && at !== this.domElement; at = at.parentElement)
+        if (FOLDING_HOSTS.has(at.localName)) at.toggleAttribute("open", true)
+    }
+    this.goToChange(this.changesToAccept()[0])
+  }
+
+  /** Accept or Reopen pressed on a change (`epic-change-answered`):  on to the next one waiting, after it in the page. */
+  @E.on(CHANGE_ANSWERED)
+  protected onChangeAnswered(event: CustomEvent<{ id: string }>) {
+    const was = event.detail.id
+    // after its mark lands:  the list leaves an accepted one out
+    E.beforeNextPaint(() => {
+      const ids = this.changesToAccept().filter((id) => id !== was)
+      const order = Array.from(this.domElement.querySelectorAll(`[to-accept], ${CHANGE_TAG}[id]`))
+      const at = order.findIndex(
+        (element) => element.id === was || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(was)
+      )
+      const after = ids.find(
+        (id) =>
+          order.findIndex(
+            (element) => element.id === id || (element.getAttribute("to-accept") ?? "").split(/\s+/).includes(id)
+          ) > at
+      )
+      this.goToChange(after ?? ids[0])
+    })
+  }
+
+  /** Land on change `id` as a link to it does:  the runtime unfolds what hides it and loads its part. */
+  private goToChange(id: string | undefined) {
+    if (id) location.hash = `#${id}`
   }
 
   /**
@@ -1464,6 +1508,9 @@ const OPEN_QUESTIONS = ':scope > epic-section[kind="questions"] > epic-item[stat
 const CHANGE_TAG = "epic-change"
 
 /** What says a change waits for Accept:  a body host's list (`to-accept`), or a mark in the page not accepted. */
+/** The blocks that fold:  what `showChanges()` opens. */
+const FOLDING_HOSTS = new Set(["epic-section", "epic-phase", "epic-item", "epic-overview"])
+
 const CHANGES_WAITING = `[to-accept], ${CHANGE_TAG}[id]:not([accepted])`
 
 /** What takes Owen's marks after a flight (epic `airplane`):  the review line's command in airplane mode. */

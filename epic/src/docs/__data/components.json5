@@ -708,7 +708,13 @@
           "description": "The changed or new words:  running text, links and code included."
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "name": "epic-change-answered",
+          "detail": "{ id }",
+          "description": "Accept or Reopen pressed (bubbles, composed;  `detail.id`):  the page lands on the next change waiting."
+        }
+      ],
       "parts": [
         {
           "name": "base",

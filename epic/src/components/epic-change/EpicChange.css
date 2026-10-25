@@ -92,14 +92,18 @@
   :host(:state(open)) .buttons {
     display: block;
   }
+  /*
+   * on WHITE, so it stands out over the page (Owen, 2026-10-25);  its own pill's rim the only line:  the hairline ring
+   * round it drew a second border on its right;  in the dark the page's ground, a ring then (C57) as the shadow alone
+   * doesn't edge it
+   */
   .buttons epic-review {
     display: inline-block;
-    border-radius: 6px;
-    background: var(--epic-bg, var(--ui-background, Canvas));
-    /* a hairline ring as well as the shadow:  in the dark a shadow alone doesn't edge it (C57) */
+    border-radius: 999px;
+    background: light-dark(#fff, var(--epic-bg, var(--ui-background, Canvas)));
     box-shadow:
-      0 0 0 1px color-mix(in srgb, currentColor 14%, transparent),
-      0 2px 8px rgb(0 0 0 / 0.18);
+      0 0 0 1px light-dark(transparent, color-mix(in srgb, currentColor 14%, transparent)),
+      0 2px 8px rgb(0 0 0 / 0.16);
   }
 
   /* ## The question and its answer, unfolded */
