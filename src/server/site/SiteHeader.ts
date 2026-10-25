@@ -66,7 +66,7 @@ import {
  *   - `bar`:  the row
  *   - `nav`:  its links;  the Spell UI site's top bar keeps them on one line, scrolling sideways
  *   - `brand`:  the hat;  that bar hides it where its own brand already shows the hat
- * - Re-draws on `spell-site:page` (a router swapped the page in place:  new title, new source file).
+ * - Re-draws on `spell-site:navigated` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
  *   `file://` pages, and servers that don't inject one (the page server's `WebServer` does).
@@ -84,7 +84,7 @@ export class SiteHeader extends HTMLElement {
   }
 
   /** event a router dispatches on `document` after swapping the page in place:  re-draw */
-  static readonly PAGE_EVENT = "spell-site:page"
+  static readonly PAGE_EVENT = "spell-site:navigated"
 
   /**
    * The tabs a page shows when its server names none (`tabs`):  a `file://` page, a server without `"siteTabs"`.
@@ -291,7 +291,7 @@ export class SiteHeader extends HTMLElement {
   private toggleEdit(): void {
     const on = !readEdit()
     tabPrefs.set(EDIT_PREF, on ? EDIT_ON : undefined)
-    document.dispatchEvent(new CustomEvent("spell-site:edit", { detail: { on } }))
+    document.dispatchEvent(new CustomEvent(on ? "spell-site:edit-opened" : "spell-site:edit-closed", { detail: { on } }))
     this.render()
   }
 

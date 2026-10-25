@@ -71,7 +71,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a script it loaded, or one beside it:  reloaded, keeping the scroll
         - which:  its `<script src>` tags, and `performance`'s resource entries
           (lazy chunks, `epics.pack.js`, an experiment's `*.bundle.js`)
-      - anything else:  `spell-server:file`, and the page decides
+      - anything else:  `spell-server:changed`, and the page decides
     - Each socket opens with `hello` and the server's `run` (`LiveReload.run`, also `SPELL_SERVER.run`):
       a page from an earlier run (the server restarted) reloads, for the new `/api/server/live.js` and token.
     - Reloads go through `reloadGate()`:  one, 500ms after the last change.

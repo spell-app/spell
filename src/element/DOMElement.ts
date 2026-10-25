@@ -187,7 +187,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
 
   /**
    * DOM API, widened:  sets an attribute, or what a function or object given to one stands for.
-   * - A function or object (`on-ui-change={f}`, `tree={tree}`):  a listener or a property (`RichAttributes`)
+   * - A function or object (`on-ui-changed={f}`, `tree={tree}`):  a listener or a property (`RichAttributes`)
    * - Text for the family's script API (`content` on `<ui-code>`):  the property too
    * - Other text:  the attribute, as ever
    * - Why:  Solid sets a JSX prop it doesn't know this way, the value as it is,

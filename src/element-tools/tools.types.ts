@@ -55,7 +55,7 @@ export type CatalogElement = {
   parts: ElementDoc[]
   /** Its attributes' names, e.g. `vertical-align`. */
   attributes: string[]
-  /** The names of the events it dispatches, e.g. `ui-change`. */
+  /** The names of the events it dispatches, e.g. `ui-changed`. */
   events: string[]
 }
 

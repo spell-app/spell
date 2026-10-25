@@ -52,7 +52,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots
   - [RichAttributes](RichAttributes.ts):  a function or object given to an element's attribute, as Solid hands a
-    plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property (epic `solid-17`)
+    plain JSX prop:  `on-ui-changed={f}` listens, `options={[...]}` sets the property (epic `solid-17`)
     - NOT in the barrel:  `DOMElement` uses it;  its page-wide `setAttribute()` patch goes in as the file loads
     - `<ui-root pure>` turns the patch off
   - [HotDefinitions](HotDefinitions.ts):  hot reload of a set's elements in `yarn dev` (dev-only)
@@ -202,7 +202,7 @@ As WWOD §4, plus:
 A root (`<ui-root>`) defines every tag of its catalog BEFORE that tag's family loads (epic `solid-17`, P7);
 the family ATTACHES it when it arrives.
 - Why:  so every element is one of ours from the start, and keeps a function or object given to it
-  (`on-ui-change={f}`, `options={[...]}`;  `RichAttributes`) with no page-wide patch.
+  (`on-ui-changed={f}`, `options={[...]}`;  `RichAttributes`) with no page-wide patch.
 - Meanwhile the element is PENDING:  `:state(pending)`, no component, its values held.
   - `:state(ready)` once it has drawn with its styles (its `ready` promise), on every element.
 - "Its family has loaded" is `DOMElement.isAttached(tag)`, `whenAttached(tag)` and the selector `notAttached`:

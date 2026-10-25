@@ -111,7 +111,7 @@ export type CamelCase<S extends string> = S extends `${infer Head}-${infer Tail}
 /** Canonical attribute names of `V`. */
 export type AttributeName<V extends E.ComponentVocabulary> = V["attributes"][number]["name"]
 
-/** Canonical event names of `V`, e.g. `ui-change`. */
+/** Canonical event names of `V`, e.g. `ui-changed`. */
 export type EventName<V extends E.ComponentVocabulary> = V["events"][number]["name"]
 
 /** Canonical slot names of `V`;  `""` is the default slot. */

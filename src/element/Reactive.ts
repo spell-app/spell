@@ -286,7 +286,7 @@ export class Reactive {
   /**
    * A user change of `@controlled` member `member` to `next`:  `announce()` dispatches the event first, then
    *   - a vetoed (cancelable) event changes nothing
-   *   - if the DOM element set the property DURING the event (re-set the old value in a `ui-change` handler),
+   *   - if the DOM element set the property DURING the event (re-set the old value in a `ui-changed` handler),
    *     the DOM element's value stands
    *   - otherwise `next` is written to the DOM element's property (and reflects)
    * - Returns true when `next` was applied.
@@ -533,7 +533,7 @@ function ariaText(value: AriaValue): string | null {
  *   so a server render applies it once, now (the server never runs an effect).
  *   - ARIA alone is `@aria`.
  * - A trailing `{ defer: true }`:  NOT called at the start, only on a change
- *   (an event the first draw mustn't send:  `<ui-progress>`'s `ui-change`).
+ *   (an event the first draw mustn't send:  `<ui-progress>`'s `ui-changed`).
  * - Created by `Reactive.startEffects()` (`UIComponent.onMount()`), after every subclass field exists.
  */
 export function onChange(...members: (string | OnChangeOptions)[]) {

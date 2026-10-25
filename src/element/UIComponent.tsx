@@ -602,7 +602,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * Is the element shown?  `el.visible`, which is always `!el.hidden`.
    * - Controlled:  `this.isVisible = false` hides it, as `el.visible = false` or `el.hidden = true` do.
    * - A person's action asks first, with an event the page may cancel:
-   *   `this.requestChange("isVisible", false, () => this.send("ui-close", { visible: false }))`.
+   *   `this.requestChange("isVisible", false, () => this.send("ui-closing", { visible: false }))`.
    * - What it is when the page writes neither name:  `elementSetup.visible`.
    */
   @controlled("visible")
@@ -822,7 +822,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * The user wants to change the `@controlled` accessor named `memberName` to `next`:
-   * `this.requestChange("isOpen", true, () => this.send("ui-open", { open: true }))`.
+   * `this.requestChange("isOpen", true, () => this.send("ui-opening", { open: true }))`.
    * - `memberName`:  the name of an accessor ON THIS COMPONENT
    *   (`isOpen`, declared `@controlled("open") accessor isOpen`),
    *   not the DOM element's property (`open`), which it follows.

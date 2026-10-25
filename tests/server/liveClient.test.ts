@@ -112,7 +112,7 @@ describe("liveAction():  what a changed file means to a page", () => {
     expect(SRV.liveAction("/api/server/other.js", page)).toBe("ignore")
   })
 
-  test("any other file:  the page decides (spell-server:file)", () => {
+  test("any other file:  the page decides (spell-server:changed)", () => {
     expect(SRV.liveAction("/epics/x/parts/q2.html", page)).toBe("file")
     expect(SRV.liveAction("/guides/x/data.json5", page)).toBe("file")
   })
