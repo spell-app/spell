@@ -12,6 +12,8 @@
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);
     --_epic-fold-gap: var(--epic-section-gap, 28px);
+    /* an item list's runs:  the corners at each end (`EpicSection.runRules()` hands it to the items) */
+    --_epic-run-radius: var(--epic-section-run-radius, 8px);
   }
   /* a section its page's stage hides (`<epic-page stage>`, epic `epic-engine` P29):  still in the file, drawn as nothing */
   :host(:state(offstage)) {

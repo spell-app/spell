@@ -30,12 +30,14 @@ import {
   FILTER,
   FILTER_KEY,
   FILTER_STATES,
+  ITEMS,
   ITEM_KINDS,
   NEW_HERE,
   NUMBERED_BLOCKS,
   PHASE_TOGGLES,
   PHASE_TOGGLES_KEY,
   REPORT,
+  RUN_ATTRIBUTES,
   SECTION_LOOKS,
   TOGGLE,
   type ContentsEntry,
@@ -105,6 +107,8 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *   - hidden items go by a `::slotted()` rule drawn in the shadow root:  the doc's markup is never touched
  *   - remembered per page, under the old runtime's key (`FILTER_KEY`);  `ui-filter` says it changed
  *   - the page's toolbar filters every section at once, through its DOM element (`DOMEpicSectionElement`)
+ * - An item section's lines are drawn as rounded cards, one per RUN of lines between unfolded items' details
+ *   (Owen, 2026-10-24;  `runEnds`):  each run's first line rounded on top, its last on the bottom.
  * - The Phases section's title holds the Files / Verify toggles:
  *   - each shows or hides that field in every phase,
  *     through `--epic-files-display` / `--epic-verify-display`, which the fields read
@@ -247,6 +251,36 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** The items the filter hides. */
   readonly hidden = createMemo(() => this.itemStates().filter((it) => !this.showing().has(it.state)))
 
+  /**
+   * Its items, read again whenever one folds, unfolds, or is hidden by its own `hidden`:  the run ends follow.
+   * - A NEW list on every change, so `runEnds` reads each item's `open` again.
+   * - `subtree`:  an item's `open` is ITS attribute, not this element's
+   */
+  @E.watches({ childList: true, subtree: true, attributeFilter: RUN_ATTRIBUTES })
+  get runItems(): readonly Element[] {
+    void this.slots.filledSlots
+    if (!this.holdsItems() || isServer) return NOTHING_COUNTED
+    return Array.from(this.domElement.querySelectorAll(ITEMS))
+  }
+
+  /**
+   * Where its list's RUNS start and end:  the item lines drawn as one rounded card between unfolded items' details
+   * (Owen, 2026-10-24:  "tops and bottoms should always be rounded").
+   * - a run starts at the first item showing, and after each unfolded item (its details end the card above)
+   * - a run ends at the last item showing, and at each unfolded item (its details follow its line)
+   * - so an unfolded item right after another is a run of its own:  rounded top and bottom
+   * - only the items SHOWING count:  one the filter hides, or its own `hidden`, is skipped
+   */
+  readonly runEnds = createMemo((): { tops: Element[]; bottoms: Element[] } => {
+    const hidden = new Set(this.hidden().map((it) => it.item))
+    const shown = this.runItems.filter((item) => !hidden.has(item) && !item.hasAttribute("hidden"))
+    const isUnfolded = (item: Element | undefined) => !!item?.hasAttribute("open")
+    return {
+      tops: shown.filter((_item, index) => index === 0 || isUnfolded(shown[index - 1])),
+      bottoms: shown.filter((item, index) => index === shown.length - 1 || isUnfolded(item))
+    }
+  })
+
   ////////////////
   // ## Element hooks
   ////////////////
@@ -324,6 +358,10 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             </p>
           </Show>
           <Show when={this.hidden().length}>{this.hiddenNote()}</Show>
+          {/* the runs' rounded ends, by id:  nothing in the doc changes */}
+          <Show when={this.holdsItems()}>
+            <style>{this.runRules()}</style>
+          </Show>
           {/* Claude's status cards (P13):  at the end of its body, above the note box */}
           <Show when={kind === "overview-part"}>
             <slot name={this.slotForName(STATUS_SLOT)} />
@@ -462,6 +500,28 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Under a filtered list:  `3 hidden · show all` (`<epic-hidden-note>`);  a click shows everything (`onShowAll()`). */
   private hiddenNote(): JSX.Element {
     return <epic-hidden-note part={this.partForName("hidden-note")} count={this.hidden().length} />
+  }
+
+  /**
+   * The rules rounding its runs' ends (`runEnds`):  `::slotted(#q1, ...) { --epic-item-top-radius: ... }`.
+   * - Drawn here, not in `<epic-item>`'s own sheet:  where a run ends hangs on the items AROUND an item
+   *   and on this section's filter, which no selector inside the item (`:host()`) can see.
+   * - The item rounds its line by the two tokens;  the size is this sheet's (`--_epic-run-radius`).
+   * - A run's top also drops the item's rule above it (Owen, 2026-10-24):  a straight line over rounded corners
+   *   reads as a mistake, and the details' gap above already separates them.
+   *   This sheet's `::slotted()` wins over the item's own `:host` rule:  the outer tree's normal rules win.
+   */
+  private runRules(): string {
+    if (isServer) return ""
+    const { tops, bottoms } = this.runEnds()
+    const ruleFor = (items: Element[], declarations: string) => {
+      const selectors = items.filter((item) => item.id).map((item) => `::slotted(#${CSS.escape(item.id)})`)
+      return selectors.length ? `${selectors.join(", ")} { ${declarations} }` : ""
+    }
+    return [
+      ruleFor(tops, `${TOP_RADIUS}: var(--_epic-run-radius); border-top: none;`),
+      ruleFor(bottoms, `${BOTTOM_RADIUS}: var(--_epic-run-radius);`)
+    ].join("\n")
   }
 
   /** The rule hiding the filtered-out items:  `::slotted(#q3, ...)`;  `""` with none. */
@@ -805,6 +865,10 @@ export interface EpicSection extends E.AttributeValues<EpicSectionVocabulary> {}
 
 /** No counted children:  a kind that isn't counted, or a server render.  One list, so a recount keeps it. */
 const NOTHING_COUNTED: readonly Element[] = []
+
+/** `<epic-item>`'s tokens for its line's rounded corners, top and bottom (`runRules()`). */
+const TOP_RADIUS = "--epic-item-top-radius"
+const BOTTOM_RADIUS = "--epic-item-bottom-radius"
 
 /** Class of the To test section's Start testing. */
 const START_TESTING = "start-testing"
