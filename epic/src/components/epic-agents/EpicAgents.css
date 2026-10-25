@@ -104,7 +104,10 @@
     border-inline-start-width: var(--epic-agents-border-start, 1px);
     /* a whole pill;  the header's pill sets its own corners (`--epic-agents-radius`) */
     border-radius: var(--epic-agents-radius, 999px);
-    background: transparent;
+    /* in the header's pill:  the step label's height and fill (`EpicPage.css`) */
+    box-sizing: border-box;
+    height: var(--epic-agents-height, auto);
+    background: var(--epic-agents-fill, transparent);
     color: var(--epic-heading-ink, var(--ui-text-color));
     font: inherit;
     white-space: nowrap;
