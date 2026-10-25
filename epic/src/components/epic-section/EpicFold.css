@@ -203,6 +203,12 @@
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:not(:state(stuck))::part(title) {
     border-radius: var(--epic-drawer-radius, 8px);
   }
+  /* stuck:  square on top, flush under the titles above it, its bottom still round (Owen, 2026-10-25:  "bottom of P1
+     should be round when sticky") */
+  :host(:is(epic-phase, [kind="overview-part"]):state(open)) ui-section:state(stuck)::part(title) {
+    border-end-start-radius: var(--epic-drawer-radius, 8px);
+    border-end-end-radius: var(--epic-drawer-radius, 8px);
+  }
   :host(:is(epic-phase, [kind="overview-part"]):state(open)) .body {
     margin: 0 var(--epic-drawer-inset, 4px);
     /* the body's text where it stood:  the band's inset, less the drawer's and its rule */

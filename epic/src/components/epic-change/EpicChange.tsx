@@ -113,6 +113,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
             for={WORDS_ID}
             open-on="hover"
             hoverable=""
+            show-delay="2000"
             hide-delay="2000"
             position="bottom left"
             class={BUTTONS}
