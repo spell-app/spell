@@ -118,6 +118,28 @@ describe("MainMerge.run()", () => {
     expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/uncommitted changes/)
     expect(() => new MainMerge({ root: repo, ...OPTIONS }).run("continue")).toThrow(/no merge in progress/)
   })
+  test("generated files left uncommitted are moved aside, then it merges;  someone's change still refuses", () => {
+    process.env.SPELL_EPIC_HOME = join(TEMP, "home")
+    const repo = makeRepo("strays")
+    put(repo, { ".gitattributes": read(repo, ".gitattributes") + "lib/*.ts linguist-generated\n", "lib/x.ts": "1\n" })
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "a compiled file")
+    change(repo, "main", { "src/a.txt": "A2\n" })
+    put(repo, { "lib/x.ts": "2\n", "lib/x.ts.map": "{}", "gen/out.txt": "stale" })
+
+    const report = new MainMerge({ root: repo, ...OPTIONS }).run()
+    expect(report.result).toBe("merged")
+    expect(report.ditched).toEqual(["gen/out.txt", "lib/x.ts", "lib/x.ts.map"])
+    expect(read(join(report.ditchedTo!), "lib/x.ts")).toBe("2\n")
+    expect(read(repo, "lib/x.ts")).toBe("1\n")
+    expect(existsSync(join(repo, "lib/x.ts.map"))).toBe(false)
+
+    put(repo, { "lib/x.ts": "3\n", "src/b.txt": "mine\n" })
+    expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/commit them first\n  src\/b.txt$/)
+    expect(read(repo, "lib/x.ts")).toBe("3\n")
+    delete process.env.SPELL_EPIC_HOME
+  })
+
   test("a merge or fast-forward that changed the lockfile installs the packages;  a failed install is reported", () => {
     const repo = makeRepo("lockfile")
     const marker = join(TEMP, "lockfile-installed")

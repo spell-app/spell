@@ -537,6 +537,9 @@ export type MergeMainReport = {
    * `lockfiles` changed, whether it worked;  left out when none changed
    */
   installed?: { command: string; lockfiles: string[]; ok: boolean }
+  /** generated files left uncommitted, moved aside before the merge (`StrayFiles`);  `ditchedTo`:  where */
+  ditched?: string[]
+  ditchedTo?: string
 }
 
 /**
