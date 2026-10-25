@@ -15,7 +15,7 @@ writeFileSync(join(DIR, "site", "docs", "index.html"), "<html><head></head><body
 writeFileSync(join(DIR, "site", "app.ts"), "const x: number = 1")
 writeFileSync(join(DIR, "site", "style.css"), "a{}")
 writeFileSync(join(DIR, "site", ".hidden"), "no")
-writeFileSync(join(DIR, "element", "spell-app.js"), "export {}")
+writeFileSync(join(DIR, "element", "spell-viewer.js"), "export {}")
 
 describe("StaticHandler", () => {
   let served: Served
@@ -49,7 +49,7 @@ describe("StaticHandler", () => {
   })
 
   it("picks the longest prefix", async () => {
-    expect((await ask(served.port, "GET", "/element/spell-app.js")).text).toBe("export {}")
+    expect((await ask(served.port, "GET", "/element/spell-viewer.js")).text).toBe("export {}")
   })
 
   it("runs html hooks on pages, with the path", async () => {
@@ -78,7 +78,7 @@ describe("StaticHandler", () => {
 
   it("refuses dot files and escapes;  passes misses on", async () => {
     expect((await ask(served.port, "GET", "/.hidden")).status).toBe(403)
-    expect((await ask(served.port, "GET", "/%2e%2e/element/spell-app.js")).status).toBe(403)
+    expect((await ask(served.port, "GET", "/%2e%2e/element/spell-viewer.js")).status).toBe(403)
     expect((await ask(served.port, "GET", "/missing.html")).text).toBe("fallback")
     expect((await ask(served.port, "POST", "/style.css")).status).toBe(404)
   })

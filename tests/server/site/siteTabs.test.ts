@@ -87,7 +87,7 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/_beside/spell-epic/src/docs/epic-item.html", "Epic/UI"],
       ["/Users/owen/www/spell/spell-epic/src/docs/index.html", "Epic/UI"],
       ["/components/app/", "App/UI"],
-      ["/components/app/spell-app.html", "App/UI"],
+      ["/components/app/spell-viewer.html", "App/UI"],
       ["/worktrees/w/components/app/", "App/UI"],
       // App UI's folder, spell-app's:  served from the kit's root, a worktree's, or from disk
       ["/spell-app/app/docs/index.html", "App/UI"],
@@ -100,7 +100,7 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       // the old addresses:  no tab
       ["/ui/components/ui-card.html", undefined],
       ["/epic-ui/", undefined],
-      ["/src/app/components/spell-app/SpellApp.tsx", undefined],
+      ["/src/app/components/spell-viewer/SpellViewer.tsx", undefined],
       ["/packages/ui/docs/ui-card.html", undefined],
       // Epic UI's old element pages, until the merge:  guides
       ["/guides/epic-components/elements/epic-item.html", "Guides"],

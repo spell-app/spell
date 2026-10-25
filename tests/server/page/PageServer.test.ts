@@ -229,8 +229,8 @@ describe("PageServer", () => {
     expect(bare.headers.location).toBe("/components/epics/")
     // its long address is a plain folder:  no redirect (Q30)
     expect((await ask(port, "GET", "/spell-epic/src/docs/index.html")).status).toBe(200)
-    expect(componentSetPath("/components/app/spell-app.html", server.componentSets)).toBe(
-      "/packages/app/docs/spell-app.html"
+    expect(componentSetPath("/components/app/spell-viewer.html", server.componentSets)).toBe(
+      "/packages/app/docs/spell-viewer.html"
     )
     expect(componentSetPath("/components/brand/brand-logo.html", server.componentSets)).toBe(
       "/packages/brand/docs/brand-logo.html"

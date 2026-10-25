@@ -22,7 +22,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
     `packages/ui/AGENTS.md` says;  when:  WWOD §8 › "Promotion path".  NEVER without an intensive design review
     first:  `ui` is a library others build on
   - hosts stay thin adapters (WWOD §8 › "Hosts are thin adapters"):  the VS Code runner (`VSCodeRunner.tsx`) and
-    `<spell-app>` (`SpellAppRunner.tsx`) show the SAME `<TypeExplorer>`, `<ThingExplorer>` and `<RunnerConsole>`;
+    `<spell-viewer>` (`SpellAppRunner.tsx`) show the SAME `<TypeExplorer>`, `<ThingExplorer>` and `<RunnerConsole>`;
     each host only feeds them (a runtime copy's objects, messages to the extension)
 
 - **Singletons by import, per-subtree values by context:**
@@ -32,7 +32,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
     `useContext()` in the component body:  it needs an OWNER -- at module scope it throws `NoOwnerError`, default
     or not
   - take the INSTANCE you're handed;  never reach for a parallel one, and say why in the docstring:
-    `<RunnerConsole console>` shows the console it's given, NOT the imported `core`'s -- every `<spell-app>`
+    `<RunnerConsole console>` shows the console it's given, NOT the imported `core`'s -- every `<spell-viewer>`
     runs on its own runtime copy (`runner/RunnerConsole.tsx`)
   - NOT:  `getAppContext()` at module scope, destructured before props -- `useContext()` throws without an owner,
     and app singletons are imports anyway

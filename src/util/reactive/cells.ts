@@ -10,7 +10,7 @@
  *   `observe()`.  Derived values (`Derived`) are both reader and source.
  *
  * ONE context per page, on `globalThis`:  every copy of this module shares it.
- * - A page holds several copies:  the app's own `spell/util`, plus each `spell-runtime.js` (one per `<spell-app>`, see
+ * - A page holds several copies:  the app's own `spell/util`, plus each `spell-runtime.js` (one per `<spell-viewer>`, see
  *   `packages/app/src/runner/spellRuntime.ts`).  A Solid computation reads cells of ALL of them, so they must share
  *   the "who's reading now" slot, the pending checks and the host's flush.
  * - Hence duck-typing across copies:  a source is `{ subs, version, refresh? }`, never checked with `instanceof`.

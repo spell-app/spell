@@ -35,7 +35,7 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
 
 - **How CSS reaches a web component:**
   - A shadow root sees ONLY its own styles:  a rule a page imports never gets in.
-  - `<spell-app>` / `<spell-editor>`:  importing a sheet from its component is enough.  The element build gathers
+  - `<spell-viewer>` / `<spell-editor>`:  importing a sheet from its component is enough.  The element build gathers
     every imported sheet into `spell-app.css`, which the element adopts into its shadow root
     (`vite.element.config.ts`, `runner/shadowStyles.ts`).
   - A `ui-*` element:  its sheet is imported `?inline` and adopted by the element itself (`./UIButton.css?inline`,
@@ -117,7 +117,7 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
 
 - **No `rem`:**
   - lengths in `em` (local font size) or `px`:  a page's stylesheet can redefine `rem`, and our sheets ship on other
-    people's pages (`ui`'s elements, `<spell-app>` / `<spell-editor>`), whose root font size isn't ours
+    people's pages (`ui`'s elements, `<spell-viewer>` / `<spell-editor>`), whose root font size isn't ours
 
 - **Check at phone width:**
   - pages, the docs and anything embeddable work at phone width (390px):  no horizontal scroll, nothing squeezed
@@ -125,4 +125,4 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
     never a bare px media query
   - the checks fail on phone-width overflow:  `spell-epic/src/tools/check-spell.js` (docs pages), `yarn site:check`
     (Spell UI's site)
-  - NOT:  "desktop only, no mobile breakpoints" -- the docs, the Spell UI site and `<spell-app>` are read on phones
+  - NOT:  "desktop only, no mobile breakpoints" -- the docs, the Spell UI site and `<spell-viewer>` are read on phones

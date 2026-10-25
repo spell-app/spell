@@ -82,11 +82,11 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
 
 - **Hosts are thin adapters:**
   - Our hosts:  the editor (`packages/app/src/editor.ts`), the runner (`packages/app/src/runner/`), the web
-    components `<spell-app>` / `<spell-editor>` (`SpellAppElement.tsx`, `SpellEditorElement.tsx`).
+    components `<spell-viewer>` / `<spell-editor>` (`SpellViewer.tsx`, `SpellEditorElement.tsx`).
   - A host's constructor and public entry methods are each under 10 lines, and delegate to shared code.
   - Code more than one host uses lives in a capability-named file of free exported functions -- NOT private methods
     on a host class.  `packages/app/src/runner/runCompiled.ts` (`runCompiled()`, `unmountApp()`) serves
-    `SpellAppRunner`, `VSCodeRunner` and `<spell-app>`.
+    `SpellAppRunner`, `VSCodeRunner` and `<spell-viewer>`.
   - A class instead once that code has shared state.
 
 - **Gather related options in one place:**
