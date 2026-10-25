@@ -639,6 +639,13 @@
    * - the panel round them keeps the space (`--site-tabs-gap`)
    * - the section toolbar first in a pane is the panel's lower half, so it must meet the tabs' track
    */
+  /*
+   * the tabs' track is the panel itself:  an unselected tab shows the panel's own fill, only the selected one its thumb
+   * (Owen, 2026-10-25:  "non-selected tab to show bg color";  a theme's segmented track, fruity's grey, before)
+   */
+  .site-tabs::part(menu) {
+    --ui-menu-segmented-background: transparent;
+  }
   .site-tabs > ui-tab::part(tab) {
     margin-block-start: 0;
     padding-inline: 0;
