@@ -12,6 +12,8 @@ import type { UIT } from "spell-ui/core"
  *   `<key>ExpirationDate` (Fomantic's `expirationKey`) holding the UTC date, checked (and the pair removed) on read.
  *   `sessionStorage` ends with the tab anyway.
  * - Cookies:  Fomantic's RFC 6265 encoding;  `path` (default `/`), `domain`, `secure`, `samesite`.
+ * - NOT on `spell/util`'s `PrefStore`, on purpose:  its keys are the page author's, whole and with no store name
+ *   (Fomantic's), and it keeps cookies too.
  ****************/
 export class DismissalStore {
   /** Where. */
