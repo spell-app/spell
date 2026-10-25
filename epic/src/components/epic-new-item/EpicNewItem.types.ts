@@ -11,7 +11,7 @@ import type { epicNewItemVocabulary } from "./EpicNewItem.en"
 export type EpicNewItemVocabulary = typeof epicNewItemVocabulary
 
 /** The kinds of new item, as its `adds` attribute takes them. */
-export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test"] as const satisfies readonly NewKind[]
+export const NEW_ITEM_KINDS = ["todo", "question", "issue", "test", "phase"] as const satisfies readonly NewKind[]
 
 /**
  * Each kind of new item Owen may ask for from the page:
