@@ -133,11 +133,11 @@
                   <tr><th>Attribute</th><th>What it is</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>state</code></td><td><code>idle</code>, <code>unsent</code> or <code>sent</code>: where what the owner sends stands. Default <code>idle</code>.</td></tr>
+                  <tr><td><code>state</code></td><td>Where what the owner sends stands: <code>unsent</code> or <code>sent</code>. Default <code>idle</code>, nothing to send.</td></tr>
                   <tr><td><code>send-tip</code></td><td>The plane's tooltip and name: what a press sends. Default <code>Send</code>.</td></tr>
                   <tr><td><code>count</code></td><td>How many things a press sends: a badge on the plane. None at 0.</td></tr>
                   <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
-                  <tr><td><code>accept</code></td><td>A STAGE BUTTON in the plane's place (epic <code>epic-engine</code> P29): a check and these words (<code>Accept Overview</code>), green. A press asks the owner as the plane's does; the wand stays. An epic page's header draws it while the page is in a stage.</td></tr>
+                  <tr><td><code>accept</code></td><td>A STAGE BUTTON in the plane's place, drawn by an epic page's header while the page is in a stage (epic <code>epic-engine</code> P29): a check and these words (<code>Accept Overview</code>), green. A press asks the owner as the plane's does, and the wand stays.</td></tr>
                   <tr><td><code>accepted</code></td><td>The stage button pressed: the pill outlined green, waiting for the session to move the page on.</td></tr>
                   <tr><td><code>manual</code></td><td>No countdown: only a press sends, and no wand is drawn. For a page a command waits on (<code>&lt;epic-run&gt;</code>).</td></tr>
                 </tbody>
@@ -198,8 +198,12 @@
               <li>The wand filled light blue, its icon white, while countdown mode is on, grey while off; while it counts, a light grey ring round it turns blue, clockwise from the top.</li>
               <li>Countdown off with something waiting: the plane filled blue, its icon white.</li>
               <li>
-                Its tokens: <code>--epic-send-buttons-size</code> (28px), <code>--epic-send-buttons-rule</code>,
-                <code>--epic-send-buttons-muted</code>; an epic page's header sets them to its own.
+                Its tokens, which an epic page's header sets to its own:
+                <ul>
+                  <li><code>--epic-send-buttons-size</code> (28px)</li>
+                  <li><code>--epic-send-buttons-rule</code></li>
+                  <li><code>--epic-send-buttons-muted</code></li>
+                </ul>
               </li>
             </ul>
           </ui-section>

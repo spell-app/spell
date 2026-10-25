@@ -550,14 +550,14 @@ export class ReviewClient {
 
   /**
    * The mark `text` typed in `id`'s note box makes (`saveTyped()`):
-   * - words, and no note mark yet (none, an Approve, a pick):  Revisit ON, a revisit to talk over carrying them, the
-   *   pick kept ("pick B, but ...")
-   * - words, and a note mark already (a revisit, Make Todo, the x, a todo's plane or drop):  the same mark, its words
-   *   changed
-   * - emptied:  a revisit goes again (its pick stays, a plain pick);  any other mark stays as it is, and the empty box
-   *   is a draft
-   * - `"draft"`:  saved as the box's draft instead, as before P20:  a request at work (Do Now, a revisit now), or an
-   *   empty box with no revisit
+   * - words, and no note mark yet (none, an Approve, a pick):
+   *   Revisit ON, a revisit to talk over carrying them, the pick kept ("pick B, but ...")
+   * - words, and a note mark already (a revisit, Make Todo, the x, a todo's plane or drop):
+   *   the same mark, its words changed
+   * - emptied:  a revisit goes again (its pick stays, a plain pick);
+   *   any other mark stays as it is, and the empty box is a draft
+   * - `"draft"`:  saved as the box's draft instead, as before P20:
+   *   a request at work (Do Now, a revisit now), or an empty box with no revisit
    */
   typedMark(id: string, text: string): MarkInput | null | "draft" {
     const mark = this.inbox.marks[id]
@@ -789,7 +789,10 @@ export class ReviewClient {
     return value && typeof value === "object" ? (value as Record<string, string>) : {}
   }
 
-  /** Save `backups`, as JSON;  none forgets the key.  A browser that blocks storage keeps them for the visit. */
+  /**
+   * Save `backups`, as JSON;  none forgets the key.
+   * - A browser that blocks storage keeps them for the visit.
+   */
   private writeBackups(backups: Record<string, string>) {
     PrefStore.setAt(this.backupKey, Object.keys(backups).length ? backups : undefined, this.backupsKept)
   }
@@ -910,8 +913,9 @@ export class ReviewClient {
 const TEST_ACTION = "test"
 
 /**
- * The note marks typing in the note box keeps as they are, changing only their words (`typedMark()`):  Make Todo, the
- * x (`skip`), a todo's plane (`next`) and its x (`drop`).  A revisit's words change too, as a revisit to talk over.
+ * The note marks typing in the note box keeps as they are, changing only their words (`typedMark()`):
+ * Make Todo, the x (`skip`), a todo's plane (`next`) and its x (`drop`).
+ * - A revisit's words change too, as a revisit to talk over.
  */
 const TYPED_KEEPS: ReadonlySet<string> = new Set(["todo", "skip", "next", "drop"])
 

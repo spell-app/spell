@@ -1,8 +1,7 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this package, `spell-epic`:  spell-epic's `src/`, the whole repo's code
-(epic `epic-eject` J14).
+This file guides AI coding agents (Claude Code, Codex, and others) working in this package, `spell-epic`:
+spell-epic's `src/`, the whole repo's code (epic `epic-eject` J14).
 
 **READ the repo root's [AGENTS.md](../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -72,8 +71,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Every element with a TITLE ROW has an `actions` slot in it (epic `epic-workflow` P25):
     `<epic-section>`, `<epic-overview>`, `<epic-phase>`, `<epic-item>`, `<epic-aside>`, `<epic-code>`, `<epic-update>`.
     - What a page puts there (`<ui-button slot="actions">`) sits after the title, before the element's own buttons.
-    - The title (Owen, 2026-10-19:  "I don't like the ellipsis in a collapsed issue/etc header -- make it always show
-      the full title, wrapped"):
+    - The title, as Owen asked (2026-10-19:  "I don't like the ellipsis in a collapsed issue/etc header --
+      make it always show the full title, wrapped"):
       - ALWAYS in full, as many lines as it needs, folded or open:  no "…", no tooltip
       - Before:  J183 (2026-10-18), "ellipsis when collapsed, wrap when expanded".
       - a phase's plan-changed pen comes after it, on its first line (`FoldPieces.mark`)
@@ -88,8 +87,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a DETAILS page's `<ui-section>` titles wrap in full too (epic `epic-engine` I21):  Owen answers there;
         its count and actions go below the title when they don't fit beside it
     - A click on it never folds:  `CONTROLS` in `Fold.tsx` takes the slot and its box (`Fold.actions()`).
-    - The slot, its child spec and its part:  [Fold.types.ts](components/epic-item/Fold.types.ts), which each
-      vocabulary imports.
+    - The slot, its child spec and its part:
+      [Fold.types.ts](components/epic-item/Fold.types.ts), which each vocabulary imports.
     - The docs runtime puts a block's bullhorn there (see "Comments").
     - NOT the cards with a heading band (a reply, a status card, a note ...):  nothing needs it there yet.
 - `src/` (`spell-epic`, `EP`) -- code the elements and the node tools share.
@@ -118,8 +117,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It touches no browser global until `forPage()` / `watch()`.
     - Used by:
       - `<epic-review>`:  the review controls drawn by items, sections (Overview parts), phases and the Overview
-        - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-overview>` (keyed `summary`, on its title row:  epic
-          `epic-engine` I55;  `<epic-summary>` drew them under its lede before)
+        - `<epic-item>`, `<epic-section>`, `<epic-phase>`, `<epic-overview>`
+          - the Overview's keyed `summary`, on its title row (epic `epic-engine` I55):
+            `<epic-summary>` drew them under its lede before
       - `<epic-change>` (epic `epic-engine` P30):  a change mark's Reopen while it's new, keyed by its id (`ch3`),
         its own `<epic-review buttons="change">` in a tooltip on its words
       - `<epic-new-item>`:  the page's toolbar button, and the Caveats and Questions sections' New caveat / question
@@ -206,13 +206,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
       - each one's default is spell-app's layout before the file existed;  `app`'s:  none
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
-      - a BROKEN worktree too, one git no longer knows (its `.git` names `<main>/.git/worktrees/<id>`, gone):  the
-        main checkout from that path (epic `epic-engine` P26, r20:  solid-17's settings came out inside solid-17);  the
-        window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main checkout)
+      - a BROKEN worktree too, one git no longer knows (its `.git` names `<main>/.git/worktrees/<id>`, gone):
+        the main checkout from that path (epic `epic-engine` P26, r20:  solid-17's settings came out inside solid-17)
+        - the window script's worktree commands say it's broken, and the fix (`git worktree repair`, from the main
+          checkout)
     - `epic config [key] [--json]` prints the values, for the skills (folders absolute)
     - a repo MOVED behind compat links (repo-split's move to `~/www/spell/`;  epic `epic-engine` I59):
-      - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:  an unrepaired
-        worktree's `.git` file names the OLD one
+      - `main` (and `mainOf()`) is the main checkout's REAL path, whatever spelling it was found by:
+        an unrepaired worktree's `.git` file names the OLD one
       - a configured folder (`contentFolder`, `worktreesFolder`, `windowsFolder`, `engineFolder`) missing beside the
         real main checkout, but there beside an OLD spelling of it, is used from there (its real path), with ONE line
         on stderr per process:  `contentFolder ../spell-app.epics is missing beside <main>;  using <found> -- update
@@ -255,19 +256,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `epicGroups.ts`:  each group's verbs, for their help (`epic ask create --help`)
     - its entry is [epicMain.ts](cli/epicMain.ts), run by [bin/epic](../bin/epic)
       - NEVER imports the kit's `spell` program (`spell/cli`), and loads no spell
-    - Owen's names (repo-split P13):  `create`, `lint`, `inbox watch | ignore | wait ... <epic>` (the inbox's verb
-      first), `window should-stay`, `window reload`, `summarize`, `status` (taking stock, `stock` before);  an item's
-      status card is `update`'s (`epic update seo#J3 underway`, J140);  `add-request`, `overnight` and `plan-doc` gone
+    - Owen's names (repo-split P13):
+      - `create`, `lint`
+      - `inbox watch | ignore | wait ... <epic>` (the inbox's verb first)
+      - `window should-stay`, `window reload`
+      - `summarize`, `status` (taking stock, `stock` before)
+      - an item's status card is `update`'s (`epic update seo#J3 underway`, J140)
+      - `add-request`, `overnight` and `plan-doc` gone
     - node only, NOT in the `spell-epic` barrel:  imported by path, `spell-epic/cli/EpicProgram`
     - its tests:  `tests/cli/`
   - `command/` -- what the `epic` command's verbs run (epic `epic-eject` P5).
     - a class per verb group, a method per verb:
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
-      - `Worktrees` (`worktree`), with `MainMerge` (`worktree merge-main`:  installs the packages when it changed a
-        lockfile)
-      - `StrayFiles`:  what's uncommitted in a main checkout `epic merge` fast-forwards, and moving it aside into the
-        epic home's `ditched/` (epic `epic-engine` I77):  a snapshot or generated output by itself, a few others with
-        `--ditch`
+      - `Worktrees` (`worktree`), with `MainMerge`
+        (`worktree merge-main`:  installs the packages when it changed a lockfile)
+      - `StrayFiles`:  what's uncommitted in a main checkout `epic merge` fast-forwards,
+        and moving it aside into the epic home's `ditched/` (epic `epic-engine` I77)
+        - a snapshot or generated output by itself, a few others with `--ditch`
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
@@ -276,8 +281,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         through `Stock`), `epic worktree move`
       - `atSessionStart()`:  the servers whose checkout is gone already, at most once an hour (a stamp in
         `~/.spell-epic`), from the `SessionStart` hook ([server-prune.mjs](../hooks/server-prune.mjs))
-      - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):  by process, never a pid file;  never a
-        live checkout's
+      - found by spell-app's own finder, `prune.ts` (`epic server prune`'s):
+        by process, never a pid file;  never a live checkout's
       - plain `node` loads it by path, `prune.ts` too (the server package's entry `spell/server/page/prune`)
     - `CheckoutPatches`:  `epic worktree patch [--all]`, the fixes a repo lists in `"checkoutPatches"` given to every
       checkout at once, the worktrees behind `main` too (epic `epic-engine` P17)
@@ -303,19 +308,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - plain `node` loads it by path, with `command.types.ts`
     - `SessionMoves`:  whether a session's move to another window (`epic window handoff`, `launch --move`) will
       really happen, and what's said when it didn't (epic `epic-engine` P26, request r20)
-      - why:  the move is ONLY the end-of-turn hook's ([handoff.mjs](../hooks/handoff.mjs));  with the plugin's hooks
-        failing (Claude Code still looked for spell-epic in spell-app's old folder), "this session moves" was said,
-        and nothing happened
-      - `hookProblem()`:  before a move is promised, why that hook won't run, from Claude Code's own plugin lists
-        (`~/.claude/settings.json`, `plugins/known_marketplaces.json`, `plugins/installed_plugins.json`:  a folder
-        that's gone, the plugin off) and this session's mark;  `fixFor()`:  what fixes it
+      - why:  the move is ONLY the end-of-turn hook's ([handoff.mjs](../hooks/handoff.mjs))
+        - with the plugin's hooks failing (Claude Code still looked for spell-epic in spell-app's old folder),
+          "this session moves" was said, and nothing happened
+      - `hookProblem()`:  before a move is promised, why that hook won't run:
+        from Claude Code's own plugin lists and this session's mark;  `fixFor()`:  what fixes it
+        - the lists say a folder that's gone, or the plugin off:
+
+          ```text
+          ~/.claude/settings.json
+          ~/.claude/plugins/known_marketplaces.json
+          ~/.claude/plugins/installed_plugins.json
+          ```
       - the mark:  the prompt hook writes `~/.spell-epic/windows/hooks-seen/<session id>` on every prompt
         (`sawHooks()`), so a session whose hooks aren't loaded (started before a fix) is known too
-      - refused:  `handoff` exits 1, saying why, the fix, and `epic window launch <name>`;  `launch --move` starts a NEW
-        session in the epic's window instead, and says why
-      - `missedMove()`:  a move's record still waiting when the session's next prompt comes (the hook renames it the
-        moment it runs) is said to Owen and Claude, and set aside as `<session id>.missed.json`;  the window script's
-        worktree commands say it too when the hook can't run, since then the prompt hook can't either
+      - refused:  `handoff` exits 1, saying why, the fix, and `epic window launch <name>`
+        - `launch --move` starts a NEW session in the epic's window instead, and says why
+      - `missedMove()`:  a move's record still waiting when the session's next prompt comes
+        (the hook renames it the moment it runs) is said to Owen and Claude, and set aside as `<session id>.missed.json`
+        - the window script's worktree commands say it too when the hook can't run, since then the prompt hook can't
+          either
       - plain `node` loads it by path
     - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
@@ -340,8 +352,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `tool/` -- the `epic` tool (`epic`), node only, never bundled into the pack.
     - It reads and writes `<epic-*>` markup only (through `Markup`),
       and refuses a doc still in the old markup.
-      - Every live doc was converted at the switch (P12 of epic `epic-components`);  the converter went in epic
-        `repo-split` (Q45).
+      - Every live doc was converted at the switch (P12 of epic `epic-components`);
+        the converter went in epic `repo-split` (Q45).
     - Its rules for a doc's DATA (ids, statuses, review marks, prose):  [PLAN-DOC.md](tool/PLAN-DOC.md)
     - `migrations/`:  the named, dated steps that bring an older epic page up to today's markup (`Migrations`)
       - `epic migrate` runs them, by page kind (`MigrateCommands`;  PLAN-DOC.md, "Migrations")
@@ -349,13 +361,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - SAGA PAGES (epic `epic-workflow` P15):  an epic page of kind "saga", so every verb edits it
       - its file:  `sagas/<id>/<id>.saga.html`, marked `<epic-page kind="saga" saga="<id>">`
       - named `SAGA:/<id>` (`PlanDocFiles.findDoc()`)
-      - made by `epic saga page <id> [--force]` (`SagaPage`) from [saga.html](tool/templates/saga.html):
-        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Log;  one file
-        (its Todos went with epic `epic-engine` P32:  no Caveats there yet)
+      - made by `epic saga page <id> [--force]` (`SagaPage`) from [saga.html](tool/templates/saga.html), one file:
+        its Overview (the saga's purpose, Done so far, Ideas not done yet), Epics, Questions, Log
+        - its Todos went with epic `epic-engine` P32:  no Caveats there yet
       - its Epics:  `<epic-cards saga>`, the epics whose page names the saga, drawn from the page server
         (`GET /api/epics/saga`, `SagaEpics`), asked again as epic pages change
-        - as the Epics page's own list and cards (epic `epic-engine` I39):  an `<epic-list no-favorites>` of
-          `<epic-card>`s in its shadow root, with each epic's star and last-worked day
+        - as the Epics page's own list and cards (epic `epic-engine` I39):
+          an `<epic-list no-favorites>` of `<epic-card>`s in its shadow root, with each epic's star and last-worked day
       - reviewed as an epic page is:
         - marks and comments in its own inbox beside it (`ReviewInbox.pathFor()`)
         - the review routes and comments routes take it (`SAGA_PAGE`)
@@ -364,20 +376,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
-    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR (`monitors/monitors.json`), one beside
-      every session (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
+    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR, one beside every session
+      ([monitors.json](../monitors/monitors.json);  epic `epic-engine` P18):
+      an epic's session listens to its page whenever it's open
       - the epic:  the session's title, else its worktree;  none, it does nothing
       - holds the inbox for the session (`setListening()`, with the monitor's pid:  live while it runs, no heartbeat)
         unless another listener holds it
       - says what's waiting, the `📬` line to print, which files to watch, and when to look again
-    - `InboxPoller` (`spell-epic/tool/InboxPoller.mjs`, run by `monitors/listen.mjs`):  the monitor itself (epic
-      `epic-engine` P19)
-      - plain JavaScript, node's own modules only:  bare node, about 45MB a session;  the look, under `tsx`, about
-        150MB, runs for a moment as its own process.  NEVER import TypeScript into it:  node's TypeScript support
-        alone adds about 28MB
+    - `InboxPoller`:  the monitor itself (epic `epic-engine` P19)
+      - [InboxPoller.mjs](tool/InboxPoller.mjs), run by the plugin's monitor, [listen.mjs](../monitors/listen.mjs)
+      - plain JavaScript, node's own modules only:  bare node, about 45MB a session
+        - the look, under `tsx`, about 150MB, runs for a moment as its own process
+        - NEVER import TypeScript into it:  node's TypeScript support alone adds about 28MB
       - looks at start, a few seconds after a watched file changes, and when the last look said to
-      - prints NOTHING while idle (no tokens);  Owen's Send:  the look's `📬` line, once per batch, which wakes the
-        session, which takes the work with its own `epic inbox wait`
+      - prints NOTHING while idle (no tokens)
+        - Owen's Send:  the look's `📬` line, once per batch,
+          which wakes the session, which takes the work with its own `epic inbox wait`
     - the inboxes, one shape of comment for both (`CommentList`):
       - `ReviewInbox`:  an epic page's marks and comments
       - `GuideInbox`:  a docs page's comments and its Send (epic `epic-workflow` P13)
@@ -445,14 +459,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     [packModules.ts](../../src/element-tools/packModules.ts).
 - Every tag starts `epic-`:  `<ui-root>` knows the pack's tags by that prefix.
 - What an element, a form or the docs runtime keeps in the browser goes through the kit's `PrefStore`
-  (epic `prefs-and-undo` P4):  `spell/util/persist/PrefStore`, by file, never the persist barrel.
-  - Keys named whole (`spell-folds:<path>`), byte for byte:  `PrefStore.getAt()` / `setAt()`;  a class handed a
-    `Storage` for its tests keeps it, through a `StoragePlace` over it.
-  - A key needs a store's name before its first colon:  the four that had none were renamed, their old values moved
-    once (`PrefStore.moveOldKey()`):  `spell-epics:sort`, `spell-epics:sagas`, `spell-epics:new-epic-draft`,
-    `spell-epics:send-countdown`;  a page-named filter is under `spell-filter:` too.
-  - Stays raw:  [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle, and
-    [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright.
+  (epic `prefs-and-undo` P4).
+  - By file, `spell/util/persist/PrefStore`, never the persist barrel:
+    the barrel would bring the database and server places too.
+  - Keys are named whole (`spell-folds:<path>`), byte for byte as before:  `PrefStore.getAt()` / `setAt()`.
+  - A class handed a `Storage` for its tests keeps it, through a `StoragePlace` over it.
+  - A key needs a store's name before its first colon.
+    - The four that had none were renamed, their old values moved once (`PrefStore.moveOldKey()`):
+
+      ```text
+      spell-epics:sort    spell-epics:sagas    spell-epics:new-epic-draft    spell-epics:send-countdown
+      ```
+
+    - A page-named filter is under `spell-filter:` too.
+  - Stays raw:
+    - [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle
+    - [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -555,27 +577,30 @@ Laid out as every set is since P18 of `people-and-orgs`
   - The bullhorns, the pane, the threads and Send, all of "Comments" below.
   - Each page loads the comments by themselves, after the site's bundle, in its `<head>`:
     `<script defer src="/_epic/assets/spell-comments.js">` (the template has it too).
-    - It's the docs runtime's comments ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js)) and its
-      toolbar ([spell-doc-toolbar.js](tools/_assets/spell-doc-toolbar.js), epic `epic-engine` T11), and nothing else
-      of it:  these pages load Spell UI's site, not the docs bundle.
+    - It's the docs runtime's comments ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js))
+      and its toolbar ([spell-doc-toolbar.js](tools/_assets/spell-doc-toolbar.js), epic `epic-engine` T11),
+      and nothing else of it:  these pages load Spell UI's site, not the docs bundle.
     - It holds NO Spell UI:  the page's own draws its `<ui-*>` markup, so there's one Spell UI on the page
       (epic `epic-engine` I18:  two handle every event twice).  The build checks it.
     - Its look:  `spell-comments.css` and `spell-toolbar.css`, which it links.
-    - The site's router swaps `main` for the next page:  the toolbar and the comments are taken down and wired again
-      for it.
+    - The site's router swaps `main` for the next page:
+      the toolbar and the comments are taken down and wired again for it.
   - The masthead is the page header:  the page's bullhorn over its corner, Send under the title.
-  - A TOOLBAR (epic `epic-engine` T11;  Owen, 2026-10-20:  "Epic UI pages should have a toolbar"):  a guide's, built
-    by the same code (`titledItems()`, `toolbarMenu()`), first in the page's article, under the masthead
-    - a button per top-level section (its icon and title, `1. Example` shows `Example`), the section being read
-      marked;  the comments' bullhorn at its right, its orange count, each click the next thread waiting on Owen
-    - in the site's page bar, `<ui-sticky class="site-sticky-bar">` (`SiteSections`' `PAGE_BAR`):  it sticks at the
-      site's top (under the narrow screens' top bar), the section titles stick below it, links land below both
+  - A TOOLBAR (epic `epic-engine` T11;  Owen, 2026-10-20:  "Epic UI pages should have a toolbar"):
+    a guide's, built by the same code (`titledItems()`, `toolbarMenu()`),
+    first in the page's article, under the masthead
+    - a button per top-level section (its icon and title, `1. Example` shows `Example`), the section being read marked
+    - the comments' bullhorn at its right, its orange count, each click the next thread waiting on Owen
+    - in the site's page bar, `<ui-sticky class="site-sticky-bar">` (`SiteSections`' `PAGE_BAR`):
+      it sticks at the site's top (under the narrow screens' top bar), the section titles stick below it,
+      links land below both
     - the docs pages' ivory band, out to the page column's edges;  marks only when the titles don't fit (390px)
-    - the site's "On this page" column stays (1200px and wider):  it lists the nested sections too, and holds the
-      site's header and look controls (J:  keep both)
-  - Cmd / Ctrl + K, on a page that takes comments:  the docs pages' jump dialog, taking a comment's id (`M3`) or any
-    id on the page;  anything else typed goes to the site's SEARCH, words and all (J:  one key for both;  `/` still
-    opens the search straight away).  Elsewhere the key stays the search's.
+    - the site's "On this page" column stays (1200px and wider):
+      it lists the nested sections too, and holds the site's header and look controls (J:  keep both)
+  - Cmd / Ctrl + K, on a page that takes comments:  the docs pages' jump dialog,
+    taking a comment's id (`M3`) or any id on the page.
+    - Anything else typed goes to the site's SEARCH, words and all (J:  one key for both).
+    - `/` still opens the search straight away;  elsewhere the key stays the search's.
   - Kept in `<page>.inbox.json5` beside a page, git-ignored.
   - No epic owns these pages, so their comments go to the standing epic `feedback` (epic `epic-engine` T9):
     Send says "feedback is listening", or "nobody is listening:  Send wakes feedback".
@@ -620,8 +645,8 @@ The pages live in SHARED root folders;  the tooling lives here, in `tools/`.
     `solid/solid-2.html` is a guide.
 
 The shared folders:
-- They're the repo's CONTENT FOLDER's (`contentFolder` in its `.epic/config.json5`;  `../spell.epics`), read and
-  written there, NEVER through a link at a checkout's root (epic `epic-eject` P12):
+- They're the repo's CONTENT FOLDER's, read and written there, NEVER through a link at a checkout's root
+  (epic `epic-eject` P12;  `contentFolder` in its `.epic/config.json5`:  `../spell.epics`):
   - `EpicConfig.contentOf(<checkout>)` ([EpicConfig.ts](config/EpicConfig.ts));  `pages.js` `CONTENT`
   - a page's PATH is from the content folder (`epics/seo/seo.plan.html`:  `pagePath()`), as the page servers serve it
     at `/`;  `pageAt()` turns one back into its file, `inContent()` maps a path through an older checkout's link
@@ -774,36 +799,43 @@ In `tools/`:
     - the comments are their own module, `spell-doc-comments.js`, which it imports (epic `epic-engine` P2, T3);
       so is the toolbar, `spell-doc-toolbar.js` (its menu, items, fitting their titles, the jump key:  T11);
       `spell-doc-helpers.js`, what they share
-    - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine`
-      I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"):
-      - an icon button:  `<ui-button circular basic size="mini" icon="..." title aria-label>` (the comments'
-        `iconButton()`), its `title` on the inner button too (`titleInside()`)
-      - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it.
-        Measured:  within 0.4px of the button's centre, at 1200 and 390px, light and dark.
-        The raw `<button>`s it replaced sat 1.3-1.7px off.
-      - a look of its own through the component's tokens (`--ui-button-basic-border-width: 0px` for the plain pen,
-        trash and ×) or `::part(button)` (Send's dashed ring), never by rebuilding the button
+    - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine` I26):
+      - Owen, 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
+      - an icon button (the comments' `iconButton()`), its `title` on the inner button too (`titleInside()`):
+        `<ui-button circular basic size="mini" icon="..." title aria-label>`
+      - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it
+        - measured:  within 0.4px of the button's centre, at 1200 and 390px, light and dark
+        - the raw `<button>`s it replaced sat 1.3-1.7px off
+      - a look of its own through the component's tokens, never by rebuilding the button:
+        `--ui-button-basic-border-width: 0px` for the plain pen, trash and ×;
+        `::part(button)` for Send's dashed ring
       - on an epic page, the `<epic-*>` element's own controls
-      - the page's chrome too (epic `epic-engine` P3), never an HTML string or a `createElement("div")` tree (the
-        helpers' `el()` makes elements):
-        - the TOOLBAR, every page's:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>` of `<ui-item>`
-          links (`data-rail`, `selected`), badges `<ui-label>`s;  its bullhorn an item of it (`<ui-item link>`)
+      - the page's chrome too (epic `epic-engine` P3), never an HTML string or a `createElement("div")` tree
+        (the helpers' `el()` makes elements):
+        - the TOOLBAR, every page's:  Spell UI's menu, `<ui-menu class="spell-toolbar" secondary>`
+          - its `<ui-item>` links (`data-rail`, `selected`), its badges `<ui-label>`s
+          - its bullhorn an item of it (`<ui-item link>`)
         - the jump dialog:  a `<ui-modal>`, its waiting threads a `<ui-menu vertical secondary link>`
-        - the state chips and "N hidden · show all":  the epics pack's `<epic-state-filter>` and
-          `<epic-hidden-note>`, the same elements an epic page's sections and toolbar draw
+        - the state chips and "N hidden · show all":  the epics pack's `<epic-state-filter>` and `<epic-hidden-note>`,
+          the same elements an epic page's sections and toolbar draw
         - the one-line head's divider:  the breadcrumb's own (`oneLineHead()`)
-        - the header's tools (Send, a page's own, the page's bullhorn):  ONE row, `addHeadTool()` (I38)
-      - the COMMENTS (epic `epic-engine` P3):  each thread an `<epic-thread>` in an `<epic-threads>` box, the
-        comment pane an `<epic-comment-pane>`, an old page note's head line an `<epic-page-note-head>` (the epics
-        pack);  a thread's and a note's fold are their own shadow markup now (J16's two raw buttons)
-        - Owen's field in the pane or a thread stays a native `<textarea>` the comments' code makes and slots in:  it
-          lives through every redraw, the cursor with it
-    - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `.spell-block-actions`), the bullhorn
-      first, then a table's expand button:  never a row or corner of their own (see "Comments", WHERE it sits)
-  - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`:  the bullhorns,
-    Send, Owen's field, where a box of threads sits;  the threads and the pane draw themselves (their own sheets).
-  - `spell-toolbar.css`:  the toolbar's look and the jump dialog's, `@import`ed by `spell-doc.css` (which keeps where
-    a docs page puts the toolbar), linked by `spell-comments.js` (epic `epic-engine` T11)
+        - the header's tools (expand and collapse all, Send, a page's own, the page's bullhorn):
+          ONE row, `addHeadTool()` (I38)
+      - the COMMENTS (epic `epic-engine` P3), the epics pack's elements:
+        - each thread an `<epic-thread>` in an `<epic-threads>` box
+        - the comment pane an `<epic-comment-pane>`
+        - an old page note's head line an `<epic-page-note-head>`
+        - a thread's and a note's fold are their own shadow markup now (J16's two raw buttons)
+        - Owen's field in the pane or a thread stays a native `<textarea>` the comments' code makes and slots in:
+          it lives through every redraw, the cursor with it
+    - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `.spell-block-actions`):
+      the bullhorn first, then a table's expand button;  never a row or corner of their own
+      (see "Comments", WHERE it sits)
+  - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`
+    - the bullhorns, Send, Owen's field, where a box of threads sits
+    - the threads and the pane draw themselves (their own sheets)
+  - `spell-toolbar.css`:  the toolbar's look and the jump dialog's (epic `epic-engine` T11)
+    - `@import`ed by `spell-doc.css`, which keeps where a docs page puts the toolbar;  linked by `spell-comments.js`
   - `spell-comments.entry.js` -> `spell-comments.js`:  the toolbar and the comments ALONE, for Epic UI's pages
     (see "Epic UI, the docs set").
     - no Spell UI or Solid in it:  it draws with the page's
@@ -852,8 +884,8 @@ In `tools/`:
       - core's [core.declarations.json5](../../spell-parser/src/core/core.declarations.json5)
       - py's [not_ported_yet.json5](../../spell-parser/src/py/core/not_ported_yet.json5)
     - Both are read from the checkout serving the page, so each branch shows its own core.
-    - Built from elements, never markup in strings (epic `epic-engine` P3, J19):  light-DOM `<ui-section>`s and
-      `<ui-table>`s, as a page writes them;  each file's source link a `<ui-button href>`.
+    - Built from elements, never markup in strings (epic `epic-engine` P3, J19):
+      light-DOM `<ui-section>`s and `<ui-table>`s, as a page writes them;  each file's source link a `<ui-button href>`.
       - The files' sections take the place of `[data-core-modules]`, never go inside it:
         in the placeholder's box they took the reading column's indent twice.
     - Then it loads `spell-ui.js` itself, as `commands.js` does.
@@ -913,16 +945,22 @@ In `tools/`:
       - the runtime's `wireTableWidths()` measures how far in a table starts,
         so one inside a list item or an epic item's details goes out to the gutter too
       - no button at phone width:  the column is the page already
-      - its HEADER ROW sticks under the stuck titles while its rows scroll past (Owen, 2026-10-19:  "make the table
-        headers sticky";  epic `epic-engine` r4):  every page's tables, guides, details pages, an epic page's items
+      - its HEADER ROW sticks under the stuck titles while its rows scroll past
+        (Owen, 2026-10-19:  "make the table headers sticky";  epic `epic-engine` r4)
+        - every page's tables:  guides, details pages, an epic page's items
         - a `<thead>`, else a first row of `<th>`s alone
-        - a COPY of it sticks, the runtime's `wireTableHeads()`:  a `<thead>` can't stick inside the box a table
-          scrolls sideways in (every `<ui-table>`, a bare table at phone width)
-        - `.spell-table-pin` (`data-spell-added`), a line of no height before the table, held at the line by the
-          browser;  shown while the table's own header is under the line, its columns measured to the table's, moved
-          sideways with it, wide or not;  it leaves with the table's last row, cut off at the line
-        - the line (`tableLine()`):  an epic page's `--epic-stack` and the open item's line;  else the TOP-LEVEL
-          section's stack (a nested stuck title joins its row);  a saga page's h2 and h3
+        - a COPY of it sticks, the runtime's `wireTableHeads()`:
+          a `<thead>` can't stick inside the box a table scrolls sideways in (every `<ui-table>`, a bare table at phone
+          width)
+        - `.spell-table-pin` (`data-spell-added`):
+          a line of no height before the table, held at the line by the browser
+          - shown while the table's own header is under the line,
+            its columns measured to the table's, moved sideways with it, wide or not
+          - it leaves with the table's last row, cut off at the line
+        - the line (`tableLine()`):
+          - an epic page's `--epic-stack` and the open item's line
+          - else the TOP-LEVEL section's stack (a nested stuck title joins its row)
+          - a saga page's h2 and h3
         - `tableBoxes()` leaves the copies out:  no expand button on one, and no table key counts one
     - the page's HEAD (breadcrumb, title, toolbar):  one ivory band from the site header down
       - an epic page's header and subtitle too (`EpicPage.css`)
@@ -1061,8 +1099,8 @@ In `tools/`:
     - without one:  an open goals question red, anything else open yellow, done / decided grey
     - The saga pages colour their id chips by it, NOT by kind:  the kind is only the id's letter.
   - Item filter (`wireItemFilters()`):  a top-level section with such items gets a chip per state it has.
-    - The chips are the epics pack's `<epic-state-filter>`, an epic page's own (epic `epic-engine` P3);  the line
-      under a filtered list its `<epic-hidden-note>`.
+    - The chips are the epics pack's `<epic-state-filter>`, an epic page's own (epic `epic-engine` P3);
+      the line under a filtered list its `<epic-hidden-note>`.
     - Each chip shows how many, left of its count.
     - solid while that state shows, outlined while hidden
     - no filter icon (Owen, 2026-10-10)
@@ -1074,8 +1112,8 @@ In `tools/`:
       Remembered per page.
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
-      - the page header (Send and its countdown while reviewed, `<epic-send-buttons>`;  the step label, git), and its
-        toolbar's tools
+      - the page header and its toolbar's tools:
+        Send and its countdown while reviewed (`<epic-send-buttons>`), the step label, git
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
       - every review control on the page's ONE review client
@@ -1106,10 +1144,11 @@ In `tools/`:
     - a script it loaded (`spell-ui.js` and its lazy chunks, the runtime, `epics.pack.js`, an experiment's bundle),
       or the page server restarting (a merge changed its code):  ONE reload, half a second after the last change
     - it keeps its place (epic `epic-engine` I23):
-      - the scroll:  the live client saves it;  this runtime lands there, and holds it while the page settles
-        (`holdScroll()`), never on the section the address names
-      - every fold open before it, items and a link's unfolds too:  this runtime, as the page goes
-        (`keepFoldsForReload()`, `sessionStorage`)
+      - the scroll:  the live client saves it;
+        this runtime lands there, and holds it while the page settles (`holdScroll()`), never on the section the address
+        names
+      - every fold open before it, items and a link's unfolds too:
+        this runtime keeps them as the page goes (`keepFoldsForReload()`, `sessionStorage`)
       - a half-written note (the review inbox's drafts) and comment drafts (`localStorage`)
     - not while you type in a field:  an "Updated:  reload" pill waits, and it reloads once you leave the field
     - so a merge's new widgets show up by themselves:  VS Code's window needs reloading only when the EXTENSION changes
@@ -1140,14 +1179,15 @@ In `tools/`:
 - Widgets (see the templates for exact markup):
   - recommendations / warnings:  `<ui-message state="positive|negative|warning|info" header="...">`
   - comparisons:  `<ui-table celled compact striped unstackable>` around a native `<table>`
-    - ALWAYS `unstackable`:  never stacked, at any width (epic `epic-engine` I36;  Owen, 2026-10-19, on a table drawn
-      at the side bar's width as its header cells, then each row's cells one under another:  "I hate it")
+    - ALWAYS `unstackable`:  never stacked, at any width (epic `epic-engine` I36)
+      - Owen, 2026-10-19, on a table drawn at the side bar's width as its header cells,
+        then each row's cells one under another:  "I hate it"
       - too wide for its column, it scrolls sideways in its own box, never the page
-      - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS");  a table
-        that asks to stack (`stackable`, `stack-by`) still does:  a demo of stacking
+      - `spell-doc.css` holds every `<ui-table>` unstacked whatever its markup ("NO table ever STACKS")
+        - a table that asks to stack (`stackable`, `stack-by`) still does:  a demo of stacking
         - by Spell UI's public token, `--ui-table-stack-by: none` (epic `epic-engine` I40;  spell-app 3d7061910)
-      - the migration step adds the word to a page's tables (`components-not-markup`), and the epic tool's way in
-        to what it's handed (`IncomingHtml`)
+      - the migration step adds the word to a page's tables (`components-not-markup`),
+        and the epic tool's way in to what it's handed (`IncomingHtml`)
     - never a bare `<table>`:  the migration step `components-not-markup` wraps one (see "Scripts")
     - number cells:  `class="num right aligned"`
     - verdict cells:  `yes positive` / `no negative` / `meh warning`
@@ -1253,8 +1293,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 - spell-epic's own, in its [`templates/`](../templates/) (epic `epic-eject` T11, Q8):  every repo's pages start from them.
   - Served at `/templates/` (and `/r/<repo>/templates/`) by the epic server and the kit's page server alike.
-  - `epic pages template <name>` prints one's path;  `epic pages index` writes the Templates list page,
-    `templates/index.html`, here.
+  - `epic pages template <name>` prints one's path.
+  - `epic pages index` writes the Templates list page here, `templates/index.html`.
   - A repo adds its own only if it wants one:  `repoTemplates` (`EpicConfig`), listed beside these, found first.
 - [durable.html](../templates/durable.html):  a guide -- design notes, research, references.
   - prose sections, tables, code, callouts
@@ -1389,19 +1429,22 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - A new caveat or question asked for from the page (epic `airplane` P2):  a mark under its own key, `new1` ...
     - `setNew()`:  `{ action: "new", kind, title, note?, near? }`
     - `epic inbox apply <name>` makes the item.
-  - A TEST's answer from Owen's test run (epic `epic-engine` P4):  `{ action: "test", result, note?, shot? }`,
-    on a test only
-    - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`);  `shot`:  his screenshot, `tests/t3-<stamp>.png`
-      from the page's folder (`POST shot`, below)
-    - sent with Send;  `epic inbox apply <name>` applies it (`PlanDoc.applyMark()`:  passed closes, failed files a
-      new issue with the note and screenshot, skip cancels, not now defers):  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
+  - A TEST's answer from Owen's test run (epic `epic-engine` P4), on a test only:
+    `{ action: "test", result, note?, shot? }`
+    - `result`:  `passed`, `failed`, `skip`, `notnow` (`TEST_RESULTS`)
+    - `shot`:  his screenshot, `tests/t3-<stamp>.png` from the page's folder (`POST shot`, below)
+    - sent with Send;  `epic inbox apply <name>` applies it:  [PLAN-DOC.md](tool/PLAN-DOC.md), "Items"
+      - `PlanDoc.applyMark()`:  passed closes, failed files a new issue with the note and screenshot,
+        skip cancels, not now defers
     - the run itself is `<epic-page>`'s test mode (`?test=1`), drawn by `<epic-test-run>` (Epic UI's page says how):
-      one card per test from its `<epic-field label="Step">` ... (an older test's prose as its Step), the answers
-      P / F / S / N, a COMMENT box on every card (the mark's `note`, with any answer;  before one, the inbox's draft;
-      `apply` keeps it on the test as Owen's reply), its place in the address (`#t3`), kept there against the runtime's scroll-follow
-      (`spell-doc:place`);  `epic test <name>` opens it, `epic test --all` the
-      first epic with open tests, the run's last card leading to the next (`GET /api/epics/tests`,
-      [epicRoutes.ts](tool/epicRoutes.ts), `EpicTests.waiting()`)
+      - one card per test, from its `<epic-field label="Step">` ... (an older test's prose as its Step)
+      - the answers P / F / S / N
+      - a COMMENT box on every card:  the mark's `note`, with any answer
+        - before one, the inbox's draft;  `apply` keeps it on the test as Owen's reply
+      - its place in the address (`#t3`), kept there against the runtime's scroll-follow (`spell-doc:place`)
+      - `epic test <name>` opens it;  `epic test --all` the first epic with open tests
+      - the run's last card leads to the next (`GET /api/epics/tests`, [epicRoutes.ts](tool/epicRoutes.ts),
+        `EpicTests.waiting()`)
   - `comments`:  Owen's comments on the doc's blocks, and on selected text (P11, see "Comments"):  `M1` ...
     - Written through the comments route.
     - Sent with Send, as marks are (Owen, 2026-10-10:  he keeps Send as the way comments reach Claude).
@@ -1508,17 +1551,17 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Why:  Owen typed comments on such a page while `epic ask show --wait` waited on it, and saw "nobody is listening"
     (the comments' Send, below, drawn over the page's own).
   - "repo-split is listening" (a green dot):  a session's `epic ask wait` (or `ask show --wait`) waits for the answer.
-    - The wait keeps a heartbeat while it waits, gone as it ends:  `~/.spell-epic/asks/<hash>.json5`, one per page
-      ([AskListeners.ts](tools/AskListeners.ts)).  In the home folder, not beside the page:  the content repo is
-      committed every turn.
+    - The wait keeps a heartbeat while it waits, gone as it ends ([AskListeners.ts](tools/AskListeners.ts)):
+      `~/.spell-epic/asks/<hash>.json5`, one per page.
+      - In the home folder, not beside the page:  the content repo is committed every turn.
     - Stale after 90s, or once its process is gone.
-    - The route module answers it (`GET /api/docs/details/listening`, and with the answer's GET and POST);  the page
-      asks again every 30s while in view.
+    - The route module answers it (`GET /api/docs/details/listening`, and with the answer's GET and POST);
+      the page asks again every 30s while in view.
   - "nobody is waiting yet":  Send still works.  The answer is saved beside the page, and an orange line under Send
     says so:  "Saved:  nobody is waiting yet;  Claude reads it when it next looks" (the next `ask wait` / `answer`).
     - It wakes no session (a docs page's Send does).
-  - A details page takes no bullhorn comments, questions or not (`commentsRoutes.ts`, its `<epic-send>`):  so no
-    second Send in its header.
+  - A details page takes no bullhorn comments, questions or not (`commentsRoutes.ts`, its `<epic-send>`):
+    so no second Send in its header.
 - What he typed and hasn't sent is a DRAFT (epic `epic-workflow` P18).
   - Why:  agents rewrote a page under him twice, and everything he hadn't sent was lost (request r4).
   - `<slug>.draft.json5` beside the page, through the same route module (`POST /api/docs/details/draft`)
@@ -1589,12 +1632,14 @@ Each kind of page has ONE name, written everywhere a person reads it.
   (each save through `SRV.FileOperations.save()`):
   - the draft:  `<slug>.draft.json5`, never wakes anyone
     - saved as Owen types (half a second after each change), and as the page goes away
-    - a copy in the browser's `localStorage` too, written at once;  on load the newest of the two (or the answer)
-      comes back
-    - a save that fails says so in red on the bar, and tries again every 3s until one goes through (epic `epic-engine`
-      P15, r14:  a page server gone lost 76 boxes Owen typed)
-    - Copy my answers, on the bar:  what's typed, as the draft's JSON, onto the clipboard, for a page whose server is
-      gone for good (a reload there brings back nothing);  saved as the draft file, the page shows it again
+    - a copy in the browser's `localStorage` too, written at once
+      (through `PrefStore`, as everything this package keeps in the browser:  "Rules")
+    - on load the newest of the two (or the answer) comes back
+    - a save that fails says so in red on the bar, and tries again every 3s until one goes through
+      (epic `epic-engine` P15, r14:  a page server gone lost 76 boxes Owen typed)
+    - Copy my answers, on the bar:  what's typed, as the draft's JSON, onto the clipboard,
+      for a page whose server is gone for good (a reload there brings back nothing)
+      - saved as the draft file, the page shows it again
   - the answer:  `<slug>.answer.json5`, which `epic choices wait` exits with
 
 ## Run pages
@@ -1613,15 +1658,15 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - the command (the translator):  calls the kit's class, acts on the answers itself
 - The routes:
   - `GET /runs/<id>/`:  the template, titled with the run's title, through the server's page hooks
-  - `GET /api/runs/<id>`:  `{ page, answers, waiting }`;  `waiting`:  the run `open` and its heartbeat fresh, from a
-    live process (`SRV.CommandRun.isWaiting()`)
-  - `POST /api/runs/<id>/answer { rowId, outcome, value, ticked }`, `POST /api/runs/<id>/send`:  `answers.json5`,
-    under its lock, all at once;  Send stamps `sent` afresh each time
+  - `GET /api/runs/<id>`:  `{ page, answers, waiting }`
+    - `waiting`:  the run `open` and its heartbeat fresh, from a live process (`SRV.CommandRun.isWaiting()`)
+  - `POST /api/runs/<id>/answer { rowId, outcome, value, ticked }`, `POST /api/runs/<id>/send`:
+    `answers.json5`, under its lock, all at once;  Send stamps `sent` afresh each time
   - `POST /api/runs/<id>/effort { effort }` (epic `epic-engine` P25):  `answers.json5`'s `effort`, the same way;
     400 for a run that offers none, or an effort not in its `effort.choices`
   - run id `[a-z0-9-]` only, a row of the run only, a known outcome:  else 400;  no such run:  404
-- `epic pages open <run folder> [--review]` opens its page (`pages.js` `runPagePath()`):  the kit's
-  `CommandRun.show()` runs it.
+- `epic pages open <run folder> [--review]` opens its page (`pages.js` `runPagePath()`):
+  the kit's `CommandRun.show()` runs it.
 - Steering (P25):  the command keeps going while Owen answers, and the page shows it live, from `run.json5`:
   - `passes`:  the status card, a line per pass (name, bar and `212 of 380`, calls, time)
   - `effort`:  the picker;  Owen's pick is saved at once, and the command reads it before its next pass
@@ -1662,16 +1707,17 @@ Each kind of page has ONE name, written everywhere a person reads it.
           (`alignBlockActions()` measures where the block's top edge is:  its own margin may lie between)
         - shared:  a table's expand button goes right of the bullhorn, so they never overlap or float apart
       - the page header:  in it (`.at-page`)
-    - A corner bullhorn makes room rather than cover what's there (`makeRoom()`;  Owen, 2026-10-10:  "Overlap in
-      bullhorn buttons"):  a thread right under a short block, which it would cover, leaves room on its header's right.
+    - A corner bullhorn makes room rather than cover what's there (`makeRoom()`):
+      a thread right under a short block, which it would cover, leaves room on its header's right.
+      - Owen, 2026-10-10:  "Overlap in bullhorn buttons"
       - Before P25 it also moved an item's corner bullhorn left of its review pills, and an update's left of its date
         (`MAKES_ROOM`, gone);  and a CSS rule shortened an aside's or code block's fold button by 34px (28e350907).
     - A click on a comment's highlighted quote opens its thread.
   - Or on SELECTED TEXT:  ⌘ / Ctrl I, or the bullhorn floating beside the selection.
     - The comment keeps the quote, highlighted softly on the page while the comment exists.
-  - The box is a small floating PANE (Owen, 2026-10-10), fixed on the screen, for writing a NEW comment:  an
-    `<epic-comment-pane>` (the epics pack;  epic `epic-engine` P3).  Once saved and closed, the comment is a THREAD
-    (below).
+  - The box is a small floating PANE (Owen, 2026-10-10), fixed on the screen, for writing a NEW comment:
+    an `<epic-comment-pane>` (the epics pack;  epic `epic-engine` P3).
+    - Once saved and closed, the comment is a THREAD (below).
     - just under the selection (or the bullhorn clicked);  above it when there's no room below
     - the page never scrolls for it;  Owen drags it by its header
     - ivory, 8px inside on every side, with no buttons below the text
@@ -1707,8 +1753,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     box under its block (the runtime's `thread()`, `boxFor()`):
     - ONE element per comment for the visit, given what the server holds at each redraw, moved only when its place
       changes:  Owen's box in it, what's typed and the cursor stay
-    - it draws what it's given and says what Owen did (`epic-thread-fold`, `-edit`, `-delete`, `-answer`);  the
-      comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
+    - it draws what it's given and says what Owen did (`epic-thread-fold`, `-edit`, `-delete`, `-answer`);
+      the comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
     - what it shows is worked out by `ThreadFacts` (`spell-epic/comments`), the comments' code's too
     - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
     - WHOSE TURN (`CommentList.turnOf()`, sent by the GET as each comment's `turn`):
@@ -1752,8 +1798,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - No date:  each message has its time.
     - Then OWEN'S ANSWER, while it's his turn:  an epic page item's review pills
       ("same semantics/look as pills in item header").
-      - The real `<epic-review>`, `buttons="thread"` (`closed`:  Reopen), drawn by the thread in its shadow root:  the
-        item line's group, look and colours, but no inbox behind it (a press sends `epic-thread-answer`).
+      - The real `<epic-review>`, `buttons="thread"` (`closed`:  Reopen), drawn by the thread in its shadow root:
+        the item line's group, look and colours, but no inbox behind it (a press sends `epic-thread-answer`).
         - Before epic `epic-engine` P3 the docs runtime drew a copy of its markup:  a guide didn't load the pack.
       - ONE grouped pill of 24px square icon buttons, grey outlined, on the page's ground;
         each button its colour under the pointer.
@@ -1835,9 +1881,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
         VS Code 1.141 runs Electron 43.
     - So every icon inside a comment's buttons takes no pointer, and the pointer lands on the titled button:
       - the pill's, the pen, the trash, the fold, the pane's × and floppy, the bullhorn
-      - `pointer-events: none`, in spell-comments.css's "TOOLTIPS that show":  ONE rule for every titled
-        `<ui-button>` the runtime draws (`ui-button[title]::part(icon)`);  in the thread and the pane, the pack's
-        `Tooltip.css`
+      - `pointer-events: none`, in spell-comments.css's "TOOLTIPS that show":
+        ONE rule for every titled `<ui-button>` the runtime draws (`ui-button[title]::part(icon)`)
+        - in the thread and the pane, the pack's `Tooltip.css`
       - Keep it so for any new comment button.
     - A plain browser shows them either way.
       Headless Playwright can't show a native tooltip, only check what's under the pointer.
@@ -1846,9 +1892,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
   Owen comments, presses Send, and the session working the epic the page BELONGS to gets them.
   - The page header's right:  a pill, the paper plane, "Send" and how many comments aren't sent yet.
     - blue by the fill rule (grey outline:  nothing waiting;  dashed:  some not sent;  outlined:  sent)
-    - then who is listening:  "python-target is listening" (a green dot), "nobody is listening";
-      a page no epic owns:  "feedback is listening", "nobody is listening:  Send wakes feedback"
-      (or "no epic owns this page" in a repo with no `feedback` epic yet);  each says more in its tooltip
+    - then who is listening:  "python-target is listening" (a green dot), "nobody is listening"
+      - a page no epic owns:  "feedback is listening", "nobody is listening:  Send wakes feedback"
+      - a repo with no `feedback` epic yet:  "no epic owns this page"
+      - each says more in its tooltip
     - The runtime's `drawSend()`.
       It asks again every 30s, since a session that stops leaves only an old heartbeat.
     - Not on an epic page:  its Send is `<epic-page>`'s.
@@ -1859,8 +1906,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - none:  the STANDING epic `feedback` (epic `epic-engine` T9, J7;  `SeeAlso.epicFor()`), the inbox for every
       page no epic owns:  guides no epic claims, Epic UI's pages, the list pages, the changelog
       - its `epic inbox wait feedback` hears every such page's Send (`PageInboxes.unowned()`)
-      - its old name, `guide-changes`, is read as `feedback` (`epicNamed()`:  `epic` commands, `comments gather
-        --epic`, `comments list`)
+      - its old name, `guide-changes`, is read as `feedback`:
+        `epicNamed()`, for the `epic` commands, `comments gather --epic` and `comments list`
   - A click:  `POST /api/docs/comments/send`;  the comments waiting are sent (`GuideInbox` `sent`).
   - The epic's `epic inbox wait <name>` wakes on it, and prints each comment under its page.
     - The session answers each with `epic comments working` / `answer` (below), one at a time.
@@ -1912,17 +1959,19 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - App UI's and Brand's (spell-app's) too, since epic `epic-engine`'s sets work:  the same line in every page's
       head, and the epics pack in their layout (`<ui-components source="/_epic/pack/epics.pack.js">`), whose
       elements draw the threads and the pane.
-    - Spell UI's own too (spell-ui's `docs/`, at `/components/ui/`), the same way.  Its site bundle
-      couldn't load a pack until then:  `SitePacks` (`globalThis.SpellUI`'s `registerPack` and `packModules`) was the
-      other sets' own build of the site alone;  it's the one bundle now, every set's.
-      - Its prose is `<ui-markdown>`'s, in a shadow root:  a text comment there doesn't open (the selection isn't in
-        the page's `main`);  the page, each section and a live example's light-DOM text take comments.
-    - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):  the
-      toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
+    - Spell UI's own too (spell-ui's `docs/`, at `/components/ui/`), the same way.
+      - Its site bundle couldn't load a pack until then:
+        `SitePacks` (`globalThis.SpellUI`'s `registerPack` and `packModules`) was the other sets' own build of the site
+        alone;  it's the one bundle now, every set's.
+      - Its prose is `<ui-markdown>`'s, in a shadow root:
+        a text comment there doesn't open (the selection isn't in the page's `main`);
+        the page, each section and a live example's light-DOM text take comments.
+    - a page in TABS (a components page's Examples, Usage, API, Theming:  Spell UI's and Brand's element pages):
+      the toolbar lists the shown tab's sections, and follows the tabs (`spell-comments.entry.js`).
   - NOT:
     - an epic page's `parts/`
-    - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6), choice pages,
-      run pages
+    - details pages (questions, or comment boxes alone:  their `<epic-send>`;  epic `epic-engine` r6)
+    - choice pages, run pages
     - `templates/`, the parked goal sets in `goals/` (thoughts), the Brand tab's own pages (`brand/`)
 - Claude's side, for docs pages ([comments.ts](tools/comments.ts), [GuideChanges.ts](tools/GuideChanges.ts)):
 
@@ -1981,8 +2030,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Claude's `<spell-note-reply by at>` under one
   - The markup, and every edit to it:  [PageNotes.js](tools/PageNotes.js).
   - Plain markup, no element:  the runtime (`spell-doc-runtime.js`, "Page notes") draws each note as a folded card,
-    its head line an `<epic-page-note-head>` (the epics pack;  epic `epic-engine` P3).  `spell-doc.css` styles the
-    card.
+    its head line an `<epic-page-note-head>` (the epics pack;  epic `epic-engine` P3).
+    - `spell-doc.css` styles the card.
   - An edit splices the page's source, every other byte kept ([`editNotes()`](tools/notesOnDisk.ts)).
     It's formatted after only if the page was formatted.
 - Claude's side ([notes.ts](tools/notes.ts)):
@@ -2004,8 +2053,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - Each has a header comment, saying how it was run.
 - They live in the shared repo, so they DON'T run in place any more.
   - Node runs them from their real path in the content folder, where there's no `node_modules` to find packages in.
-  - To re-measure, copy one into a checkout with packages, and run it there:  spell-epic's root, or another repo's,
-    e.g. spell-ui's.
+  - To re-measure, copy one into a checkout with packages, and run it there:
+    spell-epic's root, or another repo's, e.g. spell-ui's.
 - Tables quote medians of several runs, never a single run.
 - Keep the scripts:  they re-measure on upgrades.
 - A guide's own LIVE elements, e.g. the custom elements guide's `<ui-counter>`:
@@ -2039,10 +2088,10 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - spell-app's pages, and spell-epic's own epics too:  spell-app serves that content, so a code name in an
       epic-engine reply links `../../../spell-epic/src/...` (spell-app's `spell-epic` link), never
       `../../../src/...`, which leads nowhere there
-    - which checkout:  `RepoList.linkRootOf()`, the registered repo whose content folder it is;  `PlanDocFiles`'
-      linker and `doc-links.js`'s `contentLinker`
-    - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):  a link to
-      `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
+    - which checkout:  `RepoList.linkRootOf()`, the registered repo whose content folder it is
+      - for `PlanDocFiles`' linker and `doc-links.js`'s `contentLinker`
+    - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):
+      a link to `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
     - links to the engine's old places in spell-app (`packages/epics/...`):  fixed once by the migration step
       `engine-links`, gone since epic `repo-split` P14
     - `doc-links.js` is its command line.
@@ -2078,8 +2127,9 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - `--skip-ui-build` reuses `../ui/dist`;  `--no-check` skips the browser.
 - [bundle-spell-ui.js](tools/bundle-spell-ui.js):  builds UI (`yarn build`), and bundles `spell-ui.js`, in `_assets/`.
   - then `spell-comments.js` beside it (Epic UI's pages' comments);  `--comments`:  only that one, no UI build
-  - NOT the claude.ai design system's bundle (`bundle.js` in its `components/`), nor its check:  spell-brand's
-    `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32), run by `spell design bundle | check`.
+  - NOT the claude.ai design system's bundle (`bundle.js` in its `components/`), nor its check:
+    spell-brand's `yarn design:bundle` / `design:check` since epic `repo-split` P10 (Q32),
+    run by `spell design bundle | check`.
 - `yarn tsx src/tools/bundle-experiment.ts <entry.ts> [<out.js>]`:  a guide's live elements, as one classic script.
   - See "Experiments".
   - default out:  `<name>.bundle.js`, beside `<name>.entry.ts`
@@ -2164,8 +2214,9 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - `{ view: "review" }`:  the "Review" tab
 - `tools/check-spell.js <page> [outDir] [--base <url>]`, with Playwright:  writes screenshots.
   - It loads the page from `file://`, or from the page server when the page says `data-spell-needs-server`.
-  - `--base <url>`:  from that server, whatever the page (the epic server's `http://127.0.0.1:4848`:  a page as the
-    side bar shows it, with its comments and the toolbar's bullhorn)
+  - `--base <url>`:  from that server, whatever the page
+    - the epic server's `http://127.0.0.1:4848`:
+      a page as the side bar shows it, with its comments and the toolbar's bullhorn
   - It fails on:
     - console errors
     - an undefined or unrendered `ui-*` or `epic-*` element (an epic page's, the `epics` pack)
@@ -2247,9 +2298,11 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
         `stack-by`) listed (epic `epic-engine` I36)
       - a `<details>` aside as `<ui-accordion class="spell-aside" styled>` (`spell-code` round one code block),
         its id and classes kept, folded
-      - LEFT, and listed for a person:  a table with its own class, style or role (which look is a call);  a
-        `<details>` that isn't a plain summary and body;  either inside an `<epic-*>` element that reads its
-        children;  everything on a page that runs its own script, or styles tables or asides itself
+      - LEFT, and listed for a person:
+        - a table with its own class, style or role (which look is a call)
+        - a `<details>` that isn't a plain summary and body
+        - either inside an `<epic-*>` element that reads its children
+        - everything on a page that runs its own script, or styles tables or asides itself
       - not its business:  a page's own buttons (its script wires them), the markup the TOOLS draw (their own code
         becomes elements), a heading outside `<ui-section>` (where its section ends is a call)
       - on 2026-10-19 it had nothing to do in spell-app's content:  every table was in a `<ui-table>` already
@@ -2262,8 +2315,8 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
     - A step runs on a page only when its `applies()` holds on the page as the steps before left it.
       Notes it returns with nothing changed (what it left, or skipped) are reported all the same.
     - The epic `details` has its epic page in a `details/` folder:  `pageKind()` takes an epic page's path first.
-  - The older steps went once every page had run them (epic `repo-split` Q45):  `ui-section`, `answer-elements`,
-    `engine-asset-routes` and the data files' renames;  their code is in git history.
+  - The older steps went once every page had run them (epic `repo-split` Q45);  their code is in git history:
+    `ui-section`, `answer-elements`, `engine-asset-routes` and the data files' renames.
   - A change to a page kind's markup adds its step here, in the same commit.
 - [doc-links.js](tools/doc-links.js):  see "Links".
   - Text and regexes, not a DOM:  it edits only what it links.

@@ -42,8 +42,8 @@ import listCSS from "./EpicList.css?inline"
  *   the slotted cards, each card placed by a `::slotted()` rule (CSS `order`), the hidden ones hidden by one
  *   - so a live update of the page, or the page server's added cards, are placed as they come
  * - a card's star answered (`epic-favorite`):  every card starred as the page server says
- * - SIDE EFFECT:  watches its cards' attributes and text (`@watches`);  listens for `epic-sort` on the document
- *   while connected
+ * - SIDE EFFECT:  watches its cards' attributes and text (`@watches`);
+ *   listens for `epic-sort` on the document while connected
  ****************/
 export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
   @E.proto static vocabulary = epicListVocabulary

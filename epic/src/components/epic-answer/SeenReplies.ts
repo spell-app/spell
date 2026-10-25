@@ -12,7 +12,9 @@ import { PrefStore } from "spell/util/persist/PrefStore"
  *     a NEWER reply is unseen again
  *   - its own key, beside the comments' `spell-comment-read:<path>`:  an item id and a comment id never meet
  * - One per `<epic-reply>`:  it watches only while its reply is the newest and unseen (`watch()`).
- * - Best effort:  storage refused (a private window) reads as nothing seen, and a write that fails is dropped.
+ * - Best effort, through `PrefStore`:
+ *   - storage refused (a private window):  what's seen is kept for this visit only
+ *   - a write that fails is logged, and dropped
  ****************/
 export class SeenReplies {
   /** The time of this item's reply Owen has seen, as stored;  `""` for none.  Tracked. */

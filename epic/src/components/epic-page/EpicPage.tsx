@@ -97,9 +97,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - the toolbar's bar, sticky again, right below the header (`--epic-head-h`):  the new item form, the toolbar
  *   - the review line, and the pill under it while it shows
  *   - the meta lines (branch, worktree, dates, the saga it serves, the guide's link from `slot="durable"`)
- *     - the saga (`saga`, epic `epic-workflow` P15):  a link to its saga page, by its title and with its purpose
- *       as the tooltip once the page server says them (`GET /api/epics/pages`'s `saga`);  by its id until then, and
- *       from `file://`
+ *     - the saga (`saga`, epic `epic-workflow` P15):  a link to its saga page, by its title, its purpose the tooltip
+ *       - once the page server says them (`GET /api/epics/pages`'s `saga`);  by its id until then, and from `file://`
  *   - a future epic's notice, then its children
  * - The step label follows the phases, in the colours of decision Q20;  while the page is in a stage (P29), the stage
  *   instead (`OVERVIEW`, `PHASES`, grey), since its phases may not show yet, and none while the stage button shows,
@@ -117,8 +116,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     a session listening to the review counts as running
  * - The review line under the header:  "To review this doc, type `/epic review <name>`", copied on click (it flashes)
  *   - on every epic page, as today:  it's how a review starts;  airplane mode:  `/airplane land`
- * - SEND AND ITS COUNTDOWN, at the header's right, before its labels:  `<epic-send-buttons>` (epic `epic-engine`
- *   P20, in place of P10's Send and Review Now)
+ * - SEND AND ITS COUNTDOWN, `<epic-send-buttons>`, at the header's right, before its labels
+ *   (epic `epic-engine` P20, in place of P10's Send and Review Now)
  *   - there whenever the page is reviewed (served with a token, its inbox answering:
  *     `ReviewClient`, through a `ReviewState` of its own), so it's always in the same place
  *   - Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header,
@@ -127,19 +126,22 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *     - grey with nothing to send, blue with marks not sent, outlined blue once sent
  *     - Owen's comments too (Owen, 2026-10-10, he keeps Send as the way they reach Claude):
  *       a new comment, or his reply on a thread, makes it blue;  its tooltip counts both ("2 marks, 1 comment")
- *   - the wand:  countdown mode (Owen, 2026-10-22).  On (the default), what's unsent goes by itself 2 minutes after
- *     Owen stops typing, clicking and scrolling, a ring draining round the wand;  that send asks every revisit now,
- *     as Review Now did (decision Q7).  Off, the plane is filled blue until he presses it.
+ *   - the wand:  countdown mode (Owen, 2026-10-22)
+ *     - on (the default):  what's unsent goes by itself 2 minutes after Owen stops typing, clicking and scrolling,
+ *       a ring draining round the wand;  that send asks every revisit now, as Review Now did (decision Q7)
+ *     - off:  the plane is filled blue until he presses it
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
  *   - `overview`:  only the Overview, Questions and Todos show;  `phases`:  the Phases too;  `building` (or none):
  *     everything.  Each section hides itself (`<epic-section>`'s `:state(offstage)`), and the toolbar lists only
  *     what shows (`spell-doc-runtime.js` reads the same rule)
- *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON (Q14:  "Accept Overview", then
- *     "Accept Phases";  `stageButton()`):  a press sends what's unsent, with an accept mark (`accept()`), and the
- *     session moves the page on (`epic inbox apply`);  its tooltip says what's still open ("2 questions open"),
- *     a reminder, never a lock.  The wand stays:  the countdown still sends Owen's answers by itself
+ *   - while the page is in a stage, Send's paper plane is the STAGE BUTTON
+ *     (Q14:  "Accept Overview", then "Accept Phases";  `stageButton()`)
+ *     - a press sends what's unsent, with an accept mark (`accept()`),
+ *       and the session moves the page on (`epic inbox apply`)
+ *     - its tooltip says what's still open ("2 questions open"):  a reminder, never a lock
+ *     - the wand stays:  the countdown still sends Owen's answers by itself
  *   - Send's plane is back once building starts
  * - THE PILL, under the review line, while marks, comments or Do Now requests wait and nobody can take them:
  *   no session listening (solid orange, a warning), or airplane mode;  a click copies the review line's command,
@@ -173,8 +175,9 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   through `--epic-commits-display`;  remembered per page (`localStorage`), as today's.
  * - The page-wide signals its blocks read (`signalsOf()`):
  *   - `layout`
- *   - `top`, where top-level titles stick:  the site header's `--spell-site-header-height`
- *     plus this header's and the toolbar bar's heights, re-measured as any of them changes size
+ *   - `top`, where top-level titles stick:
+ *     the site header's `--spell-site-header-height` plus this header's and the toolbar bar's heights,
+ *     re-measured as any of them changes size
  * - EDGE TO EDGE (P14):  its `:host` breaks out of the docs' `<main>` padding
  *   (`--spell-doc-pad-inline`, `spell-doc.css`), so the bands reach across;
  *   everything inside insets itself by `--epic-inset`.
@@ -184,8 +187,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - crumbs `DOCS / SAGAS / <ID>`;  a click on the id copies `/epic review SAGA:/<id>`, as the review line does
  *   - no step label, state, Plan hung?, See Also or Agents running:  a saga has no phases, branch or agents
  *   - one meta line, its short address (`SAGA:/drawable-spell`, copied on click), then its dates
- *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox, for the session
- *     running `/epic review SAGA:/<id>` (`reviewRoutes.ts`)
+ *   - Send and the review line as on an epic page:  its marks and comments wait in its own inbox,
+ *     for the session running `/epic review SAGA:/<id>` (`reviewRoutes.ts`)
  * - TEST MODE (epic `epic-engine` P4):  a TEST RUN over its blocks (`<epic-test-run>`), its open tests one at a time
  *   - from the To test section's Start testing (`epic-test-start`), or the address's `?test=1` (`epic test <epic>`);
  *     `?test=1&all=1` (or `?test=all`), one epic of a run across every epic (`epic test --all`)
@@ -380,8 +383,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):  its words, its tooltip,
-   * and whether it was pressed (its mark, `stage`, in the inbox);  `undefined` once building, or not reviewed.
+   * The header's STAGE BUTTON while the page is in a stage (epic `epic-engine` P29, Q14):
+   * its words, its tooltip, and whether it was pressed (its mark, `stage`, in the inbox).
+   * - `undefined` once building, or not reviewed
    * - the tooltip says what's still open:  the open questions ("2 questions open"), a reminder, never a lock
    */
   readonly stageButton = createMemo((): StageButton | undefined => {
@@ -432,8 +436,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     const label = this.phaseStep()
     const state = this.state()
     if (!label || !state) return label
-    // the phase's OWN icon, as its row draws it (Owen, 2026-10-24:  "phase icon + top 'P26' are inconsistent");  the
-    // epic's state colours it and says itself in the tooltip
+    // the phase's OWN icon, as its row draws it (Owen, 2026-10-24:  "phase icon + top 'P26' are inconsistent");
+    // the epic's state colours it and says itself in the tooltip
     return {
       ...label,
       color: state.color as StepLabel["color"],
@@ -860,10 +864,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The sticky bar's last row, the TOOLBAR (epic `airplane` P8), in its order:
    * - the docs runtime's section buttons (`slot="toolbar"`)
-   * - at the right, what Claude is doing and the agents running (`<epic-agents>`, epic `epic-engine` P35), the
-   *   page's state filter (`pageFilter()`), then expand-all and collapse-all
-   * - no new item button:  each item section has its own, on its title (Owen, 2026-10-13:  "Remove "comment" icon
-   *   from top header -- add it to question/todo/issue/test headers")
+   * - at the right:
+   *   - what Claude is doing and the agents running (`<epic-agents>`, epic `epic-engine` P35)
+   *   - the page's state filter (`pageFilter()`), then expand-all and collapse-all
+   * - no new item button:  each item section has its own, on its title
+   *   (Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers")
    */
   private toolbar(): JSX.Element {
     return (
@@ -962,9 +967,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The STAGE BUTTON pressed (Accept Overview, Accept Phases;  epic `epic-engine` P29):  the page's accept mark
-   * (`{ action: "accept", stage }`, keyed `stage`), then Send, so it goes at once with whatever else is unsent and wakes
-   * the epic when nobody listens.
+   * The STAGE BUTTON pressed (Accept Overview, Accept Phases;  epic `epic-engine` P29):
+   * the page's accept mark (`{ action: "accept", stage }`, keyed `stage`), then Send,
+   * so it goes at once with whatever else is unsent, and wakes the epic when nobody listens.
    * - pressed again once accepted:  sent again, nothing more (the mark stands until the session applies it)
    */
   @E.untracked
@@ -1269,10 +1274,11 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
 
   /**
    * The review line or the pill, clicked:  copy the command, then flash and say so.
-   * - nobody listening, not in airplane mode:  start the review too (epic `airplane` P12):  the page server types
-   *   `/epic review <name>` into the session titled for the epic, or says why it didn't (`ReviewClient.startReview()`)
-   *   - its notice is the ONE toast, and says it's copied too:  a "Copied" toast beside it stacked two over the test
-   *     run's bar (epic `epic-engine` I78)
+   * - nobody listening, not in airplane mode:  start the review too (epic `airplane` P12)
+   *   - the page server types `/epic review <name>` into the session titled for the epic,
+   *     or says why it didn't (`ReviewClient.startReview()`)
+   *   - its notice is the ONE toast, and says it's copied too:
+   *     a "Copied" toast beside it stacked two over the test run's bar (epic `epic-engine` I78)
    */
   @E.untracked
   private async copyCommand() {
@@ -1301,8 +1307,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * Copy `text`, and a quiet blue toast says so (Owen, 2026-10-13:  "copied toast in blue.  All file links and
-   * commands should be clickable to copy the text").  True when it was copied.
+   * Copy `text`, and a quiet blue toast says so.  True when it was copied.
+   * - Owen, 2026-10-13:  "copied toast in blue.  All file links and commands should be clickable to copy the text"
    * - the docs bundle defines `<ui-toast>`;  a page without it just copies
    */
   @E.untracked

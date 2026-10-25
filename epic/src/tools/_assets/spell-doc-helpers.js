@@ -1,12 +1,13 @@
 /*
- * Small helpers the docs pages' scripts share:  the page runtime (`spell-doc-runtime.js`), the comments
- * (`spell-doc-comments.js`) and the toolbar (`spell-doc-toolbar.js`), which Epic UI's pages load by themselves too
- * (`spell-comments.js`).
+ * Small helpers the docs pages' scripts share:
+ * - the page runtime (`spell-doc-runtime.js`)
+ * - the comments (`spell-doc-comments.js`) and the toolbar (`spell-doc-toolbar.js`),
+ *   which Epic UI's pages load by themselves too (`spell-comments.js`)
  * - Plain DOM, no Spell UI imports:  the comments' own script runs beside the page's Spell UI, never with a second one
  *   (a toast goes through the page's `window.SpellUI`)
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
-import { PrefStore } from "spell/util/persist"
+import { PrefStore } from "spell/util/persist/PrefStore"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -38,13 +39,16 @@ export function beforeToolbar(head, pill) {
 }
 
 /**
- * The page header's TOOLS ROW (epic `epic-engine` I38):  ONE row at the right of the h1's line, holding what our tools
- * put there, in `HEAD_TOOLS`' order, whoever adds first:  the comments' Send, then the page's own tools (the Epics
- * page's New epic pill and sort), then the page's bullhorn, last at the right.
- * - one row, so they never overlap each other (they used to be placed apart, each at its own distance from the edge,
- *   and Send covered the New epic pill);  the row overlaps a long title rather than wrapping (`spell-doc.css`)
- * - a docs page's `.spell-page-head` only:  any other head (Epic UI's masthead) takes the tool as before
- *   (`beforeToolbar()`)
+ * The page header's TOOLS ROW (epic `epic-engine` I38):  ONE row at the right of the h1's line,
+ * holding what our tools put there, in `HEAD_TOOLS`' order, whoever adds first:
+ *   1. expand all and collapse all (`folds`)
+ *   2. the comments' Send
+ *   3. the page's own tools (the Epics page's New epic pill and sort)
+ *   4. the page's bullhorn, last at the right
+ * - one row, so they never overlap each other:  the row overlaps a long title rather than wrapping (`spell-doc.css`)
+ *   - they used to be placed apart, each at its own distance from the edge, and Send covered the New epic pill
+ * - a docs page's `.spell-page-head` only:
+ *   any other head (Epic UI's masthead) takes the tool as before (`beforeToolbar()`)
  * - made on first use, `data-spell-added` (a live update steps around it);  `kind`:  one of `HEAD_TOOLS`
  */
 export function addHeadTool(head, tool, kind) {
@@ -64,15 +68,16 @@ export function addHeadTool(head, tool, kind) {
 const HEAD_TOOLS = ["folds", "send", "page", "comment"]
 
 /**
- * A block's ACTIONS ROW (epic `epic-engine` I26;  Owen, 2026-10-19:  "The expand button should be to the right of the
- * bullhorn rather than in its own line"):  the ONE row of a block's own controls, for a block with no title row of its
- * own (a table, a paragraph, a list, a message ...):  a line of no height just before the block, its buttons over the
- * block's top right corner (`spell-comments.css`, "A block's actions row").
- * - every feature puts its control here, never in a row of its own, so they never overlap or float apart:  the
- *   comments' bullhorn (`addBullhorn()`), a table's expand button (`wireTableWidths()`)
+ * A block's ACTIONS ROW (epic `epic-engine` I26):  the ONE row of a block's own controls,
+ * for a block with no title row of its own (a table, a paragraph, a list, a message ...).
+ * - a line of no height just before the block, its buttons over the block's top right corner
+ *   (`spell-comments.css`, "A block's actions row")
+ * - Owen, 2026-10-19:  "The expand button should be to the right of the bullhorn rather than in its own line"
+ * - every feature puts its control here, never in a row of its own, so they never overlap or float apart:
+ *   the comments' bullhorn (`addBullhorn()`), a table's expand button (`wireTableWidths()`)
  * - in `BLOCK_ACTIONS`' order, whoever adds first:  the bullhorn, then the expand button
- * - made on first use, `data-spell-added` (a live update steps around it);  `dropBlockAction()` takes it away with its
- *   last control
+ * - made on first use, `data-spell-added` (a live update steps around it);
+ *   `dropBlockAction()` takes it away with its last control
  * - `kind`:  one of `BLOCK_ACTIONS`;  returns the row
  */
 export function addBlockAction(block, control, kind) {
@@ -81,13 +86,13 @@ export function addBlockAction(block, control, kind) {
     row = document.createElement("div")
     row.className = "spell-block-actions"
     row.dataset.spellAdded = ""
-    // the buttons in a box of their own, out of the flow:  the row stays a line of no height;  over the block's top
-    // edge however its margin falls (`alignBlockActions()`)
+    // the buttons in a box of their own, out of the flow:  the row stays a line of no height;
+    // over the block's top edge however its margin falls (`alignBlockActions()`)
     const buttons = document.createElement("span")
     buttons.className = "spell-block-buttons"
     row.append(buttons)
-    // a block slotted into an element (a docs example's description) takes its row with it:  unslotted, the row
-    // landed in the element's default slot, somewhere else entirely
+    // a block slotted into an element (a docs example's description) takes its row with it:
+    // unslotted, the row landed in the element's default slot, somewhere else entirely
     if (block.slot) row.slot = block.slot
     block.before(row)
   }
@@ -115,12 +120,14 @@ const BLOCK_ACTIONS = ["comment", "expand"]
  * the row is a line of no height just before the block, but the block's own top margin (a table's 12px, a list's)
  * may lie between them, or collapse into the margin above:  CSS can't know which, so this measures it
  * (`--spell-block-gap`, read by `spell-comments.css`'s `.spell-block-buttons`).
- * - a table's buttons are centred on its header row (its first row):  the gap down to that ROW's top (the table's
- *   own top border lies above it), its height, `--spell-block-head`, and the row marked `.at-head-row`
- *   - to the hundredth of a pixel, not whole pixels:  the gap to the TABLE's top, and both rounded, left the expand
- *     button 1.65px above the row's middle (epic `epic-engine` r1, the repo-split analysis page's Q5)
- * - all reads, then all writes;  a row or block not drawn (a folded section's) is skipped until it shows:  its
- *   callers run again on a resize (the comments' `makeRoom()`, a table's `place()`)
+ * - a table's buttons are centred on its header row (its first row):
+ *   the gap down to that ROW's top (the table's own top border lies above it), its height, `--spell-block-head`,
+ *   and the row marked `.at-head-row`
+ *   - to the hundredth of a pixel, not whole pixels:  the gap to the TABLE's top, and both rounded,
+ *     left the expand button 1.65px above the row's middle (epic `epic-engine` r1, the repo-split analysis page's Q5)
+ * - all reads, then all writes
+ * - a row or block not drawn (a folded section's) is skipped until it shows:
+ *   its callers run again on a resize (the comments' `makeRoom()`, a table's `place()`)
  */
 export function alignBlockActions(root) {
   const rows = root.matches?.(".spell-block-actions") ? [root] : [...root.querySelectorAll(".spell-block-actions")]
@@ -189,9 +196,9 @@ export function growField(field) {
 /**
  * A toast through `UI.toast()`;  the console when toasts aren't there.
  * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`ToastAction`s:  `{ text, icon, click }`)
- * - a toast with buttons looks like one without (epic `epic-engine` P20;  Owen, 2026-10-22:  "make the 'comment
- *   deleted' toast not ugly, matching the styles of the other toasts"):  each button on the toast's own line, at
- *   its end, on its colour (`TOAST_ACTIONS`), never a second band under it
+ * - a toast with buttons looks like one without (epic `epic-engine` P20):
+ *   each button on the toast's own line, at its end, on its colour (`TOAST_ACTIONS`), never a second band under it
+ *   - Owen, 2026-10-22:  "make the 'comment deleted' toast not ugly, matching the styles of the other toasts"
  */
 export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
   const buttons = actions?.map((action) => ({ class: TOAST_ACTION_CLASS, ...action }))

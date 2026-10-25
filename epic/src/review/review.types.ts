@@ -47,8 +47,8 @@ export const PLAN_DOC_PAGE = /\/(?:packages\/docs\/content\/)?epics\/([^/]+)\/\1
 export const SAGA_PAGE = /\/sagas\/([^/]+)\/\1\.saga\.html$/
 
 /**
- * How a saga page is NAMED to `/epic review` and the `epic` tool:  its short address, `SAGA:/<id>`
- * (`/epic review SAGA:/drawable-spell`, `epic inbox wait SAGA:/drawable-spell`, `epic add SAGA:/drawable-spell#T`).
+ * How a saga page is NAMED to `/epic review` and the `epic` tool:  its short address, `SAGA:/<id>`.
+ * - e.g. `/epic review SAGA:/drawable-spell`, `epic inbox wait SAGA:/drawable-spell`, `epic add SAGA:/drawable-spell#T`
  * - a saga id may be an epic's name too (`output-targets`):  the prefix says which page
  * - REFACTOR:  one resolver for every `SAGA:/` address once epic `epic-workflow` P15's `<epic-link>` work lands
  */
@@ -67,8 +67,8 @@ export const NOTICE_MS = 6000
 export const FOCUS_HOLD_MS = 3000
 
 /**
- * How long Owen leaves the page alone before countdown mode sends what's waiting (`SendCountdown`;  epic
- * `epic-engine` P20:  "2 minutes of inactivity from me").
+ * How long Owen leaves the page alone before countdown mode sends what's waiting
+ * (`SendCountdown`;  epic `epic-engine` P20:  "2 minutes of inactivity from me").
  */
 export const COUNTDOWN_MS = 120_000
 
@@ -76,8 +76,8 @@ export const COUNTDOWN_MS = 120_000
 export const COUNTDOWN_TICK_MS = 1000
 
 /**
- * localStorage key of countdown mode, for every page this browser shows:  `"off"` while it's off;
- * anything else, or nothing, on (decision Q6:  on by default, remembered per viewer).
+ * `localStorage` key of countdown mode, for every page this browser shows:  `"off"` while it's off.
+ * - Anything else, or nothing:  on (decision Q6:  on by default, remembered per viewer).
  */
 export const COUNTDOWN_KEY = "spell-epics:send-countdown"
 
@@ -181,8 +181,8 @@ export const TEST_RESULTS = ["passed", "failed", "skip", "notnow"] as const
 export type TestResult = (typeof TEST_RESULTS)[number]
 
 /**
- * The epics with open tests, in Owen's saga order (`GET`, `[{ epic, open, page }]`):  where a run started by
- * `epic test --all` goes next.
+ * The epics with open tests, in Owen's saga order (`GET`, `[{ epic, open, page }]`):
+ * where a run started by `epic test --all` goes next.
  */
 export const TESTS_API = "/api/epics/tests"
 
@@ -264,10 +264,10 @@ export type ServerLinkOptions = {
   /** `fetch`, bound */
   fetch: typeof fetch
   /**
-   * the page as the page server serves it to the browser NOW, with its `window.SPELL_SERVER` (`ServerLink`'s token
-   * refresh);  none:  `fetch()`ed (tests)
-   * - why not `fetch()` in a browser:  the server sends a script's `fetch()` the file as is, without it
-   *   (`StaticHandler`, `Sec-Fetch-Dest: empty`)
+   * the page as the page server serves it to the browser NOW, with its `window.SPELL_SERVER`
+   * (`ServerLink`'s token refresh);  none:  `fetch()`ed (tests)
+   * - why not `fetch()` in a browser:
+   *   the server sends a script's `fetch()` the file as is, without it (`StaticHandler`, `Sec-Fetch-Dest: empty`)
    */
   readServed?: (page: string) => Promise<string>
 }

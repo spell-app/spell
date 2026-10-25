@@ -26,25 +26,26 @@ import {
  * - One per page (`forPage()`).
  * - Each row, `<epic-choice-row>`, registers while connected (`add()`);
  *   `<epic-choices-bar>` holds the feedback and "Do it", and draws where things stand.
- * - Keeps a DRAFT of what's typed, so nothing typed lives only in the open page (epic `epic-engine` P15, r14:  a page
- *   server gone lost 76 boxes Owen filled):
+ * - Keeps a DRAFT of what's typed, so nothing typed lives only in the open page
+ *   (epic `epic-engine` P15, r14:  a page server gone lost 76 boxes Owen filled):
  *   - every change goes into the browser's storage at once (`localStorage`, `CHOICES_KEY_PREFIX` + the page's path)
  *   - and to the page server as he types (`src/tools/choicesRoutes.ts`, `POST /api/docs/choices/draft`):
- *     `CHOICES_SAVE_MS` (half a second) after the last change, one save at a time;  and as the page goes away
- *     (`watch()`:  `pagehide`, the page hidden), a request that outlives the page
+ *     `CHOICES_SAVE_MS` (half a second) after the last change, one save at a time
+ *   - and as the page goes away (`watch()`:  `pagehide`, the page hidden), a request that outlives the page
  *   - a save that fails says so in red (`isSaveError`), and tries again every `ANSWER_RETRY_MS` (3s) until one goes
  *     through:  a page server back on its address takes it, with its new token (`ServerLink`), no keystroke, no reload
  *   - the draft never wakes anyone:  only "Do it" does;  "Do it" drops the browser's copy
  *   - Copy my answers (`copyText()`):  what's typed, as the draft, for a page whose server is gone for good
- * - "Do it" (`send()`):  `POST /api/docs/choices/answer`, which `epic choices wait` exits with;  pressed again after
- *   changes, it sends again.
- * - On load (`restore()`):  the newest of the server's draft, the browser's copy and the answer comes back into the
- *   boxes and the feedback;  the browser's copy, newer than what the server has, is saved to it.
- * - Only the boxes that differ from the recommendation are sent, by row id (`values`), with the feedback;  a `blank`
- *   row's box (epic `epic-engine` P13) when it holds something other than today's text.
- * - A table Owen can put in order (`<epic-choice-rows reorder>`, epic `epic-workflow` P15):  its rows' ids in the
- *   order he left them go too (`order`), by its section's id;  on load they come back in `restoredOrder`, which the
- *   table puts its rows in.
+ * - "Do it" (`send()`):  `POST /api/docs/choices/answer`, which `epic choices wait` exits with.
+ *   Pressed again after changes, it sends again.
+ * - On load (`restore()`):  the newest of the server's draft, the browser's copy and the answer
+ *   comes back into the boxes and the feedback.
+ *   - The browser's copy, newer than what the server has, is saved to it.
+ * - Only the boxes that differ from the recommendation are sent, by row id (`values`), with the feedback.
+ *   - A `blank` row's box (epic `epic-engine` P13):  when it holds something other than today's text.
+ * - A table Owen can put in order (`<epic-choice-rows reorder>`, epic `epic-workflow` P15):
+ *   its rows' ids in the order he left them go too (`order`), by its section's id.
+ *   - On load they come back in `restoredOrder`, which the table puts its rows in.
  * - Node-safe at import:  no `window` / `document` touched until `forPage()`, `watch()` or `expandAll()`;
  *   `fetch` and the storage come in through `AnswerFormOptions`, so tests stub them.
  * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peer types.
@@ -223,8 +224,8 @@ export class ChoicesForm {
   /**
    * Save the draft to the page server now, if anything changed since the last save;  after any save on its way.
    * - `keepalive`:  the page is going away;  the request outlives it
-   * - NEVER throws:  a failure shows in `savedText`, in red (the browser's copy still has it), and it tries again in
-   *   `ANSWER_RETRY_MS`
+   * - NEVER throws:  a failure shows in `savedText`, in red (the browser's copy still has it),
+   *   and it tries again in `ANSWER_RETRY_MS`
    */
   save({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
     if (this.timer) clearTimeout(this.timer)
@@ -348,10 +349,11 @@ export class ChoicesForm {
   }
 
   /**
-   * What's typed, for Copy my answers:  the draft as the page server would save it (`ChoicesDraft`:  the page, when,
-   * the changed boxes by row id, the feedback, the order), as JSON.
-   * - Why:  a page whose server is gone for good can't save, and a reload brings back nothing;  this gets it out
-   *   without developer tools (r14).  Saved as `<slug>.draft.json5` beside the page, the page shows it again.
+   * What's typed, for Copy my answers:  the draft as the page server would save it, as JSON.
+   * - A `ChoicesDraft`:  the page, when, the changed boxes by row id, the feedback, the order.
+   * - Why:  a page whose server is gone for good can't save, and a reload brings back nothing;
+   *   this gets it out without developer tools (r14).
+   * - Saved as `<slug>.draft.json5` beside the page, the page shows it again.
    */
   copyText(): string {
     return JSON.stringify(this.draftNow(), null, 2)
@@ -362,10 +364,12 @@ export class ChoicesForm {
   ////////////////
 
   /**
-   * `file` (from the repo's root) at `line`, for VS Code:  `vscode://file/<checkout>/<file>:<line>`, which VS Code
-   * opens AT the line;  `#` before the page server says where the checkout is (the link then does nothing).
-   * - the checkout:  the one the page server serves (`root`);  a `/worktrees/<w>/` page's, that worktree, in the
-   *   folder the server serves them from (`worktrees`, `SPELL_SERVER.worktrees`)
+   * `file` (from the repo's root) at `line`, for VS Code:
+   * `vscode://file/<checkout>/<file>:<line>`, which VS Code opens AT the line.
+   * - `#` before the page server says where the checkout is:  the link then does nothing.
+   * - the checkout:  the one the page server serves (`root`)
+   *   - a `/worktrees/<w>/` page's:
+   *     that worktree, in the folder the server serves them from (`worktrees`, `SPELL_SERVER.worktrees`)
    */
   static fileUrl(
     file: string,
@@ -383,10 +387,10 @@ export class ChoicesForm {
   ////////////////
 
   /**
-   * Unfold every section holding rows in `document`, or, once they all are, fold them again;  true when they're
-   * now all open.
-   * - remembered as the reader's own folds are:  a property set fires no `ui-open`, so this writes the docs
-   *   runtime's store itself (`FOLD_KEY_PREFIX` + path)
+   * Unfold every section holding rows in `document`, or, once they all are, fold them again.
+   * - Returns true when they're now all open.
+   * - Remembered as the reader's own folds are:  a property set fires no `ui-open`,
+   *   so this writes the docs runtime's store itself (`FOLD_KEY_PREFIX` + path, through `PrefStore`).
    */
   static expandAll(document: Document): boolean {
     const sections = ChoicesForm.sectionsOf(document)
