@@ -8,7 +8,15 @@ import type {
   SiteUse
 } from "spell-ui/docs-components/docs-components.types"
 import { InlineCode } from "./InlineCode"
-import type { ApiCell, ApiNote, ApiRow, ApiSection } from "./UIDocsApi.types"
+import {
+  ApiSectionIds,
+  type ApiCell,
+  type ApiNote,
+  type ApiOnly,
+  type ApiRow,
+  type ApiSection,
+  type ApiSectionId
+} from "./UIDocsApi.types"
 
 /****************
  * ### `ApiModel`
@@ -18,7 +26,8 @@ import type { ApiCell, ApiNote, ApiRow, ApiSection } from "./UIDocsApi.types"
  * - Only the tables a tag has:  an empty one is left out.
  * - `json` attributes (rich data) are the `properties` table, not `attributes`:  they have no attribute.
  * - A function component's props (`SiteTag.props`) come first, and where it's drawn (`SiteTag.usedIn`) last.
- * - Static and pure, so tests drive it directly.
+ * - Each row also has its NAME (`ApiRow.name`):  what the "On this page" list shows, and its anchor's last word.
+ * - Static and pure, so tests drive it directly;  node loads it too (`yarn site:sections` asks which tables a page has).
  ****************/
 export class ApiModel {
   /** `tag`'s non-empty tables, in `ApiSectionIds` order. */
@@ -77,6 +86,22 @@ export class ApiModel {
     return sections.filter((section) => section.rows.length)
   }
 
+  /** The tables any of `tags` has, in `ApiSectionIds` order:  the sections a page's API tab gets. */
+  static sectionIdsFor(tags: readonly SiteTag[]): ApiSectionId[] {
+    const ids = new Set(tags.flatMap((tag) => ApiModel.sectionsFor(tag).map((section) => section.id)))
+    return ApiSectionIds.filter((id) => ids.has(id))
+  }
+
+  /** A table's id as `only` writes it:  `usedIn` => `used-in`. */
+  static onlyFor(id: ApiSectionId): ApiOnly {
+    return id.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`) as ApiOnly
+  }
+
+  /** The table `only` names (`used-in` => `usedIn`);  `undefined` for none, or a value that names no table. */
+  static sectionIdFor(only: string | undefined): ApiSectionId | undefined {
+    return ApiSectionIds.find((id) => !!only && ApiModel.onlyFor(id) === only)
+  }
+
   /** JS property name of `attribute`:  its `property`, else its name in camelCase. */
   static propertyFor(attribute: SiteAttribute): string {
     return attribute.property ?? attribute.name.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
@@ -124,6 +149,7 @@ export class ApiModel {
   private static propRow(prop: SiteProp): ApiRow {
     return {
       key: prop.name,
+      name: prop.name,
       cells: [
         { type: "name", code: prop.name, notes: prop.required ? [{ key: "required" }] : [] },
         { type: "text", text: InlineCode.wrap(prop.type) },
@@ -136,6 +162,7 @@ export class ApiModel {
   private static useRow(use: SiteUse): ApiRow {
     return {
       key: `${use.name} ${use.file}`,
+      name: use.name,
       cells: [
         { type: "name", code: use.name, notes: [] },
         { type: "text", text: InlineCode.wrap(use.file) }
@@ -154,6 +181,7 @@ export class ApiModel {
     const fallback = ApiModel.defaultFor(attribute)
     return {
       key: attribute.name,
+      name: attribute.name,
       cells: [
         { type: "name", code: attribute.name, notes },
         { type: "text", text: ApiModel.kindLabelFor(attribute.kind) },
@@ -168,6 +196,7 @@ export class ApiModel {
   private static propertyRow(attribute: SiteAttribute): ApiRow {
     return {
       key: attribute.name,
+      name: ApiModel.propertyFor(attribute),
       cells: [
         { type: "name", code: ApiModel.propertyFor(attribute), notes: [] },
         { type: "text", text: attribute.description }
@@ -179,6 +208,7 @@ export class ApiModel {
   private static eventRow(event: SiteEvent): ApiRow {
     return {
       key: event.name,
+      name: event.name,
       cells: [
         { type: "name", code: event.name, notes: event.cancelable ? [{ key: "cancelable" }] : [] },
         { type: "text", text: event.detail ? InlineCode.wrap(event.detail) : "" },
@@ -192,13 +222,14 @@ export class ApiModel {
     const name: ApiCell = slot.name
       ? { type: "name", code: slot.name, notes: [] }
       : { type: "name", label: "defaultSlot", notes: [] }
-    return { key: slot.name, cells: [name, { type: "text", text: slot.description }] }
+    return { key: slot.name, name: slot.name || DEFAULT_SLOT, cells: [name, { type: "text", text: slot.description }] }
   }
 
   /** `code` as the name, description. */
   private static namedRow(code: string, named: SiteNamed): ApiRow {
     return {
       key: named.name,
+      name: named.name,
       cells: [
         { type: "name", code, notes: [] },
         { type: "text", text: named.description }
@@ -210,6 +241,7 @@ export class ApiModel {
   private static textRow(text: SiteText): ApiRow {
     return {
       key: text.key,
+      name: text.key,
       cells: [
         { type: "name", code: text.key, notes: [] },
         { type: "text", text: InlineCode.wrap(text.text) },
@@ -224,6 +256,9 @@ export class ApiModel {
     return values.every((value, index) => /^\d+$/.test(value) && Number(value) === Number(values[0]) + index)
   }
 }
+
+/** The default slot's name in the "On this page" list and its anchor (the table says `(default)`, translated). */
+const DEFAULT_SLOT = "default"
 
 /** The `AttributeKind` of rich data:  a property, no attribute. */
 const JSON_KIND = "json"

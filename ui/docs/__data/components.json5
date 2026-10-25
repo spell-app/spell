@@ -32471,6 +32471,22 @@
           "description": "Document EVERY tag of a family instead, e.g. `ui-button` (`<ui-button>`, `<ui-buttons>`, `<ui-or>`):  each under its own header, whose id is the tag, so `#ui-or` links to it.  A folder or any of its tags."
         },
         {
+          "name": "only",
+          "kind": "enum",
+          "values": [
+            "props",
+            "attributes",
+            "properties",
+            "events",
+            "slots",
+            "parts",
+            "states",
+            "texts",
+            "used-in"
+          ],
+          "description": "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  Each row is an entry of the page's \"On this page\" list, its id `<section id>-<name>` (`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
+        },
+        {
           "name": "level",
           "kind": "number",
           "default": 3,
@@ -32619,6 +32635,10 @@
         {
           "name": "table",
           "description": "Each `<ui-table>`."
+        },
+        {
+          "name": "member",
+          "description": "A row's name cell (`<th>`), with `only`:  its id is the row's anchor."
         },
         {
           "name": "message",
@@ -36685,6 +36705,12 @@
           "default": "var(--ui-space-l)",
           "description": "Room kept above a tag header scrolled to by `#<tag>`, e.g. for a sticky page header.",
           "type": "length"
+        },
+        {
+          "name": "--ui-docs-api-landed-background",
+          "default": "var(--ui-highlight)",
+          "description": "Colour a landed row flashes, fading back to its own.",
+          "type": "color"
         },
         {
           "name": "--ui-docs-api-code-background",

@@ -155,6 +155,22 @@ describe("<ui-docs-toc> scan", () => {
     const { toc } = await render(SECTIONS.replace("<ui-docs-toc ", "<ui-docs-toc expanded "))
     expect(links(toc, "entry")).toEqual(["Button", "Group ui-buttons", "Or", "Disabled"])
   })
+
+  it("lists a `<ui-docs-api>`'s marked rows once it says it has drawn (`ui-drawn`)", async () => {
+    const page = `
+      <div>
+        <ui-docs-toc for="api" expanded></ui-docs-toc>
+        <article id="api"><ui-section id="api-states" label="States"><ui-docs-api></ui-docs-api></ui-section></article>
+      </div>`
+    const { wrapper, toc } = await render(page)
+    expect(links(toc, "entry")).toEqual([])
+    const api = wrapper.querySelector("ui-docs-api")!
+    api.attachShadow({ mode: "open" }).innerHTML = `<p id="api-states-open" data-toc="open"></p>`
+    api.dispatchEvent(new CustomEvent("ui-drawn", { bubbles: true, composed: true }))
+    await vi.waitFor(() => expect(links(toc, "entry")).toEqual(["open"]))
+    const entry = toc.shadowRoot!.querySelector("[part~=entry]")!
+    expect(entry.getAttribute("href")).toBe("#api-states-open")
+  })
 })
 
 ////////////////

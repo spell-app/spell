@@ -36,6 +36,13 @@ export class InlineCode {
     return pieces
   }
 
+  /** `text` as plain text, its code spans' fences dropped:  for a tooltip, which draws no `<code>`. */
+  static plain(text: string): string {
+    return InlineCode.parse(text)
+      .map((piece) => piece.text)
+      .join("")
+  }
+
   /**
    * `code` as a code span:  fenced by one more backtick than its longest run, padded with spaces when it starts or
    * ends with a backtick.  `InlineCode.parse(InlineCode.wrap(x))` ~== one code piece `x`.

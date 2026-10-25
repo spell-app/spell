@@ -358,13 +358,101 @@ describe("<ui-docs-api family>", () => {
     } finally {
       spy.mockRestore()
     }
+  })
+})
 
-    /** One animation frame. */
-    function frame() {
-      return new Promise((resolve) => requestAnimationFrame(resolve))
+describe("<ui-docs-api only>", () => {
+  afterEach(() => history.replaceState(null, "", location.pathname + location.search))
+
+  /** `only`'s api inside a page section `sectionId`, drawn. */
+  async function inSection(attributes: string, sectionId = "api-attributes") {
+    SiteData.url = DATA_URL
+    const wrapper = await ElementFixture.render(
+      `<ui-section id="${sectionId}" label="X"><ui-docs-api ${attributes}></ui-docs-api></ui-section>`
+    )
+    const host = wrapper.querySelector<DOMElement>("ui-docs-api")!
+    await drawn(host)
+    return host
+  }
+
+  /** Every `[data-toc]` element of `host`'s shadow root:  its id, text, and whether it's a group. */
+  function marked(host: Element) {
+    return [...host.shadowRoot!.querySelectorAll("[data-toc]")].map((element) => [
+      element.id,
+      element.getAttribute("data-toc"),
+      element.hasAttribute("data-toc-group")
+    ])
+  }
+
+  it("draws ONE table, with no title:  the page's section has it", async () => {
+    const host = await inSection(`tag="x-button" only="events"`, "api-events")
+    expect(host.shadowRoot!.querySelectorAll("ui-table")).toHaveLength(1)
+    expect(host.shadowRoot!.querySelector("[part~=title]")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=note]")!.textContent).toContain("CustomEvent")
+    expect(host.shadowRoot!.querySelector("table")!.getAttribute("aria-label")).toBe("Events of <x-button>")
+  })
+
+  it("makes every row's name cell an anchor and an \"On this page\" entry, under its section's id", async () => {
+    const host = await inSection(`tag="x-button" only="slots"`, "api-slots")
+    expect(marked(host)).toEqual([
+      ["api-slots-default", "default", false],
+      ["api-slots-icon", "icon", false]
+    ])
+    const cell = host.shadowRoot!.getElementById("api-slots-icon")!
+    expect([cell.localName, cell.getAttribute("part")]).toEqual(["th", "member"])
+  })
+
+  it("starts its ids with `only` outside a section", async () => {
+    const host = await render(`<ui-docs-api tag="x-button" only="states"></ui-docs-api>`)
+    expect(marked(host)).toEqual([["states-pressed", "pressed", false]])
+  })
+
+  it("heads each tag of a family that has the table, as an entry group;  its summary in the tooltip", async () => {
+    const parts = await inSection(`family="x-button" only="parts"`, "api-parts")
+    expect(marked(parts)).toEqual([
+      ["api-parts-x-button", "<x-button>", true],
+      ["api-parts-x-button-button", "button", false],
+      ["api-parts-x-or", "<x-or>", true],
+      ["api-parts-x-or-or", "or", false]
+    ])
+    const header = parts.shadowRoot!.getElementById("api-parts-x-button")!
+    expect(header.getAttribute("title")).toBe("A button does things.")
+    expect(parts.shadowRoot!.querySelector("[part~=description]")).toBeNull()
+    expect(header.querySelector("a")!.getAttribute("href")).toBe("#x-button")
+
+    const events = await inSection(`family="x-button" only="events"`, "api-events")
+    expect(events.shadowRoot!.querySelectorAll("[part~=header]")).toHaveLength(1)
+    expect(events.shadowRoot!.querySelectorAll("ui-table")).toHaveLength(1)
+  })
+
+  it("draws nothing, and no message, when the tag has no such table", async () => {
+    const host = await inSection(`tag="x-or" only="events"`, "api-events")
+    expect(host.shadowRoot!.querySelector("ui-table")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=message]")).toBeNull()
+  })
+
+  it("flashes the row `location.hash` names, and doesn't scroll:  the page lands", async () => {
+    const spy = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {})
+    try {
+      history.replaceState(null, "", "#api-events-ui-click")
+      const host = await inSection(`tag="x-button" only="events"`, "api-events")
+      await frame()
+      await ElementFixture.settle(host)
+      const row = host.shadowRoot!.getElementById("api-events-ui-click")!.closest("tr")!
+      expect(row.classList.contains("landed")).toBe(true)
+      expect(spy).not.toHaveBeenCalled()
+      const other = host.shadowRoot!.getElementById("api-events-ui-toggle")!.closest("tr")!
+      expect(other.classList.contains("landed")).toBe(false)
+    } finally {
+      spy.mockRestore()
     }
   })
 })
+
+/** One animation frame. */
+function frame() {
+  return new Promise((resolve) => requestAnimationFrame(resolve))
+}
 
 ////////////////
 // ## Messages and states

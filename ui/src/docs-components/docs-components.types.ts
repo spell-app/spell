@@ -540,6 +540,22 @@ export const DOCS_DARK_QUERY = "(prefers-color-scheme: dark)"
  */
 export const CODE_SPAN = /`([^`]+)`/g
 
+/**
+ * Marks an element in a docs element's SHADOW root as an entry of the page's "On this page" list (`<ui-docs-toc>`);
+ * its value is the entry's text.
+ * - The list reads light DOM only, except the shadow roots of `TOC_SHADOW_HOSTS`:  there it lists these, in order,
+ *   under the `<ui-section>` around the host.
+ * - The element has an id, so the entry links to `#<id>`;  the site lands there (`SiteSections`), as the browser can't.
+ * - `<ui-docs-api only>` marks its tag headers and every row's name cell (`th`):  "every member in the list".
+ */
+export const TOC_ENTRY_ATTRIBUTE = "data-toc"
+
+/** On a `TOC_ENTRY_ATTRIBUTE` element:  a GROUP (a tag's header);  the entries after it, to the next group, nest in it. */
+export const TOC_GROUP_ATTRIBUTE = "data-toc-group"
+
+/** The docs elements whose shadow roots hold "On this page" entries (`TOC_ENTRY_ATTRIBUTE`). */
+export const TOC_SHADOW_HOSTS = "ui-docs-api"
+
 /** A family's `level` attribute:  the heading levels it may draw, and the one when unset. */
 export type HeadingBounds = {
   /** lowest level allowed */

@@ -42,7 +42,7 @@ export type FollowedContent = {
 /**
  * What becomes a SECTION:  a level 2 page header, or a `<ui-section>` inside no other (inside one:
  * an entry of it, at any depth).
- * - Light DOM only:  headers a widget renders in its shadow root (`<ui-docs-api>`'s) can't be listed or linked to.
+ * - Light DOM only:  a widget's shadow headers are listed only when it marks them (`TOC_ENTRY_ATTRIBUTE`).
  */
 export const SECTION_SELECTOR = 'ui-header[level="2"], h2, ui-section'
 

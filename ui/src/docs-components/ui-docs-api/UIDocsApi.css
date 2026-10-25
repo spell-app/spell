@@ -12,6 +12,7 @@
  *   - A table is `<ui-header part="title">`, an optional `<p class="note" part="note">`,
  *     and `<ui-table part="table">` around a native `<table>`,
  *     whose row headers (`th[scope=row]`) hold the name and `<small class="ui-caption">` notes.
+ *   - With `only`:  no title;  each row header is `part="member"`, and its row is `tr.landed` while it flashes.
  * - Public tokens (`--ui-docs-api-*`) are never declared:  each is read through a private alias
  *   (`notes/theming.md` "Component tokens").
  */
@@ -30,6 +31,8 @@
     --_ui-docs-api-table-gap: var(--ui-docs-api-table-gap, 1.5em);
     /* Room kept above a tag header scrolled to by `#<tag>`, e.g. for a sticky page header. */
     --_ui-docs-api-scroll-margin: var(--ui-docs-api-scroll-margin, var(--ui-space-l));
+    /* Colour a landed row flashes, fading back to its own. */
+    --_ui-docs-api-landed-background: var(--ui-docs-api-landed-background, var(--ui-highlight));
     /* Background of inline code. */
     --_ui-docs-api-code-background: var(--ui-docs-api-code-background, var(--ui-surface-strong));
     display: block;
@@ -102,5 +105,24 @@
   }
   small code {
     padding: 0 0.25em;
+  }
+}
+
+@layer ui.components.docs-api.states {
+  /* A row a link landed on (`only`):  it flashes once the page has scrolled to it, then fades back.
+     Without motion it holds the colour a moment instead, and drops it. */
+  tr.landed > * {
+    animation: ui-docs-api-landed calc(var(--ui-duration-slowest) * 2) ease-in var(--ui-duration-slow) backwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    tr.landed > * {
+      animation-timing-function: steps(1, end);
+    }
+  }
+
+  @keyframes ui-docs-api-landed {
+    from {
+      background-color: var(--_ui-docs-api-landed-background);
+    }
   }
 }
