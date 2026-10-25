@@ -61,7 +61,7 @@ export const tabVocabulary = {
       group: "advanced",
       kind: "boolean",
       description:
-        "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with " +
+        "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with " +
         "`first: true` to fill it yourself)."
     },
     {
@@ -86,7 +86,7 @@ export const tabVocabulary = {
   ],
   events: [
     {
-      name: "ui-show",
+      name: "ui-opened",
       detail: "{ value: string, first: boolean }",
       description: "Became the shown pane;  `first` the first time (fill a lazy pane now)."
     }

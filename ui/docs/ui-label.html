@@ -92,7 +92,7 @@
                     >Helen</ui-label
                   >
                 </ui-docs-example>
-                <ui-docs-example description="`removable` adds a delete button, which fires `ui-remove`.">
+                <ui-docs-example description="`removable` adds a delete button, which fires `ui-removing`.">
                   <ui-label image="../images/avatar/small/ade.jpg" removable>Adrienne</ui-label>
                   <ui-label image="../images/avatar/small/zoe.jpg" removable>Zoe</ui-label>
                   <ui-label image="../images/avatar/small/nan.jpg" removable>Nan</ui-label>
@@ -795,13 +795,13 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A plain click is the native `click`. `ui-remove` is the only custom event: a `removable` label fires it when its
+                  A plain click is the native `click`. `ui-removing` is the only custom event: a `removable` label fires it when its
                   delete button is activated. It is cancelable, and the label does NOT remove itself: remove it in the listener.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
-                  document.addEventListener("ui-remove", (event) => {
+                  document.addEventListener("ui-removing", (event) => {
                     if (event.target.matches("ui-label")) event.target.remove()
                   })
                 </script>
@@ -813,7 +813,7 @@
                 <script type="text/markdown">
                   - A label with `href` is a real link: **Tab** reaches it, **Enter** follows it.
                   - Without `href` a label is inert text, never a tab stop.
-                  - A `removable` label's delete button is its own tab stop; **Enter** or **Space** fires `ui-remove`.
+                  - A `removable` label's delete button is its own tab stop; **Enter** or **Space** fires `ui-removing`.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -827,7 +827,7 @@
                     the Prompt example does; it is only a look, so it does not link itself to the input.
                   - Colour is never the only signal: a label's text carries its meaning.
                   - If the label fails to render, it shows its children through a bare `<slot>`, so text and links stay;
-                    its box and colours, the `removable` delete button (and `ui-remove`), the `icon` glyph, a slotted
+                    its box and colours, the `removable` delete button (and `ui-removing`), the `icon` glyph, a slotted
                     icon and the `image` shorthand go.
                 </script>
               </ui-markdown>
@@ -848,13 +848,13 @@
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
-                  <ui-label removable @ui-remove="removeTag(tag)">{{ tag }}</ui-label>
+                  <ui-label removable @ui-removing="removeTag(tag)">{{ tag }}</ui-label>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-label removable on-ui-remove={() => removeTag(tag)}>
+                  <ui-label removable on-ui-removing={() => removeTag(tag)}>
                     {tag}
                   </ui-label>
                 </script>

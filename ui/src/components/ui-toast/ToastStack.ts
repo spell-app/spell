@@ -58,7 +58,7 @@ export class ToastStack implements E.ToastProvider {
     return { id, closed, element: toast }
   }
 
-  /** Close toast `id` as `domElement.close()` does (the cancelable `ui-close` first);  nothing for an unknown id. */
+  /** Close toast `id` as `domElement.close()` does (the cancelable `ui-closing` first);  nothing for an unknown id. */
   dismiss(id: string) {
     const record = this.showingToasts.get(id)
     ;(record?.element as { close?: () => boolean } | undefined)?.close?.()
@@ -233,7 +233,7 @@ type ToastRecord = {
 }
 
 /** The event that ends a toast:  the stack removes its toasts on it. */
-const HIDE_EVENT: E.EventName<Vocabulary> = "ui-hide"
+const HIDE_EVENT: E.EventName<Vocabulary> = "ui-closed"
 
 /** Positions a toast container takes (Fomantic's);  the first is the default. */
 const ToastPositions = [

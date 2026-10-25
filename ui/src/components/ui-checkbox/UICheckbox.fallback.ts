@@ -16,7 +16,7 @@ import { type CheckPartName } from "./UICheckbox.types"
  *   - sets the DOM element's form value to what the box submits:  the DOM element's `chosenValue` /
  *     `unchosenValue` (class defaults included), else the `value` (default `on`) / `off-value` attributes
  *   - copies the input's validity onto the DOM element
- *   - sends a composed `ui-change`.
+ *   - sends a composed `ui-changed`.
  * - Its starting state is the DOM element's `selected` PROPERTY, else its `selected` / `checked` attributes.
  * - Its accessible name is the slotted text, else the DOM element's `aria-label`.
  ****************/
@@ -24,7 +24,7 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
   @E.proto static vocabulary = checkboxVocabulary
   @E.proto static degraded = [
     "radio grouping across elements (each fallback radio is alone in its shadow root) and arrow keys",
-    "`ui-change` cannot be vetoed by re-setting `selected`",
+    "`ui-changed` cannot be vetoed by re-setting `selected`",
     "`:state(invalid)`, form reset of the chosen state",
     "labels from `<label for>` (only `aria-label` names a fitted box)"
   ]

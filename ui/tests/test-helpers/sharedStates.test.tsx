@@ -221,7 +221,7 @@ describe("readonly (form controls)", () => {
     const native = select.shadowRoot!.querySelector("select")!
     expect(native.getAttribute("aria-readonly")).toBe("true")
     const changed = vi.fn()
-    select.addEventListener("ui-change", changed)
+    select.addEventListener("ui-changed", changed)
     native.value = "b"
     native.dispatchEvent(new Event("change", { bubbles: true }))
     await ElementFixture.settle(select)

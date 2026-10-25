@@ -23,7 +23,7 @@ import tabCSS from "./UITab.css?inline"
  * - `disabled`:  its tab can't be selected;  the pane itself is unusable, the base class's way
  *   (`elementSetup.disabled`:  its content inert and dimmed, `aria-disabled`).
  * - `lazy`:  its `<template>` children are stamped into it (light DOM, after them) the first time it shows;
- *   `ui-show` (`{ value, first }`) fires every time it becomes the shown pane.
+ *   `ui-opened` (`{ value, first }`) fires every time it becomes the shown pane.
  * - Its looks come from `UISegment.css` (the pane IS a segment) and `UITab.css`, adopted in that order.
  ****************/
 export class UITab extends E.UIComponent<typeof tabVocabulary> {
@@ -154,7 +154,7 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
     if (isShown) this.onShown()
   }
 
-  /** Became the shown pane:  stamp lazy content the first time, then `ui-show`. */
+  /** Became the shown pane:  stamp lazy content the first time, then `ui-opened`. */
   @E.untracked
   private onShown() {
     const first = !this.wasShownBefore
@@ -167,7 +167,7 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
     const owner = this.owner
     const value = owner ? owner.valueFor(this.domElement) : (this.value ?? "")
     const detail: UIT.TabShowDetail = { value, first }
-    this.send("ui-show", detail)
+    this.send("ui-opened", detail)
   }
 
   ////////////////

@@ -2,7 +2,7 @@
  * The English vocabulary of `<ui-code>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - The source pieces (`source`, `load`, `ui-load` ... `ui-error`, the loader and error parts, the states and texts)
+ * - The source pieces (`source`, `load`, `ui-loaded` ... `ui-error`, the loader and error parts, the states and texts)
  *   are shared with `<ui-include>` and `<ui-markdown>`:  `UIT.Source*`, which `LoadableComponent` reads.
  * - Class words:  `line-numbers` => `numbered`, `wrap` => `wrapping` (`ui numbered wrapping code`).
  */
@@ -60,12 +60,12 @@ export const codeVocabulary = {
   events: [
     ...UIT.SourceEvents,
     {
-      name: "ui-highlight",
+      name: "ui-coloured",
       detail: "{ language?: string, detected: boolean }",
       description:
         "Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed."
     },
-    { name: "ui-copy", detail: "{ content: string }", description: "The copy button copied `content`." }
+    { name: "ui-copied", detail: "{ content: string }", description: "The copy button copied `content`." }
   ],
   slots: [],
   parts: [

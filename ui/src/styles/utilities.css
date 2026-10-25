@@ -2,7 +2,7 @@
  * Utility classes, `@layer ui.utilities`, modelled on Web Awesome's layout / text utilities.
  * - Injected into the page AND adopted into every shadow root, so they work on light-DOM markup and on
  *   component internals alike.  The utilities layer beats component layers, and page rules targeting a host
- *   beat its `:host` rules, so `class="ui-hidden"` on a component works without `!important`.
+ *   beat its `:host` rules, so `class="ui-out-of-view"` on a component works without `!important`.
  * - Token driven:  lengths are `em` of the LOCAL font size (spacing tokens), never rem or bare px.
  * - Generated siblings (from the vocabulary, `yarn gen:styles`):
  *   - `colors.css`:  `ui-<hue>` remaps, `ui-text-<hue>`, `ui-bg-<hue>`, `ui-border-<hue>`
@@ -493,7 +493,7 @@
     }
   }
 
-  .ui-hidden {
+  .ui-out-of-view {
     display: none;
   }
   .ui-block {

@@ -592,7 +592,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - And no `:host-context` (WWOD §18 › "Reach into `ui-*` elements through `::part()` and tokens").
 - Events are `CustomEvent`s:
   - `bubbles: true, composed: true`
-  - lowercase kebab `ui-*` names (`ui-change`, `ui-open`)
+  - lowercase kebab `ui-*` names (`ui-changed`, `ui-opening`)
   - `detail` carries computed state (`{ value }`, `{ open }` ...), plus `originalEvent`
 - Rich data (`options`, `rows`) as JS PROPERTIES:
   real accessors on the class, so frameworks find them with `key in el`.
@@ -848,7 +848,7 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
   - An effect that used to live in `render()` names `isReady` too, and returns early until it's true,
     keeping that timing (`UIShape`, `UISidebar`, `UISection`).
   - `{ defer: true }`:  the method isn't called at the start, only on a change.
-    - E.g. `<ui-progress>`'s `ui-change`.
+    - E.g. `<ui-progress>`'s `ui-changed`.
   - A page-wide value, or one an attribute alias holds:  a getter member over it, named in the list.
     - E.g. `UIEmoji.rootSettingsGeneration`, `CheckControl.checkedAttribute`.
     - `protected`, as `@E.on` methods are.
@@ -994,13 +994,13 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
   - Each but `afterSolidUpdate()` can be canceled:
     keep what it returns in a field, to cancel a pending one (`this.copiedTimer?.cancel()`).
   - Raw calls stay only in the helpers themselves, and in tests.
-- **Events:**  dispatch through `this.send("ui-change", detail)`:  vocabulary-checked, localized on translated tags.
+- **Events:**  dispatch through `this.send("ui-changed", detail)`:  vocabulary-checked, localized on translated tags.
   - Listen on the DOM element (or its shadow root) with `@E.on("command") protected onCommand(event)`:
     for the element's whole life, untracked ("Reactive members").
     `this.on()` for one added later, or under a condition.
   - Inside a component, `onClick={...}` for native events.
     - No `on:` namespace, no `prop:` (epic `solid-17`).
-    - A `ui-*` event:  `on-ui-change={f}`, the event's own name after `on-`.
+    - A `ui-*` event:  `on-ui-changed={f}`, the event's own name after `on-`.
     - Rich data as a plain prop, `options={[...]}`:  a function or object reaches the element as itself.
     - Both through the kit's element framework, its `RichAttributes`:
       Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
@@ -1008,7 +1008,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
     - `spell-ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
       - the `ref`'s element knows its tag's events, `event.detail` too
-      - `on-ui-change`, one prop per event, typed
+      - `on-ui-changed`, one prop per event, typed
       - rich data by its plain name (`options`);  its `prop:` name is typed too, `@deprecated`:
         only compiled Spell still writes it
     - So an event's `detail` in its vocabulary is TypeScript.

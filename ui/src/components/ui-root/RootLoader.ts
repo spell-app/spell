@@ -93,7 +93,7 @@ export class RootLoader {
   /**
    * Define every tag of Spell UI's catalog NOW, before its family loads (`E.DOMElement.defineEarly()`):
    * pending elements, `:state(pending)`, attached as each family loads.
-   * - So each is one of ours from the start, and keeps a function or object given to it (`on-ui-change={f}`)
+   * - So each is one of ours from the start, and keeps a function or object given to it (`on-ui-changed={f}`)
    *   with no page-wide patch (`<ui-root pure>`;  epic `solid-17`, P7).
    * - What the platform fixes as a tag is defined comes from the catalog:  the attributes it observes
    *   (its own, the shared ones, `hidden`), and whether it's a form control.

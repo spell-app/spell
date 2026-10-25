@@ -18,7 +18,7 @@ import buttonCSS from "./UIButton.css?inline"
  *   - It sends no value of its own, except while it is the submitter (`submit()`).
  *   - It doesn't use `DOMFormControl`, so a page with only buttons never loads the `forms` entry.
  *
- * - `active` (`isActive`) is controlled:  `toggle` flips it on click, sending `ui-toggle` first.
+ * - `active` (`isActive`) is controlled:  `toggle` flips it on click, sending `ui-selected` / `ui-deselected` first.
  *
  * - Fomantic's `state` behaviour is two attributes here, not an element:
  *   `active-text` / `inactive-text` replace the content while `active` is on / off (`Follow` => `Following`).
@@ -354,7 +354,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     this.runInvoker(event)
     if (this.toggle) {
       const next = !this.isActive
-      this.requestChange("isActive", next, () => this.send("ui-toggle", { active: next, originalEvent: event }))
+      this.requestChange("isActive", next, () => this.send(next ? "ui-selected" : "ui-deselected", { active: next, originalEvent: event }))
     }
     const { form } = this.domElement.internals
     if (!form) return

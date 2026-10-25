@@ -41,7 +41,7 @@ export class DOMShapeElement extends E.DOMElement<UIShape> {
  * Its shadow DOM:  `<div class="ui … shape [animating]" part="shape"><div class="sides" part="sides"><slot>`.
  *
  * - `activeIndex` is the side shown.
- *   Changing it turns the `direction` way (`up`, `down`, `left`, `right`, `over`, `back`), then fires `ui-change`;
+ *   Changing it turns the `direction` way (`up`, `down`, `left`, `right`, `over`, `back`), then fires `ui-animated`;
  *   so do the DOM element's `flip()` / `next()` / `previous()` (`DOMShapeElement`)
  *   and invoker commands (`UIT.ShapeCommands`).
  *   - Flips queue;  a flip to the side already shown does nothing.
@@ -55,7 +55,7 @@ export class DOMShapeElement extends E.DOMElement<UIShape> {
  * - SIDE EFFECTS on the sides (this family's own DOM elements):
  *   custom states (`active`, `inactive`, `animating`, `leaving`)
  *   and, during a flip, inline `transform` / `top` / `left`.
- * - Reduced motion:  an instant swap, `ui-change` all the same.
+ * - Reduced motion:  an instant swap, `ui-animated` all the same.
  * - Accessibility:  hidden sides are `display: none`;
  *   the sides box is a polite live region, so the new side is read out after a flip (Fomantic's had no ARIA).
  ****************/
@@ -234,7 +234,7 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
     this.shownIndex = index
     this.mark(sides)
     const detail: UIT.ShapeChangeDetail = { activeIndex: index, side: next, flip: direction }
-    this.send("ui-change", detail)
+    this.send("ui-animated", detail)
     return true
   }
 

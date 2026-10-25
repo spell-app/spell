@@ -272,13 +272,13 @@ describe("<ui-popup> target", () => {
 ////////////////
 
 describe("<ui-popup> hover", () => {
-  it("shows after show-delay, as a `hint` popover, with ui-open;  hides after hide-delay", async () => {
+  it("shows after show-delay, as a `hint` popover, with ui-opening;  hides after hide-delay", async () => {
     fakeTimers()
     const { host, wrapper } = await popup(
       `<button>Target</button><ui-popup show-delay="30" hide-delay="30">Tip</ui-popup>`
     )
-    const opens = record(host, "ui-open")
-    const closes = record(host, "ui-close")
+    const opens = record(host, "ui-opening")
+    const closes = record(host, "ui-closing")
     await userEvent.hover(wrapper.querySelector("button")!)
     await settle()
     expect(shown(host)).toBe(false)
@@ -347,9 +347,9 @@ describe("<ui-popup> hover", () => {
     expect(document.activeElement).toBe(button)
   })
 
-  it("a vetoed ui-open keeps it hidden", async () => {
+  it("a vetoed ui-opening keeps it hidden", async () => {
     const { host, wrapper } = await popup(`<button>Target</button><ui-popup>Tip</ui-popup>`)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     wrapper.querySelector("button")!.focus()
     await settle()
     expect(shown(host)).toBe(false)
@@ -434,10 +434,10 @@ describe("<ui-popup> click", () => {
     expect(document.activeElement).toBe(button)
   })
 
-  it("a vetoed ui-close keeps it open", async () => {
+  it("a vetoed ui-closing keeps it open", async () => {
     const { host, wrapper } = await popup(CLICK)
-    const closes = record(host, "ui-close")
-    host.addEventListener("ui-close", (event) => event.preventDefault())
+    const closes = record(host, "ui-closing")
+    host.addEventListener("ui-closing", (event) => event.preventDefault())
     await userEvent.click(wrapper.querySelector("#t")!)
     await settle()
     await userEvent.keyboard("{Escape}")
@@ -467,7 +467,7 @@ describe("<ui-popup> click", () => {
 describe("<ui-popup> manual", () => {
   it("shows and hides with `visible` only, as a `manual` popover, without events", async () => {
     const { host, wrapper } = await popup(`<button>Target</button><ui-popup open-on="manual">Tip</ui-popup>`)
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     expect(host.popover).toBe("manual")
     wrapper.querySelector("button")!.focus()
     await settle()
@@ -481,9 +481,9 @@ describe("<ui-popup> manual", () => {
     expect(opens).toHaveLength(0)
   })
 
-  it("follows the browser when it dismisses the popover itself:  a ui-close, `visible` off", async () => {
+  it("follows the browser when it dismisses the popover itself:  a ui-closing, `visible` off", async () => {
     const { host } = await popup(`<button>Target</button><ui-popup open-on="manual" visible>Tip</ui-popup>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     const toggled = nextToggle(host)
     host.hidePopover()
     await toggled
@@ -675,8 +675,8 @@ describe("<ui-popup> invoker commands", () => {
     async () => {
       const { host, wrapper } = await popup(MARKUP)
       const press = (id: string) => wrapper.querySelector<HTMLButtonElement>(`#${id}`)!.click()
-      const opens = record(host, "ui-open")
-      const closes = record(host, "ui-close")
+      const opens = record(host, "ui-opening")
+      const closes = record(host, "ui-closing")
       press("show")
       await settle()
       expect(shown(host)).toBe(true)
@@ -698,9 +698,9 @@ describe("<ui-popup> invoker commands", () => {
     }
   )
 
-  it.skipIf(!NATIVE)("a vetoed ui-open keeps it hidden", async () => {
+  it.skipIf(!NATIVE)("a vetoed ui-opening keeps it hidden", async () => {
     const { host, wrapper } = await popup(MARKUP)
-    host.addEventListener("ui-open", (event) => event.preventDefault())
+    host.addEventListener("ui-opening", (event) => event.preventDefault())
     wrapper.querySelector<HTMLButtonElement>("#show")!.click()
     await settle()
     expect(shown(host)).toBe(false)

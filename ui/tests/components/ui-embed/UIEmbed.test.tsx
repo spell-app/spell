@@ -24,7 +24,7 @@ type Embed = DOMElement & { active: boolean; parameters: unknown; activate(): bo
 
 /**
  * A SAME-ORIGIN page to frame, so activation tests never reach the network (a file the dev server has anyway).
- * - Third-party URLs are only ever asserted, through a cancelled `ui-activate` or `EmbedSources` directly.
+ * - Third-party URLs are only ever asserted, through a cancelled `ui-loading` or `EmbedSources` directly.
  */
 const LOCAL = new URL("/src/components/ui-embed/examples/types.html", location.href).href
 
@@ -145,9 +145,9 @@ describe("<ui-embed> placeholder", () => {
 ////////////////
 
 describe("<ui-embed> activation", () => {
-  it("loads the frame on a click:  ui-activate with the url, active, a titled iframe", async () => {
+  it("loads the frame on a click:  ui-loading with the url, active, a titled iframe", async () => {
     const { host, root } = await embed(`<ui-embed url="${LOCAL}" label="Local page"></ui-embed>`)
-    const activated = next<EmbedActivateDetail>(host, "ui-activate")
+    const activated = next<EmbedActivateDetail>(host, "ui-loading")
     await userEvent.click(root.querySelector("button")!)
     const event = await activated
     expect(event.cancelable).toBe(true)
@@ -164,8 +164,8 @@ describe("<ui-embed> activation", () => {
 
   it("builds a privacy-enhanced YouTube URL with autoplay -- asserted, never loaded", async () => {
     const { host, root } = await embed(`<ui-embed source="youtube" video-id="O6Xo21L0ybE"></ui-embed>`)
-    host.addEventListener("ui-activate", (event) => event.preventDefault())
-    const activated = next<EmbedActivateDetail>(host, "ui-activate")
+    host.addEventListener("ui-loading", (event) => event.preventDefault())
+    const activated = next<EmbedActivateDetail>(host, "ui-loading")
     root.querySelector("button")!.click()
     const url = new URL((await activated).detail.url)
     expect(url.origin + url.pathname).toBe("https://www.youtube-nocookie.com/embed/O6Xo21L0ybE")
@@ -194,9 +194,9 @@ describe("<ui-embed> activation", () => {
     await expect.poll(() => host.active).toBe(true)
   })
 
-  it("stays a placeholder when ui-activate is cancelled", async () => {
+  it("stays a placeholder when ui-loading is cancelled", async () => {
     const { host, root } = await embed(`<ui-embed url="${LOCAL}"></ui-embed>`)
-    host.addEventListener("ui-activate", (event) => event.preventDefault())
+    host.addEventListener("ui-loading", (event) => event.preventDefault())
     await userEvent.click(root.querySelector("button")!)
     expect(host.active).toBe(false)
     expect(root.querySelector("iframe")).toBeNull()
@@ -205,7 +205,7 @@ describe("<ui-embed> activation", () => {
   it("refuses a non-http(s) url:  nothing loads", async () => {
     const { host, root } = await embed(`<ui-embed url="javascript:alert(1)"></ui-embed>`)
     const events: Event[] = []
-    host.addEventListener("ui-activate", (event) => events.push(event))
+    host.addEventListener("ui-loading", (event) => events.push(event))
     root.querySelector("button")!.click()
     await ElementFixture.tick()
     expect(events).toEqual([])
@@ -216,7 +216,7 @@ describe("<ui-embed> activation", () => {
   it("loads without an event when `active` is written, and resets back with ui-reset", async () => {
     const { host, root } = await embed(`<ui-embed url="${LOCAL}"></ui-embed>`)
     const events: string[] = []
-    for (const name of ["ui-activate", "ui-reset"]) host.addEventListener(name, () => events.push(name))
+    for (const name of ["ui-loading", "ui-reset"]) host.addEventListener(name, () => events.push(name))
     host.active = true
     await ElementFixture.tick()
     expect(root.querySelector("iframe")).not.toBeNull()
@@ -226,7 +226,7 @@ describe("<ui-embed> activation", () => {
     expect(root.querySelector("button")).not.toBeNull()
     expect(events).toEqual(["ui-reset"])
     expect(host.activate()).toBe(true)
-    expect(events).toEqual(["ui-reset", "ui-activate"])
+    expect(events).toEqual(["ui-reset", "ui-loading"])
   })
 
   it("adds `parameters` (property or JSON attribute) to the frame url", async () => {

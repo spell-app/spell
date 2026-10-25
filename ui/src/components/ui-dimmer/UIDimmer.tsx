@@ -25,12 +25,12 @@ import dimmablePageCSS from "./UIDimmer.page.css?inline"
  *
  * - Shown or hidden by the shared `visible` / `hidden` (`UIComponent`, "Shown or hidden"), starting hidden.
  *   - While it shows, its box has Fomantic's `active` class.
- *   - Controlled (`isVisible`):  for a person's actions, the cancelable `ui-open` / `ui-close` come first:
+ *   - Controlled (`isVisible`):  for a person's actions, the cancelable `ui-opening` / `ui-closing` come first:
  *     - `show-on`:  `hover` (the pointer over the parent, or focus inside it) or `click` (a click on the parent)
  *     - a click on the dimmer itself (not its content;  `closedby="any"`)
  *     - Escape (a page dimmer), invoker commands (`UIT.ToggleCommands`)
- *   - `ui-show` / `ui-hide` follow once its transition has ended.
- *   - Writing `visible` (or `hidden`) fires no `ui-open` / `ui-close`.
+ *   - `ui-opened` / `ui-closed` follow once its transition has ended.
+ *   - Writing `visible` (or `hidden`) fires no `ui-opening` / `ui-closing`.
  *
  * - A hidden `hover` dimmer stays laid out but transparent (and ignores the pointer),
  *   so a keyboard user can Tab into its content, which shows it (`UIDimmer.css`).
@@ -65,22 +65,22 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     return this.isShowing ? UIT.ACTIVE : undefined
   }
 
-  /** Show for a person's action, dispatching the cancelable `ui-open` first;  true when applied. */
+  /** Show for a person's action, dispatching the cancelable `ui-opening` first;  true when applied. */
   @E.untracked
   requestOpen(originalEvent?: Event): boolean {
     if (this.isVisible || this.disabled) return false
     const detail: UIT.DimmerOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.send("ui-open", detail))
+    return this.requestChange("isVisible", true, () => this.send("ui-opening", detail))
   }
 
-  /** Hide for `reason`, dispatching the cancelable `ui-close` first;  true when applied. */
+  /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
   @E.untracked
   requestClose(reason: UIT.DimmerCloseReason, originalEvent?: Event): boolean {
     if (!this.isVisible) return false
     this.isDismissing = true
     E.soon(() => (this.isDismissing = false))
     const detail: UIT.DimmerCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.send("ui-close", detail))
+    return this.requestChange("isVisible", false, () => this.send("ui-closing", detail))
   }
 
   /** An invoker command aimed at the DOM element (`UIT.ToggleCommands`). */
@@ -154,7 +154,7 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
   // ## Show and hide
   ////////////////
 
-  /** Bumped on every show / hide, so a late `ui-show` / `ui-hide` of an earlier one is dropped. */
+  /** Bumped on every show / hide, so a late `ui-opened` / `ui-closed` of an earlier one is dropped. */
   private generation = 0
 
   /** A page dimmer's `UI.overlays` entry;  its Escape option follows `closedby` when it shows. */
@@ -170,7 +170,7 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
 
   /**
    * `visible` changed (`UIComponent`'s hook):  show the dimmer, or take it down.
-   * - Resolves once the box's transition has ended, sending `ui-show` / `ui-hide`.
+   * - Resolves once the box's transition has ended, sending `ui-opened` / `ui-closed`.
    * - How it moves, by `animation`:
    *   - the family's own (`fade`), or an attention one (`shake`):  the sheet's transition (`UIDimmer.css`)
    *   - any other:  on the box, through `UI.transitions`
@@ -192,7 +192,7 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     const detail: UIT.DimmerOpenDetail = { visible }
     if (!(await this.transitionsEnd())) return
     if (visible ? this.isShowing : !this.isShowing && this.domElement.isConnected) {
-      this.send(visible ? "ui-show" : "ui-hide", detail)
+      this.send(visible ? "ui-opened" : "ui-closed", detail)
     }
   }
 
@@ -330,7 +330,7 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
 
   /**
    * A page dimmer's `cancel`:  Escape the overlay didn't take (a `CloseWatcher` request).
-   * - Always prevented;  the element decides, by `closedby`, and `ui-close` may veto.
+   * - Always prevented;  the element decides, by `closedby`, and `ui-closing` may veto.
    */
   @E.untracked
   private readonly onCancel = (event: Event) => {
@@ -346,7 +346,7 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     if ((box instanceof HTMLDialogElement && box.open) || !this.domElement.isConnected) return
     if (!this.isVisible) return
     const detail: UIT.DimmerCloseDetail = { visible: false, reason: "escape", originalEvent: event }
-    this.send("ui-close", detail)
+    this.send("ui-closing", detail)
     this.isVisible = false
   }
 }

@@ -17,10 +17,10 @@
  * - Rich data (an object, array or function), as a plain prop:  `options={[...]}`.
  *   - It reaches the element whole, as its property.
  *   - `prop:options`, and `prop:` for every attribute, are `@deprecated`:  only compiled spell writes them.
- * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.
+ * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-changed={(event) => ...}`.
  *   - Solid hands the function to the element, which listens for the event.
  *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),
- *     whose `addEventListener("ui-toggle", ...)` types `event.detail`.
+ *     whose `addEventListener("ui-selected", ...)` types `event.detail`.
  *     So does a JSX `ref`'s element.
  *   - On any other element or the document, every `ui-*` name completes (`UIEventMap`):
  *     its `detail` is `unknown`.
@@ -81,17 +81,17 @@ export interface UIHTMLElement<Events> extends HTMLElement {
 /** `<ui-accordion>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIAccordionEventMap {
   /**
-   * `ui-open`:  A panel is about to open;  `preventDefault()` keeps it closed.  NOT cancelable in effect when the browser opened it itself (find-in-page).
+   * `ui-opening`:  A panel is about to open;  `preventDefault()` keeps it closed.  NOT cancelable in effect when the browser opened it itself (find-in-page).
    * - `event.detail`:  `{ index: number, open: true, title: Element, content?: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ index: number; open: true; title: Element; content?: Element; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ index: number; open: true; title: Element; content?: Element; originalEvent?: Event }>
   /**
-   * `ui-close`:  A panel is about to close -- its title was activated, or another panel is opening in an `exclusive` accordion;  `preventDefault()` keeps it open (and then the other one closed).
+   * `ui-closing`:  A panel is about to close -- its title was activated, or another panel is opening in an `exclusive` accordion;  `preventDefault()` keeps it open (and then the other one closed).
    * - `event.detail`:  `{ index: number, open: false, title: Element, content?: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ index: number; open: false; title: Element; content?: Element; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ index: number; open: false; title: Element; content?: Element; originalEvent?: Event }>
   /**
    * `ui-loading`:  The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`.
    * - `event.detail`:  `{ source: string }`
@@ -199,7 +199,7 @@ export interface UIAccordionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the first index counts.
+   * Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to open / close panels;  `ui-opening` / `ui-closing` can veto people's changes.  When `exclusive`, only the first index counts.
    * - takes:  text
    */
   open?: string
@@ -339,17 +339,17 @@ export interface UIAccordionAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  A panel is about to open;  `preventDefault()` keeps it closed.  NOT cancelable in effect when the browser opened it itself (find-in-page).
+   * `ui-opening`:  A panel is about to open;  `preventDefault()` keeps it closed.  NOT cancelable in effect when the browser opened it itself (find-in-page).
    * - `event.detail`:  `{ index: number, open: true, title: Element, content?: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIAccordionEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIAccordionEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  A panel is about to close -- its title was activated, or another panel is opening in an `exclusive` accordion;  `preventDefault()` keeps it open (and then the other one closed).
+   * `ui-closing`:  A panel is about to close -- its title was activated, or another panel is opening in an `exclusive` accordion;  `preventDefault()` keeps it open (and then the other one closed).
    * - `event.detail`:  `{ index: number, open: false, title: Element, content?: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIAccordionEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIAccordionEventMap["ui-closing"]) => void
   /**
    * `ui-loading`:  The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`.
    * - `event.detail`:  `{ source: string }`
@@ -1273,10 +1273,15 @@ export interface UIBreadcrumbSectionJSXAttributes
 /** `<ui-button>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIButtonEventMap {
   /**
-   * `ui-toggle`:  A `toggle` button flipped its `active` state.  NOTE: plain clicks are the native `click`.
-   * - `event.detail`:  `{ active: boolean, originalEvent?: Event }`
+   * `ui-selected`:  A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`.
+   * - `event.detail`:  `{ active: true, originalEvent?: Event }`
    */
-  "ui-toggle": CustomEvent<{ active: boolean; originalEvent?: Event }>
+  "ui-selected": CustomEvent<{ active: true; originalEvent?: Event }>
+  /**
+   * `ui-deselected`:  A `toggle` button turned `active` off.
+   * - `event.detail`:  `{ active: false, originalEvent?: Event }`
+   */
+  "ui-deselected": CustomEvent<{ active: false; originalEvent?: Event }>
 }
 
 /** `<ui-button>`'s own attributes, from its vocabulary. */
@@ -1403,7 +1408,7 @@ export interface UIButtonAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`.
+   * Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`.
    * - takes:  flag (present / absent)
    */
   toggle?: boolean | ""
@@ -1774,10 +1779,15 @@ export interface UIButtonAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-toggle`:  A `toggle` button flipped its `active` state.  NOTE: plain clicks are the native `click`.
-   * - `event.detail`:  `{ active: boolean, originalEvent?: Event }`
+   * `ui-selected`:  A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`.
+   * - `event.detail`:  `{ active: true, originalEvent?: Event }`
    */
-  "on-ui-toggle"?: (event: UIButtonEventMap["ui-toggle"]) => void
+  "on-ui-selected"?: (event: UIButtonEventMap["ui-selected"]) => void
+  /**
+   * `ui-deselected`:  A `toggle` button turned `active` off.
+   * - `event.detail`:  `{ active: false, originalEvent?: Event }`
+   */
+  "on-ui-deselected"?: (event: UIButtonEventMap["ui-deselected"]) => void
 }
 
 /** `<ui-button>` in JSX:  its own attributes, and HTML's global ones. */
@@ -2199,23 +2209,28 @@ export interface UIButtonsJSXAttributes
 /** `<ui-calendar>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UICalendarEventMap {
   /**
-   * `ui-change`:  The person chose, typed or cleared a value;  `preventDefault()` keeps the old one.
+   * `ui-changing`:  The person chose, typed or cleared a value;  `preventDefault()` keeps the old one.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-changing": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-open`:  The popup is about to open;  `preventDefault()` keeps it closed.
+   * `ui-changed`:  The value changed:  after `ui-changing`, unless it was cancelled.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-opening`:  The popup is about to open;  `preventDefault()` keeps it closed.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ open: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
   /**
-   * `ui-close`:  The popup is about to close;  `preventDefault()` keeps it open.
+   * `ui-closing`:  The popup is about to close;  `preventDefault()` keeps it open.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ open: false; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
 }
 
 /** `<ui-calendar>`'s own attributes, from its vocabulary. */
@@ -2311,7 +2326,7 @@ export interface UICalendarAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
-   * The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
+   * The popup is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
@@ -2655,23 +2670,28 @@ export interface UICalendarAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  The person chose, typed or cleared a value;  `preventDefault()` keeps the old one.
+   * `ui-changing`:  The person chose, typed or cleared a value;  `preventDefault()` keeps the old one.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-change"?: (event: UICalendarEventMap["ui-change"]) => void
+  "on-ui-changing"?: (event: UICalendarEventMap["ui-changing"]) => void
   /**
-   * `ui-open`:  The popup is about to open;  `preventDefault()` keeps it closed.
+   * `ui-changed`:  The value changed:  after `ui-changing`, unless it was cancelled.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UICalendarEventMap["ui-changed"]) => void
+  /**
+   * `ui-opening`:  The popup is about to open;  `preventDefault()` keeps it closed.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UICalendarEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UICalendarEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  The popup is about to close;  `preventDefault()` keeps it open.
+   * `ui-closing`:  The popup is about to close;  `preventDefault()` keeps it open.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UICalendarEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UICalendarEventMap["ui-closing"]) => void
 }
 
 /** `<ui-calendar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -3279,10 +3299,10 @@ export interface UICardsJSXAttributes
 /** `<ui-checkbox>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UICheckboxEventMap {
   /**
-   * `ui-change`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
+   * `ui-changed`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
    * - `event.detail`:  `{ selected: boolean, value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ selected: boolean; value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ selected: boolean; value: string; originalEvent?: Event }>
 }
 
 /** `<ui-checkbox>`'s own attributes, from its vocabulary. */
@@ -3418,7 +3438,7 @@ export interface UICheckboxAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
+   * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
@@ -3578,10 +3598,10 @@ export interface UICheckboxAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
+   * `ui-changed`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
    * - `event.detail`:  `{ selected: boolean, value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UICheckboxEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UICheckboxEventMap["ui-changed"]) => void
 }
 
 /** `<ui-checkbox>` in JSX:  its own attributes, and HTML's global ones. */
@@ -3593,21 +3613,21 @@ export interface UICheckboxJSXAttributes
 /** `<ui-code>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UICodeEventMap {
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "ui-load": CustomEvent<{ source?: string; content: string }>
+  "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "ui-change": CustomEvent<{ content: string }>
+  "ui-changed": CustomEvent<{ content: string }>
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-save": CustomEvent<{ source?: string; content: string; etag?: string }>
+  "ui-saving": CustomEvent<{ source?: string; content: string; etag?: string }>
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -3624,15 +3644,15 @@ export interface UICodeEventMap {
     error: unknown
   }>
   /**
-   * `ui-highlight`:  Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed.
+   * `ui-coloured`:  Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed.
    * - `event.detail`:  `{ language?: string, detected: boolean }`
    */
-  "ui-highlight": CustomEvent<{ language?: string; detected: boolean }>
+  "ui-coloured": CustomEvent<{ language?: string; detected: boolean }>
   /**
-   * `ui-copy`:  The copy button copied `content`.
+   * `ui-copied`:  The copy button copied `content`.
    * - `event.detail`:  `{ content: string }`
    */
-  "ui-copy": CustomEvent<{ content: string }>
+  "ui-copied": CustomEvent<{ content: string }>
 }
 
 /** `<ui-code>`'s own attributes, from its vocabulary. */
@@ -3829,21 +3849,21 @@ export interface UICodeAttributes {
    */
   "prop:content"?: string
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "on-ui-load"?: (event: UICodeEventMap["ui-load"]) => void
+  "on-ui-loaded"?: (event: UICodeEventMap["ui-loaded"]) => void
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "on-ui-change"?: (event: UICodeEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UICodeEventMap["ui-changed"]) => void
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-save"?: (event: UICodeEventMap["ui-save"]) => void
+  "on-ui-saving"?: (event: UICodeEventMap["ui-saving"]) => void
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -3856,15 +3876,15 @@ export interface UICodeAttributes {
    */
   "on-ui-error"?: (event: UICodeEventMap["ui-error"]) => void
   /**
-   * `ui-highlight`:  Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed.
+   * `ui-coloured`:  Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed.
    * - `event.detail`:  `{ language?: string, detected: boolean }`
    */
-  "on-ui-highlight"?: (event: UICodeEventMap["ui-highlight"]) => void
+  "on-ui-coloured"?: (event: UICodeEventMap["ui-coloured"]) => void
   /**
-   * `ui-copy`:  The copy button copied `content`.
+   * `ui-copied`:  The copy button copied `content`.
    * - `event.detail`:  `{ content: string }`
    */
-  "on-ui-copy"?: (event: UICodeEventMap["ui-copy"]) => void
+  "on-ui-copied"?: (event: UICodeEventMap["ui-copied"]) => void
 }
 
 /** `<ui-code>` in JSX:  its own attributes, and HTML's global ones. */
@@ -5530,27 +5550,27 @@ export interface UIDetailJSXAttributes
 /** `<ui-dimmer>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIDimmerEventMap {
   /**
-   * `ui-open`:  About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ visible: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ visible: true; originalEvent?: Event }>
   /**
-   * `ui-show`:  Shown, its transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "ui-show": CustomEvent<{ visible: true }>
+  "ui-opened": CustomEvent<{ visible: true }>
   /**
-   * `ui-close`:  About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: DimmerCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ visible: false; reason: UIT.DimmerCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ visible: false; reason: UIT.DimmerCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Hidden, its transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "ui-hide": CustomEvent<{ visible: false }>
+  "ui-closed": CustomEvent<{ visible: false }>
 }
 
 /** `<ui-dimmer>`'s own attributes, from its vocabulary. */
@@ -5747,27 +5767,27 @@ export interface UIDimmerAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIDimmerEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIDimmerEventMap["ui-opening"]) => void
   /**
-   * `ui-show`:  Shown, its transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "on-ui-show"?: (event: UIDimmerEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UIDimmerEventMap["ui-opened"]) => void
   /**
-   * `ui-close`:  About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: DimmerCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIDimmerEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIDimmerEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Hidden, its transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "on-ui-hide"?: (event: UIDimmerEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UIDimmerEventMap["ui-closed"]) => void
 }
 
 /** `<ui-dimmer>` in JSX:  its own attributes, and HTML's global ones. */
@@ -6035,37 +6055,37 @@ export interface UIDividerJSXAttributes
 /** `<ui-dropdown>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIDropdownEventMap {
   /**
-   * `ui-change`:  Someone chose, added, removed or cleared a value.
+   * `ui-changed`:  Someone chose, added, removed or cleared a value.
    * - `event.detail`:  `{ value: string | string[], originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string | string[]; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string | string[]; originalEvent?: Event }>
   /**
-   * `ui-open`:  The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed.
+   * `ui-opening`:  The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ open: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
   /**
-   * `ui-close`:  The menu is about to close;  `preventDefault()` keeps it open.
+   * `ui-closing`:  The menu is about to close;  `preventDefault()` keeps it open.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ open: false; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
   /**
-   * `ui-search`:  `search`:  the query changed.
+   * `ui-searched`:  `search`:  the query changed.
    * - `event.detail`:  `{ query: string, originalEvent?: Event }`
    */
-  "ui-search": CustomEvent<{ query: string; originalEvent?: Event }>
+  "ui-searched": CustomEvent<{ query: string; originalEvent?: Event }>
   /**
-   * `ui-add`:  `multiple`:  a value was chosen, or `allow-additions` added a new one.
+   * `ui-added`:  `multiple`:  a value was chosen, or `allow-additions` added a new one.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-add": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-added": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-remove`:  `multiple`:  a value was removed.
+   * `ui-removed`:  `multiple`:  a value was removed.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-remove": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-removed": CustomEvent<{ value: string; originalEvent?: Event }>
 }
 
 /** `<ui-dropdown>`'s own attributes, from its vocabulary. */
@@ -6361,7 +6381,7 @@ export interface UIDropdownAttributes {
    */
   "prop:veryLong"?: boolean | ""
   /**
-   * The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto.
+   * The menu is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
@@ -6634,37 +6654,37 @@ export interface UIDropdownAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Someone chose, added, removed or cleared a value.
+   * `ui-changed`:  Someone chose, added, removed or cleared a value.
    * - `event.detail`:  `{ value: string | string[], originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UIDropdownEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIDropdownEventMap["ui-changed"]) => void
   /**
-   * `ui-open`:  The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed.
+   * `ui-opening`:  The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIDropdownEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIDropdownEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  The menu is about to close;  `preventDefault()` keeps it open.
+   * `ui-closing`:  The menu is about to close;  `preventDefault()` keeps it open.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIDropdownEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIDropdownEventMap["ui-closing"]) => void
   /**
-   * `ui-search`:  `search`:  the query changed.
+   * `ui-searched`:  `search`:  the query changed.
    * - `event.detail`:  `{ query: string, originalEvent?: Event }`
    */
-  "on-ui-search"?: (event: UIDropdownEventMap["ui-search"]) => void
+  "on-ui-searched"?: (event: UIDropdownEventMap["ui-searched"]) => void
   /**
-   * `ui-add`:  `multiple`:  a value was chosen, or `allow-additions` added a new one.
+   * `ui-added`:  `multiple`:  a value was chosen, or `allow-additions` added a new one.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-add"?: (event: UIDropdownEventMap["ui-add"]) => void
+  "on-ui-added"?: (event: UIDropdownEventMap["ui-added"]) => void
   /**
-   * `ui-remove`:  `multiple`:  a value was removed.
+   * `ui-removed`:  `multiple`:  a value was removed.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-remove"?: (event: UIDropdownEventMap["ui-remove"]) => void
+  "on-ui-removed"?: (event: UIDropdownEventMap["ui-removed"]) => void
 }
 
 /** `<ui-dropdown>` in JSX:  its own attributes, and HTML's global ones. */
@@ -6676,11 +6696,11 @@ export interface UIDropdownJSXAttributes
 /** `<ui-embed>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIEmbedEventMap {
   /**
-   * `ui-activate`:  About to load the frame from `url` (a click, Enter / Space, `host.activate()`);  `preventDefault()` keeps the placeholder.
+   * `ui-loading`:  About to load the frame from `url` (a click, Enter / Space, `host.activate()`);  `preventDefault()` keeps the placeholder.
    * - `event.detail`:  `{ url: string, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-activate": CustomEvent<{ url: string; originalEvent?: Event }>
+  "ui-loading": CustomEvent<{ url: string; originalEvent?: Event }>
   /**
    * `ui-reset`:  Back to the placeholder (`host.reset()`, Fomantic's `reset`):  the frame is gone.
    * - `event.detail`:  `{}`
@@ -6804,7 +6824,7 @@ export interface UIEmbedAttributes {
    */
   "prop:parameters"?: unknown
   /**
-   * The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-activate` first.
+   * The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-loading` first.
    * - takes:  flag (present / absent)
    */
   active?: boolean | ""
@@ -6924,11 +6944,11 @@ export interface UIEmbedAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-activate`:  About to load the frame from `url` (a click, Enter / Space, `host.activate()`);  `preventDefault()` keeps the placeholder.
+   * `ui-loading`:  About to load the frame from `url` (a click, Enter / Space, `host.activate()`);  `preventDefault()` keeps the placeholder.
    * - `event.detail`:  `{ url: string, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-activate"?: (event: UIEmbedEventMap["ui-activate"]) => void
+  "on-ui-loading"?: (event: UIEmbedEventMap["ui-loading"]) => void
   /**
    * `ui-reset`:  Back to the placeholder (`host.reset()`, Fomantic's `reset`):  the frame is gone.
    * - `event.detail`:  `{}`
@@ -8255,39 +8275,39 @@ export interface UIFlagJSXAttributes
 /** `<ui-flyout>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIFlyoutEventMap {
   /**
-   * `ui-open`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ visible: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ visible: true; originalEvent?: Event }>
   /**
-   * `ui-show`:  Shown, its entry transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its entry transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "ui-show": CustomEvent<{ visible: true }>
+  "ui-opened": CustomEvent<{ visible: true }>
   /**
-   * `ui-close`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: ModalCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ visible: false; reason: UIT.ModalCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ visible: false; reason: UIT.ModalCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "ui-hide": CustomEvent<{ visible: false }>
+  "ui-closed": CustomEvent<{ visible: false }>
   /**
-   * `ui-approve`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-approve": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-approving": CustomEvent<{ action: Element; originalEvent?: Event }>
   /**
-   * `ui-deny`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps it shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-deny": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-denying": CustomEvent<{ action: Element; originalEvent?: Event }>
 }
 
 /** `<ui-flyout>`'s own attributes, from its vocabulary. */
@@ -8539,39 +8559,39 @@ export interface UIFlyoutAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIFlyoutEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIFlyoutEventMap["ui-opening"]) => void
   /**
-   * `ui-show`:  Shown, its entry transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its entry transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "on-ui-show"?: (event: UIFlyoutEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UIFlyoutEventMap["ui-opened"]) => void
   /**
-   * `ui-close`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: ModalCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIFlyoutEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIFlyoutEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "on-ui-hide"?: (event: UIFlyoutEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UIFlyoutEventMap["ui-closed"]) => void
   /**
-   * `ui-approve`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-approve"?: (event: UIFlyoutEventMap["ui-approve"]) => void
+  "on-ui-approving"?: (event: UIFlyoutEventMap["ui-approving"]) => void
   /**
-   * `ui-deny`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps it shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-deny"?: (event: UIFlyoutEventMap["ui-deny"]) => void
+  "on-ui-denying"?: (event: UIFlyoutEventMap["ui-denying"]) => void
 }
 
 /** `<ui-flyout>` in JSX:  its own attributes, and HTML's global ones. */
@@ -8596,31 +8616,31 @@ export interface UIFormEventMap {
     values: Record<string, E.FieldValue>
   }>
   /**
-   * `ui-success`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
+   * `ui-saving`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-success": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
+  "ui-saving": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
   /**
-   * `ui-failure`:  A submit failed validation (the native submission is stopped);  `errors` by field.
+   * `ui-save-failed`:  A submit failed validation (the native submission is stopped);  `errors` by field.
    * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
    */
-  "ui-failure": CustomEvent<{
+  "ui-save-failed": CustomEvent<{
     values: Record<string, E.FieldValue>
     errors: Record<string, string[]>
     originalEvent?: Event
   }>
   /**
-   * `ui-saving`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
+   * `ui-applying`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-saving": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
+  "ui-applying": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
   /**
-   * `ui-saved`:  The held edits landed in the bound `value`.
+   * `ui-applied`:  The held edits landed in the bound `value`.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    */
-  "ui-saved": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
+  "ui-applied": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
   /**
    * `ui-cancelling`:  `cancel()`:  the held edits are about to be dropped;  `preventDefault()` keeps them.
    * - `event.detail`:  `{ changes: FormChange[] }`
@@ -8892,27 +8912,27 @@ export interface UIFormAttributes {
    */
   "on-ui-invalid"?: (event: UIFormEventMap["ui-invalid"]) => void
   /**
-   * `ui-success`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
+   * `ui-saving`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
-   * - cancelable:  `preventDefault()` vetoes it
-   */
-  "on-ui-success"?: (event: UIFormEventMap["ui-success"]) => void
-  /**
-   * `ui-failure`:  A submit failed validation (the native submission is stopped);  `errors` by field.
-   * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
-   */
-  "on-ui-failure"?: (event: UIFormEventMap["ui-failure"]) => void
-  /**
-   * `ui-saving`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
-   * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-saving"?: (event: UIFormEventMap["ui-saving"]) => void
   /**
-   * `ui-saved`:  The held edits landed in the bound `value`.
+   * `ui-save-failed`:  A submit failed validation (the native submission is stopped);  `errors` by field.
+   * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
+   */
+  "on-ui-save-failed"?: (event: UIFormEventMap["ui-save-failed"]) => void
+  /**
+   * `ui-applying`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
+   * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-applying"?: (event: UIFormEventMap["ui-applying"]) => void
+  /**
+   * `ui-applied`:  The held edits landed in the bound `value`.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    */
-  "on-ui-saved"?: (event: UIFormEventMap["ui-saved"]) => void
+  "on-ui-applied"?: (event: UIFormEventMap["ui-applied"]) => void
   /**
    * `ui-cancelling`:  `cancel()`:  the held edits are about to be dropped;  `preventDefault()` keeps them.
    * - `event.detail`:  `{ changes: FormChange[] }`
@@ -10485,21 +10505,21 @@ export interface UIImagesJSXAttributes
 /** `<ui-include>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIIncludeEventMap {
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "ui-load": CustomEvent<{ source?: string; content: string }>
+  "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "ui-change": CustomEvent<{ content: string }>
+  "ui-changed": CustomEvent<{ content: string }>
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-save": CustomEvent<{ source?: string; content: string; etag?: string }>
+  "ui-saving": CustomEvent<{ source?: string; content: string; etag?: string }>
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -10516,10 +10536,10 @@ export interface UIIncludeEventMap {
     error: unknown
   }>
   /**
-   * `ui-insert`:  The markup is about to go in:  `fragment` holds it, parsed and URL-rewritten, not yet in the page.  A listener may read or change it first (a docs page keeps its examples' markup before they upgrade).
+   * `ui-drawing`:  The markup is about to go in:  `fragment` holds it, parsed and URL-rewritten, not yet in the page.  A listener may read or change it first (a docs page keeps its examples' markup before they upgrade).
    * - `event.detail`:  `{ fragment: DocumentFragment, source?: string }`
    */
-  "ui-insert": CustomEvent<{ fragment: DocumentFragment; source?: string }>
+  "ui-drawing": CustomEvent<{ fragment: DocumentFragment; source?: string }>
 }
 
 /** `<ui-include>`'s own attributes, from its vocabulary. */
@@ -10685,21 +10705,21 @@ export interface UIIncludeAttributes {
    */
   "prop:content"?: string
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "on-ui-load"?: (event: UIIncludeEventMap["ui-load"]) => void
+  "on-ui-loaded"?: (event: UIIncludeEventMap["ui-loaded"]) => void
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "on-ui-change"?: (event: UIIncludeEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIIncludeEventMap["ui-changed"]) => void
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-save"?: (event: UIIncludeEventMap["ui-save"]) => void
+  "on-ui-saving"?: (event: UIIncludeEventMap["ui-saving"]) => void
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -10712,10 +10732,10 @@ export interface UIIncludeAttributes {
    */
   "on-ui-error"?: (event: UIIncludeEventMap["ui-error"]) => void
   /**
-   * `ui-insert`:  The markup is about to go in:  `fragment` holds it, parsed and URL-rewritten, not yet in the page.  A listener may read or change it first (a docs page keeps its examples' markup before they upgrade).
+   * `ui-drawing`:  The markup is about to go in:  `fragment` holds it, parsed and URL-rewritten, not yet in the page.  A listener may read or change it first (a docs page keeps its examples' markup before they upgrade).
    * - `event.detail`:  `{ fragment: DocumentFragment, source?: string }`
    */
-  "on-ui-insert"?: (event: UIIncludeEventMap["ui-insert"]) => void
+  "on-ui-drawing"?: (event: UIIncludeEventMap["ui-drawing"]) => void
 }
 
 /** `<ui-include>` in JSX:  its own attributes, and HTML's global ones. */
@@ -10727,15 +10747,15 @@ export interface UIIncludeJSXAttributes
 /** `<ui-input>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIInputEventMap {
   /**
-   * `ui-input`:  The value changed as someone typed (every keystroke).
+   * `ui-typed`:  The value changed as someone typed (every keystroke).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-input": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-typed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-change`:  Someone committed a change (blur, Enter, picking a file).
+   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
 }
 
 /** `<ui-input>`'s own attributes, from its vocabulary. */
@@ -11191,15 +11211,15 @@ export interface UIInputAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-input`:  The value changed as someone typed (every keystroke).
+   * `ui-typed`:  The value changed as someone typed (every keystroke).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-input"?: (event: UIInputEventMap["ui-input"]) => void
+  "on-ui-typed"?: (event: UIInputEventMap["ui-typed"]) => void
   /**
-   * `ui-change`:  Someone committed a change (blur, Enter, picking a file).
+   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UIInputEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIInputEventMap["ui-changed"]) => void
 }
 
 /** `<ui-input>` in JSX:  its own attributes, and HTML's global ones. */
@@ -11686,11 +11706,11 @@ export interface UIItemsJSXAttributes
 /** `<ui-label>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UILabelEventMap {
   /**
-   * `ui-remove`:  The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself.
+   * `ui-removing`:  The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself.
    * - `event.detail`:  `{ originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-remove": CustomEvent<{ originalEvent?: Event }>
+  "ui-removing": CustomEvent<{ originalEvent?: Event }>
 }
 
 /** `<ui-label>`'s own attributes, from its vocabulary. */
@@ -11946,7 +11966,7 @@ export interface UILabelAttributes {
    */
   "prop:detail"?: string
   /**
-   * Shows a delete icon button;  clicking it dispatches `ui-remove`.
+   * Shows a delete icon button;  clicking it dispatches `ui-removing`.
    * - takes:  flag (present / absent)
    */
   removable?: boolean | ""
@@ -12076,11 +12096,11 @@ export interface UILabelAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-remove`:  The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself.
+   * `ui-removing`:  The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself.
    * - `event.detail`:  `{ originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-remove"?: (event: UILabelEventMap["ui-remove"]) => void
+  "on-ui-removing"?: (event: UILabelEventMap["ui-removing"]) => void
 }
 
 /** `<ui-label>` in JSX:  its own attributes, and HTML's global ones. */
@@ -12348,10 +12368,10 @@ export interface UILabelsJSXAttributes
 /** `<ui-list>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIListEventMap {
   /**
-   * `ui-select`:  An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / button.  `value` is the item's `value`, else its text.
+   * `ui-chosen`:  An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / button.  `value` is the item's `value`, else its text.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    */
-  "ui-select": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  "ui-chosen": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
 }
 
 /** `<ui-list>`'s own attributes, from its vocabulary. */
@@ -12617,10 +12637,10 @@ export interface UIListAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-select`:  An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / button.  `value` is the item's `value`, else its text.
+   * `ui-chosen`:  An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / button.  `value` is the item's `value`, else its text.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    */
-  "on-ui-select"?: (event: UIListEventMap["ui-select"]) => void
+  "on-ui-chosen"?: (event: UIListEventMap["ui-chosen"]) => void
 }
 
 /** `<ui-list>` in JSX:  its own attributes, and HTML's global ones. */
@@ -12878,21 +12898,21 @@ export interface UILoaderJSXAttributes
 /** `<ui-markdown>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIMarkdownEventMap {
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "ui-load": CustomEvent<{ source?: string; content: string }>
+  "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "ui-change": CustomEvent<{ content: string }>
+  "ui-changed": CustomEvent<{ content: string }>
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-save": CustomEvent<{ source?: string; content: string; etag?: string }>
+  "ui-saving": CustomEvent<{ source?: string; content: string; etag?: string }>
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -12909,10 +12929,10 @@ export interface UIMarkdownEventMap {
     error: unknown
   }>
   /**
-   * `ui-render`:  Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents.
+   * `ui-drawn`:  Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents.
    * - `event.detail`:  `{ headings: { level: number, text: string, id: string }[] }`
    */
-  "ui-render": CustomEvent<{ headings: { level: number; text: string; id: string }[] }>
+  "ui-drawn": CustomEvent<{ headings: { level: number; text: string; id: string }[] }>
 }
 
 /** `<ui-markdown>`'s own attributes, from its vocabulary. */
@@ -12980,7 +13000,7 @@ export interface UIMarkdownAttributes {
    */
   "prop:skipTitle"?: boolean | ""
   /**
-   * Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` writes it.
+   * Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it.
    * - takes:  flag (present / absent)
    */
   editable?: boolean | ""
@@ -13119,21 +13139,21 @@ export interface UIMarkdownAttributes {
    */
   "prop:content"?: string
   /**
-   * `ui-load`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
    * - `event.detail`:  `{ source?: string, content: string }`
    */
-  "on-ui-load"?: (event: UIMarkdownEventMap["ui-load"]) => void
+  "on-ui-loaded"?: (event: UIMarkdownEventMap["ui-loaded"]) => void
   /**
-   * `ui-change`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
    * - `event.detail`:  `{ content: string }`
    */
-  "on-ui-change"?: (event: UIMarkdownEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIMarkdownEventMap["ui-changed"]) => void
   /**
-   * `ui-save`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
    * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-save"?: (event: UIMarkdownEventMap["ui-save"]) => void
+  "on-ui-saving"?: (event: UIMarkdownEventMap["ui-saving"]) => void
   /**
    * `ui-saved`:  Saved;  `etag` is the file's new version.
    * - `event.detail`:  `{ source?: string, etag?: string }`
@@ -13146,10 +13166,10 @@ export interface UIMarkdownAttributes {
    */
   "on-ui-error"?: (event: UIMarkdownEventMap["ui-error"]) => void
   /**
-   * `ui-render`:  Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents.
+   * `ui-drawn`:  Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents.
    * - `event.detail`:  `{ headings: { level: number, text: string, id: string }[] }`
    */
-  "on-ui-render"?: (event: UIMarkdownEventMap["ui-render"]) => void
+  "on-ui-drawn"?: (event: UIMarkdownEventMap["ui-drawn"]) => void
 }
 
 /** `<ui-markdown>` in JSX:  its own attributes, and HTML's global ones. */
@@ -13161,11 +13181,11 @@ export interface UIMarkdownJSXAttributes
 /** `<ui-menu>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIMenuEventMap {
   /**
-   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-select": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
 }
 
 /** `<ui-menu>`'s own attributes, from its vocabulary. */
@@ -13635,11 +13655,11 @@ export interface UIMenuAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-select"?: (event: UIMenuEventMap["ui-select"]) => void
+  "on-ui-choosing"?: (event: UIMenuEventMap["ui-choosing"]) => void
 }
 
 /** `<ui-menu>` in JSX:  its own attributes, and HTML's global ones. */
@@ -13649,11 +13669,11 @@ export interface UIMenuJSXAttributes
 /** `<ui-message>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIMessageEventMap {
   /**
-   * `ui-dismiss`:  The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself).
+   * `ui-closing`:  The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself).
    * - `event.detail`:  `{ originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-dismiss": CustomEvent<{ originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ originalEvent?: Event }>
 }
 
 /** `<ui-message>`'s own attributes, from its vocabulary. */
@@ -13799,7 +13819,7 @@ export interface UIMessageAttributes {
    */
   "prop:header"?: string
   /**
-   * Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message.
+   * Shows a close button;  clicking it dispatches `ui-closing`, then hides the message.
    * - takes:  flag (present / absent)
    */
   dismissible?: boolean | ""
@@ -13919,11 +13939,11 @@ export interface UIMessageAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-dismiss`:  The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself).
+   * `ui-closing`:  The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself).
    * - `event.detail`:  `{ originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-dismiss"?: (event: UIMessageEventMap["ui-dismiss"]) => void
+  "on-ui-closing"?: (event: UIMessageEventMap["ui-closing"]) => void
 }
 
 /** `<ui-message>` in JSX:  its own attributes, and HTML's global ones. */
@@ -14053,39 +14073,39 @@ export interface UIMetaJSXAttributes
 /** `<ui-modal>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIModalEventMap {
   /**
-   * `ui-open`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ visible: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ visible: true; originalEvent?: Event }>
   /**
-   * `ui-show`:  Shown, its entry transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its entry transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "ui-show": CustomEvent<{ visible: true }>
+  "ui-opened": CustomEvent<{ visible: true }>
   /**
-   * `ui-close`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: ModalCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ visible: false; reason: UIT.ModalCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ visible: false; reason: UIT.ModalCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "ui-hide": CustomEvent<{ visible: false }>
+  "ui-closed": CustomEvent<{ visible: false }>
   /**
-   * `ui-approve`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-approve": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-approving": CustomEvent<{ action: Element; originalEvent?: Event }>
   /**
-   * `ui-deny`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-deny": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-denying": CustomEvent<{ action: Element; originalEvent?: Event }>
 }
 
 /** `<ui-modal>`'s own attributes, from its vocabulary. */
@@ -14312,39 +14332,39 @@ export interface UIModalAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIModalEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIModalEventMap["ui-opening"]) => void
   /**
-   * `ui-show`:  Shown, its entry transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its entry transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "on-ui-show"?: (event: UIModalEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UIModalEventMap["ui-opened"]) => void
   /**
-   * `ui-close`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: ModalCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIModalEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIModalEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its exit transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "on-ui-hide"?: (event: UIModalEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UIModalEventMap["ui-closed"]) => void
   /**
-   * `ui-approve`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
+   * `ui-approving`:  An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`).
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-approve"?: (event: UIModalEventMap["ui-approve"]) => void
+  "on-ui-approving"?: (event: UIModalEventMap["ui-approving"]) => void
   /**
-   * `ui-deny`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
+   * `ui-denying`:  A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-deny"?: (event: UIModalEventMap["ui-deny"]) => void
+  "on-ui-denying"?: (event: UIModalEventMap["ui-denying"]) => void
 }
 
 /** `<ui-modal>` in JSX:  its own attributes, and HTML's global ones. */
@@ -14354,21 +14374,21 @@ export interface UIModalJSXAttributes
 /** `<ui-nag>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UINagEventMap {
   /**
-   * `ui-show`:  Shown, its entry animation finished (Fomantic's `onVisible`).
+   * `ui-opening`:  Shown, its entry animation finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{}`
    */
-  "ui-show": CustomEvent<{}>
+  "ui-opening": CustomEvent<{}>
   /**
-   * `ui-close`:  About to close:  the close icon (`close`), the display time (`timeout`) or `host.close()` (`dismiss`).  `preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`).
+   * `ui-closing`:  About to close:  the close icon (`close`), the display time (`timeout`) or `host.close()` (`dismiss`).  `preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`).
    * - `event.detail`:  `{ reason: NagCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ reason: UIT.NagCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ reason: UIT.NagCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.
+   * `ui-closed`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.
    * - `event.detail`:  `{ reason: NagCloseReason }`
    */
-  "ui-hide": CustomEvent<{ reason: UIT.NagCloseReason }>
+  "ui-closed": CustomEvent<{ reason: UIT.NagCloseReason }>
 }
 
 /** `<ui-nag>`'s own attributes, from its vocabulary. */
@@ -14689,21 +14709,21 @@ export interface UINagAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-show`:  Shown, its entry animation finished (Fomantic's `onVisible`).
+   * `ui-opening`:  Shown, its entry animation finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{}`
    */
-  "on-ui-show"?: (event: UINagEventMap["ui-show"]) => void
+  "on-ui-opening"?: (event: UINagEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  About to close:  the close icon (`close`), the display time (`timeout`) or `host.close()` (`dismiss`).  `preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`).
+   * `ui-closing`:  About to close:  the close icon (`close`), the display time (`timeout`) or `host.close()` (`dismiss`).  `preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`).
    * - `event.detail`:  `{ reason: NagCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UINagEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UINagEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.
+   * `ui-closed`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.
    * - `event.detail`:  `{ reason: NagCloseReason }`
    */
-  "on-ui-hide"?: (event: UINagEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UINagEventMap["ui-closed"]) => void
 }
 
 /** `<ui-nag>` in JSX:  its own attributes, and HTML's global ones. */
@@ -16008,17 +16028,17 @@ export interface UIPlaceholderParagraphJSXAttributes
 /** `<ui-popup>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPopupEventMap {
   /**
-   * `ui-open`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ visible: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ visible: true; originalEvent?: Event }>
   /**
-   * `ui-close`:  About to hide;  `preventDefault()` keeps it shown.  NOT cancelable in effect when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
+   * `ui-closing`:  About to hide;  `preventDefault()` keeps it shown.  NOT cancelable in effect when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
    * - `event.detail`:  `{ visible: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ visible: false; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ visible: false; originalEvent?: Event }>
 }
 
 /** `<ui-popup>`'s own attributes, from its vocabulary. */
@@ -16364,17 +16384,17 @@ export interface UIPopupAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UIPopupEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UIPopupEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  About to hide;  `preventDefault()` keeps it shown.  NOT cancelable in effect when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
+   * `ui-closing`:  About to hide;  `preventDefault()` keeps it shown.  NOT cancelable in effect when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
    * - `event.detail`:  `{ visible: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIPopupEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIPopupEventMap["ui-closing"]) => void
 }
 
 /** `<ui-popup>` in JSX:  its own attributes, and HTML's global ones. */
@@ -16384,15 +16404,15 @@ export interface UIPopupJSXAttributes
 /** `<ui-progress>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIProgressEventMap {
   /**
-   * `ui-change`:  The percentage changed (after the first render).
+   * `ui-changed`:  The percentage changed (after the first render).
    * - `event.detail`:  `{ percent: number, percents: number[], value?: number, total?: number }`
    */
-  "ui-change": CustomEvent<{ percent: number; percents: number[]; value?: number; total?: number }>
+  "ui-changed": CustomEvent<{ percent: number; percents: number[]; value?: number; total?: number }>
   /**
-   * `ui-complete`:  The percentage reached 100.
+   * `ui-completed`:  The percentage reached 100.
    * - `event.detail`:  `{ value?: number, total?: number }`
    */
-  "ui-complete": CustomEvent<{ value?: number; total?: number }>
+  "ui-completed": CustomEvent<{ value?: number; total?: number }>
 }
 
 /** `<ui-progress>`'s own attributes, from its vocabulary. */
@@ -16719,15 +16739,15 @@ export interface UIProgressAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  The percentage changed (after the first render).
+   * `ui-changed`:  The percentage changed (after the first render).
    * - `event.detail`:  `{ percent: number, percents: number[], value?: number, total?: number }`
    */
-  "on-ui-change"?: (event: UIProgressEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIProgressEventMap["ui-changed"]) => void
   /**
-   * `ui-complete`:  The percentage reached 100.
+   * `ui-completed`:  The percentage reached 100.
    * - `event.detail`:  `{ value?: number, total?: number }`
    */
-  "on-ui-complete"?: (event: UIProgressEventMap["ui-complete"]) => void
+  "on-ui-completed"?: (event: UIProgressEventMap["ui-completed"]) => void
 }
 
 /** `<ui-progress>` in JSX:  its own attributes, and HTML's global ones. */
@@ -16739,10 +16759,10 @@ export interface UIProgressJSXAttributes
 /** `<ui-property>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPropertyEventMap {
   /**
-   * `ui-change`:  Its property was written (on Save, with `apply="on save"`).
+   * `ui-changed`:  Its property was written (on Save, with `apply="on save"`).
    * - `event.detail`:  `{ name: string, value: unknown }`
    */
-  "ui-change": CustomEvent<{ name: string; value: unknown }>
+  "ui-changed": CustomEvent<{ name: string; value: unknown }>
 }
 
 /** `<ui-property>`'s own attributes, from its vocabulary. */
@@ -17054,10 +17074,10 @@ export interface UIPropertyAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Its property was written (on Save, with `apply="on save"`).
+   * `ui-changed`:  Its property was written (on Save, with `apply="on save"`).
    * - `event.detail`:  `{ name: string, value: unknown }`
    */
-  "on-ui-change"?: (event: UIPropertyEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIPropertyEventMap["ui-changed"]) => void
 }
 
 /** `<ui-property>` in JSX:  its own attributes, and HTML's global ones. */
@@ -17069,10 +17089,10 @@ export interface UIPropertyJSXAttributes
 /** `<ui-property-editor>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIPropertyEditorEventMap {
   /**
-   * `ui-change`:  A property was written to the thing (or things).
+   * `ui-changed`:  A property was written to the thing (or things).
    * - `event.detail`:  `{ name: string, value: unknown, things: object[] }`
    */
-  "ui-change": CustomEvent<{ name: string; value: unknown; things: object[] }>
+  "ui-changed": CustomEvent<{ name: string; value: unknown; things: object[] }>
   /**
    * `ui-loading`:  Its `source` page is about to load (P6).
    * - `event.detail`:  `{ source: string }`
@@ -17099,31 +17119,31 @@ export interface UIPropertyEditorEventMap {
     values: Record<string, E.FieldValue>
   }>
   /**
-   * `ui-success`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
+   * `ui-saving`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-success": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
+  "ui-saving": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
   /**
-   * `ui-failure`:  A submit failed validation (the native submission is stopped);  `errors` by field.
+   * `ui-save-failed`:  A submit failed validation (the native submission is stopped);  `errors` by field.
    * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
    */
-  "ui-failure": CustomEvent<{
+  "ui-save-failed": CustomEvent<{
     values: Record<string, E.FieldValue>
     errors: Record<string, string[]>
     originalEvent?: Event
   }>
   /**
-   * `ui-saving`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
+   * `ui-applying`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-saving": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
+  "ui-applying": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
   /**
-   * `ui-saved`:  The held edits landed in the bound `value`.
+   * `ui-applied`:  The held edits landed in the bound `value`.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    */
-  "ui-saved": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
+  "ui-applied": CustomEvent<{ changes: UIT.FormChange[]; value: unknown }>
   /**
    * `ui-cancelling`:  `cancel()`:  the held edits are about to be dropped;  `preventDefault()` keeps them.
    * - `event.detail`:  `{ changes: FormChange[] }`
@@ -17749,10 +17769,10 @@ export interface UIPropertyEditorAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  A property was written to the thing (or things).
+   * `ui-changed`:  A property was written to the thing (or things).
    * - `event.detail`:  `{ name: string, value: unknown, things: object[] }`
    */
-  "on-ui-change"?: (event: UIPropertyEditorEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIPropertyEditorEventMap["ui-changed"]) => void
   /**
    * `ui-loading`:  Its `source` page is about to load (P6).
    * - `event.detail`:  `{ source: string }`
@@ -17774,27 +17794,27 @@ export interface UIPropertyEditorAttributes {
    */
   "on-ui-invalid"?: (event: UIPropertyEditorEventMap["ui-invalid"]) => void
   /**
-   * `ui-success`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
+   * `ui-saving`:  A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
-   * - cancelable:  `preventDefault()` vetoes it
-   */
-  "on-ui-success"?: (event: UIPropertyEditorEventMap["ui-success"]) => void
-  /**
-   * `ui-failure`:  A submit failed validation (the native submission is stopped);  `errors` by field.
-   * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
-   */
-  "on-ui-failure"?: (event: UIPropertyEditorEventMap["ui-failure"]) => void
-  /**
-   * `ui-saving`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
-   * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-saving"?: (event: UIPropertyEditorEventMap["ui-saving"]) => void
   /**
-   * `ui-saved`:  The held edits landed in the bound `value`.
+   * `ui-save-failed`:  A submit failed validation (the native submission is stopped);  `errors` by field.
+   * - `event.detail`:  `{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }`
+   */
+  "on-ui-save-failed"?: (event: UIPropertyEditorEventMap["ui-save-failed"]) => void
+  /**
+   * `ui-applying`:  `save()`, with `apply="on save"`:  the held edits are about to land;  `preventDefault()` keeps them held.
+   * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-applying"?: (event: UIPropertyEditorEventMap["ui-applying"]) => void
+  /**
+   * `ui-applied`:  The held edits landed in the bound `value`.
    * - `event.detail`:  `{ changes: FormChange[], value: unknown }`
    */
-  "on-ui-saved"?: (event: UIPropertyEditorEventMap["ui-saved"]) => void
+  "on-ui-applied"?: (event: UIPropertyEditorEventMap["ui-applied"]) => void
   /**
    * `ui-cancelling`:  `cancel()`:  the held edits are about to be dropped;  `preventDefault()` keeps them.
    * - `event.detail`:  `{ changes: FormChange[] }`
@@ -17855,10 +17875,10 @@ export interface UIPropertyGroupEventMap {
     values: Record<string, E.FieldValue>
   }>
   /**
-   * `ui-success`:  The editor's submit or Save passed validation (sent on each group too).
+   * `ui-saved`:  The editor's submit or Save passed validation (sent on each group too).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
    */
-  "ui-success": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
+  "ui-saved": CustomEvent<{ values: Record<string, E.FieldValue>; originalEvent?: Event }>
   /**
    * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
@@ -17886,11 +17906,6 @@ export interface UIPropertyGroupEventMap {
    * - `event.detail`:  `{ source: string }`
    */
   "ui-loading": CustomEvent<{ source: string }>
-  /**
-   * `ui-loaded`:  The `source` file arrived and its body is in place (`content` is the file's text).
-   * - `event.detail`:  `{ source: string, content: string }`
-   */
-  "ui-loaded": CustomEvent<{ source: string; content: string }>
   /**
    * `ui-error`:  The `source` file couldn't be loaded or shown;  `kind` says why.  An error line shows in the content unless cancelled;  opening it again tries again.
    * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown }`
@@ -18362,10 +18377,10 @@ export interface UIPropertyGroupAttributes {
    */
   "on-ui-invalid"?: (event: UIPropertyGroupEventMap["ui-invalid"]) => void
   /**
-   * `ui-success`:  The editor's submit or Save passed validation (sent on each group too).
+   * `ui-saved`:  The editor's submit or Save passed validation (sent on each group too).
    * - `event.detail`:  `{ values: Record<string, FieldValue>, originalEvent?: Event }`
    */
-  "on-ui-success"?: (event: UIPropertyGroupEventMap["ui-success"]) => void
+  "on-ui-saved"?: (event: UIPropertyGroupEventMap["ui-saved"]) => void
   /**
    * `ui-opening`:  About to unfold:  the title was activated, or find-in-page matched inside (not cancelable then, `cancelable: false`).  Cancel to stay folded.
    * - `event.detail`:  `{ open: boolean, section: Element, originalEvent?: Event }`
@@ -18393,11 +18408,6 @@ export interface UIPropertyGroupAttributes {
    * - `event.detail`:  `{ source: string }`
    */
   "on-ui-loading"?: (event: UIPropertyGroupEventMap["ui-loading"]) => void
-  /**
-   * `ui-loaded`:  The `source` file arrived and its body is in place (`content` is the file's text).
-   * - `event.detail`:  `{ source: string, content: string }`
-   */
-  "on-ui-loaded"?: (event: UIPropertyGroupEventMap["ui-loaded"]) => void
   /**
    * `ui-error`:  The `source` file couldn't be loaded or shown;  `kind` says why.  An error line shows in the content unless cancelled;  opening it again tries again.
    * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown }`
@@ -18651,10 +18661,10 @@ export interface UIPusherJSXAttributes
 /** `<ui-radio>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIRadioEventMap {
   /**
-   * `ui-change`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
+   * `ui-changed`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
    * - `event.detail`:  `{ selected: boolean, value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ selected: boolean; value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ selected: boolean; value: string; originalEvent?: Event }>
 }
 
 /** `<ui-radio>`'s own attributes, from its vocabulary. */
@@ -18780,7 +18790,7 @@ export interface UIRadioAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`.
+   * Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
@@ -18930,10 +18940,10 @@ export interface UIRadioAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
+   * `ui-changed`:  Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen.
    * - `event.detail`:  `{ selected: boolean, value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UIRadioEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIRadioEventMap["ui-changed"]) => void
 }
 
 /** `<ui-radio>` in JSX:  its own attributes, and HTML's global ones. */
@@ -19121,10 +19131,10 @@ export interface UIRailJSXAttributes
 /** `<ui-rating>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIRatingEventMap {
   /**
-   * `ui-change`:  The person rated (`0` when cleared).  A handler that re-sets `value` wins.
+   * `ui-changed`:  The person rated (`0` when cleared).  A handler that re-sets `value` wins.
    * - `event.detail`:  `{ value: number, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: number; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: number; originalEvent?: Event }>
 }
 
 /** `<ui-rating>`'s own attributes, from its vocabulary. */
@@ -19362,10 +19372,10 @@ export interface UIRatingAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  The person rated (`0` when cleared).  A handler that re-sets `value` wins.
+   * `ui-changed`:  The person rated (`0` when cleared).  A handler that re-sets `value` wins.
    * - `event.detail`:  `{ value: number, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UIRatingEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIRatingEventMap["ui-changed"]) => void
 }
 
 /** `<ui-rating>` in JSX:  its own attributes, and HTML's global ones. */
@@ -19851,7 +19861,7 @@ export interface UIRootAttributes {
    */
   "prop:fixed"?: boolean | ""
   /**
-   * Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.
+   * Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-changed={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it.
    * - takes:  flag (present / absent)
    */
   pure?: boolean | ""
@@ -20301,38 +20311,38 @@ export interface UIRowJSXAttributes
 /** `<ui-search>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISearchEventMap {
   /**
-   * `ui-search`:  Someone typed a query at least `min-characters` long;  it's about to run.
+   * `ui-searched`:  Someone typed a query at least `min-characters` long;  it's about to run.
    * - `event.detail`:  `{ query: string, originalEvent?: Event }`
    */
-  "ui-search": CustomEvent<{ query: string; originalEvent?: Event }>
+  "ui-searched": CustomEvent<{ query: string; originalEvent?: Event }>
   /**
-   * `ui-select`:  A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page.
+   * `ui-choosing`:  A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page.
    * - `event.detail`:  `{ result: SearchResult, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-select": CustomEvent<{ result: UIT.SearchResult; originalEvent?: Event }>
+  "ui-choosing": CustomEvent<{ result: UIT.SearchResult; originalEvent?: Event }>
   /**
-   * `ui-change`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
+   * `ui-changed`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-results`:  A remote query answered.
+   * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
    */
-  "ui-results": CustomEvent<{ query: string; results: UIT.SearchResult[] }>
+  "ui-replied": CustomEvent<{ query: string; results: UIT.SearchResult[] }>
   /**
-   * `ui-open`:  The results are about to show;  `preventDefault()` keeps them hidden.
+   * `ui-opening`:  The results are about to show;  `preventDefault()` keeps them hidden.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ open: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
   /**
-   * `ui-close`:  The results are about to hide;  `preventDefault()` keeps them showing.
+   * `ui-closing`:  The results are about to hide;  `preventDefault()` keeps them showing.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ open: false; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
 }
 
 /** `<ui-search>`'s own attributes, from its vocabulary. */
@@ -20478,7 +20488,7 @@ export interface UISearchAttributes {
    */
   "prop:readOnly"?: boolean | ""
   /**
-   * The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show.
+   * The results are showing.  Controlled:  `ui-opening` / `ui-closing` can veto;  shown only with something to show.
    * - takes:  flag (present / absent)
    */
   open?: boolean | ""
@@ -20735,38 +20745,38 @@ export interface UISearchAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-search`:  Someone typed a query at least `min-characters` long;  it's about to run.
+   * `ui-searched`:  Someone typed a query at least `min-characters` long;  it's about to run.
    * - `event.detail`:  `{ query: string, originalEvent?: Event }`
    */
-  "on-ui-search"?: (event: UISearchEventMap["ui-search"]) => void
+  "on-ui-searched"?: (event: UISearchEventMap["ui-searched"]) => void
   /**
-   * `ui-select`:  A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page.
+   * `ui-choosing`:  A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page.
    * - `event.detail`:  `{ result: SearchResult, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-select"?: (event: UISearchEventMap["ui-select"]) => void
+  "on-ui-choosing"?: (event: UISearchEventMap["ui-choosing"]) => void
   /**
-   * `ui-change`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
+   * `ui-changed`:  The text was committed:  a result chosen, the input cleared with Escape, or left after an edit.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UISearchEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UISearchEventMap["ui-changed"]) => void
   /**
-   * `ui-results`:  A remote query answered.
+   * `ui-replied`:  A remote query answered.
    * - `event.detail`:  `{ query: string, results: SearchResult[] }`
    */
-  "on-ui-results"?: (event: UISearchEventMap["ui-results"]) => void
+  "on-ui-replied"?: (event: UISearchEventMap["ui-replied"]) => void
   /**
-   * `ui-open`:  The results are about to show;  `preventDefault()` keeps them hidden.
+   * `ui-opening`:  The results are about to show;  `preventDefault()` keeps them hidden.
    * - `event.detail`:  `{ open: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UISearchEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UISearchEventMap["ui-opening"]) => void
   /**
-   * `ui-close`:  The results are about to hide;  `preventDefault()` keeps them showing.
+   * `ui-closing`:  The results are about to hide;  `preventDefault()` keeps them showing.
    * - `event.detail`:  `{ open: false, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UISearchEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UISearchEventMap["ui-closing"]) => void
 }
 
 /** `<ui-search>` in JSX:  its own attributes, and HTML's global ones. */
@@ -22015,10 +22025,10 @@ export interface UISegmentsJSXAttributes
 /** `<ui-select>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISelectEventMap {
   /**
-   * `ui-change`:  Someone chose a value (or changed the chosen set, with `multiple`).
+   * `ui-changed`:  Someone chose a value (or changed the chosen set, with `multiple`).
    * - `event.detail`:  `{ value: string | string[], originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string | string[]; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string | string[]; originalEvent?: Event }>
 }
 
 /** `<ui-select>`'s own attributes, from its vocabulary. */
@@ -22255,10 +22265,10 @@ export interface UISelectAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Someone chose a value (or changed the chosen set, with `multiple`).
+   * `ui-changed`:  Someone chose a value (or changed the chosen set, with `multiple`).
    * - `event.detail`:  `{ value: string | string[], originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UISelectEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UISelectEventMap["ui-changed"]) => void
 }
 
 /** `<ui-select>` in JSX:  its own attributes, and HTML's global ones. */
@@ -22268,10 +22278,10 @@ export interface UISelectJSXAttributes
 /** `<ui-shape>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIShapeEventMap {
   /**
-   * `ui-change`:  Another side is shown, its flip finished (Fomantic's `onChange`).
+   * `ui-animated`:  Another side is shown, its flip finished (Fomantic's `onChange`).
    * - `event.detail`:  `{ activeIndex: number, side: Element, flip: ShapeFlip }`
    */
-  "ui-change": CustomEvent<{ activeIndex: number; side: Element; flip: UIT.ShapeFlip }>
+  "ui-animated": CustomEvent<{ activeIndex: number; side: Element; flip: UIT.ShapeFlip }>
 }
 
 /** `<ui-shape>`'s own attributes, from its vocabulary. */
@@ -22439,10 +22449,10 @@ export interface UIShapeAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  Another side is shown, its flip finished (Fomantic's `onChange`).
+   * `ui-animated`:  Another side is shown, its flip finished (Fomantic's `onChange`).
    * - `event.detail`:  `{ activeIndex: number, side: Element, flip: ShapeFlip }`
    */
-  "on-ui-change"?: (event: UIShapeEventMap["ui-change"]) => void
+  "on-ui-animated"?: (event: UIShapeEventMap["ui-animated"]) => void
 }
 
 /** `<ui-shape>` in JSX:  its own attributes, and HTML's global ones. */
@@ -22570,27 +22580,27 @@ export interface UISideJSXAttributes
 /** `<ui-sidebar>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISidebarEventMap {
   /**
-   * `ui-open`:  About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-open": CustomEvent<{ visible: true; originalEvent?: Event }>
+  "ui-opening": CustomEvent<{ visible: true; originalEvent?: Event }>
   /**
-   * `ui-show`:  Shown, its transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "ui-show": CustomEvent<{ visible: true }>
+  "ui-opened": CustomEvent<{ visible: true }>
   /**
-   * `ui-close`:  About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: SidebarCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ visible: false; reason: UIT.SidebarCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ visible: false; reason: UIT.SidebarCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Hidden, its transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "ui-hide": CustomEvent<{ visible: false }>
+  "ui-closed": CustomEvent<{ visible: false }>
 }
 
 /** `<ui-sidebar>`'s own attributes, from its vocabulary. */
@@ -22812,27 +22822,27 @@ export interface UISidebarAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-open`:  About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden.
+   * `ui-opening`:  About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden.
    * - `event.detail`:  `{ visible: true, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-open"?: (event: UISidebarEventMap["ui-open"]) => void
+  "on-ui-opening"?: (event: UISidebarEventMap["ui-opening"]) => void
   /**
-   * `ui-show`:  Shown, its transition finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its transition finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true }`
    */
-  "on-ui-show"?: (event: UISidebarEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UISidebarEventMap["ui-opened"]) => void
   /**
-   * `ui-close`:  About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown.
+   * `ui-closing`:  About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown.
    * - `event.detail`:  `{ visible: false, reason: SidebarCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UISidebarEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UISidebarEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Hidden, its transition finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its transition finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false }`
    */
-  "on-ui-hide"?: (event: UISidebarEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UISidebarEventMap["ui-closed"]) => void
 }
 
 /** `<ui-sidebar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -22844,15 +22854,15 @@ export interface UISidebarJSXAttributes
 /** `<ui-slider>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UISliderEventMap {
   /**
-   * `ui-input`:  A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins.
+   * `ui-moved`:  A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins.
    * - `event.detail`:  `{ value: number, end?: number, originalEvent?: Event }`
    */
-  "ui-input": CustomEvent<{ value: number; end?: number; originalEvent?: Event }>
+  "ui-moved": CustomEvent<{ value: number; end?: number; originalEvent?: Event }>
   /**
-   * `ui-change`:  A change was committed:  on a key, or when a drag ends somewhere new.
+   * `ui-changed`:  A change was committed:  on a key, or when a drag ends somewhere new.
    * - `event.detail`:  `{ value: number, end?: number, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: number; end?: number; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: number; end?: number; originalEvent?: Event }>
 }
 
 /** `<ui-slider>`'s own attributes, from its vocabulary. */
@@ -23222,15 +23232,15 @@ export interface UISliderAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-input`:  A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins.
+   * `ui-moved`:  A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins.
    * - `event.detail`:  `{ value: number, end?: number, originalEvent?: Event }`
    */
-  "on-ui-input"?: (event: UISliderEventMap["ui-input"]) => void
+  "on-ui-moved"?: (event: UISliderEventMap["ui-moved"]) => void
   /**
-   * `ui-change`:  A change was committed:  on a key, or when a drag ends somewhere new.
+   * `ui-changed`:  A change was committed:  on a key, or when a drag ends somewhere new.
    * - `event.detail`:  `{ value: number, end?: number, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UISliderEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UISliderEventMap["ui-changed"]) => void
 }
 
 /** `<ui-slider>` in JSX:  its own attributes, and HTML's global ones. */
@@ -24222,15 +24232,15 @@ export interface UIStepsJSXAttributes
 /** `<ui-sticky>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIStickyEventMap {
   /**
-   * `ui-stick`:  Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`.
+   * `ui-stuck`:  Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`.
    * - `event.detail`:  `{ edge: StickyEdge }`
    */
-  "ui-stick": CustomEvent<{ edge: UIT.StickyEdge }>
+  "ui-stuck": CustomEvent<{ edge: UIT.StickyEdge }>
   /**
-   * `ui-unstick`:  Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`).
+   * `ui-unstuck`:  Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`).
    * - `event.detail`:  `{ edge: StickyEdge }`
    */
-  "ui-unstick": CustomEvent<{ edge: UIT.StickyEdge }>
+  "ui-unstuck": CustomEvent<{ edge: UIT.StickyEdge }>
 }
 
 /** `<ui-sticky>`'s own attributes, from its vocabulary. */
@@ -24378,15 +24388,15 @@ export interface UIStickyAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-stick`:  Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`.
+   * `ui-stuck`:  Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`.
    * - `event.detail`:  `{ edge: StickyEdge }`
    */
-  "on-ui-stick"?: (event: UIStickyEventMap["ui-stick"]) => void
+  "on-ui-stuck"?: (event: UIStickyEventMap["ui-stuck"]) => void
   /**
-   * `ui-unstick`:  Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`).
+   * `ui-unstuck`:  Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`).
    * - `event.detail`:  `{ edge: StickyEdge }`
    */
-  "on-ui-unstick"?: (event: UIStickyEventMap["ui-unstick"]) => void
+  "on-ui-unstuck"?: (event: UIStickyEventMap["ui-unstuck"]) => void
 }
 
 /** `<ui-sticky>` in JSX:  its own attributes, and HTML's global ones. */
@@ -24514,10 +24524,10 @@ export interface UISummaryJSXAttributes
 /** `<ui-tab>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITabEventMap {
   /**
-   * `ui-show`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
+   * `ui-opened`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
    * - `event.detail`:  `{ value: string, first: boolean }`
    */
-  "ui-show": CustomEvent<{ value: string; first: boolean }>
+  "ui-opened": CustomEvent<{ value: string; first: boolean }>
 }
 
 /** `<ui-tab>`'s own attributes, from its vocabulary. */
@@ -24588,7 +24598,7 @@ export interface UITabAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with `first: true` to fill it yourself).
+   * Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself).
    * - takes:  flag (present / absent)
    */
   lazy?: boolean | ""
@@ -24718,10 +24728,10 @@ export interface UITabAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-show`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
+   * `ui-opened`:  Became the shown pane;  `first` the first time (fill a lazy pane now).
    * - `event.detail`:  `{ value: string, first: boolean }`
    */
-  "on-ui-show"?: (event: UITabEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UITabEventMap["ui-opened"]) => void
 }
 
 /** `<ui-tab>` in JSX:  its own attributes, and HTML's global ones. */
@@ -24731,11 +24741,16 @@ export interface UITabJSXAttributes
 /** `<ui-table>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITableEventMap {
   /**
-   * `ui-sort`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
+   * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
    * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-sort": CustomEvent<{ column: number; key?: string; direction: "ascending" | "descending"; originalEvent?: Event }>
+  "ui-sorting": CustomEvent<{
+    column: number
+    key?: string
+    direction: "ascending" | "descending"
+    originalEvent?: Event
+  }>
 }
 
 /** `<ui-table>`'s own attributes, from its vocabulary. */
@@ -24871,7 +24886,7 @@ export interface UITableAttributes {
    */
   "prop:singleLine"?: boolean | ""
   /**
-   * Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic's `class="disabled"`).
+   * Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic's `class="disabled"`).
    * - takes:  flag (present / absent)
    */
   sortable?: boolean | ""
@@ -25085,7 +25100,7 @@ export interface UITableAttributes {
    */
   "prop:sortDirection"?: "ascending" | "descending"
   /**
-   * Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  Off, the app sorts its own rows.
+   * Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  Off, the app sorts its own rows.
    * - takes:  flag (present / absent)
    */
   "client-sort"?: boolean | ""
@@ -25227,11 +25242,11 @@ export interface UITableAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-sort`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
+   * `ui-sorting`:  A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering).
    * - `event.detail`:  `{ column: number, key?: string, direction: "ascending" | "descending", originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-sort"?: (event: UITableEventMap["ui-sort"]) => void
+  "on-ui-sorting"?: (event: UITableEventMap["ui-sorting"]) => void
 }
 
 /** `<ui-table>` in JSX:  its own attributes, and HTML's global ones. */
@@ -25241,11 +25256,16 @@ export interface UITableJSXAttributes
 /** `<ui-tabs>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITabsEventMap {
   /**
-   * `ui-change`:  A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the current one.
+   * `ui-changing`:  A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the current one.
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-change": CustomEvent<{ value: string; tab: Element; originalEvent?: Event }>
+  "ui-changing": CustomEvent<{ value: string; tab: Element; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  A pane was selected:  after `ui-changing`, unless it was cancelled.
+   * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{ value: string; tab: Element; originalEvent?: Event }>
 }
 
 /** `<ui-tabs>`'s own attributes, from its vocabulary. */
@@ -25431,7 +25451,7 @@ export interface UITabsAttributes {
    */
   "prop:attached"?: boolean | "" | "top" | "bottom"
   /**
-   * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
+   * Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one.
    * - takes:  text
    */
   value?: string
@@ -25572,11 +25592,16 @@ export interface UITabsAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the current one.
+   * `ui-changing`:  A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the current one.
    * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-change"?: (event: UITabsEventMap["ui-change"]) => void
+  "on-ui-changing"?: (event: UITabsEventMap["ui-changing"]) => void
+  /**
+   * `ui-changed`:  A pane was selected:  after `ui-changing`, unless it was cancelled.
+   * - `event.detail`:  `{ value: string, tab: Element, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UITabsEventMap["ui-changed"]) => void
 }
 
 /** `<ui-tabs>` in JSX:  its own attributes, and HTML's global ones. */
@@ -25774,15 +25799,15 @@ export interface UITextJSXAttributes
 /** `<ui-textarea>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITextareaEventMap {
   /**
-   * `ui-input`:  The value changed as someone typed (every keystroke).
+   * `ui-typed`:  The value changed as someone typed (every keystroke).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-input": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-typed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-change`:  Someone committed a change (blur).
+   * `ui-changed`:  Someone committed a change (blur).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
 }
 
 /** `<ui-textarea>`'s own attributes, from its vocabulary. */
@@ -26049,15 +26074,15 @@ export interface UITextareaAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-input`:  The value changed as someone typed (every keystroke).
+   * `ui-typed`:  The value changed as someone typed (every keystroke).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-input"?: (event: UITextareaEventMap["ui-input"]) => void
+  "on-ui-typed"?: (event: UITextareaEventMap["ui-typed"]) => void
   /**
-   * `ui-change`:  Someone committed a change (blur).
+   * `ui-changed`:  Someone committed a change (blur).
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UITextareaEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UITextareaEventMap["ui-changed"]) => void
 }
 
 /** `<ui-textarea>` in JSX:  its own attributes, and HTML's global ones. */
@@ -26069,20 +26094,20 @@ export interface UITextareaJSXAttributes
 /** `<ui-theme-editor>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIThemeEditorEventMap {
   /**
-   * `ui-change`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
    * - `event.detail`:  `{ value: ThemeChoices, css: string }`
    */
-  "ui-change": CustomEvent<{ value: UIT.ThemeChoices; css: string }>
+  "ui-changed": CustomEvent<{ value: UIT.ThemeChoices; css: string }>
   /**
-   * `ui-copy`:  Copy CSS put the stylesheet on the clipboard.
+   * `ui-copied`:  Copy CSS put the stylesheet on the clipboard.
    * - `event.detail`:  `{ css: string }`
    */
-  "ui-copy": CustomEvent<{ css: string }>
+  "ui-copied": CustomEvent<{ css: string }>
   /**
-   * `ui-save`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * `ui-saved`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
    * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
    */
-  "ui-save": CustomEvent<{ value?: UIT.ThemeChoices; css: string }>
+  "ui-saved": CustomEvent<{ value?: UIT.ThemeChoices; css: string }>
 }
 
 /** `<ui-theme-editor>`'s own attributes, from its vocabulary. */
@@ -26219,20 +26244,20 @@ export interface UIThemeEditorAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
    * - `event.detail`:  `{ value: ThemeChoices, css: string }`
    */
-  "on-ui-change"?: (event: UIThemeEditorEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIThemeEditorEventMap["ui-changed"]) => void
   /**
-   * `ui-copy`:  Copy CSS put the stylesheet on the clipboard.
+   * `ui-copied`:  Copy CSS put the stylesheet on the clipboard.
    * - `event.detail`:  `{ css: string }`
    */
-  "on-ui-copy"?: (event: UIThemeEditorEventMap["ui-copy"]) => void
+  "on-ui-copied"?: (event: UIThemeEditorEventMap["ui-copied"]) => void
   /**
-   * `ui-save`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * `ui-saved`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
    * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
    */
-  "on-ui-save"?: (event: UIThemeEditorEventMap["ui-save"]) => void
+  "on-ui-saved"?: (event: UIThemeEditorEventMap["ui-saved"]) => void
 }
 
 /** `<ui-theme-editor>` in JSX:  its own attributes, and HTML's global ones. */
@@ -26372,33 +26397,33 @@ export interface UITitleJSXAttributes
 /** `<ui-toast>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIToastEventMap {
   /**
-   * `ui-show`:  Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started.
+   * `ui-opened`:  Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started.
    * - `event.detail`:  `{ displayTime: number }`
    */
-  "ui-show": CustomEvent<{ displayTime: number }>
+  "ui-opened": CustomEvent<{ displayTime: number }>
   /**
-   * `ui-close`:  About to close:  the countdown ran out, the close icon, a click, Escape inside it, an action, a `--close` invoker command.  `preventDefault()` keeps it (Fomantic's `onHide` returning `false`).
+   * `ui-closing`:  About to close:  the countdown ran out, the close icon, a click, Escape inside it, an action, a `--close` invoker command.  `preventDefault()` keeps it (Fomantic's `onHide` returning `false`).
    * - `event.detail`:  `{ reason: ToastCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-close": CustomEvent<{ reason: UIT.ToastCloseReason; originalEvent?: Event }>
+  "ui-closing": CustomEvent<{ reason: UIT.ToastCloseReason; originalEvent?: Event }>
   /**
-   * `ui-hide`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  `UI.toast()` removes its toasts here.
+   * `ui-closed`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  `UI.toast()` removes its toasts here.
    * - `event.detail`:  `{ reason: ToastCloseReason }`
    */
-  "ui-hide": CustomEvent<{ reason: UIT.ToastCloseReason }>
+  "ui-closed": CustomEvent<{ reason: UIT.ToastCloseReason }>
   /**
-   * `ui-approve`:  An approve action (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the toast open.
+   * `ui-approving`:  An approve action (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the toast open.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-approve": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-approving": CustomEvent<{ action: Element; originalEvent?: Event }>
   /**
-   * `ui-deny`:  A deny action (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the toast open.
+   * `ui-denying`:  A deny action (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the toast open.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-deny": CustomEvent<{ action: Element; originalEvent?: Event }>
+  "ui-denying": CustomEvent<{ action: Element; originalEvent?: Event }>
 }
 
 /** `<ui-toast>`'s own attributes, from its vocabulary. */
@@ -26687,33 +26712,33 @@ export interface UIToastAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-show`:  Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started.
+   * `ui-opened`:  Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started.
    * - `event.detail`:  `{ displayTime: number }`
    */
-  "on-ui-show"?: (event: UIToastEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UIToastEventMap["ui-opened"]) => void
   /**
-   * `ui-close`:  About to close:  the countdown ran out, the close icon, a click, Escape inside it, an action, a `--close` invoker command.  `preventDefault()` keeps it (Fomantic's `onHide` returning `false`).
+   * `ui-closing`:  About to close:  the countdown ran out, the close icon, a click, Escape inside it, an action, a `--close` invoker command.  `preventDefault()` keeps it (Fomantic's `onHide` returning `false`).
    * - `event.detail`:  `{ reason: ToastCloseReason, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-close"?: (event: UIToastEventMap["ui-close"]) => void
+  "on-ui-closing"?: (event: UIToastEventMap["ui-closing"]) => void
   /**
-   * `ui-hide`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  `UI.toast()` removes its toasts here.
+   * `ui-closed`:  Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  `UI.toast()` removes its toasts here.
    * - `event.detail`:  `{ reason: ToastCloseReason }`
    */
-  "on-ui-hide"?: (event: UIToastEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UIToastEventMap["ui-closed"]) => void
   /**
-   * `ui-approve`:  An approve action (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the toast open.
+   * `ui-approving`:  An approve action (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the toast open.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-approve"?: (event: UIToastEventMap["ui-approve"]) => void
+  "on-ui-approving"?: (event: UIToastEventMap["ui-approving"]) => void
   /**
-   * `ui-deny`:  A deny action (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the toast open.
+   * `ui-denying`:  A deny action (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the toast open.
    * - `event.detail`:  `{ action: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-deny"?: (event: UIToastEventMap["ui-deny"]) => void
+  "on-ui-denying"?: (event: UIToastEventMap["ui-denying"]) => void
 }
 
 /** `<ui-toast>` in JSX:  its own attributes, and HTML's global ones. */
@@ -26723,11 +26748,11 @@ export interface UIToastJSXAttributes
 /** `<ui-toolbar>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIToolbarEventMap {
   /**
-   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-select": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
 }
 
 /** `<ui-toolbar>`'s own attributes, from its vocabulary. */
@@ -27197,11 +27222,11 @@ export interface UIToolbarAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-select`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
+   * `ui-choosing`:  An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.
    * - `event.detail`:  `{ value: string, item: Element, originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "on-ui-select"?: (event: UIToolbarEventMap["ui-select"]) => void
+  "on-ui-choosing"?: (event: UIToolbarEventMap["ui-choosing"]) => void
 }
 
 /** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -27213,20 +27238,20 @@ export interface UIToolbarJSXAttributes
 /** `<ui-transition>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITransitionEventMap {
   /**
-   * `ui-show`:  Shown, its animation finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its animation finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true, animation: string }`
    */
-  "ui-show": CustomEvent<{ visible: true; animation: string }>
+  "ui-opened": CustomEvent<{ visible: true; animation: string }>
   /**
-   * `ui-hide`:  Hidden, its animation finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its animation finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false, animation: string }`
    */
-  "ui-hide": CustomEvent<{ visible: false; animation: string }>
+  "ui-closed": CustomEvent<{ visible: false; animation: string }>
   /**
-   * `ui-complete`:  Any animation finished, attention ones included (Fomantic's `onComplete`).
+   * `ui-animated`:  Any animation finished, attention ones included (Fomantic's `onComplete`).
    * - `event.detail`:  `{ visible: boolean, animation: string }`
    */
-  "ui-complete": CustomEvent<{ visible: boolean; animation: string }>
+  "ui-animated": CustomEvent<{ visible: boolean; animation: string }>
 }
 
 /** `<ui-transition>`'s own attributes, from its vocabulary. */
@@ -27452,20 +27477,20 @@ export interface UITransitionAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-show`:  Shown, its animation finished (Fomantic's `onVisible`).
+   * `ui-opened`:  Shown, its animation finished (Fomantic's `onVisible`).
    * - `event.detail`:  `{ visible: true, animation: string }`
    */
-  "on-ui-show"?: (event: UITransitionEventMap["ui-show"]) => void
+  "on-ui-opened"?: (event: UITransitionEventMap["ui-opened"]) => void
   /**
-   * `ui-hide`:  Hidden, its animation finished (Fomantic's `onHidden`).
+   * `ui-closed`:  Hidden, its animation finished (Fomantic's `onHidden`).
    * - `event.detail`:  `{ visible: false, animation: string }`
    */
-  "on-ui-hide"?: (event: UITransitionEventMap["ui-hide"]) => void
+  "on-ui-closed"?: (event: UITransitionEventMap["ui-closed"]) => void
   /**
-   * `ui-complete`:  Any animation finished, attention ones included (Fomantic's `onComplete`).
+   * `ui-animated`:  Any animation finished, attention ones included (Fomantic's `onComplete`).
    * - `event.detail`:  `{ visible: boolean, animation: string }`
    */
-  "on-ui-complete"?: (event: UITransitionEventMap["ui-complete"]) => void
+  "on-ui-animated"?: (event: UITransitionEventMap["ui-animated"]) => void
 }
 
 /** `<ui-transition>` in JSX:  its own attributes, and HTML's global ones. */
@@ -27734,25 +27759,25 @@ export interface UIValueJSXAttributes
 /** `<ui-visibility>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIVisibilityEventMap {
   /**
-   * `ui-visible`:  Some of it came on screen (`onOnScreen`).
+   * `ui-in-view`:  Some of it came on screen (`onOnScreen`).
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "ui-visible": CustomEvent<E.VisibilityCalculations>
+  "ui-in-view": CustomEvent<E.VisibilityCalculations>
   /**
-   * `ui-hidden`:  None of it is on screen (`onOffScreen`).
+   * `ui-out-of-view`:  None of it is on screen (`onOffScreen`).
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "ui-hidden": CustomEvent<E.VisibilityCalculations>
+  "ui-out-of-view": CustomEvent<E.VisibilityCalculations>
   /**
-   * `ui-top-visible`:  Its top came on screen.
+   * `ui-top-in-view`:  Its top came on screen.
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "ui-top-visible": CustomEvent<E.VisibilityCalculations>
+  "ui-top-in-view": CustomEvent<E.VisibilityCalculations>
   /**
-   * `ui-bottom-visible`:  Its bottom came on screen.
+   * `ui-bottom-in-view`:  Its bottom came on screen.
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "ui-bottom-visible": CustomEvent<E.VisibilityCalculations>
+  "ui-bottom-in-view": CustomEvent<E.VisibilityCalculations>
   /**
    * `ui-top-passed`:  Its top passed the screen top.
    * - `event.detail`:  `VisibilityCalculations`
@@ -27769,10 +27794,10 @@ export interface UIVisibilityEventMap {
    */
   "ui-passing": CustomEvent<E.VisibilityCalculations>
   /**
-   * `ui-load`:  `type="image"`:  an image got its source (and finished its transition).
+   * `ui-loaded`:  `type="image"`:  an image got its source (and finished its transition).
    * - `event.detail`:  `{ image: HTMLImageElement }`
    */
-  "ui-load": CustomEvent<{ image: HTMLImageElement }>
+  "ui-loaded": CustomEvent<{ image: HTMLImageElement }>
 }
 
 /** `<ui-visibility>`'s own attributes, from its vocabulary. */
@@ -27810,7 +27835,7 @@ export interface UIVisibilityAttributes {
    */
   "prop:offset"?: number | `${number}`
   /**
-   * `image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`).
+   * `image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-loaded`).
    * - takes:  `image`
    */
   type?: "image"
@@ -27941,25 +27966,25 @@ export interface UIVisibilityAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-visible`:  Some of it came on screen (`onOnScreen`).
+   * `ui-in-view`:  Some of it came on screen (`onOnScreen`).
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "on-ui-visible"?: (event: UIVisibilityEventMap["ui-visible"]) => void
+  "on-ui-in-view"?: (event: UIVisibilityEventMap["ui-in-view"]) => void
   /**
-   * `ui-hidden`:  None of it is on screen (`onOffScreen`).
+   * `ui-out-of-view`:  None of it is on screen (`onOffScreen`).
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "on-ui-hidden"?: (event: UIVisibilityEventMap["ui-hidden"]) => void
+  "on-ui-out-of-view"?: (event: UIVisibilityEventMap["ui-out-of-view"]) => void
   /**
-   * `ui-top-visible`:  Its top came on screen.
+   * `ui-top-in-view`:  Its top came on screen.
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "on-ui-top-visible"?: (event: UIVisibilityEventMap["ui-top-visible"]) => void
+  "on-ui-top-in-view"?: (event: UIVisibilityEventMap["ui-top-in-view"]) => void
   /**
-   * `ui-bottom-visible`:  Its bottom came on screen.
+   * `ui-bottom-in-view`:  Its bottom came on screen.
    * - `event.detail`:  `VisibilityCalculations`
    */
-  "on-ui-bottom-visible"?: (event: UIVisibilityEventMap["ui-bottom-visible"]) => void
+  "on-ui-bottom-in-view"?: (event: UIVisibilityEventMap["ui-bottom-in-view"]) => void
   /**
    * `ui-top-passed`:  Its top passed the screen top.
    * - `event.detail`:  `VisibilityCalculations`
@@ -27976,10 +28001,10 @@ export interface UIVisibilityAttributes {
    */
   "on-ui-passing"?: (event: UIVisibilityEventMap["ui-passing"]) => void
   /**
-   * `ui-load`:  `type="image"`:  an image got its source (and finished its transition).
+   * `ui-loaded`:  `type="image"`:  an image got its source (and finished its transition).
    * - `event.detail`:  `{ image: HTMLImageElement }`
    */
-  "on-ui-load"?: (event: UIVisibilityEventMap["ui-load"]) => void
+  "on-ui-loaded"?: (event: UIVisibilityEventMap["ui-loaded"]) => void
 }
 
 /** `<ui-visibility>` in JSX:  its own attributes, and HTML's global ones. */
@@ -27996,7 +28021,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  collapse, collapsible, disclosure, expander, details, faq
        * - slots:
        *   - default:  Title + content pairs:  each `<ui-title>` starts a panel, the element after it is its content (usually a `<ui-content>`).  Other children are not shown.
-       * - events:  `ui-open`, `ui-close`, `ui-loading`, `ui-loaded`, `ui-error`
+       * - events:  `ui-opening`, `ui-closing`, `ui-loading`, `ui-loaded`, `ui-error`
        */
       "ui-accordion": UIAccordionJSXAttributes
       /**
@@ -28048,7 +28073,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - default:  Content, usually text;  instead of the `content` attribute.
        *   - `icon`:  Icon, instead of the `icon` attribute;  the hidden content of `animated`.
        *   - `label`:  Label content, instead of the `label` attribute.
-       * - events:  `ui-toggle`
+       * - events:  `ui-selected`, `ui-deselected`
        */
       "ui-button": UIButtonJSXAttributes
       /**
@@ -28061,7 +28086,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-calendar>`:  A calendar lets a person pick a date, a time, or both.
        * - also known as:  date picker, datepicker, time picker, datetime, date range
-       * - events:  `ui-change`, `ui-open`, `ui-close`
+       * - events:  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`
        */
       "ui-calendar": UICalendarJSXAttributes
       /**
@@ -28083,13 +28108,13 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  check box, toggle, switch, tick box
        * - slots:
        *   - default:  Label content.
-       * - events:  `ui-change`
+       * - events:  `ui-changed`
        */
       "ui-checkbox": UICheckboxJSXAttributes
       /**
        * `<ui-code>`:  Code shows a block of source code coloured by its language, from the element's own text or a file on this site.
        * - also known as:  code block, syntax highlighting, highlighter, pre, snippet, source code, listing
-       * - events:  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-highlight`, `ui-copy`
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-coloured`, `ui-copied`
        */
       "ui-code": UICodeJSXAttributes
       /**
@@ -28160,7 +28185,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  overlay, backdrop, scrim, mask, blocker
        * - slots:
        *   - default:  The content, centred:  a header, a loader, buttons ...
-       * - events:  `ui-open`, `ui-show`, `ui-close`, `ui-hide`
+       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`
        */
       "ui-dimmer": UIDimmerJSXAttributes
       /**
@@ -28178,7 +28203,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `trigger`:  Custom trigger content, e.g. an icon and a word, instead of the text.
        *   - `header`:  Content at the top of the menu, e.g. a header or a search input.
        *   - `icon`:  Replaces the caret, or the `labeled` icon.
-       * - events:  `ui-change`, `ui-open`, `ui-close`, `ui-search`, `ui-add`, `ui-remove`
+       * - events:  `ui-changed`, `ui-opening`, `ui-closing`, `ui-searched`, `ui-added`, `ui-removed`
        */
       "ui-dropdown": UIDropdownJSXAttributes
       /**
@@ -28186,7 +28211,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  iframe, video, youtube, vimeo, player
        * - slots:
        *   - default:  Placeholder content inside the play button, over the image, e.g. a caption.
-       * - events:  `ui-activate`, `ui-reset`
+       * - events:  `ui-loading`, `ui-reset`
        */
       "ui-embed": UIEmbedJSXAttributes
       /**
@@ -28245,7 +28270,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  drawer, sheet, side panel, off canvas, slide over
        * - slots:
        *   - default:  Content parts:  `<ui-header>`, `<ui-content>`, `<ui-actions>` with buttons.
-       * - events:  `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`
+       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`
        */
       "ui-flyout": UIFlyoutJSXAttributes
       /**
@@ -28253,7 +28278,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  form layout, fieldset, validation
        * - slots:
        *   - default:  The native `<form>` (or its content, when the `<ui-form>` sits inside one).
-       * - events:  `ui-valid`, `ui-invalid`, `ui-success`, `ui-failure`, `ui-saving`, `ui-saved`, `ui-cancelling`, `ui-cancelled`
+       * - events:  `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`
        */
       "ui-form": UIFormJSXAttributes
       /**
@@ -28299,7 +28324,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  island, partial, fragment, server-side include, html import, transclusion, embed
        * - slots:
        *   - default:  Placeholder shown until the include loads (e.g. a server-rendered copy), then replaced.
-       * - events:  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-insert`
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawing`
        */
       "ui-include": UIIncludeJSXAttributes
       /**
@@ -28309,7 +28334,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `label`:  Label content (text, an icon, a `<ui-dropdown>`), inside the joined label box.
        *   - `action`:  `<ui-button>`s (or a `<ui-dropdown button>`) joined to the field.
        *   - `icon`:  Icon, instead of the `icon` attribute.
-       * - events:  `ui-input`, `ui-change`
+       * - events:  `ui-typed`, `ui-changed`
        */
       "ui-input": UIInputJSXAttributes
       /**
@@ -28333,7 +28358,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content, usually text;  a slotted `<img>` for an `image` label, `<ui-detail>`s.
        *   - `icon`:  Icon, instead of the `icon` attribute.
-       * - events:  `ui-remove`
+       * - events:  `ui-removing`
        */
       "ui-label": UILabelJSXAttributes
       /**
@@ -28348,7 +28373,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  ul, ol, bullet list, list view
        * - slots:
        *   - default:  `<ui-item>`s;  a nested `<ui-list>` inside an item is its sub-list.
-       * - events:  `ui-select`
+       * - events:  `ui-chosen`
        */
       "ui-list": UIListJSXAttributes
       /**
@@ -28361,7 +28386,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-markdown>`:  Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site.
        * - also known as:  markdown, md, gfm, readme, rich text, prose
-       * - events:  `ui-load`, `ui-change`, `ui-save`, `ui-saved`, `ui-error`, `ui-render`
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawn`
        */
       "ui-markdown": UIMarkdownJSXAttributes
       /**
@@ -28369,7 +28394,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
-       * - events:  `ui-select`
+       * - events:  `ui-choosing`
        */
       "ui-menu": UIMenuJSXAttributes
       /**
@@ -28378,7 +28403,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<p>`s, a `<ul>` list, `<ui-header>` / `<ui-content>` parts.
        *   - `icon`:  Icon, instead of the `icon` attribute;  shown large beside the content.
-       * - events:  `ui-dismiss`
+       * - events:  `ui-closing`
        */
       "ui-message": UIMessageJSXAttributes
       /**
@@ -28393,7 +28418,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  dialog, popup window, lightbox, confirm, alert dialog
        * - slots:
        *   - default:  Content parts:  `<ui-header>`, `<ui-content>` (`image`, `scrolling`), `<ui-actions>` with buttons.
-       * - events:  `ui-open`, `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`
+       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`
        */
       "ui-modal": UIModalJSXAttributes
       /**
@@ -28401,7 +28426,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  banner, cookie notice, announcement bar, sticky banner
        * - slots:
        *   - default:  The text;  a `<span class="title">` is set off in the title colour.
-       * - events:  `ui-show`, `ui-close`, `ui-hide`
+       * - events:  `ui-opening`, `ui-closing`, `ui-closed`
        */
       "ui-nag": UINagJSXAttributes
       /**
@@ -28459,7 +28484,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tooltip, popover, hint, hover card, info bubble
        * - slots:
        *   - default:  Content:  text, `<ui-header>` / `<ui-content>` parts, a grid, controls.
-       * - events:  `ui-open`, `ui-close`
+       * - events:  `ui-opening`, `ui-closing`
        */
       "ui-popup": UIPopupJSXAttributes
       /**
@@ -28467,7 +28492,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  progress bar, meter, percent bar, upload progress
        * - slots:
        *   - default:  Label content (rich version of `label`);  also the accessible name.
-       * - events:  `ui-change`, `ui-complete`
+       * - events:  `ui-changed`, `ui-completed`
        */
       "ui-progress": UIProgressJSXAttributes
       /**
@@ -28480,7 +28505,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `hint`:  Rich hint (instead of `hint`).
        *   - `output`:  Rich output (instead of `output`).
        *   - `actions`:  Small buttons at the end of the label row (`Reset`, `Auto`);  a taller one never grows the row.
-       * - events:  `ui-change`
+       * - events:  `ui-changed`
        */
       "ui-property": UIPropertyJSXAttributes
       /**
@@ -28495,7 +28520,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-change`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-success`, `ui-failure`, `ui-saving`, `ui-saved`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
+       * - events:  `ui-changed`, `ui-loading`, `ui-loaded`, `ui-valid`, `ui-invalid`, `ui-saving`, `ui-save-failed`, `ui-applying`, `ui-applied`, `ui-cancelling`, `ui-cancelled`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-error`
        */
       "ui-property-editor": UIPropertyEditorJSXAttributes
       /**
@@ -28510,7 +28535,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `badge`:  Rich badge, instead of the `badge` attribute (e.g. a `<ui-label>`).
        *   - `actions`:  Controls at the right of the title bar (buttons, a menu);  never fold it.
        *   - `description`:  Rich tip, instead of the `description` attribute (bold words, line breaks).
-       * - events:  `ui-invalid`, `ui-success`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-loaded`, `ui-error`
+       * - events:  `ui-invalid`, `ui-saved`, `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`, `ui-loading`, `ui-error`
        */
       "ui-property-group": UIPropertyGroupJSXAttributes
       /**
@@ -28532,7 +28557,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  radio button, option button, radio group
        * - slots:
        *   - default:  Label content.
-       * - events:  `ui-change`
+       * - events:  `ui-changed`
        */
       "ui-radio": UIRadioJSXAttributes
       /**
@@ -28545,7 +28570,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-rating>`:  A rating indicates people's interest in content.
        * - also known as:  stars, star rating, score, review stars, hearts
-       * - events:  `ui-change`
+       * - events:  `ui-changed`
        */
       "ui-rating": UIRatingJSXAttributes
       /**
@@ -28584,7 +28609,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  autocomplete, typeahead, search box, combobox, lookup
        * - slots:
        *   - `icon`:  Replaces the magnifying glass.
-       * - events:  `ui-search`, `ui-select`, `ui-change`, `ui-results`, `ui-open`, `ui-close`
+       * - events:  `ui-searched`, `ui-choosing`, `ui-changed`, `ui-replied`, `ui-opening`, `ui-closing`
        */
       "ui-search": UISearchJSXAttributes
       /**
@@ -28627,7 +28652,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  select box, native select, picker, option list
        * - slots:
        *   - default:  `<ui-item>`s:  the options (`value`, `icon`, `image`, `flag`, `description`), headers and dividers.
-       * - events:  `ui-change`
+       * - events:  `ui-changed`
        */
       "ui-select": UISelectJSXAttributes
       /**
@@ -28635,7 +28660,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  3d flip, cube, flip card, carousel
        * - slots:
        *   - default:  The sides:  `<ui-side>` elements, in order.
-       * - events:  `ui-change`
+       * - events:  `ui-animated`
        */
       "ui-shape": UIShapeJSXAttributes
       /**
@@ -28650,13 +28675,13 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  drawer, off canvas, side menu, nav drawer, hamburger menu
        * - slots:
        *   - default:  The content:  usually a `<ui-menu vertical fluid>`.
-       * - events:  `ui-open`, `ui-show`, `ui-close`, `ui-hide`
+       * - events:  `ui-opening`, `ui-opened`, `ui-closing`, `ui-closed`
        */
       "ui-sidebar": UISidebarJSXAttributes
       /**
        * `<ui-slider>`:  A slider lets people select values within a range.
        * - also known as:  range, range slider, volume, scrubber, track bar
-       * - events:  `ui-input`, `ui-change`
+       * - events:  `ui-moved`, `ui-changed`
        */
       "ui-slider": UISliderJSXAttributes
       /**
@@ -28693,7 +28718,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  affix, pinned, fixed header, sticky header
        * - slots:
        *   - default:  The content that sticks.
-       * - events:  `ui-stick`, `ui-unstick`
+       * - events:  `ui-stuck`, `ui-unstuck`
        */
       "ui-sticky": UIStickyJSXAttributes
       /**
@@ -28708,7 +28733,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tab panel, pane
        * - slots:
        *   - default:  The pane's content.
-       * - events:  `ui-show`
+       * - events:  `ui-opened`
        */
       "ui-tab": UITabJSXAttributes
       /**
@@ -28716,7 +28741,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  data table, data grid, grid, spreadsheet
        * - slots:
        *   - default:  One native `<table>`.
-       * - events:  `ui-sort`
+       * - events:  `ui-sorting`
        */
       "ui-table": UITableJSXAttributes
       /**
@@ -28724,7 +28749,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  tab bar, tab strip, tabbed panel, tab view
        * - slots:
        *   - default:  `<ui-tab>` panes;  each one's `label` becomes a tab.
-       * - events:  `ui-change`
+       * - events:  `ui-changing`, `ui-changed`
        */
       "ui-tabs": UITabsJSXAttributes
       /**
@@ -28737,13 +28762,13 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-textarea>`:  A textarea is a multi-line field used to elicit a longer response.
        * - also known as:  multiline, text area, memo, comment box
-       * - events:  `ui-input`, `ui-change`
+       * - events:  `ui-typed`, `ui-changed`
        */
       "ui-textarea": UITextareaJSXAttributes
       /**
        * `<ui-theme-editor>`:  A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.
        * - also known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens
-       * - events:  `ui-change`, `ui-copy`, `ui-save`
+       * - events:  `ui-changed`, `ui-copied`, `ui-saved`
        */
       "ui-theme-editor": UIThemeEditorJSXAttributes
       /**
@@ -28759,7 +28784,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Rich content, after the `message`.
        *   - `actions`:  Buttons:  `<ui-button>`s, or a `<ui-buttons>` group for `attached` actions.  Any activated one closes the toast unless its click was `preventDefault()`ed.
-       * - events:  `ui-show`, `ui-close`, `ui-hide`, `ui-approve`, `ui-deny`
+       * - events:  `ui-opened`, `ui-closing`, `ui-closed`, `ui-approving`, `ui-denying`
        */
       "ui-toast": UIToastJSXAttributes
       /**
@@ -28771,7 +28796,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
-       * - events:  `ui-select`
+       * - events:  `ui-choosing`
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**
@@ -28779,7 +28804,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  animate, fade, slide, motion, effect
        * - slots:
        *   - default:  The content to animate.
-       * - events:  `ui-show`, `ui-hide`, `ui-complete`
+       * - events:  `ui-opened`, `ui-closed`, `ui-animated`
        */
       "ui-transition": UITransitionJSXAttributes
       /**
@@ -28799,7 +28824,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  scroll spy, in view, intersection, lazy load, on screen
        * - slots:
        *   - default:  The content;  its `<img data-src>`s with `type="image"`.
-       * - events:  `ui-visible`, `ui-hidden`, `ui-top-visible`, `ui-bottom-visible`, `ui-top-passed`, `ui-bottom-passed`, `ui-passing`, `ui-load`
+       * - events:  `ui-in-view`, `ui-out-of-view`, `ui-top-in-view`, `ui-bottom-in-view`, `ui-top-passed`, `ui-bottom-passed`, `ui-passing`, `ui-loaded`
        */
       "ui-visibility": UIVisibilityJSXAttributes
     }
@@ -28812,53 +28837,52 @@ declare module "@solidjs/web/types/jsx.js" {
  *   The tag's own element types it:  `querySelector("ui-button")`, or a JSX `ref`.
  */
 export interface UIEventMap {
-  "ui-open": CustomEvent<unknown>
-  "ui-close": CustomEvent<unknown>
+  "ui-opening": CustomEvent<unknown>
+  "ui-closing": CustomEvent<unknown>
   "ui-loading": CustomEvent<unknown>
   "ui-loaded": CustomEvent<unknown>
   "ui-error": CustomEvent<unknown>
-  "ui-toggle": CustomEvent<unknown>
-  "ui-change": CustomEvent<unknown>
-  "ui-load": CustomEvent<unknown>
-  "ui-save": CustomEvent<unknown>
+  "ui-selected": CustomEvent<unknown>
+  "ui-deselected": CustomEvent<unknown>
+  "ui-changing": CustomEvent<unknown>
+  "ui-changed": CustomEvent<unknown>
+  "ui-saving": CustomEvent<unknown>
   "ui-saved": CustomEvent<unknown>
-  "ui-highlight": CustomEvent<unknown>
-  "ui-copy": CustomEvent<unknown>
-  "ui-show": CustomEvent<unknown>
-  "ui-hide": CustomEvent<unknown>
-  "ui-search": CustomEvent<unknown>
-  "ui-add": CustomEvent<unknown>
-  "ui-remove": CustomEvent<unknown>
-  "ui-activate": CustomEvent<unknown>
+  "ui-coloured": CustomEvent<unknown>
+  "ui-copied": CustomEvent<unknown>
+  "ui-opened": CustomEvent<unknown>
+  "ui-closed": CustomEvent<unknown>
+  "ui-searched": CustomEvent<unknown>
+  "ui-added": CustomEvent<unknown>
+  "ui-removed": CustomEvent<unknown>
   "ui-reset": CustomEvent<unknown>
-  "ui-approve": CustomEvent<unknown>
-  "ui-deny": CustomEvent<unknown>
+  "ui-approving": CustomEvent<unknown>
+  "ui-denying": CustomEvent<unknown>
   "ui-valid": CustomEvent<unknown>
   "ui-invalid": CustomEvent<unknown>
-  "ui-success": CustomEvent<unknown>
-  "ui-failure": CustomEvent<unknown>
-  "ui-saving": CustomEvent<unknown>
+  "ui-save-failed": CustomEvent<unknown>
+  "ui-applying": CustomEvent<unknown>
+  "ui-applied": CustomEvent<unknown>
   "ui-cancelling": CustomEvent<unknown>
   "ui-cancelled": CustomEvent<unknown>
-  "ui-insert": CustomEvent<unknown>
-  "ui-input": CustomEvent<unknown>
-  "ui-select": CustomEvent<unknown>
-  "ui-render": CustomEvent<unknown>
-  "ui-dismiss": CustomEvent<unknown>
-  "ui-opening": CustomEvent<unknown>
-  "ui-opened": CustomEvent<unknown>
-  "ui-closing": CustomEvent<unknown>
-  "ui-closed": CustomEvent<unknown>
-  "ui-complete": CustomEvent<unknown>
+  "ui-drawing": CustomEvent<unknown>
+  "ui-typed": CustomEvent<unknown>
+  "ui-removing": CustomEvent<unknown>
+  "ui-chosen": CustomEvent<unknown>
+  "ui-drawn": CustomEvent<unknown>
+  "ui-choosing": CustomEvent<unknown>
+  "ui-completed": CustomEvent<unknown>
   "ui-ready": CustomEvent<unknown>
-  "ui-results": CustomEvent<unknown>
-  "ui-stick": CustomEvent<unknown>
-  "ui-unstick": CustomEvent<unknown>
-  "ui-sort": CustomEvent<unknown>
-  "ui-visible": CustomEvent<unknown>
-  "ui-hidden": CustomEvent<unknown>
-  "ui-top-visible": CustomEvent<unknown>
-  "ui-bottom-visible": CustomEvent<unknown>
+  "ui-replied": CustomEvent<unknown>
+  "ui-animated": CustomEvent<unknown>
+  "ui-moved": CustomEvent<unknown>
+  "ui-stuck": CustomEvent<unknown>
+  "ui-unstuck": CustomEvent<unknown>
+  "ui-sorting": CustomEvent<unknown>
+  "ui-in-view": CustomEvent<unknown>
+  "ui-out-of-view": CustomEvent<unknown>
+  "ui-top-in-view": CustomEvent<unknown>
+  "ui-bottom-in-view": CustomEvent<unknown>
   "ui-top-passed": CustomEvent<unknown>
   "ui-bottom-passed": CustomEvent<unknown>
   "ui-passing": CustomEvent<unknown>

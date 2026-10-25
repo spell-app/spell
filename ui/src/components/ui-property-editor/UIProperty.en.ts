@@ -49,7 +49,7 @@ export const propertyVocabulary = {
   ),
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ name: string, value: unknown }",
       description: 'Its property was written (on Save, with `apply="on save"`).'
     }

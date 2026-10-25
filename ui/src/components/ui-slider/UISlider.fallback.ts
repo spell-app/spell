@@ -13,7 +13,7 @@ import { DEFAULT_MAX, DEFAULT_MIN, DEFAULT_STEP } from "./UISlider.types"
  * - Still a form control.  `input` / `change`:
  *   - set the DOM element's form value (a range:  two entries under `name`)
  *   - set `domElement.value` / `domElement.end`
- *   - send a composed `ui-input` / `ui-change`.
+ *   - send a composed `ui-input` / `ui-changed`.
  * - Its starting values are the DOM element's `value` / `end` PROPERTIES, else the attributes;
  *   `min` / `max` / `step` default to Fomantic's 0 / 20 / 1.
  * - Named by the DOM element's `aria-*` (copied onto each input).
@@ -47,8 +47,8 @@ export class SliderFallback extends E.NativeFallback<typeof sliderVocabulary> {
       this.decorate(input, "thumb")
       if (isRange) input.setAttribute("aria-label", THUMB_NAMES[index]!)
       input.value = String(starts[index])
-      this.listen(input, "input", (event) => this.changed(event, "ui-input"))
-      this.listen(input, "change", (event) => this.changed(event, "ui-change"))
+      this.listen(input, "input", (event) => this.changed(event, "ui-moved"))
+      this.listen(input, "change", (event) => this.changed(event, "ui-changed"))
       this.listen(input, "keydown", (event: KeyboardEvent) => {
         if (this.flag("readonly")) event.preventDefault()
       })

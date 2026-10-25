@@ -119,12 +119,12 @@ export const progressVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ percent: number, percents: number[], value?: number, total?: number }",
       description: "The percentage changed (after the first render)."
     },
     {
-      name: "ui-complete",
+      name: "ui-completed",
       detail: "{ value?: number, total?: number }",
       description: "The percentage reached 100."
     }

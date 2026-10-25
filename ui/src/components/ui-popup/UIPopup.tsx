@@ -30,14 +30,14 @@ import anchoredCSS from "./UIPopup.anchored.css?raw"
  *   are a person's actions too:  the popup opens at ITS target, whichever button sent the command.
  *
  * - Shown by the shared `visible` / `hidden` (`UIComponent`, "Shown or hidden"), starting hidden.
- *   - Controlled:  a person's cancelable `ui-open` / `ui-close` come first.
+ *   - Controlled:  a person's cancelable `ui-opening` / `ui-closing` come first.
  *   - Escape and outside clicks come from `UI.overlays` (kind `popover`;  the target counts as inside).
  *
  * - Its popover mode:  `hint` for hover / focus popups when `UI.browser.supports.popoverHint`
  *   (they don't close an open dropdown's menu), else `manual`.
- *   - Click and manual popups are always `manual`:  `auto`'s light dismiss would skip the cancelable `ui-close`.
+ *   - Click and manual popups are always `manual`:  `auto`'s light dismiss would skip the cancelable `ui-closing`.
  *   - When the browser dismisses a `hint` popover itself,
- *     the component follows (with a `ui-close` that can no longer veto).
+ *     the component follows (with a `ui-closing` that can no longer veto).
  *
  * - Accessibility, by `open-on`:
  *   - `hover` / `focus` / `manual`:  the DOM element is `role=tooltip`;  the target is `aria-describedby` it
@@ -78,13 +78,13 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
     onDismiss: () => void this.requestVisible(false)
   }
 
-  /** Show or hide, dispatching the cancelable `ui-open` / `ui-close` first;  true when applied. */
+  /** Show or hide, dispatching the cancelable `ui-opening` / `ui-closing` first;  true when applied. */
   @E.untracked
   requestVisible(visible: boolean, originalEvent?: Event): boolean {
     this.delayTimer?.cancel()
     if (visible === this.isVisible) return false
     const detail: UIT.PopupOpenDetail = { visible, originalEvent }
-    return this.requestChange("isVisible", visible, () => this.send(visible ? "ui-open" : "ui-close", detail))
+    return this.requestChange("isVisible", visible, () => this.send(visible ? "ui-opening" : "ui-closing", detail))
   }
 
   /** `requestVisible()` after `delay` ms (at once for `0`);  a newer call replaces a pending one. */
@@ -167,13 +167,13 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
 
   /**
    * The popover's `toggle`:  the browser closed it (a `hint` popover's light dismiss)
-   * while the element thinks it's open -- follow, announcing a `ui-close` that can't veto any more.
+   * while the element thinks it's open -- follow, announcing a `ui-closing` that can't veto any more.
    */
   @E.on("toggle")
   protected onToggle(event: Event) {
     if ((event as ToggleEvent).newState !== CLOSED || !this.domElement.isConnected || !this.isVisible) return
     const detail: UIT.PopupOpenDetail = { visible: false, originalEvent: event }
-    this.send("ui-close", detail)
+    this.send("ui-closing", detail)
     this.isVisible = false
   }
 

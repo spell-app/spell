@@ -379,7 +379,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   What the element adds is reporting. It keeps `:state(stuck)` while stuck and `:state(bound)` while pushed out by
-                  the end of its parent, and fires `ui-stick` / `ui-unstick` (Fomantic's `onStick` / `onUnstick`, with `{ edge }`,
+                  the end of its parent, and fires `ui-stuck` / `ui-unstuck` (Fomantic's `onStick` / `onUnstick`, with `{ edge }`,
                   `top` or `bottom`) as that changes. It watches with an `IntersectionObserver` on two 1px markers, against the
                   nearest scroll container (else the viewport).
                 </script>
@@ -395,7 +395,7 @@
                 <script type="text/plain">
                   document
                     .querySelector("ui-sticky")
-                    .addEventListener("ui-stick", (event) => console.log("stuck to the", event.detail.edge))
+                    .addEventListener("ui-stuck", (event) => console.log("stuck to the", event.detail.edge))
                 </script>
               </ui-code>
             </ui-section>
@@ -419,7 +419,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Nothing to bind: put it in the template, and listen for `ui-stick` / `ui-unstick` if you need to know.
+                  Nothing to bind: put it in the template, and listen for `ui-stuck` / `ui-unstuck` if you need to know.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -434,14 +434,14 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-sticky offset="60" @ui-stick="stuck = true" @ui-unstick="stuck = false">...</ui-sticky>
+                  <ui-sticky offset="60" @ui-stuck="stuck = true" @ui-unstuck="stuck = false">...</ui-sticky>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
-                  <ui-sticky offset="60" on-ui-stick={() => setStuck(true)}>
+                  <ui-sticky offset="60" on-ui-stuck={() => setStuck(true)}>
                     ...
                   </ui-sticky>
                 </script>

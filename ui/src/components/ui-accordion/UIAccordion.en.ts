@@ -87,14 +87,14 @@ export const accordionVocabulary = {
       kind: "string",
       description:
         'Indexes of the open panels (0-based), space-separated:  `open="0"`, `open="0 2"`.  Controlled:  set it to ' +
-        "open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the " +
+        "open / close panels;  `ui-opening` / `ui-closing` can veto people's changes.  When `exclusive`, only the " +
         "first index counts."
     },
     ...UIT.SourceBodyAttributes
   ],
   events: [
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ index: number, open: true, title: Element, content?: Element, originalEvent?: Event }",
       cancelable: true,
       description:
@@ -102,7 +102,7 @@ export const accordionVocabulary = {
         "opened it itself (find-in-page)."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ index: number, open: false, title: Element, content?: Element, originalEvent?: Event }",
       cancelable: true,
       description:

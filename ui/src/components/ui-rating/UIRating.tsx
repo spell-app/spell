@@ -39,7 +39,7 @@ export class DOMRatingElement extends F.DOMFormControl<UIRating> {
  *   - arrows move and choose (wrapping, as in the APG);  Space chooses
  *   - Home / End choose the first / last;  Backspace / Delete clear when `clearable`.
  *
- * - `value` is controlled (`@controlled`):  a choice sends `ui-change` first;
+ * - `value` is controlled (`@controlled`):  a choice sends `ui-changed` first;
  *   a handler that sets `el.value` again wins, and the radios show that value.
  *   The ATTRIBUTE is the starting (and reset) value.
  * - Fractions (`value="3.5"`) fill part of the next icon (Fomantic's `partial`, `--full`).
@@ -112,13 +112,13 @@ export class UIRating extends F.FormComponent<typeof ratingVocabulary> {
   }
 
   /**
-   * A person's choice of `value`:  send `ui-change`, then set the DOM element's property,
+   * A person's choice of `value`:  send `ui-changed`, then set the DOM element's property,
    * unless a handler set it first.
    * - Returns true when applied.
    */
   choose(value: number, originalEvent?: Event): boolean {
     this.isTouched = true
-    const applied = this.requestChange("value", value, () => this.send("ui-change", { value, originalEvent }))
+    const applied = this.requestChange("value", value, () => this.send("ui-changed", { value, originalEvent }))
     if (!applied) E.afterSolidUpdate(() => this.syncRadios())
     return applied
   }

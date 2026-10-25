@@ -133,7 +133,7 @@ export const dropdownVocabulary = {
       group: "states",
       kind: "keyOnly",
       key: "active",
-      description: "The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
+      description: "The menu is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto."
     },
     {
       name: "pointing",
@@ -224,35 +224,35 @@ export const dropdownVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changed",
       detail: "{ value: string | string[], originalEvent?: Event }",
       description: "Someone chose, added, removed or cleared a value."
     },
     {
-      name: "ui-open",
+      name: "ui-opening",
       detail: "{ open: true, originalEvent?: Event }",
       cancelable: true,
       description:
         "The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ open: false, originalEvent?: Event }",
       cancelable: true,
       description: "The menu is about to close;  `preventDefault()` keeps it open."
     },
     {
-      name: "ui-search",
+      name: "ui-searched",
       detail: "{ query: string, originalEvent?: Event }",
       description: "`search`:  the query changed."
     },
     {
-      name: "ui-add",
+      name: "ui-added",
       detail: "{ value: string, originalEvent?: Event }",
       description: "`multiple`:  a value was chosen, or `allow-additions` added a new one."
     },
     {
-      name: "ui-remove",
+      name: "ui-removed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "`multiple`:  a value was removed."
     }

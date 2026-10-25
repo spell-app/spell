@@ -44,7 +44,7 @@ export const visibilityVocabulary = {
       group: "appearance",
       kind: "enum",
       values: ["image"],
-      description: "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`)."
+      description: "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-loaded`)."
     },
     {
       name: "duration",
@@ -55,15 +55,15 @@ export const visibilityVocabulary = {
     }
   ],
   events: [
-    { name: "ui-visible", detail: "VisibilityCalculations", description: "Some of it came on screen (`onOnScreen`)." },
-    { name: "ui-hidden", detail: "VisibilityCalculations", description: "None of it is on screen (`onOffScreen`)." },
-    { name: "ui-top-visible", detail: "VisibilityCalculations", description: "Its top came on screen." },
-    { name: "ui-bottom-visible", detail: "VisibilityCalculations", description: "Its bottom came on screen." },
+    { name: "ui-in-view", detail: "VisibilityCalculations", description: "Some of it came on screen (`onOnScreen`)." },
+    { name: "ui-out-of-view", detail: "VisibilityCalculations", description: "None of it is on screen (`onOffScreen`)." },
+    { name: "ui-top-in-view", detail: "VisibilityCalculations", description: "Its top came on screen." },
+    { name: "ui-bottom-in-view", detail: "VisibilityCalculations", description: "Its bottom came on screen." },
     { name: "ui-top-passed", detail: "VisibilityCalculations", description: "Its top passed the screen top." },
     { name: "ui-bottom-passed", detail: "VisibilityCalculations", description: "Its bottom passed the screen top." },
     { name: "ui-passing", detail: "VisibilityCalculations", description: "It spans the screen top." },
     {
-      name: "ui-load",
+      name: "ui-loaded",
       detail: "{ image: HTMLImageElement }",
       description: '`type="image"`:  an image got its source (and finished its transition).'
     }

@@ -61,7 +61,7 @@ export const calendarVocabulary = {
       group: "states",
       kind: "keyOnly",
       key: "active",
-      description: "The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
+      description: "The popup is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto."
     },
     {
       name: "type",
@@ -194,19 +194,24 @@ export const calendarVocabulary = {
   ],
   events: [
     {
-      name: "ui-change",
+      name: "ui-changing",
       detail: "{ value: string, originalEvent?: Event }",
       cancelable: true,
       description: "The person chose, typed or cleared a value;  `preventDefault()` keeps the old one."
     },
     {
-      name: "ui-open",
+      name: "ui-changed",
+      detail: "{ value: string, originalEvent?: Event }",
+      description: "The value changed:  after `ui-changing`, unless it was cancelled."
+    },
+    {
+      name: "ui-opening",
       detail: "{ open: true, originalEvent?: Event }",
       cancelable: true,
       description: "The popup is about to open;  `preventDefault()` keeps it closed."
     },
     {
-      name: "ui-close",
+      name: "ui-closing",
       detail: "{ open: false, originalEvent?: Event }",
       cancelable: true,
       description: "The popup is about to close;  `preventDefault()` keeps it open."

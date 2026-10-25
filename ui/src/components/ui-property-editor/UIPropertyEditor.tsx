@@ -62,10 +62,10 @@ export class DOMPropertyEditorElement extends DOMFormElement {
  *   - A group's `select`:  that group's own part of the page.
  *   - `ui-loading`, then `ui-loaded`;  a page that doesn't load warns, and nothing changes.
  *   - SIDE EFFECT:  writes its light DOM (marked `data-ui-made="source"`) and its own missing attributes.
- * - When a property is written:  `ui-change` (from the editor and from the property), then the schema's
+ * - When a property is written:  `ui-changed` (from the editor and from the property), then the schema's
  *   "on change" rules for it (`UI.propertyControls.rule()`).
  * - Its groups hear about their properties:  `ui-invalid` and `:state(error)` when one fails,
- *   `:state(changed)` while one holds an edit, `ui-success` when a submit or a save passes.
+ *   `:state(changed)` while one holds an edit, `ui-saved` when a submit or a save passes.
  * - `apply="on save"`:  Save and Cancel under the properties (`part="footer"`).
  * - `readonly`:  every property in it is readonly (read as each connects).
  * - A NESTED editor, made by a property (`as="editor"`), edits that property's thing:  its `value` unless given.
@@ -372,7 +372,7 @@ export class UIPropertyEditor extends UIForm {
   // ## Its properties and groups hear what happened
   ////////////////
 
-  /** A property was written:  `ui-change` from the editor and the property, then its "on change" rules. */
+  /** A property was written:  `ui-changed` from the editor and the property, then its "on change" rules. */
   protected onWritten({ control, name, value, things }: WrittenProperty) {
     const property = control.closest(PROPERTY_SELECTOR)
     property?.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { name, value }, bubbles: false }))
@@ -423,7 +423,7 @@ export class UIPropertyEditor extends UIForm {
     }
   }
 
-  /** A submit or a save passed:  each group hears `ui-success`. */
+  /** A submit or a save passed:  each group hears `ui-saved`. */
   protected onSucceeded() {
     for (const group of this.domElement.querySelectorAll(GROUP_SELECTOR)) {
       group.dispatchEvent(new CustomEvent(SUCCESS_EVENT, { detail: { values: this.values }, bubbles: false }))
@@ -466,7 +466,7 @@ const OWN = {
   label: "label",
   save: "save",
   cancel: "cancel",
-  change: "ui-change",
+  change: "ui-changed",
   loading: "ui-loading",
   loaded: "ui-loaded"
 } as unknown as Record<string, never>
@@ -482,9 +482,9 @@ const ACTIONS_SLOT = "actions"
 const ON_SAVE = "on save"
 
 /** Events it sends on its properties and groups (and on itself). */
-const CHANGE_EVENT = "ui-change"
+const CHANGE_EVENT = "ui-changed"
 const INVALID_EVENT = "ui-invalid"
-const SUCCESS_EVENT = "ui-success"
+const SUCCESS_EVENT = "ui-saved"
 
 /** Shadow classes. */
 const FOOTER = "footer"

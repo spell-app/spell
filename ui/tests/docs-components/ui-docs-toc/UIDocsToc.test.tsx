@@ -118,7 +118,7 @@ describe("<ui-docs-toc> scan", () => {
     expect(links(toc, "entry")).toEqual(["Button", "Labeled Icon", "Disabled", "Loading"])
   })
 
-  it("is `:state(empty)` with nothing to list, and fires `ui-render` with the ids", async () => {
+  it("is `:state(empty)` with nothing to list, and fires `ui-drawn` with the ids", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
       `<div><ui-docs-toc for="nothing"></ui-docs-toc><p id="nothing">Text only.</p></div>`
     )
@@ -162,11 +162,11 @@ describe("<ui-docs-toc> scan", () => {
 ////////////////
 
 describe("<ui-docs-toc> following", () => {
-  it("marks the entry in view and opens its section as the page scrolls;  fires `ui-change`", async () => {
+  it("marks the entry in view and opens its section as the page scrolls;  fires `ui-scrolled-to`", async () => {
     const tall = PAGE.replaceAll("<ui-docs-example", '<ui-docs-example style="display: block; min-height: 120vh"')
     const { toc } = await render(tall)
     const changes: string[] = []
-    toc.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<{ value: string }>).detail.value))
+    toc.addEventListener("ui-scrolled-to", (event) => changes.push((event as CustomEvent<{ value: string }>).detail.value))
     const scroller = document.scrollingElement!
     const before = scroller.scrollTop
     onTestFinished(() => scroller.scrollTo(0, before))

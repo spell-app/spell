@@ -130,10 +130,10 @@ describe("<ui-input> value", () => {
     expect(host.getAttribute("value")).toBe("Ada")
   })
 
-  it("typing dispatches ui-input per keystroke, then ui-change on commit", async () => {
+  it("typing dispatches ui-input per keystroke, then ui-changed on commit", async () => {
     const { host, control } = await input(`<ui-input aria-label="Name"></ui-input>`)
-    const inputs = record(host, "ui-input")
-    const changes = record(host, "ui-change")
+    const inputs = record(host, "ui-typed")
+    const changes = record(host, "ui-changed")
     await userEvent.type(control, "Ada")
     expect(inputs.map((detail) => detail.value)).toEqual(["A", "Ad", "Ada"])
     expect(inputs[0]!.originalEvent).toBeInstanceOf(Event)
@@ -144,7 +144,7 @@ describe("<ui-input> value", () => {
 
   it("keeps the host's value when a ui-input handler re-sets it", async () => {
     const { host, control } = await input(`<ui-input value="x" aria-label="Name"></ui-input>`)
-    host.addEventListener("ui-input", () => (host.value = "x"))
+    host.addEventListener("ui-typed", () => (host.value = "x"))
     await userEvent.type(control, "y")
     await ElementFixture.tick()
     await ElementFixture.tick()
@@ -154,7 +154,7 @@ describe("<ui-input> value", () => {
 
   it("follows a handler that transforms the value", async () => {
     const { host, control } = await input(`<ui-input aria-label="Code"></ui-input>`)
-    host.addEventListener("ui-input", (event) => (host.value = (event as CustomEvent).detail.value.toUpperCase()))
+    host.addEventListener("ui-typed", (event) => (host.value = (event as CustomEvent).detail.value.toUpperCase()))
     await userEvent.type(control, "ab")
     await ElementFixture.tick()
     expect(host.value).toBe("AB")

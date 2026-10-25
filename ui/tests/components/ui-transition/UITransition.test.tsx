@@ -95,11 +95,11 @@ describe("<ui-transition> classes and first paint", () => {
 ////////////////
 
 describe("<ui-transition> show / hide", () => {
-  it("`visible` animates out then in through UI.transitions:  ui-hide, ui-show, ui-complete", async () => {
+  it("`visible` animates out then in through UI.transitions:  ui-closed, ui-opened, ui-animated", async () => {
     const { host, box } = await transition(`<ui-transition animation="fade up" duration="40" visible>x</ui-transition>`)
-    const hides = record(host, "ui-hide")
-    const shows = record(host, "ui-show")
-    const completes = record(host, "ui-complete")
+    const hides = record(host, "ui-closed")
+    const shows = record(host, "ui-opened")
+    const completes = record(host, "ui-animated")
     host.visible = false
     await settle()
     expect(box.getAttribute("data-ui-animation")).toBe("fade-up out")
@@ -153,10 +153,10 @@ describe("<ui-transition> show / hide", () => {
 })
 
 describe("<ui-transition> transition()", () => {
-  it("runs an attention animation in place:  visibility unchanged, ui-complete only", async () => {
+  it("runs an attention animation in place:  visibility unchanged, ui-animated only", async () => {
     const { host, box } = await transition(`<ui-transition duration="30" visible>x</ui-transition>`)
-    const completes = record(host, "ui-complete")
-    const hides = record(host, "ui-hide")
+    const completes = record(host, "ui-animated")
+    const hides = record(host, "ui-closed")
     const done = host.transition("tada")
     await settle()
     expect(box.getAttribute("data-ui-animation")).toBe("tada static")
@@ -187,8 +187,8 @@ describe("<ui-transition> queue", () => {
   it("queues:  hide then show run one after the other", async () => {
     const { host, box } = await transition(`<ui-transition duration="30" visible>x</ui-transition>`)
     const order: string[] = []
-    host.addEventListener("ui-hide", () => order.push("hide"))
-    host.addEventListener("ui-show", () => order.push("show"))
+    host.addEventListener("ui-closed", () => order.push("hide"))
+    host.addEventListener("ui-opened", () => order.push("show"))
     const hidden = host.hide()
     const shown = host.show()
     expect(await hidden).toBe(true)
@@ -199,7 +199,7 @@ describe("<ui-transition> queue", () => {
 
   it("drops the same animation twice in a row, unless allow-repeats", async () => {
     const { host } = await transition(`<ui-transition duration="30" visible>x</ui-transition>`)
-    const completes = record(host, "ui-complete")
+    const completes = record(host, "ui-animated")
     await Promise.all([host.transition("shake"), host.transition("shake")])
     expect(completes).toHaveLength(1)
     host.setAttribute("allow-repeats", "")
@@ -210,7 +210,7 @@ describe("<ui-transition> queue", () => {
 
   it("`interrupt` stops the running animation:  it resolves false and fires nothing", async () => {
     const { host, box } = await transition(`<ui-transition duration="500" interrupt visible>x</ui-transition>`)
-    const hides = record(host, "ui-hide")
+    const hides = record(host, "ui-closed")
     const hidden = host.hide()
     await settle()
     host.setAttribute("duration", "30")
@@ -230,7 +230,7 @@ describe("<ui-transition> reduced motion", () => {
   it("reduced motion:  the end state at once, events still fire", async () => {
     reduceMotion()
     const { host, box } = await transition(`<ui-transition animation="fly left" visible>x</ui-transition>`)
-    const hides = record(host, "ui-hide")
+    const hides = record(host, "ui-closed")
     expect(await host.hide()).toBe(true)
     expect(box.hidden).toBe(true)
     expect(box.hasAttribute("data-ui-animation")).toBe(false)
@@ -245,7 +245,7 @@ describe("<ui-transition> invoker commands", () => {
         `<button commandfor="t" command="--transition">Run</button>` +
         `<ui-transition id="t" duration="30" visible>x</ui-transition>`
     )
-    const completes = record(host, "ui-complete")
+    const completes = record(host, "ui-animated")
     await userEvent.click(wrapper.querySelector("[command='--toggle']")!)
     await expect.poll(() => box.hidden).toBe(true)
     expect(host.visible).toBe(false)

@@ -296,7 +296,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` fires when the user rates (Fomantic's `onRate`), with `event.detail.value`: `0` when they clear it.
+                  `ui-changed` fires when the user rates (Fomantic's `onRate`), with `event.detail.value`: `0` when they clear it.
                   Setting `value` back inside the handler vetoes the change. Setting `value` from script fires nothing (Fomantic's
                   `fireOnInit: false`).
                 </script>
@@ -304,7 +304,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const rating = document.querySelector("ui-rating")
-                  rating.addEventListener("ui-change", (event) => console.log(event.detail.value))
+                  rating.addEventListener("ui-changed", (event) => console.log(event.detail.value))
                 </script>
               </ui-code>
             </ui-section>
@@ -380,7 +380,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `value` is a plain attribute; listen for `ui-change` with your framework's custom-event syntax.
+                  `value` is a plain attribute; listen for `ui-changed` with your framework's custom-event syntax.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -393,7 +393,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-rating name="food" max-rating="5" :value="stars" @ui-change="(event) => (stars = event.detail.value)" />
+                  <ui-rating name="food" max-rating="5" :value="stars" @ui-changed="(event) => (stars = event.detail.value)" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -404,7 +404,7 @@
                     name="food"
                     max-rating="5"
                     value={stars()}
-                    on-ui-change={(event) => setStars(event.detail.value)}
+                    on-ui-changed={(event) => setStars(event.detail.value)}
                   />
                 </script>
               </ui-code>

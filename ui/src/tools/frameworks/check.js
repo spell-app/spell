@@ -6,7 +6,7 @@
  *   - `initialValue` -- the trigger text shows the host's value (`Banana`)
  *   - `initiallyOpen` -- `open` is true and the listbox is `:popover-open`
  *   - `optionsIsProperty` -- `options` arrived as an array property, never an attribute
- *   - `pickUpdatesHost` -- a pick (`Apple`) round-trips:  `ui-change` => host state => `value` => text
+ *   - `pickUpdatesHost` -- a pick (`Apple`) round-trips:  `ui-changed` => host state => `value` => text
  *   - `hostSetsValue` -- host state => the element's `value` and text (`Cherry`)
  *   - `closesAfterPick` -- the menu closed after the pick
  *   - `hostOpens` -- host state `open` => the listbox opens

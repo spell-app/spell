@@ -52,10 +52,10 @@ function parts(host: Element) {
   }
 }
 
-/** Collect `detail`s of `ui-change`. */
+/** Collect `detail`s of `ui-changed`. */
 function changes(host: Element) {
   const details: { selected: boolean; value: string; originalEvent?: Event }[] = []
-  host.addEventListener("ui-change", (event) => details.push((event as CustomEvent).detail))
+  host.addEventListener("ui-changed", (event) => details.push((event as CustomEvent).detail))
   return details
 }
 
@@ -113,7 +113,7 @@ describe("<ui-checkbox> classes", () => {
 ////////////////
 
 describe("<ui-checkbox> selected", () => {
-  it("toggles on click, with ui-change first", async () => {
+  it("toggles on click, with ui-changed first", async () => {
     const { host, input, label } = await check(`<ui-checkbox value="yes">Agree</ui-checkbox>`)
     const details = changes(host)
     label.click()
@@ -155,9 +155,9 @@ describe("<ui-checkbox> selected", () => {
     expect(host.selected).toBe(false)
   })
 
-  it("keeps the host's state when a ui-change handler re-sets it", async () => {
+  it("keeps the host's state when a ui-changed handler re-sets it", async () => {
     const { host, input } = await check(`<ui-checkbox>Agree</ui-checkbox>`)
-    host.addEventListener("ui-change", () => (host.selected = false))
+    host.addEventListener("ui-changed", () => (host.selected = false))
     input.click()
     await ElementFixture.tick()
     await ElementFixture.tick()
@@ -255,7 +255,7 @@ describe("<ui-checkbox> forms", () => {
 })
 
 describe("<ui-checkbox> off-value", () => {
-  it("submits `off-value` while unchosen and `value` while chosen;  ui-change says which", async () => {
+  it("submits `off-value` while unchosen and `value` while chosen;  ui-changed says which", async () => {
     const form = await ElementFixture.render<HTMLFormElement>(
       `<form><ui-checkbox type="toggle" name="panel" value="open" off-value="closed">Open</ui-checkbox></form>`
     )
@@ -371,7 +371,7 @@ describe("<ui-radio> groups", () => {
     <ui-radio name="other" value="x">Other group</ui-radio>
   </form>`
 
-  it("chooses one per name:  choosing another unchooses the rest, only it fires ui-change", async () => {
+  it("chooses one per name:  choosing another unchooses the rest, only it fires ui-changed", async () => {
     const form = await ElementFixture.render<HTMLFormElement>(GROUP)
     await ElementFixture.tick()
     const [small, medium, large, other] = form.querySelectorAll<Check>("ui-radio")

@@ -42,7 +42,7 @@ export const docsExampleVocabulary = {
       name: "code",
       kind: "boolean",
       description:
-        "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-toggle`).  " +
+        "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-opened` / `ui-closed`).  " +
         "Set it in markup to open the code at start."
     },
     {
@@ -68,9 +68,14 @@ export const docsExampleVocabulary = {
   ],
   events: [
     {
-      name: "ui-toggle",
-      detail: "{ open: boolean, originalEvent?: Event }",
-      description: "The code button opened or closed the code pane."
+      name: "ui-opened",
+      detail: "{ open: true, originalEvent?: Event }",
+      description: "The code button opened the code pane."
+    },
+    {
+      name: "ui-closed",
+      detail: "{ open: false, originalEvent?: Event }",
+      description: "The code button closed the code pane."
     }
   ],
   slots: [

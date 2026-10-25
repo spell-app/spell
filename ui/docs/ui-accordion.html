@@ -600,7 +600,7 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  When the user activates a title, the cancelable `ui-open` / `ui-close` go first, with
+                  When the user activates a title, the cancelable `ui-opening` / `ui-closing` go first, with
                   `{ index, open, title, content, originalEvent }`; switching panels in an exclusive accordion announces the close
                   too. `preventDefault()` keeps things as they were.
                 </script>
@@ -608,7 +608,7 @@
               <ui-code language="js">
                 <script type="text/plain">
                   const faq = document.querySelector("ui-accordion")
-                  faq.addEventListener("ui-open", (event) => {
+                  faq.addEventListener("ui-opening", (event) => {
                     if (event.detail.index === 2 && !signedIn) event.preventDefault() // stays closed
                   })
                   faq.open = "0 1" // open panels from code:  no event
@@ -627,7 +627,7 @@
                   fetches: same origin, cached, scripts inert, relative URLs rewritten.
 
                   The panel stays closed while the body is on its way (at most 300 ms), so it opens onto the real content.
-                  `ui-load` fires once it's in (`:state(loaded)`); a failure fires the cancelable `ui-error` and shows an error
+                  `ui-loaded` fires once it's in (`:state(loaded)`); a failure fires the cancelable `ui-error` and shows an error
                   line in the panel (`:state(error)`). `load()` fetches it now, `reload()` again past the cache.
                 </script>
               </ui-markdown>
@@ -667,7 +667,7 @@
                     ARIA to keep in sync.
                   - Arrow keys move between the titles of one accordion, as the APG accordion pattern suggests.
                   - Find-in-page (Ctrl / Cmd + F) opens a closed panel that holds a match. That opening can't be vetoed:
-                    `ui-open` still fires, but `preventDefault()` does nothing.
+                    `ui-opening` still fires, but `preventDefault()` does nothing.
                   - Titles are buttons, not headings: they don't appear in the page's outline.
                 </script>
               </ui-markdown>
@@ -676,7 +676,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `open` (a string of indexes) and listen for `ui-open` / `ui-close` to follow the user.
+                  Bind `open` (a string of indexes) and listen for `ui-opening` / `ui-closing` to follow the user.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -689,7 +689,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-accordion styled :open="String(index)" @ui-open="(e) => (index = e.detail.index)">...</ui-accordion>
+                  <ui-accordion styled :open="String(index)" @ui-opening="(e) => (index = e.detail.index)">...</ui-accordion>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -699,7 +699,7 @@
                   <ui-accordion
                     styled
                     open={String(index())}
-                    on-ui-open={(e) => setIndex(e.detail.index)}
+                    on-ui-opening={(e) => setIndex(e.detail.index)}
                   >
                     ...
                   </ui-accordion>

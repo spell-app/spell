@@ -12,7 +12,7 @@ import { type Vocabulary } from "./UIModal.types"
  *   - `<ui-actions>`:  a deny button (`cancel`, first:  it takes the initial focus, the least destructive choice)
  *     and a primary approve button.
  * - Escape denies (`closedby="closerequest"`:  no dimmer clicks, so a stray click can't answer).
- * - The promise settles once the modal is HIDDEN (`ui-hide`), so a caller can open the next dialog straight away.
+ * - The promise settles once the modal is HIDDEN (`ui-closed`), so a caller can open the next dialog straight away.
  * - Button texts:  `okText` / `cancelText`, else the translated `ok` / `cancel` texts (`UI.i18n`).
  * - Everything is light DOM built with `createElement` / `textContent`:  never `innerHTML` with caller text.
  * - Other families' tags (`<ui-content>`, `<ui-actions>`, `<ui-button>`) are looked up at CALL time,
@@ -144,10 +144,10 @@ export type ModalDialogsProps = {
 }
 
 /** An approve element was activated:  the dialog answers yes. */
-const APPROVE_EVENT: E.EventName<Vocabulary> = "ui-approve"
+const APPROVE_EVENT: E.EventName<Vocabulary> = "ui-approving"
 
 /** Hidden:  the call settles. */
-const HIDE_EVENT: E.EventName<Vocabulary> = "ui-hide"
+const HIDE_EVENT: E.EventName<Vocabulary> = "ui-closed"
 
 /** `<ui-modal>` width attribute (canonical name). */
 const SIZE = "size"

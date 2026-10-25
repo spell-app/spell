@@ -30,15 +30,15 @@ describe("InputFallback", () => {
     await expectAccessible(host, AXE)
   })
 
-  it("is still a form control:  value, validity, ui-input / ui-change", () => {
+  it("is still a form control:  value, validity, ui-input / ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-input name="q" required aria-label="Query"></x-fb-input></form>`
     )
     const host = form.querySelector<StubHost & { value?: string }>("x-fb-input")!
     expect(form.checkValidity()).toBe(false)
     const events: string[] = []
-    host.addEventListener("ui-input", (event) => events.push(`input:${(event as CustomEvent).detail.value}`))
-    host.addEventListener("ui-change", () => events.push("change"))
+    host.addEventListener("ui-typed", (event) => events.push(`input:${(event as CustomEvent).detail.value}`))
+    host.addEventListener("ui-changed", () => events.push("change"))
     const input = FallbackStub.shadow(host).querySelector("input")!
     input.value = "cats"
     input.dispatchEvent(new Event("input", { bubbles: true }))

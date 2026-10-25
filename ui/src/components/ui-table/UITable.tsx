@@ -41,7 +41,7 @@ import tableCSS from "./UITable.css?inline"
  *     The component never moves or wraps the author's nodes.
  *   - The sorted header gets `aria-sort` (removed from the others);  `UITable.css` draws the caret from it.
  *   - `sort-column` and `sort-direction` are auto-controlled.
- *     Each activation first sends the cancelable `ui-sort` (`TableSortDetail`):
+ *     Each activation first sends the cancelable `ui-sorting` (`TableSortDetail`):
  *     the sorted column flips, another starts `ascending`.
  *   - Reordering:  data mode shows its rows sorted.
  *     A slotted table reorders its `tbody` rows by cell text only with `client-sort` (simple static tables);
@@ -424,7 +424,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   }
 
   /**
-   * Sort by `header`'s column:  `ui-sort` first (cancelable), then `sort-column` / `sort-direction`.
+   * Sort by `header`'s column:  `ui-sorting` first (cancelable), then `sort-column` / `sort-direction`.
    * - The sorted column flips direction;  another column starts `ascending`.
    * - Nothing changes when the event is cancelled, or when a handler set either property itself.
    */
@@ -436,7 +436,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
       column === current && this.effectiveSortDirection === "ascending" ? "descending" : "ascending"
     const detail: UIT.TableSortDetail = { column, key: TableSort.key(header), direction, originalEvent }
     this.requestChange("sortDirection", direction, () =>
-      this.requestChange("sortColumn", column, () => this.send("ui-sort", detail))
+      this.requestChange("sortColumn", column, () => this.send("ui-sorting", detail))
     )
   }
 

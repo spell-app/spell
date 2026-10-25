@@ -104,7 +104,7 @@ describe("ButtonFallback", () => {
     const host = Fixture.render<StubHost>(`<x-fb-button toggle>T</x-fb-button>`)
     const button = FallbackStub.shadow(host).querySelector("button")!
     const events: string[] = []
-    host.addEventListener("ui-toggle", () => events.push("ui-toggle"))
+    host.addEventListener("ui-selected", () => events.push("ui-selected"))
     expect(button.getAttribute("aria-pressed")).toBe("false")
     button.click()
     expect(button.getAttribute("aria-pressed")).toBe("true")

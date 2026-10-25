@@ -14,7 +14,7 @@ import { DEFAULT_TYPE, type Vocabulary } from "./UICalendar.types"
  * - Still a form control:
  *   - every `input` / `change` copies the value and the native validity (`required`, `min`, `max`)
  *     onto the DOM element (`setValidity(..., control)`)
- *   - `change` sets `domElement.value` and sends a composed `ui-change`
+ *   - `change` sets `domElement.value` and sends a composed `ui-changing`
  *     (not cancelable:  the native control has already changed).
  * - Its starting value is the DOM element's `value` PROPERTY, else its attribute.
  * - Its accessible name is the DOM element's `aria-label`, else `placeholder`.
@@ -26,7 +26,7 @@ export class CalendarFallback extends E.NativeFallback<Vocabulary> {
     "`inline` (always a field), `position`, `today`, `first-day-of-week`, `locale` (the page's instead)",
     "`disabled-dates`, `disabled-days-of-week`, `select-adjacent-days`, ranges (`start-calendar` / `end-calendar`)",
     "`disable-minute` / `-month` / `-year`, typed text in the locale's words",
-    "vetoing `ui-change`, `ui-open` / `ui-close`, `:state(invalid)`, form reset of the value"
+    "vetoing `ui-changing`, `ui-opening` / `ui-closing`, `:state(invalid)`, form reset of the value"
   ]
 
   /** The native control, once built, for `attached()`. */
@@ -104,4 +104,4 @@ const INPUT_PART: E.PartNameOf<Vocabulary> = "input"
 const CALENDAR_PART: E.PartNameOf<Vocabulary> = "calendar"
 
 /** The event a change dispatches, from the vocabulary. */
-const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-change"
+const CHANGE_EVENT: E.EventName<Vocabulary> = "ui-changed"

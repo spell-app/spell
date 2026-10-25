@@ -15,7 +15,7 @@ const CARD = {
     { name: "pointing", kind: "keyOrValueAndKey", values: "floats", description: "Arrow." },
     { name: "selected", kind: "boolean", aliases: ["checked"], description: "Chosen." }
   ],
-  events: [{ name: "ui-change", detail: "{ value: string }", description: "Value changed." }],
+  events: [{ name: "ui-changed", detail: "{ value: string }", description: "Value changed." }],
   slots: [
     { name: "", description: "Content." },
     { name: "header", description: "Header." }
@@ -53,7 +53,7 @@ const SPANISH: Dictionary = {
     floats: { left: "izquierda" },
     booleans: { yes: "si" }
   },
-  events: { "ui-change": "cambio" },
+  events: { "ui-changed": "cambiado" },
   slots: { header: "encabezado" },
   parts: { header: "encabezado" },
   components: {
@@ -167,7 +167,7 @@ describe("Vocabulary.define() with the English identity dictionary", () => {
       "checked"
     ])
     expect(localized.attributes.get("checked")).toBe(CARD.attributes[5])
-    expect([...localized.events.keys()]).toEqual(["ui-change"])
+    expect([...localized.events.keys()]).toEqual(["ui-changed"])
     expect([...localized.slots.keys()]).toEqual(["", "header"])
     expect([...localized.parts.keys()]).toEqual(["header"])
   })
@@ -211,7 +211,7 @@ describe("Vocabulary.define() with a Spanish dictionary", () => {
   })
 
   it("prefixes and translates events, slots and parts", () => {
-    expect(tarjeta.events.get("ie-cambio")!.name).toBe("ui-change")
+    expect(tarjeta.events.get("ie-cambiado")!.name).toBe("ui-changed")
     expect(tarjeta.slots.get("encabezado")!.name).toBe("header")
     expect(tarjeta.slots.get("")!.name).toBe("")
     expect(tarjeta.parts.get("encabezado")!.name).toBe("header")
@@ -229,8 +229,8 @@ describe("Vocabulary.define():  another package's events", () => {
     noun: "app",
     attributes: [],
     events: [
-      { name: "spell-open", detail: "{ href: string }", description: "A link was clicked." },
-      { name: "ui-change", detail: "{}", description: "Changed." }
+      { name: "spell-exploring", detail: "{ href: string }", description: "A link was clicked." },
+      { name: "ui-changed", detail: "{}", description: "Changed." }
     ],
     slots: [],
     parts: [],
@@ -241,15 +241,15 @@ describe("Vocabulary.define():  another package's events", () => {
   it("keep their names, canonical or under another prefix;  Spell UI's take the prefix", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
-    expect([...vocabulary.define().get("spell-viewer")!.events.keys()]).toEqual(["spell-open", "ui-change"])
-    expect([...vocabulary.define("ie", SPANISH).get("spell-viewer")!.events.keys()]).toEqual(["spell-open", "ie-cambio"])
+    expect([...vocabulary.define().get("spell-viewer")!.events.keys()]).toEqual(["spell-exploring", "ui-changed"])
+    expect([...vocabulary.define("ie", SPANISH).get("spell-viewer")!.events.keys()]).toEqual(["spell-exploring", "ie-cambiado"])
   })
 
   it("are translated when the dictionary names them", () => {
     const vocabulary = new Vocabulary()
     vocabulary.register(APP)
-    const events = vocabulary.define("ie", { lang: "es", events: { "spell-open": "abrir" } }).get("spell-viewer")!.events
-    expect([...events.keys()]).toEqual(["ie-abrir", "ie-change"])
+    const events = vocabulary.define("ie", { lang: "es", events: { "spell-exploring": "abrir" } }).get("spell-viewer")!.events
+    expect([...events.keys()]).toEqual(["ie-abrir", "ie-changed"])
   })
 })
 

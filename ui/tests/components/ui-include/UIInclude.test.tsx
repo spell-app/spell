@@ -93,15 +93,15 @@ describe("<ui-include> loading", () => {
     expect(host.contentRoot).toBe(host)
   })
 
-  it("`ui-insert` hands over the markup before it goes in, and may change it", async () => {
+  it("`ui-drawing` hands over the markup before it goes in, and may change it", async () => {
     const seen: string[] = []
-    document.addEventListener("ui-insert", listener)
+    document.addEventListener("ui-drawing", listener)
     try {
       const host = await include(`<ui-include source="${DIR}/part.html" page-styles></ui-include>`)
       expect(seen).toEqual(["A part, with a label."])
       expect(host.querySelector("p.part.seen")).not.toBeNull()
     } finally {
-      document.removeEventListener("ui-insert", listener)
+      document.removeEventListener("ui-drawing", listener)
     }
 
     /** Record the part's text, check it's not in the page yet, and mark it. */

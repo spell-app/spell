@@ -221,7 +221,7 @@
         {
           "name": "open",
           "kind": "string",
-          "description": "Indexes of the open panels (0-based), space-separated:  `open=\"0\"`, `open=\"0 2\"`.  Controlled:  set it to open / close panels;  `ui-open` / `ui-close` can veto people's changes.  When `exclusive`, only the first index counts."
+          "description": "Indexes of the open panels (0-based), space-separated:  `open=\"0\"`, `open=\"0 2\"`.  Controlled:  set it to open / close panels;  `ui-opening` / `ui-closing` can veto people's changes.  When `exclusive`, only the first index counts."
         },
         {
           "name": "source",
@@ -303,13 +303,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ index: number, open: true, title: Element, content?: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A panel is about to open;  `preventDefault()` keeps it closed.  NOT cancelable in effect when the browser opened it itself (find-in-page)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ index: number, open: false, title: Element, content?: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A panel is about to close -- its title was activated, or another panel is opening in an `exclusive` accordion;  `preventDefault()` keeps it open (and then the other one closed)."
@@ -1524,7 +1524,7 @@
         {
           "name": "toggle",
           "kind": "keyOnly",
-          "description": "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-toggle`."
+          "description": "Toggles `active` on click, with `aria-pressed`;  dispatches `ui-selected` / `ui-deselected`."
         },
         {
           "name": "active",
@@ -1757,9 +1757,14 @@
       ],
       "events": [
         {
-          "name": "ui-toggle",
-          "detail": "{ active: boolean, originalEvent?: Event }",
-          "description": "A `toggle` button flipped its `active` state.  NOTE: plain clicks are the native `click`."
+          "name": "ui-selected",
+          "detail": "{ active: true, originalEvent?: Event }",
+          "description": "A `toggle` button turned `active` on.  NOTE: plain clicks are the native `click`."
+        },
+        {
+          "name": "ui-deselected",
+          "detail": "{ active: false, originalEvent?: Event }",
+          "description": "A `toggle` button turned `active` off."
         }
       ],
       "parts": [
@@ -2256,7 +2261,7 @@
         {
           "name": "open",
           "kind": "keyOnly",
-          "description": "The popup is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
+          "description": "The popup is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto."
         },
         {
           "name": "type",
@@ -2451,19 +2456,24 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changing",
           "detail": "{ value: string, originalEvent?: Event }",
           "cancelable": true,
           "description": "The person chose, typed or cleared a value;  `preventDefault()` keeps the old one."
         },
         {
-          "name": "ui-open",
+          "name": "ui-changed",
+          "detail": "{ value: string, originalEvent?: Event }",
+          "description": "The value changed:  after `ui-changing`, unless it was cancelled."
+        },
+        {
+          "name": "ui-opening",
           "detail": "{ open: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "The popup is about to open;  `preventDefault()` keeps it closed."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, originalEvent?: Event }",
           "cancelable": true,
           "description": "The popup is about to close;  `preventDefault()` keeps it open."
@@ -3292,7 +3302,7 @@
         {
           "name": "selected",
           "kind": "boolean",
-          "description": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`."
+          "description": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`."
         },
         {
           "name": "value",
@@ -3383,7 +3393,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ selected: boolean, value: string, originalEvent?: Event }",
           "description": "Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen."
         }
@@ -3587,17 +3597,17 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-load",
+          "name": "ui-loaded",
           "detail": "{ source?: string, content: string }",
           "description": "Content arrived:  fetched from `source`, or read from the element's own content."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ content: string }",
           "description": "The `content` property was set:  the element shows the new text, and is `dirty` until saved."
         },
         {
-          "name": "ui-save",
+          "name": "ui-saving",
           "detail": "{ source?: string, content: string, etag?: string }",
           "cancelable": true,
           "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere)."
@@ -3614,12 +3624,12 @@
           "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is."
         },
         {
-          "name": "ui-highlight",
+          "name": "ui-coloured",
           "detail": "{ language?: string, detected: boolean }",
           "description": "Coloured:  `language` is what it was coloured as (`undefined`:  plain text), `detected` when it was guessed."
         },
         {
-          "name": "ui-copy",
+          "name": "ui-copied",
           "detail": "{ content: string }",
           "description": "The copy button copied `content`."
         }
@@ -5632,24 +5642,24 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ visible: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to show for a person's action (`show-on`, an invoker command);  `preventDefault()` keeps it hidden."
         },
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ visible: true }",
           "description": "Shown, its transition finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ visible: false, reason: DimmerCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to hide:  a click on it, Escape, the pointer leaving.  `preventDefault()` keeps it shown."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ visible: false }",
           "description": "Hidden, its transition finished (Fomantic's `onHidden`)."
         }
@@ -6151,7 +6161,7 @@
         {
           "name": "open",
           "kind": "keyOnly",
-          "description": "The menu is open.  Controlled:  set it to open / close;  `ui-open` / `ui-close` can veto."
+          "description": "The menu is open.  Controlled:  set it to open / close;  `ui-opening` / `ui-closing` can veto."
         },
         {
           "name": "pointing",
@@ -6322,34 +6332,34 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: string | string[], originalEvent?: Event }",
           "description": "Someone chose, added, removed or cleared a value."
         },
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "The menu is about to open (a person's action, an invoker command too);  `preventDefault()` keeps it closed."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, originalEvent?: Event }",
           "cancelable": true,
           "description": "The menu is about to close;  `preventDefault()` keeps it open."
         },
         {
-          "name": "ui-search",
+          "name": "ui-searched",
           "detail": "{ query: string, originalEvent?: Event }",
           "description": "`search`:  the query changed."
         },
         {
-          "name": "ui-add",
+          "name": "ui-added",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "`multiple`:  a value was chosen, or `allow-additions` added a new one."
         },
         {
-          "name": "ui-remove",
+          "name": "ui-removed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "`multiple`:  a value was removed."
         }
@@ -6555,7 +6565,7 @@
         {
           "name": "active",
           "kind": "keyOnly",
-          "description": "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-activate` first."
+          "description": "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-loading` first."
         },
         {
           "name": "disabled",
@@ -6627,7 +6637,7 @@
       ],
       "events": [
         {
-          "name": "ui-activate",
+          "name": "ui-loading",
           "detail": "{ url: string, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to load the frame from `url` (a click, Enter / Space, `host.activate()`);  `preventDefault()` keeps the placeholder."
@@ -8317,35 +8327,35 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ visible: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden."
         },
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ visible: true }",
           "description": "Shown, its entry transition finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ visible: false, reason: ModalCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ visible: false }",
           "description": "Hidden, its exit transition finished (Fomantic's `onHidden`)."
         },
         {
-          "name": "ui-approve",
+          "name": "ui-approving",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps it shown (Fomantic's `onApprove` returning `false`)."
         },
         {
-          "name": "ui-deny",
+          "name": "ui-denying",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps it shown."
@@ -8616,24 +8626,24 @@
           "description": "A field failed validation;  `errors` are its prompts."
         },
         {
-          "name": "ui-success",
+          "name": "ui-saving",
           "detail": "{ values: Record<string, FieldValue>, originalEvent?: Event }",
           "cancelable": true,
           "description": "A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch)."
         },
         {
-          "name": "ui-failure",
+          "name": "ui-save-failed",
           "detail": "{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }",
           "description": "A submit failed validation (the native submission is stopped);  `errors` by field."
         },
         {
-          "name": "ui-saving",
+          "name": "ui-applying",
           "detail": "{ changes: FormChange[], value: unknown }",
           "cancelable": true,
           "description": "`save()`, with `apply=\"on save\"`:  the held edits are about to land;  `preventDefault()` keeps them held."
         },
         {
-          "name": "ui-saved",
+          "name": "ui-applied",
           "detail": "{ changes: FormChange[], value: unknown }",
           "description": "The held edits landed in the bound `value`."
         },
@@ -10317,17 +10327,17 @@
       ],
       "events": [
         {
-          "name": "ui-load",
+          "name": "ui-loaded",
           "detail": "{ source?: string, content: string }",
           "description": "Content arrived:  fetched from `source`, or read from the element's own content."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ content: string }",
           "description": "The `content` property was set:  the element shows the new text, and is `dirty` until saved."
         },
         {
-          "name": "ui-save",
+          "name": "ui-saving",
           "detail": "{ source?: string, content: string, etag?: string }",
           "cancelable": true,
           "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere)."
@@ -10344,7 +10354,7 @@
           "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is."
         },
         {
-          "name": "ui-insert",
+          "name": "ui-drawing",
           "detail": "{ fragment: DocumentFragment, source?: string }",
           "description": "The markup is about to go in:  `fragment` holds it, parsed and URL-rewritten, not yet in the page.  A listener may read or change it first (a docs page keeps its examples' markup before they upgrade)."
         }
@@ -10762,12 +10772,12 @@
       ],
       "events": [
         {
-          "name": "ui-input",
+          "name": "ui-typed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "The value changed as someone typed (every keystroke)."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "Someone committed a change (blur, Enter, picking a file)."
         }
@@ -11478,7 +11488,7 @@
         {
           "name": "removable",
           "kind": "boolean",
-          "description": "Shows a delete icon button;  clicking it dispatches `ui-remove`."
+          "description": "Shows a delete icon button;  clicking it dispatches `ui-removing`."
         },
         {
           "name": "href",
@@ -11558,7 +11568,7 @@
       ],
       "events": [
         {
-          "name": "ui-remove",
+          "name": "ui-removing",
           "detail": "{ originalEvent?: Event }",
           "cancelable": true,
           "description": "The delete icon of a `removable` label was activated.  NOTE: the element doesn't remove itself."
@@ -12050,7 +12060,7 @@
       ],
       "events": [
         {
-          "name": "ui-select",
+          "name": "ui-chosen",
           "detail": "{ value: string, item: Element, originalEvent?: Event }",
           "description": "An interactive item was activated (click, Enter, Space):  a `selection` list's item, or an item link / button.  `value` is the item's `value`, else its text."
         }
@@ -12408,7 +12418,7 @@
         {
           "name": "editable",
           "kind": "boolean",
-          "description": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-change`;  `save()` writes it."
+          "description": "Write / Preview tabs:  a text box for the markdown, and its preview.  Each edit is a `ui-changed`;  `save()` writes it."
         },
         {
           "name": "sanitized",
@@ -12480,17 +12490,17 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-load",
+          "name": "ui-loaded",
           "detail": "{ source?: string, content: string }",
           "description": "Content arrived:  fetched from `source`, or read from the element's own content."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ content: string }",
           "description": "The `content` property was set:  the element shows the new text, and is `dirty` until saved."
         },
         {
-          "name": "ui-save",
+          "name": "ui-saving",
           "detail": "{ source?: string, content: string, etag?: string }",
           "cancelable": true,
           "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere)."
@@ -12507,7 +12517,7 @@
           "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is."
         },
         {
-          "name": "ui-render",
+          "name": "ui-drawn",
           "detail": "{ headings: { level: number, text: string, id: string }[] }",
           "description": "Rendered;  `headings` (also the `headings` property) lists its headings, e.g. for a table of contents."
         }
@@ -12955,7 +12965,7 @@
       ],
       "events": [
         {
-          "name": "ui-select",
+          "name": "ui-choosing",
           "detail": "{ value: string, item: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice."
@@ -13144,7 +13154,7 @@
         {
           "name": "dismissible",
           "kind": "boolean",
-          "description": "Shows a close button;  clicking it dispatches `ui-dismiss`, then hides the message."
+          "description": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message."
         },
         {
           "name": "disabled",
@@ -13220,7 +13230,7 @@
       ],
       "events": [
         {
-          "name": "ui-dismiss",
+          "name": "ui-closing",
           "detail": "{ originalEvent?: Event }",
           "cancelable": true,
           "description": "The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself)."
@@ -13621,35 +13631,35 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ visible: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to show (a person's action, not a `visible` write);  `preventDefault()` keeps it hidden."
         },
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ visible: true }",
           "description": "Shown, its entry transition finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ visible: false, reason: ModalCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to hide:  Escape, the dimmer, the close icon, approve or deny.  `preventDefault()` keeps it shown."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ visible: false }",
           "description": "Hidden, its exit transition finished (Fomantic's `onHidden`)."
         },
         {
-          "name": "ui-approve",
+          "name": "ui-approving",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "An approve button (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the modal shown (Fomantic's `onApprove` returning `false`)."
         },
         {
-          "name": "ui-deny",
+          "name": "ui-denying",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A deny button (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the modal shown."
@@ -13952,18 +13962,18 @@
       ],
       "events": [
         {
-          "name": "ui-show",
+          "name": "ui-opening",
           "detail": "{}",
           "description": "Shown, its entry animation finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ reason: NagCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to close:  the close icon (`close`), the display time (`timeout`) or `host.close()` (`dismiss`).  `preventDefault()` keeps it and stores nothing (Fomantic's `onHide` returning `false`)."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ reason: NagCloseReason }",
           "description": "Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now."
         }
@@ -15642,13 +15652,13 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ visible: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to show for a person's action (the trigger, an invoker command);  `preventDefault()` keeps it hidden."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ visible: false, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to hide;  `preventDefault()` keeps it shown.  NOT cancelable in effect when the browser already dismissed a `hint` popover (Escape, a click elsewhere)."
@@ -15947,12 +15957,12 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ percent: number, percents: number[], value?: number, total?: number }",
           "description": "The percentage changed (after the first render)."
         },
         {
-          "name": "ui-complete",
+          "name": "ui-completed",
           "detail": "{ value?: number, total?: number }",
           "description": "The percentage reached 100."
         }
@@ -16255,7 +16265,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ name: string, value: unknown }",
           "description": "Its property was written (on Save, with `apply=\"on save\"`)."
         }
@@ -16814,7 +16824,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ name: string, value: unknown, things: object[] }",
           "description": "A property was written to the thing (or things)."
         },
@@ -16839,24 +16849,24 @@
           "description": "A field failed validation;  `errors` are its prompts."
         },
         {
-          "name": "ui-success",
+          "name": "ui-saving",
           "detail": "{ values: Record<string, FieldValue>, originalEvent?: Event }",
           "cancelable": true,
           "description": "A submit passed validation;  `preventDefault()` stops the native submission (e.g. to send it by fetch)."
         },
         {
-          "name": "ui-failure",
+          "name": "ui-save-failed",
           "detail": "{ values: Record<string, FieldValue>, errors: Record<string, string[]>, originalEvent?: Event }",
           "description": "A submit failed validation (the native submission is stopped);  `errors` by field."
         },
         {
-          "name": "ui-saving",
+          "name": "ui-applying",
           "detail": "{ changes: FormChange[], value: unknown }",
           "cancelable": true,
           "description": "`save()`, with `apply=\"on save\"`:  the held edits are about to land;  `preventDefault()` keeps them held."
         },
         {
-          "name": "ui-saved",
+          "name": "ui-applied",
           "detail": "{ changes: FormChange[], value: unknown }",
           "description": "The held edits landed in the bound `value`."
         },
@@ -17486,7 +17496,7 @@
           "description": "A property in the group failed validation (the editor sends it on the group too)."
         },
         {
-          "name": "ui-success",
+          "name": "ui-saved",
           "detail": "{ values: Record<string, FieldValue>, originalEvent?: Event }",
           "description": "The editor's submit or Save passed validation (sent on each group too)."
         },
@@ -17516,11 +17526,6 @@
           "name": "ui-loading",
           "detail": "{ source: string }",
           "description": "The `source` file is on its way:  the section unfolded for the first time, or `reloadBody()`."
-        },
-        {
-          "name": "ui-loaded",
-          "detail": "{ source: string, content: string }",
-          "description": "The `source` file arrived and its body is in place (`content` is the file's text)."
         },
         {
           "name": "ui-error",
@@ -18074,7 +18079,7 @@
         {
           "name": "selected",
           "kind": "boolean",
-          "description": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-change` first.  Alias:  `checked`."
+          "description": "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`."
         },
         {
           "name": "value",
@@ -18160,7 +18165,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ selected: boolean, value: string, originalEvent?: Event }",
           "description": "Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen."
         }
@@ -18579,7 +18584,7 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: number, originalEvent?: Event }",
           "description": "The person rated (`0` when cleared).  A handler that re-sets `value` wins."
         }
@@ -19137,7 +19142,7 @@
         {
           "name": "pure",
           "kind": "boolean",
-          "description": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-change={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it."
+          "description": "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a framework gives them before they load (`on-ui-changed={f}`, `options={[...]}`) either way:  the root defines them up front.  Without `pure`, another library's custom elements keep them too;  with it, they get text, as the browser makes it.  Read once, as the page first needs it."
         },
         {
           "name": "disabled",
@@ -19672,7 +19677,7 @@
         {
           "name": "open",
           "kind": "boolean",
-          "description": "The results are showing.  Controlled:  `ui-open` / `ui-close` can veto;  shown only with something to show."
+          "description": "The results are showing.  Controlled:  `ui-opening` / `ui-closing` can veto;  shown only with something to show."
         },
         {
           "name": "placeholder",
@@ -19821,34 +19826,34 @@
       ],
       "events": [
         {
-          "name": "ui-search",
+          "name": "ui-searched",
           "detail": "{ query: string, originalEvent?: Event }",
           "description": "Someone typed a query at least `min-characters` long;  it's about to run."
         },
         {
-          "name": "ui-select",
+          "name": "ui-choosing",
           "detail": "{ result: SearchResult, originalEvent?: Event }",
           "cancelable": true,
           "description": "A result is about to be chosen;  `preventDefault()` keeps the text, the results and the page."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "The text was committed:  a result chosen, the input cleared with Escape, or left after an edit."
         },
         {
-          "name": "ui-results",
+          "name": "ui-replied",
           "detail": "{ query: string, results: SearchResult[] }",
           "description": "A remote query answered."
         },
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ open: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "The results are about to show;  `preventDefault()` keeps them hidden."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ open: false, originalEvent?: Event }",
           "cancelable": true,
           "description": "The results are about to hide;  `preventDefault()` keeps them showing."
@@ -21352,7 +21357,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: string | string[], originalEvent?: Event }",
           "description": "Someone chose a value (or changed the chosen set, with `multiple`)."
         }
@@ -21562,7 +21567,7 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-animated",
           "detail": "{ activeIndex: number, side: Element, flip: ShapeFlip }",
           "description": "Another side is shown, its flip finished (Fomantic's `onChange`)."
         }
@@ -21947,24 +21952,24 @@
       ],
       "events": [
         {
-          "name": "ui-open",
+          "name": "ui-opening",
           "detail": "{ visible: true, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to show for a person's action (an invoker command);  `preventDefault()` keeps it hidden."
         },
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ visible: true }",
           "description": "Shown, its transition finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ visible: false, reason: SidebarCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to hide:  Escape, a click beside it, a command.  `preventDefault()` keeps it shown."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ visible: false }",
           "description": "Hidden, its transition finished (Fomantic's `onHidden`)."
         }
@@ -22262,12 +22267,12 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-input",
+          "name": "ui-moved",
           "detail": "{ value: number, end?: number, originalEvent?: Event }",
           "description": "A thumb moved (each drag step or key).  A handler that re-sets `value` / `end` wins."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: number, end?: number, originalEvent?: Event }",
           "description": "A change was committed:  on a key, or when a drag ends somewhere new."
         }
@@ -23433,12 +23438,12 @@
       ],
       "events": [
         {
-          "name": "ui-stick",
+          "name": "ui-stuck",
           "detail": "{ edge: StickyEdge }",
           "description": "Stuck to an edge (`top`, or `bottom` with `pushing`), Fomantic's `onStick`."
         },
         {
-          "name": "ui-unstick",
+          "name": "ui-unstuck",
           "detail": "{ edge: StickyEdge }",
           "description": "Left the edge it was stuck to:  scrolled back, or pushed out by the end of its container (`:state(bound)`)."
         }
@@ -23692,7 +23697,7 @@
         {
           "name": "lazy",
           "kind": "boolean",
-          "description": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-show` with `first: true` to fill it yourself)."
+          "description": "Stamp its `<template>` children into it the first time it's shown (and listen for `ui-opened` with `first: true` to fill it yourself)."
         },
         {
           "name": "attached",
@@ -23771,7 +23776,7 @@
       ],
       "events": [
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ value: string, first: boolean }",
           "description": "Became the shown pane;  `first` the first time (fill a lazy pane now)."
         }
@@ -23939,7 +23944,7 @@
         {
           "name": "sortable",
           "kind": "keyOnly",
-          "description": "Header cells sort the table:  click / Enter / Space dispatches `ui-sort`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable=\"false\"` (or Fomantic's `class=\"disabled\"`)."
+          "description": "Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets `aria-sort`.  Opt a header out with `data-sortable=\"false\"` (or Fomantic's `class=\"disabled\"`)."
         },
         {
           "name": "striped",
@@ -24104,7 +24109,7 @@
         {
           "name": "client-sort",
           "kind": "boolean",
-          "description": "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sort` (numeric-aware).  Off, the app sorts its own rows."
+          "description": "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  Off, the app sorts its own rows."
         },
         {
           "name": "column-defs",
@@ -24188,7 +24193,7 @@
       ],
       "events": [
         {
-          "name": "ui-sort",
+          "name": "ui-sorting",
           "detail": "{ column: number, key?: string, direction: \"ascending\" | \"descending\", originalEvent?: Event }",
           "cancelable": true,
           "description": "A header was activated;  `preventDefault()` keeps the current sort (and skips data / `client-sort` reordering)."
@@ -24405,7 +24410,7 @@
         {
           "name": "value",
           "kind": "string",
-          "description": "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-change` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one."
+          "description": "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  `ui-changing` can veto a person's changes.  Without it, the first `selected` pane, else the first enabled one."
         },
         {
           "name": "activation",
@@ -24492,10 +24497,15 @@
       ],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changing",
           "detail": "{ value: string, tab: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A pane is about to be selected (click, key, or the URL hash with `history`);  `preventDefault()` keeps the current one."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: string, tab: Element, originalEvent?: Event }",
+          "description": "A pane was selected:  after `ui-changing`, unless it was cancelled."
         }
       ],
       "parts": [
@@ -24936,12 +24946,12 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-input",
+          "name": "ui-typed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "The value changed as someone typed (every keystroke)."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: string, originalEvent?: Event }",
           "description": "Someone committed a change (blur)."
         }
@@ -25104,17 +25114,17 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ value: ThemeChoices, css: string }",
           "description": "A choice changed:  `value` is every choice now, `css` the theme as a stylesheet."
         },
         {
-          "name": "ui-copy",
+          "name": "ui-copied",
           "detail": "{ css: string }",
           "description": "Copy CSS put the stylesheet on the clipboard."
         },
         {
-          "name": "ui-save",
+          "name": "ui-saved",
           "detail": "{ value?: ThemeChoices, css: string }",
           "description": "Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it."
         }
@@ -25999,29 +26009,29 @@
       ],
       "events": [
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ displayTime: number }",
           "description": "Shown, its entry animation finished (Fomantic's `onVisible`);  the countdown has started."
         },
         {
-          "name": "ui-close",
+          "name": "ui-closing",
           "detail": "{ reason: ToastCloseReason, originalEvent?: Event }",
           "cancelable": true,
           "description": "About to close:  the countdown ran out, the close icon, a click, Escape inside it, an action, a `--close` invoker command.  `preventDefault()` keeps it (Fomantic's `onHide` returning `false`)."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ reason: ToastCloseReason }",
           "description": "Closed, its exit animation finished (Fomantic's `onHidden`);  the host is `hidden` now.  `UI.toast()` removes its toasts here."
         },
         {
-          "name": "ui-approve",
+          "name": "ui-approving",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "An approve action (`.approve` / `.ok` / `.positive`, `<ui-button positive>`) was activated;  `preventDefault()` keeps the toast open."
         },
         {
-          "name": "ui-deny",
+          "name": "ui-denying",
           "detail": "{ action: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "A deny action (`.deny` / `.cancel` / `.negative`, `<ui-button negative>`) was activated;  `preventDefault()` keeps the toast open."
@@ -26467,7 +26477,7 @@
       ],
       "events": [
         {
-          "name": "ui-select",
+          "name": "ui-choosing",
           "detail": "{ value: string, item: Element, originalEvent?: Event }",
           "cancelable": true,
           "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice."
@@ -26719,17 +26729,17 @@
       ],
       "events": [
         {
-          "name": "ui-show",
+          "name": "ui-opened",
           "detail": "{ visible: true, animation: string }",
           "description": "Shown, its animation finished (Fomantic's `onVisible`)."
         },
         {
-          "name": "ui-hide",
+          "name": "ui-closed",
           "detail": "{ visible: false, animation: string }",
           "description": "Hidden, its animation finished (Fomantic's `onHidden`)."
         },
         {
-          "name": "ui-complete",
+          "name": "ui-animated",
           "detail": "{ visible: boolean, animation: string }",
           "description": "Any animation finished, attention ones included (Fomantic's `onComplete`)."
         }
@@ -27153,7 +27163,7 @@
           "values": [
             "image"
           ],
-          "description": "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-load`)."
+          "description": "`image`:  every `<img data-src>` inside gets its source once on screen, then fades in (`ui-loaded`)."
         },
         {
           "name": "duration",
@@ -27231,22 +27241,22 @@
       ],
       "events": [
         {
-          "name": "ui-visible",
+          "name": "ui-in-view",
           "detail": "VisibilityCalculations",
           "description": "Some of it came on screen (`onOnScreen`)."
         },
         {
-          "name": "ui-hidden",
+          "name": "ui-out-of-view",
           "detail": "VisibilityCalculations",
           "description": "None of it is on screen (`onOffScreen`)."
         },
         {
-          "name": "ui-top-visible",
+          "name": "ui-top-in-view",
           "detail": "VisibilityCalculations",
           "description": "Its top came on screen."
         },
         {
-          "name": "ui-bottom-visible",
+          "name": "ui-bottom-in-view",
           "detail": "VisibilityCalculations",
           "description": "Its bottom came on screen."
         },
@@ -27266,7 +27276,7 @@
           "description": "It spans the screen top."
         },
         {
-          "name": "ui-load",
+          "name": "ui-loaded",
           "detail": "{ image: HTMLImageElement }",
           "description": "`type=\"image\"`:  an image got its source (and finished its transition)."
         }
@@ -27429,7 +27439,7 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-render",
+          "name": "ui-drawn",
           "detail": "{ tags: string[] }",
           "description": "The tables are drawn (the data arrived, or `tag` / `family` changed);  `tags` are the tags shown."
         }
@@ -27769,7 +27779,7 @@
         {
           "name": "code",
           "kind": "boolean",
-          "description": "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-toggle`).  Set it in markup to open the code at start."
+          "description": "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-opened` / `ui-closed`).  Set it in markup to open the code at start."
         },
         {
           "name": "language",
@@ -27861,9 +27871,14 @@
       ],
       "events": [
         {
-          "name": "ui-toggle",
-          "detail": "{ open: boolean, originalEvent?: Event }",
-          "description": "The code button opened or closed the code pane."
+          "name": "ui-opened",
+          "detail": "{ open: true, originalEvent?: Event }",
+          "description": "The code button opened the code pane."
+        },
+        {
+          "name": "ui-closed",
+          "detail": "{ open: false, originalEvent?: Event }",
+          "description": "The code button closed the code pane."
         }
       ],
       "parts": [
@@ -28202,7 +28217,7 @@
             "az",
             "topics"
           ],
-          "description": "Components A-Z, or grouped by `topics` (a tag sits under each of its topics).  The switch sets it (reflected, `ui-change`) and the viewer's choice is remembered;  set in markup, it wins.  Default:  the remembered one, else `topics`."
+          "description": "Components A-Z, or grouped by `topics` (a tag sits under each of its topics).  The switch sets it (reflected, `ui-changed`) and the viewer's choice is remembered;  set in markup, it wins.  Default:  the remembered one, else `topics`."
         },
         {
           "name": "size",
@@ -28294,18 +28309,18 @@
       ],
       "events": [
         {
-          "name": "ui-navigate",
+          "name": "ui-navigating",
           "detail": "{ href: string, page: string, originalEvent: Event }",
           "cancelable": true,
           "description": "A link was followed:  `page` is its tag or page id.  A flyout or sidebar holding the nav closes on it;  `preventDefault()` keeps the browser on the page (a router takes over)."
         },
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ view: 'az' | 'topics', originalEvent?: Event }",
           "description": "The viewer switched between A-Z and Topics."
         },
         {
-          "name": "ui-favorite",
+          "name": "ui-starred",
           "detail": "{ tag: string, favorite: boolean, favorites: string[], originalEvent?: Event }",
           "description": "The viewer starred or un-starred a component;  `favorites` is the whole list, A-Z."
         }
@@ -28650,12 +28665,12 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-input",
+          "name": "ui-typed",
           "detail": "{ value: string, originalEvent: Event }",
           "description": "The text changed (every keystroke, and clearing):  what a list beside the field filters by."
         },
         {
-          "name": "ui-navigate",
+          "name": "ui-navigating",
           "detail": "{ href: string, kind: string, originalEvent: Event }",
           "cancelable": true,
           "description": "A result was picked (Enter or a plain click):  `href` is absolute, `kind` its group (`here`, `component`, `page`, `section`, `attribute`).  `preventDefault()` keeps the browser on the page (a router takes over);  else a result on the page shown sets the hash, any other loads its page."
@@ -28968,7 +28983,7 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-changed",
           "detail": "{ theme?: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
           "description": "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name, absent for our own look;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the look is stored and while its sheets load."
         }
@@ -29292,12 +29307,12 @@
       "slots": [],
       "events": [
         {
-          "name": "ui-change",
+          "name": "ui-scrolled-to",
           "detail": "{ value: string }",
           "description": "The entry in view changed (scroll, a link, the tabs);  `value` is its target's id."
         },
         {
-          "name": "ui-render",
+          "name": "ui-drawn",
           "detail": "{ ids: string[] }",
           "description": "The list was built (again):  the ids of every entry, in page order."
         }
@@ -29524,7 +29539,7 @@
       ],
       "events": [
         {
-          "name": "ui-input",
+          "name": "ui-changed",
           "detail": "{ token: string, value: string, originalEvent?: Event }",
           "description": "A playground input set a token;  `value` `\"\"`:  removed (back to its default)."
         },
@@ -32979,12 +32994,13 @@
         },
         {
           "name": "--ui-input-placeholder-color",
-          "default": "var(--ui-text-light)",
+          "default": "color-mix(in oklab, var(--ui-text-light) 55%, transparent)",
+          "description": "a placeholder well lighter than typed text, so it never reads as typed (Owen)",
           "type": "color"
         },
         {
           "name": "--ui-input-placeholder-focus-color",
-          "default": "var(--ui-text-muted)",
+          "default": "color-mix(in oklab, var(--ui-text-light) 70%, transparent)",
           "type": "color"
         },
         {
@@ -36658,7 +36674,8 @@
         },
         {
           "name": "--ui-select-placeholder-color",
-          "default": "var(--ui-text-light)",
+          "default": "color-mix(in oklab, var(--ui-text-light) 55%, transparent)",
+          "description": "as an input's: well lighter than a chosen value",
           "type": "color"
         },
         {

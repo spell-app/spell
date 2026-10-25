@@ -306,7 +306,7 @@ export class ElementManifests {
   /**
    * The DOM's own maps (`jsxTypes()`), so plain DOM code knows the tags and their events:
    * - `HTMLElementTagNameMap`:  each tag's element (`jsxElementType()`)
-   *   - so `querySelector("ui-button")` gives one whose `addEventListener("ui-toggle", ...)` types `event.detail`
+   *   - so `querySelector("ui-button")` gives one whose `addEventListener("ui-selected", ...)` types `event.detail`
    * - `UIEventMap`, every event name a tag sends, as a `CustomEvent<unknown>`,
    *   added to `HTMLElementEventMap` and `DocumentEventMap`:  any element or the document completes the names
    *   - `unknown`:  the same name is any tag's, other sets' too (`<brand-*>`, `<epic-*>`), each with its own `detail`
@@ -363,7 +363,7 @@ export class ElementManifests {
    * - The properties no vocabulary names (`JSX_SCRIPT_PROPERTIES`):  their plain name.
    * - Each of those also as `prop:<property>`, the same type, `@deprecated` (`deprecatedProp()`):
    *   compiled spell still writes `prop:` on `<ui-*>` tags, and is checked against these types.
-   * - An event:  `on-<event>` (`on-ui-change`), its listener, typed by `<name>EventMap`.
+   * - An event:  `on-<event>` (`on-ui-changed`), its listener, typed by `<name>EventMap`.
    * - The first of two same names wins.
    */
   private static jsxAttributeMembers(tag: SiteTag, name: string): string[] {
@@ -720,10 +720,10 @@ const JSX_HEADER = [
   " * - Rich data (an object, array or function), as a plain prop:  `options={[...]}`.",
   " *   - It reaches the element whole, as its property.",
   " *   - `prop:options`, and `prop:` for every attribute, are `@deprecated`:  only compiled spell writes them.",
-  " * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-change={(event) => ...}`.",
+  " * - Events:  `on-<event>` per event a tag sends, its `event.detail` typed:  `on-ui-changed={(event) => ...}`.",
   " *   - Solid hands the function to the element, which listens for the event.",
   ' *   - In plain DOM code too:  `querySelector("ui-button")` gives a `<ui-button>` (`HTMLElementTagNameMap`),',
-  ' *     whose `addEventListener("ui-toggle", ...)` types `event.detail`.',
+  ' *     whose `addEventListener("ui-selected", ...)` types `event.detail`.',
   " *     So does a JSX `ref`'s element.",
   " *   - On any other element or the document, every `ui-*` name completes (`UIEventMap`):",
   " *     its `detail` is `unknown`.",

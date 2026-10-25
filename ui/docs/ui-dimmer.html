@@ -382,7 +382,7 @@
                 <script type="text/markdown">
                   `visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows or
                   hides the dimmer and fires nothing (Fomantic's `.dimmer('show')` / `'hide'`). A dimmer starts hidden. The
-                  events' `detail` is `{ visible, originalEvent? }`, plus `reason` on `ui-close`.
+                  events' `detail` is `{ visible, originalEvent? }`, plus `reason` on `ui-closing`.
 
                   `closedby` says what hides it, as on `<dialog closedby>`:
 
@@ -407,18 +407,18 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  User actions (the `show-on` trigger, a click, Escape, an invoker command) dispatch the cancelable `ui-open` /
-                  `ui-close` first (`detail.reason` is `click`, `escape`, `hover` or `close-all`), then `ui-show` / `ui-hide`
+                  User actions (the `show-on` trigger, a click, Escape, an invoker command) dispatch the cancelable `ui-opening` /
+                  `ui-closing` first (`detail.reason` is `click`, `escape`, `hover` or `close-all`), then `ui-opened` / `ui-closed`
                   after the fade -- Fomantic's `onShow` / `onVisible`, `onHide` / `onHidden`.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const dimmer = document.querySelector("ui-dimmer")
-                  dimmer.addEventListener("ui-close", (event) => {
+                  dimmer.addEventListener("ui-closing", (event) => {
                     if (event.detail.reason === "click" && unsaved) event.preventDefault() // stays shown
                   })
-                  dimmer.addEventListener("ui-hide", () => console.log("hidden"))
+                  dimmer.addEventListener("ui-closed", () => console.log("hidden"))
                 </script>
               </ui-code>
             </ui-section>
@@ -446,7 +446,7 @@
                   - Escape closes a page dimmer unless `closedby="none"`; with `none`, hide it from code.
                   - If the element fails to render, it dims nothing: it shows its children through a bare `<slot>`,
                     where they're written, and drops `visible`, covering and blocking the page, Escape, the `show-on`
-                    triggers, the `ui-open` / `ui-close` vetoes and the fade.
+                    triggers, the `ui-opening` / `ui-closing` vetoes and the fade.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -454,7 +454,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `visible` to your state and listen for `ui-close` to follow the user.
+                  Bind `visible` to your state and listen for `ui-closing` to follow the user.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -467,7 +467,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-dimmer page :visible="busy" aria-label="Saving" @ui-close="busy = false">...</ui-dimmer>
+                  <ui-dimmer page :visible="busy" aria-label="Saving" @ui-closing="busy = false">...</ui-dimmer>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -478,7 +478,7 @@
                     page
                     visible={busy()}
                     aria-label="Saving"
-                    on-ui-close={() => setBusy(false)}
+                    on-ui-closing={() => setBusy(false)}
                   >
                     ...
                   </ui-dimmer>

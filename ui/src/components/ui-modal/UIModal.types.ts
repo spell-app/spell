@@ -30,4 +30,4 @@ export type DialogAttributes = {
 }
 
 /** The events every dialog vocabulary names. */
-export type DialogEventName = "ui-open" | "ui-show" | "ui-close" | "ui-hide" | "ui-approve" | "ui-deny"
+export type DialogEventName = "ui-opening" | "ui-opened" | "ui-closing" | "ui-closed" | "ui-approving" | "ui-denying"

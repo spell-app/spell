@@ -55,10 +55,10 @@ describe("SearchFallback", () => {
     expect([...list().options].map((option) => option.value)).toEqual(["Apple", "Banana"])
   })
 
-  it("puts its text in the form, host.value and ui-change", () => {
+  it("puts its text in the form, host.value and ui-changed", () => {
     const { form, host, input } = search(`<x-fb-search name="q" value="start" aria-label="Q"></x-fb-search>`)
     const changes: SearchChangeDetail[] = []
-    host.addEventListener("ui-change", (event) => changes.push((event as CustomEvent<SearchChangeDetail>).detail))
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<SearchChangeDetail>).detail))
     expect(input().value).toBe("start")
     expect(new FormData(form).get("q")).toBe("start")
     type(input(), "banana")

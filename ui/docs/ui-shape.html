@@ -427,7 +427,7 @@
                   - `flip(direction?, index?)` -- turn `direction` (default: the attribute's) to side `index` (default: the next).
                   - `next()` / `previous()` -- the next / previous side, wrapping round.
 
-                  Each writes `activeIndex`, so it reflects. Flips queue, as Fomantic's did. `ui-change` fires once another side
+                  Each writes `activeIndex`, so it reflects. Flips queue, as Fomantic's did. `ui-animated` fires once another side
                   is shown (Fomantic's `onChange`), with `{ activeIndex, side, flip }`.
                 </script>
               </ui-markdown>
@@ -436,13 +436,13 @@
                   const dice = document.querySelector("#dice")
                   await dice.next() // the next side, the `direction` way
                   await dice.flip("back", 0) // back to the first side
-                  dice.addEventListener("ui-change", (event) => console.log(event.detail.activeIndex))
+                  dice.addEventListener("ui-animated", (event) => console.log(event.detail.activeIndex))
                 </script>
               </ui-code>
               <ui-markdown>
                 <script type="text/markdown">
                   The turn is Fomantic's own geometry, as a CSS transition; under reduced motion the sides swap at once, and
-                  `ui-change` fires all the same.
+                  `ui-animated` fires all the same.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -455,7 +455,7 @@
                   - A shape has no keyboard of its own: turn it from real buttons (`commandfor`), so everyone can. Name icon-only
                     buttons with `aria-label`.
                   - If the element fails to render, it shows its sides through a bare `<slot>`, with no flips, invoker
-                    commands or `ui-change`.
+                    commands or `ui-animated`.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -463,7 +463,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `active-index` and listen for `ui-change`, or call the methods through a ref.
+                  Bind `active-index` and listen for `ui-animated`, or call the methods through a ref.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -478,7 +478,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-shape cube :active-index="side" @ui-change="(event) => (side = event.detail.activeIndex)">...</ui-shape>
+                  <ui-shape cube :active-index="side" @ui-animated="(event) => (side = event.detail.activeIndex)">...</ui-shape>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -488,7 +488,7 @@
                   <ui-shape
                     cube
                     active-index={side()}
-                    on-ui-change={(event) => setSide(event.detail.activeIndex)}
+                    on-ui-animated={(event) => setSide(event.detail.activeIndex)}
                   >
                     ...
                   </ui-shape>

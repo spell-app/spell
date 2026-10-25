@@ -241,10 +241,10 @@ describe("<ui-progress> accessibility", () => {
 ////////////////
 
 describe("<ui-progress> events and states", () => {
-  it("fires ui-change on changes (not the first render), ui-complete once at 100", async () => {
+  it("fires ui-changed on changes (not the first render), ui-completed once at 100", async () => {
     const { host } = await progress(`<ui-progress value="20" total="40" aria-label="P"></ui-progress>`)
-    const changes = events(host, "ui-change")
-    const completes = events(host, "ui-complete")
+    const changes = events(host, "ui-changed")
+    const completes = events(host, "ui-completed")
     await ElementFixture.tick()
     expect(changes).toEqual([])
     host.value = "30"

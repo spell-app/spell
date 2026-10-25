@@ -17,7 +17,7 @@ import nagCSS from "./UINag.css?inline"
  ****************/
 export class DOMNagElement extends E.DOMElement<UINag> {
   /**
-   * Dismiss it now, reason `dismiss` (the cancelable `ui-close` first), storing the dismissal;  true when it closes.
+   * Dismiss it now, reason `dismiss` (the cancelable `ui-closing` first), storing the dismissal;  true when it closes.
    */
   close(): boolean {
     return this.component?.close() ?? false
@@ -51,8 +51,8 @@ export class DOMNagElement extends E.DOMElement<UINag> {
  *     before anything paints), unless it `persist`s.
  *   - Storage that is blocked or missing just doesn't remember:  the nag still shows and closes.
  *
- * - Closing:  the cancelable `ui-close` (with a `reason`) first,
- *   then the exit animation (Fomantic's `slide`), `hidden` on the DOM element, and `ui-hide`.
+ * - Closing:  the cancelable `ui-closing` (with a `reason`) first,
+ *   then the exit animation (Fomantic's `slide`), `hidden` on the DOM element, and `ui-closed`.
  *   - It never removes itself.
  *   - `display-time` hides it without storing anything.
  *
@@ -134,7 +134,7 @@ export class UINag extends E.UIComponent<Vocabulary> {
   /** Pending `display-time`. */
   private displayTimer?: E.CancelablePromise<unknown>
 
-  /** Appeared (entry animation, `ui-show`, timer) since it last showed. */
+  /** Appeared (entry animation, `ui-opening`, timer) since it last showed. */
   private hasShown = false
 
   /**
@@ -148,7 +148,7 @@ export class UINag extends E.UIComponent<Vocabulary> {
     return () => this.displayTimer?.cancel()
   }
 
-  /** Entry animation, `ui-show` and the display time -- once per showing. */
+  /** Entry animation, `ui-opening` and the display time -- once per showing. */
   @E.untracked
   private appear() {
     if (this.hasShown || this.domElement.hidden) return
@@ -160,7 +160,7 @@ export class UINag extends E.UIComponent<Vocabulary> {
       ? UI.transitions.animate({ element: root, name: SLIDE, direction: UIT.IN })
       : Promise.resolve(true)
     void entered.then(() => {
-      if (!this.isClosing) this.send("ui-show", {})
+      if (!this.isClosing) this.send("ui-opening", {})
     })
   }
 
@@ -181,13 +181,13 @@ export class UINag extends E.UIComponent<Vocabulary> {
   private isClosing = false
 
   /**
-   * Close for `reason`:  the cancelable `ui-close`, the dismissal stored (not for `timeout`),
-   * then the exit animation, `hidden` on the DOM element and `ui-hide`.  True when it closes.
+   * Close for `reason`:  the cancelable `ui-closing`, the dismissal stored (not for `timeout`),
+   * then the exit animation, `hidden` on the DOM element and `ui-closed`.  True when it closes.
    */
   close(reason: UIT.NagCloseReason = "dismiss", originalEvent?: Event): boolean {
     if (this.isClosing || this.domElement.hidden) return false
     const detail: UIT.NagCloseDetail = { reason, originalEvent }
-    if (!this.send("ui-close", detail)) return false
+    if (!this.send("ui-closing", detail)) return false
     this.isClosing = true
     this.displayTimer?.cancel()
     if (reason !== "timeout") {
@@ -203,7 +203,7 @@ export class UINag extends E.UIComponent<Vocabulary> {
       this.hasShown = false
       this.domElement.hidden = true
       const hidden: UIT.NagCloseDetail = { reason }
-      this.send("ui-hide", hidden)
+      this.send("ui-closed", hidden)
     })
     return true
   }

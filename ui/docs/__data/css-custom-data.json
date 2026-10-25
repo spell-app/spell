@@ -3526,14 +3526,14 @@
       "name": "--ui-input-placeholder-color",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-input>`'s token.  Default:  `var(--ui-text-light)`"
+        "value": "a placeholder well lighter than typed text, so it never reads as typed (Owen)\n\n`<ui-input>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-light) 55%, transparent)`"
       }
     },
     {
       "name": "--ui-input-placeholder-focus-color",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-input>`'s token.  Default:  `var(--ui-text-muted)`"
+        "value": "`<ui-input>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-light) 70%, transparent)`"
       }
     },
     {
@@ -7810,7 +7810,7 @@
       "name": "--ui-select-placeholder-color",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-select>`'s token.  Default:  `var(--ui-text-light)`"
+        "value": "as an input's: well lighter than a chosen value\n\n`<ui-select>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-light) 55%, transparent)`"
       }
     },
     {

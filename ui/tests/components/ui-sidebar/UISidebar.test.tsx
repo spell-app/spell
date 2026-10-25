@@ -45,10 +45,10 @@ async function pushable(sidebars: string) {
   return { wrapper, host, panel, pusher, pusherBox, toggle }
 }
 
-/** Show `host` from `from` (focus returns there), and wait for `ui-show`. */
+/** Show `host` from `from` (focus returns there), and wait for `ui-opened`. */
 async function show(host: Sidebar, from?: HTMLElement) {
   from?.focus()
-  const shown = next(host, "ui-show")
+  const shown = next(host, "ui-opened")
   host.visible = true
   await settle()
   await shown
@@ -208,9 +208,9 @@ describe("<ui-sidebar> modal (default)", () => {
 
   it("Escape hides it (reason `escape`):  the pusher comes back and focus returns to the toggle", async () => {
     const { host, pusher, pusherBox, toggle } = await pushable(`<ui-sidebar>${LINKS}</ui-sidebar>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await show(host, toggle)
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     await userEvent.keyboard("{Escape}")
     await settle()
     await hidden
@@ -226,14 +226,14 @@ describe("<ui-sidebar> modal (default)", () => {
     const { host, toggle } = await pushable(`<ui-sidebar id="side">${LINKS}</ui-sidebar>`)
     toggle.setAttribute("commandfor", "side")
     toggle.setAttribute("command", "--toggle")
-    const closes = record(host, "ui-close")
-    const shown = next(host, "ui-show")
+    const closes = record(host, "ui-closing")
+    const shown = next(host, "ui-opened")
     // Safari doesn't focus a button on a real click, so the open would have no focus to return to:
     // focus it, then click without moving focus
     toggle.focus()
     toggle.click()
     await shown
-    const hidden = next(host, "ui-hide")
+    const hidden = next(host, "ui-closed")
     await userEvent.keyboard("{Escape}")
     await settle()
     await hidden
@@ -244,7 +244,7 @@ describe("<ui-sidebar> modal (default)", () => {
 
   it("a click on the dimmed pusher hides it (reason `outside`);  closedby=closerequest ignores it", async () => {
     const { host, toggle, wrapper } = await pushable(`<ui-sidebar>${LINKS}</ui-sidebar>`)
-    const closes = record(host, "ui-close")
+    const closes = record(host, "ui-closing")
     await show(host, toggle)
     // the pusher is `inert`:  a click on it lands on the pushable
     const beside = { position: { x: 380, y: 20 } }
@@ -273,12 +273,12 @@ describe("<ui-sidebar> modal (default)", () => {
     expect(document.activeElement).toBe(two)
   })
 
-  it("invoker commands:  --toggle (a cancelable ui-open), --close", async () => {
+  it("invoker commands:  --toggle (a cancelable ui-opening), --close", async () => {
     const { host, wrapper } = await pushable(`<ui-sidebar id="s">${LINKS}</ui-sidebar>`)
     wrapper.insertAdjacentHTML("afterbegin", `<button id="t" commandfor="s" command="--toggle">T</button>`)
-    const opens = record(host, "ui-open")
+    const opens = record(host, "ui-opening")
     let veto = true
-    host.addEventListener("ui-open", (event) => veto && event.preventDefault())
+    host.addEventListener("ui-opening", (event) => veto && event.preventDefault())
     await userEvent.click(wrapper.querySelector("#t")!)
     await settle()
     expect(opens).toHaveLength(1)
@@ -294,7 +294,7 @@ describe("<ui-sidebar> modal (default)", () => {
     toggle.setAttribute("commandfor", "s")
     toggle.setAttribute("command", "--toggle")
     toggle.focus()
-    const shown = next(host, "ui-show")
+    const shown = next(host, "ui-opened")
     await userEvent.keyboard("{Enter}")
     await shown
     expect(document.activeElement).toBe(host.querySelector("a"))

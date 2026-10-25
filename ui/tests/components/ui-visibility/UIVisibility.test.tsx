@@ -40,10 +40,10 @@ async function below(attributes = "", content = "<p style='height: 100px; margin
 function record(host: EventTarget) {
   const names: string[] = []
   for (const name of [
-    "ui-visible",
-    "ui-hidden",
-    "ui-top-visible",
-    "ui-bottom-visible",
+    "ui-in-view",
+    "ui-out-of-view",
+    "ui-top-in-view",
+    "ui-bottom-in-view",
     "ui-top-passed",
     "ui-bottom-passed",
     "ui-passing"
@@ -103,11 +103,11 @@ describe("<ui-visibility> events", () => {
     const host = await below()
     const names = record(host)
     const details: VisibilityCalculations[] = []
-    host.addEventListener("ui-visible", (event) => details.push((event as CustomEvent).detail))
-    await expect.poll(() => names).toEqual(["ui-hidden"])
+    host.addEventListener("ui-in-view", (event) => details.push((event as CustomEvent).detail))
+    await expect.poll(() => names).toEqual(["ui-out-of-view"])
     expect(host.matches(":state(visible)")).toBe(false)
     await scrollHostTo(host, 200)
-    expect(names.slice(1)).toEqual(["ui-visible", "ui-top-visible", "ui-bottom-visible"])
+    expect(names.slice(1)).toEqual(["ui-in-view", "ui-top-in-view", "ui-bottom-in-view"])
     expect(details[0]!.onScreen).toBe(true)
     expect(host.matches(":state(visible)")).toBe(true)
     await scrollHostTo(host, -50)
@@ -128,8 +128,8 @@ describe("<ui-visibility> events", () => {
     await scrollHostTo(again, 200)
     await scrollHostTo(again, -500)
     await scrollHostTo(again, 200)
-    expect(first.filter((name) => name === "ui-visible")).toHaveLength(1)
-    expect(second.filter((name) => name === "ui-visible")).toHaveLength(2)
+    expect(first.filter((name) => name === "ui-in-view")).toHaveLength(1)
+    expect(second.filter((name) => name === "ui-in-view")).toHaveLength(2)
   })
 
   it("counts the screen top from `offset`", async () => {
@@ -151,7 +151,7 @@ describe("<ui-visibility> events", () => {
     parent.append(host)
     host.remove()
     await observersSettle()
-    expect(names).toEqual(["ui-hidden"])
+    expect(names).toEqual(["ui-out-of-view"])
   })
 })
 
@@ -183,13 +183,13 @@ describe("<ui-visibility type=image>", () => {
     expect(host.shadowRoot!.querySelector("[part~=visibility]")!.className).toBe("ui image visibility")
   })
 
-  it("loads each <img data-src> once on screen, then fires ui-load", async () => {
+  it("loads each <img data-src> once on screen, then fires ui-loaded", async () => {
     const host = await below(
       `type="image" animation="none"`,
       `<img alt="A" width="10" height="10" data-src="${PIXEL}"><img alt="B" width="10" height="10" data-src="${PIXEL}">`
     )
     const loaded: HTMLImageElement[] = []
-    host.addEventListener("ui-load", (event) => loaded.push((event as CustomEvent).detail.image))
+    host.addEventListener("ui-loaded", (event) => loaded.push((event as CustomEvent).detail.image))
     const images = [...host.querySelectorAll("img")]
     await observersSettle()
     expect(images.map((image) => image.hasAttribute("src"))).toEqual([false, false])

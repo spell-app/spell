@@ -618,14 +618,14 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `ui-change` (`{ value }`) fires when the user chooses, types or clears a value; `ui-open` / `ui-close` around
+                  `ui-changing` (`{ value }`) fires when the user chooses, types or clears a value; `ui-opening` / `ui-closing` around
                   the popup. All three are cancelable.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   const due = document.querySelector("ui-calendar[name=due]")
-                  due.addEventListener("ui-change", (event) => {
+                  due.addEventListener("ui-changing", (event) => {
                     if (event.detail.value < today) event.preventDefault() // keep the old value
                   })
                 </script>
@@ -684,7 +684,7 @@
             <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Bind `value` (an ISO string) and listen for `ui-change`; set `disabledDates` as a property.
+                  Bind `value` (an ISO string) and listen for `ui-changing`; set `disabledDates` as a property.
                 </script>
               </ui-markdown>
               <ui-header level="4" id="framework-react">React 19</ui-header>
@@ -697,7 +697,7 @@
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-calendar type="date" name="due" :value="due" :disabledDates="holidays" @ui-change="(e) => (due = e.detail.value)" />
+                  <ui-calendar type="date" name="due" :value="due" :disabledDates="holidays" @ui-changing="(e) => (due = e.detail.value)" />
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
@@ -709,7 +709,7 @@
                     name="due"
                     value={due()}
                     disabledDates={holidays}
-                    on-ui-change={(e) => setDue(e.detail.value)}
+                    on-ui-changing={(e) => setDue(e.detail.value)}
                   />
                 </script>
               </ui-code>
