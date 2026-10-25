@@ -18,13 +18,22 @@ import {
  *   - `FlipTile`:  an event, an action's details, a drawing's if-chain placing parts.
  *   - `Deck`:  a template with nothing inside, a list template, bodies on a tag's own line.
  *   - `Scores`:  a page template, an app, a test.
+ *   - `DoubleSidedView`:  o1's two sided view, renamed:  two sided view is spell's own template now (J35).
+ *   - `Solitaire`:  o1's app, page template and page, without what later phases build (its menus, P10;
+ *     the original target, P9;  bare component names and `<for each>` in a drawing, P7).
+ *   - `Carta.es`, `Ficha.es`:  Spanish, the card and a tile with an app.
  */
 describe("spellx:  a third style of spell", () => {
-  test.each(["Card", "FlipTile", "Deck", "Scores"])("%s.spellx compiles as its twin, %s.spell, does", (name) => {
-    const spellx = compiled(`${name}.spellx`)
-    expect(spellx.errors).toEqual([])
-    expect(spellx.code).toBe(compiled(`${name}.spell`).code)
-  })
+  test.each(["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"])(
+    "%s.spellx compiles as its twin, %s.spell, does",
+    (name) => {
+      const spellx = compiled(`${name}.spellx`)
+      const spell = compiled(`${name}.spell`)
+      expect(spellx.errors).toEqual([])
+      expect(spell.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+    }
+  )
 
   test("a description becomes the docstring, as the comments above its twin are", () => {
     const { code } = compiledText(
@@ -124,6 +133,24 @@ describe("spellx:  a third style of spell", () => {
     test("a tag never closed", () => {
       const { errors } = compiledText(['<spell-view "card">', '\t<action "go">', "\t\tprint 1", "</spell-view>"])
       expect(errors).toEqual(['2:1 <action> is never closed:  end it with "</>"'])
+    })
+
+    test("in Spanish:  in Spanish, on its own line", () => {
+      const path = "/prueba.es.spellx"
+      const unknown = compiledText(
+        ['<encanto-vista "carta">', '\t<propiedd "palo" uno-de="a, b" />', "</encanto-vista>"],
+        {
+          path
+        }
+      )
+      expect(unknown.errors).toEqual(['2:1 "<propiedd>" no es una palabra de spellx:  ¿querías decir "<propiedad>"?'])
+      const unclosed = compiledText(
+        ['<encanto-vista "carta">', '\t<acción "ir">', "\t\timprimir 1", "</encanto-vista>"],
+        {
+          path
+        }
+      )
+      expect(unclosed.errors).toEqual(['2:1 <acción> nunca se cierra:  termínalo con "</>"'])
     })
 
     test("a tag spellx can't read yet:  a menu (P10)", () => {

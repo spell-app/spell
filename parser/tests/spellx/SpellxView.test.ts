@@ -6,8 +6,9 @@ import { SP } from "spell-parser/spell"
 import { SX } from "spell-parser/spellx"
 
 /**
- * The spellx reader (epic `elemental-spell` P3):  o1's examples read to their outlines, and each kind of mistake
- * gives its diagnostic.
+ * The spellx view (epic `elemental-spell` P6, J30):  a `.spellx` file's chunk tree, built from the tokens spell's
+ * parser reads it as.  o1's examples read to the same outlines P3's hand-written reader gave;  each spellx mistake
+ * the tokenizer notes is a diagnostic.
  * - The fixtures are the epic page's examples (its o1), both languages:  `fixtures/`.
  */
 
@@ -20,20 +21,26 @@ const EXAMPLES = ["TwoSidedView.spellx", "Card.spellx", "Carta.es.spellx", "Soli
 
 /** Read a fixture by its name, its language from its name. */
 function readExample(name: string) {
-  return SX.SpellxReader.read(readFileSync(join(import.meta.dirname, "fixtures", name), "utf8"), { path: name })
+  return SX.SpellxView.read(readFileSync(join(import.meta.dirname, "fixtures", name), "utf8"), { path: name })
 }
 
 /** Read `text` as a spellx file, English unless `path` says otherwise. */
 function read(text: string, path = "Test.spellx") {
-  return SX.SpellxReader.read(text, { path })
+  return SX.SpellxView.read(text, { path })
 }
 
-/** The problems a file's diagnostics name, in order. */
-function problemsOf(file: SX.SpellxFile) {
-  return file.diagnostics.map((diagnostic) => diagnostic.problem)
+/** A file's diagnostics, each as `line:column-line:column  message`, as its outline prints them. */
+function messagesOf(file: SX.SpellxFile) {
+  return (
+    file
+      .toOutline()
+      .split("\n--\n")[1]
+      ?.split("\n")
+      .map((line) => line.replace(/^error /, "")) ?? []
+  )
 }
 
-describe("SpellxReader.read():  the examples", () => {
+describe("SpellxView.read():  the examples", () => {
   test.each(EXAMPLES)("%s reads with NO diagnostics, to its outline", (name) => {
     const file = readExample(name)
     expect(file.diagnostics).toEqual([])
@@ -118,7 +125,7 @@ describe("SpellxReader.read():  the examples", () => {
 // ## Heads, bodies and markup
 ////////////////
 
-describe("SpellxReader.read():  what a tag says", () => {
+describe("SpellxView.read():  what a tag says", () => {
   test("a name, quoted or `name=`, and attributes that repeat (Q6, Q39)", () => {
     const file = read(`<spell-view "card">
 	<property name="color" one-of="red, black" alias="is (color)" alias="is a (color) card" />
@@ -256,21 +263,14 @@ describe("SpellxReader.read():  what a tag says", () => {
 // ## Mistakes
 ////////////////
 
-describe("SpellxReader.read():  mistakes are diagnostics, and reading goes on", () => {
-  test("an unknown word names the closest, with a fix", () => {
+describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", () => {
+  test("an unknown word names the closest", () => {
     const file = read(`<spell-view "card">
 	<propety "suit" />
 	<alias "is red">if its color is red</>
 </spell-view>
 `)
-    expect(file.diagnostics).toMatchObject([
-      {
-        severity: "error",
-        problem: "unknown-word",
-        message: `"<propety>" isn't a spellx word:  did you mean "<property>"?`,
-        fix: { text: "property" }
-      }
-    ])
+    expect(messagesOf(file)).toEqual([`2:2-2:20  "<propety>" isn't a spellx word:  did you mean "<property>"?`])
     expect(file.templates[0]!.children.map((node) => node.kind)).toEqual(["declaration", "declaration"])
   })
 
@@ -280,24 +280,22 @@ describe("SpellxReader.read():  mistakes are diagnostics, and reading goes on", 
 	<event "flipped" side="direction" />
 </spell-view>
 `)
-    expect(file.diagnostics).toMatchObject([
-      { problem: "unknown-attribute", message: `<property> has no "one-off":  did you mean "one-of"?` }
-    ])
+    expect(messagesOf(file)).toEqual([`2:2-2:45  <property> has no "one-off":  did you mean "one-of"?`])
   })
 
-  test("a named closer for another tag:  reported, with `</>` as its fix", () => {
+  test("a named closer for another tag", () => {
     const file = read(`<spell-view "card">
 	<action "turn it over">
 		turn it face down
 	</property>
 </spell-view>
 `)
-    expect(file.diagnostics).toMatchObject([{ problem: "mismatched-closer", fix: { text: "</>" } }])
+    expect(messagesOf(file)).toEqual([`4:2-4:13  "</property>" can't close <action>:  write "</>"`])
     expect(file.templates[0]!.children).toHaveLength(1)
   })
 
-  test("an `<otherwise>` after a `</>` that closed its `<if>`:  the fix drops that `</>` (Q53)", () => {
-    const text = `<spell-view "card">
+  test("an `<otherwise>` after a `</>` that closed its `<if>` (Q53):  an error, read as ONE chain", () => {
+    const file = read(`<spell-view "card">
 	<draw>
 		<if it is face up>
 			<draw "front" />
@@ -307,30 +305,28 @@ describe("SpellxReader.read():  mistakes are diagnostics, and reading goes on", 
 		</>
 	</draw>
 </spell-view>
-`
-    const file = read(text)
-    expect(problemsOf(file)).toEqual(["otherwise-after-closed-if"])
-    const { fix } = file.diagnostics[0]!
-    expect(text.slice(fix!.span.start, fix!.span.end)).toBe("</>")
-    // read as ONE chain anyway
+`)
+    expect(messagesOf(file)[0]).toMatch(
+      /^6:3-6:14  <otherwise> goes on with the "if" above it, but a "<\/>" closed that/
+    )
     const draw = file.templates[0]!.children[0] as SX.SpellxDeclaration
     expect(draw.children.map((node) => node.kind)).toEqual(["choice"])
     expect((draw.children[0] as SX.SpellxChoice).branches).toHaveLength(2)
   })
 
-  test("an unclosed tag:  reported at its head, the file read to its end", () => {
+  test("a tag never closed:  reported at its head, the file read to its end", () => {
     const file = read(`<spell-view "card">
 	<action "turn it over">
 		turn it face down
 `)
-    expect(problemsOf(file)).toEqual(["unclosed-tag", "unclosed-tag"])
     expect(file.diagnostics.map((diagnostic) => file.text.slice(diagnostic.span.start, diagnostic.span.end))).toEqual([
-      '<action "turn it over">',
-      '<spell-view "card">'
+      '<spell-view "card">',
+      '<action "turn it over">'
     ])
+    expect(file.diagnostics[1]!.message).toBe('<action> is never closed:  end it with "</>"')
   })
 
-  test("a body line indented less than its body is a warning (Q7), and still read", () => {
+  test("a body that starts deeper than its next line is still all of its lines (Q7)", () => {
     const file = read(`<spell-view "card">
 	<action "turn it over">
 			set its direction to down
@@ -338,7 +334,6 @@ describe("SpellxReader.read():  mistakes are diagnostics, and reading goes on", 
 	</>
 </spell-view>
 `)
-    expect(file.diagnostics).toMatchObject([{ severity: "warning", problem: "indented-less" }])
     const action = file.templates[0]!.children[0] as SX.SpellxDeclaration
     expect((action.children[0] as SX.SpellxCode).lines.map((line) => line.text)).toEqual([
       "set its direction to down",
@@ -352,26 +347,13 @@ describe("SpellxReader.read():  mistakes are diagnostics, and reading goes on", 
 	<spell-view "inner">
 	</>
 `)
-    expect(problemsOf(file)).toEqual(["outside-template", "nested-template"])
-    expect(file.templates.map((template) => template.name)).toEqual(["outer", "inner"])
-  })
-
-  test("a part defined in a drawing, an `<if>` among members, a handler in a drawing", () => {
-    const file = read(`<spell-view "card">
-	<if it is face up>
-		<text>up</text>
-	</>
-	<draw>
-		<draw "front">
-			<text>front</text>
-		</>
-		<on click>
-			turn it over
-		</>
-	</draw>
-</spell-view>
-`)
-    expect(problemsOf(file)).toEqual(["misplaced-tag", "part-in-drawing", "misplaced-tag"])
+    expect(messagesOf(file)).toEqual(
+      expect.arrayContaining([
+        `1:1-1:21  <property> goes inside a template, e.g. "<spell-view>"`,
+        `3:2-3:22  <spell-view> can't go inside <spell-view>:  close <spell-view> first, with "</>"`
+      ])
+    )
+    expect(file.templates.map((template) => template.name)).toEqual(["outer"])
   })
 
   test("a message speaks the file's language", () => {

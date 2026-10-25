@@ -38,13 +38,18 @@ export class SpellxTokenizer extends P.Tokenizer {
     const words = language.words.spellx ?? SP.Language.default.words.spellx
     if (!words) throw new TypeError("SpellxTokenizer():  no language has spellx's words;  English's should")
     this.words = words
-    // each file starts with no tag open
+    // each file starts with no tag open;  one still open at its end was never closed
     const tokenizeFile = this.tokenize
     this.tokenize = (text: string, start?: number, end?: number) => {
       this.frames = []
       this.inlineCloser = undefined
       this.closedChain = undefined
-      return tokenizeFile(text, start, end)
+      const tokens = tokenizeFile(text, start, end)
+      for (const frame of this.frames.reverse()) {
+        for (const error of this.unclosed(frame)) SP.addSpellxError(frame.token, error)
+      }
+      this.frames = []
+      return tokens
     }
   }
 
@@ -99,6 +104,17 @@ export class SpellxTokenizer extends P.Tokenizer {
       return this.prose(text, start, lineEnd, text.slice(start, lineEnd).trim(), note)
     }
     return undefined
+  }
+
+  /**
+   * Where markup's next element would start, for a run of them (`matchJSXElements()`):  never at a line a spellx tag
+   * starts, e.g. `<if ...>` or `<for each ...>` after a drawing's `<toolbar />`, which is a tag of its own.
+   */
+  protected nextElementStart(text: string, from: number, end: number, indent: number): number {
+    const next = super.nextElementStart(text, from, end, indent)
+    if (next >= end || !this.isLineStart(text, next) || !WORD_START.test(text[next + 1] ?? "")) return next
+    const lineIndent = next - (text.lastIndexOf("\n", next - 1) + 1)
+    return this.isTagHere(this.tagWordAt(text, next), lineIndent) ? end : next
   }
 
   /** Is `start` a line's first character that isn't a space or tab? */
@@ -165,12 +181,14 @@ export class SpellxTokenizer extends P.Tokenizer {
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
    * - In a body of spell:  notes and controls.
    * - In a drawing (or a control in one):  notes, controls and a placed part, `<draw "front" />`.
+   * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them).
    * - In a note:  none;  its text is prose.
    */
   private isTagHere(word: TagWord, indent: number): boolean {
     const owner = this.ownerOfTag(indent, word)
     if (!owner || owner.category === "template") return true
     if (owner.category === "note") return false
+    if (owner.kind === "menu" && word.category === "declaration" && word.kind === "action") return true
     if (word.category === "note" || word.category === "control") return true
     return word.category === "declaration" && word.kind === "draw" && this.isInDrawing()
   }

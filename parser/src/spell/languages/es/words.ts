@@ -166,8 +166,59 @@ export const spanishWords: SP.LanguageWords = {
       atajo: "shortcut",
       "activa-cuando": "enabled-when",
       "elegida-cuando": "selected-when",
+      "seleccionada-cuando": "selected-when",
+      "se-deshace-como": "undone-as",
+      icono: "icon",
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar"
+    },
+    // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
+    twins: {
+      template: "{a name} {name} es {a super} {super} :",
+      templateAka: "{a words} {words} alias {aka} es {a super} {super} :",
+      singleton: "{words} es {a super} {super} :",
+      supers: {
+        view: "vista",
+        thing: "cosa",
+        page: "página",
+        app: "aplicación",
+        "page template": "página",
+        "app template": "aplicación"
+      },
+      property: {
+        list: "su {name} es uno de {one-of}",
+        listBody: "su {name} es uno de {one-of} :",
+        body: "su {name} es :",
+        value: "su {name} es",
+        bare: "tiene {a words} {words}"
+      },
+      // el sujeto de una frase queda implícito, como en el esquema:  `- "es un (palo)"`
+      propertyAlias: "{quoted alias}",
+      alias: "{name}",
+      aliasBlock: "{name} :",
+      action: "para {words} :",
+      actionDetails: {
+        shortcut: "atajo {shortcut}",
+        "enabled-when": "activa cuando {enabled-when}",
+        "selected-when": "seleccionada cuando {selected-when}",
+        "undone-as": "se deshace como {quoted undone-as}",
+        icon: "icono {quoted icon}"
+      },
+      test: "para probar {words} :",
+      event: "envía {name}",
+      eventWith: "con",
+      eventParam: "{param} como {a value} {value}",
+      eventAnd: "y",
+      draw: "para dibujar eso :",
+      drawPart: "para dibujar su {words} :",
+      placePart: "dibujar su {words}",
+      handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
+      controls: {
+        if: "si {phrase}",
+        "otherwise if": "de lo contrario si {phrase}",
+        otherwise: "de lo contrario",
+        "for each": "para cada {phrase}"
+      }
     }
   },
 

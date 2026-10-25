@@ -439,8 +439,9 @@ export class Tokenizer {
    * Where an element right after one ending at `from` would start -- see `matchJSXElements()`:
    * past spaces, and past ONE newline when the line after it is indented at least `indent`.
    * - `end` when there's no room for one:  `matchJSXElement()` then matches nothing.
+   * - A subclass may end a run sooner:  spellx stops at a line its own tag starts (`SP.SpellxTokenizer`).
    */
-  private nextElementStart(text: string, from: number, end: number, indent: number): number {
+  protected nextElementStart(text: string, from: number, end: number, indent: number): number {
     let at = this.eatWhitespace(text, from, end)
     if (text[at] === "\r") at++
     if (text[at] !== "\n") return text[at] === "<" ? at : end

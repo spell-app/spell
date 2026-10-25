@@ -432,7 +432,7 @@ export type LanguageWords = {
  * A language's words for SPELLX, the tag-shaped form of a spell file (epic `elemental-spell`):  a CLOSED vocabulary.
  * - Each table maps a word as a person writes it to what it means, named in English:
  *   Spanish's `{ propiedad: "property" }`.
- * - The spellx reader (`spell-parser/spellx`) knows no other words:
+ * - The spellx tokenizer (`SP.SpellxTokenizer`) knows no other words:
  *   one that's in none of these is an error naming the closest.
  * - Several spellings may mean one thing, e.g. `página` and `pagina`:  the first is the one a writer uses.
  */

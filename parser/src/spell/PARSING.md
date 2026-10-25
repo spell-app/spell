@@ -1130,9 +1130,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - So a tag line and its indented body are a line and its block, as an outline item and its body are:
     `breakIntoIndentedBlocks()` needs nothing new.
   - It keeps a stack of open tags, by indent, to check what it can see there:
-    a word spellx doesn't know (naming the closest), a closer for another tag, a tag never closed,
-    an `<otherwise>` after a `</>` closed its `<if>`, a body line indented less than its tag's.
+    a word spellx doesn't know (naming the closest), a closer for another tag, a tag never closed (one still open at
+    the file's end too), an `<otherwise>` after a `</>` closed its `<if>`, a body line indented less than its tag's.
     - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
+  - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
+    controls;  in a drawing, those and a placed part;  in a menu, its actions (`isTagHere()`).
+  - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
+    else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
 - [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
   - The twin's words are the LANGUAGE's, in its words file (`spellx.twins`), with slots:
     `its {name} is one of {one-of}`, `to {words} :`, `on {phrase} :`.
@@ -1148,8 +1152,12 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - A tag spellx can't read yet (`<menu>`, P10) is the line's error, `spellx-not-yet`, with its block.
 - The pre-pass that finds every type and method a file declares (`declaredTypes`, `declaredMethods`) reads a spellx
   file's twin skeleton:  its template lines, then `\t- ` + each member's twin line (`SpellxTwin.skeletonOf()`).
-- Its tests:  each English pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same
-  ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
+- Spanish reads the same way, with its own twin words (`su {name} es uno de {one-of}`, `para {words} :`):
+  a `.es.spellx` file is a Spanish code-spell file's twin, its words the language's.
+- Its tests:  each pair in `tests/spell/spellx/`, `X.spellx` beside the `X.spell` it means, compiles the same and has no
+  errors, in English and Spanish ([SpellxTwin.test.ts](../../tests/spell/SpellxTwin.test.ts)).
+- A file's CHUNK TREE (`SX.SpellxView`, `spell-parser/spellx`) is built from these same tokens, for the editor, the
+  notebook and agents:  no rules, nothing compiled (J30).
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 

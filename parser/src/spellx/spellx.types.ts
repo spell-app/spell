@@ -1,11 +1,11 @@
 /**
  * Spellx's types:  the CHUNK TREE a `.spellx` file reads into, its spans and its diagnostics (epic `elemental-spell`).
  * - The bottom of the folder's import graph:  `import type` only, so it erases completely.
- *   `SpellxFile` and `SpellxReader` stand on it.
+ *   `SpellxFile` and `SpellxView` stand on it.
  * - A chunk tree is what a `.spellx` file SAYS, in the order it says it, every node with its exact span:
  *   nothing is compiled, every body stays raw spell text.
- *   - P5 writes it into `.spell` text with a span map;  the editor colours and maps it;  the notebook shows it;
- *     agents walk it (`SpellxFile.walk()`).
+ *   - Spell's own parser reads the file (P6:  each tag as its code-spell twin);  this tree is what it SAYS, for the
+ *     editor, the notebook (P12) and agents, which walk it (`SpellxFile.walk()`).
  */
 import type { SP } from "spell-parser/spell"
 
@@ -330,51 +330,18 @@ export type SpellxNodeKind = SpellxNode["kind"]
 ////////////////
 
 /**
- * Something wrong in a `.spellx` file, found while reading it.
- * - COLLECTED, never thrown:  the reader goes on, so one slip doesn't hide the rest of the file.
- * - Its message is in the file's language (`SP.Language.parserMessage()`, the `spellx-*` keys).
+ * Something wrong in a `.spellx` file's spellx:  a word spellx doesn't know, a closer for another tag, a tag never closed ...
+ * - What the spellx tokenizer noted while reading it (`SP.spellxErrorOf()`), in the file's language.
+ * - COLLECTED, never thrown.  What the rules say of a body's spell is the parsed file's (`SP.SpellFile.errors`).
  */
 export type SpellxDiagnostic = {
   /** `error`:  the file means something else than it says;  `warning`:  it reads, but should be fixed */
   severity: SpellxSeverity
-  /** what kind of problem, e.g. `unknown-word` -- stable, for tests and quick fixes */
-  problem: SpellxProblem
   /** what's wrong and how to fix it, for people */
   message: string
   /** where */
   span: SpellxSpan
-  /** an edit that fixes it, when there's one obvious edit */
-  fix?: SpellxFix
 }
 
 /** How bad a diagnostic is. */
 export type SpellxSeverity = "error" | "warning"
-
-/** An edit that fixes a diagnostic:  `span` replaced by `text`;  an empty `text` deletes it. */
-export type SpellxFix = {
-  /** what to replace */
-  span: SpellxSpan
-  /** what to put there */
-  text: string
-}
-
-/** Every problem the reader reports, by the name tests and quick fixes know it by. */
-export const SPELLX_PROBLEMS = [
-  "unknown-word",
-  "unknown-attribute",
-  "unexpected-closer",
-  "mismatched-closer",
-  "unclosed-tag",
-  "unclosed-head",
-  "otherwise-without-if",
-  "otherwise-after-closed-if",
-  "missing-phrase",
-  "indented-less",
-  "nested-template",
-  "outside-template",
-  "misplaced-tag",
-  "part-in-drawing"
-] as const
-
-/** A problem the reader reports -- see `SPELLX_PROBLEMS`. */
-export type SpellxProblem = (typeof SPELLX_PROBLEMS)[number]

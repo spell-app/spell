@@ -1,0 +1,26 @@
+// A view with a front and a back:  it shows one side at a time.
+// A view that extends it says what each side looks like, in `<draw "front">` and `"back"`.
+
+a "double sided view" is a view where:
+	// Which way it faces
+	- its "direction" is one of up, down
+		- it "is face (direction)"
+	// Sent each time it turns over;  side is the way it faces now
+	- it sends "flipped" with side as a direction
+	- to turn it face up:
+		set its direction to up
+	- to turn it face down:
+		set its direction to down
+	// Flips it:  face up becomes face down, and back.
+	- to turn it over:
+		if it is face up
+			turn it face down
+		otherwise
+			turn it face up
+		send flipped with side = its direction
+	// The front when it's face up, the back when it's face down.
+	- to draw it:
+		if it is face up
+			draw its front
+		otherwise
+			draw its back

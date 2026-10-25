@@ -3,7 +3,7 @@ import type { SX } from "spell-parser/spellx"
 
 /**
  * A `.spellx` file, read:  its CHUNK TREE, what's wrong in it, and where things are (epic `elemental-spell` P3).
- * - Made by `SX.SpellxReader.read()`;  everything in it is as the file says, nothing compiled.
+ * - Made by `SX.SpellxView.read()`;  everything in it is as the file says, nothing compiled.
  * - For an agent or a tool walking a file:  `walk()` visits every node, `toOutline()` prints one line per node.
  */
 export class SpellxFile {
@@ -74,8 +74,8 @@ export class SpellxFile {
     const lines = [...this.walk()].map(({ node, depth }) => "  ".repeat(depth) + this.outlineOf(node))
     if (this.diagnostics.length) {
       lines.push("--")
-      for (const { severity, problem, message, span } of this.diagnostics)
-        lines.push(`${severity} ${problem} ${this.spanText(span)}  ${message}`)
+      for (const { severity, message, span } of this.diagnostics)
+        lines.push(`${severity} ${this.spanText(span)}  ${message}`)
     }
     return lines.join("\n")
   }
@@ -141,7 +141,7 @@ export class SpellxFile {
   }
 }
 
-/** What a `SpellxFile` is made of -- see `SX.SpellxReader`. */
+/** What a `SpellxFile` is made of -- see `SX.SpellxView`. */
 export type SpellxFileProps = {
   /** its path, if it has one */
   path: string | undefined

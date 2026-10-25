@@ -11,7 +11,9 @@ import { CreateType } from "./CreateType"
  * - No article:  it names the thing, not a kind of thing.
  *   - The type is `Solitaire`, as for `a solitaire is an app`;  its one instance is the variable `solitaire`.
  *   - So there's no `set the solitaire to a new solitaire`:  `print solitaire`, `debug the solitaire` just work.
- * - Only an app, or a kind of app:  `x is a thing` isn't ours.
+ * - Only an app or a page, or a kind of one:  `x is a thing` isn't ours.
+ *   - A page:  spellx's `<spell-page>` (epic `elemental-spell` Q16), `leaderboard is a page`.
+ *   - Its kind is ONE word for now:  `klondike is a card game` doesn't read (epic `elemental-spell` C27).
  * - The instance is made where the line is, right after its class:
  *   classes declared further down the file move up above it (`SP.hoistClassDeclarations()`),
  *   so its properties' starting values can make things of those types.
@@ -35,7 +37,7 @@ export class CreateOneOfAKind extends CreateType {
     const app = tokens.findIndex(
       (token, index) =>
         index > start + 2 &&
-        !!scope.getType(SP.typeName(`${token.value}`))?.isA("App") &&
+        isOneOfAKindType(scope.getType(SP.typeName(`${token.value}`))) &&
         reads("indefinite_article", tokens[index - 1]) &&
         reads("is_or_is_not", tokens[index - 2])
     )
@@ -43,14 +45,14 @@ export class CreateOneOfAKind extends CreateType {
     return super.test(scope, tokens, start)
   }
 
-  /** Only an app, or a kind of app, is one of a kind. */
+  /** Only an app or a page, or a kind of one, is one of a kind. */
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     // refused (`refuseTakenNames()`), with no super-type to check:  not ours
     const superType = match?.groups.superType as P.Match<P.MatchGroups, { scopeType?: unknown }> | undefined
     if (!superType) return undefined
     const { scopeType } = superType.data
-    return scopeType instanceof P.TypeScope && scopeType.isA("App") ? match : undefined
+    return isOneOfAKindType(scopeType) ? match : undefined
   }
 
   /** SIDE EFFECT:  declares our type, then its one instance, e.g. `solitaire` -- a variable of kind `only`. */
@@ -84,4 +86,12 @@ export class CreateOneOfAKind extends CreateType {
       .toLowerCase()
       .replace(/[\s-]+/g, "_")
   }
+}
+
+/**
+ * Can `type` be one of a kind:  an app or a page, or a kind of one (`solitaire is an app`, `leaderboard is a page`).
+ * - A page:  spellx's `<spell-page>` (epic `elemental-spell` Q16).
+ */
+function isOneOfAKindType(type: unknown): boolean {
+  return type instanceof P.TypeScope && (type.isA("App") || type.isA("Page"))
 }
