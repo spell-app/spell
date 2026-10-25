@@ -1,5 +1,6 @@
 import { contrast, CONTRAST_TEXT, type Oklch as OklchColor } from "spell/util/color"
 import { clamp } from "spell/util/number"
+import { DARK_QUERY } from "spell/util/persist/persist.types"
 import { kebabCase } from "spell-ui/util"
 
 import type {
@@ -172,7 +173,7 @@ export class StyleGenerator {
       lines.push(...this.property(`--ui-${name}-on-dark`, this.oklch(color.onDark)))
     }
     const tokens = this.tokenBlock("colors", this.colorDeclarations(), [
-      "@media (prefers-color-scheme: dark)",
+      `@media ${DARK_QUERY}`,
       [["--ui-scheme", "dark"]]
     ])
     const remaps = this.colorRemaps()
