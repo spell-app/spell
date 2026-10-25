@@ -47,7 +47,7 @@ export const CLOSED_STATUSES = ["decided", "done", "canceled"] as const
 export const STATUS_STATES: Readonly<Record<string, ItemState>> = { decided: "recent", done: "recent", canceled: "old" }
 
 /**
- * An item's state as DRAWN:  `recent` (green) turns grey (`old`) a week after its last change (`changed`)
+ * An item's state as DRAWN:  `recent` (green) turns grey (`old`) a day after its last change (`changed`)
  * (Owen, 2026-10-25:  "these were decided a very long time ago, they could be grey");  green only while fresh.
  * - the id chip, the section's counts and filters, the To review links:  the same rule
  * - worked out as the page draws, never written:  the tool's `state` stays `recent`
@@ -74,8 +74,11 @@ export class ItemAge {
   }
 }
 
-/** How long a decided or done item stays green, in days. */
-const RECENT_DAYS = 7
+/**
+ * How long a decided or done item stays green, in days.
+ * - Owen, 2026-10-25:  "make it grey after one day.  If I haven't seen it by then, I don't care."
+ */
+const RECENT_DAYS = 1
 const DAY_MS = 24 * 60 * 60 * 1000
 
 /** `state`'s text key, for the id chip's tooltip. */

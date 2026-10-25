@@ -73,7 +73,8 @@
      * its chevron, id chip and title in the same columns as a phase's chevron, status icon and title (Owen,
      * 2026-10-25:  "icon / Q# and text should line up horizontally between the two sections";  2px in, before)
      */
-    padding: 5px 6px 5px 14px;
+    /* 1px more below than above:  the shadow over its top reads as a border (Owen, 2026-10-25) */
+    padding: 5px 6px 6px 14px;
     border-start-start-radius: var(--_epic-item-top-radius);
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
