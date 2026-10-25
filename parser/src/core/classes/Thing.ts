@@ -1,13 +1,14 @@
 /**
  * Base classes for spell.
  */
-import { Observable, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
+import { Observable, peekProp, runsCreate, schemaOf, typedJSON, type PropInfo } from "spell/util"
 import { registerThing, noteSetting, core } from "spell-parser/core/core"
 import type { Drawing } from "spell-parser/core/drawing"
 import { Eventful } from "spell-parser/core/SpellEvent"
 import type { PropCheck } from "spell-parser/core/core.types"
+import { rememberedStartFor, rememberSetting } from "spell-parser/core/remembered"
 
-import { ID_PROP } from "./ids"
+import { hasChosenId, ID_PROP } from "./ids"
 
 /**
  * `Thing`: base for all object-like things in spell -- what `a task is a thing` extends.
@@ -72,18 +73,45 @@ export class Thing extends Eventful(Observable) {
   create(_props?: Record<string, unknown>): void {}
 
   /**
+   * Reactive `property` -- see `Observable.getProp()`.
+   * - Compiled property getters call this, e.g. `get title() { return this.getProp('title') }`.
+   * - Declared `remembered`, and still unset:  what the app remembered for it, last run (`remembered.ts`).
+   */
+  protected getProp<T>(property: string, initializer?: () => T): T {
+    if (!initializer && peekProp(this, property) === undefined) {
+      initializer = rememberedStartFor(this, property, () => this.rememberedKeyFor(property)) as (() => T) | undefined
+    }
+    return super.getProp(property, initializer)
+  }
+
+  /**
    * Set reactive `property` to `value` -- see `Observable.setProp()`.
    * - Compiled property setters call this, e.g. `set title(value) { this.setProp('title', value) }`.
    *   - What it's checked against is declared in the class's schema:
    *     `static { this.declareProp('title', { type: 'text' }) }`.
    * - `check`:  how compiled spell said it BEFORE the schema, e.g. `this.setProp('title', value, { type: 'text' })` --
    *   still honoured, warning first if it fails, so programs compiled then still run.
+   * - Declared `remembered`:  kept for the app's next run too (`remembered.ts`).
    * - Same as `List.setProp()`.
    */
   protected setProp<T>(property: string, value: T, check?: PropCheck) {
     if (check) core.checkProp(property, value, check)
     noteSetting(this, property, value)
-    return super.setProp(property, value)
+    super.setProp(property, value)
+    rememberSetting(this, property, value, () => this.rememberedKeyFor(property))
+    return value
+  }
+
+  /**
+   * The key our remembered prop `property` is kept under, in the app's preferences:  `<id>.<property>`, e.g.
+   * `main.theme` -- see `remembered.ts`.
+   * - Only with an id the program chose, or loaded (`hasChosenId()`):
+   *   a made-up one is new each run, so nothing kept under it would be found again.
+   * - `undefined` without one:  then it isn't remembered, said once on the console.
+   * - `App` keeps its own by name alone, `theme`.
+   */
+  protected rememberedKeyFor(property: string): string | undefined {
+    return hasChosenId(this) ? `${this.id}.${property}` : undefined
   }
 
   /** A declared prop was set:  warn on the PROGRAM's console if `value` isn't what `info` declares -- see `checkProp()`. */

@@ -1861,6 +1861,22 @@
     },
     {
       "kind": "method",
+      "name": "remember",
+      "of": "core",
+      "module": "runtime",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "place"
+        }
+      ],
+      "section": "Runtime State",
+      "description": "Remember the running program's `remembered` props from run to run, under `name`, its project's id (epic `prefs-and-undo` P8)."
+    },
+    {
+      "kind": "method",
       "name": "clearRuntime",
       "of": "core",
       "module": "runtime",
