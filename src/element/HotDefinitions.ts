@@ -3,12 +3,15 @@ import { E } from "spell/element"
 
 /****************
  * ### `HotDefinitions`
- * Hot module replacement for Spell UI's elements in `yarn dev` (`packages/ui`):
- * an edited component re-renders every live element in place,
+ * Hot replacement of a set's elements:  an edited component re-renders every live element in place,
  * keeping the element objects, their attributes and their property values.
- * - Dev-only;  NEVER in a build.
- * - Loaded into every component barrel, before its `define()` calls run,
- *   by the kit's Vite plugin (`src/element-tools/HotElements.ts`), which Spell UI's `vite.config.ts` adds.
+ * - Two users:
+ *   - `yarn dev`:  loaded into every component barrel, before its `define()` calls run,
+ *     by the kit's Vite plugin (`src/element-tools/HotElements.ts`), which Spell UI's `vite.config.ts` adds
+ *   - a page that swaps in a REBUILT COMPONENT PACK instead of reloading (epic `epic-engine` I116):
+ *     Spell UI's `PackHotSwap` installs it as the page's bundle loads, before any pack defines;
+ *     the pack's `define()` runs again, and only the families whose sources changed are swapped (`keeps`)
+ * - Not in the `spell/element` barrel:  only the pages and builds that swap pay for it.
  * - SIDE EFFECT:
  *   `install()` wraps `UIComponent.define`, and hooks into every DOM element made (`DOMElement.hotReloadHooks`).
  * - Why:  `define()` is idempotent per tag, so a barrel re-run by HMR would return the OLD element class.
@@ -72,12 +75,22 @@ export class HotDefinitions {
     const defined = customElements.get(resolved)
     if (!defined || known.Class === Class || known.Class.name !== Class.name)
       return original.call(Class, tag, dictionary)
+    // a pack swap keeping this tag's family as it was (its sources didn't change):  the live class stays
+    if (HotDefinitions.keeps?.(resolved)) return defined
     HotDefinitions.replace(known.Class, Class)
     return defined
   }
 
+  /**
+   * While a pack is swapped in (`PackHotSwap`):  whether a re-run `define()` of tag `tag` KEEPS its live class.
+   * - `true`:  its family's sources didn't change, so its elements aren't re-rendered
+   * - `undefined` (the default, and in `yarn dev`):  every new version of a class is swapped in
+   */
+  static keeps?: (tag: string) => boolean
+
   /** `Next` is a new version of `Previous`:  re-define every tag `Previous` had with it (`redefine()`). */
   static replace(Previous: E.UIComponentClass, Next: E.UIComponentClass) {
+    HotDefinitions.updateSheets(Previous, Next)
     const before = Previous.prototype.vocabulary
     const after = Next.prototype.vocabulary
     if (before !== after) {
@@ -155,6 +168,7 @@ export class HotDefinitions {
    * Finish a hot update:  re-render the live elements of every class swapped since the last call;
    * or, if a re-definition was refused, log it and `hot.invalidate()` (Vite then reloads the page).
    * - The Vite plugin calls it from each barrel's `import.meta.hot.accept()`.
+   * - A pack swap calls it with no `hot`:  it reloads the page itself on a refusal (`PackHotSwap`).
    */
   static update(hot?: HotContext): HotUpdateResult {
     const refused = HotDefinitions.pending.refused.splice(0)
@@ -170,6 +184,18 @@ export class HotDefinitions {
       for (const domElement of HotDefinitions.liveElements(TagClass)) HotDefinitions.reload(domElement)
     }
     return { reloaded: swapped.map((TagClass) => TagClass.tagSetup.elementDefinition.tag), refused }
+  }
+
+  /**
+   * The style sheets `Next` changed from `Previous`'s, re-registered by name:  the elements' shadow roots already
+   * adopted them, and the runtime replaces their rules in place (`styles.register()`).
+   * - Why:  a sheet registers once per name, so a new class's changed text never reached the page (a pack swap)
+   */
+  private static updateSheets(Previous: E.UIComponentClass, Next: E.UIComponentClass) {
+    const before = Previous.prototype.elementSetup.styleSheets ?? {}
+    for (const [name, css] of Object.entries(Next.prototype.elementSetup.styleSheets ?? {})) {
+      if (before[name] !== css) HotDefinitions.whenRuntime(() => E.SpellSolid.settings.styles.register(name, css))
+    }
   }
 
   /**

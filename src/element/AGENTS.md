@@ -55,7 +55,8 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property (epic `solid-17`)
     - NOT in the barrel:  `DOMElement` uses it;  its page-wide `setAttribute()` patch goes in as the file loads
     - `<ui-root pure>` turns the patch off
-  - [HotDefinitions](HotDefinitions.ts):  hot reload of a set's elements in `yarn dev` (dev-only)
+  - [HotDefinitions](HotDefinitions.ts):  hot reload of a set's elements:  in `yarn dev`, and on a page that swaps in a
+    rebuilt component pack (Spell UI's `PackHotSwap`, epic `epic-engine` I116)
   - [timing](timing.ts):  when to run something
     - `afterSolidUpdate()`, `beforeNextPaint()`
     - `soon()`, `after()`, `every()`
@@ -164,7 +165,8 @@ As WWOD §4, plus:
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
   - `spell/element/timing`:  Spell UI's util barrel re-exports it
   - `spell/element/SkeletonText`:  node code that parses skeletons
-  - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path
+  - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;
+    Spell UI's `PackHotSwap` (its `spell-ui/hot` entry) imports it
 - The element tools and the `spell-pack` bin are node only:
   they may import node built-ins, Vite and `tsx` too, and never run in a page.
 

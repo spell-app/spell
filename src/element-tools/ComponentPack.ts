@@ -183,7 +183,7 @@ export class ComponentPack {
    * - `stale` names each one that isn't, and why;  none means current.
    * - The catalog:  its recorded hash is the sources' (`hash()`),
    *   and its text is what a build writes now (so a hand edit shows too)
-   * - The entry:  its text;  the script:  its banner's hash
+   * - The entry:  its text, while the sources are current (it holds each family's hash);  the script:  its banner's hash
    * - And the set's docs data:  its builder's `--check` (`buildSiteData()`)
    * - Doesn't build:  fast enough for every `yarn test` (a pack's own test runs it)
    */
@@ -199,8 +199,10 @@ export class ComponentPack {
       add(files.catalog, "not what a build writes (edited by hand?)")
     }
     const entry = ComponentPack.readText(files.entry)
+    const sourcesChanged = catalog !== undefined && ComponentPack.recordedHash(catalog) !== hash
     if (entry === undefined) add(files.entry, "missing")
-    else if (entry !== this.entrySource()) add(files.entry, "not what a build writes")
+    // the entry carries each family's hash, so changed sources change it too:  the catalog and script say so already
+    else if (!sourcesChanged && entry !== this.entrySource()) add(files.entry, "not what a build writes")
     const script = ComponentPack.readText(files.script)
     if (script === undefined) add(files.script, "missing")
     else if (ComponentPack.recordedHash(script) !== hash) add(files.script, "built from older sources")
@@ -259,8 +261,33 @@ export class ComponentPack {
    * - Tests and snapshots never count.
    */
   sources(): string[] {
+    return this.sourcesFrom(ComponentPack.filesUnder(this.components))
+  }
+
+  /**
+   * Each family folder => a hash of ITS sources:  the files in its folder, and every file of the pack they import,
+   * transitively (`sources()`' rule).  16 hex digits of sha-256.
+   * - In the entry's `registerPack({ families })`:  a page swapping in the rebuilt pack re-renders only the families
+   *   whose hash changed (Spell UI's `PackHotSwap`, epic `epic-engine` I116).
+   * - A file shared by several families (a base class, a types file) counts in each that imports it, so they all
+   *   re-render when it changes.
+   */
+  familyHashes(): Record<string, string> {
+    const hashes: Record<string, string> = {}
+    for (const family of this.families()) {
+      const hash = createHash("sha256")
+      for (const file of this.sourcesFrom(ComponentPack.filesUnder(join(this.components, family)))) {
+        hash.update(`${relative(this.dir, file)}\n`).update(readFileSync(file))
+      }
+      hashes[family] = hash.digest("hex").slice(0, 16)
+    }
+    return hashes
+  }
+
+  /** The files reachable from `start`, absolute, sorted:  `start` and what it imports of the pack's own, transitively. */
+  private sourcesFrom(start: string[]): string[] {
     const sources = new Set<string>()
-    const queue = ComponentPack.filesUnder(this.components)
+    const queue = [...start]
     while (queue.length) {
       const file = queue.pop()!
       if (sources.has(file) || NOT_SOURCE.test(file) || !this.isSource(file)) continue
@@ -339,10 +366,14 @@ ${lines.join(",\n")}${lines.length ? "\n" : ""}}
     const define = imports.length
       ? `() =>\n    Promise.all([\n      ${imports.join(",\n      ")}\n    ]).then(() => undefined)`
       : "() => Promise.resolve()"
+    const families = Object.entries(this.familyHashes()).map(
+      ([family, hash]) => `    ${JSON.stringify(family)}: "${hash}"`
+    )
     return `/* GENERATED -- do not edit:  \`spell pack build ${this.name}\` */
 /**
  * The \`${this.name}\` pack's script:  registers with the page's Spell UI, which adds the catalog and calls \`define()\`.
  * - \`define()\` imports every family barrel, which defines its tags:  inlined in the script, run only when called.
+ * - \`families\`:  each family's sources' hash, so a page swapping in a rebuilt pack re-renders only what changed.
  */
 import { CATALOG } from "./${this.name}.catalog"
 
@@ -353,6 +384,9 @@ SpellUI.registerPack({
   name: ${JSON.stringify(this.name)},
   prefix: ${JSON.stringify(this.prefix)},
   catalog: CATALOG,
+  families: {
+${families.join(",\n")}
+  },
   define: ${define}
 })
 `
@@ -521,7 +555,7 @@ const USAGE = "usage:  spell-pack build | check [<folder>]   (the pack's package
 const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
-const PACK_FORMAT = "spell-pack 2"
+const PACK_FORMAT = "spell-pack 3"
 
 /** The set's docs data, in the pack's `dir`:  what its pages' side column, search and API tables read. */
 const DOCS_DATA_FOLDER = "docs/__data"
