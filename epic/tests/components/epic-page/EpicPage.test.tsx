@@ -788,14 +788,9 @@ describe("<epic-page> toolbar", () => {
     await ElementFixture.tick()
     const questions = host.querySelector<E.DOMElement>("#decisions")!
     const item = host.querySelector<E.DOMElement>("#q1")!
-    // the item's own:  its aside folds, the item stays open
-    const itemButton = item.shadowRoot!.querySelector<HTMLButtonElement>('[part~="collapse-all"]')!
-    expect(itemButton.title).toBe("Fold everything in Q1")
-    itemButton.click()
-    await ElementFixture.tick()
-    expect([aside.component!.fold.isOpen(), item.hasAttribute("open")]).toEqual([false, true])
+    // an item has no collapse-all of its own (Owen, 2026-10-25:  "lose it entirely")
+    expect(item.shadowRoot!.querySelector('[part~="collapse-all"]')).toBe(null)
     // the section's:  its items fold, it stays open
-    aside.component!.fold.toggle()
     // the section's ONE toggle:  first it opens everything inside, then the same button folds it
     const sectionButton = questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
     expect(sectionButton.title).toBe("Open everything in 3. Questions")
@@ -1196,8 +1191,8 @@ describe("<epic-page> stages", () => {
     const host = await render(stagedPage("phases"))
     const [one, two] = Array.from(host.querySelectorAll("epic-phase"))
     await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["approve", "defer"]))
-    expect(pillsOf(two!)).toEqual(["revisit", "todo", "details"])
+    expect(pillsOf(two!)).toEqual(["todo", "revisit", "details"])
     host.setAttribute("stage", "building")
-    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["revisit", "todo", "details"]))
+    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["todo", "revisit", "details"]))
   })
 })

@@ -2022,10 +2022,6 @@
           "description": "The fold `<button>` (the chevron), on an item with details."
         },
         {
-          "name": "collapse-all",
-          "description": "Open, holding cards or panels that fold:  the double chevron at its line's end, folding them all."
-        },
-        {
           "name": "id",
           "description": "The id chip (`Q7`), a link to the item, in its state's colour.  While the page is reviewed, an open judgement call's or issue's chip is a button instead:  urgent (red) <-> not urgent (yellow)."
         },
@@ -2055,7 +2051,7 @@
         },
         {
           "name": "actions",
-          "description": "The box at the end of the line:  the `actions` slot (the page's own buttons, the bullhorn), then the git icon, the review label, the review buttons and collapse-all."
+          "description": "The box at the end of the line:  the `actions` slot (the page's own buttons, the bullhorn), then the git icon, the review label and the review buttons."
         },
         {
           "name": "details",
@@ -2110,11 +2106,6 @@
           "key": "unfold",
           "text": "Unfold {id}",
           "description": "Accessible name of the fold button while folded."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Fold everything in {id}",
-          "description": "The collapse-all button's name and tooltip:  folds every card and panel in the item."
         },
         {
           "key": "showCommits",
