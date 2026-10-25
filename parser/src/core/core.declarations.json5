@@ -2160,7 +2160,7 @@
       "type": "TwoSidedView",
       "superType": "View",
       "module": "classes/TwoSidedView",
-      "description": "`TwoSidedView`:  a `View` with a front and a back, face up or face down -- what `a card is a two sided view` extends."
+      "description": "`TwoSidedView`:  spell's built-in template `two sided view`, compiled from `templates/TwoSidedView.spell`."
     },
     {
       "type": "ViewableList",

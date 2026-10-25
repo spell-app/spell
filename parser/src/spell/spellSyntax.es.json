@@ -3769,7 +3769,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 21,
+          "line": 17,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -5053,7 +5053,7 @@
           "ruleNames": ["has_parts"],
           "internal": false,
           "file": "src/spell/rules/classes/HasParts.ts",
-          "line": 20,
+          "line": 21,
           "purpose": "A view's PARTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56).",
           "syntaxes": [
             {

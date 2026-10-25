@@ -332,8 +332,6 @@ export class SpellParser extends P.Parser {
       if (!/^\s/.test(line)) {
         subject = this.subjectOf(line) ?? ""
         if (this.declarations.methodLine.test(line)) found.push(`\t${firstLineOf(line)}`)
-        // made straight from a built-in template written in spell:  its methods are the type's too
-        if (subject) found.push(...this.preludeMethodsFor(line).map((method) => `${subject}\t${method}`))
         continue
       }
       const bullet = /^(?:\t| {2,4})-[ \t]+(.*)$/.exec(line)?.[1]
@@ -355,28 +353,6 @@ export class SpellParser extends P.Parser {
       // our language in play:  the method's name is worked out by its rules, as when it's parsed
       if (match) this.inPlay(() => (match.rule as CallsAhead).callAhead!(match))
     }
-  }
-
-  /**
-   * First lines of the methods a type gets from the built-in template `line` makes it from, if that template is
-   * written in spell, e.g. a two sided view's `to turn it over` for `a card is a two sided view` -- see
-   * `SP.LanguageWords.templatePreludes` (epic `elemental-spell` P5).
-   * - Found by the template's words in our language, e.g. `two sided view`, `vista reversible`, at a word's end.
-   */
-  private preludeMethodsFor(line: string): string[] {
-    const language = this.language ?? SP.Language.default
-    const methods: string[] = []
-    for (const [datatype, prelude] of Object.entries(language.words.templatePreludes ?? {})) {
-      const words = Object.entries(language.typeWords)
-        .filter(([, type]) => type === datatype)
-        .map(([written]) => written.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      if (!words.length || !new RegExp(`[ \\t](?:${words.join("|")})(?![\\p{L}\\p{M}\\d_-])`, "iu").test(line)) continue
-      for (const bullet of prelude.split("\n")) {
-        const said = /^-[ \t]+(.*)$/.exec(bullet)?.[1]
-        if (said && this.declarations.methodLine.test(said)) methods.push(firstLineOf(said))
-      }
-    }
-    return methods
   }
 
   /** Does `after` define a method `before` didn't, or the other way round?  See `P.Parser.changesMethods()`. */

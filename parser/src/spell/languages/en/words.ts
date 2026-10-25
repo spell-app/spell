@@ -119,28 +119,6 @@ export const englishWords: SP.LanguageWords = {
   listOfWord: "of",
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  // the lines a type made straight from a built-in template gets (epic `elemental-spell` P5):  see `templatePreludes`
-  templatePreludes: {
-    "two sided view": [
-      '- it has parts "front" and "back"',
-      '- its "direction" is up or down',
-      '- it "is face (direction)"',
-      "- to turn it face up:",
-      "\tset its direction to up",
-      "- to turn it face down:",
-      "\tset its direction to down",
-      "- to turn it over:",
-      "\tif it is face down",
-      "\t\tturn it face up",
-      "\totherwise",
-      "\t\tturn it face down",
-      "- to draw it:",
-      "\tif it is face down",
-      "\t\tdraw its back",
-      "\totherwise",
-      "\t\tdraw its front"
-    ].join("\n")
-  },
   retiredTypeWords: {
     drawable: "view",
     "drawable thing": "view",

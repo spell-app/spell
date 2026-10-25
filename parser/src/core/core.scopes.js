@@ -280,6 +280,8 @@
       path: "type:TwoSidedView",
       super: "type:View"
     },
+    { path: "type:TwoSidedView/property:direction" },
+    { path: "type:TwoSidedView/enumeration:Directions" },
     {
       path: "type:ViewableList",
       super: "type:List"

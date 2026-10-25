@@ -66,6 +66,12 @@ export class TypeScope extends BlockScope {
    */
   declare parts?: string[]
   /**
+   * The name each of our parts compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
+   * with `drawFront()` (epic `elemental-spell` Q71):  a built-in template has ONE class, whatever language says it.
+   * - Read through `partOutput()`, which walks the super-type chain.
+   */
+  declare partOutputs?: Record<string, string>
+  /**
    * Name of our class when the code runs, if not `name` -- e.g. `Card` for a type imported as `Playingcard`.
    * - Why:  runtime type checks compare class names as strings, e.g. `core.isOfType(thing, 'Card')`.
    *   Compiled code names the class by `name` -- `import { Card as Playingcard }` -- but that doesn't rename it.
@@ -112,6 +118,11 @@ export class TypeScope extends BlockScope {
   /** Is `name` a part of ours, or of a type we're built on?  See `parts`. */
   hasPart(name: string): boolean {
     return this.chain().some((type) => type.parts?.includes(name))
+  }
+
+  /** The name part `name` compiles by, e.g. `front` for a two sided view's `frente` -- itself if no type says.  See `partOutputs`. */
+  partOutput(name: string): string {
+    return this.chain().find((type) => type.partOutputs?.[name])?.partOutputs?.[name] ?? name
   }
 
   /**

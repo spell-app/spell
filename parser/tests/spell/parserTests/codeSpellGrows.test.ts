@@ -188,39 +188,55 @@ describe("a two sided view (J8)", () => {
     '\t\t<ui-image source="back.svg" />'
   ]
 
-  test("gives its own words, its parts and a drawing that picks its front or its back", () => {
+  test("its words are the template's, compiled once in the core:  a card has just its own (Q71)", () => {
     const compiled = compile(card)
     expect(compiled).toContain("export class Card extends TwoSidedView {")
-    expect(compiled).toContain('static parts = ["front", "back"]')
-    expect(compiled).toMatch(
-      /draw\(\) \{\n\s+if \(this\.isFaceDirection\("down"\)\) return this\.drawBack\(\)\n\s+else return this\.drawFront\(\)/
-    )
+    expect(compiled).toContain("drawFront() {")
+    expect(compiled).toContain("drawBack() {")
+    // NOT copied in:  `TwoSidedView` holds them, once
+    expect(compiled).not.toContain("static parts")
+    expect(compiled).not.toContain("turnOver() {")
+    expect(compiled).not.toMatch(/^\s+draw\(\) \{/m)
     const run = runSpell([
       ...card,
       "set c to a new card",
-      "set was_up to c is face up",
+      "set was_down to c is face down",
       "turn c over",
-      "set now_down to c is face down",
+      "set now_up to c is face up",
       "turn c over",
-      "set back_up to c is face up"
+      "set back_down to c is face down"
     ])
-    // a new one is face up:  its direction starts as the first of its list
-    expect(run("was_up, now_down, back_up")).toEqual({ was_up: true, now_down: true, back_up: true })
+    // a new one is face down:  `its "direction" is down or up`, the first of its list (Owen, J36)
+    expect(run("was_down, now_up, back_down")).toEqual({ was_down: true, now_up: true, back_down: true })
   })
 
-  test("in Spanish, in its own words", () => {
-    const compiled = compile(
-      [
-        'una "carta" es una vista reversible donde:',
-        "\t- para dibujar su frente:",
-        "\t\t<es-texto>hola</es-texto>",
-        '\t- para "dibujar su dorso": <es-imagen source="dorso.svg" />'
-      ],
-      "/test.es.spell"
-    )
-    expect(compiled).toContain('static parts = ["frente", "dorso"]')
-    expect(compiled).toContain("voltear() {")
-    expect(compiled).toMatch(/return this\.drawDorso\(\)\n\s+else return this\.drawFrente\(\)/)
+  test("in Spanish, in its own words, the same class:  `frente` draws its front", () => {
+    const carta = [
+      'una "carta" es una vista reversible donde:',
+      "\t- para dibujar su frente:",
+      "\t\t<es-texto>hola</es-texto>",
+      '\t- para "dibujar su dorso": <es-imagen source="dorso.svg" />'
+    ]
+    const compiled = compile(carta, "/test.es.spell")
+    expect(compiled).toContain("export class Carta extends TwoSidedView {")
+    expect(compiled).toContain("drawFront() {")
+    expect(compiled).toContain("drawBack() {")
+    expect(compiled).toContain('part: "front"')
+    expect(compiled).not.toContain("voltear() {")
+    const run = runSpellFiles([
+      {
+        path: "/Test.es.spell",
+        contents: [
+          ...carta,
+          "c es una nueva carta",
+          "abajo1 es c está boca abajo",
+          "voltear c",
+          "arriba2 es c está boca arriba",
+          "lado es la dirección de c"
+        ].join("\n")
+      }
+    ])
+    expect(run("abajo1, arriba2, lado")).toEqual({ abajo1: true, arriba2: true, lado: "up" })
   })
 
   test("its actions are known ahead, as any type's:  a file before the card's turns it over", () => {
@@ -230,18 +246,6 @@ describe("a two sided view (J8)", () => {
     ])
     expect(files.flatMap((file) => file.errors)).toEqual([])
     expect(files[0]!.compiled).toContain("this.turnOver()")
-  })
-
-  test("its lines parse, in every language", () => {
-    for (const language of SP.Language.all.values()) {
-      const prelude = language.words.templatePreludes?.["two sided view"]
-      if (!prelude) continue
-      const path = language.lang === "en" ? "/test.spell" : `/test.${language.lang}.spell`
-      const declare = language.lang === "en" ? 'a "card" is a view where:' : 'una "carta" es una vista donde:'
-      const body = prelude.split("\n").map((line) => `\t${line}`)
-      const { files } = parseSpellProject([{ path, contents: [declare, ...body].join("\n") }])
-      expect(files[0]!.errors, language.lang).toEqual([])
-    }
   })
 })
 

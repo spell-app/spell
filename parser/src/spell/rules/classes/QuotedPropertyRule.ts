@@ -37,6 +37,8 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
     of?: string
     /** A sub-type's phrase:  the type whose STATIC method it calls, e.g. `Joker` -- see `staticArg`. */
     staticOf?: string
+    /** Each placeholder's values by what they compile to, when that isn't themselves -- see `valueOutputs`. */
+    valueOutputs?: Record<string, Record<string, string | number>>
   }
   /** The phrase's owner, e.g. `Card`, if known -- see `parse()`. */
   declare thisType: P.Datatype | undefined
@@ -46,6 +48,12 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
    * - See `QuotedPropertyFormulaBits.staticArg`.
    */
   declare staticOf: string | undefined
+  /**
+   * Each placeholder's values, by what they compile to when that isn't themselves, e.g.
+   * `{ direction: { abajo: "down", arriba: "up" } }`:  a built-in template's Spanish words for its English class's
+   * values (epic `elemental-spell` Q71).
+   */
+  declare valueOutputs: Record<string, Record<string, string | number>> | undefined
   /**
    * Calls generated method `output`, e.g. `is_a_$suit` -- also our `ruleName`.
    * - `values`:  each `(var)` placeholder's enumerated values, in order, e.g. `{ suit: ["'clubs'", ...] }`.
@@ -57,7 +65,8 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
    * - What a project's `SPELL: DECLARES` comment holds for us -- see `SP.SpellDeclarations`.
    */
   static specialize<T extends AbstractClass<P.Rule>>(this: T, declared: P.SpecializeWith<T>): T {
-    const { output, values, kinds, of, staticOf } = declared as (typeof QuotedPropertyRule)["SpecializeWith"]
+    const { output, values, kinds, of, staticOf, valueOutputs } =
+      declared as (typeof QuotedPropertyRule)["SpecializeWith"]
     const ruleData = Object.entries(values).map(([instanceVar, varValues]) =>
       placeholderData(instanceVar, varValues, kinds?.[instanceVar])
     )
@@ -66,17 +75,25 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
       methodName: output,
       ruleData,
       thisType: of,
-      staticOf
+      staticOf,
+      valueOutputs
     }
     return super.specialize(statics, declared) as unknown as T
   }
 
   /** What we write into our statement's `SPELL: DECLARES` comment -- see `P.Rule.declarationProps()`. */
   static declarationProps(
-    { output, values, kinds, staticOf }: (typeof QuotedPropertyRule)["SpecializeWith"],
+    { output, values, kinds, staticOf, valueOutputs }: (typeof QuotedPropertyRule)["SpecializeWith"],
     syntax: string | undefined
   ) {
-    return { syntax, output, values, ...(kinds ? { kinds } : {}), ...(staticOf ? { staticOf } : {}) }
+    return {
+      syntax,
+      output,
+      values,
+      ...(kinds ? { kinds } : {}),
+      ...(staticOf ? { staticOf } : {}),
+      ...(valueOutputs ? { valueOutputs } : {})
+    }
   }
 
   /**
@@ -139,13 +156,13 @@ export class QuotedPropertyRule extends InfixOperatorSuffix {
         if (typeof arg.value === "string") {
           // the word said, singular or plural (`club`, `clubs`), to its value:
           // `values` are `clubs`, `spades`, etc -- quoted (`'clubs'`) in older declarations
-          const { values } = this.ruleData[index]!
+          const { values, instanceVar } = this.ruleData[index]!
           const valueIndex = placeholderValueIndex(values, arg.value)
-          return new P.ASTConstantExpression(arg, {
-            name: arg.value,
-            // not one of its values:  the word as said (it was the text `arg.value`, a typo)
-            value: valueIndex !== -1 ? P.spellValueOf(values[valueIndex]!) : arg.value
-          })
+          // not one of its values:  the word as said (it was the text `arg.value`, a typo)
+          const said = valueIndex !== -1 ? P.spellValueOf(values[valueIndex]!) : arg.value
+          // what it compiles to, if not itself:  a built-in template's Spanish `abajo` is its `down`
+          const output = this.valueOutputs?.[instanceVar]?.[`${said}`]
+          return new P.ASTConstantExpression(arg, { name: arg.value, value: output ?? said })
         }
         if (typeof arg.value === "number") {
           return new P.ASTNumericLiteral(arg, {
@@ -179,5 +196,6 @@ type QuotedPropertyRuleProps = Prettify<
     ruleData: QuotedPropertyFormulaBits["ruleData"]
     thisType?: P.Datatype
     staticOf?: string
+    valueOutputs?: Record<string, Record<string, string | number>>
   }
 >

@@ -103,28 +103,6 @@ export const spanishWords: SP.LanguageWords = {
   listOfWord: "de",
 
   /** The old words for views, each an error naming its new word (epic `elemental-spell`, Q61). */
-  // las líneas que recibe un tipo hecho directamente de una plantilla integrada (épica `elemental-spell` P5)
-  templatePreludes: {
-    "two sided view": [
-      '- tiene las partes "frente" y "dorso"',
-      '- su "dirección" es arriba o abajo',
-      '- "está boca (dirección)"',
-      "- para voltearla boca arriba:",
-      "\tponer su dirección a arriba",
-      "- para voltearla boca abajo:",
-      "\tponer su dirección a abajo",
-      "- para voltearla:",
-      "\tsi está boca abajo",
-      "\t\tvoltear eso boca arriba",
-      "\tde lo contrario",
-      "\t\tvoltear eso boca abajo",
-      "- para dibujarla:",
-      "\tsi está boca abajo",
-      "\t\tdibujar su dorso",
-      "\tde lo contrario",
-      "\t\tdibujar su frente"
-    ].join("\n")
-  },
   retiredTypeWords: {
     dibujable: "vista",
     "cosa dibujable": "vista",

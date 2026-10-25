@@ -708,6 +708,8 @@ export function loadBuiltInTypes(
 ): void {
   for (const entry of BUILT_IN_TYPE_TABLE) {
     const type = scope.types.get(entry.name, "LOCAL_ONLY")
+    // a built-in template written in spell, in a root without them (`SP.Language.bareRootScope()`):  only its docs here
+    if (!type && SP.isBuiltInTemplate(entry.name)) continue
     if (!type) throw new TypeError(`Built-in type '${entry.name}' isn't in the root scope:  see P.BUILT_IN_TYPES`)
     const addMember = (props: P.ScopeVariableProps) => {
       if (!keepExisting || !type.variables.get(props.name, "LOCAL_ONLY")) type.variables.add(props)
@@ -811,8 +813,10 @@ export function builtInMembersOfRule(ruleName: string): Array<{ type: SP.BuiltIn
  */
 export function isBuiltInTypeScope(type: P.TypeScope | undefined): boolean {
   if (!type) return false
-  // any root:  a Spanish project's built-ins are its own language's root's, a mixed project's its own root's
-  return SP.Language.rootScopes.some((root) => root.types.get(type.name, "LOCAL_ONLY") === type)
+  // any root's own:  a Spanish project's built-ins are its own language's root's, a mixed project's its own
+  // root's, a built-in template's compile its bare root's (`SP.Language.bareRootScope()`):  a plain `P.RootScope`,
+  // NOT its sub-classes, a project's scope or its import layer
+  return type.parentScope?.constructor === P.RootScope
 }
 
 /**

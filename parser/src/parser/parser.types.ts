@@ -44,8 +44,11 @@ export type Datatype = string
  * - Their members, e.g. `the length of the name`, are spell's:
  *   in its `BUILT_IN_TYPE_TABLE`, loaded into these `TypeScope`s.
  *   The parser only knows their names.
- * - NOTE: `list`, `thing`, `app`, `view`, `viewable list`, `page` and `two sided view` are runtime classes too
+ * - NOTE: `list`, `thing`, `app`, `view`, `viewable list` and `page` are runtime classes too
  *   (`List`, `Thing` ...), which compiled code names by `BUILT_IN_CLASS_NAMES`.  The rest are plain javascript values.
+ * - NOT here:  a built-in TEMPLATE written in spell, e.g. `two sided view`.  Its type comes into the root scope
+ *   from its compiled declarations, with its members (spell's `loadBuiltInTemplates()`;  epic `elemental-spell` Q71).
+ *   Its class name is still `BUILT_IN_CLASS_NAMES`', so compiled code imports it from the core.
  */
 export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   text: undefined,
@@ -64,8 +67,6 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   "viewable list": "list",
   // a view people reach by its own address -- `a home is a page`
   page: "view",
-  // a view with a front and a back, face up or face down -- `a card is a two sided view`
-  "two sided view": "view",
   nothing: undefined
 }
 
@@ -82,6 +83,7 @@ export const BUILT_IN_CLASS_NAMES: Record<Datatype, string> = {
   view: "View",
   "viewable list": "ViewableList",
   page: "Page",
+  // a built-in template written in spell, compiled into the core (not in `BUILT_IN_TYPES`)
   "two sided view": "TwoSidedView"
 }
 

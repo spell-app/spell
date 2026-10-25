@@ -165,6 +165,9 @@ export class SpellDeclarations {
         merge({ ...SpellDeclarations.ruleDeclaration(item), of: SpellDeclarations.ownerOf(statement) })
       }
     }
+    // a view's parts aren't scope records:  its rule notes them -- see `HasParts`
+    const declaresParts = (statement.data as { declaresParts?: SP.DeclaredParts }).declaresParts
+    if (declaresParts) merge({ of: declaresParts.of, parts: declaresParts.parts })
     // constants an `enumeration` declares are loaded from it
     const fromEnumeration = enumerationConstants(declaration.enumeration)
     const others = constants.filter((name) => !fromEnumeration.includes(name))
@@ -296,7 +299,10 @@ export class SpellDeclarations {
    * - A type picked as `Card:Playingcard` loads as `Playingcard`, everywhere a loaded record names it:
    *   see `renamed()`.
    *   - Its `runtimeName` stays `Card`:  its class is still called that when the code runs.
-   * - Records where each name came from in `scope.origins`, and what `module` provides in `scope.modules`.
+   * - `scope`:  a project's import layer;  or a ROOT, for spell's built-in templates written in spell
+   *   (`SP.loadBuiltInTemplates()`, epic `elemental-spell` Q71).
+   * - Records where each name came from in `scope.origins`, and what `module` provides in `scope.modules`:
+   *   an import layer only.
    * - Each record keeps where it was declared, in `projectId`'s sources, for editors (see `P.DeclaredAt`):
    *   - `declaredAt` on types, variables and constants
    *   - `declared` on rules
@@ -308,7 +314,7 @@ export class SpellDeclarations {
    *   - a type it declares was already imported, from elsewhere -- NOT a rule:  see `checkImportClashes()`
    */
   static load(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     { from, projectId = from, declarations, import: picks = ["*"], version, module }: SP.DeclarationsImport
   ) {
     SpellDeclarations.checkVersions(from, declarations, version)
@@ -317,7 +323,7 @@ export class SpellDeclarations {
     const provided = declarations.provides
       .filter((name) => originals.has(name))
       .map((name) => (renames.has(name) ? `${name} as ${renames.get(name)}` : name))
-    if (module) scope.modules.set(module, provided)
+    if (module && scope instanceof P.ImportScope) scope.modules.set(module, provided)
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
     for (const original of declarations.statements) {
@@ -340,6 +346,7 @@ export class SpellDeclarations {
         SpellDeclarations.loadRule(scope, from, names, rule, declaration, declaredAt)
       }
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
+      SpellDeclarations.loadParts(scope, names, declaration)
     }
   }
 
@@ -372,14 +379,14 @@ export class SpellDeclarations {
    * Type `type`, if picked -- throws if another import already declared it.
    * - `runtimeName`:  its class's name when the code runs, if it was renamed -- see `P.TypeScope.runtimeName`.
    */
-  private static loadType(scope: P.ImportScope, from: string, names: Set<string>, type: P.TypeScopeProps) {
+  private static loadType(scope: P.RootScope, from: string, names: Set<string>, type: P.TypeScopeProps) {
     const { name } = type
     if (!names.has(name)) return
     if (scope.types.get(name, "LOCAL_ONLY")) {
-      SpellDeclarations.fail(from, `type '${name}' was already imported from '${scope.origins.get(name)}'`)
+      SpellDeclarations.fail(from, `type '${name}' was already imported from '${originOf(scope, name)}'`)
     }
     scope.types.add(definedOnly(type))
-    scope.origins.set(name, from)
+    if (scope instanceof P.ImportScope) scope.origins.set(name, from)
   }
 
   /**
@@ -395,7 +402,7 @@ export class SpellDeclarations {
    *   so an importer can say `its "suit" is a card suit` too -- see `loadPropertyKind()`.
    */
   private static loadVariables(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     names: Set<string>,
     declaration: SP.SpellDeclaration,
     declaredAt: P.DeclaredAt | undefined
@@ -411,7 +418,8 @@ export class SpellDeclarations {
       autoDeclared,
       exclusive,
       rules,
-      readAs
+      readAs,
+      output
     } = declaration
     const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
     if (!typeScope) return
@@ -419,6 +427,8 @@ export class SpellDeclarations {
       typeScope.variables.add(
         definedOnly({
           name: property,
+          // compiled by another name:  a built-in template's Spanish `dirección` reads `.direction`
+          output,
           asWritten,
           datatype,
           readAs,
@@ -452,7 +462,7 @@ export class SpellDeclarations {
    * - Returns its name.
    */
   private static loadPropertyKind(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     typeScope: P.TypeScope,
     { property, asWritten, classVariable, enumeration, defined }: SP.SpellDeclaration,
     declaredAt: P.DeclaredAt | undefined
@@ -471,7 +481,7 @@ export class SpellDeclarations {
    * - The same constant twice is fine, unless it means something else.
    */
   private static loadConstants(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     from: string,
     names: Set<string>,
     { of, enumeration, constants = [], constantOutputs = {} }: SP.SpellDeclaration,
@@ -494,7 +504,7 @@ export class SpellDeclarations {
    * - Its `P.ScopeRule.declared` keeps its owner, what its statement declared and where -- for editors.
    */
   private static loadRule(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     from: string,
     names: Set<string>,
     importableAs: string,
@@ -509,7 +519,18 @@ export class SpellDeclarations {
     const { syntax } = declaration
     const declared = definedOnly({ owner, declaration: SpellDeclarations.editorDeclaration(declaration), declaredAt })
     scope.addRule(rule, syntax === undefined ? {} : { syntax }, undefined, declared)
-    if (rule.ruleName) scope.origins.set(rule.ruleName, from)
+    if (rule.ruleName && scope instanceof P.ImportScope) scope.origins.set(rule.ruleName, from)
+  }
+
+  /**
+   * `declaration`'s parts, and the names they compile by, onto its type `of` -- if it was picked.
+   * - See `P.TypeScope.parts` and `partOutputs`.
+   */
+  private static loadParts(scope: P.RootScope, names: Set<string>, { of, parts, partOutputs }: SP.SpellDeclaration) {
+    const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
+    if (!typeScope || !parts) return
+    typeScope.parts = [...new Set([...(typeScope.parts ?? []), ...parts])]
+    if (partOutputs) typeScope.partOutputs = { ...typeScope.partOutputs, ...partOutputs }
   }
 
   /**
@@ -519,7 +540,7 @@ export class SpellDeclarations {
    * - Keys a compiler from before P4 didn't write -- `params`, `returns` -- load as unknown.
    */
   private static loadMethod(
-    scope: P.ImportScope,
+    scope: P.RootScope,
     names: Set<string>,
     declaration: SP.SpellDeclaration,
     declaredAt: P.DeclaredAt | undefined
@@ -747,11 +768,20 @@ export class SpellDeclarations {
   /**
    * PascalCase name of the type `statement` declares something ON, from its `getDeclaration().of`.
    * - e.g. `Card` for `cards have a suit as ...`
+   * - The type it names, as the statement's scope knows it, when there is one -- or the body's own, for its `it`:  a type of several words keeps its
+   *   class name, `TwoSidedView` for `two sided view` -- NOT `Twosidedview`, which no type is called, so its rule
+   *   would never load.
    * - `undefined` if it isn't on a type.
    */
   private static ownerOf(statement: P.Match): string | undefined {
     const of = statement.rule.getDeclaration(statement)?.of
-    return of ? P.typeCase(P.singularize(of)) : undefined
+    if (!of) return undefined
+    // `it` in a type's body says its instance name, which can't be turned back into a class name of several words:
+    // `twosidedview` -- so the body's own type, when it's the one
+    const subject = P.SubjectScope.of(statement.scope)?.subjectType
+    if (subject && subject.instanceName === of) return subject.name
+    const known = statement.scope.getType(CLASS_NAME.test(of) ? of : SP.typeName(of))?.name
+    return known ?? (CLASS_NAME.test(of) ? of : P.typeCase(P.singularize(of)))
   }
 
   /**
@@ -795,6 +825,9 @@ const PROJECT_MARKER = "SPELL: PROJECT"
  * - Epic page D37:  no version bump, so an old compiled library still loads.
  */
 const LEGACY_ENUMERATION_RULE = "enumeration"
+
+/** A class name as compiled code has it, e.g. `Card`, `TwoSidedView`:  a capital, then no spaces -- see `ownerOf()`. */
+const CLASS_NAME = /^\p{Lu}[^\s]*$/u
 
 /** Starts each declaring statement's comment -- see `commentFor()`. */
 const DECLARES_MARKER = "SPELL: DECLARES"
@@ -935,6 +968,11 @@ function enumerationInitializer(enumeration: Array<string | number> | undefined)
  */
 function spellValues(enumeration: Array<string | number> | undefined): Array<string | number> | undefined {
   return enumeration?.map(P.spellValueOf)
+}
+
+/** Where import layer `scope` got `name` from -- a root has no record of it. */
+function originOf(scope: P.RootScope, name: string): string | undefined {
+  return scope instanceof P.ImportScope ? scope.origins.get(name) : undefined
 }
 
 /**

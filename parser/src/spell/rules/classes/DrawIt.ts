@@ -61,6 +61,8 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
     if (match.groups.part && DrawIt.readsAsDrawMethod(scope, tokens, match.groups.part)) return undefined
     const drawing = DrawIt.drawingOf(match)
     if (!drawing) return undefined
+    // a part by the name it compiles by:  a two sided view's Spanish `frente` draws its `front` (`P.TypeScope.partOutputs`)
+    if (match.data.part) match.data.part = type.partOutput(match.data.part)
     // only a list draws each item, or a placeholder while it's empty;  any type draws its parts
     if (drawing !== "draw" && drawing !== "draw_its_part" && !type.isA("list")) return undefined
     // English's `to draw it:` is `to_do_something`'s:  `draw()`, as for any `to <verb> it:`

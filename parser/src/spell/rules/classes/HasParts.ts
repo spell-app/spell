@@ -1,5 +1,6 @@
 import { proto } from "spell/util"
 import { P } from "spell-parser/parser"
+import type { SP } from "spell-parser/spell"
 import { Priority } from "spell-parser/spell/rules/rules.types"
 import { getKnownType } from "spell-parser/spell/rules/types"
 // Through the folder:  read only when called, once the folder has loaded
@@ -17,7 +18,7 @@ import { SpellStatement } from "spell-parser/spell/rules/Statement"
  * - Compiles to the list of them on the class, for whatever reads its parts:  `static parts = ["front", "back"]`.
  * - Declaring a part is optional:  its drawing declares it too.  Declare one that a type built on this one draws.
  */
-export class HasParts extends SpellStatement<"type|parts"> {
+export class HasParts extends SpellStatement<"type|parts", { declaresParts?: SP.DeclaredParts }> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
@@ -30,9 +31,16 @@ export class HasParts extends SpellStatement<"type|parts"> {
       .map((name) => DrawIt.partName(`${name.raw}`.replace(/^["']|["']$/g, "")))
   }
 
+  /**
+   * SIDE EFFECT:  each of its parts is one of its type's.
+   * - Noted in `match.data.declaresParts` too, for the project's declarations:  parts aren't scope records, so an
+   *   importer -- or a root loading a built-in template -- learns them from there (`SP.SpellDeclarations`).
+   */
   mutateScope(match: P.MatchFor<this>) {
     const type = getKnownType(match.groups.type)
-    for (const part of HasParts.partsOf(match)) type.declarePart(part, match)
+    const parts = HasParts.partsOf(match)
+    for (const part of parts) type.declarePart(part, match)
+    match.data.declaresParts = { of: type.name, parts }
   }
 
   getAST(match: P.MatchFor<this>): P.ASTStaticDefinition {

@@ -67,18 +67,38 @@ export class Language {
    *   - spell's runtime classes (`SPELL_BASE_TYPES`:  `Object`, `Thing`, `List`, `App`)
    *   - then every other built-in type's NAME (`P.BUILT_IN_TYPES`:  `text`, `number` ...), each with its super-type,
    *     so `is a number` names a known type, and `integer` is a `number`
+   * - Spell's built-in TEMPLATES written in spell, e.g. `two sided view`:  each one's type and its members, in this
+   *   language's words, from its compiled declarations -- see `SP.loadBuiltInTemplates()` (epic `elemental-spell` Q71).
+   *   - Their rules go on a clone of this language's `parser`, the root's own:  so `bareRootScope()` has none.
    * - Their members -- `the length of the name` -- from `SP.BUILT_IN_TYPE_TABLE`, see `loadBuiltInTypes()`.
    * - Built the first time it's asked for, with this language's words in play.
    */
   get rootScope(): P.RootScope {
     return (this._rootScope ??= P.Inflector.using(this.inflector, () => {
-      const scope = new P.RootScope({ name: `spellRoot_${this.lang}`, parser: this.parser })
+      const parser = this.parser.clone({ module: `spellRoot_${this.lang}` })
+      const scope = new P.RootScope({ name: `spellRoot_${this.lang}`, parser })
       Language.addBuiltInTypes(scope)
+      SP.loadBuiltInTemplates(scope, [this])
       SP.loadBuiltInTypes(scope, this.words)
       return scope
     }))
   }
   private _rootScope: P.RootScope | undefined
+
+  /**
+   * A root like `rootScope`, WITHOUT spell's built-in templates written in spell (`SP.loadBuiltInTemplates()`):
+   * where those templates compile themselves, e.g. `two sided view` -- see the core's `writeTemplates.ts`.
+   * - Made afresh each time, never shared, on a clone of this language's `parser`.
+   */
+  bareRootScope(): P.RootScope {
+    return P.Inflector.using(this.inflector, () => {
+      const parser = this.parser.clone({ module: `spellRoot_${this.lang}_bare` })
+      const scope = new P.RootScope({ name: `spellRoot_${this.lang}_bare`, parser })
+      Language.addBuiltInTypes(scope)
+      SP.loadBuiltInTypes(scope, this.words)
+      return scope
+    })
+  }
 
   /**
    * The root scope of a project whose files are written in `languages`, in file order (epic `spanish` P19).
@@ -98,8 +118,10 @@ export class Language {
     let root = Language.mixedRoots.get(key)
     if (!root) {
       root = P.Inflector.using(first.inflector, () => {
-        const scope = new P.RootScope({ name: `spellRoot_${key}`, parser: first.parser })
+        const parser = first.parser.clone({ module: `spellRoot_${key}` })
+        const scope = new P.RootScope({ name: `spellRoot_${key}`, parser })
         Language.addBuiltInTypes(scope)
+        SP.loadBuiltInTemplates(scope, languages)
         // each language's words for each member, the first's first:  one both say the same, e.g. `id`, once
         for (const language of languages) SP.loadBuiltInTypes(scope, language.words, { keepExisting: true })
         return scope
@@ -121,9 +143,12 @@ export class Language {
    * Add spell's built-in types to root `scope`, with no members yet:
    * - spell's runtime classes (`SPELL_BASE_TYPES`:  `Object`, `Thing`, `List`, `App`)
    * - then every other built-in type's NAME (`P.BUILT_IN_TYPES`:  `text`, `number` ...), each with its super-type
+   * - NOT a built-in template written in spell, e.g. `TwoSidedView`:  its type comes from its declarations
+   *   (`SP.loadBuiltInTemplates()`), or, in a bare root, from compiling it
    */
   private static addBuiltInTypes(scope: P.RootScope): void {
-    SPELL_BASE_TYPES.forEach((type) => scope.types.add(type))
+    const templates = Object.values(SP.BUILT_IN_TEMPLATES)
+    SPELL_BASE_TYPES.filter((type) => !templates.includes(type)).forEach((type) => scope.types.add(type))
     for (const [name, superType] of Object.entries(P.BUILT_IN_TYPES)) {
       const existing = scope.types.get(name, "LOCAL_ONLY")
       if (!existing) scope.types.add({ name, superType })
@@ -392,16 +417,6 @@ export type LanguageWords = {
    * - None:  nothing retired.
    */
   retiredTypeWords?: Record<string, string>
-  /**
-   * A built-in template written in spell, by the datatype it's made from:  the lines a type made straight from it
-   * gets, in its outline body, before its own (epic `elemental-spell` P5).
-   * - e.g. `two sided view`:  its parts, its direction, `it is face up`, `turn it over` and its drawing, which picks
-   *   its front or its back -- so `a card is a two sided view` with `to draw its front:` and `to draw its back:`
-   *   just works.
-   * - Written in this language, so they compile in it, as the type's own lines would.
-   * - See `CreateType.preludeOf()`.
-   */
-  templatePreludes?: Record<string, string>
   /**
    * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
    * - None:  a spellx file in this language reads English's.

@@ -348,11 +348,14 @@ export class Tableau extends Pile {
   - `draw its front` places it, on a line of its own or inside markup:  `<div>{draw its front}</div>`
   - the part's element carries its name as a CSS part, `part="front"`, so a page can style it with `::part(front)`
 - `a card is a two sided view` gives the card a front and a back:
-  - its direction, `up` or `down` (a new one starts up), `it is face up`, `it is face down`
+  - its direction, `down` or `up` (a new one starts face down), `it is face up`, `it is face down`
   - `turn it face up`, `turn it face down`, `turn it over`
   - a drawing that shows its front face up and its back face down
   - So the card says only `- to draw its front:` and `- to draw its back:`.
     In Spanish:  `una carta es una vista reversible`, `para dibujar su frente`, `voltear la carta`.
+  - A two sided view is written in Spell itself, and compiled once into the runtime's `TwoSidedView`:
+    [TwoSidedView.spell](src/core/templates/TwoSidedView.spell).
+    The card compiles to just its own two drawings, `class Card extends TwoSidedView`.
 - A viewable list has three:
   - its `to draw it` is the WRAPPER around its items, by default nothing but the place they show
   - its `to draw each item` is the wrapper each item is drawn in, by default just the item's own drawing:

@@ -90,6 +90,7 @@
     "/////// markdown": "",
     "markdown:spec:update": "node scripts/markdown/gfm-spec.mjs",
     "/////// core": "",
+    "core:gen:templates": "tsx src/spell/node/writeBuiltInTemplates.ts && vp fmt src/core/classes src/spell/builtInTemplates.generated.ts",
     "core:gen:declarations": "tsx src/core/writeCoreDeclarations.ts && vp fmt src/core/core.declarations.json5",
     "/////// spell": "",
     "spell:test:ui": "vp test --ui --project spell",

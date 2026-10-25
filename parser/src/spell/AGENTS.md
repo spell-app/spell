@@ -58,6 +58,11 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - And the spell syntax table (see "Parser rules"):
     - `spellSyntax`
     - `writeSpellSyntax`, the script behind `yarn spell:gen:syntax`
+  - And spell's built-in templates written in spell, compiled once (epic `elemental-spell` Q71;  "What spellx says, in
+    code spell" in [PARSING.md](PARSING.md)):
+    - `builtInTemplateFiles`:  what they compile to, each one's class (the JavaScript and Python cores) and every
+      language's declarations, `builtInTemplates.generated.ts`
+    - `writeBuiltInTemplates`, the script behind `yarn core:gen:templates`
   - Projects on disk are NOT here:  they're spaces' (`spell-app/spaces/server/node/...`).
   - The barrel NEVER exports it.
   - Other repos import these files by name, e.g. `spell-parser/spell/node/buildTsx`.

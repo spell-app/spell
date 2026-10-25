@@ -14,10 +14,13 @@ import { SP } from "spell-parser/spell"
 describe("built-in type table", () => {
   test("each type is in the root scope, with the super-type `P.BUILT_IN_TYPES` gives it", () => {
     for (const entry of SP.BUILT_IN_TYPE_TABLE) {
-      expect(Object.hasOwn(P.BUILT_IN_TYPES, entry.name), entry.name).toBe(true)
-      expect(entry.superType, entry.name).toBe(P.BUILT_IN_TYPES[entry.name])
+      // a built-in template written in spell:  its type comes from its compiled declarations, NOT `P.BUILT_IN_TYPES`
+      const isTemplate = SP.isBuiltInTemplate(entry.name)
+      expect(Object.hasOwn(P.BUILT_IN_TYPES, entry.name), entry.name).toBe(!isTemplate)
+      if (!isTemplate) expect(entry.superType, entry.name).toBe(P.BUILT_IN_TYPES[entry.name])
       const type = SP.SpellParser.rootScope.types.get(entry.name, "LOCAL_ONLY")
       expect(type, entry.name).toBeDefined()
+      expect(type!.superType, entry.name).toBe(entry.superType && P.classCase(entry.superType))
       expect(SP.isBuiltInTypeScope(type)).toBe(true)
     }
   })

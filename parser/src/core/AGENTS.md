@@ -32,6 +32,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Python's [test_core_declarations.py](../../tests/py/core/tests/test_core_declarations.py) checks `spell_core`
     against it:  a new name fails there too,
     until it's ported or listed in py's [not_ported_yet.json5](../py/core/not_ported_yet.json5).
+- [templates/](templates/) holds spell's built-in TEMPLATES, written in spell, e.g. [TwoSidedView.spell](templates/TwoSidedView.spell)
+  and its Spanish twin (epic `elemental-spell` Q71).
+  - Compiled ONCE by `yarn core:gen:templates`:  each one's class is GENERATED, [classes/TwoSidedView.ts](classes/TwoSidedView.ts)
+    and Python's `spell_core/two_sided_view.py`.  NEVER edit those:  edit the template, run that.
+  - Its words for the parser:  spell's `loadBuiltInTemplates()`, from the declarations the same run writes.
+  - The generator is spell's ([builtInTemplateFiles.ts](../spell/node/builtInTemplateFiles.ts)):  core never imports
+    spell, the templates are data here.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.

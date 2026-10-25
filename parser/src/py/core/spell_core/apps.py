@@ -11,7 +11,8 @@ game = Game()
 game.start()   # drawn on the page:  `core.page.body_html()` writes it
 ```
 
-- The twins of the JavaScript core's `App`, `View`, `Page`, `TwoSidedView` and `ViewableList` (`classes/`).
+- The twins of the JavaScript core's `App`, `View`, `Page` and `ViewableList` (`classes/`).
+- `TwoSidedView` is a built-in template written in spell:  generated, in `two_sided_view.py`.
 """
 
 from spell_core.drawing import Element, h
@@ -61,13 +62,6 @@ class Page(View):
     """A view people reach by its own address:  what `a home is a page` extends.
 
     - NOTE:  its address, and moving from page to page, aren't built yet:  for now it's drawn as any view is.
-    """
-
-
-class TwoSidedView(View):
-    """A view with a front and a back, face up or face down:  what `a card is a two sided view` extends.
-
-    - NOTE:  empty for now, as the JavaScript core's:  its own words and its front and back come with parts.
     """
 
 

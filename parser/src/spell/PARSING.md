@@ -1081,16 +1081,28 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
   - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
     `{markup:draw_part}` => `return ...`, at `Priority.specific`.
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
-- A BUILT-IN TEMPLATE written in spell:  `a card is a two sided view` (J8).
-  - The template's lines are the language's `templatePreludes` (English's, Spanish's own words), parsed into the
-    type's outline body BEFORE its own lines (`CreateType.readPrelude()`, in `mutateScope()`), kept as
-    `data.preludeBlock`, compiled into the class.
-  - A two sided view's:  its parts front and back, `its "direction" is up or down` (a new one starts up),
+- A BUILT-IN TEMPLATE written in spell:  `a card is a two sided view` (J8;  compiled once since Q71).
+  - Its source is spell, in the core:  [TwoSidedView.spell](../core/templates/TwoSidedView.spell), and each other
+    language's twin, [TwoSidedView.es.spell](../core/templates/TwoSidedView.es.spell).
+  - Compiled ONCE by `yarn core:gen:templates` ([builtInTemplateFiles.ts](node/builtInTemplateFiles.ts)), in a root
+    without it (`SP.Language.bareRootScope()`):
+    - its class into the core, `TwoSidedView` ([classes/TwoSidedView.ts](../core/classes/TwoSidedView.ts)), and
+      Python's (`spell_core/two_sided_view.py`)
+    - its declarations, every language's, into [builtInTemplates.generated.ts](builtInTemplates.generated.ts)
+    - [builtInTemplateFiles.test.ts](../../tests/spell/node/builtInTemplateFiles.test.ts) fails while either is stale
+  - Each language's root loads its declarations (`SP.loadBuiltInTemplates()`, from `Language.rootScope`):  the
+    type, its property, its phrases, its methods' rules, its parts -- as an import layer loads a project's.
+    - Its datatype is still a type word (`two sided view`, `vista reversible`) and a class name
+      (`P.BUILT_IN_CLASS_NAMES`), but NOT one of `P.BUILT_IN_TYPES`:  its type comes from its declarations.
+    - Its rules go on the root's own clone of the language's parser.
+  - So `a card is a two sided view` compiles to just the card's own members, `extends TwoSidedView`.
+  - Another language's words name the ONE English class's members:  the generator pairs the twin's statements with
+    the English, so `dirección` reads `.direction` (a property's `output`), `frente` draws `drawFront()`
+    (`P.TypeScope.partOutputs`) and `está boca arriba` is `isFaceDirection("up")` (a phrase's `valueOutputs`).
+    - NOT its values as constants:  a root's constants are every program's, so a Spanish file sets a direction by
+      the template's words (`voltearla boca arriba`), not `poner su dirección a arriba`.
+  - A two sided view's:  its parts front and back, `its "direction" is down or up` (a new one starts face down, J36),
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a part.
-  - Only a type made STRAIGHT from it;  its sub-types get them through it.
-  - The pre-pass knows its methods ahead (`SpellParser.preludeMethodsFor()`), so a file before the card's can call
-    `turn the card over`.
-  - Its lines' positions are the prelude's own text, not the file's:  hover and go-to on them land nowhere useful.
 
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 
@@ -1140,6 +1152,9 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
       - e.g. `text`, `number` ...
       - e.g. `integer` is a `number`
     - their members, from `SP.BUILT_IN_TYPE_TABLE`
+    - spell's built-in templates written in spell, e.g. `two sided view`:  each one's type and members, from its
+      compiled declarations (`SP.loadBuiltInTemplates()`;  "What spellx says, in code spell", above)
+      - NOT in a bare root (`SP.Language.bareRootScope()`), where they compile themselves
 - `MethodScope` adds args, plus `this` / `it` alias variables, of type `itDatatype`.
 - `SubjectScope` owns nothing, and names the type its lines are about:  see "Outline bodies".
 - `TypeScope` holds:

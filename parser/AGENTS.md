@@ -100,6 +100,6 @@ yarn review           # the finishing pass:  ts, lint:fix, format, test
   `cli`).
 - A folder's own scripts are the root's, prefixed with its name:
   - `markdown:spec:update`
-  - `core:gen:declarations`
+  - `core:gen:declarations`, `core:gen:templates` (spell's built-in templates written in spell, compiled into the core)
   - `spell:gen:syntax`, `spell:test:rules` (and `:bless`), `spell:test:ui`, `spell:test:coverage`
   - The frozen test projects' `spell:test:fixtures` (and `:bless`) are spell-app's, at its root.

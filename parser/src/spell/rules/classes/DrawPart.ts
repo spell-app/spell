@@ -33,7 +33,8 @@ export class DrawPart extends SpellStatement<"part", { part?: string }> {
     const part = DrawIt.partName(`${match.groups.part.value}`)
     const type = DrawPart.viewIn(scope)
     if (type && !type.hasPart(part) && type.getMember(`${match.groups.part.value}`)) return undefined
-    match.data.part = part
+    // by the name it compiles by:  a two sided view's Spanish `frente` is its `front` (`P.TypeScope.partOutputs`)
+    match.data.part = type?.partOutput(part) ?? part
     return match
   }
 

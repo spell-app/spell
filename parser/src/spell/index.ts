@@ -30,6 +30,7 @@ export * from "./SpellSetup"
 export * from "./SpellUrls"
 export * from "./SpellParser"
 export * from "./builtinTypes"
+export * from "./builtInTemplates"
 
 /**
  * `spellParser`: shared `SpellParser` instance with spell's "core" rules already applied.

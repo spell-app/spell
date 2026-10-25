@@ -547,6 +547,14 @@ export type SpellWordsData = {
   messages?: Record<string, string>
 }
 
+/** The parts `- it has parts "front" and "back"` declared on its type, for the project's declarations -- see `HasParts`. */
+export type DeclaredParts = {
+  /** The type they're on, by class name, e.g. `TwoSidedView`. */
+  of: string
+  /** Their names, e.g. `["front", "back"]`. */
+  parts: string[]
+}
+
 /**
  * What ONE statement declared, flat:  a `/*! SPELL: DECLARES {...} *\/` comment.
  * - e.g. `{ property: "suit", classVariable: "Suits", of: "Card", enumeration: [...] }`
@@ -623,6 +631,16 @@ export type SpellDeclaration = {
   /** Compiled output of any `constants` NOT output as just their name, quoted. */
   constantOutputs?: Record<string, string>
   /**
+   * The parts a view declared, e.g. `["front", "back"]` for `- it has parts "front" and "back"`, on type `of`
+   * (epic `elemental-spell` P5) -- see `DeclaredParts`.
+   */
+  parts?: string[]
+  /**
+   * The name each part compiles by, when it isn't its own:  a built-in template's Spanish `frente` draws its `front`
+   * (epic `elemental-spell` Q71) -- see `P.TypeScope.partOutputs`.
+   */
+  partOutputs?: Record<string, string>
+  /**
    * `importableAs` name of the class its rule was `specialize()`d from, e.g. `"method_call"`.
    * - Its OTHER keys here are what that class's `specialize()` takes, e.g. `output` + `alias`.
    * - See `P.Rule.importableRule()`.
@@ -633,7 +651,11 @@ export type SpellDeclaration = {
    * - None in an OLD `rule: "enumeration"` declaration, from before `class_member`:  loading skips those.
    */
   syntax?: string
-  /** Name of the generated method its rule calls, in compiled JS, e.g. `play_fizzbuzz`. */
+  /**
+   * Name of the generated method its rule calls, in compiled JS, e.g. `play_fizzbuzz`.
+   * - On a PROPERTY:  the name it compiles to, when it isn't its own -- a built-in template's Spanish words,
+   *   `dirección` for `.direction` (epic `elemental-spell` Q71).
+   */
   output?: string
   /** What it declares, for editors, e.g. `function` -- left out when a key above says, e.g. `type`. */
   kind?: string
