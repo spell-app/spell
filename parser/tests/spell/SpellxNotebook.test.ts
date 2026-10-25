@@ -114,7 +114,7 @@ describe("a spellx notebook", () => {
     ].join("\n")
     const { code, errors } = compiled(text, "/Raw.spellx")
     expect(errors).toEqual([])
-    expect(code).toContain('h("ui-button", { primary: "" }, "Go"),')
+    expect(code).toContain('h("ui-button", { color: "primary" }, "Go"),')
     expect(code).toContain('h("div", { class: "note" }, "hi"),')
     expect(code).toContain('h("spell-example", { name: "a button" }, h("ui-button", "Go"))')
     const written = SX.CodeSpellWriter.write(text, { path: "/Raw.spellx" })
