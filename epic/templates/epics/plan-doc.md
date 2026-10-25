@@ -504,6 +504,8 @@ active, flag what changed so the user can spot it:
 When an ANSWER rewrites the Overview or a phase (epic `epic-engine` P30;  Q13, B), mark the changed or new WORDS, not
 the block:  `<epic-change item="q16">the new words</epic-change>`, the question's id alone.
 
+They never hold the work up:  Owen accepts them at his leisure, after the fact;  Claude goes straight on.
+
 - One mark per change, around just the words that changed;  a sentence may hold several.
 - Write it in the part file as you rewrite it, or in the HTML you hand a command;  then `epic change <name>` stamps
   it (its id `ch3`, time, the question's answer in short) and lists what waits.  Any `epic` edit stamps it too;

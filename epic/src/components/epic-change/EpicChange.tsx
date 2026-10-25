@@ -101,9 +101,43 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   render(): JSX.Element {
     return (
       <span class={this.rootClass} part={this.partForName("base")}>
-        <mark class={WORDS} part={this.partForName("words")} title={this.wordsTip}>
+        <mark
+          id={WORDS_ID}
+          class={WORDS}
+          part={this.partForName("words")}
+          title={this.showsButtons ? undefined : this.wordsTip}
+        >
           <slot />
         </mark>
+        {/*
+          Accept and Reopen ON the words:  a tooltip with an arrow, on hover, kept 2 seconds after the pointer leaves so
+          it can reach them (Owen, 2026-10-25:  "hard to get to this because it's not attached to the text")
+        */}
+        <Show when={this.showsButtons}>
+          <ui-popup
+            for={WORDS_ID}
+            open-on="hover"
+            hoverable=""
+            hide-delay="2000"
+            position="bottom left"
+            class={BUTTONS}
+            part={this.partForName("buttons")}
+          >
+            <span
+              class={TIP_WORDS}
+              // a native listener, capturing:  the press comes from inside `<epic-review>`, which stops it going further
+              ref={(element: HTMLElement) => this.wireAnswered(element)}
+            >
+              <span class={TIP_LINE}>{this.wordsTip}</span>
+              <epic-review
+                of={this.id}
+                shows="buttons"
+                buttons="change"
+                label={this.translationForKey("buttonsLabel", { item: this.itemLabel })}
+              />
+            </span>
+          </ui-popup>
+        </Show>
         <span class={CHIP_BOX}>
           <button
             type="button"
@@ -116,21 +150,6 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
           >
             {this.itemLabel}
           </button>
-          <Show when={this.showsButtons}>
-            <span
-              class={BUTTONS}
-              part={this.partForName("buttons")}
-              // a native listener, capturing:  the press comes from inside `<epic-review>`, which stops it going further
-              ref={(element: HTMLElement) => this.wireAnswered(element)}
-            >
-              <epic-review
-                of={this.id}
-                shows="buttons"
-                buttons="change"
-                label={this.translationForKey("buttonsLabel", { item: this.itemLabel })}
-              />
-            </span>
-          </Show>
         </span>
         <span id={QA_ID} class={QA} part={this.partForName("qa")} hidden={!this.unfolded}>
           <Show when={this.itemTitle}>
@@ -198,3 +217,10 @@ const QA = "qa"
 
 /** The Q&A's id in its shadow root:  the chip's `aria-controls`. */
 const QA_ID = "qa"
+
+/** The changed words' id:  the buttons' tooltip points at them. */
+const WORDS_ID = "words"
+
+/** Inside the buttons' tooltip:  its box, and its line saying which answer changed the words. */
+const TIP_WORDS = "tip-words"
+const TIP_LINE = "tip-line"

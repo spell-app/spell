@@ -75,35 +75,16 @@
     background: color-mix(in srgb, var(--_epic-change-accent) 12%, transparent);
   }
 
-  /* under the chip, its left edge on the chip's, over the next line:  above, a stuck title row covered it;
-     shown on hover, focus, or unfolded */
-  .buttons {
-    position: absolute;
-    z-index: 2;
-    inset-block-start: 100%;
-    inset-inline-start: -4px;
-    display: none;
-    padding-block-start: 3px;
-    line-height: 1;
-    white-space: nowrap;
+  /* Accept and Reopen:  a tooltip on the words, its arrow at them (`<ui-popup>`, EpicChange.tsx) */
+  .tip-words {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.3;
   }
-  :host(:hover) .buttons,
-  :host(:focus-within) .buttons,
-  :host(:state(open)) .buttons {
-    display: block;
-  }
-  /*
-   * on WHITE, so it stands out over the page (Owen, 2026-10-25);  its own pill's rim the only line:  the hairline ring
-   * round it drew a second border on its right;  in the dark the page's ground, a ring then (C57) as the shadow alone
-   * doesn't edge it
-   */
-  .buttons epic-review {
-    display: inline-block;
-    border-radius: 999px;
-    background: light-dark(#fff, var(--epic-bg, var(--ui-background, Canvas)));
-    box-shadow:
-      0 0 0 1px light-dark(transparent, color-mix(in srgb, currentColor 14%, transparent)),
-      0 2px 8px rgb(0 0 0 / 0.16);
+  .tip-line {
+    color: var(--ui-text-muted, GrayText);
   }
 
   /* ## The question and its answer, unfolded */
