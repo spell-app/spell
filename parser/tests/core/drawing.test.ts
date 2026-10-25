@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vite-plus/test"
 
 import { bridgeSolid } from "spell/util"
-import { core, Thing, List, ViewableList, prop, drawn, h } from "spell-parser/core"
+import { core, App, Thing, List, ViewableList, prop, drawn, h } from "spell-parser/core"
 import { isElementThunk, type Drawing } from "spell-parser/core/drawing"
 
 // counts each error boundary drawn:  `drawing.ts` makes one with `createComponent(Errored, ...)`
@@ -220,6 +220,29 @@ describe("@drawn", () => {
     core.flush()
     expect(element.innerHTML).toBe(`<span class="card">ace clubs</span>`)
     expect(Errored).toHaveBeenCalledTimes(1)
+  })
+
+  test("an app mounts as its own element, `<test-app>`, its drawing that element's CHILDREN (epic `elemental-spell` Q62)", async () => {
+    /** An app as compiled JavaScript writes it:  its element named for its project and `App`. */
+    class Game extends App {
+      static elementTag = core.defineElement(this, "test", "App")
+      override draw(): Drawing {
+        return h("div", { class: "Board" }, "board") as unknown as Drawing
+      }
+    }
+    expect(Game.elementTag).toBe("test-app")
+    // a page that defines elements:  the app is drawn as its element
+    core.elementDefiner = () => undefined
+    try {
+      // the definer hears of the class a microtask after it's declared
+      await Promise.resolve()
+      dispose = core.mountApp(new Game({}), element).unmount
+      core.flush()
+      // its drawing is the element's child, in the same tree as the project's styles:  not in a shadow root
+      expect(element.innerHTML).toBe(`<test-app><div class="Board">board</div></test-app>`)
+    } finally {
+      core.elementDefiner = undefined
+    }
   })
 
   test("the boundary makes h()'s thunk ONCE:  a card added to a pile makes only that card, never the pile again", () => {

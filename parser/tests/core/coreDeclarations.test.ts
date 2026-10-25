@@ -45,7 +45,7 @@ describe("the core's method list, core.declarations.json5", () => {
     )
     expect(statements).toContainEqual(expect.objectContaining({ property: "console", of: "core", module: "console" }))
     expect(statements).toContainEqual(
-      expect.objectContaining({ type: "App", superType: "Thing", module: "classes/App" })
+      expect.objectContaining({ type: "App", superType: "View", module: "classes/App" })
     )
     expect(statements).toContainEqual(
       expect.objectContaining({

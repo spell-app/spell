@@ -22,7 +22,7 @@ import { MARKDOWN_TAG, rawTextOf } from "./JSX.shared"
  * - The markdown is never read as spell:  the tokenizer takes a `<markdown>` element's contents as raw text
  *   (`rawTextTags`), so its `*`, `#`, `<` reach the page as written.
  * - The indent its lines share comes off, so the block can sit indented in a drawing.
- * - A `{hole}` shows a LIVE value, as a `<spell-app>` layout's text does:
+ * - A `{hole}` shows a LIVE value, as a `<spell-viewer>` layout's text does:
  *   the markdown is drawn again when a value it shows changes.
  *   - A hole is a spell expression, read as a text fill-in is (`parseFillIn()`):
  *     `{rank}` ~== `{its rank}` in a card's drawing.

@@ -13,7 +13,8 @@ import {
   isCoreCall,
   isTight,
   topLevelOf,
-  unwrapped
+  unwrapped,
+  withUsedCoreClasses
 } from "./jsShapes"
 import { Naming } from "./Naming"
 
@@ -57,13 +58,21 @@ export class JSWriter extends ProgramWriter {
   /** While writing a loop's body:  a bare `return` in it is `continue` -- see `loop()`. */
   protected returnContinues = false
   /**
-   * The finished module:
+   * The finished module (`writeModule()`), its `@spell/core` import naming only the spell classes it uses
+   * (`withUsedCoreClasses()`):  last, so what a writer adds at the end still counts.
+   */
+  module(code: string): string {
+    return withUsedCoreClasses(this.writeModule(code))
+  }
+
+  /**
+   * The finished module, before `module()` leaves out the spell classes it doesn't use:
    * - `@spell/core`'s helpers the code calls by name, added to its import (see `coreImportNames()`)
    * - what it imports from another project, by our names, e.g. `playFromTheStockPile`:
    *   that project exports them so
    * - a class keeps its name, e.g. `StockPile`
    */
-  module(code: string): string {
+  protected writeModule(code: string): string {
     const names = this.coreImportNames(code)
     if (names.length) {
       const replaced = code.replace(CORE_IMPORT, (_line, imported: string) => {

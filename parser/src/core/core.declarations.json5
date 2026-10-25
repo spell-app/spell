@@ -1387,6 +1387,9 @@
         },
         {
           "name": "project"
+        },
+        {
+          "name": "name"
         }
       ],
       "description": "Name the element of view class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag."
@@ -2033,7 +2036,7 @@
       "property": "appRoot",
       "of": "core",
       "module": "classes",
-      "description": "Element `App.start()` mounts into, if the host says -- e.g. `<spell-app>`'s, inside its shadow root."
+      "description": "Element `App.start()` mounts into, if the host says -- e.g. `<spell-viewer>`'s, inside its shadow root."
     },
     {
       "kind": "method",
@@ -2061,9 +2064,9 @@
     },
     {
       "type": "App",
-      "superType": "Thing",
+      "superType": "View",
       "module": "classes/App",
-      "description": "`App`: a `Thing` that draws a whole application -- what `a game is an app` extends."
+      "description": "`App`:  a `View` that draws a whole application -- what `a game is an app` extends."
     },
     {
       "type": "View",

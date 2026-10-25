@@ -3762,13 +3762,13 @@
               "example": "solitaire is an app",
               "outputs": {
                 "js": {
-                  "code": "export class Solitaire extends App {}\nexport const solitaire = new Solitaire()"
+                  "code": "export class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_statement\", \"App\")\n}\nexport const solitaire = new Solitaire()"
                 },
                 "ts": {
-                  "code": "export class Solitaire extends App {}\nexport const solitaire = new Solitaire()"
+                  "code": "export class Solitaire extends App {\n  static elementTag = core.defineElement(this, \"syntax_statement\", \"App\")\n}\n\nexport class SolitaireElement extends SpellElement<Solitaire> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-statement-app\", \"solitaire\", [])\n}\ncore.useElement(Solitaire, SolitaireElement)\nexport const solitaire = new Solitaire()"
                 },
                 "py": {
-                  "code": "class Solitaire(App):\n    pass\n\nsolitaire = Solitaire()"
+                  "code": "class Solitaire(App):\n    element_tag = \"syntax-statement-app\"\n\nsolitaire = Solitaire()"
                 }
               }
             }

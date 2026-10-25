@@ -22,7 +22,7 @@ import type { PropRule } from "spell/util"
 
 /**
  * ES module specifier compiled spell imports its runtime from:  `import { core, Thing } from "@spell/core"`.
- * - Every runner -- the app, VS Code's, `<spell-app>` -- points it at the copy of the runtime the program runs on,
+ * - Every runner -- the app, VS Code's, `<spell-viewer>` -- points it at the copy of the runtime the program runs on,
  *   by rewriting it:  see `linkModule()` in app's `runner/runCompiled.ts`.
  * - No import map.
  */

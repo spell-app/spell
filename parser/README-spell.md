@@ -186,7 +186,7 @@ and the JavaScript they become.
 | --- | --- |
 | `a card is a thing` | `export class Card extends Thing {}` |
 | `a deck is a list of cards` | `export class Deck extends List { static instanceType = Card }` |
-| `solitaire is an app` | `export class Solitaire extends App {}`, and `export const solitaire = new Solitaire()` |
+| `solitaire is an app` | `export class Solitaire extends App`, its element `<solitaire-app>`, and `export const solitaire = new Solitaire()` |
 | `cards have a suit as one of clubs, diamonds, hearts or spades` | `static Suits = ["clubs", "diamonds", "hearts", "spades"]`, and the property |
 | `the color of a card is red if ... otherwise it is black` | `get color() { ... }` |
 | `the value of a card is the position of its rank in card ranks` | `get value() { return spellPosition(positionOf(Card.Ranks, this.rank)) }` |

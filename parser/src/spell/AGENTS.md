@@ -26,7 +26,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - `../../../spell-app/vscode`:  the VS Code extension that runs it.
     Its own yarn project, NOT a workspace.
   - [app](../../../spell-app/src/app/AGENTS.md), `spell-app/app`:  the web app.
-    - Also the runner, and the `<spell-app>` / `<spell-editor>` elements.
+    - Also the runner, and the `<spell-viewer>` / `<spell-editor>` elements.
     - `yarn start` is run THERE, at spell-app's root (epic `repo-split` P11).
   - [spaces](../../../spell-app/src/spaces/AGENTS.md), `spell-app/spaces`:
     where projects live, and the editor's server.

@@ -26,7 +26,7 @@ export const classesMethods = defineCoreModule({
   /**
    * Is the app's page laid out in markup, around the program?  Then `App.start()` draws nothing:
    * the markup is the app's drawing, and its tags find their things (epic `drawable-thing` P9).
-   * - Set by the runner for each run, e.g. a `<spell-app>` with markup inside it.
+   * - Set by the runner for each run, e.g. a `<spell-viewer>` with markup inside it.
    */
   appLayout: false,
 
@@ -34,7 +34,7 @@ export const classesMethods = defineCoreModule({
   REACT_APP_ROOT_ID: "spell-app-root",
 
   /**
-   * Element `App.start()` mounts into, if the host says -- e.g. `<spell-app>`'s, inside its shadow root.
+   * Element `App.start()` mounts into, if the host says -- e.g. `<spell-viewer>`'s, inside its shadow root.
    * - Unset:  `#spell-app-root` in `document`, see `appElement()`.
    * - Also decides where `installStyles()` puts a project's styles -- see `domRoot()`.
    */

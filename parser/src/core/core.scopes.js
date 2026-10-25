@@ -238,8 +238,8 @@
     },
     {
       path: "type:App",
-      super: "type:Thing",
-      description: "A thing which is a whole program -- `a game is an app` makes a game.\n- Everything a thing has, plus `start`.\n- Write its `to draw (a game)` to lay out the page, then `start the game` to show it.\n\n```spell\na game is an app\nto draw (a game)\n  return <div>Hello</div>\n\nset the game to a new game\nstart the game\n```",
+      super: "type:View",
+      description: "A view which is a whole program -- `a game is an app` makes a game.\n- Everything a view has, plus `start`.\n- Its element is named for its project:  `<solitaire-app>` in a solitaire app.\n- Write its `to draw (a game)` to lay out the page, then `start the game` to show it.\n\n```spell\na game is an app\nto draw (a game)\n  return <div>Hello</div>\n\nset the game to a new game\nstart the game\n```",
       rules: [
         { name: "create_type", syntax: "(a|an) {type:type_words} (aka {aka:singular_type})? is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" }
@@ -247,7 +247,7 @@
     },
     {
       path: "type:App/method:start (an app)",
-      description: "Show it on the page, drawn by its `to draw`, e.g. `start the game`.\n- Start it ONCE:  it redraws itself when things change.\n- In the editor, VS Code or `<spell-app>`, it shows in the app's own area;  anywhere else in\n  `#spell-app-root`, which is added to the end of the page if there isn't one.",
+      description: "Show it on the page, drawn by its `to draw`, e.g. `start the game`.\n- Start it ONCE:  it redraws itself when things change.\n- In the editor, VS Code or `<spell-viewer>`, it shows in the app's own area;  anywhere else in\n  `#spell-app-root`, which is added to the end of the page if there isn't one.",
       rules: [
         { name: "start_app", syntax: "start {app:expression}" }
       ]

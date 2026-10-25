@@ -61,6 +61,8 @@ export const drawingMethods = defineCoreModule({
    *   `thing`:  it draws itself in there, with `drawOwn()`.  When the page can define it -- see `elementFor()`.
    *   - A viewable LIST's items are its element's children, e.g. `<game-pile>` holding `<game-card>`s,
    *     shown in its drawing's `<slot>` (spell's `<children/>`).
+   *   - An APP's whole drawing is its element's children, e.g. `<solitaire-app>` holding its board:
+   *     its class `drawsInItsChildren`, so the project's styles still reach it (epic `elemental-spell` Q62).
    * - Anything else:  its own drawing, here -- see `drawOwn()`.
    */
   drawThing(drawable?: unknown): Drawing | null {
@@ -68,10 +70,14 @@ export const drawingMethods = defineCoreModule({
     if (typeof thing?.draw !== "function") return null
     const tag = core.elementFor(thing)
     if (tag) {
-      // a viewable list's items are its element's children:  shown in its drawing's `<slot>`
-      const items = thing instanceof ViewableList ? [() => core.drawItems(thing)] : []
+      // a viewable list's items, or an app's whole drawing, are its element's children:  shown in its `<slot>`
+      const children = drawsInItsChildren(thing)
+        ? [() => core.drawOwn(thing)]
+        : thing instanceof ViewableList
+          ? [() => core.drawItems(thing)]
+          : []
       // made NOW:  the thing is a plain value, set once
-      return (h(tag, { "prop:thing": thing }, ...items) as unknown as () => Drawing)()
+      return (h(tag, { "prop:thing": thing }, ...children) as unknown as () => Drawing)()
     }
     return core.drawOwn(thing)
   },
@@ -198,6 +204,14 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
       return createMemo(() => madeOnce(draw())) as unknown as Drawing
     }
   })
+}
+
+/**
+ * Does `thing`'s element show its drawing as its children, rather than in its shadow root?
+ * - An app's does:  its class says `drawsInItsChildren` (`App`).
+ */
+function drawsInItsChildren(thing: object): boolean {
+  return (thing.constructor as { drawsInItsChildren?: boolean }).drawsInItsChildren === true
 }
 
 /** Is `draw` a method `@drawn` made, which draws in its own boundary? */

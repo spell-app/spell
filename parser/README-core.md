@@ -195,6 +195,7 @@ a card that only said `a card is a thing` would be `class Card extends Thing`.
 ([below](#reactivity--a-write-reads-back-at-once)).
 
 `core.defineElement()` gives every card an element of its own, `<solitaire-card>`, to draw itself in.
+An app is a view too, its element named for its project:  `<solitaire-app>`, which `<spell-viewer>` holds.
 And `color` is a plain getter, worked out each time it's read:  nothing caches it, so nothing can go stale.
 
 The other two targets lean on the core in their own ways
@@ -405,8 +406,8 @@ So every running app gets a core of its own, and that one rule decides who may i
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   subgraph page ["one page"]
-    a1["a &lt;spell-app&gt;"] --> r1["spell-runtime.js<br/>its own core"]
-    a2["another &lt;spell-app&gt;"] --> r2["spell-runtime.js<br/>its own core"]
+    a1["a &lt;spell-viewer&gt;"] --> r1["spell-runtime.js<br/>its own core"]
+    a2["another &lt;spell-viewer&gt;"] --> r2["spell-runtime.js<br/>its own core"]
   end
   ed["the editor, the parser, the language"] -. "types only" .-> types["spell-parser/core/core.types"]
   %% the Spell look:  yarn mermaid:pretty
@@ -420,9 +421,9 @@ _Two apps on one page, two cores;  everything else reads only the types._
 Compiled JavaScript and TypeScript import it as `@spell/core`.
 In a page, ONLY the runner in `spell-app` imports the core's code:
 [spellRuntime.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/spellRuntime.ts) bundles it as `spell-runtime.js`,
-the one module in each runner's bundle (the `<spell-app>` element's, the VS Code runner's, the web app's)
+the one module in each runner's bundle (the `<spell-viewer>` element's, the VS Code runner's, the web app's)
 that holds the runtime's code.
-Each `<spell-app>` then imports a fresh copy, from a `blob:` URL of its own,
+Each `<spell-viewer>` then imports a fresh copy, from a `blob:` URL of its own,
 with its own console, event listeners, running state and mount point.
 So a program never runs on whatever else the page loaded, nor on another app's core.
 
@@ -445,7 +446,7 @@ Where `@spell/core` points, by where the program runs:
 
 | Where | `@spell/core` is | Who points it |
 | --- | --- | --- |
-| a page:  the editor, VS Code, a `<spell-app>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/runCompiled.ts) |
+| a page:  the editor, VS Code, a `<spell-viewer>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/runCompiled.ts) |
 | node:  `spell run`, `spell test` | the core's source | node module hooks, which do the job of a page's import map:  [hooks.mjs](https://github.com/spell-app/spell-app/blob/main/src/cli/runner/hooks.mjs) |
 | the type check | the core's source | [typecheck.ts](src/spell/node/typecheck.ts) |
 

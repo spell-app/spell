@@ -283,7 +283,29 @@ classesEs.addRule(CreateOneOfAKind, {
       tests: [
         [
           "solitaire es una aplicación",
-          ["export class Solitaire extends App {}", "export const solitaire = new Solitaire()"]
+          [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "export const solitaire = new Solitaire()"
+          ],
+          [
+            "export class Solitaire extends App {",
+            '  static elementTag = core.defineElement(this, "test_classes", "App")',
+            "}",
+            "",
+            "/**",
+            " * `<test-classes-app>`:  a solitaire, drawn in its own element, e.g. by `draw the solitaire`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its solitaire's properties;  its methods call its solitaire's.",
+            " * - What every view's element does, e.g. drawing its solitaire, is `SpellElement`'s.",
+            " */",
+            "export class SolitaireElement extends SpellElement<Solitaire> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-classes-app", "solitaire", [])',
+            "}",
+            "core.useElement(Solitaire, SolitaireElement)",
+            "export const solitaire = new Solitaire()"
+          ]
         ],
         ["solitaire es una cosa", undefined]
       ]

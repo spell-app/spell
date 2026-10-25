@@ -103,7 +103,7 @@ export { SPELL_TAG_NAMES }
 /** Export so editors can show a type's `<markdown>` description where its docstring shows -- e.g. hover. */
 export { MarkdownDescription }
 /**
- * Export so a `<spell-app>` layout's `<markdown>` splits its holes as a drawing's does
+ * Export so a `<spell-viewer>` layout's `<markdown>` splits its holes as a drawing's does
  * -- see `MarkdownBlock.partsOf()`.
  */
 export { MarkdownBlock }

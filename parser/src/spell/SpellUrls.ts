@@ -1,6 +1,6 @@
 import type * as SP from "./spell.types"
 import type { SpellLocation } from "./SpellLocation"
-// Import directly:  this file stays as light as `SpellSetup`, so `<spell-app>` can build URLs without the barrel
+// Import directly:  this file stays as light as `SpellSetup`, so `<spell-viewer>` can build URLs without the barrel
 import { SpellSetup } from "./SpellSetup"
 
 /**

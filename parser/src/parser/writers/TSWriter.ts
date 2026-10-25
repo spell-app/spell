@@ -5,6 +5,7 @@ import { JSWriter } from "./JSWriter"
 import * as jsText from "./jsText"
 import {
   attributeName,
+  elementNameOf,
   elementProjectOf,
   importedClasses,
   isCoreCall,
@@ -102,7 +103,7 @@ export class TSWriter extends JSWriter {
   private elementTags = new Map<string, string>()
 
   /**
-   * The finished module, as javascript's (`JSWriter.module()`), plus:
+   * The finished module, as javascript's (`JSWriter.writeModule()`), plus:
    * - its `@spell/core` import names the decorators `code` uses too,
    *   and Solid's control flow (`<Show>`, `<For>` ...) is imported from `solid-js` above it
    * - a member it adds to a class it imports is declared in that project's module,
@@ -111,10 +112,11 @@ export class TSWriter extends JSWriter {
    * - with a view type's element class:
    *   - `@spell/elements` imported below `@spell/core`
    *   - each view type's tag declared for the JSX, last (`elementTagsDeclaration()`)
+   * - `JSWriter.module()` then leaves out the spell classes none of it uses
    */
-  module(code: string): string {
+  protected writeModule(code: string): string {
     const solid = SOLID_COMPONENTS.filter((name) => new RegExp(`<${name}[\\s>]`).test(code))
-    code = super.module(code)
+    code = super.writeModule(code)
     if (this.elementTags.size) {
       code = this.withElementsImport(code)
       code = `${code.replace(/\n*$/, "")}\n\n${this.elementTagsDeclaration()}`
@@ -838,7 +840,7 @@ export class TSWriter extends JSWriter {
     if (project === undefined) return undefined
     const typeName = this.typeNameOf(node.type.name)
     const name = this.elementClassName(typeName)
-    const tag = elementTagFor(project, typeName)
+    const tag = elementTagFor(project, elementNameOf(node) ?? typeName)
     this.elementTags.set(name, tag)
     const words = wordsOf(typeName)
     const attributes = this.elementAttributes(node)

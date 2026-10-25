@@ -138,13 +138,24 @@ export class TypeDeclaration<
    * `undefined` for a type that isn't a view (no `project`).
    * - `static elementTag = core.defineElement(this, "Solitaire")`:  a static field runs as the class is made,
    *   so before the program draws anything.  See `core.defineElement()`, in core's `elements.ts`.
+   * - `name`:  the tag's own word when it isn't the class's, e.g. an app's,
+   *   `core.defineElement(this, "Solitaire", "App")` for `<solitaire-app>`.
    */
-  elementMember(match: P.Match, type: P.ASTTypeExpression, project: string | undefined): P.ASTClassMember | undefined {
+  elementMember(
+    match: P.Match,
+    type: P.ASTTypeExpression,
+    project: string | undefined,
+    name?: string
+  ): P.ASTClassMember | undefined {
     if (project === undefined) return undefined
+    const args = name === undefined ? [project] : [project, name]
     return new P.ASTStaticDefinition(match, {
       type,
       name: "elementTag",
-      value: new P.ASTStringLiteral(match, `core.defineElement(this, ${JSON.stringify(project)})`)
+      value: new P.ASTStringLiteral(
+        match,
+        `core.defineElement(this, ${args.map((arg) => JSON.stringify(arg)).join(", ")})`
+      )
     })
   }
 

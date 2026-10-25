@@ -223,7 +223,7 @@ const PLACE = /^[1-9]\d*$/
 /**
  * The id each thing drawn as an element was given, and the name it was given for -- see `elementIdFor()`.
  * - Held weakly:  a thing thrown away takes its entry with it.
- * - One per runtime copy, as `core` is:  each `<spell-app>`'s program numbers its own things.
+ * - One per runtime copy, as `core` is:  each `<spell-viewer>`'s program numbers its own things.
  */
 const ELEMENT_IDS = new WeakMap<object, { name: string; id: string }>()
 

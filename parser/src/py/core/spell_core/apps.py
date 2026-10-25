@@ -19,9 +19,26 @@ from spell_core.lists import List
 from spell_core.things import Thing, program_core
 
 
-class App(Thing):
-    """A thing that draws a whole application:  what `a game is an app` compiles to, `class Game(App)`.
+class View(Thing):
+    """A thing drawn as its own element (`<solitaire-card>`):  what `a card is a view` extends.
 
+    - Its tag:  `element_tag`, which each compiled view class names in its body.
+    - `core.draw_thing()` draws it as that element, its own `draw()` inside;  with no tag, as any thing draws.
+    """
+
+    # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
+    element_tag: str | None = None
+    # may a page let people drag our things?  `a card can be dragged` says yes -- the JavaScript core's `canBeDragged`
+    can_be_dragged: bool = False
+    # may a page let people select our things?  `a task can be selected` says yes -- `canBeSelected`
+    can_be_selected: bool = False
+
+
+class App(View):
+    """A view that draws a whole application:  what `a game is an app` compiles to, `class Game(App)`.
+
+    - Its element is named for its project and `app`, not its class:  `<solitaire-app>` (epic `elemental-spell` Q62);
+      the compiled class names it, `element_tag = "solitaire-app"`.
     - Its `draw()` is compiled from `to draw (a game)`;  `start()` from `start the game`.
     """
 
@@ -38,21 +55,6 @@ class App(Thing):
             element = Element("div", {"id": core.REACT_APP_ROOT_ID})
             core.page.body.append(element)
         core.mount_app(self, element)
-
-
-class View(Thing):
-    """A thing drawn as its own element (`<solitaire-card>`):  what `a card is a view` extends.
-
-    - Its tag:  `element_tag`, which each compiled view class names in its body.
-    - `core.draw_thing()` draws it as that element, its own `draw()` inside;  with no tag, as any thing draws.
-    """
-
-    # our element's tag, e.g. `solitaire-card`:  the compiled class names it -- see `core.element_tag_of()`
-    element_tag: str | None = None
-    # may a page let people drag our things?  `a card can be dragged` says yes -- the JavaScript core's `canBeDragged`
-    can_be_dragged: bool = False
-    # may a page let people select our things?  `a task can be selected` says yes -- `canBeSelected`
-    can_be_selected: bool = False
 
 
 class Page(View):

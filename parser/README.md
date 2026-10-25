@@ -502,7 +502,7 @@ and the command line's base is the kit's:
 
 | What | Where |
 | --- | --- |
-| the editor and the runner:  `<spell-app>`, `<spell-editor>`, the live loop | spell-app's [src/app/](https://github.com/spell-app/spell-app/tree/main/src/app), [README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md) |
+| the editor and the runner:  `<spell-viewer>`, `<spell-editor>`, the live loop | spell-app's [src/app/](https://github.com/spell-app/spell-app/tree/main/src/app), [README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md) |
 | the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](https://github.com/spell-app/spell-app/tree/main/src/lsp) and [vscode/](https://github.com/spell-app/spell-app/tree/main/vscode), [README-lsp](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) |
 | projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](https://github.com/spell-app/spell-app/tree/main/src/spaces), [README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) |
 | the example projects people open and edit | spell-app's [spaces/@spell/examples/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples), [README-examples](https://github.com/spell-app/spell-app/blob/main/README-examples.md) |

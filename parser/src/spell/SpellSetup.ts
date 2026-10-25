@@ -9,11 +9,11 @@ import type * as SP from "./spell.types"
  * - It starts EMPTY:  the groups are spaces' (`spell-app/spaces`, `SPACES.PROJECT_GROUPS`),
  *   which registers them with `addProjectRoot()` as it loads (epic `people-and-orgs` P15).
  *   - So every program that reads an address loads spaces' groups first:
- *     the editor, `<spell-app>`, the language server, the `spell` command, the routes, the tests.
+ *     the editor, `<spell-viewer>`, the language server, the `spell` command, the routes, the tests.
  *   - Without them, every address is "invalid".
  * - NOTE: kept deliberately dependency-free (`import type` only):
  *   anything pulled in here would leak into the bundles of the files that depend on it.
- *   - They're `SpellLocation.ts` and `SpellUrls.ts`, which must stay light:  `<spell-app>` and the server import them.
+ *   - They're `SpellLocation.ts` and `SpellUrls.ts`, which must stay light:  `<spell-viewer>` and the server import them.
  */
 export const SpellSetup = {
   /**

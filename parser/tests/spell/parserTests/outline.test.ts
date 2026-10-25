@@ -365,8 +365,11 @@ describe("outline style", () => {
     })
 
     test("compiles to the class, then `export const game = new Game()`;  `a game is an app` makes none", () => {
-      expect(compile(["game is an app"])).toBe("export class Game extends App {}\nexport const game = new Game()")
-      expect(compile(["a game is an app"])).toBe("export class Game extends App {}")
+      // an app is a view:  its element is `<test-project-app>` (epic `elemental-spell` Q62)
+      const app =
+        'export class Game extends App {\n  static elementTag = core.defineElement(this, "test-project", "App")\n}'
+      expect(compile(["game is an app"])).toBe(`${app}\nexport const game = new Game()`)
+      expect(compile(["a game is an app"])).toBe(app)
     })
 
     test("only an app", () => {

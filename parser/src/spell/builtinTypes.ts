@@ -356,10 +356,11 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
   },
   {
     name: "app",
-    superType: "thing",
+    superType: "view",
     docstring: md(
-      "A thing which is a whole program -- `a game is an app` makes a game.",
-      "- Everything a thing has, plus `start`.",
+      "A view which is a whole program -- `a game is an app` makes a game.",
+      "- Everything a view has, plus `start`.",
+      "- Its element is named for its project:  `<solitaire-app>` in a solitaire app.",
       "- Write its `to draw (a game)` to lay out the page, then `start the game` to show it.",
       "",
       "```spell",
@@ -380,7 +381,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
         docstring: md(
           "Show it on the page, drawn by its `to draw`, e.g. `start the game`.",
           "- Start it ONCE:  it redraws itself when things change.",
-          "- In the editor, VS Code or `<spell-app>`, it shows in the app's own area;  anywhere else in",
+          "- In the editor, VS Code or `<spell-viewer>`, it shows in the app's own area;  anywhere else in",
           "  `#spell-app-root`, which is added to the end of the page if there isn't one."
         )
       }

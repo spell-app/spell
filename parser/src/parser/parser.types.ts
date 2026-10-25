@@ -57,7 +57,8 @@ export const BUILT_IN_TYPES: Record<Datatype, Datatype | undefined> = {
   date: undefined,
   list: undefined,
   thing: undefined,
-  app: "thing",
+  // a whole program:  a view with its own element, `<solitaire-app>` (epic `elemental-spell` Q62)
+  app: "view",
   // a thing drawn as its own custom element -- `a card is a view` (epic `drawable-thing`, renamed in `elemental-spell`)
   view: "thing",
   "viewable list": "list",

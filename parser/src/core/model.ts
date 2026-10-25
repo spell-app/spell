@@ -4,6 +4,7 @@
  * - What a compiled LIBRARY imports, e.g. `people.lib.ts`:  the `ts/lib` target, `P.LibraryWriter`.
  * - The same `core`, `Thing` and `List` as the barrel, assembled from the same modules, minus:
  *   - drawing (`drawing.ts`, `elements.ts`, `View`, `ViewableList`):  they load Solid
+ *   - `App`, a `View` since epic `elemental-spell` (Q62):  a library declares no app
  *   - the registry of a running program's things, `core.things` (`things.ts`):
  *     a thing made here belongs to no program, so it registers nowhere -- see `registerThing()`
  *   - what reads that registry:  carrying a program over a recompile (`carry.ts`)
@@ -31,9 +32,8 @@ import "./ui"
 import "./references"
 import { Thing } from "./classes/Thing"
 import { List } from "./classes/List"
-import { App } from "./classes/App"
 
-export { core, assert, SpellEvent, Eventful, Thing, List, App }
+export { core, assert, SpellEvent, Eventful, Thing, List }
 export { on, off, once, trigger }
 export { positionOf } from "./collection-core"
 export { position, spellPosition, endPosition, withSpellPositions } from "./positions"

@@ -208,7 +208,7 @@ describe("core.things", () => {
 
     test("`typeChainOf()`:  down to the built-in type", () => {
       expect(core.things.typeChainOf(new Joker({}))).toEqual(["Joker", "Card", "Thing"])
-      expect(core.things.typeChainOf(new Game({}))).toEqual(["Game", "App", "Thing"])
+      expect(core.things.typeChainOf(new Game({}))).toEqual(["Game", "App", "View", "Thing"])
       expect(core.things.typeChainOf(new Deck({}))).toEqual(["Deck", "List"])
     })
 

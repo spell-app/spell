@@ -1266,7 +1266,7 @@ A kind that says so is saved in a file of its own.
   - So every program that reads a spell path loads them first, through one of:
     - `spell-app/spaces`
     - spaces' disk reader
-    - `spell-app/spaces/models/projectGroups` alone, as `<spell-app>` does
+    - `spell-app/spaces/models/projectGroups` alone, as `<spell-viewer>` does
   - Spell never imports spaces.
 - Everything is named by its ADDRESS (epic `people-and-orgs` P4, [SpellLocation](SpellLocation.ts)):
   - a group, e.g. `@spell/examples`
@@ -1505,7 +1505,7 @@ A kind that says so is saved in a file of its own.
     - top-level functions:  `export function`
     - top-level vars:  `export let`
   - see "Classes" under Compile, for what goes in a class's body
-  - NO import map:  every runner (the app, VS Code's, `<spell-app>`) runs compiled code from a `blob:` URL.
+  - NO import map:  every runner (the app, VS Code's, `<spell-viewer>`) runs compiled code from a `blob:` URL.
     - Its specifiers are rewritten (`runCompiled()` / `linkModule()`, in [the app's runner](../../../spell-app/src/app/runner/)):
       - `@spell/core` => the runtime it runs on (`spellRuntime.ts`)
       - `@spell/project/<projectId>` => that project's compiled JS, fetched and linked the same way, afresh each run
@@ -1760,7 +1760,7 @@ A kind that says so is saved in a file of its own.
   - in a type's outline:  [`markdown_description`](rules/classes/MarkdownDescription.ts), the type's description
     - compiled to the class's `static description`
     - hover and the Type Explorer show it when the type has no comment docstring (`SpellLanguageService.docsOf()`)
-  - in a `<spell-app>` layout:  the app's `LayoutSpell`
+  - in a `<spell-viewer>` layout:  the app's `LayoutSpell`
     - it splits holes as `markdown_block` does
   - no diagnostics inside
   - editors colour it as markdown themselves:

@@ -201,6 +201,22 @@ export const PROJECT_IMPORT = /^import \{ ([^}]*) \} from "(@spell\/project\/[^"
 export const CORE_IMPORT = /^import \{ ([^}]*) \} from "@spell\/core"$/m
 
 /**
+ * `code` with its `@spell/core` import naming only the spell classes the rest of it uses,
+ * e.g. no `Page` in a program with no page (epic `elemental-spell` I2).
+ * - Every program's header names them all (`SP.SpellProject.importsOf()`):  it's written before the code is.
+ * - A class is used when its name is a word of the rest of `code`:  one a comment names is kept, harmlessly.
+ * - `core` and the helpers stay:  `JSWriter.module()` adds a helper only when the code calls it.
+ */
+export function withUsedCoreClasses(code: string): string {
+  const classes = new Set(Object.values(P.BUILT_IN_CLASS_NAMES))
+  return code.replace(CORE_IMPORT, (_line, imported: string) => {
+    const rest = code.replace(CORE_IMPORT, "")
+    const used = imported.split(/,\s*/).filter((name) => !classes.has(name) || new RegExp(`\\b${name}\\b`).test(rest))
+    return `import { ${used.join(", ")} } from "@spell/core"`
+  })
+}
+
+/**
  * Each class `code` imports from another project, by its name here => [its module, its name there],
  * e.g. `Card` => `["@spell/project/owen@spell/cards", "Card"]`.
  */
@@ -233,10 +249,35 @@ export function elementProjectOf(node: P.ASTClassDeclaration): string | undefine
  * - Javascript's own, written as it is:  a target with no page of its own leaves it out (Python's program side).
  */
 export function elementTagProject(member: P.ASTNode): string | undefined {
-  if (!(member instanceof P.ASTStaticDefinition) || member.name !== "elementTag") return undefined
-  const found = member.value instanceof P.ASTStringLiteral && DEFINE_ELEMENT.exec(member.value.value)
+  const found = defineElementOf(member)
   return found ? (JSON.parse(found[1]!) as string) : undefined
 }
 
-/** What a view class's `elementTag` is:  `core.defineElement(this, "<project>")`. */
-const DEFINE_ELEMENT = /^core\.defineElement\(this, ("(?:[^"\\]|\\.)*")\)$/
+/**
+ * The tag's own word view class `node` names, when it isn't the class's:  `App` for an app's
+ * `core.defineElement(this, "Solitaire", "App")`, its tag `<solitaire-app>` -- `undefined` for any other class.
+ */
+export function elementNameOf(node: P.ASTClassDeclaration): string | undefined {
+  for (const member of node.members ?? []) {
+    if (defineElementOf(member)) return elementTagName(member)
+  }
+  return undefined
+}
+
+/**
+ * The tag's own word `member` names, when it's a view class's `static elementTag = core.defineElement(...)` naming
+ * one:  `App` for `core.defineElement(this, "Solitaire", "App")` -- `undefined` for any other member.
+ */
+export function elementTagName(member: P.ASTNode): string | undefined {
+  const name = defineElementOf(member)?.[2]
+  return name === undefined ? undefined : (JSON.parse(name) as string)
+}
+
+/** `member`'s `core.defineElement(...)`, matched by `DEFINE_ELEMENT` -- `undefined` for any other member. */
+function defineElementOf(member: P.ASTNode): RegExpExecArray | undefined {
+  if (!(member instanceof P.ASTStaticDefinition) || member.name !== "elementTag") return undefined
+  return (member.value instanceof P.ASTStringLiteral && DEFINE_ELEMENT.exec(member.value.value)) || undefined
+}
+
+/** What a view class's `elementTag` is:  `core.defineElement(this, "<project>")`, or `(this, "<project>", "<name>")`. */
+const DEFINE_ELEMENT = /^core\.defineElement\(this, ("(?:[^"\\]|\\.)*")(?:, ("(?:[^"\\]|\\.)*"))?\)$/

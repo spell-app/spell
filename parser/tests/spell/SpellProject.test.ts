@@ -38,6 +38,39 @@ describe("a program's own tests", () => {
   })
 })
 
+describe("the program's `@spell/core` import names only the spell classes it uses (epic `elemental-spell` I2)", () => {
+  /** The spell classes `contents`, a project's one file, imports from `@spell/core` when `writer` writes it. */
+  function importedClasses(contents: string, writer: P.ProgramWriter = P.JSWriter.instance): string[] {
+    const { scope, files } = parseSpellProject([{ path: "/test.spell", contents }])
+    const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
+    const header = SP.SpellProject.importHeaderFor(scope, writer)
+    const code = SP.SpellProject.combineCompiled(parts, writer, header, scope)
+    const imported = /^import \{ ([^}]*) \} from "@spell\/core"$/m.exec(code)?.[1] ?? ""
+    const classes = Object.values(P.BUILT_IN_CLASS_NAMES)
+    return imported.split(/,\s*/).filter((name) => classes.includes(name))
+  }
+
+  const THING = `a "card" is a thing where:\n\t- its "rank" is a number`
+  const VIEW = `a "card" is a view where:\n\t- to draw it:\n\t\treturn <ui-text>card</ui-text>`
+  const VIEWABLE_LIST = `${VIEW}\na "pile" is a viewable list of cards`
+
+  test("a thing:  Thing alone", () => {
+    expect(importedClasses(THING)).toEqual(["Thing"])
+  })
+
+  test("a view:  View alone", () => {
+    expect(importedClasses(VIEW)).toEqual(["View"])
+  })
+
+  test("a list of views:  View and ViewableList, in the header's order", () => {
+    expect(importedClasses(VIEWABLE_LIST)).toEqual(["View", "ViewableList"])
+  })
+
+  test("TypeScript's the same", () => {
+    expect(importedClasses(VIEWABLE_LIST, P.TSWriter.instance)).toEqual(["View", "ViewableList"])
+  })
+})
+
 // the bug of 2026-10-22:  a project copied to a folder of another name parsed its old words file as spell
 describe("getFileForPath():  a file's kind is the END of its name", () => {
   /** The file `name` is, in a project. */

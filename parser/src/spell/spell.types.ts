@@ -109,7 +109,7 @@ export const ELEMENTS_JS_SUFFIX = ".elements.spell.js"
 
 /**
  * End of a project's scope pack file's name, e.g. `Solitaire.scopes.js`.
- * - The file:  what its Type Explorer shows, for pages which run it without the parser, e.g. `<spell-app>`.
+ * - The file:  what its Type Explorer shows, for pages which run it without the parser, e.g. `<spell-viewer>`.
  *   See `LSP.ScopePack`.
  * - NEVER one of a project's own files:  the server leaves it out of the manifest, as `COMPILED_JS_SUFFIX`.
  * - In the project's build folder, as `COMPILED_JS_SUFFIX`.

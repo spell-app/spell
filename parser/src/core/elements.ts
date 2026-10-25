@@ -17,6 +17,7 @@ import { elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core, programThings, recordingSettings } from "./core"
 import { defineCoreModule } from "./core.types"
+import { App } from "./classes/App"
 import { View } from "./classes/View"
 import { ViewableList } from "./classes/ViewableList"
 import { List } from "./classes/List"
@@ -99,6 +100,9 @@ export const elementsMethods = defineCoreModule({
    * Name the element of view class `Class`, in project `project`, e.g. `<solitaire-card>` -- its tag.
    * - What a view class's static field calls as it's declared:
    *   `static elementTag = core.defineElement(this, "Solitaire")`.
+   * - `name`:  the tag's own word, after the project's -- the class's name by default.
+   *   An app's is `App` (`core.defineElement(this, "Solitaire", "App")`):  `<solitaire-app>`, not
+   *   `<solitaire-solitaire>` (epic `elemental-spell` Q62).
    * - The page's `elementDefiner` hears of it once its class is whole:
    *   when one of its things is first drawn (`elementFor()`), else in a microtask.
    *   Not now:  the class's later statics, e.g. its `css`, aren't set yet.
@@ -107,9 +111,9 @@ export const elementsMethods = defineCoreModule({
    * - SIDE EFFECT:  the program's things know the class now (`core.things`), before any of its things is made:
    *   so a card's element finds its pile's class on a page that only mirrors the program (`elementApiOf()`).
    */
-  defineElement(Class: unknown, project: string): string | undefined {
+  defineElement(Class: unknown, project: string, name?: string): string | undefined {
     if (!isViewClass(Class)) return undefined
-    const tag = elementTagFor(project, Class.name)
+    const tag = elementTagFor(project, name ?? Class.name)
     Object.defineProperty(Class, ELEMENT_TAG, { value: tag, configurable: true })
     programThings()?.addClasses({ [Class.name]: Class })
     queueMicrotask(() => tellDefiner(Class, tag))
@@ -166,7 +170,7 @@ export const elementsMethods = defineCoreModule({
    *     `a card belongs to one pile` is `{ name: "pile", type: "Pile", owner: true }`
    *   - down to `View` / `ViewableList`:  NOT what every thing has built in, its `id`,
    *     which would clash with the element's own `id`, the name a page's layout finds a thing by (`thingFor()`)
-   * - `methods`:  each method it has, its own and its super-types', down to `View` / `ViewableList`,
+   * - `methods`:  each method it has, its own and its super-types', down to `App` / `View` / `ViewableList`,
    *   e.g. `turn_over` -- NOT `draw()`, nor a method of several words with values in them (`is_a_$suit`)
    * - Names as compiled:  the page names them as it likes, e.g. `turnOver()`.
    */
@@ -310,7 +314,7 @@ function hasGetter(prototype: object, name: string): boolean {
 }
 
 /** Where `elementApiOf()` stops looking for methods:  spell's own view classes, and what they're built on. */
-const BASE_PROTOTYPES: object[] = [View.prototype, ViewableList.prototype, Object.prototype]
+const BASE_PROTOTYPES: object[] = [App.prototype, View.prototype, ViewableList.prototype, Object.prototype]
 
 /** Methods that aren't a type's own API:  its drawing, and the class's own. */
 const NOT_METHODS = new Set(["constructor", "draw"])
