@@ -752,7 +752,9 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const parser = (into.scope.parser ?? parse.parser) as SP.SpellParser
     if (kind === "drawing") {
       const element = SpellProject.elementAt(file, span.start)
-      const code = element ? parser.inPlay(() => String(P.JSWriter.instance.writeMatch(element) ?? "")) : ""
+      const code = element
+        ? parser.inPlay(() => (P.JSWriter.instance.writeMatch(element) as string | undefined) ?? "")
+        : ""
       return { code, errors }
     }
     // the file's classes, each with its members:  the template's is the one declared at `span`

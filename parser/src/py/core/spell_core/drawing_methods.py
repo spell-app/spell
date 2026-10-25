@@ -153,6 +153,19 @@ class DrawingMethods:
         """The element an app mounts into:  `app_root`, else the page's `#spell-app-root` -- `None` if neither."""
         return self.app_root or self.page.body.find(self.REACT_APP_ROOT_ID)
 
+    def start_drawing(self, view: object) -> None:
+        """SIDE EFFECT:  mount `view`'s drawing on the page, into `app_element()` (see `mount_app()`).
+
+        - What `App.start()` and `Page.start()` do:  the JavaScript core's `core.startDrawing()`.
+        - Makes the page's `<div id="spell-app-root">` the first time, when the host set no `app_root`.
+        - Starting again replaces what's drawn there.
+        """
+        element = self.app_element()
+        if element is None:
+            element = Element("div", {"id": self.REACT_APP_ROOT_ID})
+            self.page.body.append(element)
+        self.mount_app(view, element)
+
     def mount_app(self, app: object, element: Element) -> MountedApp:
         """Draw `app` into `element`, replacing what was there:  what `App.start()` does, into `app_element()`.
 
