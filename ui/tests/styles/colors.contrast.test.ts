@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { hueAliases, hueStates, hues, semanticAliases, semanticColors, type Oklch } from "spell-ui/styles"
-import { ColorContrast } from "spell-ui/styles/ColorContrast"
+import { clipped, contrast, CONTRAST_LARGE, CONTRAST_TEXT, oklchToRgb, type Oklch } from "spell/util/color"
+import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell-ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
@@ -15,7 +15,7 @@ import utilitiesRaw from "spell-ui/styles/utilities.css?raw"
  * WCAG contrast of the GENERATED palette, per colour and per scheme.
  * - Colours are read back from the browser (`getComputedStyle`), so what's measured is what `colors.css`
  *   resolves to -- `light-dark()`, relative-colour roles and remaps included -- not the vocabulary's numbers.
- * - Ratios via `ColorContrast` (clipped to sRGB, as axe does), so a pass here is a pass in the axe tests.
+ * - Ratios via the kit's `contrast()` (`spell/util/color`:  clipped to sRGB, as axe does), so a pass here is a pass in the axe tests.
  * - Raw sheets, so `light-dark()` survives whatever the Lightning CSS targets (see `styles.test.ts`).
  */
 
@@ -36,14 +36,30 @@ const SCHEMES = ["ui-light", "ui-dark"] as const
 /** Solid-colour tokens `--ui-color-on` must read on:  the colour and each interaction state. */
 const SOLIDS = ["--ui-color", ...Object.keys(hueStates).map((state) => `--ui-color-${state}`)]
 
+describe("the kit's colour maths", () => {
+  it("measures OKLCH like the browser paints it", () => {
+    // cross-check `oklchToRgb()` against a canvas pixel, for every light-scheme base
+    const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!
+    for (const [name, hue] of Object.entries(hues)) {
+      const [l, c, h] = hue.onLight
+      context.fillStyle = `oklch(${l} ${c} ${h})`
+      context.fillRect(0, 0, 1, 1)
+      const pixel = [...context.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+      const { r, g, b } = clipped(oklchToRgb({ l, c, h }))
+      const expected = [r, g, b].map((channel) => Math.round(channel * 255))
+      for (const [index, value] of pixel.entries()) expect(Math.abs(value - expected[index]!), name).toBeLessThan(2)
+    }
+  })
+})
+
 describe("colors.css contrast (WCAG AA)", () => {
   it.each(SCHEMES)("puts readable text on every solid colour and state (%s)", (scheme) => {
     adoptFoundation()
     const failures: string[] = []
     for (const name of NAMES) {
       const probe = renderProbe(scheme, name)
-      for (const solid of SOLIDS) failures.push(...check(probe, name, "--ui-color-on", solid, ColorContrast.text))
-      failures.push(...check(probe, name, "--ui-color-inverted-on", "--ui-color-inverted", ColorContrast.text))
+      for (const solid of SOLIDS) failures.push(...check(probe, name, "--ui-color-on", solid, CONTRAST_TEXT))
+      failures.push(...check(probe, name, "--ui-color-inverted-on", "--ui-color-inverted", CONTRAST_TEXT))
     }
     expect(failures).toEqual([])
   })
@@ -54,17 +70,17 @@ describe("colors.css contrast (WCAG AA)", () => {
     for (const name of NAMES) {
       const probe = renderProbe(scheme, name)
       for (const role of ["--ui-color-text", "--ui-color-header"]) {
-        failures.push(...check(probe, name, role, "--ui-background", ColorContrast.text))
-        failures.push(...check(probe, name, role, "--ui-color-background", ColorContrast.text))
+        failures.push(...check(probe, name, role, "--ui-background", CONTRAST_TEXT))
+        failures.push(...check(probe, name, role, "--ui-color-background", CONTRAST_TEXT))
       }
       // the `-inverted` colour is TEXT on a dark surface too (inverted labels, icons, basic buttons)
       if (scheme === "ui-dark") {
-        failures.push(...check(probe, name, "--ui-color-inverted", "--ui-background", ColorContrast.text))
+        failures.push(...check(probe, name, "--ui-color-inverted", "--ui-background", CONTRAST_TEXT))
       }
       // NOTE: semantic borders are decorative (a message's edge), so only hue borders -- button / label
       // outlines -- need the 3:1 of a UI component boundary
       if (HUE_NAMES.has(name)) {
-        failures.push(...check(probe, name, "--ui-color-border", "--ui-background", ColorContrast.large))
+        failures.push(...check(probe, name, "--ui-color-border", "--ui-background", CONTRAST_LARGE))
       }
     }
     expect(failures).toEqual([])
@@ -95,7 +111,7 @@ function renderProbe(scheme: string, name: string): HTMLElement {
 
 /** `[]` if `foreground` on `background` (both tokens, resolved on `probe`) reaches `minimum`, else the failure. */
 function check(probe: HTMLElement, name: string, foreground: string, background: string, minimum: number): string[] {
-  const ratio = ColorContrast.ratio(resolve(probe, foreground), resolve(probe, background))
+  const ratio = contrast(resolve(probe, foreground), resolve(probe, background))
   return ratio >= minimum ? [] : [`${name}: ${foreground} on ${background} is ${ratio.toFixed(2)}:1 < ${minimum}`]
 }
 
@@ -109,5 +125,5 @@ function resolve(probe: HTMLElement, name: string): Oklch {
   const value = getComputedStyle(probe).color
   const match = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+|none)\)$/.exec(value)
   if (!match) throw new Error(`${name} resolved to ${value}, not an opaque oklch()`)
-  return [Number(match[1]), Number(match[2]), match[3] === "none" ? 0 : Number(match[3])]
+  return { l: Number(match[1]), c: Number(match[2]), h: match[3] === "none" ? 0 : Number(match[3]) }
 }

@@ -5,15 +5,17 @@
  * - The shadow markup it expects:
  *
  *     <button class="ui [size] [fluid read-only disabled] icon picker" part="field"
- *             style="--_ui-icon-picker-anchor: --ui-icon-picker-7">
+ *             style="anchor-name: --ui-icon-picker-7">
  *       <span class="glyph" part="glyph"><svg></span>                     (while an icon is chosen)
  *       <span class="text [placeholder]" part="text">star</span>
  *     </button>
- *     <div class="panel" popover part="panel" style="--_ui-icon-picker-anchor: ...">
+ *     <div class="panel" popover part="panel" style="position-anchor: --ui-icon-picker-7">
  *       <input type="search" class="search" part="search">
  *       <div class="grid" role="listbox" part="grid">
+ *         <div class="heading stuck" part="heading" aria-hidden="true"><span>Animals</span></div>  (scrolled)
  *         <div class="rows" role="none" style="padding-block-start: <rows above>;  block-size: <every row>">
  *           <div class="cell none [active] [selected]" role="option" part="cell"><svg></div>
+ *           <div class="heading" part="heading" aria-hidden="true"><span>Alert</span></div>  (in groups)
  *           <div class="cell [active] [selected]" role="option" part="cell"><svg></div> ...
  *         </div>
  *       </div>
@@ -22,8 +24,11 @@
  *
  *   - `active`:  the chosen icon's cell;  `selected`:  the highlighted one (keys, pointer)
  *   - only the rows in view are drawn:  the rows box, sized inline, stands for the rest
- * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor (`anchor-name`, a per-instance name the
- *   component sets inline on both boxes);  the panel sits below it, or above when there's more room there,
+ *   - a heading spans a whole row of the grid, as tall as a row of cells, so every row is the same height;
+ *     the stuck one sits over the rows box's top row, taking no room (its negative margin)
+ * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor:  its name, and the panel hung from it, are
+ *   inline, per element (the component's `PopoverPanel`);
+ *   the panel sits below it, or above when there's more room there,
  *   never taller than that room:  its grid scrolls.
  * - The DOM element:  `inline-flex`, `:state(fluid)` block-level.
  * - Public tokens (`--ui-icon-picker-*`) are NEVER declared here:  each is read through a private alias.
@@ -116,6 +121,8 @@
       var(--ui-border-color-selected-strong)
     );
     --_ui-icon-picker-none-color: var(--ui-icon-picker-none-color, var(--ui-text-light));
+    --_ui-icon-picker-heading-color: var(--ui-icon-picker-heading-color, var(--ui-text-light));
+    --_ui-icon-picker-heading-size: var(--ui-icon-picker-heading-size, 0.8125em);
   }
 
   /* The field:  an input's box, with the select's caret;  the anchor of the panel. */
@@ -152,7 +159,6 @@
     text-align: start;
     cursor: pointer;
     appearance: none;
-    anchor-name: var(--_ui-icon-picker-anchor, --ui-icon-picker);
     -webkit-tap-highlight-color: transparent;
     transition-property: border-color, box-shadow;
     transition-duration: var(--_ui-icon-picker-duration);
@@ -183,7 +189,6 @@
    */
   .panel[popover] {
     position: fixed;
-    position-anchor: var(--_ui-icon-picker-anchor, --ui-icon-picker);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     /* below or above, whichever has more room */
@@ -298,6 +303,38 @@
     stroke: currentColor;
     stroke-width: 1.5;
     stroke-linecap: round;
+  }
+
+  /*
+   * A group's heading:  a whole row, its words at the row's foot, in line with the cells' edge.
+   * - The words are smaller in a `<span>`:  the heading itself keeps the panel's em,
+   *   so the stuck one's height (`--_ui-icon-picker-cell-size`, in em) is a row's.
+   */
+  .panel .heading {
+    box-sizing: border-box;
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: flex-end;
+    min-inline-size: 0;
+    padding-block-end: 0.25em;
+  }
+  .panel .heading > span {
+    overflow: hidden;
+    color: var(--_ui-icon-picker-heading-color);
+    font-size: var(--_ui-icon-picker-heading-size);
+    font-weight: var(--ui-font-weight-bold, 700);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* The group at the grid's top:  its heading stays there, over the rows, taking no room. */
+  .panel > .grid > .heading.stuck {
+    position: sticky;
+    z-index: 1;
+    inset-block-start: 0;
+    block-size: var(--_ui-icon-picker-cell-size);
+    margin-block-end: calc(-1 * var(--_ui-icon-picker-cell-size));
+    background: var(--_ui-icon-picker-panel-background);
   }
 
   .panel > .message {

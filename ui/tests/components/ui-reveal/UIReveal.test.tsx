@@ -54,7 +54,7 @@ describe("<ui-reveal> classes", () => {
     ['move="right"', "ui right move reveal"],
     ['rotate="left"', "ui left rotate reveal"],
     ['slide="down"', "ui down slide reveal"],
-    ['size="small" instant unclipped', "ui small instant visible reveal"],
+    ['size="small" instant unclipped', "ui small visible instant reveal"],
     ["active disabled fade", "ui active disabled fade reveal"]
   ])("<ui-reveal %s>", async (attributes, classes) => {
     const { root } = await render(markup(attributes))
@@ -204,5 +204,25 @@ describe("<ui-reveal> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+////////////////
+// ## Old names
+//
+// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
+////////////////
+
+describe("<ui-reveal> old names", () => {
+  /** The class string of the element's first classed box. */
+  async function classesOf(html: string) {
+    const host = await ElementFixture.render<DOMElement>(html)
+    return host.shadowRoot!.querySelector("[class]")!.className
+  }
+
+  it("<ui-reveal>:  each old spelling draws as its new one", async () => {
+    expect(await classesOf(`<ui-reveal fade unclipped>A</ui-reveal>`)).toBe(
+      await classesOf(`<ui-reveal fade clip="none">A</ui-reveal>`)
+    )
   })
 })

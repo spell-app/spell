@@ -18,7 +18,7 @@ import iconCSS from "./UIIcon.css?inline"
  *   `UIIcon.css` stacks and positions it by that, since the group can't reach into its children's shadow roots.
  * - `name` is the whole name:  `bell`, `bell outline`, `lucide:bell`.
  *   `outline` appends ` outline` (Fomantic's `bell outline icon` spelling),
- *   so `<ui-icon name="bell" outline>` ~== `name="bell outline"`.
+ *   so `<ui-icon name="bell" appearance="outline">` ~== `name="bell outline"`.
  ****************/
 export class UIIcon extends E.UIComponent<typeof iconVocabulary> {
   @E.proto static vocabulary = iconVocabulary
@@ -40,10 +40,15 @@ export class UIIcon extends E.UIComponent<typeof iconVocabulary> {
   /** The glyph for `name` (+ `outline`). */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName })
 
-  /** The name to look up:  `name`, plus ` outline` for the `outline` attribute;  tracked. */
+  /** The name to look up:  `name`, plus ` outline` for `appearance="outline"`;  tracked. */
   private get iconName(): string | undefined {
     const name = this.name
-    return name && this.outline ? `${name}${OUTLINE_SUFFIX}` : name
+    return name && this.hasLook(OUTLINE) ? `${name}${OUTLINE_SUFFIX}` : name
+  }
+
+  /** Is `word` one of `appearance`'s words? */
+  private hasLook(word: string): boolean {
+    return ` ${this.appearance ?? ""} `.includes(` ${word} `)
   }
 
   ////////////////
@@ -70,3 +75,6 @@ export interface UIIcon extends E.AttributeValues<typeof iconVocabulary> {}
 
 /** What `outline` appends to the name (Fomantic's `bell outline`). */
 const OUTLINE_SUFFIX = " outline"
+
+/** The `appearance` word that picks the outlined glyph. */
+const OUTLINE = "outline"

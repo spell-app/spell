@@ -32,7 +32,7 @@ export class UICheckbox extends CheckControl<typeof checkboxVocabulary> {
   }
 
   protected get inputRole(): string | undefined {
-    return this.type ? "switch" : undefined
+    return this.appearance ? "switch" : undefined
   }
 
   /** `off-value`, else the class's `defaultUnchosenValue`. */

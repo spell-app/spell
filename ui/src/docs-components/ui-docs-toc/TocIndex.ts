@@ -1,6 +1,11 @@
 // `spell-ui/util` by name, never the `spell-ui/core` entry:  node scripts load this file (see the class docs)
-import { beforeNextPaint } from "spell-ui/util"
+import { beforeNextPaint, slug } from "spell-ui/util"
 import * as UIT from "spell-ui/components/components.types"
+import {
+  TOC_ENTRY_ATTRIBUTE,
+  TOC_GROUP_ATTRIBUTE,
+  TOC_SHADOW_HOSTS
+} from "spell-ui/docs-components/docs-components.types"
 import {
   EXAMPLE_TAG,
   HEADING_SELECTOR,
@@ -21,6 +26,9 @@ import {
  * - Static only:  pure reads (and id writes) of the DOM it's given.
  * - Entries form a tree:  level 2 headings and top-level `<ui-section>`s,
  *   then what's under each (examples, level 3 headings, nested sections), as deep as the sections nest.
+ * - Light DOM only, but for the shadow roots of `TOC_SHADOW_HOSTS` (`<ui-docs-api>`):
+ *   their marked elements (`TOC_ENTRY_ATTRIBUTE`) are entries of the section around the host,
+ *   a group's (`TOC_GROUP_ATTRIBUTE`) nesting the ones after it.
  * - SIDE EFFECT:  `scan()` gives every listed heading / section / example without an `id` one
  *   (a slug of its text, made unique in the document), so the links have targets and other pages can link to them.
  ****************/
@@ -59,6 +67,8 @@ export class TocIndex {
    * - each `<ui-section>` with what's nested in it (sections, examples, headings), at any depth
    * - A level 2 heading inside a `<ui-section>` is an entry of that section, like the rest.
    * - Headings before the first section become sections with no entries.
+   * - A `TOC_SHADOW_HOSTS` element:  its shadow root's marked elements, as entries of the section around it
+   *   (`shadowEntries()`).
    * - Skipped:  sections without a title, and headings and sections
    *   inside an example's live markup (a header page's demos) or inside templates.
    * - `reserved`:  ids a new id must not take (the tab values, which the URL hash also names).
@@ -66,8 +76,13 @@ export class TocIndex {
   static scan(root: Element, reserved: ReadonlySet<string> = new Set()): TocSection[] {
     const sections: TocEntry[] = []
     const ofSection = new Map<Element, TocEntry>()
-    for (const heading of root.querySelectorAll(HEADING_SELECTOR)) {
+    for (const heading of root.querySelectorAll(`${HEADING_SELECTOR}, ${TOC_SHADOW_HOSTS}`)) {
       if (TocIndex.insideExample(heading, root)) continue
+      if (heading.matches(TOC_SHADOW_HOSTS)) {
+        const parent = TocIndex.enclosing(heading, root, ofSection) ?? sections.at(-1)
+        if (parent) (parent.entries as TocEntry[]).push(...TocIndex.shadowEntries(heading))
+        continue
+      }
       const text = TocIndex.text(heading)
       if (!text) continue
       const entry: TocEntry = { id: TocIndex.idOf(heading, text, reserved), text, target: heading, entries: [] }
@@ -79,6 +94,47 @@ export class TocIndex {
       else (last.entries as TocEntry[]).push(entry)
     }
     return sections
+  }
+
+  /**
+   * The entries `host`'s shadow root marks (`TOC_ENTRY_ATTRIBUTE`, with an id), in order;
+   * a group's (`TOC_GROUP_ATTRIBUTE`) holding the ones after it, up to the next group.
+   * - `[]` before the host has drawn:  the toc scans again when it says it has (`ui-drawn`).
+   */
+  static shadowEntries(host: Element): TocEntry[] {
+    const marked = host.shadowRoot?.querySelectorAll(`[${TOC_ENTRY_ATTRIBUTE}]`) ?? []
+    const entries: TocEntry[] = []
+    let group: TocEntry | undefined
+    for (const element of marked) {
+      const text = element.getAttribute(TOC_ENTRY_ATTRIBUTE)?.trim()
+      if (!text || !element.id) continue
+      const entry: TocEntry = { id: element.id, text, target: element, entries: [] }
+      if (element.hasAttribute(TOC_GROUP_ATTRIBUTE)) {
+        group = entry
+        entries.push(entry)
+      } else if (group) (group.entries as TocEntry[]).push(entry)
+      else entries.push(entry)
+    }
+    return entries
+  }
+
+  /** The element with `id`:  in the page, else in a `TOC_SHADOW_HOSTS` element's shadow root (a row's anchor). */
+  static elementById(document: Document, id: string): Element | undefined {
+    const own = document.getElementById(id)
+    if (own) return own
+    for (const host of document.querySelectorAll(TOC_SHADOW_HOSTS)) {
+      const found = host.shadowRoot?.getElementById(id)
+      if (found) return found
+    }
+    return undefined
+  }
+
+  /** The light-DOM element `element` is drawn in:  its shadow root's host (at any depth), else itself. */
+  static lightElementOf(element: Element): Element {
+    let light = element
+    for (let root = light.getRootNode(); "host" in root && root.host; root = light.getRootNode())
+      light = root.host as Element
+    return light
   }
 
   /** `entries` and everything under them, depth first:  page order. */
@@ -108,7 +164,7 @@ export class TocIndex {
     const view = document.defaultView
     if (!view) return undefined
     const all = TocIndex.flatten(sections).filter(
-      (entry) => entry.target.getClientRects().length && !TocIndex.folded(entry.target)
+      (entry) => entry.target.getClientRects().length && !TocIndex.folded(TocIndex.lightElementOf(entry.target))
     )
     if (!all.length) return undefined
     const scroller = document.scrollingElement ?? document.documentElement
@@ -149,16 +205,14 @@ export class TocIndex {
     else root.addEventListener("ui-ready", () => beforeNextPaint(then), { once: true })
   }
 
-  /** `text` as an id:  lowercase words joined by `-`, e.g. `Labeled Icon` => `labeled-icon`. */
+  /**
+   * `text` as a section's id:  the kit's id slug (`slug()`), `section` when nothing is left.
+   * - e.g. `Labeled Icon` => `labeled-icon`, `Émphasis & More!` => `emphasis-more`
+   * - EXCEPT an apostrophe, which splits words here (`Spell UI's own` => `spell-ui-s-own`),
+   *   where the kit's drops it:  the docs pages' saved section ids were made so, and links point at them.
+   */
   static slug(text: string): string {
-    return (
-      text
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[̀-ͯ]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "section"
-    )
+    return slug(text.replace(/['’]/g, " "), { fallback: "section" })
   }
 
   /** `element`'s id, giving it one first if it has none (SIDE EFFECT). */

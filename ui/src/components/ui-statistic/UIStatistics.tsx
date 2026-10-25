@@ -36,7 +36,7 @@ export class UIStatistics extends E.UIComponent<typeof statisticsVocabulary> {
    */
   @E.cssState("spaced")
   get isSpaced(): boolean {
-    return !this.horizontal && !this.widths
+    return !this.direction && !this.widths
   }
 
   /** `stack-with`'s class (`UIT.StackClasses`). */

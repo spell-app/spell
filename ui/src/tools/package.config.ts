@@ -82,7 +82,7 @@ function bucket(id: string): Bucket {
   const src = /\/src\/(.+)$/.exec(file)?.[1]
   if (!src) return "other"
   if (
-    /^(forms\.ts|elements\/(FormComponent|DOMFormControl|Validator|MenuOptions|ControlLabels|LabelWatch)\.ts)$/.test(
+    /^(forms\.ts|elements\/(FormComponent|DOMFormControl|Validator|MenuOptions|ControlLabels|LabelWatch|PopoverPanel)\.ts)$/.test(
       src
     )
   )

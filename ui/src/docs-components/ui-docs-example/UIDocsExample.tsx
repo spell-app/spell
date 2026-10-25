@@ -80,12 +80,15 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
   /** The wait for the code to finish rolling closed (`onCodeOpenChanged()`). */
   private closingTimer?: E.CancelablePromise<unknown>
 
-  /** Open or close the code pane, as the viewer did with `event`. */
+  /**
+   * The code pane, open as `code` (`isCodeOpen`):  `ui-opened` / `ui-closed` as the code button opens or closes it;
+   * the button's `aria-expanded`.
+   */
+  readonly disclosure = new E.Disclosure({ component: this, member: "isCodeOpen" })
+
+  /** Open or close the code pane, as the viewer did with `event`:  then `ui-opened` / `ui-closed`. */
   toggle(event?: Event): void {
-    const next = !this.isCodeOpen
-    this.requestChange("isCodeOpen", next, () =>
-      this.send(next ? "ui-opened" : "ui-closed", { open: next, originalEvent: event })
-    )
+    if (this.disclosure.toggle(event)) this.disclosure.sendAfter(this.isCodeOpen, event)
   }
 
   /** The code button's name:  what a click does. */
@@ -143,20 +146,19 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
         <div class={FRAME_CLASS}>
           <ui-button
             part={this.partForName("toggle")}
-            circular=""
-            basic=""
             icon={CODE_ICON}
             size={this.variation ? "mini" : "tiny"}
             aria-label={this.toggleLabel}
             title={this.toggleLabel}
-            aria-expanded={this.isCodeOpen ? "true" : "false"}
+            aria-expanded={this.disclosure.ariaExpanded}
             aria-controls={CODE_PANE_ID}
             ref={(button: HTMLElement) => button.addEventListener("click", (event) => this.toggle(event))}
+            appearance="circular basic"
           />
           <ui-segment
             part={this.partForName("demo")}
-            basic={this.demoIsFramed ? undefined : ""}
-            attached={this.demoIsFramed ? UIT.TOP : undefined}
+            appearance={this.demoIsFramed ? undefined : "basic"}
+            attach={this.demoIsFramed ? UIT.TOP : undefined}
           >
             <slot />
           </ui-segment>
@@ -164,8 +166,8 @@ export class UIDocsExample extends E.UIComponent<typeof docsExampleVocabulary> {
             <ui-segment
               id={CODE_PANE_ID}
               part={this.partForName("code")}
-              secondary=""
-              attached={this.bare ? undefined : UIT.BOTTOM}
+              attach={this.bare ? undefined : UIT.BOTTOM}
+              appearance="secondary"
             >
               <ui-code
                 part={this.partForName("source")}

@@ -24,7 +24,7 @@ import stepCSS from "./UIStep.css?inline"
  *
  * - The DOM element's states:
  *   - `steps` always
- *   - `block` while the root is block-level (`fluid`, or `circular` and not `vertical`)
+ *   - `block` while the root is block-level (`fluid`, or circular and not vertical)
  *   - `circular` while circular
  *   - Why `block`:  the DOM element is a size container (its own formatting context),
  *     so a block-level root's outer margin sits on the DOM ELEMENT,
@@ -45,16 +45,23 @@ export class UISteps extends E.UIComponent<typeof stepsVocabulary> {
     return true
   }
 
-  /** The root is block-level:  `fluid`, or `circular` and not `vertical` (`:state(block)`). */
+  /** The root is block-level:  `fluid`, or circular and not vertical (`:state(block)`). */
   @E.cssState("block")
   get isBlockLevel(): boolean {
-    return !!this.fluid || (this.isCircular && !this.vertical)
+    return !!this.fluid || (this.isCircular && !this.isVertical)
   }
 
-  /** `circular`:  `:state(circular)`. */
+  /** `appearance="circular"`:  `:state(circular)`. */
   @E.cssState("circular")
   get isCircular(): boolean {
-    return !!this.circular
+    return String(this.appearance ?? "")
+      .split(" ")
+      .includes(CIRCULAR)
+  }
+
+  /** The steps run top to bottom (`direction="vertical"`, or `vertical-right`). */
+  get isVertical(): boolean {
+    return String(this.direction ?? "").startsWith(VERTICAL)
   }
 
   /** `stack-with`'s class (`UIT.StackClasses`). */
@@ -73,3 +80,9 @@ export class UISteps extends E.UIComponent<typeof stepsVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UISteps extends E.AttributeValues<typeof stepsVocabulary> {}
+
+/** The `appearance` word of Fomantic's circular steps. */
+const CIRCULAR = "circular"
+
+/** The `direction` of steps stacked top to bottom (`vertical-right` too). */
+const VERTICAL = "vertical"

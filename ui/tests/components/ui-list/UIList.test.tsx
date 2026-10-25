@@ -75,9 +75,9 @@ describe("<ui-list> classes and markup", () => {
     ["relaxed", "ui relaxed list"],
     ['relaxed="very"', "ui very relaxed list"],
     ['relaxed="no"', "ui list"],
-    ["divided relaxed selection", "ui divided selection relaxed list"],
+    ["divided relaxed selection", "ui relaxed divided selection list"],
     ["horizontal inverted", "ui horizontal inverted list"],
-    ["link animated fitted celled", "ui animated celled fitted link list"],
+    ["link animated fitted celled", "ui animated fitted celled link list"],
     ['floated="right"', "ui right floated list"],
     ['vertical-align="middle"', "ui middle aligned list"]
   ])("<ui-list %s>", async (attributes, classes) => {
@@ -574,5 +574,13 @@ describe("<ui-list> accessibility", () => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await ElementFixture.settle(root)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-list> old names", () => {
+  it('<ui-list link animated horizontal relaxed="very" fitted> draws as the new spelling', async () => {
+    const before = await list(`link animated horizontal relaxed="very" fitted`)
+    const after = await list(`appearance="link" hover="indent" direction="horizontal" spacing="xl" padding="none"`)
+    expect(before.root.className).toBe(after.root.className)
   })
 })

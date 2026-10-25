@@ -25,9 +25,31 @@ export const imagesVocabulary = {
       description: "Width of every image in the group, `mini` ... `massive`."
     },
     { name: "avatar", group: "content", kind: "keyOnly", description: "Every image a small circle." },
-    { name: "bordered", group: "appearance", kind: "keyOnly", description: "Every image with a hairline border." },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Rows centred in the container." },
-    { name: "circular", group: "appearance", kind: "keyOnly", description: "Every image cropped to a circle." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["bordered", "circular", "rounded"],
+      replaces: [
+        { from: "bordered", value: "bordered" },
+        { from: "circular", value: "circular" },
+        { from: "rounded", value: "rounded" }
+      ],
+      description:
+        "Every image's look, several words at once:  `bordered` (a hairline border), `circular` (cropped to a " +
+        "circle), `rounded` (softly rounded corners).  Old names:  `bordered`, `circular`, `rounded` written alone."
+    },
+    {
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center`:  rows centred in the container.  Its old name is `centered`."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "The whole group faded." },
     {
       name: "fluid",
@@ -35,7 +57,6 @@ export const imagesVocabulary = {
       kind: "keyOnly",
       description: "Every image fills the group's width, one per row."
     },
-    { name: "rounded", group: "appearance", kind: "keyOnly", description: "Every image with softly rounded corners." },
     {
       name: "floated",
       group: "layout",

@@ -65,7 +65,11 @@ export class ValueSets {
     "pink",
     "brown",
     "grey",
-    "black"
+    "black",
+    // what a click does, as Fomantic's buttons had them:  `colors.css` remaps them as it does every hue
+    // (epic `ui-gaps` P4:  `<ui-button positive>` became `color="positive"`)
+    "positive",
+    "negative"
   ] as const
 
   /** Ratios of 16, smallest first;  `medium` means "default" and emits no class. */

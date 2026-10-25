@@ -7,21 +7,19 @@
 
   <section>
     <h4>Compact</h4>
-    <ui-message compact><p>Get all the best inventions in your e-mail every day. Sign up now!</p></ui-message>
-    <ui-message compact icon="envelope" heading="Compact icon">
+    <ui-message padding="compact"><p>Get all the best inventions in your e-mail every day. Sign up now!</p></ui-message>
+    <ui-message padding="compact" icon="envelope" heading="Compact icon">
       <p>Only as wide as it needs.</p>
     </ui-message>
   </section>
 
   <section>
     <h4>Attached</h4>
-    <ui-message attached heading="Welcome to our site!">
+    <ui-message attach="both" heading="Welcome to our site!">
       <p>Fill out the form below to sign-up for a new account</p>
     </ui-message>
     <form style="padding: 1em; border: 1px solid var(--ui-border-color)">A form, attached between the messages</form>
-    <ui-message state="warning" attached="bottom"
-      >Already signed up? <a href="#login">Login here</a> instead.</ui-message
-    >
+    <ui-message state="warning" attach="bottom">Already signed up? <a href="#login">Login here</a> instead.</ui-message>
   </section>
 
   <section>
@@ -105,7 +103,7 @@
 
   <section>
     <h4>Right aligned</h4>
-    <ui-message text-align="right" heading="Right aligned">
+    <ui-message align="right" heading="Right aligned">
       <p>Its text sits on the right.</p>
     </ui-message>
   </section>

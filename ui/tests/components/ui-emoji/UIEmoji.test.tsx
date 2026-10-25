@@ -75,7 +75,7 @@ describe("<ui-emoji> glyph and classes", () => {
     ["", "ui emoji"],
     ['size="small"', "ui small emoji"],
     ['size="medium"', "ui emoji"],
-    ['size="big" link', "ui big link emoji"],
+    ['size="big" appearance="link"', "ui big link emoji"],
     ["disabled loading", "ui disabled loading emoji"]
   ])("<ui-emoji name=smile %s>", async (attributes, classes) => {
     const { root } = await render(`<ui-emoji name="grinning_face_with_smiling_eyes" ${attributes}></ui-emoji>`)

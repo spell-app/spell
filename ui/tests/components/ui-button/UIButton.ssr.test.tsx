@@ -46,7 +46,7 @@ describe("<ui-button> static render", () => {
   })
 
   it("hands the host's id to the inner button under a joined label (the root is the wrapper)", () => {
-    const html = StaticRender.fragment(`<ui-button id="like" type="submit" name="like" label="12">Like</ui-button>`)
+    const html = StaticRender.fragment(`<ui-button id="like" type="submit" name="like" badge="12">Like</ui-button>`)
     expect(html).toMatch(/^<div [^>]*class="ui labeled button"/)
     const button = html.match(/<button [^>]*>/)?.[0] ?? ""
     for (const attribute of [`type="submit"`, `name="like"`, `id="like"`]) expect(button).toContain(attribute)

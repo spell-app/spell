@@ -42,7 +42,7 @@ export type FollowedContent = {
 /**
  * What becomes a SECTION:  a level 2 page header, or a `<ui-section>` inside no other (inside one:
  * an entry of it, at any depth).
- * - Light DOM only:  headers a widget renders in its shadow root (`<ui-docs-api>`'s) can't be listed or linked to.
+ * - Light DOM only:  a widget's shadow headers are listed only when it marks them (`TOC_ENTRY_ATTRIBUTE`).
  */
 export const SECTION_SELECTOR = 'ui-header[level="2"], h2, ui-section'
 
@@ -69,3 +69,23 @@ export const READING_LINE = 0.2
 
 /** Default `size`. */
 export const DEFAULT_SIZE = "small"
+
+////////////////
+// ## Folds
+////////////////
+
+/** What the header's toggle last did, on any page:  every section open, or every section folded. */
+export type TocAllFolds = (typeof TOC_ALL_FOLDS)[number]
+
+/** `TocAllFolds`' values. */
+export const TOC_ALL_FOLDS = ["expanded", "collapsed"] as const
+
+/** The reader's own folds on one page, by section id:  `true` opened, `false` folded. */
+export type TocFolds = Readonly<Record<string, boolean>>
+
+/**
+ * Where a toc keeps its folds (`TocPreferences`):  the `PrefStore` name, and its keys.
+ * - `all`:  the toggle's `TocAllFolds`, ONE for every page in this browser
+ * - `folds`:  + the page's path, its `TocFolds`
+ */
+export const TOC_PREFS = { store: "spell-ui-docs-toc", all: "all", folds: "folds:" } as const

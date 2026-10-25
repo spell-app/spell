@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Search">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-search%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-search%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/search.html"
+              link="https://fomantic-ui.com/modules/search.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's search page, its Definition tab section by section (Types, States, Variations), then its
@@ -117,11 +117,11 @@
                 dividing
               >
                 <ui-docs-example
-                  description="You can also display horizontal category names on top of each results instead:  `horizontal`."
+                  description='You can also display horizontal category names on top of each results instead:  `direction="horizontal"`.'
                 >
                   <ui-search
                     category
-                    horizontal
+                    direction="horizontal"
                     placeholder="Search people..."
                     source='[{"category":"Designers","title":"Elliot Fu","description":"Film buff"},{"category":"Designers","title":"Helen Troy","description":"Wizard"},{"category":"Developers","title":"Jenny Hess","description":"Student"},{"category":"Developers","title":"Matt Giampietro","description":"Coach"},{"category":"Writers","title":"Stevie Feliciano","description":"Library"},{"category":"Writers","title":"Christian Rocha","description":"Mixologist"}]'
                   ></ui-search>
@@ -268,7 +268,7 @@
                     breakpoint.</ui-message
                   >
                   <ui-search
-                    very-short
+                    length="very-short"
                     max-results="0"
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
@@ -276,7 +276,7 @@
                 </ui-docs-example>
                 <ui-docs-example description="Long:  2x of the default height.">
                   <ui-search
-                    long
+                    length="long"
                     max-results="0"
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
@@ -297,10 +297,10 @@
 
               <ui-section id="examples-variations-aligned" label="Aligned" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A search can have its results aligned to its left or right container edge:  `aligned="right"` extends them to the left.'
+                  description='A search can have its results aligned to its left or right container edge:  `align="right"` extends them to the left.'
                 >
                   <ui-search
-                    aligned="right"
+                    align="right"
                     category
                     placeholder="Search animals..."
                     source='[{"category":"Mammals","title":"Cat","description":"Aligned to the right edge"},{"category":"Mammals","title":"Dog"},{"category":"Birds","title":"Crow"},{"category":"Birds","title":"Owl"}]'
@@ -531,7 +531,33 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-search"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-search" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -560,7 +586,7 @@
                 <ui-markdown>
                   <script type="text/markdown">
                     `--ui-search-results-max-height` replaces the viewport-based height of `scrolling` results at every width;
-                    `very-short`, `long` and `very-long` scale whatever it is (0.75x, 2x, 3x). `category` results use the
+                    `length` (`very-short`, `long` and `very-long`) scales whatever it is (0.75x, 2x, 3x). `category` results use the
                     `--ui-search-category-*` tokens. Never set the `--_ui-*` / `--_search-*` names: they're the sheet's private
                     plumbing.
                   </script>

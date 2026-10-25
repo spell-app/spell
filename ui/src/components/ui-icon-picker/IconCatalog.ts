@@ -2,7 +2,7 @@ import { E } from "spell-ui/core"
 
 /****************
  * ### `IconCatalog`
- * The icons an `<ui-icon-picker>` offers, and how a search finds them.
+ * The icons an `<ui-icon-picker>` offers, how they're grouped, and how a search finds them.
  *
  * - Its icons are every icon the PICKER's icon packs know:
  *   its nearest `<ui-root icons>`'s, else the page's (`IconGlyph.packsFor()`), whatever names they take there.
@@ -11,11 +11,17 @@ import { E } from "spell-ui/core"
  *   - A choice is labelled by its file's own name when it has it (`address book`), else its first name;
  *     its other names are found by a search too.
  *   - Sorted by that name, A-Z.
+ * - Grouped by Font Awesome's own categories (`groupsOf()`):  Accessibility, Alert ... Writing, in its order,
+ *   A-Z within each;  a glyph in none goes last, under "Other" (the picker's word for it).
+ *   - A glyph in several categories is in EACH, as on Font Awesome's own site:
+ *     someone looking through Weather expects every weather glyph there, not only those no earlier category took.
+ *   - A pack of other glyphs (not Font Awesome's files) is all "Other".
  * - A search matches, best first:
  *   - a name that IS the query, then names starting with it, then names holding it
- *   - then Font Awesome's search terms for the glyph's file (`envelope` for `mail`),
- *     from `spell-ui/icons/data/search.json`:  ~100 KB, so loaded (`terms()`) on the first search only
- * - STATIC and instance-free on purpose:  a page's packs are the page's, and the terms are one file;
+ *   - then Font Awesome's search terms for the glyph's file (`envelope` for `mail`)
+ * - The categories and the terms are ONE file, `spell-ui/icons/data/search.json` (`IconSearchFile`):
+ *   ~110 KB, so it's loaded (`searchWords()`) only as a picker first opens, once per page.
+ * - STATIC and instance-free on purpose:  a page's packs are the page's, and the search words are one file;
  *   each picker holds the list it was given.
  * - Library-neutral:  no Solid, no DOM beyond what `UI.icons` holds, so a test can drive it with any packs.
  ****************/
@@ -67,27 +73,68 @@ export class IconCatalog {
   >()
 
   ////////////////
-  // ## Search
+  // ## Groups
   ////////////////
 
   /**
-   * Font Awesome's search terms, by file name (`address-book` => `["contact", "directory" ...]`):
-   * loaded on the first call, once per page.
-   * - NEVER rejects:  terms that won't load are `{}` (names still match), and the next call tries again.
+   * `choices` in Font Awesome's `categories`, in their order (see the class doc);  those in none last, "Other".
+   * - "Other" has no `label`:  the picker words it, in its own language.
+   * - A category with none of `choices` is left out, and so is "Other" when every choice has a category.
    */
-  static terms(): Promise<IconSearchTerms> {
+  static groupsOf(choices: readonly IconChoice[], categories: readonly IconCategory[]): readonly IconGroup[] {
+    const other: IconGroup & { choices: IconChoice[] } = { id: OTHER_GROUP, choices: [] }
+    const groups = [...categories.map(({ id, label }) => ({ id, label, choices: [] as IconChoice[] })), other]
+    // each file's groups' lists, so a choice finds every group it's in at once
+    const listsOfFile = new Map<string, IconChoice[][]>()
+    for (const [at, category] of categories.entries()) {
+      for (const file of category.files) {
+        const lists = listsOfFile.get(file)
+        if (lists) lists.push(groups[at].choices)
+        else listsOfFile.set(file, [groups[at].choices])
+      }
+    }
+    // `choices` are A-Z, so each group is too
+    for (const choice of choices) for (const list of listsOfFile.get(choice.file) ?? [other.choices]) list.push(choice)
+    return groups.filter((group) => group.choices.length)
+  }
+
+  ////////////////
+  // ## Search words
+  ////////////////
+
+  /**
+   * Font Awesome's search terms and categories (`IconSearchWords`), from `search.json`:  loaded on the first call,
+   * once per page.
+   * - NEVER rejects:  words that won't load are none (names still match, the grid isn't grouped),
+   *   and the next call tries again.
+   */
+  static searchWords(): Promise<IconSearchWords> {
     IconCatalog.loading ??= import("spell-ui/icons/data/search.json").then(
-      (module) => module.default as IconSearchTerms,
+      (module) => IconCatalog.wordsOf(module.default as E.IconSearchFile),
       () => {
         IconCatalog.loading = undefined
-        return {}
+        return NO_WORDS
       }
     )
     return IconCatalog.loading
   }
 
-  /** The terms' load, once started. */
-  private static loading?: Promise<IconSearchTerms>
+  /** The search words' load, once started. */
+  private static loading?: Promise<IconSearchWords>
+
+  /** `search.json`, its categories' icons turned back into file names (`IconSearchFileCategory`). */
+  private static wordsOf(file: E.IconSearchFile): IconSearchWords {
+    const files = Object.keys(file.terms)
+    const categories = file.categories.map(({ id, label, icons }) => {
+      let place = 0
+      return { id, label, files: icons.map((gap) => files[(place += gap)]) }
+    })
+    return { terms: file.terms, categories }
+  }
+
+  ////////////////
+  // ## Search
+  ////////////////
 
   /**
    * The choices that match `query`, best first (see the class doc);  all of them for an empty query.
@@ -132,6 +179,40 @@ export type IconChoice = {
 
 /** Font Awesome's search terms, by file name (`address-book` => `["contact", "directory" ...]`). */
 export type IconSearchTerms = Readonly<Record<string, readonly string[]>>
+
+/** What `searchWords()` loads:  Font Awesome's search terms and categories. */
+export type IconSearchWords = {
+  /** search terms, by file name */
+  readonly terms: IconSearchTerms
+  /** Font Awesome's categories, in its order */
+  readonly categories: readonly IconCategory[]
+}
+
+/** One of Font Awesome's categories. */
+export type IconCategory = {
+  /** Font Awesome's id:  `charts-diagrams` */
+  readonly id: string
+  /** Font Awesome's label, in English:  `Charts + Diagrams` */
+  readonly label: string
+  /** its icons' file names (`chart-pie`), as `IconChoice.file` */
+  readonly files: readonly string[]
+}
+
+/** A group of the picker's grid:  a category's choices, or "Other". */
+export type IconGroup = {
+  /** the category's id, or `"other"` */
+  readonly id: string
+  /** what its heading says:  the category's label;  none for "Other", which the picker words itself */
+  readonly label?: string
+  /** its choices, A-Z */
+  readonly choices: readonly IconChoice[]
+}
+
+/** `searchWords()` when the file won't load. */
+const NO_WORDS: IconSearchWords = { terms: {}, categories: [] }
+
+/** The id of the group of choices in no category. */
+const OTHER_GROUP = "other"
 
 /** `rankOf()`'s "doesn't match". */
 const NO_MATCH = 4

@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Checkbox">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-checkbox%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-checkbox%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/checkbox.html"
+              link="https://fomantic-ui.com/modules/checkbox.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -56,7 +56,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's checkbox page, section by section, in its order (Types, States, Variations, then its
@@ -82,17 +82,17 @@
 
               <ui-section id="examples-types-slider" label="Slider" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A checkbox can be formatted to emphasize the current selection state:  `type="slider"`.'
+                  description='A checkbox can be formatted to emphasize the current selection state:  `appearance="slider"`.'
                 >
-                  <ui-checkbox type="slider" name="newsletter">Accept terms and conditions</ui-checkbox>
+                  <ui-checkbox appearance="slider" name="newsletter">Accept terms and conditions</ui-checkbox>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-types-toggle" label="Toggle" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A checkbox can be formatted to show an on or off choice:  `type="toggle"`.'
+                  description='A checkbox can be formatted to show an on or off choice:  `appearance="toggle"`.'
                 >
-                  <ui-checkbox type="toggle" name="public">Subscribe to weekly newsletter</ui-checkbox>
+                  <ui-checkbox appearance="toggle" name="public">Subscribe to weekly newsletter</ui-checkbox>
                 </ui-docs-example>
               </ui-section>
 
@@ -175,11 +175,11 @@
                   <ui-message slot="description" state="info" size="small"
                     >Unlike Fomantic's, which needs JavaScript, <code>indeterminate</code> is an attribute.</ui-message
                   >
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <ui-checkbox indeterminate>Indeterminate</ui-checkbox>
                   </ui-segment>
-                  <ui-segment basic>
-                    <ui-checkbox type="toggle" indeterminate>Indeterminate</ui-checkbox>
+                  <ui-segment appearance="basic">
+                    <ui-checkbox appearance="toggle" indeterminate>Indeterminate</ui-checkbox>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -189,11 +189,11 @@
                   <p slot="description">
                     A checkbox can show it is currently unable to be interacted with. It is left out of the form.
                   </p>
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <ui-checkbox disabled>Disabled</ui-checkbox>
                   </ui-segment>
-                  <ui-segment basic>
-                    <ui-checkbox type="toggle" disabled>Disabled</ui-checkbox>
+                  <ui-segment appearance="basic">
+                    <ui-checkbox appearance="toggle" disabled>Disabled</ui-checkbox>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -205,28 +205,28 @@
                   <p slot="description">
                     A fitted checkbox does not leave padding for a label. Give it an <code>aria-label</code>.
                   </p>
-                  <ui-segment floated="left" compact>
-                    <ui-checkbox fitted aria-label="Fitted"></ui-checkbox>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-checkbox padding="none" aria-label="Fitted"></ui-checkbox>
                   </ui-segment>
-                  <ui-segment floated="left" compact>
-                    <ui-checkbox fitted type="slider" aria-label="Fitted slider"></ui-checkbox>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-checkbox padding="none" appearance="slider" aria-label="Fitted slider"></ui-checkbox>
                   </ui-segment>
-                  <ui-segment floated="left" compact>
-                    <ui-checkbox fitted type="toggle" aria-label="Fitted toggle"></ui-checkbox>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-checkbox padding="none" appearance="toggle" aria-label="Fitted toggle"></ui-checkbox>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
                 <ui-docs-example description="A checkbox can be formatted to appear on dark backgrounds.">
-                  <ui-segment compact inverted>
+                  <ui-segment padding="compact" inverted>
                     <ui-checkbox inverted>Inverted</ui-checkbox>
                   </ui-segment>
-                  <ui-segment compact inverted>
-                    <ui-checkbox inverted type="slider">Inverted</ui-checkbox>
+                  <ui-segment padding="compact" inverted>
+                    <ui-checkbox inverted appearance="slider">Inverted</ui-checkbox>
                   </ui-segment>
-                  <ui-segment compact inverted>
-                    <ui-checkbox inverted type="toggle">Inverted</ui-checkbox>
+                  <ui-segment padding="compact" inverted>
+                    <ui-checkbox inverted appearance="toggle">Inverted</ui-checkbox>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -236,9 +236,9 @@
                   <ui-form>
                     <form>
                       <ui-fields grouped>
-                        <ui-field><ui-checkbox right-aligned selected>Checkbox</ui-checkbox></ui-field>
-                        <ui-field><ui-checkbox right-aligned type="slider" selected>Slider</ui-checkbox></ui-field>
-                        <ui-field><ui-checkbox right-aligned type="toggle" selected>Toggle</ui-checkbox></ui-field>
+                        <ui-field><ui-checkbox align="right" selected>Checkbox</ui-checkbox></ui-field>
+                        <ui-field><ui-checkbox align="right" appearance="slider" selected>Slider</ui-checkbox></ui-field>
+                        <ui-field><ui-checkbox align="right" appearance="toggle" selected>Toggle</ui-checkbox></ui-field>
                       </ui-fields>
                     </form>
                   </ui-form>
@@ -250,46 +250,46 @@
                   description="A checkbox can have different colors:  `color` tints the chosen box, bullet, lane or line."
                 >
                   <ui-checkbox color="red" selected>Red</ui-checkbox>
-                  <ui-checkbox color="green" type="toggle" selected>Green</ui-checkbox>
-                  <ui-checkbox color="blue" type="slider" selected>Blue</ui-checkbox>
+                  <ui-checkbox color="green" appearance="toggle" selected>Green</ui-checkbox>
+                  <ui-checkbox color="blue" appearance="slider" selected>Blue</ui-checkbox>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
                 <ui-docs-example description="A checkbox can have different sizes.">
                   <ui-checkbox size="mini">Checkbox</ui-checkbox>
-                  <ui-checkbox size="mini" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="mini" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="mini" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="mini" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="tiny">Checkbox</ui-checkbox>
-                  <ui-checkbox size="tiny" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="tiny" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="tiny" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="tiny" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="small">Checkbox</ui-checkbox>
-                  <ui-checkbox size="small" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="small" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="small" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="small" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="large">Checkbox</ui-checkbox>
-                  <ui-checkbox size="large" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="large" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="large" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="large" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="big">Checkbox</ui-checkbox>
-                  <ui-checkbox size="big" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="big" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="big" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="big" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="huge">Checkbox</ui-checkbox>
-                  <ui-checkbox size="huge" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="huge" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="huge" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="huge" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-checkbox size="massive">Checkbox</ui-checkbox>
-                  <ui-checkbox size="massive" type="toggle">Toggle</ui-checkbox>
-                  <ui-checkbox size="massive" type="slider">Slider</ui-checkbox>
+                  <ui-checkbox size="massive" appearance="toggle">Toggle</ui-checkbox>
+                  <ui-checkbox size="massive" appearance="slider">Slider</ui-checkbox>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -313,7 +313,7 @@
                     <code>ui-changed</code>: see "Grouped checkboxes" on the Usage tab. Here the states are set in
                     markup.</ui-message
                   >
-                  <ui-list celled relaxed>
+                  <ui-list celled spacing="lg">
                     <ui-item>
                       <ui-checkbox name="fruits" indeterminate>Fruits</ui-checkbox>
                       <ui-list>
@@ -361,7 +361,7 @@
                   <ui-form>
                     <form>
                       <ui-field
-                        ><ui-checkbox type="toggle" name="panel" value="open" off-value="closed"
+                        ><ui-checkbox appearance="toggle" name="panel" value="open" off-value="closed"
                           >Panel open</ui-checkbox
                         ></ui-field
                       >
@@ -393,11 +393,11 @@
                   like Fomantic's checkbox without its module. For an exclusive option, `<ui-radio>` (same family, sheet and tokens)
                   has its own page: [Radio](ui-radio.html).
 
-                  - `type="toggle"` / `type="slider"` changes the look.
+                  - `appearance="toggle"` / `appearance="slider"` changes the look.
                   - `selected` is the chosen state, as an attribute and a property. `checked` is an alias: the `checked`
                     attribute in markup selects the box, and `el.checked` reads and writes `el.selected`.
                   - `indeterminate` is an attribute (Fomantic needs JavaScript for it); a click clears it, as natively.
-                  - The label is the slotted content, or `label` for plain text; a `fitted` box has none.
+                  - The label is the slotted content, or `label` for plain text; a `padding="none"` box has none.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -526,13 +526,13 @@
                     draws the focus ring on the box.
                   - Toggles and sliders are `role="switch"` (on / off); an `indeterminate` checkbox reports `aria-checked="mixed"`;
                     `readonly` sets `aria-readonly` and cancels clicks.
-                  - The accessible name is the label text. A `fitted` box (or an `invisible` one holding only an image) has none,
+                  - The accessible name is the label text. A `padding="none"` box (or an `invisible` one holding only an image) has none,
                     so give it an `aria-label` or a `<label for>` pointing at the host.
                   - A box that fails `required` after the user has interacted gets `aria-invalid="true"`.
                   - If the element fails to render, its native fallback keeps the same markup with a plain native input:
                     it still submits, validates `required` and fires `ui-changed`. It drops vetoing `ui-changed`,
                     the invalid state, reset to the starting state,
-                    and naming a `fitted` box through `<label for>` (only `aria-label` works).
+                    and naming a `padding="none"` box through `<label for>` (only `aria-label` works).
                 </script>
               </ui-markdown>
             </ui-section>
@@ -574,7 +574,29 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-checkbox"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-checkbox" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

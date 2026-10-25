@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Radio">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-radio%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-radio%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/checkbox.html"
+              link="https://fomantic-ui.com/modules/checkbox.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -53,7 +53,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  the radio parts of Fomantic's checkbox page (Types, States, Variations), moved here from the
@@ -100,17 +100,17 @@
 
               <ui-section id="examples-types-slider" label="Slider" sticky collapsible dividing>
                 <ui-docs-example
-                  description='Radios can be sliders, to emphasize the current selection:  `type="slider"`.'
+                  description='Radios can be sliders, to emphasize the current selection:  `appearance="slider"`.'
                 >
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-labelledby="radio-throughput-label">
                         <label id="radio-throughput-label">Outbound Throughput</label>
-                        <ui-field><ui-radio type="slider" name="throughput" value="20">20 mbps max</ui-radio></ui-field>
-                        <ui-field><ui-radio type="slider" name="throughput" value="10">10mbps max</ui-radio></ui-field>
-                        <ui-field><ui-radio type="slider" name="throughput" value="5">5mbps max</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="slider" name="throughput" value="20">20 mbps max</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="slider" name="throughput" value="10">10mbps max</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="slider" name="throughput" value="5">5mbps max</ui-radio></ui-field>
                         <ui-field
-                          ><ui-radio type="slider" name="throughput" value="unmetered" selected>Unmetered</ui-radio></ui-field
+                          ><ui-radio appearance="slider" name="throughput" value="unmetered" selected>Unmetered</ui-radio></ui-field
                         >
                       </ui-fields>
                     </form>
@@ -119,14 +119,14 @@
               </ui-section>
 
               <ui-section id="examples-types-toggle" label="Toggle" sticky collapsible dividing>
-                <ui-docs-example description='Radios can be toggles, an on or off look:  `type="toggle"`.'>
+                <ui-docs-example description='Radios can be toggles, an on or off look:  `appearance="toggle"`.'>
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-labelledby="radio-plan-label">
                         <label id="radio-plan-label">Plan</label>
-                        <ui-field><ui-radio type="toggle" name="plan" value="free" selected>Free</ui-radio></ui-field>
-                        <ui-field><ui-radio type="toggle" name="plan" value="pro">Pro</ui-radio></ui-field>
-                        <ui-field><ui-radio type="toggle" name="plan" value="team">Team</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="toggle" name="plan" value="free" selected>Free</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="toggle" name="plan" value="pro">Pro</ui-radio></ui-field>
+                        <ui-field><ui-radio appearance="toggle" name="plan" value="team">Team</ui-radio></ui-field>
                       </ui-fields>
                     </form>
                   </ui-form>
@@ -188,11 +188,11 @@
                   <p slot="description">
                     A radio can show it is currently unable to be interacted with. It is left out of the form.
                   </p>
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <ui-radio name="disabled-example" disabled>Disabled</ui-radio>
                   </ui-segment>
-                  <ui-segment basic>
-                    <ui-radio name="disabled-toggle" type="toggle" disabled>Disabled</ui-radio>
+                  <ui-segment appearance="basic">
+                    <ui-radio name="disabled-toggle" appearance="toggle" disabled>Disabled</ui-radio>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -204,28 +204,28 @@
                   <p slot="description">
                     A fitted radio does not leave padding for a label. Give it an <code>aria-label</code>.
                   </p>
-                  <ui-segment floated="left" compact>
-                    <ui-radio fitted name="fitted" aria-label="Fitted"></ui-radio>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-radio padding="none" name="fitted" aria-label="Fitted"></ui-radio>
                   </ui-segment>
-                  <ui-segment floated="left" compact>
-                    <ui-radio fitted type="slider" name="fitted-slider" aria-label="Fitted slider"></ui-radio>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-radio padding="none" appearance="slider" name="fitted-slider" aria-label="Fitted slider"></ui-radio>
                   </ui-segment>
-                  <ui-segment floated="left" compact>
-                    <ui-radio fitted type="toggle" name="fitted-toggle" aria-label="Fitted toggle"></ui-radio>
+                  <ui-segment floated="left" padding="compact">
+                    <ui-radio padding="none" appearance="toggle" name="fitted-toggle" aria-label="Fitted toggle"></ui-radio>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
                 <ui-docs-example description="A radio can be formatted to appear on dark backgrounds.">
-                  <ui-segment compact inverted>
+                  <ui-segment padding="compact" inverted>
                     <ui-radio inverted name="inverted" selected>Inverted</ui-radio>
                   </ui-segment>
-                  <ui-segment compact inverted>
-                    <ui-radio inverted type="slider" name="inverted-slider">Inverted</ui-radio>
+                  <ui-segment padding="compact" inverted>
+                    <ui-radio inverted appearance="slider" name="inverted-slider">Inverted</ui-radio>
                   </ui-segment>
-                  <ui-segment compact inverted>
-                    <ui-radio inverted type="toggle" name="inverted-toggle">Inverted</ui-radio>
+                  <ui-segment padding="compact" inverted>
+                    <ui-radio inverted appearance="toggle" name="inverted-toggle">Inverted</ui-radio>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -235,12 +235,12 @@
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-label="Right aligned">
-                        <ui-field><ui-radio right-aligned name="right-aligned" value="a" selected>Radio</ui-radio></ui-field>
+                        <ui-field><ui-radio align="right" name="right-aligned" value="a" selected>Radio</ui-radio></ui-field>
                         <ui-field
-                          ><ui-radio right-aligned type="slider" name="right-aligned" value="b">Slider</ui-radio></ui-field
+                          ><ui-radio align="right" appearance="slider" name="right-aligned" value="b">Slider</ui-radio></ui-field
                         >
                         <ui-field
-                          ><ui-radio right-aligned type="toggle" name="right-aligned" value="c">Toggle</ui-radio></ui-field
+                          ><ui-radio align="right" appearance="toggle" name="right-aligned" value="c">Toggle</ui-radio></ui-field
                         >
                       </ui-fields>
                     </form>
@@ -253,8 +253,8 @@
                   description="A radio can have different colors:  `color` tints the chosen bullet, lane or line."
                 >
                   <ui-radio color="purple" name="colored" selected>Purple</ui-radio>
-                  <ui-radio color="green" type="toggle" name="colored-toggle" selected>Green</ui-radio>
-                  <ui-radio color="blue" type="slider" name="colored-slider" selected>Blue</ui-radio>
+                  <ui-radio color="green" appearance="toggle" name="colored-toggle" selected>Green</ui-radio>
+                  <ui-radio color="blue" appearance="slider" name="colored-slider" selected>Blue</ui-radio>
                 </ui-docs-example>
               </ui-section>
 
@@ -282,10 +282,10 @@
                   JavaScript to call: radios work as soon as the elements are defined, like Fomantic's radio checkbox without its
                   module. `<ui-radio>` shares its family, sheet and tokens with [`<ui-checkbox>`](ui-checkbox.html).
 
-                  - `type="toggle"` / `type="slider"` changes the look; the default is the round radio.
+                  - `appearance="toggle"` / `appearance="slider"` changes the look; the default is the round radio.
                   - `selected` is the chosen state, as an attribute and a property. `checked` is an alias: the `checked`
                     attribute in markup chooses the radio, and `el.checked` reads and writes `el.selected`.
-                  - The label is the slotted content, or `label` for plain text; a `fitted` radio has none.
+                  - The label is the slotted content, or `label` for plain text; a `padding="none"` radio has none.
                   - Wrap a group in `<ui-fields grouped>` (one per line) or `<ui-fields inline>` (one row) inside a `<ui-form>`.
                 </script>
               </ui-markdown>
@@ -353,7 +353,7 @@
                     checked state come from the browser. `delegatesFocus` keeps the host out of the tab order and draws the focus
                     ring on the box.
                   - Toggles and sliders keep the radio role (one of a group), not `switch`.
-                  - The accessible name is the label text. A `fitted` radio (or an `invisible` one holding only an image) has none,
+                  - The accessible name is the label text. A `padding="none"` radio (or an `invisible` one holding only an image) has none,
                     so give it an `aria-label` or a `<label for>` pointing at the host.
                   - Wrap a group in `role="radiogroup"` with a name (`aria-label` or `aria-labelledby`), as the examples do.
                   - Only the chosen radio of a group (else the first enabled one) is a tab stop, as with native radios.
@@ -414,7 +414,25 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  `<ui-radio>`'s tables (`docs/__data/components.json5`);  the whole family's are on the checkbox page. -->
-            <ui-docs-api tag="ui-radio"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api tag="ui-radio" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api tag="ui-radio" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api tag="ui-radio" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api tag="ui-radio" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api tag="ui-radio" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

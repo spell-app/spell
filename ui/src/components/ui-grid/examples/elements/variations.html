@@ -71,15 +71,15 @@
 
   <section>
     <h4>Padded</h4>
-    <ui-grid padded>
+    <ui-grid padding="md">
       <ui-column width="8"><p>Padded</p></ui-column>
       <ui-column width="8"><p>Padded</p></ui-column>
     </ui-grid>
-    <ui-grid padded="horizontally">
+    <ui-grid padding="md-x">
       <ui-column width="8"><p>Horizontally padded</p></ui-column>
       <ui-column width="8"><p>Horizontally padded</p></ui-column>
     </ui-grid>
-    <ui-grid padded="vertically">
+    <ui-grid padding="md-y">
       <ui-column width="8"><p>Vertically padded</p></ui-column>
       <ui-column width="8"><p>Vertically padded</p></ui-column>
     </ui-grid>
@@ -87,12 +87,12 @@
 
   <section>
     <h4>Relaxed</h4>
-    <ui-grid relaxed columns="3">
+    <ui-grid spacing="lg" columns="3">
       <ui-column><p>Relaxed</p></ui-column>
       <ui-column><p>Relaxed</p></ui-column>
       <ui-column><p>Relaxed</p></ui-column>
     </ui-grid>
-    <ui-grid relaxed="very" columns="3">
+    <ui-grid spacing="xl" columns="3">
       <ui-column><p>Very relaxed</p></ui-column>
       <ui-column><p>Very relaxed</p></ui-column>
       <ui-column><p>Very relaxed</p></ui-column>
@@ -101,12 +101,12 @@
 
   <section>
     <h4>Compact</h4>
-    <ui-grid compact columns="3">
+    <ui-grid spacing="compact" columns="3">
       <ui-column><p>Compact</p></ui-column>
       <ui-column><p>Compact</p></ui-column>
       <ui-column><p>Compact</p></ui-column>
     </ui-grid>
-    <ui-grid compact="very" columns="3">
+    <ui-grid spacing="xs" columns="3">
       <ui-column><p>Very compact</p></ui-column>
       <ui-column><p>Very compact</p></ui-column>
       <ui-column><p>Very compact</p></ui-column>
@@ -153,11 +153,11 @@
 
   <section>
     <h4>Text alignment</h4>
-    <ui-grid columns="3" text-align="center">
+    <ui-grid columns="3" align="center">
       <ui-column><p>Center aligned</p></ui-column>
-      <ui-column text-align="left"><p>Left aligned</p></ui-column>
-      <ui-column text-align="right"><p>Right aligned</p></ui-column>
-      <ui-column text-align="justified">
+      <ui-column align="left"><p>Left aligned</p></ui-column>
+      <ui-column align="right"><p>Right aligned</p></ui-column>
+      <ui-column align="justified">
         <p>Justified text wraps to the full width of its column, hyphenated where it must.</p>
       </ui-column>
     </ui-grid>
@@ -180,8 +180,8 @@
   <section>
     <h4>Attached</h4>
     <ui-grid>
-      <ui-column attached="left" width="8"><p>Left attached</p></ui-column>
-      <ui-column attached="right" width="8"><p>Right attached</p></ui-column>
+      <ui-column attach="left" width="8"><p>Left attached</p></ui-column>
+      <ui-column attach="right" width="8"><p>Right attached</p></ui-column>
     </ui-grid>
   </section>
 </div>

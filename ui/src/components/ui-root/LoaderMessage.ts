@@ -22,6 +22,7 @@ export class LoaderMessage {
   static render(part: string, message: Accessor<string>): JSX.Element {
     const loader = document.createElement(loaderVocabulary.tag)
     for (const name of LOADER_SWITCHES) loader.setAttribute(name, "")
+    loader.setAttribute(ALIGN, CENTER)
     loader.setAttribute("part", part)
     createRenderEffect(message, (text) => {
       loader.textContent = text
@@ -33,8 +34,12 @@ export class LoaderMessage {
 /** A class `UIRoot.Loading` accepts:  `LoaderMessage` or one shaped like it. */
 export type RootLoading = Pick<typeof LoaderMessage, "render">
 
-/** The loader's switches for a centred spinner with its text below:  `<ui-loader visible inline centered text>`. */
-const LOADER_SWITCHES: readonly LoaderSwitch[] = ["visible", "inline", "centered", "text"]
+/** The loader's switches for a centred spinner with its text below:  `<ui-loader visible inline align="center" text>`. */
+const LOADER_SWITCHES: readonly LoaderSwitch[] = ["visible", "inline", "text"]
+
+/** The loader's `align`, and the value that centres it on a line of its own. */
+const ALIGN: LoaderSwitch = "align"
+const CENTER = "center"
 
 /** One of the loader's attributes:  its vocabulary's, or the shared `visible` (`SharedVocabulary`). */
 type LoaderSwitch = E.AttributeName<typeof loaderVocabulary> | "visible"

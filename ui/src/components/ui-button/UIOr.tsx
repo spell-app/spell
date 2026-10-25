@@ -10,7 +10,7 @@ import buttonCSS from "./UIButton.css?inline"
  * The component behind `<ui-or>`:  the round "or" between two buttons of a group.
  *
  * - Its shadow DOM is one box, `<span class="or" data-text="or">`:  the CSS draws the text.
- * - The text is `text`, else the page language's word for "or" (`UI.i18n`).
+ * - The text is `label`, else the page language's word for "or" (`UI.i18n`).
  ****************/
 export class UIOr extends E.UIComponent<typeof orVocabulary> {
   @E.proto static vocabulary = orVocabulary
@@ -27,7 +27,7 @@ export class UIOr extends E.UIComponent<typeof orVocabulary> {
       <span
         class={this.rootClass}
         part={this.partForName("or")}
-        data-text={this.text ?? this.translationForKey("or")}
+        data-text={this.label ?? this.translationForKey("or")}
       />
     )
   }

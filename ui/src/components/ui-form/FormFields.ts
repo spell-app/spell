@@ -234,9 +234,18 @@ export class FormFields {
     return "validity" in element && (element.constructor as { formAssociated?: boolean }).formAssociated === true
   }
 
-  /** `name`, else `id`. */
+  /**
+   * Its `name`:  what the form's rules, messages and value know it by.
+   * - Never its `id`, which finds an element, never data (debut Q19, epic `ui-gaps` P5).
+   * - SIDE EFFECT:  a control with an `id` but no `name` is noted in the console, once each, rather than half-working.
+   */
   private static identifierFor(control: Element): string | undefined {
-    return FormFields.nameOf(control) || control.id || undefined
+    const name = FormFields.nameOf(control)
+    if (!name && control.id && !UNNAMED_NOTED.has(control)) {
+      UNNAMED_NOTED.add(control)
+      E.Warnings.warn("<ui-form>", `#${control.id} has no name, so the form skips it;  give it name="..."`)
+    }
+    return name
   }
 
   /** Its `name` (the property, else the attribute), if any:  what `<ui-form value>` binds it to. */
@@ -352,3 +361,6 @@ const NOT_EMPTY = "notEmpty"
 
 /** Native input types that are buttons, not values. */
 const BUTTON_TYPES = new Set(["submit", "reset", "button", "image"])
+
+/** The controls `identifierFor()` already noted as unnamed:  each is noted once. */
+const UNNAMED_NOTED = new WeakSet<Element>()

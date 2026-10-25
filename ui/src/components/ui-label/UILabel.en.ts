@@ -78,42 +78,74 @@ export const labelVocabulary = {
       description: "Floats over the owner's top end corner, e.g. a count on a menu item;  `left` / `bottom` move it."
     },
     {
-      name: "basic",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Less pronounced:  an outline on the surface colour."
-    },
-    {
-      name: "tinted",
-      group: "appearance",
-      kind: "keyOnly",
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["basic", "tinted", "circular"],
+      replaces: [
+        { from: "basic", value: "basic" },
+        { from: "tinted", value: "tinted" },
+        { from: "circular", value: "circular" }
+      ],
       description:
-        "Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's."
+        "The look, several words at once:  `basic` (less pronounced:  an outline on the surface colour), " +
+        "`tinted` (soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge;  not " +
+        "Fomantic's), `circular` (a round badge).  Old names:  `basic`, `tinted`, `circular` written alone."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
+      kind: "valueOnly",
       values: ["top", "bottom", "top left", "top right", "bottom left", "bottom right"],
-      description: "Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`."
+      classes: {
+        top: "top attached",
+        bottom: "bottom attached",
+        "top left": "top left attached",
+        "top right": "top right attached",
+        "bottom left": "bottom left attached",
+        "bottom right": "bottom right attached"
+      },
+      replaces: [{ from: "attached", value: "top" }],
+      description:
+        "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` " +
+        "(bare:  `top`)."
     },
     {
-      name: "horizontal",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "A fixed-width tag before a line of text, e.g. in a list."
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description:
+        "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`."
     },
-    { name: "circular", group: "appearance", kind: "keyOnly", description: "A round badge." },
     { name: "empty", group: "appearance", kind: "keyOnly", description: "With `circular`:  an empty dot." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its content." },
+    {
+      name: "align",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["center"],
+      classes: { center: "centered" },
+      replaces: [{ from: "centered", value: "center" }],
+      description: "`center` centres its content.  Its old name is `centered`."
+    },
     {
       name: "prompt",
       group: "content",
       kind: "keyOnly",
       description: "A form field's validation message:  the negative colour on the surface, wins over `color`."
     },
-    { name: "active", group: "states", kind: "keyOnly", description: "Selected / on." },
+    {
+      name: "selected",
+      group: "states",
+      kind: "keyOnly",
+      key: "active",
+      replaces: ["active"],
+      description: "Selected / on.  Its old name is `active`."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
@@ -163,7 +195,7 @@ export const labelVocabulary = {
     { name: "delete", description: "The delete icon button of a `removable` label." }
   ],
   states: [
-    { name: "active", description: "Selected / on." },
+    { name: "active", description: "Selected / on (`selected`)." },
     { name: "disabled", description: "Dimmed and inert." }
   ],
   texts: [{ key: "remove", text: "Remove", description: "Accessible name of the delete icon button." }],

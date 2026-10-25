@@ -6,7 +6,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 // NOTE: order matters:  table registers its `label` text BEFORE breadcrumb does
 import "spell-ui/components/ui-table"
-import "spell-ui/components/ui-breadcrumb"
+import "spell-ui/components/ui-breadcrumbs"
 
 /** Text `key` as the element `host` resolves it. */
 function textOf(host: Element, key: string): string {
@@ -15,7 +15,7 @@ function textOf(host: Element, key: string): string {
 
 describe("UIComponent.translationForKey()", () => {
   it("gives two families sharing a key each their own English text", async () => {
-    const breadcrumb = await ElementFixture.render(`<ui-breadcrumb><a href="#a">A</a></ui-breadcrumb>`)
+    const breadcrumb = await ElementFixture.render(`<ui-breadcrumbs><a href="#a">A</a></ui-breadcrumbs>`)
     expect(breadcrumb.shadowRoot!.querySelector("nav")!.getAttribute("aria-label")).toBe("Breadcrumb")
     expect(textOf(breadcrumb, "label")).toBe("Breadcrumb")
     const table = await ElementFixture.render(`<ui-table><table><tr><td>1</td></tr></table></ui-table>`)
@@ -23,7 +23,7 @@ describe("UIComponent.translationForKey()", () => {
   })
 
   it("takes a translation per component first, then a shared one, then its own English", async () => {
-    const breadcrumb = await ElementFixture.render(`<ui-breadcrumb><a href="#a">A</a></ui-breadcrumb>`)
+    const breadcrumb = await ElementFixture.render(`<ui-breadcrumbs><a href="#a">A</a></ui-breadcrumbs>`)
     const table = await ElementFixture.render(`<ui-table><table><tr><td>1</td></tr></table></ui-table>`)
     const { locale } = UI.i18n
     try {
@@ -31,7 +31,7 @@ describe("UIComponent.translationForKey()", () => {
       expect(textOf(breadcrumb, "label")).toBe("Breadcrumb")
       UI.i18n.register("xx", { label: "Etiqueta" })
       expect(textOf(table, "label")).toBe("Etiqueta")
-      UI.i18n.register("xx", { label: "Migas" }, "ui-breadcrumb")
+      UI.i18n.register("xx", { label: "Migas" }, "ui-breadcrumbs")
       expect(textOf(breadcrumb, "label")).toBe("Migas")
       expect(textOf(table, "label")).toBe("Etiqueta")
     } finally {

@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Toolbar">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-app/issues/new?title=ui-toolbar%3A%20%20"
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-toolbar%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -47,7 +47,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
@@ -66,13 +66,13 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-toolbar" label="Toolbar" sticky collapsible dividing>
                 <ui-docs-example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
-                  <ui-toolbar secondary aria-label="Sections" style="max-width: 360px">
-                    <ui-item href="#types" selected>Types</ui-item>
-                    <ui-item href="#groups">Groups</ui-item>
-                    <ui-item href="#content">Content</ui-item>
-                    <ui-item href="#states">States</ui-item>
-                    <ui-item href="#variations">Variations</ui-item>
-                    <ui-item href="#group-variations">Group Variations</ui-item>
+                  <ui-toolbar appearance="secondary" aria-label="Sections" style="max-width: 360px">
+                    <ui-item link="#types" selected>Types</ui-item>
+                    <ui-item link="#groups">Groups</ui-item>
+                    <ui-item link="#content">Content</ui-item>
+                    <ui-item link="#states">States</ui-item>
+                    <ui-item link="#variations">Variations</ui-item>
+                    <ui-item link="#group-variations">Group Variations</ui-item>
                   </ui-toolbar>
                 </ui-docs-example>
               </ui-section>
@@ -90,10 +90,10 @@
               </ui-section>
               <ui-section id="examples-types-everything-fits" label="Everything fits" sticky collapsible dividing>
                 <ui-docs-example description="When every item fits, no buttons show:  it's a plain menu.">
-                  <ui-toolbar secondary aria-label="Short">
-                    <ui-item href="#one" selected>One</ui-item>
-                    <ui-item href="#two">Two</ui-item>
-                    <ui-item href="#three">Three</ui-item>
+                  <ui-toolbar appearance="secondary" aria-label="Short">
+                    <ui-item link="#one" selected>One</ui-item>
+                    <ui-item link="#two">Two</ui-item>
+                    <ui-item link="#three">Three</ui-item>
                   </ui-toolbar>
                 </ui-docs-example>
               </ui-section>
@@ -101,13 +101,13 @@
                 <ui-docs-example
                   description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room."
                 >
-                  <ui-toolbar secondary aria-label="App">
-                    <ui-button slot="icon" basic circular icon="bars" aria-label="Menu" title="Menu"></ui-button>
+                  <ui-toolbar appearance="secondary" aria-label="App">
+                    <ui-button slot="icon" icon="bars" aria-label="Menu" title="Menu" appearance="basic circular"></ui-button>
                     <b slot="title">Spell UI</b>
-                    <ui-item href="#guides" selected>Guides</ui-item>
-                    <ui-item href="#components">Components</ui-item>
-                    <ui-item href="#themes">Themes</ui-item>
-                    <ui-button slot="right" basic circular icon="search" aria-label="Search" title="Search"></ui-button>
+                    <ui-item link="#guides" selected>Guides</ui-item>
+                    <ui-item link="#components">Components</ui-item>
+                    <ui-item link="#themes">Themes</ui-item>
+                    <ui-button slot="right" icon="search" aria-label="Search" title="Search" appearance="basic circular"></ui-button>
                   </ui-toolbar>
                 </ui-docs-example>
               </ui-section>
@@ -150,7 +150,29 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-toolbar"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-toolbar" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

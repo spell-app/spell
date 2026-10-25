@@ -1,6 +1,6 @@
+import { contrast, CONTRAST_TEXT, type Oklch as OklchColor } from "spell/util/color"
+import { clamp } from "spell/util/number"
 import { kebabCase } from "spell-ui/util"
-
-import { ColorContrast } from "./ColorContrast"
 
 import type {
   ColorRecipe,
@@ -51,8 +51,8 @@ import {
  * `styles.en.ts`.
  * - Pure:  returns CSS text and touches no file system, so it runs both in node (`scripts/gen-styles.ts`,
  *   `yarn gen:styles`) and in the browser test that checks the committed sheets are current.
- * - Imports only its own folder (the vocabulary, `ColorContrast`, types) and `spell-ui/util`'s `kebabCase`:  never the
- *   element layer, which node can't load.  Build-time only, so left out of the `spell-ui/styles` barrel.
+ * - Imports only its own folder (the vocabulary, types), `spell-ui/util`'s `kebabCase` and the kit's `color` and
+ *   `number`, by file:  never the element layer, which node can't load.  Build-time only, so left out of the `spell-ui/styles` barrel.
  * - Output is close to oxfmt's CSS style;  the script runs oxfmt afterwards, and the staleness test
  *   compares with whitespace stripped, so line breaking never matters.
  * - Token declarations go on `:root`, plus a `:host` copy guarded by
@@ -68,7 +68,7 @@ import {
  *   (`--ui-red-on-light` / `--ui-red-on-dark`) hold no `light-dark()`, so THEY are registered (animatable,
  *   type-checked, document-wide initial values).
  * - Text ON a solid colour is DATA:  `--ui-<name>-on` (white or ink) is picked here by WCAG contrast
- *   (`ColorContrast`) against the colour and its states, per scheme -- see `onColors`.
+ *   (`spell/util/color`'s `contrast()`) against the colour and its states, per scheme -- see `onColors`.
  ****************/
 export class StyleGenerator {
   /** Every generated sheet:  file name inside `src/styles/` => CSS text. */
@@ -482,7 +482,7 @@ export class StyleGenerator {
   }
 
   /**
-   * CSS of the first `onColors` candidate reaching `ColorContrast.text` on `color` and every state of it,
+   * CSS of the first `onColors` candidate reaching WCAG AA's text contrast (`CONTRAST_TEXT`) on `color` and every state of it,
    * else of the candidate with the best worst case.
    * - Never fails generation:  `colors.contrast.test.ts` is what fails, naming the pair.
    */
@@ -490,15 +490,15 @@ export class StyleGenerator {
     const backgrounds = [color, ...Object.values(states).map((shift) => this.shifted(color, shift))]
     const candidates = Object.values(onColors).map((candidate) => ({
       css: candidate.css,
-      worst: Math.min(...backgrounds.map((background) => ColorContrast.ratio(candidate.color, background)))
+      worst: Math.min(...backgrounds.map((background) => contrast(oklchOf(candidate.color), oklchOf(background))))
     }))
-    const passing = candidates.find((candidate) => candidate.worst >= ColorContrast.text)
+    const passing = candidates.find((candidate) => candidate.worst >= CONTRAST_TEXT)
     return (passing ?? candidates.toSorted((a, b) => b.worst - a.worst)[0]!).css
   }
 
   /** `color` with `shift` applied, as `shift()` does in CSS (lightness clamped to `0..1`, as CSS does). */
   private shifted([lightness, chroma, hue]: Oklch, shift: ColorShift): Oklch {
-    return [Math.min(1, Math.max(0, lightness + shift.lightness)), chroma * shift.chroma, hue]
+    return [clamp(lightness + shift.lightness, 0, 1), chroma * shift.chroma, hue]
   }
 
   /** `light-dark(<light>, <dark>)`. */
@@ -630,3 +630,8 @@ const SPACING_SIDES = [
   ["-is", "-inline-start"],
   ["-ie", "-inline-end"]
 ] as const
+
+/** A palette colour (`[l, c, h]`) in the shape the kit's colour maths takes. */
+function oklchOf([l, c, h]: Oklch): OklchColor {
+  return { l, c, h }
+}

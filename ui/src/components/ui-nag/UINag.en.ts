@@ -76,10 +76,11 @@ export const nagVocabulary = {
       description: "Days a dismissal lasts (`local` and `cookie`);  `0` never expires."
     },
     {
-      name: "persist",
+      name: "persistent",
       group: "advanced",
       kind: "boolean",
-      description: "Shows even when dismissed before (stores nothing new either)."
+      replaces: ["persist"],
+      description: "Shows even when dismissed before (stores nothing new either).  Old name:  `persist`."
     },
     {
       name: "display-time",

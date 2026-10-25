@@ -3,6 +3,7 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test"
 import { mkdirSync, writeFileSync } from "node:fs"
 
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 import type { VisualState } from "spell-ui/test-helpers/test.types"
 import { environment } from "spell-ui/tools/environment"
 import type {
@@ -127,11 +128,9 @@ class VisualFixture {
   private watch() {
     if (this.isWatching) return
     this.isWatching = true
-    this.page.on("pageerror", (error) =>
-      this.testInfo.annotations.push({ type: "pageerror", description: error.message })
-    )
-    this.page.on("console", (message) => {
-      if (message.type() === "error") this.testInfo.annotations.push({ type: "console", description: message.text() })
+    BrowserPage.watch(this.page, {
+      onProblem: (description, kind) =>
+        this.testInfo.annotations.push({ type: kind === "page error" ? "pageerror" : "console", description })
     })
   }
 

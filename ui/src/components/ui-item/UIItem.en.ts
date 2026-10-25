@@ -5,7 +5,7 @@
  * - ONE generic item, as Fomantic's `.item` is shared by dropdown, list and menu:  it renders by OWNER
  *   (`PartContext`), never `ui-list-item` / `ui-menu-item`.  See `notes/grammar.md`, "Items".
  * - Class words come out through `ClassBuilder`, no `ui`:
- *   `<ui-item color="red" selected link>` => `red active link item` -- the owner's sheet (`UIList.css`,
+ *   `<ui-item color="red" selected appearance="link">` => `red active link item` -- the owner's sheet (`UIList.css`,
  *   `UIMenu.css`) styles them by context.
  * - Attributes name what ANY owner needs;  each description says who reads it.
  * - `ownsParts`:  CONDITIONAL (`ConditionalOwner`) -- the item owns them only in the Items view (`<ui-items>`);
@@ -43,9 +43,15 @@ export const itemVocabulary = {
       name: "value",
       group: "form",
       kind: "string",
-      description: "Value;  defaults to `text`.  Ordered list:  shown as the marker."
+      description: "Value;  defaults to `label`.  Ordered list:  shown as the marker."
     },
-    { name: "text", group: "name", kind: "string", description: "Dropdown:  text;  defaults to the text content." },
+    {
+      name: "label",
+      group: "name",
+      kind: "string",
+      replaces: ["text"],
+      description: "Dropdown:  its words;  defaults to the text content.  Its old name is `text`."
+    },
     {
       name: "description",
       group: "content",
@@ -65,13 +71,25 @@ export const itemVocabulary = {
       kind: "string",
       description: "Dropdown:  country code, shown as a flag before the text."
     },
-    { name: "href", group: "link", kind: "string", description: "List / menu:  renders a link (`<a>`)." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
     {
       name: "link",
       group: "link",
-      kind: "keyOnly",
-      description: "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover."
+      kind: "string",
+      replaces: ["href"],
+      description: "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`."
+    },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["link"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "link", value: "link" }],
+      description:
+        "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  " +
+        "Its old name is the bare `link` switch."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be chosen or followed." },
     {
@@ -84,19 +102,25 @@ export const itemVocabulary = {
         "NOTE: Fomantic's word for it is `active`;  its `selected` means highlighted."
     },
     {
-      name: "fitted",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["horizontally", "vertically"],
-      description: "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding."
+      kind: "valueOnly",
+      values: ["none", "none-x", "none-y"],
+      classes: { none: "fitted", "none-x": "horizontally fitted", "none-y": "vertically fitted" },
+      replaces: [{ from: "fitted", value: "none", values: { horizontally: "none-x", vertically: "none-y" } }],
+      description:
+        "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  " +
+        "Its old name is `fitted` (`horizontally`, `vertically`)."
     },
     {
-      name: "type",
+      name: "kind",
       group: "content",
       kind: "enum",
       values: ["item", "header", "divider"],
       default: "item",
-      description: "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown)."
+      replaces: ["type"],
+      description:
+        "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`."
     }
   ],
   events: [],

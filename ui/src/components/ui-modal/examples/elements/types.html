@@ -16,7 +16,7 @@
       </ui-content>
       <ui-actions>
         <ui-button class="deny" color="black">Nope</ui-button>
-        <ui-button class="approve" positive>Yep, that's me</ui-button>
+        <ui-button class="approve" color="positive">Yep, that's me</ui-button>
       </ui-actions>
     </ui-modal>
   </section>
@@ -24,12 +24,12 @@
   <section>
     <h4>Basic</h4>
     <button type="button" class="ui button" commandfor="modal-types-basic" command="--show">Show basic</button>
-    <ui-modal id="modal-types-basic" basic size="small" heading="Archive Old Messages">
+    <ui-modal id="modal-types-basic" appearance="basic" size="small" heading="Archive Old Messages">
       <ui-content>
         <p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</p>
       </ui-content>
       <ui-actions>
-        <ui-button class="cancel" basic inverted>No</ui-button>
+        <ui-button class="cancel" inverted appearance="basic">No</ui-button>
         <ui-button class="ok" color="green" inverted>Yes</ui-button>
       </ui-actions>
     </ui-modal>

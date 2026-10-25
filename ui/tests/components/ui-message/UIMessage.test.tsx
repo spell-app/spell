@@ -55,7 +55,11 @@ describe("<ui-message> classes", () => {
     ['state="negative"', "ui negative message"],
     ['state="warning" attached="bottom"', "ui warning bottom attached message"],
     ["attached", "ui attached message"],
-    ['floating compact="yes" centered inverted', "ui centered compact floating inverted message"],
+    // old names (`compact`, `text-align`, `attached`) and the new ones draw the same words (epic `ui-gaps` P4)
+    ['floating compact="yes" centered inverted', "ui compact centered floating inverted message"],
+    ['floating padding="compact" centered inverted', "ui compact centered floating inverted message"],
+    ['attached="bottom" text-align="right"', "ui bottom attached right aligned message"],
+    ['attach="bottom" align="right"', "ui bottom attached right aligned message"],
     ['floating="no"', "ui message"],
     ['text-align="right"', "ui right aligned message"],
     ['icon="envelope"', "ui icon message"]

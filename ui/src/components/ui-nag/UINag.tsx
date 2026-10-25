@@ -23,7 +23,7 @@ export class DOMNagElement extends E.DOMElement<UINag> {
     return this.component?.close() ?? false
   }
 
-  /** Show it again, unless a dismissal is stored (and it doesn't `persist`);  true when it shows. */
+  /** Show it again, unless a dismissal is stored (and it isn't `persistent`);  true when it shows. */
   show(): boolean {
     return this.component?.show() ?? false
   }
@@ -48,7 +48,7 @@ export class DOMNagElement extends E.DOMElement<UINag> {
  * - Remembering (opt-in, with `key`):  closing it from its icon (or `domElement.close()`)
  *   stores `value` under `key` in `storage` (`DismissalStore`:  local / session / cookie, `expires` days).
  *   - A nag whose dismissal is stored is `hidden` from the start (set on the DOM element as it first connects,
- *     before anything paints), unless it `persist`s.
+ *     before anything paints), unless it's `persistent`.
  *   - Storage that is blocked or missing just doesn't remember:  the nag still shows and closes.
  *
  * - Closing:  the cancelable `ui-closing` (with a `reason`) first,
@@ -97,9 +97,9 @@ export class UINag extends E.UIComponent<Vocabulary> {
     this.dismissalStore?.clear()
   }
 
-  /** A stored dismissal hides it:  dismissed, and not `persist`. */
+  /** A stored dismissal hides it:  dismissed, and not `persistent`. */
   private get isHiddenByStorage(): boolean {
-    return !this.persist && this.isDismissed
+    return !this.persistent && this.isDismissed
   }
 
   /**
@@ -164,7 +164,7 @@ export class UINag extends E.UIComponent<Vocabulary> {
     })
   }
 
-  /** Show again, unless a stored dismissal says not (and it doesn't `persist`).  True when it shows. */
+  /** Show again, unless a stored dismissal says not (and it isn't `persistent`).  True when it shows. */
   show(): boolean {
     if (this.isHiddenByStorage || this.isClosing || (!this.domElement.hidden && this.hasShown)) return false
     this.isHiddenByDismissal = false
@@ -181,13 +181,36 @@ export class UINag extends E.UIComponent<Vocabulary> {
   private isClosing = false
 
   /**
+   * Shown until it closes:  the cancelable `ui-closing` as it's asked to close, `ui-closed` once it has gone.
+   * - Its `ui-opening` comes as it has slid in (`appear()`), not as a request:  `show()` is the page's.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    kept: {
+      isOpen: () => !this.isClosing && !this.domElement.hidden,
+      setOpen: (open) => {
+        if (!open) this.startClosing()
+      }
+    },
+    detail: (_open, originalEvent): UIT.NagCloseDetail => ({ reason: this.closeReason, originalEvent }),
+    afterDetail: (): UIT.NagCloseDetail => ({ reason: this.closeReason })
+  })
+
+  /** Why it was asked to close:  `ui-closing`'s and `ui-closed`'s `reason`. */
+  private closeReason: UIT.NagCloseReason = "dismiss"
+
+  /**
    * Close for `reason`:  the cancelable `ui-closing`, the dismissal stored (not for `timeout`),
    * then the exit animation, `hidden` on the DOM element and `ui-closed`.  True when it closes.
    */
   close(reason: UIT.NagCloseReason = "dismiss", originalEvent?: Event): boolean {
-    if (this.isClosing || this.domElement.hidden) return false
-    const detail: UIT.NagCloseDetail = { reason, originalEvent }
-    if (!this.send("ui-closing", detail)) return false
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
+  }
+
+  /** `ui-closing` wasn't cancelled:  the dismissal stored, the exit animation, `hidden`, `ui-closed`. */
+  private startClosing() {
+    const reason = this.closeReason
     this.isClosing = true
     this.displayTimer?.cancel()
     if (reason !== "timeout") {
@@ -202,10 +225,8 @@ export class UINag extends E.UIComponent<Vocabulary> {
       this.isClosing = false
       this.hasShown = false
       this.domElement.hidden = true
-      const hidden: UIT.NagCloseDetail = { reason }
-      this.send("ui-closed", hidden)
+      this.disclosure.sendAfter(false)
     })
-    return true
   }
 
   /** An invoker command aimed at the DOM element (`UIT.ToggleCommands`):  open means not `hidden`. */

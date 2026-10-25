@@ -40,10 +40,14 @@ export const searchVocabulary = {
       description: "Results in named groups (`category` of each result)."
     },
     {
-      name: "horizontal",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "`category`:  each group's name above its results, not beside them."
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description:
+        "`horizontal`, with `category`:  each group's name above its results, not beside them.  " +
+        "Old name:  `horizontal`."
     },
     {
       name: "fluid",
@@ -58,26 +62,32 @@ export const searchVocabulary = {
       kind: "keyOnly",
       description: "`scrolling`:  people can resize the results vertically."
     },
-    { name: "short", group: "appearance", kind: "keyOnly", description: "The results scroll after a shorter height." },
     {
-      name: "very-short",
+      name: "length",
       group: "appearance",
-      kind: "keyOnly",
-      description: "The results scroll after a much shorter height."
+      kind: "valueOnly",
+      values: ["very-short", "short", "long", "very-long"],
+      classes: { "very-short": "very short", "very-long": "very long" },
+      replaces: [
+        { from: "short", value: "short" },
+        { from: "very-short", value: "very-short" },
+        { from: "long", value: "long" },
+        { from: "very-long", value: "very-long" }
+      ],
+      description:
+        "How far the results go before they scroll:  `very-short`, `short`, `long`, `very-long`.  " +
+        "Old names:  `short`, `very-short`, `long`, `very-long`."
     },
-    { name: "long", group: "appearance", kind: "keyOnly", description: "The results scroll after a longer height." },
     {
-      name: "very-long",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "The results scroll after a much longer height."
-    },
-    {
-      name: "aligned",
+      name: "align",
       group: "layout",
       kind: "valueAndKey",
+      key: "aligned",
       values: ["left", "right"],
-      description: "Which edge the results line up with:  `right` => `right aligned` (they extend to the left)."
+      replaces: ["aligned"],
+      description:
+        "Which edge the results line up with:  `right` => `right aligned` (they extend to the left).  " +
+        "Old name:  `aligned`."
     },
     {
       name: "loading",

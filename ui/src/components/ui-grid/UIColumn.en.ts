@@ -86,11 +86,13 @@ export const columnVocabulary = {
       description: "Pushed to the `left` or `right` end."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "valueAndKey",
+      kind: "valueOnly",
       values: ["left", "right"],
-      description: "No gutter on the `left` / `right` side."
+      classes: { left: "left attached", right: "right attached" },
+      replaces: ["attached"],
+      description: "No gutter on the `left` / `right` side.  Its old name is `attached`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its line." },
     {
@@ -107,11 +109,12 @@ export const columnVocabulary = {
       description: "Shown only on these devices (by the viewport)."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns its text `left`, `center`, `right` or `justified`."
+      replaces: ["text-align"],
+      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
     },
     {
       name: "vertical-align",

@@ -97,7 +97,7 @@ function row(host: Element, value: string) {
 
 /** The dropdown's option rows (`show="theme"`):  `[value, text]`. */
 function dropdownRows(host: Element): [string, string][] {
-  return [...part(host, "theme").querySelectorAll("ui-item:not([type])")].map((item) => [
+  return [...part(host, "theme").querySelectorAll("ui-item:not([kind])")].map((item) => [
     item.getAttribute("value")!,
     item.textContent!.trim()
   ])

@@ -5,16 +5,17 @@
  * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only,
  *   `UIT` by value straight from `components.types`.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-menu secondary pointing size="large" items="3">` => `ui large pointing secondary three item menu`.
+ *   `<ui-menu appearance="secondary pointing" size="large" items="3">` => `ui large three item secondary pointing menu`.
  *   `UIMenu.css` keys on those words.
  * - Items are the generic `<ui-item>` (`spell-ui/components/ui-item`), styled by owner context:  `ownsParts` has `item`.
  *   A `<ui-menu>` inside a menu is a SUB-MENU (Fomantic's `<div class="right menu">`), so `menu` is owned too;
  *   a `<ui-header>` inside an item is a vertical menu's sub header.
  * - `tabular` is Fomantic's classic word;  2.9 renamed it `tabbed` (`@variationMenuTabbedLegacyTabular`).
- * - The look is ONE word, `appearance` (`UIT.MenuAppearances`), shared with `<ui-tabs>`;
- *   the older booleans (`tabular`, `pointing`, `secondary`, `text`) stay as aliases and emit the same class words.
- * - Item layout:  `alignment` (`UIT.ItemAlignments`) places the items, `equal` sizes them alike from the items
- *   themselves;  `items="3"` / `items="equal"` stay as the older count-based aliases.
+ * - The look is `appearance`, several words at once (`UIT.MenuAppearances`, shared with `<ui-tabs>`, plus `link` and
+ *   `borderless`);  the older booleans (`tabular`, `pointing`, `secondary`, `text`, `link`, `borderless`) are its
+ *   old names (`replaces`, epic `ui-gaps` P4), and draw the same class words.
+ * - Item layout:  `align` (`UIT.ItemAlignments`;  its old name `alignment`) places the items, `equal` sizes them alike
+ *   from the items themselves;  `items="3"` / `items="equal"` stay as the older count-based aliases.
  */
 
 import type { E } from "spell-ui/core"
@@ -49,15 +50,22 @@ export const menuVocabulary = {
     {
       name: "appearance",
       group: "appearance",
-      kind: "valueOnly",
-      values: UIT.MenuAppearances,
+      kind: "multiple",
+      values: [...UIT.MenuAppearances, "link", "borderless"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [...UIT.MenuAppearances.filter((word) => word !== "segmented"), "link", "borderless"].map((word) => ({
+        from: word,
+        value: word
+      })),
       description:
-        "The look:  `tabular` (tabs on a rule), `pointing` (the active item points at the content), `secondary` " +
-        "(no box, rounded items), `text` (plain words), `segmented` (a segmented control:  a bordered group of " +
-        "joined items, the selected one filled with `color`, else the primary colour;  it moves `selected` to the " +
-        "item chosen itself;  `--ui-menu-segmented-*` restyle it as a pill track with a raised thumb).  The " +
-        "booleans `tabular`, `pointing`, `secondary`, `text` are aliases:  " +
-        '`appearance="pointing" secondary` ~== `secondary pointing`.'
+        "The look, several words at once:  `tabular` (tabs on a rule), `pointing` (the active item points at the " +
+        "content;  an underline with `secondary`), `secondary` (no box, rounded items), `text` (plain words), " +
+        "`segmented` (a segmented control:  a bordered group of joined items, the selected one filled with `color`, " +
+        "else the primary colour;  it moves `selected` to the item chosen itself;  `--ui-menu-segmented-*` restyle " +
+        "it as a pill track with a raised thumb), `link` (every item interactive:  a `<button>` with the link " +
+        "hover), `borderless` (no dividers between items).  Old names:  the bare switches `tabular`, `pointing`, " +
+        "`secondary`, `text`, `link`, `borderless`."
     },
     {
       name: "position",
@@ -69,32 +77,16 @@ export const menuVocabulary = {
         "opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`)."
     },
     {
-      name: "secondary",
-      group: "appearance",
-      kind: "keyOnly",
-      description: 'De-emphasized:  no box, rounded items.  Alias of `appearance="secondary"`.'
-    },
-    {
-      name: "pointing",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
+      kind: "valueOnly",
+      values: ["horizontal", "vertical"],
+      classes: { horizontal: "" },
+      replaces: [{ from: "vertical", value: "vertical" }],
       description:
-        "The active item points at the content below (an arrow;  an underline with `secondary`).  Alias of " +
-        '`appearance="pointing"`.'
+        "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  " +
+        "Its old name is the bare `vertical` switch."
     },
-    {
-      name: "tabular",
-      group: "layout",
-      kind: "keyOnly",
-      description: 'Looks like tabs (Fomantic 2.9\'s `tabbed`).  Alias of `appearance="tabular"`.'
-    },
-    {
-      name: "text",
-      group: "name",
-      kind: "keyOnly",
-      description: 'Plain text items, no box.  Alias of `appearance="text"`.'
-    },
-    { name: "vertical", group: "layout", kind: "keyOnly", description: "Items stacked top to bottom." },
     { name: "pagination", group: "appearance", kind: "keyOnly", description: "Page links:  compact, centred items." },
     { name: "icon", group: "content", kind: "keyOnly", description: "Icon-only items." },
     {
@@ -104,17 +96,10 @@ export const menuVocabulary = {
       key: "labeled icon",
       description: "Labeled icon items:  a large icon above each item's text."
     },
-    {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Every item is interactive:  a `<button>` with the link hover."
-    },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     { name: "stackable", group: "layout", kind: "keyOnly", description: "Stacks its items on mobile." },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its container, items centred." },
-    { name: "borderless", group: "appearance", kind: "keyOnly", description: "No dividers between items." },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its items." },
+
     {
       name: "wrapping",
       group: "layout",
@@ -122,10 +107,12 @@ export const menuVocabulary = {
       description: "Items wrap onto more lines when they don't fit."
     },
     {
-      name: "wrapped",
+      name: "wrap",
       group: "appearance",
       kind: "keyOnly",
-      description: "With `wrapping`:  square corners where the lines meet."
+      key: "wrapped",
+      replaces: ["wrapped"],
+      description: "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`."
     },
     {
       name: "inverted",
@@ -141,18 +128,29 @@ export const menuVocabulary = {
       description: "Floats beside the content;  `right` floats right."
     },
     {
-      name: "fitted",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["horizontally", "vertically"],
-      description: "No item padding;  `horizontally` / `vertically` keep the other axis' padding."
+      kind: "valueOnly",
+      values: ["none", "none-x", "none-y", "compact"],
+      classes: { none: "fitted", "none-x": "horizontally fitted", "none-y": "vertically fitted" },
+      replaces: [
+        { from: "fitted", value: "none", values: { horizontally: "none-x", vertically: "none-y" } },
+        { from: "compact", value: "compact" }
+      ],
+      description:
+        "`none`:  no item padding;  `none-x` / `none-y` keep only the top and bottom, or the left and right;  " +
+        "`compact`:  only as wide as its items.  Old names:  `fitted` (`horizontally`, `vertically`), `compact`."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "Joined edge to edge with a segment above / below;  bare `attached` sits in the middle."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  " +
+        "Its old name is `attached`."
     },
     {
       name: "fixed",
@@ -162,21 +160,23 @@ export const menuVocabulary = {
       description: "Fixed to an edge of the viewport."
     },
     {
-      name: "alignment",
+      name: "align",
       group: "layout",
       kind: "valueAndKey",
       key: "aligned",
       values: UIT.ItemAlignments,
+      replaces: ["alignment"],
       description:
         "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of " +
-        'a full-width bar (a `segmented` menu moves as a whole).  `alignment="center"` => `center aligned`.'
+        'a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  ' +
+        "Its old name is `alignment`."
     },
     {
       name: "equal",
       group: "layout",
       kind: "keyOnly",
       description:
-        'Every item the same width, from the items themselves (no count):  with `alignment="fluid"` each takes an ' +
+        'Every item the same width, from the items themselves (no count):  with `align="fluid"` each takes an ' +
         "equal share of the bar;  otherwise each is as wide as the widest, packed."
     },
     {
@@ -213,7 +213,7 @@ export const menuVocabulary = {
   parts: [{ name: "menu", description: "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`." }],
   states: [
     { name: "interactive", description: "A menubar (`interactive`)." },
-    { name: "vertical", description: "Items stacked (`vertical`)." }
+    { name: "vertical", description: 'Items stacked (`direction="vertical"`).' }
   ],
   texts: [],
   ownsParts: ["item", "menu", "header"]

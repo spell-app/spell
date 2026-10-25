@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Summary">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-summary%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-summary%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -47,7 +47,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  `<ui-summary>` in each owner that gives it a look (from the owners' own pages and
@@ -114,7 +114,21 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api tag="ui-summary"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api tag="ui-summary" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api tag="ui-summary" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api tag="ui-summary" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api tag="ui-summary" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
         </ui-tabs>
       </ui-container>

@@ -124,7 +124,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   @E.untracked
   private move(thumb: Thumb, value: number, originalEvent: Event): boolean {
     const [low, high] = this.bounds(thumb)
-    const next = Math.min(high, Math.max(low, value))
+    const next = E.clamp(value, low, high)
     if (next === this.thumbValue(thumb)) return false
     return this.requestChange(thumb === SECOND ? "end" : "value", next, () =>
       this.send("ui-moved", this.detail(thumb, next, originalEvent))
@@ -138,6 +138,25 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     if (!this.range) return { value, originalEvent }
     const end = thumb === SECOND && next !== undefined ? next : this.snappedEnd
     return { value, end, originalEvent }
+  }
+
+  ////////////////
+  // ## Direction
+  ////////////////
+
+  /** `direction` holds `vertical`:  upright, min at the top. */
+  get isVertical(): boolean {
+    return this.directionWords.includes(VERTICAL)
+  }
+
+  /** `direction` holds `reversed`:  from the right, or upright from the bottom. */
+  get isReversed(): boolean {
+    return this.directionWords.includes(REVERSED)
+  }
+
+  /** The words of `direction`. */
+  private get directionWords(): string[] {
+    return String(this.direction ?? "").split(E.WHITESPACE)
   }
 
   ////////////////
@@ -202,7 +221,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
    */
   @E.untracked
   private measure() {
-    const vertical = this.vertical
+    const vertical = this.isVertical
     const inner = this.inner
     const length = inner?.isConnected
       ? vertical
@@ -281,7 +300,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
         aria-valuenow={this.thumbValue(thumb)}
         aria-valuetext={this.valueText(this.thumbValue(thumb))}
         aria-label={this.thumbName(thumb)}
-        aria-orientation={this.vertical ? "vertical" : undefined}
+        aria-orientation={this.isVertical ? "vertical" : undefined}
         aria-disabled={this.isDisabled ? "true" : undefined}
         aria-readonly={this.readonly ? "true" : undefined}
         {...this.staticMark(thumb)}
@@ -423,7 +442,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     const scale = this.scale
     if (this.smooth) {
       const [low, high] = this.bounds(thumb)
-      this.glideRatio = Math.min(scale.ratio(high), Math.max(scale.ratio(low), ratio))
+      this.glideRatio = E.clamp(ratio, scale.ratio(low), scale.ratio(high))
     }
     this.move(thumb, scale.valueAt(ratio), event)
   }
@@ -434,11 +453,11 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
     const inner = this.inner!
     const box = inner.getBoundingClientRect()
     const thumb = inner.querySelector<HTMLElement>(THUMB_SELECTOR)
-    const [vertical, reversed] = [this.vertical, this.reversed]
+    const [vertical, reversed] = [this.isVertical, this.isReversed]
     const size = vertical ? (thumb?.offsetHeight ?? 0) : (thumb?.offsetWidth ?? 0)
     const length = (vertical ? box.height : box.width) - size
     const offset = (vertical ? event.clientY - box.top : event.clientX - box.left) - size / 2
-    const ratio = length > 0 ? Math.min(1, Math.max(0, offset / length)) : 0
+    const ratio = length > 0 ? E.clamp(offset / length, 0, 1) : 0
     return reversed ? 1 - ratio : ratio
   }
 
@@ -477,7 +496,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   /** Steps key `key` takes:  arrows the way they point (Fomantic's `keyMovement`), pages 2;  `0` for other keys. */
   @E.untracked
   private keySteps(key: string): number {
-    const [vertical, reversed] = [this.vertical, this.reversed]
+    const [vertical, reversed] = [this.isVertical, this.isReversed]
     // the value grows downward on a vertical slider (min at the top) and leftward on a reversed horizontal one
     const { arrowUp, arrowDown, arrowLeft, arrowRight, pageUp, pageDown } = UIT.Key
     const grows = vertical ? (reversed ? arrowUp : arrowDown) : reversed ? arrowLeft : arrowRight
@@ -539,6 +558,10 @@ const LABELS = "auto labels"
 
 /** Classes of a label too crowded to show in full:  a half tick. */
 const HALF_TICK_LABEL = "halftick label"
+
+/** `direction`'s words. */
+const VERTICAL = "vertical"
+const REVERSED = "reversed"
 
 /** Custom property `UISlider.css` places a thumb or label by:  its ratio along the track. */
 const AT = "--_slider-at"

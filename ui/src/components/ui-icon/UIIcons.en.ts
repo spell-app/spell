@@ -35,18 +35,29 @@ export const iconsVocabulary = {
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
     { name: "loading", group: "states", kind: "keyOnly", description: "The whole group spins." },
-    { name: "fitted", group: "layout", kind: "keyOnly", description: "No gap after the group." },
     {
-      name: "circular",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "Inside a circular ring, the first icon centred."
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "fitted" },
+      replaces: [{ from: "fitted", value: "none" }],
+      description: "`none`:  no gap after the group.  Its old name is `fitted`."
     },
     {
-      name: "bordered",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Inside a square ring, the first icon centred."
+      kind: "multiple",
+      // the words are the classes:  no key after them (`ClassBuilder`)
+      classes: {},
+      values: ["circular", "bordered"],
+      replaces: [
+        { from: "circular", value: "circular" },
+        { from: "bordered", value: "bordered" }
+      ],
+      description:
+        "The look, several words at once:  `circular` (inside a circular ring), `bordered` (inside a square ring), " +
+        "the first icon centred.  Old names:  `circular`, `bordered` written alone."
     },
     {
       name: "inverted",

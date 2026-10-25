@@ -68,25 +68,28 @@ export const gridVocabulary = {
       description: 'A table-like box with hairlines between every cell;  `"internally"` drops the outer box.'
     },
     {
-      name: "padded",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["horizontally", "vertically"],
-      description: "Keeps its outer gutters inside its box;  `horizontally` / `vertically` for one axis."
+      kind: "valueOnly",
+      values: ["md", "md-x", "md-y"],
+      classes: { md: "padded", "md-x": "horizontally padded", "md-y": "vertically padded" },
+      replaces: [{ from: "padded", value: "md", values: { horizontally: "md-x", vertically: "md-y" } }],
+      description:
+        "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`."
     },
     {
-      name: "relaxed",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'Wider gutters;  `relaxed="very"` wider still.'
-    },
-    {
-      name: "compact",
-      group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'Narrower gutters and row spacing;  `compact="very"` narrower still.'
+      kind: "valueOnly",
+      values: ["xs", "compact", "lg", "xl"],
+      classes: { xs: "very compact", compact: "compact", lg: "relaxed", xl: "very relaxed" },
+      replaces: [
+        { from: "relaxed", value: "lg", values: { very: "xl" } },
+        { from: "compact", value: "compact", values: { very: "xs" } }
+      ],
+      description:
+        "The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider " +
+        "still).  Its old names are `compact` and `relaxed`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its columns in each line." },
     {
@@ -138,11 +141,12 @@ export const gridVocabulary = {
         "decides (`<ui-root stack-with>`).  Rows and columns follow their grid."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns every column's text `left`, `center`, `right` or `justified`."
+      replaces: ["text-align"],
+      description: "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
     },
     {
       name: "vertical-align",

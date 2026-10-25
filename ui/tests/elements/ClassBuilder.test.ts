@@ -201,3 +201,30 @@ describe("ClassBuilder.build() performance", () => {
     expect(performance.now() - start).toBeLessThan(100)
   })
 })
+
+describe("ClassBuilder.build() with `classes`", () => {
+  /** A vocabulary whose values aren't Fomantic's words:  epic `ui-gaps` P4's renamed attributes. */
+  const RENAMED = {
+    tag: "ui-renamed",
+    noun: "segment",
+    attributes: [
+      { name: "padding", kind: "valueOnly", classes: { md: "padded", lg: "very padded", none: "" }, description: "" },
+      { name: "appearance", kind: "multiple", classes: { "very-basic": "very basic" }, description: "" }
+    ],
+    events: [],
+    slots: [],
+    parts: [],
+    states: [],
+    texts: []
+  } as const satisfies ComponentVocabulary
+
+  it.each([
+    [{ padding: "md" }, "ui padded segment"],
+    [{ padding: "lg" }, "ui very padded segment"],
+    [{ padding: "none" }, "ui segment"],
+    [{ padding: "compact" }, "ui compact segment"],
+    [{ appearance: "very-basic raised" }, "ui very basic raised segment"]
+  ])("%o => %s", (values, classes) => {
+    expect(new ClassBuilder(RENAMED).build(values as ClassInput)).toBe(classes)
+  })
+})

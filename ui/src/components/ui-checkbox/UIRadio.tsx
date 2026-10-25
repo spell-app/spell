@@ -153,7 +153,7 @@ export class UIRadio extends CheckControl<typeof radioVocabulary> implements Rad
   }
 
   protected classValue(name: E.AttributeName<typeof radioVocabulary>): unknown {
-    if (name === "type") return this.type ?? "radio"
+    if (name === "appearance") return this.appearance ?? "radio"
     return super.classValue(name)
   }
 }

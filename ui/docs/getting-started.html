@@ -25,11 +25,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Getting started">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=Getting%20started%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Getting%20started%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -71,12 +71,12 @@
                   on <code>ui-*</code> tags. The tag's <code>ui-</code> prefix does the namespacing Fomantic's
                   <code>ui</code> class did.
                 </p>
-                <ui-button primary>Button</ui-button>
+                <ui-button color="primary">Button</ui-button>
               </ui-docs-example>
               <ui-docs-example
                 description="Combine variations to get several effects on the same component:  `size` and `primary`."
               >
-                <ui-button size="huge" primary>Button</ui-button>
+                <ui-button size="huge" color="primary">Button</ui-button>
               </ui-docs-example>
             </ui-section>
             <ui-section id="general-usage-attribute-order" label="Attribute Order" sticky collapsible dividing>
@@ -86,10 +86,10 @@
                   never <code>ui left right button floated labeled</code>). Attributes have no such rule: each names its
                   own side, so any order renders the same.
                 </p>
-                <ui-segment basic clearing>
+                <ui-segment clearing appearance="basic">
                   <ui-button labeled="left" floated="right" icon="heart">Labeled</ui-button>
                 </ui-segment>
-                <ui-segment basic clearing>
+                <ui-segment clearing appearance="basic">
                   <ui-button floated="right" icon="heart" labeled="left">Labeled</ui-button>
                 </ui-segment>
               </ui-docs-example>
@@ -135,7 +135,7 @@
             <ui-code language="html">
               <script type="text/plain">
                 <ui-root icons="fa7-brands" display="immediately">
-                  <ui-button primary>Save</ui-button>
+                  <ui-button color="primary">Save</ui-button>
                 </ui-root>
               </script>
             </ui-code>
@@ -174,7 +174,7 @@
                 description="No framework:  attributes in markup, the `options` property and a `ui-changed` listener in script.  Pick a fruit."
               >
                 <ui-dropdown id="contract-dropdown" selection placeholder="Fruit" aria-label="Fruit"></ui-dropdown>
-                <ui-label id="contract-value" basic pointing="left">nothing chosen</ui-label>
+                <ui-label id="contract-value" pointing="left" appearance="basic">nothing chosen</ui-label>
                 <script type="module">
                   const dropdown = document.querySelector("#contract-dropdown")
                   dropdown.options = [

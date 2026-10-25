@@ -84,15 +84,15 @@ describe("<ui-menu> classes", () => {
     ['size="large"', "ui large menu"],
     ['size="medium"', "ui menu"],
     ['color="red"', "ui red menu"],
-    ["secondary pointing", "ui pointing secondary menu"],
+    ["secondary pointing", "ui secondary pointing menu"],
     ['secondary="no" pointing="yes"', "ui pointing menu"],
     ["tabular", "ui tabular menu"],
-    ["text vertical", "ui text vertical menu"],
+    ["text vertical", "ui vertical text menu"],
     ["pagination", "ui pagination menu"],
     ["icon", "ui icon menu"],
     ["labeled", "ui labeled icon menu"],
-    ["fluid stackable borderless", "ui borderless fluid stackable menu"],
-    ["compact centered wrapping wrapped", "ui centered compact wrapped wrapping menu"],
+    ["fluid stackable borderless", "ui fluid stackable borderless menu"],
+    ["compact centered wrapping wrapped", "ui compact centered wrapped wrapping menu"],
     ["inverted", "ui inverted menu"],
     ["link", "ui link menu"],
     ["floated", "ui floated menu"],
@@ -106,7 +106,9 @@ describe("<ui-menu> classes", () => {
     ["interactive", "ui menu"],
     ['appearance="segmented"', "ui segmented menu"],
     ['appearance="tabular"', "ui tabular menu"],
-    ['appearance="pointing" secondary', "ui pointing secondary menu"],
+    // the new spelling wins over an old switch written beside it (`AttributeSpec.replaces`)
+    ['appearance="pointing" secondary', "ui pointing menu"],
+    ['appearance="pointing secondary"', "ui pointing secondary menu"],
     ['alignment="center"', "ui center aligned menu"],
     ['alignment="fluid" equal', "ui equal fluid aligned menu"],
     ["equal", "ui equal menu"]
@@ -160,7 +162,7 @@ describe("<ui-menu> semantics", () => {
     expect(action).toMatchObject({
       localName: "button",
       type: "button",
-      className: "link active item",
+      className: "active link item",
       ariaCurrent: "true"
     })
     expect(header!.localName).toBe("div")
@@ -744,7 +746,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
 
   it("segmented:  moves `selected` to the chosen item itself;  a canceled ui-select keeps the old choice", async () => {
     const { host, items } = await menu(
-      'appearance="segmented" link',
+      'appearance="segmented link"',
       `<ui-item value="a">A</ui-item><ui-item value="b" selected>B</ui-item><ui-item value="c">C</ui-item>`
     )
     const chosen = () => items.map((item) => item.matches(":state(selected)"))
@@ -762,7 +764,7 @@ describe("<ui-menu> appearance, alignment, equal", () => {
 
   it("segmented:  ONE thumb under the items, sliding to each new choice (Apple's segmented control)", async () => {
     const { root, items } = await bar(
-      'appearance="segmented" link',
+      'appearance="segmented link"',
       `<ui-item value="a">A</ui-item><ui-item value="b" selected>Bee</ui-item><ui-item value="c">Cicada</ui-item>`
     )
     /** An item box's left edge, from the track's padding edge. */
@@ -857,5 +859,17 @@ describe("<ui-menu> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-menu> old names", () => {
+  it.each([
+    ["secondary pointing link borderless", 'appearance="secondary pointing link borderless"'],
+    ['vertical compact attached="top"', 'direction="vertical" padding="compact" attach="top"'],
+    ['fitted="vertically" wrapped alignment="center"', 'padding="none-y" wrap align="center"'],
+    ["attached", 'attach="both"']
+  ])("<ui-menu %s> draws as the new spelling", async (old, spelling) => {
+    const [before, after] = [await menu(old), await menu(spelling)]
+    expect(before.root.className).toBe(after.root.className)
   })
 })

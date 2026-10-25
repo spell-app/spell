@@ -33,11 +33,12 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
+import { escapeHTML } from "spell/util/string"
 
 import { Terminal } from "spell/element-tools/Terminal"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
-import { STATUS_TEXT, escapeHtml } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** Spell UI's repo root. */
@@ -184,8 +185,8 @@ class SitePageWriter {
     html = SitePageWriter.block(html, "tag", facts.own)
     html = SitePageWriter.block(html, "theming", facts.theming)
     html = html
-      .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(`${facts.title} | Spell UI`)}</title>`)
-      .replace(/(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${escapeHtml(facts.summary)}$2`)
+      .replace(/<title>[^<]*<\/title>/, `<title>${escapeHTML(`${facts.title} | Spell UI`)}</title>`)
+      .replace(/(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${escapeHTML(facts.summary)}$2`)
       .replaceAll(TEMPLATE_SITE, rel)
     const values: Record<string, string> = {
       title: facts.title,
@@ -196,7 +197,7 @@ class SitePageWriter {
       fomantic: facts.fomantic,
       bugTitle: encodeURIComponent(`${facts.tag || facts.title}:  `)
     }
-    return html.replace(/\{\{(\w+)\}\}/g, (match, key: string) => (key in values ? escapeHtml(values[key]!) : match))
+    return html.replace(/\{\{(\w+)\}\}/g, (match, key: string) => (key in values ? escapeHTML(values[key]!) : match))
   }
 
   /** `name` as a tag:  `button` => `ui-button`. */

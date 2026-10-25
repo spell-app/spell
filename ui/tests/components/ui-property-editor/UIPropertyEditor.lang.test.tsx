@@ -9,15 +9,15 @@ describe("<ui-property-editor> in another language", () => {
   it("a Spanish editor's properties find it, and read its schema:  `<es-editor-propiedades>` (outline-spell P29)", async () => {
     await RootLoader.useLanguage("es")
     const host = await ElementFixture.render(
-      `<es-editor-propiedades esquema="ui-button"><es-propiedad name="basic"></es-propiedad></es-editor-propiedades>`
+      `<es-editor-propiedades esquema="ui-button"><es-propiedad name="toggle"></es-propiedad></es-editor-propiedades>`
     )
-    ;(host as HTMLElement & { value: unknown }).value = { basic: true }
+    ;(host as HTMLElement & { value: unknown }).value = { toggle: true }
     for (let round = 0; round < 4; round++) {
       await ElementFixture.settle(host)
       await ElementFixture.tick()
     }
-    // the button's `basic` is a yes / no:  a checkbox, not a plain field
-    const control = host.querySelector("es-propiedad [name=basic]")!
+    // the button's `toggle` is a yes / no:  a checkbox, not a plain field
+    const control = host.querySelector("es-propiedad [name=toggle]")!
     expect(control.localName).toBe("ui-checkbox")
     expect(host.matches(":state(property-editor)")).toBe(true)
     expect(host.querySelector("es-propiedad")!.matches(":state(property)")).toBe(true)

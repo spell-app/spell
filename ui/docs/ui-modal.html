@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Modal">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-modal%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-modal%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/modal.html"
+              link="https://fomantic-ui.com/modules/modal.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -56,7 +56,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's modal page, section by section, in its order (Types, Content, Variations, States), then its
@@ -87,7 +87,7 @@
                     </ui-content>
                     <ui-actions>
                       <ui-button class="deny" color="black">Nope</ui-button>
-                      <ui-button class="approve" positive labeled="right" icon="checkmark">Yep, that's me</ui-button>
+                      <ui-button class="approve" labeled="right" icon="checkmark" color="positive">Yep, that's me</ui-button>
                     </ui-actions>
                   </ui-modal>
                 </ui-docs-example>
@@ -98,7 +98,7 @@
                   description="A modal can reduce its complexity:  no box, light text straight on the dimmer."
                 >
                   <ui-button commandfor="modal-types-basic" command="--show">Show basic</ui-button>
-                  <ui-modal id="modal-types-basic" basic size="small">
+                  <ui-modal id="modal-types-basic" appearance="basic" size="small">
                     <ui-header icon>
                       <ui-icon name="archive"></ui-icon>
                       Archive Old Messages
@@ -109,7 +109,7 @@
                       </p>
                     </ui-content>
                     <ui-actions>
-                      <ui-button class="cancel" color="red" basic inverted icon="remove">No</ui-button>
+                      <ui-button class="cancel" color="red" inverted icon="remove" appearance="basic">No</ui-button>
                       <ui-button class="ok" color="green" inverted icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-modal>
@@ -157,7 +157,7 @@
                         <p>We've found the following gravatar image associated with your e-mail address.</p>
                       </ui-description>
                     </ui-content>
-                    <ui-actions><ui-button class="approve" primary>Use it</ui-button></ui-actions>
+                    <ui-actions><ui-button class="approve" color="primary">Use it</ui-button></ui-actions>
                   </ui-modal>
                 </ui-docs-example>
               </ui-section>
@@ -320,7 +320,7 @@
                       <p>Clause eight: one more.</p>
                       <p>Until the very end.</p>
                     </ui-content>
-                    <ui-actions><ui-button class="approve" primary>I agree</ui-button></ui-actions>
+                    <ui-actions><ui-button class="approve" color="primary">I agree</ui-button></ui-actions>
                   </ui-modal>
                 </ui-docs-example>
               </ui-section>
@@ -332,11 +332,11 @@
                 >
                   <ui-button commandfor="modal-variations-center" command="--show">Show</ui-button>
                   <ui-modal id="modal-variations-center">
-                    <ui-header text-align="center">Header is centered</ui-header>
-                    <ui-content text-align="center"><p>Content is centered</p></ui-content>
+                    <ui-header align="center">Header is centered</ui-header>
+                    <ui-content align="center"><p>Content is centered</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
                 </ui-docs-example>
@@ -349,8 +349,8 @@
                   <ui-modal id="modal-variations-left" heading="Look at the Actions">
                     <ui-content><p>They are aligned to the left</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
                 </ui-docs-example>
@@ -372,8 +372,8 @@
                     <ui-header>Basic Header</ui-header>
                     <ui-content><p>Basic Actions below</p></ui-content>
                     <ui-actions>
-                      <ui-button negative>Cancel</ui-button>
-                      <ui-button positive>OK</ui-button>
+                      <ui-button color="negative">Cancel</ui-button>
+                      <ui-button color="positive">OK</ui-button>
                     </ui-actions>
                   </ui-modal>
                 </ui-docs-example>
@@ -451,8 +451,7 @@
                       </ui-description>
                     </ui-content>
                     <ui-actions
-                      ><ui-button class="approve" primary labeled="right" icon="chevron right"
-                        >Proceed</ui-button
+                      ><ui-button class="approve" labeled="right" icon="chevron right" color="primary">Proceed</ui-button
                       ></ui-actions
                     >
                   </ui-modal>
@@ -470,13 +469,7 @@
                       <ui-description><p>This modal opens a second one.</p></ui-description>
                     </ui-content>
                     <ui-actions>
-                      <ui-button
-                        primary
-                        commandfor="modal-behaviour-second"
-                        command="--show"
-                        labeled="right"
-                        icon="chevron right"
-                        >Proceed</ui-button
+                      <ui-button commandfor="modal-behaviour-second" command="--show" labeled="right" icon="chevron right" color="primary">Proceed</ui-button
                       >
                     </ui-actions>
                   </ui-modal>
@@ -501,7 +494,7 @@
                   description='A modal can refuse to close from the dimmer or Escape, to force a user to make a choice:  `closedby="none"`.'
                 >
                   <ui-button commandfor="modal-behaviour-none" command="--show">Show</ui-button>
-                  <ui-modal id="modal-behaviour-none" closedby="none" basic size="small">
+                  <ui-modal id="modal-behaviour-none" closedby="none" appearance="basic" size="small">
                     <ui-header icon>
                       <ui-icon name="archive"></ui-icon>
                       Archive Old Messages
@@ -510,7 +503,7 @@
                       <p>Escape and clicks on the dimmer do nothing here: only a button closes it.</p>
                     </ui-content>
                     <ui-actions>
-                      <ui-button class="cancel" color="red" basic inverted icon="remove">No</ui-button>
+                      <ui-button class="cancel" color="red" inverted icon="remove" appearance="basic">No</ui-button>
                       <ui-button class="ok" color="green" inverted icon="checkmark">Yes</ui-button>
                     </ui-actions>
                   </ui-modal>
@@ -599,8 +592,8 @@
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Buttons anywhere inside act by Fomantic's classes: `approve` / `ok` / `positive` (or `<ui-button positive>`)
-                  approve, `deny` / `cancel` / `negative` (or `<ui-button negative>`) deny.
+                  Buttons anywhere inside act by Fomantic's classes: `approve` / `ok` / `positive` (or `<ui-button color="positive">`)
+                  approve, `deny` / `cancel` / `negative` (or `<ui-button color="negative">`) deny.
 
                   `visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
                   or hides the modal and fires nothing. A modal starts hidden. The events, in order:
@@ -731,7 +724,29 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-modal"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-modal" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -748,7 +763,7 @@
                     dimmer).
                   - A `--ui-modal-width` holds on every screen; `fullscreen` replaces it.
                   - The header, content and actions parts read `--ui-modal-header-*`, `--ui-modal-content-background` and
-                    `--ui-modal-actions-background` from the modal, so set those on the modal or above it; `basic` replaces them.
+                    `--ui-modal-actions-background` from the modal, so set those on the modal or above it; the `basic` look replaces them.
                 </script>
               </ui-markdown>
               <ui-code language="css">

@@ -2,20 +2,25 @@
 <div class="ui-stack">
   <section>
     <h4>Reversed</h4>
-    <ui-slider reversed value="6" aria-label="Reversed"></ui-slider>
+    <ui-slider direction="reversed" value="6" aria-label="Reversed"></ui-slider>
   </section>
 
   <section>
     <h4>Vertical</h4>
     <div class="ui-cluster">
-      <ui-slider vertical value="6" style="height: 180px" aria-label="Vertical"></ui-slider>
-      <ui-slider vertical reversed value="6" style="height: 180px" aria-label="Vertical reversed"></ui-slider>
+      <ui-slider direction="vertical" value="6" style="height: 180px" aria-label="Vertical"></ui-slider>
+      <ui-slider
+        direction="vertical reversed"
+        value="6"
+        style="height: 180px"
+        aria-label="Vertical reversed"
+      ></ui-slider>
     </div>
   </section>
 
   <section>
     <h4>Bottom aligned labels</h4>
-    <ui-slider labeled ticked aligned="bottom" max="10" value="4" aria-label="Bottom labels"></ui-slider>
+    <ui-slider labeled ticked align="bottom" max="10" value="4" aria-label="Bottom labels"></ui-slider>
   </section>
 
   <section>
@@ -25,7 +30,7 @@
 
   <section>
     <h4>Basic</h4>
-    <ui-slider basic color="blue" value="10" aria-label="Basic"></ui-slider>
+    <ui-slider appearance="basic" color="blue" value="10" aria-label="Basic"></ui-slider>
   </section>
 
   <section>

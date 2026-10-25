@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar, and are MIRRORED onto the slotted
- *   `<table>` (see `UITable`):  `<ui-table size="small" celled basic="very" stuck="head first">` =>
+ *   `<table>` (see `UITable`):  `<ui-table size="small" celled appearance="very-basic" stuck="head first">` =>
  *   `ui small celled very basic head stuck first stuck table`.
  * - Row / cell classes (`positive`, `red marked`, `collapsing`, `four wide` ...) are the author's,
  *   on native `tr` / `td` / `th`:  no attribute here.
@@ -73,12 +73,21 @@ export const tableVocabulary = {
         "Header cells sort the table:  click / Enter / Space dispatches `ui-sorting`;  the sorted one gets " +
         '`aria-sort`.  Opt a header out with `data-sortable="false"` (or Fomantic\'s `class="disabled"`).'
     },
-    { name: "striped", group: "appearance", kind: "keyOnly", description: "Every other body row is tinted." },
     {
-      name: "structured",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Collapsed borders, for `rowspan` / `colspan` headers."
+      kind: "multiple",
+      values: ["basic", "very-basic", "striped", "structured"],
+      classes: { "very-basic": "very basic" },
+      replaces: [
+        { from: "basic", value: "basic", values: { very: "very-basic" } },
+        { from: "striped", value: "striped" },
+        { from: "structured", value: "structured" }
+      ],
+      description:
+        "The look, several words at once:  `basic` (no header fill), `very-basic` (no outer border or edge " +
+        "padding either), `striped` (every other body row tinted), `structured` (collapsed borders, for " +
+        '`rowspan` / `colspan` headers).  Old names:  `basic` (`basic="very"`), `striped`, `structured`.'
     },
     {
       name: "unstackable",
@@ -87,32 +96,28 @@ export const tableVocabulary = {
       description: "Never stacks rows into blocks, even on a viewport below 768px."
     },
     {
-      name: "basic",
-      group: "appearance",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: '`basic`:  no header fill;  `basic="very"`:  no outer border or edge padding either.'
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["xs", "compact", "md", "lg"],
+      classes: { xs: "very compact", md: "padded", lg: "very padded" },
+      replaces: [
+        { from: "compact", value: "compact", values: { very: "xs" } },
+        { from: "padded", value: "md", values: { very: "lg" } }
+      ],
+      description:
+        "Cell padding:  `xs` and `compact` less, `md` and `lg` more.  " +
+        'Old names:  `compact` (`compact="very"` is `xs`), `padded` (`padded="very"` is `lg`).'
     },
     {
-      name: "compact",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: '`compact` / `compact="very"`:  less cell padding.'
-    },
-    {
-      name: "padded",
-      group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: '`padded` / `padded="very"`:  more cell padding.'
-    },
-    {
-      name: "attached",
-      group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "Joins a segment or another table:  `attached` (middle), `top` or `bottom`."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joins a segment or another table:  `both` (in the middle), `top` or `bottom`.  Old name:  `attached`."
     },
     {
       name: "stackable",
@@ -168,7 +173,13 @@ export const tableVocabulary = {
       widthClass: "column",
       description: "Equal-width column count, `1` ... `16` (or `1/4`, `25%`):  `four column`."
     },
-    { name: "text-align", group: "layout", kind: "textAlign", description: "Text alignment of every cell." },
+    {
+      name: "align",
+      group: "layout",
+      kind: "textAlign",
+      replaces: ["text-align"],
+      description: "Text alignment of every cell.  Old name:  `text-align`."
+    },
     {
       name: "vertical-align",
       group: "layout",
@@ -236,11 +247,14 @@ export const tableVocabulary = {
     }
   ],
   states: [
-    { name: "attached", description: "Set while `attached` (any edge):  the host drops the outer margin it carries." },
-    { name: "attached-top", description: "Set while `attached` is `top`:  the host keeps only its top margin." },
+    {
+      name: "attached",
+      description: "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
+    },
+    { name: "attached-top", description: "Set while `attach` is `top`:  the host keeps only its top margin." },
     {
       name: "attached-bottom",
-      description: "Set while `attached` is `bottom`:  the host keeps only its bottom margin."
+      description: "Set while `attach` is `bottom`:  the host keeps only its bottom margin."
     }
   ],
   texts: [

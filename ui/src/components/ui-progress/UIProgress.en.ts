@@ -42,7 +42,15 @@ export const progressVocabulary = {
       description: "With `indeterminate`:  a `slow` or `fast` animation;  absent is normal."
     },
     { name: "active", group: "states", kind: "keyOnly", description: "Shows activity:  a pulse runs along the bar." },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No background behind the bar." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic"],
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "`basic`:  no background behind the bar.  Old name:  `basic`."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed, animations stopped." },
     {
       name: "indicating",
@@ -52,11 +60,14 @@ export const progressVocabulary = {
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
-      name: "right-aligned",
+      name: "align",
       group: "layout",
-      kind: "keyOnly",
-      key: "right aligned",
-      description: "The bar grows from the right;  its text sits at its left end."
+      kind: "valueOnly",
+      values: ["right"],
+      classes: { right: "right aligned" },
+      replaces: [{ from: "right-aligned", value: "right" }],
+      description:
+        "`right`:  the bar grows from the right;  its text sits at its left end.  Old name:  `right-aligned`."
     },
     {
       name: "indeterminate",
@@ -66,11 +77,15 @@ export const progressVocabulary = {
       description: "Unknown progress:  a pulsing full bar, or a `filling` / `sliding` / `swinging` one."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "A thin line joined to the edge of the content above (`bottom`, bare) or below (`top`)."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "A thin line joined to the edge of the content above (`bottom`, or `both`) or below (`top`).  " +
+        "Old name:  `attached`."
     },
     {
       name: "value",

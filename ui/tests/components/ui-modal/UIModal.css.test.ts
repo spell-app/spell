@@ -1,6 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
+import { escapeRegExp } from "spell/util/string"
 import { colorsCSS, foundationCSS } from "spell-ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -89,7 +90,7 @@ describe("UIModal.css source", () => {
       "--_ui-modal-header-size: var(--ui-modal-header-size, 1.42857em);",
       "--ui-inverted: 0;"
     ]) {
-      expect(text).toMatch(new RegExp(`\\.ui\\.modal \\{[^}]*${token.replace(/[.()]/g, "\\$&")}`))
+      expect(text).toMatch(new RegExp(`\\.ui\\.modal \\{[^}]*${escapeRegExp(token)}`))
     }
   })
 })

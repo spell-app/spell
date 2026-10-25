@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Theming">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=Theming%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Theming%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -80,7 +80,7 @@
                 restyles; the table below says which.
               </script>
             </ui-markdown>
-            <ui-segment secondary>
+            <ui-segment appearance="secondary">
               <ui-docs-themes></ui-docs-themes>
             </ui-segment>
             <ui-message size="small" class="site-not-ported"
@@ -92,15 +92,15 @@
               <ui-docs-example
                 description="Amazon, Basic, Bootstrap 3, Chubby, Fomantic classic, GitHub, Material, Raised, Round and Twitter restyle buttons."
               >
-                <ui-button primary>Primary</ui-button>
-                <ui-button secondary>Secondary</ui-button>
+                <ui-button color="primary">Primary</ui-button>
+                <ui-button color="secondary">Secondary</ui-button>
                 <ui-button>Standard</ui-button>
-                <ui-button basic icon="user">Basic</ui-button>
+                <ui-button icon="user" appearance="basic">Basic</ui-button>
                 <ui-button labeled icon="pause">Pause</ui-button>
                 <ui-buttons>
                   <ui-button>Cancel</ui-button>
                   <ui-or></ui-or>
-                  <ui-button positive>Save</ui-button>
+                  <ui-button color="positive">Save</ui-button>
                 </ui-buttons>
               </ui-docs-example>
               <ui-docs-example>
@@ -156,10 +156,10 @@
                       <ui-checkbox selected>I agree to the terms</ui-checkbox>
                     </ui-field>
                     <ui-field>
-                      <ui-checkbox type="slider" selected>Slider</ui-checkbox>
+                      <ui-checkbox appearance="slider" selected>Slider</ui-checkbox>
                     </ui-field>
                     <ui-field>
-                      <ui-checkbox type="toggle" selected>Toggle</ui-checkbox>
+                      <ui-checkbox appearance="toggle" selected>Toggle</ui-checkbox>
                     </ui-field>
                   </form>
                 </ui-form>
@@ -169,14 +169,14 @@
             <ui-section id="theme-gallery-menus" label="Menus" sticky collapsible dividing>
               <ui-docs-example description="Chubby, GitHub and Material restyle menus.">
                 <ui-menu aria-label="Gallery menu">
-                  <ui-item href="#theme-gallery" selected>Editorials</ui-item>
-                  <ui-item href="#theme-gallery">Reviews</ui-item>
-                  <ui-item href="#theme-gallery">Upcoming Events</ui-item>
+                  <ui-item link="#theme-gallery" selected>Editorials</ui-item>
+                  <ui-item link="#theme-gallery">Reviews</ui-item>
+                  <ui-item link="#theme-gallery">Upcoming Events</ui-item>
                 </ui-menu>
-                <ui-menu secondary pointing aria-label="Gallery pointing menu">
-                  <ui-item href="#theme-gallery" selected>Home</ui-item>
-                  <ui-item href="#theme-gallery">Messages</ui-item>
-                  <ui-item href="#theme-gallery">Friends</ui-item>
+                <ui-menu appearance="secondary pointing" aria-label="Gallery pointing menu">
+                  <ui-item link="#theme-gallery" selected>Home</ui-item>
+                  <ui-item link="#theme-gallery">Messages</ui-item>
+                  <ui-item link="#theme-gallery">Friends</ui-item>
                 </ui-menu>
               </ui-docs-example>
             </ui-section>
@@ -191,11 +191,11 @@
               <ui-docs-example
                 description="GitHub restyles labels and breadcrumbs;  Gmail and GitHub restyle messages."
               >
-                <ui-breadcrumb aria-label="Gallery breadcrumb">
-                  <ui-breadcrumb-section link="#theme-gallery">Home</ui-breadcrumb-section>
-                  <ui-breadcrumb-section link="#theme-gallery">Store</ui-breadcrumb-section>
-                  <ui-breadcrumb-section active>T-Shirt</ui-breadcrumb-section>
-                </ui-breadcrumb>
+                <ui-breadcrumbs aria-label="Gallery breadcrumb">
+                  <ui-breadcrumb link="#theme-gallery">Home</ui-breadcrumb>
+                  <ui-breadcrumb link="#theme-gallery">Store</ui-breadcrumb>
+                  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+                </ui-breadcrumbs>
                 <ui-labels>
                   <ui-label icon="envelope" detail="23">Mail</ui-label>
                   <ui-label color="blue">Blue</ui-label>
@@ -258,7 +258,7 @@
                   <ui-step disabled icon="circle info" heading="Confirm Order"></ui-step>
                 </ui-steps>
                 <ui-segment>
-                  <ui-loader visible inline centered></ui-loader>
+                  <ui-loader visible inline align="center"></ui-loader>
                 </ui-segment>
               </ui-docs-example>
             </ui-section>
@@ -267,7 +267,7 @@
               <ui-docs-example
                 description="Basic, Fomantic classic and GitHub restyle tables;  GitHub restyles segments."
               >
-                <ui-table celled striped>
+                <ui-table celled appearance="striped">
                   <table>
                     <thead>
                       <tr>
@@ -290,7 +290,7 @@
                     </tbody>
                   </table>
                 </ui-table>
-                <ui-segment raised>A raised segment.</ui-segment>
+                <ui-segment appearance="raised">A raised segment.</ui-segment>
               </ui-docs-example>
             </ui-section>
 
@@ -302,7 +302,7 @@
               dividing
             >
               <ui-docs-example description="Chubby restyles the accordion, Timeline the feed.">
-                <ui-accordion styled>
+                <ui-accordion appearance="styled">
                   <ui-title>What is a dog?</ui-title>
                   <ui-content><p>A dog is a type of domesticated animal.</p></ui-content>
                   <ui-title>What kinds of dogs are there?</ui-title>
@@ -326,7 +326,7 @@
             <ui-section id="theme-gallery-popup-and-modal" label="Popup and modal" sticky collapsible dividing>
               <ui-docs-example description="GitHub restyles popups;  Material and Fixed width restyle modals.">
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
-                <ui-popup content="Add users to your feed"></ui-popup>
+                <ui-popup label="Add users to your feed"></ui-popup>
                 <ui-button commandfor="theming-gallery-modal" command="--show">Show modal</ui-button>
                 <ui-modal id="theming-gallery-modal" heading="Profile Picture" closable>
                   <ui-content>
@@ -334,7 +334,7 @@
                   </ui-content>
                   <ui-actions>
                     <ui-button class="deny" color="black">Nope</ui-button>
-                    <ui-button class="approve" positive>Yep, that's me</ui-button>
+                    <ui-button class="approve" color="positive">Yep, that's me</ui-button>
                   </ui-actions>
                 </ui-modal>
               </ui-docs-example>
@@ -348,7 +348,7 @@
                   the components a theme restyles on purpose.
                 </script>
               </ui-markdown>
-              <ui-table celled compact striped>
+              <ui-table celled padding="compact" appearance="striped">
                 <table>
                   <thead>
                     <tr>
@@ -486,7 +486,7 @@
                       <td>GitHub's look, circa 2015. Page-wide.</td>
                       <td>
                         <ui-labels size="mini"
-                          ><ui-label link="ui-breadcrumb.html">Breadcrumb</ui-label
+                          ><ui-label link="ui-breadcrumbs.html">Breadcrumb</ui-label
                           ><ui-label link="ui-button.html">Button</ui-label
                           ><ui-label link="ui-dropdown.html">Dropdown</ui-label
                           ><ui-label link="ui-form.html">Form</ui-label
@@ -616,8 +616,8 @@
                   playground
                   tokens="--ui-primary --ui-secondary --ui-red --ui-green --ui-blue --ui-radius"
                 >
-                  <ui-button primary>Primary Button</ui-button>
-                  <ui-button secondary>Secondary Button</ui-button>
+                  <ui-button color="primary">Primary Button</ui-button>
+                  <ui-button color="secondary">Secondary Button</ui-button>
                   <ui-button color="red">Red</ui-button>
                   <ui-button color="green">Green</ui-button>
                   <ui-button color="blue">Blue</ui-button>
@@ -654,8 +654,8 @@
                   <ui-checkbox selected>Checkbox</ui-checkbox>
                   <ui-radio name="theming-radio" value="a" selected>A</ui-radio>
                   <ui-radio name="theming-radio" value="b">B</ui-radio>
-                  <ui-checkbox type="slider" selected>Slider</ui-checkbox>
-                  <ui-checkbox type="toggle" selected>Toggle</ui-checkbox>
+                  <ui-checkbox appearance="slider" selected>Slider</ui-checkbox>
+                  <ui-checkbox appearance="toggle" selected>Toggle</ui-checkbox>
                 </ui-docs-tokens>
               </ui-docs-example>
             </ui-section>
@@ -717,7 +717,7 @@
                 >
                   <ui-segment class="ui-dark">
                     <ui-header level="4">Dark, whatever the page scheme</ui-header>
-                    <ui-button primary>Primary</ui-button>
+                    <ui-button color="primary">Primary</ui-button>
                     <ui-label color="blue">Blue text re-resolves too</ui-label>
                   </ui-segment>
                 </ui-docs-example>
@@ -733,7 +733,7 @@
                   shadow-root sheet per component (`UIButton.css`, a port of the `.less`) over these foundation sheets:
                 </script>
               </ui-markdown>
-              <ui-table celled compact striped>
+              <ui-table celled padding="compact" appearance="striped">
                 <table>
                   <thead>
                     <tr>
@@ -858,7 +858,7 @@
                 <ui-docs-example description="Change `--ui-font-size` on a wrapper and everything inside follows.">
                   <ui-docs-tokens global playground tokens="--ui-font-size">
                     <ui-header level="4">A header</ui-header>
-                    <ui-button primary>A button</ui-button>
+                    <ui-button color="primary">A button</ui-button>
                     <ui-label>A label</ui-label>
                     <ui-input placeholder="An input" aria-label="An input"></ui-input>
                   </ui-docs-tokens>
@@ -939,7 +939,7 @@
                   anywhere above or on the component:
                 </script>
               </ui-markdown>
-              <ui-table celled compact>
+              <ui-table celled padding="compact">
                 <table>
                   <thead>
                     <tr>
@@ -1078,7 +1078,7 @@
                 the same idea in CSS layers and custom properties, so each later level only says what it changes:
               </script>
             </ui-markdown>
-            <ui-steps vertical ordered>
+            <ui-steps direction="vertical" ordered>
               <ui-step icon="lock" heading="Foundation" description="tokens.css, colors.css:  ui.tokens"></ui-step>
               <ui-step
                 icon="download"
@@ -1113,7 +1113,7 @@
                   (`primary` => `blue`, `secondary` => `black`) and the semantic colours (`positive negative info warning`):
                 </script>
               </ui-markdown>
-              <ui-table celled compact>
+              <ui-table celled padding="compact">
                 <table>
                   <thead>
                     <tr>
@@ -1170,7 +1170,7 @@
                 `fomantic-classic.css` (small, mostly overrides).
               </script>
             </ui-markdown>
-            <ui-steps vertical ordered>
+            <ui-steps direction="vertical" ordered>
               <ui-step
                 heading="Read the theme"
                 description="reference/Fomantic-UI/src/themes/<name>/**:  globals/site.variables first, then each component's .variables and .overrides.  Only what's there is the theme."
@@ -1212,7 +1212,7 @@
               collapsible
               dividing
             >
-              <ui-table celled compact striped>
+              <ui-table celled padding="compact" appearance="striped">
                 <table>
                   <thead>
                     <tr>

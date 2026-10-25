@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Nag">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-nag%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-nag%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/nag.html"
+              link="https://fomantic-ui.com/modules/nag.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -55,7 +55,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's nag page, section by section, in its order (Types, Groups, Variations).  Nags here sit in the
@@ -94,11 +94,11 @@
                     demo.
                   </p>
                   <ui-button commandfor="nag-fixed" command="--show" icon="eye">Show fixed nag</ui-button>
-                  <ui-nag id="nag-fixed" fixed hidden persist>Look, I am a fixed nag!</ui-nag>
+                  <ui-nag id="nag-fixed" fixed hidden persistent="">Look, I am a fixed nag!</ui-nag>
                 </ui-docs-example>
                 <ui-docs-example description="A fixed nag can appear at the bottom of the screen:  `fixed bottom`.">
                   <ui-button commandfor="nag-bottom-fixed" command="--show" icon="eye">Show bottom fixed nag</ui-button>
-                  <ui-nag id="nag-bottom-fixed" fixed bottom hidden persist>Look, I am a bottom fixed nag!</ui-nag>
+                  <ui-nag id="nag-bottom-fixed" fixed bottom hidden persistent="">Look, I am a bottom fixed nag!</ui-nag>
                 </ui-docs-example>
               </ui-section>
 
@@ -220,7 +220,7 @@
                   - `storage`: `local` (`localStorage`), `session` (`sessionStorage`) or `cookie` (Fomantic's default, with
                     `path`, `domain`, `secure` and `samesite`)
                   - `expires`: days the dismissal lasts (30 by default; `0` never expires)
-                  - a nag whose dismissal is stored is hidden before it paints, unless it `persist`s
+                  - a nag whose dismissal is stored is hidden before it paints, unless it's `persistent`
                   - blocked storage (a private window, a strict browser) just doesn't remember: the nag still shows and closes
                 </script>
               </ui-markdown>
@@ -283,7 +283,7 @@
                 <script type="text/markdown">
                   Fomantic's behaviors are methods on the host:
 
-                  - `show` -- `nag.show()`: shows it again, unless a dismissal is stored (and it doesn't `persist`); true when it
+                  - `show` -- `nag.show()`: shows it again, unless a dismissal is stored (and it isn't `persistent`); true when it
                     shows
                   - `hide` / `dismiss` -- `nag.close()`: closes it, storing the dismissal when it has a `key`
                   - `clear` -- `nag.clear()`: forgets a stored dismissal
@@ -350,7 +350,29 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-nag"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-nag" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

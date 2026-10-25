@@ -144,29 +144,49 @@ export const sectionVocabulary = {
     },
     { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule under the title." },
     { name: "block", group: "layout", kind: "keyOnly", description: "The title bar in a tinted box." },
-    { name: "bordered", group: "appearance", kind: "keyOnly", description: "A box around the section, as a segment." },
     {
-      name: "styled",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Boxed as a styled accordion:  a tinted title bar over padded content."
+      kind: "multiple",
+      values: ["bordered", "styled", "raised", "basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [
+        { from: "bordered", value: "bordered" },
+        { from: "styled", value: "styled" },
+        { from: "raised", value: "raised" },
+        { from: "basic", value: "basic" }
+      ],
+      description:
+        "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed " +
+        "as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a " +
+        "shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, " +
+        "`raised`, `basic`."
     },
-    { name: "raised", group: "appearance", kind: "keyOnly", description: "With a box:  lifted with a shadow." },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box, rule or tint, whatever else is set." },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Less padding and space around the title." },
     {
-      name: "padded",
+      name: "padding",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'More padding in the content;  `padded="very"` for even more.'
+      kind: "valueOnly",
+      values: ["compact", "md", "lg"],
+      classes: { md: "padded", lg: "very padded" },
+      replaces: [
+        { from: "compact", value: "compact" },
+        { from: "padded", value: "md", values: { very: "lg" } }
+      ],
+      description:
+        "`compact`:  less padding and space around the title;  `md` / `lg`:  more padding in the content.  Old " +
+        'names:  `compact`, `padded` (`padded="very"` is `lg`).'
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "With a box:  joined edge to edge with the box above / below;  bare `attached` sits between two."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "With a box:  joined edge to edge with the box above (`top`), below (`bottom`), or both (`both`, between " +
+        "two).  Old name:  `attached` (bare is `both`)."
     },
     {
       name: "scrolling",
@@ -183,11 +203,12 @@ export const sectionVocabulary = {
         "The content's cap, any CSS length (`20em`, `300px`):  above it the content scrolls (implies `scrolling`)."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: ["left", "center", "right"],
-      description: "Aligns the TITLE `left`, `center` or `right`."
+      replaces: ["text-align"],
+      description: "Aligns the TITLE `left`, `center` or `right`.  Old name:  `text-align`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {

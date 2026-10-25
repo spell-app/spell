@@ -44,10 +44,14 @@ export type ApiMessage = {
 
 /**
  * The tables, in the order they show;  a tag's empty ones are left out.
+ * - `tags`:  a FAMILY's table, not a tag's:  each of its tags and its one-line summary
+ *   (`ApiModel.tagsSectionFor()`;  epic `epic-engine` J127).
+ *   Only a family of 2+ tags has one, and `ApiModel.sectionsFor()` never returns it.
  * - `properties`:  the `json` attributes (rich data), split out of `attributes` as the old Astro table did.
  * - `props` and `usedIn`:  a function component's (`SiteTag.props`, `SiteTag.usedIn`:  the spell app's App UI set).
  */
 export const ApiSectionIds = [
+  "tags",
   "props",
   "attributes",
   "properties",
@@ -62,6 +66,26 @@ export const ApiSectionIds = [
 /** One of `ApiSectionIds`. */
 export type ApiSectionId = (typeof ApiSectionIds)[number]
 
+/**
+ * `only`'s values:  each table's id, as an attribute writes it (`usedIn` => `used-in`), in `ApiSectionIds` order.
+ * - `ApiModel.onlyFor()` / `sectionIdFor()` turn one into the other.
+ */
+export const ApiOnlyValues = [
+  "tags",
+  "props",
+  "attributes",
+  "properties",
+  "events",
+  "slots",
+  "parts",
+  "states",
+  "texts",
+  "used-in"
+] as const
+
+/** One of `ApiOnlyValues`. */
+export type ApiOnly = (typeof ApiOnlyValues)[number]
+
 /** One table of a tag's API:  its columns' header texts and its rows. */
 export type ApiSection = {
   /** which table, also its title's text key */
@@ -74,10 +98,15 @@ export type ApiSection = {
   readonly rows: readonly ApiRow[]
 }
 
-/** One row:  a key unique in its table (the name), and one cell per column. */
+/** One row:  a key unique in its table (the name), its name as the "On this page" list shows it, and its cells. */
 export type ApiRow = {
   /** unique in its table:  the name */
   readonly key: string
+  /**
+   * what the "On this page" list calls it, and its anchor's last word (slugged):
+   * the name as written (`size`, `ui-click`, `columnDefs`);  a state's bare name (`open`);  the default slot `default`
+   */
+  readonly name: string
   /** the first is always a `name` cell (the definition column) */
   readonly cells: readonly ApiCell[]
 }
@@ -85,7 +114,7 @@ export type ApiRow = {
 /**
  * One table cell.
  * - `name`:  the definition column:  `code` as code (`label` instead for the default slot), plus small notes under
- *   it (`alias`, `property` ...)
+ *   it (`alias`, `property` ...);  `href` makes the code a link (the tags table's, to the tag's first table)
  * - `text`:  prose with `` `code` `` spans (`InlineCode`);  defaults and detail types are written as code spans
  * - `values`:  allowed values as compact labels (`ApiModel.labelsFor()`);  `isSwatch` paints each in its own hue;
  *   `isRange` is a numeric run shown as one `first … last` label;  `set` the shared value set they come from
@@ -95,6 +124,7 @@ export type ApiCell =
       readonly type: "name"
       readonly code?: string
       readonly label?: DocsApiTextKey
+      readonly href?: string
       readonly notes: readonly ApiNote[]
     }
   | { readonly type: "text"; readonly text: string }

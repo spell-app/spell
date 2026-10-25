@@ -13,5 +13,5 @@ export const iconPickerEs = {
   name: "selector-icono",
   aka: ["selector de iconos", "elegir icono", "buscador de iconos", "selector de símbolos"],
   parts: { glyph: "glifo", panel: "panel", cell: "celda" },
-  texts: { searchIcons: "Buscar iconos", noIcon: "ninguno", noIconsMatch: "Ningún icono coincide" }
+  texts: { searchIcons: "Buscar iconos", noIcon: "ninguno", noIconsMatch: "Ningún icono coincide", otherIcons: "Otros" }
 } as const satisfies E.TagDictionary

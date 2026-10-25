@@ -29,16 +29,17 @@ export const dividerVocabulary = {
     },
     { name: "color", group: "appearance", kind: "color", description: "Hue of the rule and the text." },
     {
-      name: "horizontal",
+      name: "direction",
       group: "layout",
-      kind: "keyOnly",
-      description: "Text (or an icon) between two horizontal rules."
-    },
-    {
-      name: "vertical",
-      group: "layout",
-      kind: "keyOnly",
-      description: "A vertical rule with optional text, centred in a `position: relative` owner (segment, grid)."
+      kind: "valueOnly",
+      values: ["horizontal", "vertical"],
+      replaces: [
+        { from: "horizontal", value: "horizontal" },
+        { from: "vertical", value: "vertical" }
+      ],
+      description:
+        "`horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional " +
+        "text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`."
     },
     {
       name: "spacer",
@@ -49,7 +50,15 @@ export const dividerVocabulary = {
         "The spacing without the line (Fomantic's `hidden` divider:  the class word stays `hidden`).  " +
         "Renamed because `hidden` hides every element, as the platform's does."
     },
-    { name: "fitted", group: "layout", kind: "keyOnly", description: "No space above or below." },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "fitted" },
+      replaces: [{ from: "fitted", value: "none" }],
+      description: "`none`:  no space above or below.  Its old name is `fitted`."
+    },
     { name: "clearing", group: "appearance", kind: "keyOnly", description: "Clears floated content above it." },
     {
       name: "section",
@@ -59,11 +68,13 @@ export const dividerVocabulary = {
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: ["left", "center", "right"],
-      description: "With `horizontal`:  where the text sits;  `left` / `right` drop the rule on that side."
+      replaces: ["text-align"],
+      description:
+        'With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`.'
     },
     { name: "icon", group: "content", kind: "icon", description: "Icon name, shown before the text." }
   ],

@@ -6,12 +6,12 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { BreadcrumbDivider } from "spell-ui/components/ui-breadcrumb/BreadcrumbDivider"
+import { BreadcrumbDivider } from "spell-ui/components/ui-breadcrumbs/BreadcrumbDivider"
 
-import "spell-ui/components/ui-breadcrumb"
+import "spell-ui/components/ui-breadcrumbs"
 
 /** Element-markup rewrites of every example, by path. */
-const EXAMPLES = import.meta.glob<string>("/src/components/ui-breadcrumb/examples/elements/*.html", {
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-breadcrumbs/examples/elements/*.html", {
   query: "?raw",
   import: "default",
   eager: true
@@ -19,15 +19,15 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-breadcrumb/example
 
 /** Three sections, the last one current. */
 const TRAIL =
-  `<ui-breadcrumb-section href="#home">Home</ui-breadcrumb-section>` +
-  `<ui-breadcrumb-section href="#store">Store</ui-breadcrumb-section>` +
-  `<ui-breadcrumb-section active href="#shirt">T-Shirt</ui-breadcrumb-section>`
+  `<ui-breadcrumb href="#home">Home</ui-breadcrumb>` +
+  `<ui-breadcrumb href="#store">Store</ui-breadcrumb>` +
+  `<ui-breadcrumb active href="#shirt">T-Shirt</ui-breadcrumb>`
 
 /** Render a breadcrumb;  returns it, its `<nav>` and its section elements. */
 async function breadcrumb(attributes = "", sections = TRAIL) {
-  const host = await ElementFixture.render<DOMElement>(`<ui-breadcrumb ${attributes}>${sections}</ui-breadcrumb>`)
+  const host = await ElementFixture.render<DOMElement>(`<ui-breadcrumbs ${attributes}>${sections}</ui-breadcrumbs>`)
   const nav = host.shadowRoot!.querySelector<HTMLElement>("[part~=breadcrumb]")!
-  return { host, nav, sections: [...host.querySelectorAll<DOMElement>("ui-breadcrumb-section")] }
+  return { host, nav, sections: [...host.querySelectorAll<DOMElement>("ui-breadcrumb")] }
 }
 
 /** A section's `[part~=section]` root. */
@@ -49,14 +49,14 @@ function dividerText(host: Element): string {
 // ## Classes and markup
 ////////////////
 
-describe("<ui-breadcrumb> classes and markup", () => {
+describe("<ui-breadcrumbs> classes and markup", () => {
   it.each([
     ["", "ui breadcrumb"],
     ['size="large"', "ui large breadcrumb"],
     ['size="medium"', "ui breadcrumb"],
     ["inverted", "ui inverted breadcrumb"],
     ['inverted="no"', "ui breadcrumb"]
-  ])("<ui-breadcrumb %s>", async (attributes, classes) => {
+  ])("<ui-breadcrumbs %s>", async (attributes, classes) => {
     const { nav } = await breadcrumb(attributes)
     expect(nav.className).toBe(classes)
   })
@@ -80,16 +80,16 @@ describe("<ui-breadcrumb> classes and markup", () => {
 })
 
 ////////////////
-// ## <ui-breadcrumb-section>
+// ## <ui-breadcrumb>
 ////////////////
 
-describe("<ui-breadcrumb-section>", () => {
+describe("<ui-breadcrumb>", () => {
   it("renders a link with href, text without, and the active one as the current page", async () => {
     const { sections } = await breadcrumb(
       "",
-      `<ui-breadcrumb-section href="#a" target="_top">A</ui-breadcrumb-section>` +
-        `<ui-breadcrumb-section>B</ui-breadcrumb-section>` +
-        `<ui-breadcrumb-section active href="#c">C</ui-breadcrumb-section>`
+      `<ui-breadcrumb href="#a" target="_top">A</ui-breadcrumb>` +
+        `<ui-breadcrumb>B</ui-breadcrumb>` +
+        `<ui-breadcrumb active href="#c">C</ui-breadcrumb>`
     )
     const [a, b, c] = sections.map(sectionOf)
     expect(a!.localName).toBe("a")
@@ -104,7 +104,7 @@ describe("<ui-breadcrumb-section>", () => {
     expect(c!.localName).toBe("span")
     expect(c!.className).toBe("active section")
     expect(c!.getAttribute("aria-current")).toBe("page")
-    expect(sections[2]!.matches(":state(active)")).toBe(true)
+    expect(sections[2]!.matches(":state(selected)")).toBe(true)
   })
 
   it("moves aria-current with `active`", async () => {
@@ -132,7 +132,7 @@ describe("<ui-breadcrumb-section>", () => {
 // ## Dividers
 ////////////////
 
-describe("<ui-breadcrumb> dividers", () => {
+describe("<ui-breadcrumbs> dividers", () => {
   it("draws `/` between sections by default, none before the first", async () => {
     const { sections } = await breadcrumb()
     expect(getComputedStyle(dividerOf(sections[0]!)).display).toBe("none")
@@ -151,9 +151,9 @@ describe("<ui-breadcrumb> dividers", () => {
 
   it("leaves the token to a theming wrapper without `divider`", async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style='--ui-breadcrumb-divider: "|"'><ui-breadcrumb>${TRAIL}</ui-breadcrumb></div>`
+      `<div style='--ui-breadcrumb-divider: "|"'><ui-breadcrumbs>${TRAIL}</ui-breadcrumbs></div>`
     )
-    expect(dividerText(wrapper.querySelectorAll("ui-breadcrumb-section")[1]!)).toBe('"|"')
+    expect(dividerText(wrapper.querySelectorAll("ui-breadcrumb")[1]!)).toBe('"|"')
   })
 
   it("does not reflect a default `divider` onto the element", async () => {
@@ -163,9 +163,9 @@ describe("<ui-breadcrumb> dividers", () => {
 
   it('lets an explicit `divider="/"` override a theming wrapper', async () => {
     const wrapper = await ElementFixture.render<HTMLElement>(
-      `<div style='--ui-breadcrumb-divider: "|"'><ui-breadcrumb divider="/">${TRAIL}</ui-breadcrumb></div>`
+      `<div style='--ui-breadcrumb-divider: "|"'><ui-breadcrumbs divider="/">${TRAIL}</ui-breadcrumbs></div>`
     )
-    expect(dividerText(wrapper.querySelectorAll("ui-breadcrumb-section")[1]!)).toBe('"/"')
+    expect(dividerText(wrapper.querySelectorAll("ui-breadcrumb")[1]!)).toBe('"/"')
   })
 
   it("escapes a divider as CSS text", async () => {
@@ -191,7 +191,7 @@ describe("<ui-breadcrumb> dividers", () => {
 // ## Tokens from outside
 ////////////////
 
-describe("<ui-breadcrumb> tokens from outside", () => {
+describe("<ui-breadcrumbs> tokens from outside", () => {
   const RED = "rgb(255, 0, 0)"
 
   /** The `<nav>`'s computed text colour. */
@@ -206,17 +206,17 @@ describe("<ui-breadcrumb> tokens from outside", () => {
 
   it("takes a token set on an ANCESTOR", async () => {
     const wrapper = await ElementFixture.render(
-      `<section style="--ui-breadcrumb-color: ${RED}"><div><ui-breadcrumb>${TRAIL}</ui-breadcrumb></div></section>`
+      `<section style="--ui-breadcrumb-color: ${RED}"><div><ui-breadcrumbs>${TRAIL}</ui-breadcrumbs></div></section>`
     )
-    expect(color(wrapper.querySelector("ui-breadcrumb")!)).toBe(RED)
+    expect(color(wrapper.querySelector("ui-breadcrumbs")!)).toBe(RED)
   })
 
   it("takes a token set through `::part(breadcrumb)`", async () => {
     const wrapper = await ElementFixture.render(
       `<div><style>.themed::part(breadcrumb) { --ui-breadcrumb-color: ${RED} }</style>` +
-        `<ui-breadcrumb class="themed">${TRAIL}</ui-breadcrumb></div>`
+        `<ui-breadcrumbs class="themed">${TRAIL}</ui-breadcrumbs></div>`
     )
-    expect(color(wrapper.querySelector("ui-breadcrumb")!)).toBe(RED)
+    expect(color(wrapper.querySelector("ui-breadcrumbs")!)).toBe(RED)
   })
 
   it("takes a token set on `:root`", async () => {
@@ -232,9 +232,9 @@ describe("<ui-breadcrumb> tokens from outside", () => {
     const { sections } = await breadcrumb(`style="--ui-breadcrumb-divider-color: ${RED}"`)
     expect(getComputedStyle(dividerOf(sections[1]!)).color).toBe(RED)
     const wrapper = await ElementFixture.render(
-      `<div style="--ui-breadcrumb-link-color: ${RED}"><ui-breadcrumb>${TRAIL}</ui-breadcrumb></div>`
+      `<div style="--ui-breadcrumb-link-color: ${RED}"><ui-breadcrumbs>${TRAIL}</ui-breadcrumbs></div>`
     )
-    expect(getComputedStyle(sectionOf(wrapper.querySelector("ui-breadcrumb-section")!)).color).toBe(RED)
+    expect(getComputedStyle(sectionOf(wrapper.querySelector("ui-breadcrumb")!)).color).toBe(RED)
   })
 
   it("variations:  `inverted` swaps the colour, winning over the base token", async () => {
@@ -247,7 +247,7 @@ describe("<ui-breadcrumb> tokens from outside", () => {
 // ## Accessibility
 ////////////////
 
-describe("<ui-breadcrumb> accessibility", () => {
+describe("<ui-breadcrumbs> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
@@ -260,11 +260,20 @@ describe("<ui-breadcrumb> accessibility", () => {
 // Owen's request r1 (epic `ui-gaps` P3):  `href` became `link`, still read under its old name.
 ////////////////
 
-describe("<ui-breadcrumb-section> link", () => {
+describe("<ui-breadcrumb> link", () => {
   it.each(["link", "href"])("%s draws a real link", async (name) => {
-    const element = await ElementFixture.render(
-      `<ui-breadcrumb-section NAME="#there">Go</ui-breadcrumb-section>`.replace("NAME", name)
-    )
+    const element = await ElementFixture.render(`<ui-breadcrumb NAME="#there">Go</ui-breadcrumb>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+describe("<ui-breadcrumb> old names", () => {
+  it("`active` reads as `selected`:  the current page", async () => {
+    const [old, spelled] = [
+      await breadcrumb("", `<ui-breadcrumb active>Here</ui-breadcrumb>`),
+      await breadcrumb("", `<ui-breadcrumb selected>Here</ui-breadcrumb>`)
+    ]
+    expect(sectionOf(old.sections[0]!).outerHTML).toBe(sectionOf(spelled.sections[0]!).outerHTML)
+    expect(old.sections[0]!.matches(":state(selected)")).toBe(true)
   })
 })

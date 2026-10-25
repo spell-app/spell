@@ -3,13 +3,17 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 import type { UIMenuAttributes } from "spell-ui/jsx"
+import { TOC_SHADOW_HOSTS } from "spell-ui/docs-components/docs-components.types"
 import { docsTocVocabulary } from "./UIDocsToc.en"
 import { TocIndex } from "./TocIndex"
+import { TocPreferences } from "./TocPreferences"
 import {
   DEFAULT_SIZE,
   type DocsTocVocabulary,
   type FollowedContent,
+  type TocAllFolds,
   type TocEntry,
+  type TocFolds,
   type TocSection
 } from "./UIDocsToc.types"
 
@@ -21,26 +25,36 @@ import tocCSS from "./UIDocsToc.css?inline"
  * (`ui vertical following fluid accordion text menu`, in the right rail).
  *
  * - Its shadow DOM:
- *   `<div class="ui [size] toc" part="toc">` holding an optional `<ui-header part="header">`
- *   and ONE `<ui-menu vertical text fluid part="menu">` (the landmark) of section links.
- *   Under the section in view, an item holds a `<ui-menu part="entries">` of its entries' links.
+ *   `<div class="ui [size] toc" part="toc">` holding a `<div part="head">` row (an optional `<ui-header part="header">`,
+ *   the expand all / collapse all `<button part="toggle-all">`)
+ *   and ONE `<ui-menu direction="vertical" appearance="text" fluid part="menu">` (the landmark) of section links.
+ *   - Each section is a `<div part="section-row">`:  its fold `<button part="fold">` (when it has entries), its link.
+ *   - Under an open section, an item holds a `<ui-menu part="entries">` of its entries' links.
+ * - Folds (Owen, 2026-10-25, r31:  "Make these TOCs expandable with a expandall/collapseall icon in the header"):
+ *   - a section the reader folded or opened by hand stays so (`handFolds`, kept per page)
+ *   - else what the header's toggle last did, on ANY page (`allFolds`, one for this browser)
+ *   - else `expanded`, else open while it's in view (P38's J128)
+ *   - kept through `TocPreferences`, read again on every connect:  a page move makes a new toc
  * - It lists the FOLLOWED content (`for`;  of a `<ui-tabs>`, its shown pane) by `TocIndex.scan()`:
  *   - level 2 headings and top-level `<ui-section>`s are sections;
  *     examples with a `header`, and level 3 headings, are their entries
  *   - what a `<ui-section>` nests (sections, examples, headings) are ITS entries, as deep as it goes,
  *     each level opening on the way to the entry in view
- *   - light DOM only.
+ *   - light DOM only, but for `<ui-docs-api only>`'s rows and tag headers, which its shadow root marks
+ *     (`TOC_SHADOW_HOSTS`, `TocIndex.shadowEntries()`):  every attribute, event ... under its section
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
  *   and its section opens;  `ui-scrolled-to { value }` when that changes.
  * - Links are plain `#id` links:  the browser scrolls (below the document's `scroll-padding-top`).
  *   - A hash naming an element in a HIDDEN pane of the followed tabs (a link from elsewhere, or a page opened on it)
  *     shows that pane first, then scrolls to it:  `<ui-tabs history>` ignores hashes that aren't pane values.
  * - It scans again when the tabs show another pane (`ui-opened`),
- *   and when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`).
+ *   when the followed content changes (a `MutationObserver`:  children, `header` / `level` / `id`),
+ *   and when a `TOC_SHADOW_HOSTS` element in it has drawn (`ui-drawn`):  the observer can't see into its shadow root.
  * - It re-follows when that content resizes
  *   (a `ResizeObserver`:  components drawing late move the headings without any scroll).
  * - SIDE EFFECTS:
  *   - gives each listed heading / example without an `id` one (a slug of its text), so its link works
+ *   - the reader's folds, in `localStorage` (`TocPreferences`)
  *   - while connected:  `window` `scroll` / `resize` / `hashchange` listeners, and the two observers.
  ****************/
 export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
@@ -82,14 +96,82 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
   }
 
   ////////////////
+  // ## Folds
+  ////////////////
+
+  /** The reader's own folds on this page, by section id (`TocPreferences.foldsFor()`). */
+  @E.state accessor handFolds: TocFolds = {}
+
+  /** What the header's toggle last did, on any page;  `undefined` until it's pressed. */
+  @E.state accessor allFolds: TocAllFolds | undefined = undefined
+
+  /** Is `section`'s list open?  The reader's own fold, else the toggle's, else `expanded`, else while it's in view. */
+  isSectionOpen(section: TocSection): boolean {
+    const own = this.handFolds[section.id]
+    if (own !== undefined) return own
+    if (this.allFolds) return this.allFolds === "expanded"
+    return !!this.expanded || this.pathInView.includes(section.id)
+  }
+
+  /** Does anything fold?  A section with entries:  then the header shows the toggle. */
+  get hasFolds(): boolean {
+    return this.sections.some((section) => section.entries.length)
+  }
+
+  /** Is every section with entries open?  The toggle then folds them all. */
+  get isAllOpen(): boolean {
+    return this.sections.every((section) => !section.entries.length || this.isSectionOpen(section))
+  }
+
+  /** Nested entries open all the way down:  the toggle's expand all, else `expanded`. */
+  private get isOpenAllTheWay(): boolean {
+    return this.allFolds ? this.allFolds === "expanded" : !!this.expanded
+  }
+
+  /** A section's chevron:  fold it if open, open it if folded;  kept for this page. */
+  @E.untracked
+  toggleSection(section: TocSection): void {
+    this.handFolds = { ...this.handFolds, [section.id]: !this.isSectionOpen(section) }
+    TocPreferences.setFoldsFor(this.path, this.handFolds)
+  }
+
+  /**
+   * The header's toggle:  every section open, or, once they all are, every one folded.
+   * - Kept for EVERY page, until pressed the other way;  this page's own folds are forgotten.
+   */
+  @E.untracked
+  toggleAll(): void {
+    this.allFolds = this.isAllOpen ? "collapsed" : "expanded"
+    this.handFolds = {}
+    TocPreferences.setAll(this.allFolds)
+    TocPreferences.setFoldsFor(this.path, {})
+  }
+
+  /** The page's path:  its folds are kept under it. */
+  private get path(): string {
+    return this.domElement.ownerDocument.defaultView?.location.pathname ?? ""
+  }
+
+  /** Read the kept folds:  this page's, and the toggle's. */
+  private loadFolds(): void {
+    this.handFolds = TocPreferences.foldsFor(this.path)
+    this.allFolds = TocPreferences.all()
+  }
+
+  ////////////////
   // ## Rendering
   ////////////////
 
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("toc")}>
-        <Show when={this.header}>
-          <ui-header part={this.partForName("header")}>{this.header}</ui-header>
+        <Show when={this.header || this.hasFolds}>
+          <div class={HEAD} part={this.partForName("head")}>
+            <Show when={this.header}>
+              <ui-header part={this.partForName("header")}>{this.header}</ui-header>
+            </Show>
+            <Show when={this.hasFolds}>{this.toggleAllButton()}</Show>
+          </div>
         </Show>
         <ui-menu
           part={this.partForName("menu")}
@@ -105,32 +187,87 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     )
   }
 
-  /** One section's link, and its entries while it's open. */
+  /** One section's row (its chevron, its link), and its entries while it's open. */
   private section(section: TocSection): JSX.Element {
+    const isOpen = () => !!section.entries.length && this.isSectionOpen(section)
     return (
       <>
-        <ui-item
-          part={this.partForName("section")}
-          class={SECTION}
-          href={`#${section.id}`}
-          selected={this.sectionIdInView === section.id ? "" : undefined}
-        >
-          {section.text}
-        </ui-item>
-        {this.entries(section)}
+        <div class={SECTION_ROW} part={this.partForName("section-row")}>
+          <Show when={section.entries.length}>{this.foldButton(section)}</Show>
+          <ui-item
+            part={this.partForName("section")}
+            class={SECTION}
+            href={`#${section.id}`}
+            selected={this.sectionIdInView === section.id ? "" : undefined}
+          >
+            {section.text}
+          </ui-item>
+        </div>
+        {this.entries(section, isOpen)}
       </>
     )
   }
 
   /**
-   * `parent`'s entries, while it's open (`expanded`, or on the way to the entry in view):
-   * a menu of their links, each followed by its own entries the same way (nested `<ui-section>`s).
+   * A section's fold chevron, left of its link:  a click folds or opens its entries (`toggleSection()`).
+   * - Named by the section's words;  its `aria-expanded` and tooltip as the fold stands.
+   * - Drawn here, not from an icon pack:  on screen in the first frame, the epic pages' chevron.
    */
-  private entries(parent: TocEntry): JSX.Element {
-    const isOpen = () => !!parent.entries.length && (!!this.expanded || this.pathInView.includes(parent.id))
+  private foldButton(section: TocSection): JSX.Element {
+    const isOpen = () => this.isSectionOpen(section)
+    const tip = () => this.translationForKey(isOpen() ? "foldSection" : "openSection", { section: section.text })
+    return (
+      <button
+        type="button"
+        class={FOLD}
+        part={this.partForName("fold")}
+        aria-label={section.text}
+        aria-expanded={isOpen() ? "true" : "false"}
+        title={tip()}
+        onClick={() => this.toggleSection(section)}
+      >
+        <svg class={CHEVRON} viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6 3.5 10.5 8 6 12.5" />
+        </svg>
+      </button>
+    )
+  }
+
+  /**
+   * The header's ONE expand all / collapse all button (`toggleAll()`):  the epic pages' double chevron,
+   * pointing down while it would open everything, up once everything is open.
+   */
+  private toggleAllButton(): JSX.Element {
+    const label = () => this.translationForKey(this.isAllOpen ? "collapseAll" : "expandAll")
+    return (
+      <button
+        type="button"
+        class={TOGGLE_ALL}
+        part={this.partForName("toggle-all")}
+        aria-label={label()}
+        title={label()}
+        aria-pressed={this.isAllOpen ? "true" : "false"}
+        onClick={() => this.toggleAll()}
+      >
+        <svg class={CHEVRONS} viewBox="0 0 16 16" aria-hidden="true">
+          <path d={this.isAllOpen ? COLLAPSE_ALL_PATH : EXPAND_ALL_PATH} />
+        </svg>
+      </button>
+    )
+  }
+
+  /**
+   * `parent`'s entries, while it's open (`isOpen`:  a section's own fold;  an entry's, `isOpenAllTheWay`, or on the
+   * way to the entry in view):  a menu of their links, each followed by its own entries the same way
+   * (nested `<ui-section>`s).
+   */
+  private entries(parent: TocEntry, isFoldOpen?: () => boolean): JSX.Element {
+    const isOpen = () =>
+      !!parent.entries.length &&
+      (isFoldOpen ? isFoldOpen() : this.isOpenAllTheWay || this.pathInView.includes(parent.id))
     return (
       <Show when={isOpen()}>
-        <ui-item class={ENTRIES} fitted="vertically">
+        <ui-item class={ENTRIES} padding="none-y">
           <ui-menu part={this.partForName("entries")} vertical="" text="" fluid="" size={this.menuSize}>
             <For each={parent.entries}>
               {(entry) => (
@@ -181,9 +318,13 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const resized = new ResizeObserver(() => this.schedule("follow"))
     const onScroll = () => this.schedule("follow")
     const onShow = () => this.schedule("rescan")
+    const onDrawn = (event: Event) => {
+      if ((event.target as Element).matches?.(TOC_SHADOW_HOSTS)) this.schedule("rescan")
+    }
     const onHash = () => this.reveal("hash change")
+    this.loadFolds()
     let followed: FollowedContent | undefined
-    const start = () => (followed = this.observe({ observer, resized, onShow }))
+    const start = () => (followed = this.observe({ observer, resized, onShow, onDrawn }))
     view.addEventListener("scroll", onScroll, { passive: true })
     view.addEventListener("resize", onScroll, { passive: true })
     view.addEventListener("hashchange", onHash)
@@ -194,6 +335,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
       observer.disconnect()
       resized.disconnect()
       followed?.tabs?.removeEventListener(UI_SHOW, onShow)
+      followed?.root.removeEventListener(UI_DRAWN, onDrawn)
       document.removeEventListener("DOMContentLoaded", start)
       view.removeEventListener("scroll", onScroll)
       view.removeEventListener("resize", onScroll)
@@ -207,7 +349,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
    * Follow what `for` names, once it exists:  observe it, hear its tabs show a pane, scan it, land on the hash.
    * - Returns what it follows (`watch()` undoes the tabs' listener), or `undefined` while it doesn't exist.
    */
-  private observe({ observer, resized, onShow }: Observers): FollowedContent | undefined {
+  private observe({ observer, resized, onShow, onDrawn }: Observers): FollowedContent | undefined {
     const followed = this.followedContent()
     if (!followed) return undefined
     observer.observe(followed.root, {
@@ -218,6 +360,7 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     })
     resized.observe(followed.root)
     followed.tabs?.addEventListener(UI_SHOW, onShow)
+    followed.root.addEventListener(UI_DRAWN, onDrawn)
     this.rescan()
     this.reveal("page load")
     return followed
@@ -268,10 +411,10 @@ export class UIDocsToc extends E.UIComponent<DocsTocVocabulary> {
     const document = this.domElement.ownerDocument
     const hash = document.defaultView!.location.hash.slice(1)
     if (!hash) return
-    const target = document.getElementById(TocIndex.decode(hash))
+    const target = TocIndex.elementById(document, TocIndex.decode(hash))
     if (!target) return
     const tabs = this.followedContent()?.tabs
-    const pane = tabs && TocIndex.paneOf(tabs, target)
+    const pane = tabs && TocIndex.paneOf(tabs, TocIndex.lightElementOf(target))
     const scroll = () => target.scrollIntoView({ block: "start" })
     const isPageLoad = moment === "page load"
     if (tabs && pane && TocIndex.shownPane(tabs) !== pane) {
@@ -310,6 +453,8 @@ type Observers = {
   resized: ResizeObserver
   /** rescans when the tabs show another pane */
   onShow: () => void
+  /** rescans when a `TOC_SHADOW_HOSTS` element has drawn its entries */
+  onDrawn: (event: Event) => void
 }
 
 /** The attributes whose changes rescan:  a section's title, a heading's level, an id. */
@@ -318,8 +463,35 @@ const OBSERVED_ATTRIBUTES = ["header", "level", "id"]
 /** `<ui-tabs>`' event as it shows another pane. */
 const UI_SHOW = "ui-opened"
 
+/** A docs element's event once it has drawn:  a `TOC_SHADOW_HOSTS` element's entries are in. */
+const UI_DRAWN = "ui-drawn"
+
 /** Class word of a section's link item. */
 const SECTION = "section"
 
 /** Class word of the item holding a section's entries. */
 const ENTRIES = "entries"
+
+/** Class of the row above the links:  the title and the toggle. */
+const HEAD = "head"
+
+/** Class of a section's row:  its fold button and its link. */
+const SECTION_ROW = "section-row"
+
+/** Class of a section's fold button. */
+const FOLD = "fold"
+
+/** Class of the fold chevron. */
+const CHEVRON = "chevron"
+
+/** Class of the header's expand all / collapse all button. */
+const TOGGLE_ALL = "toggle-all"
+
+/** Class of its double chevron. */
+const CHEVRONS = "chevrons"
+
+/** The toggle's double chevron, pointing down:  expand all. */
+const EXPAND_ALL_PATH = "M4 3.5 8 7.5 12 3.5M4 7.5 8 11.5 12 7.5"
+
+/** ... pointing up:  collapse all. */
+const COLLAPSE_ALL_PATH = "M4 8.5 8 4.5 12 8.5M4 12.5 8 8.5 12 12.5"

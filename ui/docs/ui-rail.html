@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Rail">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-rail%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-rail%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/rail.html"
+              link="https://fomantic-ui.com/elements/rail.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -56,7 +56,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's rail page, section by section, in its order (Types, Variations).
@@ -96,7 +96,7 @@
 
               <ui-section id="examples-types-internal" label="Internal" sticky collapsible dividing>
                 <ui-docs-example description="A rail can attach itself to the inside of a container.">
-                  <ui-segment padded="very">
+                  <ui-segment padding="lg">
                     <ui-rail position="left" internal><ui-segment>Left Rail Content</ui-segment></ui-rail>
                     <ui-rail position="right" internal><ui-segment>Right Rail Content</ui-segment></ui-rail>
                   </ui-segment>
@@ -133,7 +133,7 @@
                   <ui-grid>
                     <ui-column width="8" floated="right">
                       <ui-segment>
-                        <ui-rail position="left" attached><ui-segment>Left Rail Content</ui-segment></ui-rail>
+                        <ui-rail position="left" attach="both"><ui-segment>Left Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
@@ -143,16 +143,16 @@
                   <ui-grid>
                     <ui-column width="8">
                       <ui-segment>
-                        <ui-rail position="right" attached><ui-segment>Right Rail Content</ui-segment></ui-rail>
+                        <ui-rail position="right" attach="both"><ui-segment>Right Rail Content</ui-segment></ui-rail>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                       </ui-segment>
                     </ui-column>
                   </ui-grid>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-segment padded="very">
-                    <ui-rail position="left" internal attached><ui-segment>Left Rail Content</ui-segment></ui-rail>
-                    <ui-rail position="right" internal attached><ui-segment>Right Rail Content</ui-segment></ui-rail>
+                  <ui-segment padding="lg">
+                    <ui-rail position="left" internal attach="both"><ui-segment>Left Rail Content</ui-segment></ui-rail>
+                    <ui-rail position="right" internal attach="both"><ui-segment>Right Rail Content</ui-segment></ui-rail>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -270,7 +270,7 @@
                   <ui-container text class="article">
                     <ui-rail position="right">
                       <ui-sticky offset="64">
-                        <ui-menu vertical>...</ui-menu>
+                        <ui-menu direction="vertical">...</ui-menu>
                       </ui-sticky>
                     </ui-rail>
                     <p>The article ...</p>
@@ -305,7 +305,21 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-rail"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-rail" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-rail" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-rail" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-rail" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

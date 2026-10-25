@@ -41,7 +41,7 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
       type: isRadio ? "radio" : "checkbox",
       disabled: this.flag("disabled"),
       required: this.flag("required"),
-      role: !isRadio && this.attr("type") ? "switch" : undefined
+      role: !isRadio && this.look ? "switch" : undefined
     })
     this.decorate(input, "control")
     input.checked = domElement.selected ?? (this.flag("selected") || domElement.hasAttribute("checked"))
@@ -49,7 +49,7 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
     const label = this.create("label", { for: id, part: LABEL_PART }, this.slot(this.attr("label")))
     const root = this.create("div", { class: this.classes(), part: ROOT_PART }, input, label)
     // a radio without a `slider` / `toggle` look says `radio` before its noun, as the component does
-    if (isRadio && !this.attr("type")) root.className = root.className.replace(NOUN_AT_END, " radio checkbox")
+    if (isRadio && !this.look) root.className = root.className.replace(NOUN_AT_END, " radio checkbox")
     this.listen(input, "click", (event) => {
       if (this.flag("readonly")) event.preventDefault()
     })
@@ -102,7 +102,15 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
    * - Static:  page-wide, so two fallbacks never share an id.
    */
   private static counter = 0
+
+  /** The `appearance` (`toggle`, `slider`), or `type`, its old name. */
+  private get look(): string | undefined {
+    return this.attr("appearance") ?? this.domElement.getAttribute(OLD_LOOK) ?? undefined
+  }
 }
+
+/** `appearance`'s old name on a checkbox or radio (epic `ui-gaps` P4). */
+const OLD_LOOK = "type"
 
 /**
  * What the fallback reads and writes of the DOM element (`DOMCheckElement`).

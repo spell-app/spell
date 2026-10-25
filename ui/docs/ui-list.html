@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="List">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-list%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-list%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/list.html"
+              link="https://fomantic-ui.com/elements/list.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's list page, section by section, in its order (Types, Content, Variations, Content
@@ -89,7 +89,7 @@
 
                 <!-- GAP I89:  linked headers (`<ui-header href>`) in list items draw underlined, as on the rest of this page. -->
                 <ui-docs-example>
-                  <ui-list relaxed divided vertical-align="middle">
+                  <ui-list spacing="lg" divided vertical-align="middle">
                     <ui-item>
                       <ui-icon slot="icon" name="github" size="large"></ui-icon>
                       <ui-content>
@@ -188,7 +188,7 @@
                     <ui-item>
                       Benefits
                       <ui-list>
-                        <ui-item href="#list">Link to somewhere</ui-item>
+                        <ui-item link="#list">Link to somewhere</ui-item>
                         <ui-item>Rebates</ui-item>
                         <ui-item>Discounts</ui-item>
                       </ui-list>
@@ -205,10 +205,10 @@
               >
 
               <ui-docs-example>
-                <ui-list horizontal bulleted>
-                  <ui-item href="#list">About Us</ui-item>
-                  <ui-item href="#list">Sitemap</ui-item>
-                  <ui-item href="#list">Contact</ui-item>
+                <ui-list direction="horizontal" bulleted>
+                  <ui-item link="#list">About Us</ui-item>
+                  <ui-item link="#list">Sitemap</ui-item>
+                  <ui-item link="#list">Contact</ui-item>
                 </ui-list>
               </ui-docs-example>
 
@@ -217,17 +217,17 @@
                   description="A list can be ordered numerically.  Sub lists continue the numbering (`3.1`)."
                 >
                   <ui-list ordered>
-                    <ui-item href="#list">Getting Started</ui-item>
-                    <ui-item href="#list">Introduction</ui-item>
+                    <ui-item link="#list">Getting Started</ui-item>
+                    <ui-item link="#list">Introduction</ui-item>
                     <ui-item>
                       <a href="#list">Languages</a>
                       <ui-list>
-                        <ui-item href="#list">HTML</ui-item>
-                        <ui-item href="#list">Javascript</ui-item>
-                        <ui-item href="#list">CSS</ui-item>
+                        <ui-item link="#list">HTML</ui-item>
+                        <ui-item link="#list">Javascript</ui-item>
+                        <ui-item link="#list">CSS</ui-item>
                       </ui-list>
                     </ui-item>
-                    <ui-item href="#list">Review</ui-item>
+                    <ui-item link="#list">Review</ui-item>
                   </ui-list>
                 </ui-docs-example>
 
@@ -268,11 +268,11 @@
                 <ui-docs-example
                   description="A list can be specially formatted for navigation links:  the `selected` (or `active`) item is the current page."
                 >
-                  <ui-list link>
+                  <ui-list appearance="link">
                     <ui-item active>Home</ui-item>
-                    <ui-item href="#list">About</ui-item>
-                    <ui-item href="#list">Jobs</ui-item>
-                    <ui-item href="#list">Team</ui-item>
+                    <ui-item link="#list">About</ui-item>
+                    <ui-item link="#list">Jobs</ui-item>
+                    <ui-item link="#list">Team</ui-item>
                   </ui-list>
                 </ui-docs-example>
               </ui-section>
@@ -292,7 +292,7 @@
               <ui-section id="examples-content-icon" label="Icon" sticky collapsible dividing>
                 <ui-docs-example description="A list item can contain an icon.">
                   <ui-list>
-                    <ui-item href="#list" icon="help">
+                    <ui-item link="#list" icon="help">
                       <ui-content>
                         <ui-header>Floated Icon</ui-header>
                         <ui-description
@@ -301,7 +301,7 @@
                         >
                       </ui-content>
                     </ui-item>
-                    <ui-item href="#list" icon="caret right">
+                    <ui-item link="#list" icon="caret right">
                       <ui-content>
                         <ui-header>Icon Alignment</ui-header>
                         <ui-description
@@ -363,11 +363,11 @@
               </ui-section>
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example description="A list can contain links:  with `href` an item renders a real link.">
+                <ui-docs-example description="A list can contain links:  with a `link` an item renders a real link.">
                   <ui-list>
-                    <ui-item href="#list">What is a FAQ?</ui-item>
-                    <ui-item href="#list">Who is our user?</ui-item>
-                    <ui-item href="#list">Where is our office located?</ui-item>
+                    <ui-item link="#list">What is a FAQ?</ui-item>
+                    <ui-item link="#list">Who is our user?</ui-item>
+                    <ui-item link="#list">Where is our office located?</ui-item>
                   </ui-list>
                 </ui-docs-example>
 
@@ -450,20 +450,20 @@
                 <ui-docs-example
                   description="A list item can be active:  `selected` is the attribute;  Fomantic's `active` works too."
                 >
-                  <ui-list link>
-                    <ui-item href="#list">Home</ui-item>
-                    <ui-item selected href="#list">About</ui-item>
-                    <ui-item href="#list">Jobs</ui-item>
+                  <ui-list appearance="link">
+                    <ui-item link="#list">Home</ui-item>
+                    <ui-item selected link="#list">About</ui-item>
+                    <ui-item link="#list">Jobs</ui-item>
                   </ui-list>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
                 <ui-docs-example description="A list item can be disabled:  it can't be followed or chosen.">
-                  <ui-list horizontal>
-                    <ui-item disabled href="#list">Disabled</ui-item>
-                    <ui-item href="#list">Terms</ui-item>
-                    <ui-item href="#list">Privacy</ui-item>
+                  <ui-list direction="horizontal">
+                    <ui-item disabled link="#list">Disabled</ui-item>
+                    <ui-item link="#list">Terms</ui-item>
+                    <ui-item link="#list">Privacy</ui-item>
                   </ui-list>
                 </ui-docs-example>
               </ui-section>
@@ -472,7 +472,7 @@
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-horizontal" label="Horizontal" sticky collapsible dividing>
                 <ui-docs-example description="A list can be formatted to have items appear horizontally.">
-                  <ui-list horizontal>
+                  <ui-list direction="horizontal">
                     <ui-item image="../images/avatar/small/tom.jpg">
                       <ui-content>
                         <ui-header>Tom</ui-header>
@@ -495,7 +495,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list ordered horizontal>
+                  <ui-list ordered direction="horizontal">
                     <ui-item image="../images/avatar/small/tom.jpg">
                       <ui-content>
                         <ui-header>Steve Jobes</ui-header>
@@ -518,10 +518,10 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list horizontal bulleted link>
-                    <ui-item href="#list">Terms and Conditions</ui-item>
-                    <ui-item href="#list">Privacy Policy</ui-item>
-                    <ui-item href="#list">Contact Us</ui-item>
+                  <ui-list direction="horizontal" bulleted appearance="link">
+                    <ui-item link="#list">Terms and Conditions</ui-item>
+                    <ui-item link="#list">Privacy Policy</ui-item>
+                    <ui-item link="#list">Contact Us</ui-item>
                   </ui-list>
                 </ui-docs-example>
               </ui-section>
@@ -529,7 +529,7 @@
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
                 <ui-docs-example description="A list can be inverted to appear on a dark background.">
                   <ui-segment inverted>
-                    <ui-list inverted relaxed divided>
+                    <ui-list inverted spacing="lg" divided>
                       <ui-item>
                         <ui-content>
                           <ui-header>Snickerdoodle</ui-header>
@@ -577,9 +577,9 @@
                 </ui-docs-example>
 
                 <ui-docs-example
-                  description="`fitted` drops the items' side padding, so the hover background reaches past the list's edges."
+                  description="`padding=&quot;none&quot;` drops the items' side padding, so the hover background reaches past the list's edges."
                 >
-                  <ui-list fitted selection>
+                  <ui-list padding="none" selection>
                     <ui-item>Inbox</ui-item>
                     <ui-item>Starred</ui-item>
                     <ui-item>Sent</ui-item>
@@ -593,7 +593,7 @@
                     >Be sure content can fit on one line when using the animated variation, otherwise text content will
                     reflow when hovered.</ui-message
                   >
-                  <ui-list animated vertical-align="middle">
+                  <ui-list hover="indent" vertical-align="middle">
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -615,9 +615,9 @@
 
               <ui-section id="examples-variations-relaxed" label="Relaxed" sticky collapsible dividing>
                 <ui-docs-example
-                  description='A list can relax its padding to provide more negative space:  `relaxed`, or `relaxed="very"`.'
+                  description='A list can relax its padding to provide more negative space:  `spacing="lg"`, or `spacing="xl"`.'
                 >
-                  <ui-list relaxed>
+                  <ui-list spacing="lg">
                     <ui-item image="../images/avatar/small/daniel.jpg">
                       <ui-content>
                         <ui-header link="#list">Daniel Louise</ui-header>
@@ -646,7 +646,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list relaxed horizontal>
+                  <ui-list spacing="lg" direction="horizontal">
                     <ui-item image="../images/avatar/small/daniel.jpg">
                       <ui-content>
                         <ui-header link="#list">Daniel Louise</ui-header>
@@ -666,7 +666,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list relaxed="very">
+                  <ui-list spacing="xl">
                     <ui-item image="../images/avatar/small/daniel.jpg">
                       <ui-content>
                         <ui-header link="#list">Daniel Louise</ui-header>
@@ -695,7 +695,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list relaxed="very" horizontal>
+                  <ui-list spacing="xl" direction="horizontal">
                     <ui-item image="../images/avatar/small/daniel.jpg">
                       <ui-content>
                         <ui-header link="#list">Daniel Louise</ui-header>
@@ -777,7 +777,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list celled horizontal>
+                  <ui-list celled direction="horizontal">
                     <ui-item>About Us</ui-item>
                     <ui-item>Contact</ui-item>
                     <ui-item>Support</ui-item>
@@ -787,7 +787,7 @@
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
                 <ui-docs-example description="A list can vary in size.">
-                  <ui-list size="mini" horizontal divided>
+                  <ui-list size="mini" direction="horizontal" divided>
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -807,7 +807,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="tiny" horizontal>
+                  <ui-list size="tiny" direction="horizontal">
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -827,7 +827,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="small" horizontal>
+                  <ui-list size="small" direction="horizontal">
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -847,7 +847,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="large" horizontal divided>
+                  <ui-list size="large" direction="horizontal" divided>
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -867,7 +867,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="big" horizontal divided>
+                  <ui-list size="big" direction="horizontal" divided>
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -887,7 +887,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="huge" horizontal divided>
+                  <ui-list size="huge" direction="horizontal" divided>
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -907,7 +907,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list size="massive" horizontal divided>
+                  <ui-list size="massive" direction="horizontal" divided>
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content>
                         <ui-header>Helen</ui-header>
@@ -939,7 +939,7 @@
                 <ui-docs-example
                   description="An element inside a list can be vertically aligned:  `vertical-align` on a `<ui-content>` (or on the whole list)."
                 >
-                  <ui-list horizontal>
+                  <ui-list direction="horizontal">
                     <ui-item image="../images/avatar/small/helen.jpg">
                       <ui-content vertical-align="top">Top Aligned</ui-content>
                     </ui-item>
@@ -984,15 +984,15 @@
                 </ui-docs-example>
 
                 <ui-docs-example>
-                  <ui-list floated="right" horizontal>
+                  <ui-list floated="right" direction="horizontal">
                     <ui-item disabled>&copy; GitHub, Inc.</ui-item>
-                    <ui-item href="#list">Terms</ui-item>
-                    <ui-item href="#list">Privacy</ui-item>
-                    <ui-item href="#list">Contact</ui-item>
+                    <ui-item link="#list">Terms</ui-item>
+                    <ui-item link="#list">Privacy</ui-item>
+                    <ui-item link="#list">Contact</ui-item>
                   </ui-list>
-                  <ui-list horizontal>
-                    <ui-item href="#list">About Us</ui-item>
-                    <ui-item href="#list">Jobs</ui-item>
+                  <ui-list direction="horizontal">
+                    <ui-item link="#list">About Us</ui-item>
+                    <ui-item link="#list">Jobs</ui-item>
                   </ui-list>
                 </ui-docs-example>
               </ui-section>
@@ -1007,7 +1007,7 @@
                   A list's children are the one generic `<ui-item>`: the list tells each item how to render, so there is no
                   `ui-list-item`.
 
-                  - An item with `href` is a real link; in a `selection` list every item is a `<button>`; otherwise an item is a
+                  - An item with a `link` is a real link; in a `selection` list every item is a `<button>`; otherwise an item is a
                     plain block that can hold anything.
                   - `icon` and `image` are shorthands for the item's icon and avatar; a `<ui-content>` holds a `<ui-header>` and a
                     `<ui-description>`.
@@ -1055,7 +1055,7 @@
                 <script type="text/markdown">
                   - The shadow root holds a real `<ul>` (`<ol>` when `ordered`) with an explicit `role="list"`, since Safari drops
                     list semantics from unstyled lists. Each `<ui-item>` is a `listitem`.
-                  - Items with `href` are real links; the `selected` one gets `aria-current="page"`. In a `selection` list the items
+                  - Items with a `link` are real links; the `selected` one gets `aria-current="page"`. In a `selection` list the items
                     are `<button>`s and the selected one gets `aria-current="true"`.
                   - `disabled` removes a link's `href` (and sets `aria-disabled`), or disables a button.
                   - An item holding only an icon or image needs a name: put `aria-label` on the `<ui-item>`. The `image` shorthand
@@ -1099,7 +1099,25 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-list"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-list" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-list" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-list" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-list" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-list" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -1112,7 +1130,7 @@
 
                   - The items (and a nested list's items, through the `--ui-list-child-*` tokens) read them from the list, so set
                     them there or above, not on an item.
-                  - A variation (`relaxed`, `celled` ...) swaps its own values in over yours.
+                  - A variation (`spacing`, `celled` ...) swaps its own values in over yours.
                   - Style an item's box with `ui-item::part(item)`.
                 </script>
               </ui-markdown>

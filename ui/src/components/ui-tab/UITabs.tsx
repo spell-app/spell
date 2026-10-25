@@ -5,7 +5,7 @@ import { E, UI, UIT } from "spell-ui/core"
 import { tabsVocabulary } from "./UITabs.en"
 import { tabVocabulary } from "./UITab.en"
 import { UITab } from "./UITab"
-import { MENU, type TabOwner, type TabPaneState } from "./UITab.types"
+import { BASIC, MENU, type TabOwner, type TabPaneState } from "./UITab.types"
 // The menu family's, beside its sheet (below):  the tab list draws a segmented menu's thumb
 import { SegmentedThumb } from "spell-ui/components/ui-menu/SegmentedThumb"
 
@@ -27,8 +27,8 @@ import tabCSS from "./UITab.css?inline"
  * - The tab list is drawn from the panes' `label` / `icon` in THIS shadow root,
  *   styled by `UIMenu.css` (adopted as is:  the static `.ui.menu .item` rules).
  *   So the look words are the menu's, one class grammar, no second copy of the menu sheet:
- *   `appearance` (or the boolean aliases `tabular`, `pointing secondary`, `text`),
- *   `vertical`, `inverted`, `alignment`, `equal`, sizes, colours.
+ *   `appearance` (its old names the booleans `tabular`, `pointing secondary`, `text`),
+ *   `direction`, `inverted`, `align`, `equal`, sizes, colours.
  * - The owner of the panes (`ownsParts:  tab`, `TabOwner`):  each asks `paneState()` whether it shows,
  *   which edge it joins, and how it looks.
  * - Selection:  `value` is controlled.
@@ -36,7 +36,7 @@ import tabCSS from "./UITab.css?inline"
  *   - Without a `value`:  the first `selected` pane, else the first enabled one;
  *     a `value` that names no pane falls back the same way.
  * - Keyboard (APG):  ONE Tab stop, the selected tab (`UI.focus.roving`);
- *   ArrowLeft / ArrowRight (ArrowUp / ArrowDown when `vertical`), Home, End;  disabled tabs are skipped.
+ *   ArrowLeft / ArrowRight (ArrowUp / ArrowDown when vertical), Home, End;  disabled tabs are skipped.
  *   - `activation="manual"`:  the arrows move focus only, Enter / Space select;
  *     focus coming back to the list lands on the selected tab.
  * - ARIA:
@@ -125,7 +125,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return {
       selected: index >= 0 && this.values[index] === this.displayedValue,
       attached: edge ? (edge === UIT.TOP ? UIT.BOTTOM : UIT.TOP) : undefined,
-      basic: this.basic,
+      basic: this.hasLook(BASIC),
       inverted: this.inverted
     }
   }
@@ -233,22 +233,37 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   // ## The tab list
   ////////////////
 
-  /** In a column:  `:state(vertical)`. */
+  /** In a column (`direction="vertical"`):  `:state(vertical)`. */
   @E.cssState("vertical")
   get isVertical(): boolean {
-    return !!this.vertical
+    return this.direction === VERTICAL
   }
 
-  /** The tab list's edge:  `top` / `bottom` when `attached` (bare ~== `top`);  never while `vertical`. */
+  /** `appearance` holds `word` (`segmented`, `basic` ...):  it takes several at once. */
+  hasLook(word: string): boolean {
+    return String(this.appearance ?? "")
+      .split(" ")
+      .includes(word)
+  }
+
+  /** The tab list's look:  `appearance` without the panes' `basic`. */
+  private get menuAppearance(): string | undefined {
+    const words = String(this.appearance ?? "")
+      .split(" ")
+      .filter((word) => word && word !== BASIC)
+    return words.join(" ") || undefined
+  }
+
+  /** The tab list's edge:  `top` / `bottom` when `attach` says;  never while vertical. */
   get menuEdge(): MenuEdge | undefined {
-    const attached = this.attached
-    if (!attached || this.vertical) return undefined
-    return attached === UIT.BOTTOM ? UIT.BOTTOM : UIT.TOP
+    const attach = this.attach
+    if (!attach || this.isVertical) return undefined
+    return attach === UIT.BOTTOM ? UIT.BOTTOM : UIT.TOP
   }
 
-  /** Where the tabs sit (`alignment`);  none while `vertical`, whose tabs fill their column. */
+  /** Where the tabs sit (`align`);  none while vertical, whose tabs fill their column. */
   get menuAlignment() {
-    return this.vertical ? undefined : this.alignment
+    return this.isVertical ? undefined : this.align
   }
 
   /** Tab list classes:  the look words with the noun `menu`. */
@@ -257,24 +272,20 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return this.menuClassBuilder.build({
       size: this.size,
       color: this.color,
-      appearance: this.appearance,
-      tabular: this.tabular,
-      pointing: this.pointing,
-      secondary: this.secondary,
-      text: this.text,
+      appearance: this.menuAppearance,
       inverted: this.inverted,
-      vertical: this.vertical,
+      direction: this.direction,
       fluid: this.fluid,
-      compact: this.compact,
+      padding: this.padding,
       equal: this.equal,
-      alignment: this.menuAlignment,
-      attached: this.menuEdge
+      align: this.menuAlignment,
+      attach: this.menuEdge
     })
   }
 
   protected classValue(name: E.AttributeName<typeof tabsVocabulary>): unknown {
-    if (name === "attached") return this.menuEdge
-    if (name === "alignment") return this.menuAlignment
+    if (name === "attach") return this.menuEdge
+    if (name === "align") return this.menuAlignment
     return super.classValue(name)
   }
 
@@ -305,7 +316,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
 
   /** A `segmented` tab list, rendered and connected:  it draws a sliding thumb, as `<ui-menu>` does. */
   get hasThumb(): boolean {
-    return this.appearance === SEGMENTED && this.isReady && this.isConnected
+    return this.hasLook(SEGMENTED) && this.isReady && this.isConnected
   }
 
   /** SIDE EFFECT:  the thumb, drawn on the tab list while `hasThumb`;  its cleanup takes it down. */
@@ -359,7 +370,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     this.rovingTabindex = UI.focus.roving({
       container: bar,
       items: () => this.buttons(),
-      orientation: this.vertical ? "vertical" : "horizontal",
+      orientation: this.isVertical ? "vertical" : "horizontal",
       activeIndex: Math.max(0, this.selectedIndex),
       onChange: (_item, index) => this.onRovingChange(index)
     })
@@ -445,7 +456,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
         part={this.partForName("menu")}
         role="tablist"
         aria-label={this.attributes["aria-label"] ?? undefined}
-        aria-orientation={this.vertical ? "vertical" : undefined}
+        aria-orientation={this.isVertical ? "vertical" : undefined}
         onFocusOut={this.onFocusOut}
       >
         <For each={this.tabs}>{(pane, index) => this.tab(pane, index)}</For>
@@ -543,6 +554,9 @@ const HISTORY_EVENTS = ["hashchange", "popstate"] as const
 
 /** The `appearance` of a tab list drawn as a segmented control:  it has a sliding thumb. */
 const SEGMENTED: UIT.MenuAppearance = "segmented"
+
+/** The `direction` of tabs stacked in a column. */
+const VERTICAL = "vertical"
 
 /** A value no pane has. */
 const NO_VALUE = "\u0000"

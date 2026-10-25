@@ -58,7 +58,7 @@ export class StaticFamilies {
     "ui-grid": ["UIGrid", "UIRow", "UIColumn"],
     "ui-statistic": ["UIStatistic", "UIStatistics"],
     "ui-step": ["UIStep", "UISteps"],
-    "ui-breadcrumb": ["UIBreadcrumb", "UIBreadcrumbSection"],
+    "ui-breadcrumbs": ["UIBreadcrumbs", "UIBreadcrumb"],
     "ui-message": ["UIMessage"],
     "ui-progress": ["UIProgress"],
     "ui-nag": ["UINag"],

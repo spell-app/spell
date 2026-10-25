@@ -43,7 +43,7 @@ describe("<ui-menu> static render", () => {
     expect(sorted(html)).toBe(
       sorted(
         `<div class="ui vertical menu" part="menu" role="menubar" aria-orientation="vertical" ` +
-          `aria-label="Actions" data-ui="menu" data-state="interactive vertical">` +
+          `aria-label="Actions" data-ui="menu" data-state="vertical interactive">` +
           `<button class="item in-menu" part="item" type="button" role="menuitem" data-ui="item" ` +
           `data-state="in-menu" data-ui-slotted="">Cut</button>` +
           `<button class="disabled item in-menu" part="item" type="button" role="menuitem" aria-disabled="true" ` +

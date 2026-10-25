@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Form">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-form%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-form%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/behaviors/form.html"
+              link="https://fomantic-ui.com/behaviors/form.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's form page, section by section, in its order (Types, Content, Form States, Field States, Form
@@ -260,7 +260,7 @@
                       </ui-field>
                       <ui-segment>
                         <ui-field>
-                          <ui-checkbox type="toggle" name="gift">Do not include a receipt in the package</ui-checkbox>
+                          <ui-checkbox appearance="toggle" name="gift">Do not include a receipt in the package</ui-checkbox>
                         </ui-field>
                       </ui-segment>
                       <ui-button type="submit">Submit Order</ui-button>
@@ -308,7 +308,7 @@
                   <ui-form>
                     <form method="dialog">
                       <ui-field label="Accent colour" output="#6550CA">
-                        <ui-button slot="actions" size="mini" basic>Reset</ui-button>
+                        <ui-button slot="actions" size="mini" appearance="basic">Reset</ui-button>
                         <ui-input value="#6550CA"></ui-input>
                       </ui-field>
                     </form>
@@ -434,10 +434,10 @@
                         <ui-checkbox>Checkbox</ui-checkbox>
                       </ui-field>
                       <ui-field inline>
-                        <ui-checkbox type="slider">Slider</ui-checkbox>
+                        <ui-checkbox appearance="slider">Slider</ui-checkbox>
                       </ui-field>
                       <ui-field inline>
-                        <ui-checkbox type="toggle">Toggle</ui-checkbox>
+                        <ui-checkbox appearance="toggle">Toggle</ui-checkbox>
                       </ui-field>
                     </form>
                   </ui-form>
@@ -1165,7 +1165,7 @@
                         <label for="form-description-78">Description</label>
                         <ui-textarea
                           id="form-description-78"
-                          transparent
+                          appearance="transparent"
                           placeholder="Transparent textarea"
                           rows="3"
                         ></ui-textarea>
@@ -1347,7 +1347,7 @@
                         <ui-input id="email" name="email" type="email" required></ui-input>
                       </ui-field>
                       <ui-message state="error" heading="Please check the form"></ui-message>
-                      <ui-button type="submit" primary>Subscribe</ui-button>
+                      <ui-button type="submit" color="primary">Subscribe</ui-button>
                     </form>
                   </ui-form>
                 </script>
@@ -1420,7 +1420,7 @@
                         <ui-checkbox name="terms" required>I agree to the terms</ui-checkbox>
                       </ui-field>
                       <ui-message state="error" heading="Please fix the fields above"></ui-message>
-                      <ui-button type="submit" primary>Sign up</ui-button>
+                      <ui-button type="submit" color="primary">Sign up</ui-button>
                     </form>
                   </ui-form>
                 </ui-docs-example>
@@ -1546,7 +1546,7 @@
                     <form method="dialog">
                       <ui-field label="Name"><ui-input name="name"></ui-input></ui-field>
                       <ui-field label="Role"><ui-input name="role"></ui-input></ui-field>
-                      <ui-button primary type="button" onclick="this.closest('ui-form').save()">Save</ui-button>
+                      <ui-button type="button" onclick="this.closest('ui-form').save()" color="primary">Save</ui-button>
                       <ui-button type="button" onclick="this.closest('ui-form').cancel()">Cancel</ui-button>
                     </form>
                   </ui-form>
@@ -1741,7 +1741,37 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-form"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-form" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

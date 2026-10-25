@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Grammar">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=Grammar%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Grammar%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -57,7 +57,7 @@
           <ui-markdown>
             <script type="text/markdown">
               Every `ui-*` element renders SEMANTIC shadow markup that carries Fomantic's class grammar:
-              `<ui-button size="small" primary basic>` renders `<button class="ui small basic primary button">`
+              `<ui-button size="small" color="primary" appearance="basic">` renders `<button class="ui small basic primary button">`
               inside its shadow root. `ClassBuilder` writes the class string, driven by each component's
               vocabulary file, which lists every attribute, its kind and its values.
 
@@ -97,7 +97,7 @@
             </ui-markdown>
             <ui-section id="shape-all-at-once" label="All at Once" sticky collapsible dividing>
               <ui-docs-example description="`size`, two key-only words and the noun:  `ui small basic primary button`.">
-                <ui-button size="small" primary basic>Save</ui-button>
+                <ui-button size="small" color="primary" appearance="basic">Save</ui-button>
               </ui-docs-example>
               <ui-docs-example>
                 <p slot="description">
@@ -105,10 +105,10 @@
                   <code>ui left labeled right floated button icon</code> (<code>icon</code> is an extra class, after the
                   noun). Fomantic needs <code>left labeled right floated</code> spelled exactly so.
                 </p>
-                <ui-segment basic clearing>
+                <ui-segment clearing appearance="basic">
                   <ui-button labeled="left" floated="right" icon="pause">Pause</ui-button>
                 </ui-segment>
-                <ui-segment basic clearing>
+                <ui-segment clearing appearance="basic">
                   <ui-button floated="right" icon="pause" labeled="left">Pause</ui-button>
                 </ui-segment>
               </ui-docs-example>
@@ -171,8 +171,8 @@
               <ui-docs-example
                 description="A bare boolean emits its key.  `basic` => `ui basic button`.  `raised` => `ui raised segment`."
               >
-                <ui-button basic>basic</ui-button>
-                <ui-segment raised>raised</ui-segment>
+                <ui-button appearance="basic">basic</ui-button>
+                <ui-segment appearance="raised">raised</ui-segment>
               </ui-docs-example>
             </ui-section>
             <ui-section id="attribute-kinds-value-and-key" label="Value and Key" sticky collapsible dividing>
@@ -215,7 +215,7 @@
               <ui-docs-example
                 description='`text-align="center"` => `center aligned`.  `vertical-align="middle"` => `middle aligned`.'
               >
-                <ui-segment text-align="center">text-align="center"</ui-segment>
+                <ui-segment align="center">text-align="center"</ui-segment>
                 <ui-grid columns="2" vertical-align="middle">
                   <ui-column
                     ><ui-segment>vertical-align="middle"<br />on the grid</ui-segment></ui-column
@@ -295,10 +295,10 @@
               <ui-docs-example
                 description='Unlike a native attribute, `basic="false"` and `basic="no"` mean NOT basic.'
               >
-                <ui-button basic>basic</ui-button>
-                <ui-button basic="yes">basic="yes"</ui-button>
-                <ui-button basic="false">basic="false"</ui-button>
-                <ui-button basic="no">basic="no"</ui-button>
+                <ui-button appearance="basic">basic</ui-button>
+                <ui-button appearance="basic">basic="yes"</ui-button>
+                <ui-button>basic="false"</ui-button>
+                <ui-button>basic="no"</ui-button>
               </ui-docs-example>
             </ui-section>
             <ui-message size="small"

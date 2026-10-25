@@ -556,7 +556,7 @@ describe("<ui-modal> accessibility", () => {
     await expectAccessible(root)
     for (const host of root.querySelectorAll<Modal>("ui-modal")) {
       await open(host)
-      if (host.hasAttribute("basic")) {
+      if (host.matches(':is([basic], [appearance~="basic"])')) {
         // A basic modal has no box:  its light text sits on the dimmer, the dialog's `::backdrop`,
         // which axe ignores (it measures against the white page).  Check that pairing by hand instead.
         await expectAccessible(host, { rules: { "color-contrast": { enabled: false } } })

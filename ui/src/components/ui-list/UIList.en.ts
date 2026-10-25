@@ -47,10 +47,16 @@ export const listVocabulary = {
       description: "Ordered:  a dot follows each number (`1.`)."
     },
     {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Items are links:  muted until hovered, the selected one strongest."
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["link"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "link", value: "link" }],
+      description:
+        "The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  " +
+        "Its old name is the bare `link` switch."
     },
     {
       name: "selection",
@@ -58,22 +64,47 @@ export const listVocabulary = {
       kind: "keyOnly",
       description: "Items are choices:  `<button>`s with a hover background, `ui-select` on activation."
     },
-    { name: "animated", group: "appearance", kind: "keyOnly", description: "Items indent when hovered." },
-    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Items sit in a row." },
+    {
+      name: "hover",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["indent"],
+      classes: { indent: "animated" },
+      replaces: [{ from: "animated", value: "indent" }],
+      description: "What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`."
+    },
+    {
+      name: "direction",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["vertical", "horizontal"],
+      classes: { vertical: "" },
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description:
+        "Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  " +
+        "Its old name is the bare `horizontal` switch."
+    },
     { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
     { name: "celled", group: "layout", kind: "keyOnly", description: "A rule around every item." },
     {
-      name: "relaxed",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'More space between items;  `relaxed="very"` even more.'
+      kind: "valueOnly",
+      values: ["lg", "xl"],
+      classes: { lg: "relaxed", xl: "very relaxed" },
+      replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
+      description: 'Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).'
     },
     {
-      name: "fitted",
+      name: "padding",
       group: "layout",
-      kind: "keyOnly",
-      description: "No horizontal item padding;  a `selection` list's hover background reaches past its edges."
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "fitted" },
+      replaces: [{ from: "fitted", value: "none" }],
+      description:
+        "`none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  " +
+        "Its old name is `fitted`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {

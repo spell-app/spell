@@ -3,7 +3,7 @@
   The Spell UI site's LAYOUT:  every page's chrome, written ONCE.  A page's own file holds only its `<head>` and
   `<main id="main" class="site-main">`;  the site bundle wraps that `main` in this file's `<body>` on first load
   (`site/_src/SiteShell.ts`), and from then on the router (`site/_src/SiteRouter.ts`) swaps
-  only the `main`, through a `<ui-include select="main#main">` in `.site-content`, while everything here stays on
+  only the `main`, through a `<ui-include selector="main#main">` in `.site-content`, while everything here stays on
   screen.
   - Relative URLs here are against THIS file (`_parts/`):  the shell makes them absolute as it mounts, so they hold
     whichever page is shown.
@@ -38,28 +38,10 @@
         - Under it, the page header's title line sticks for the whole page (`SiteSections.splitSubtitle()`).
       -->
       <ui-toolbar class="site-topbar" aria-label="Site">
-        <ui-button
-          slot="icon"
-          class="site-menu-button"
-          icon="bars"
-          basic
-          circular
-          aria-label="Components"
-          title="Components"
-          commandfor="site-nav-flyout"
-          command="--show"
-        ></ui-button>
+        <ui-button slot="icon" class="site-menu-button" icon="bars" aria-label="Components" title="Components" commandfor="site-nav-flyout" command="--show" appearance="basic circular"></ui-button>
         <a slot="title" class="site-topbar-brand site-wordmark" href="../index.html"><span class="site-hat" aria-hidden="true"></span>Spell UI</a>
         <spell-site-header class="site-topbar-links" docked no-tools root="../../.."></spell-site-header>
-        <ui-button
-          slot="right"
-          class="site-search-button"
-          icon="search"
-          basic
-          circular
-          aria-label="Search"
-          title="Search (⌘K)"
-        ></ui-button>
+        <ui-button slot="right" class="site-search-button" icon="search" aria-label="Search" title="Search (⌘K)" appearance="basic circular"></ui-button>
         <ui-docs-themes slot="right" size="small" class="site-topbar-themes"></ui-docs-themes>
       </ui-toolbar>
 

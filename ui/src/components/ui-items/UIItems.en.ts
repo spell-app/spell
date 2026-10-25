@@ -33,17 +33,25 @@ export const itemsVocabulary = {
     },
     { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
     {
-      name: "relaxed",
+      name: "spacing",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["very"],
-      description: 'More space between items;  `relaxed="very"` even more.'
+      kind: "valueOnly",
+      values: ["lg", "xl"],
+      classes: { lg: "relaxed", xl: "very relaxed" },
+      replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
+      description: 'Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).'
     },
     {
-      name: "link",
-      group: "link",
-      kind: "keyOnly",
-      description: "Items react to hover (a pointer, the header in the link colour).  A LOOK:  links need `href`."
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["link"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "link", value: "link" }],
+      description:
+        "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link " +
+        "needs an item's `link`.  Its old name is the bare `link` switch."
     },
     {
       name: "unstackable",

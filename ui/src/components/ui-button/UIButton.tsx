@@ -18,10 +18,11 @@ import buttonCSS from "./UIButton.css?inline"
  *   - It sends no value of its own, except while it is the submitter (`submit()`).
  *   - It doesn't use `DOMFormControl`, so a page with only buttons never loads the `forms` entry.
  *
- * - `active` (`isActive`) is controlled:  `toggle` flips it on click, sending `ui-selected` / `ui-deselected` first.
+ * - `selected` (`isActive`) is controlled:  `toggle` flips it on click, sending `ui-selected` / `ui-deselected` first.
+ *   Its class word and `:state()` stay Fomantic's `active`.
  *
  * - Fomantic's `state` behaviour is two attributes here, not an element:
- *   `active-text` / `inactive-text` replace the content while `active` is on / off (`Follow` => `Following`).
+ *   `active-text` / `inactive-text` replace the content while `selected` is on / off (`Follow` => `Following`).
  *   - A label that SAYS the state must not also be `aria-pressed` (WAI-ARIA APG, toggle button),
  *     so a toggle with a state text leaves it off.
  *
@@ -56,15 +57,15 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
-  // ## Pressed (`active`)
+  // ## Pressed (`selected`)
   ////////////////
 
-  /** `active`:  set by the page, or toggled by a click (`toggle`). */
+  /** `selected`:  set by the page, or toggled by a click (`toggle`). */
   @E.cssState("active")
-  @E.controlled("active")
+  @E.controlled("selected")
   accessor isActive = false
 
-  /** Text for the current `active`, from `active-text` / `inactive-text`;  `undefined` shows the content. */
+  /** Text for the current `selected`, from `active-text` / `inactive-text`;  `undefined` shows the content. */
   get stateText(): string | undefined {
     return this.isActive ? this.activeText : this.inactiveText
   }
@@ -89,9 +90,9 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return this.attributes["aria-label"] ?? undefined
   }
 
-  /** Has text content (slotted, the `content` shorthand, or a state text)? */
+  /** Has text content (slotted, the `label` shorthand, or a state text)? */
   get hasText(): boolean {
-    return this.slots.hasContent("") || !!this.content || !!this.stateText
+    return this.slots.hasContent("") || !!this.label || !!this.stateText
   }
 
   /** Has an icon (attribute or `icon` slot)? */
@@ -99,9 +100,9 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return !!this.icon || this.slots.hasContent(this.slotForName("icon"))
   }
 
-  /** Has a joined label (attribute or `label` slot)? */
-  get hasLabel(): boolean {
-    return !!this.label || this.slots.hasContent(this.slotForName("label"))
+  /** Has a joined badge (the `badge` attribute, or the `label` slot)? */
+  get hasBadge(): boolean {
+    return !!this.badge || this.slots.hasContent(this.slotForName("label"))
   }
 
   ////////////////
@@ -113,11 +114,11 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
     return this.isMarkedDisabled
   }
 
-  /** Full width:  `fluid`, or attached as a whole row (`attached`, `top`, `bottom`). */
+  /** Full width:  `fluid`, or attached as a whole row (`attach` `both`, `top`, `bottom`). */
   @E.cssState("fluid")
   get isFluid(): boolean {
-    const { attached } = this
-    return this.fluid || attached === true || attached === "top" || attached === "bottom"
+    const { attach } = this
+    return this.fluid || attach === "both" || attach === "top" || attach === "bottom"
   }
 
   /** `floated="left"`:  the whole element floats left. */
@@ -136,18 +137,18 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
   // ## Classes
   ////////////////
 
-  /** `active` and `disabled` follow the state, not the attribute;  a joined label takes `labeled` to the wrapper. */
+  /** `selected` and `disabled` follow the state, not the attribute;  a joined badge takes `labeled` to the wrapper. */
   protected classValue(name: E.AttributeName<typeof buttonVocabulary>): unknown {
-    if (name === "active") return this.isActive
+    if (name === "selected") return this.isActive
     if (name === "disabled") return this.isDisabled
-    if (name === "labeled" && this.hasLabel) return false
+    if (name === "labeled" && this.hasBadge) return false
     return super.classValue(name)
   }
 
   /** `icon` for icon-only buttons and for `labeled icon` buttons. */
   protected get extraClass(): string | undefined {
-    if (!this.hasIcon || this.animated) return undefined
-    const isLabeledIcon = !!this.labeled && !this.hasLabel
+    if (!this.hasIcon || this.reveal) return undefined
+    const isLabeledIcon = !!this.labeled && !this.hasBadge
     return !this.hasText || isLabeledIcon ? UIT.ICON_CLASS : undefined
   }
 
@@ -157,7 +158,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
 
   render(): JSX.Element {
     return (
-      <Show when={this.hasLabel} fallback={this.control()}>
+      <Show when={this.hasBadge} fallback={this.control()}>
         <div
           class={this.wrapperClass({
             size: this.size,
@@ -167,7 +168,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
         >
           {this.control()}
           <span class={LABEL_CLASS} part={this.partForName("label")}>
-            <slot name={this.slotForName("label")}>{this.label}</slot>
+            <slot name={this.slotForName("label")}>{this.badge}</slot>
           </span>
         </div>
       </Show>
@@ -259,11 +260,11 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
 
   /**
    * Icon + text (the state text, else the slot), text + icon for `icon-position="right"`;
-   * or the two `.content` boxes of an `animated` button.
+   * or the two `.content` boxes of a `reveal` button.
    */
   private iconAndText(): JSX.Element {
     const text = (
-      <Show when={this.stateText} fallback={<slot>{this.content}</slot>}>
+      <Show when={this.stateText} fallback={<slot>{this.label}</slot>}>
         {this.stateText}
       </Show>
     )
@@ -274,7 +275,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
       <Show when={this.hasIcon && isTrailing()}>{this.iconBox(RIGHT_ICON_CLASS)}</Show>
     ]
     return (
-      <Show when={this.animated} fallback={plain}>
+      <Show when={this.reveal} fallback={plain}>
         <span class={VISIBLE_CONTENT_CLASS}>{text}</span>
         <span class={HIDDEN_CONTENT_CLASS}>{this.iconBox()}</span>
       </Show>
@@ -420,11 +421,11 @@ const ICON_END = "right"
 /** Class words of a trailing icon box:  Fomantic's `<i class="right ... icon">`, spaced on its start side. */
 const RIGHT_ICON_CLASS = "right icon"
 
-/** Class words of a joined label's box (`labeled` buttons with `label`). */
+/** Class words of a joined badge's box (`labeled` buttons with `badge`). */
 const LABEL_CLASS = "ui basic label"
 
-/** Class words of an `animated` button's resting content. */
+/** Class words of a `reveal` button's resting content. */
 const VISIBLE_CONTENT_CLASS = "visible content"
 
-/** Class words of an `animated` button's content shown on hover. */
+/** Class words of a `reveal` button's content shown on hover. */
 const HIDDEN_CONTENT_CLASS = "hidden content"

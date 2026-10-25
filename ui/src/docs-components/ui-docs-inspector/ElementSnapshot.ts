@@ -6,7 +6,7 @@ import type { E } from "spell-ui/core"
  * each as rows of text.
  * - Attributes:  every attribute the element has, in the DOM's order, as written.
  * - Properties:  for a Spell UI element (a `DOMElement`),
- *   the property of each attribute in its vocabulary (`button.active`), converted.
+ *   the property of each attribute in its vocabulary (`button.selected`), converted.
  *   - By default only the ones with a value:  not `undefined`, `null` or `false`,
  *     nor a boolean at its `true` default (every tag's `visible`, until hidden).
  *   - `{ all: true }`:  every one.

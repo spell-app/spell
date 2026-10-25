@@ -35,9 +35,14 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
 export class UILabel extends E.UIComponent<typeof labelVocabulary> {
   @E.proto static vocabulary = labelVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { label: labelCSS, parts: partsCSS },
-    cssStates: ["active"]
+    styleSheets: { label: labelCSS, parts: partsCSS }
   } satisfies Partial<E.ElementSetup>
+
+  /** `selected`:  `:state(active)`, Fomantic's word, as before `active` was renamed (epic `ui-gaps` P4). */
+  @E.cssState("active")
+  get isSelected(): boolean {
+    return !!this.selected
+  }
 
   /** The owner, when it's a statistic's label. */
   readonly context = new E.PartContext({ domElement: this.domElement, noun: this.vocabulary.noun })

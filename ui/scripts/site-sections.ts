@@ -28,6 +28,17 @@
  * - Text-level, not a DOM round trip:  every untouched line keeps its bytes.
  *   - Moved content is re-indented 2 spaces per new level
  *     (markdown / code blocks strip common indentation, so they read the same).
+ * - A pane holding a lone `<ui-docs-api family|tag>` (a components page's API tab) becomes ONE SECTION PER KIND of
+ *   table its tags have, in order (`ApiSections`, epic `epic-engine` P38):
+ *   `<ui-section id="api-attributes" label="Attributes" ...>` holding `<ui-docs-api family="ui-menu" only="attributes">`.
+ *   - A family of 2+ tags gets a Tags section FIRST (`only="tags"`;  epic `epic-engine` J127):
+ *     each tag with its one-line summary, its name a link to its first table;  a single tag's page gets none.
+ *   - So the tab gets a section row, and the "On this page" list its sections, as the Examples tab does;
+ *     the rows themselves list under them (`<ui-docs-api only>`'s anchors).
+ *   - Which kinds:  the site's data, `docs/__data/components.json5` (`ApiModel.sectionIdsFor()`).
+ *     Its sections are written again on every run, so a tag gaining its first event gains its Events section:
+ *     rerun this after `yarn site:data`.
+ *   - A tag the data doesn't know yet (a new family, before `site:data`):  its pane is left as it is.
  * - `--check`:  write nothing;  exit 1 if a page would change.
  * - No pages named:  every page of the site.
  */
@@ -36,10 +47,16 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
+import { readJSON5File } from "spell/util/node/json5"
+
+import { Terminal } from "spell/element-tools/Terminal"
+import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import { ApiModel } from "spell-ui/docs-components/ui-docs-api/ApiModel"
+import { docsApiVocabulary } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.en"
+import type { ApiSectionId } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.types"
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { environment } from "spell-ui/tools/environment"
-import { Terminal } from "spell/element-tools/Terminal"
-import { SITE_PAGES } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
 import { type GeneratedOutput, writeOrCheck } from "spell-ui/tools/generatedFiles"
 
@@ -69,9 +86,12 @@ export class SiteSections {
   /** Levels of what opens a section:  a level 2 header, a level 3 header, an example. */
   static readonly EXAMPLE_LEVEL = 4
 
-  /** `html` with its sections nested and their ids fixed;  the same text when nothing changes. */
+  /**
+   * `html` with its API panes split into sections (`ApiSections`), its sections nested and their ids fixed;
+   * the same text when nothing changes.
+   */
   static convert(html: string): string {
-    return new SiteSections(html).run()
+    return new SiteSections(ApiSections.expand(html)).run()
   }
 
   /** The page's parsed tree. */
@@ -427,6 +447,114 @@ type Header = {
   /** markup for `<span slot="label">`, when the header holds tags */
   slot?: string
 }
+
+/****************
+ * ### `ApiSections`
+ * A components page's API pane as one section per kind of table:  `ApiSections.expand(html)`.  See the file's header.
+ * - A pane is an API pane when its only elements are a lone `<ui-docs-api>` without `only`,
+ *   or the sections this wrote (each holding one `<ui-docs-api only>`).
+ * - Its comments stay, first;  the sections follow, a blank line apart.
+ * - The `<ui-docs-api>`'s own attributes (`family` or `tag`, `level`) go on every section's, before `only`.
+ ****************/
+class ApiSections {
+  /** `html` with each API pane's sections written for what its tags have now. */
+  static expand(html: string): string {
+    const root = HtmlParser.parse(html)
+    const tabs = HtmlNode.find(root, (node) => node.tag === "ui-tabs" && node.attr("id") === "site-tabs")
+    const edits: [number, number, string][] = []
+    for (const pane of tabs?.children ?? []) {
+      if (pane.tag !== "ui-tab" || !pane.attr("value") || pane.innerStart === undefined) continue
+      const inner = ApiSections.paneInner(html, pane)
+      if (inner !== undefined) edits.push([pane.innerStart, pane.innerEnd!, inner])
+    }
+    let out = html
+    for (const [start, end, text] of edits.sort((a, b) => b[0] - a[0]))
+      out = out.slice(0, start) + text + out.slice(end)
+    return out
+  }
+
+  /** The new inner text of `pane`, when it's an API pane whose tags the data knows;  else `undefined`. */
+  private static paneInner(html: string, pane: HtmlNode): string | undefined {
+    const elements = pane.children.filter((child) => child.kind === "element")
+    const api = ApiSections.apiOf(elements)
+    if (!api) return undefined
+    const attributes = api.attributes.filter((attribute) => attribute.name !== ONLY)
+    const name = api.attr("family") || api.attr("tag")
+    const ids = name ? ApiSections.sectionIdsFor(name, !!api.attr("family")) : []
+    if (!ids.length) return undefined
+    const close = lineIndentOf(html, pane.innerEnd!)
+    const pad = " ".repeat(close + 2)
+    const comments = pane.children
+      .filter((child) => child.kind === "comment")
+      .map((comment) => pad + html.slice(comment.start, comment.end))
+    const sections = ids.map((id) => {
+      const label = ApiSections.labelFor(id)
+      const tableTag = [
+        `<ui-docs-api`,
+        ...attributes.map((attribute) => attribute.raw),
+        `${ONLY}="${ApiModel.onlyFor(id)}"`
+      ]
+      return [
+        `${pad}<ui-section id="${pane.attr("value")}-${TocIndex.slug(label)}" label="${label}" ${SiteSections.FLAGS.join(" ")}>`,
+        `${pad}  ${tableTag.join(" ")}></ui-docs-api>`,
+        `${pad}</ui-section>`
+      ].join("\n")
+    })
+    return `\n${[...comments, sections.join("\n\n")].join("\n")}\n${" ".repeat(close)}`
+  }
+
+  /**
+   * The pane's `<ui-docs-api>` to split:  its lone one without `only`,
+   * or the first of the sections this wrote;  `undefined` for any other pane.
+   */
+  private static apiOf(elements: HtmlNode[]): HtmlNode | undefined {
+    const only = elements[0]
+    if (elements.length === 1 && only?.tag === API_TAG && only.attr(ONLY) === undefined) return only
+    const tables = elements.map((element) => {
+      const children = element.children.filter((child) => child.kind === "element")
+      return element.tag === "ui-section" && children.length === 1 && children[0]!.tag === API_TAG
+        ? children[0]!
+        : undefined
+    })
+    if (!tables.length || tables.some((table) => table?.attr(ONLY) === undefined)) return undefined
+    return tables[0]
+  }
+
+  /** The kinds of table `name` has (a family:  any of its tags), in order;  `[]` when the data doesn't know it. */
+  private static sectionIdsFor(name: string, isFamily: boolean): ApiSectionId[] {
+    const data = ApiSections.data
+    const tagOf = (tag: string): SiteTag | undefined =>
+      data.components.find((entry) => entry.tag === tag) ?? data.docs.find((entry) => entry.tag === tag)
+    // as `SiteData.family()` finds it:  that class loads the element core, which node can't
+    const folder = tagOf(name)?.folder ?? name
+    const names = isFamily ? (Object.hasOwn(data.families, folder) ? data.families[folder]!.tags : []) : [name]
+    const tags = names.map(tagOf).filter((tag): tag is SiteTag => !!tag)
+    return ApiModel.sectionIdsFor(tags)
+  }
+
+  /** A kind's title, as `<ui-docs-api>` says it in English:  `Attributes`, `Used in`. */
+  private static labelFor(id: ApiSectionId): string {
+    return docsApiVocabulary.texts.find((text) => text.key === id)?.text ?? id
+  }
+
+  /** The site's data, read once. */
+  private static get data(): SiteDataFile {
+    return (ApiSections.loaded ??= readJSON5File<SiteDataFile>(path.join(UI, SITE_DATA, "components.json5")))
+  }
+  private static loaded?: SiteDataFile
+}
+
+/** Indent of the line `offset` is on in `html` (spaces before the first non-space). */
+function lineIndentOf(html: string, offset: number): number {
+  const lineStart = html.lastIndexOf("\n", offset - 1) + 1
+  return /^ */.exec(html.slice(lineStart, offset))![0].length
+}
+
+/** The tag of an API table. */
+const API_TAG = "ui-docs-api"
+
+/** `<ui-docs-api>`'s attribute for one kind of table. */
+const ONLY = "only"
 
 /****************
  * ### `HtmlNode`

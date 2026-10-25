@@ -56,11 +56,14 @@ export const headerVocabulary = {
     { name: "dividing", group: "appearance", kind: "keyOnly", description: "A rule below it." },
     { name: "block", group: "layout", kind: "keyOnly", description: "In a tinted box." },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "Joined to a segment below (`top`) or above (`bottom`);  bare `attached` sits between two."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`."
     },
     {
       name: "seamless",
@@ -76,13 +79,22 @@ export const headerVocabulary = {
       description: "Floats `left` or `right`."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns its text `left`, `center`, `right` or `justified`."
+      replaces: ["text-align"],
+      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
     },
-    { name: "fitted", group: "layout", kind: "keyOnly", description: "No padding." },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "fitted" },
+      replaces: [{ from: "fitted", value: "none" }],
+      description: "`none`:  no padding.  Its old name is `fitted`."
+    },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },
     {
       name: "inverted",

@@ -37,7 +37,14 @@ export const statisticVocabulary = {
       description: "Size of the value, `mini` ... `massive`;  `medium` is the default."
     },
     { name: "color", group: "appearance", kind: "color", description: "Hue of the value." },
-    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Value and label on one line." },
+    {
+      name: "direction",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description: "`horizontal`:  value and label on one line.  Its old name is `horizontal`."
+    },
     {
       name: "inverted",
       group: "appearance",

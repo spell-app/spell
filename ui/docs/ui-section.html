@@ -28,11 +28,11 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Section">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-section%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-section%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples, restyled;  they mirror the family's
@@ -132,13 +132,13 @@
                 </ui-docs-example>
                 <ui-docs-example description="Styled sections in a collapsing group read as a styled accordion.">
                   <ui-sections collapsing>
-                    <ui-section label="What is a dog?" level="4" styled collapsed
+                    <ui-section label="What is a dog?" level="4" appearance="styled" collapsed
                       ><p>A domesticated carnivore.</p></ui-section
                     >
-                    <ui-section label="What kinds of dogs are there?" level="4" styled collapsed
+                    <ui-section label="What kinds of dogs are there?" level="4" appearance="styled" collapsed
                       ><p>Many breeds.</p></ui-section
                     >
-                    <ui-section label="How do you acquire a dog?" level="4" styled collapsed
+                    <ui-section label="How do you acquire a dog?" level="4" appearance="styled" collapsed
                       ><p>Adopt one.</p></ui-section
                     >
                   </ui-sections>
@@ -217,7 +217,7 @@
                   description="The `actions` slot holds controls at the right of the title bar.  They are not part of the open / close button:  activating one never closes the section."
                 >
                   <ui-section label="Members" level="4" collapsible dividing>
-                    <ui-button slot="actions" size="mini" basic icon="user plus">Invite</ui-button>
+                    <ui-button slot="actions" size="mini" icon="user plus" appearance="basic">Invite</ui-button>
                     <p>Four people can edit this project.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -228,7 +228,7 @@
                   description='`fold-icon="end"` moves the open / close chevron to the far end of the title bar, after the badge and actions, as an inspector draws it.  A click on it closes the section too;  the title is still the button.'
                 >
                   <ui-section label="Variants" level="4" collapsible fold-icon="end" dividing>
-                    <ui-button slot="actions" size="mini" basic icon="copy">Copy</ui-button>
+                    <ui-button slot="actions" size="mini" icon="copy" appearance="basic">Copy</ui-button>
                     <p>Seventeen shades of one colour.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -301,7 +301,7 @@
 
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
                 <ui-docs-example description="A `loading` section dims its content under a spinner and is `aria-busy`.">
-                  <ui-section label="Recent activity" level="4" bordered loading>
+                  <ui-section label="Recent activity" level="4" appearance="bordered" loading>
                     <p>Fetching the latest events.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -335,12 +335,12 @@
 
               <ui-section id="examples-variations-bordered" label="Bordered" sticky collapsible dividing>
                 <ui-docs-example
-                  description="A section can sit in a box, like a segment;  `raised` lifts it with a shadow."
+                  description="A section can sit in a box, like a segment (`appearance` `bordered`);  `raised` lifts it with a shadow."
                 >
-                  <ui-section label="Bordered" level="4" bordered>
+                  <ui-section label="Bordered" level="4" appearance="bordered">
                     <p>A box around title and content.</p>
                   </ui-section>
-                  <ui-section label="Raised" level="4" bordered raised>
+                  <ui-section label="Raised" level="4" appearance="bordered raised">
                     <p>The same box, lifted.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -350,7 +350,7 @@
                 <ui-docs-example
                   description="A section can look like a styled accordion panel:  a tinted title bar over padded content."
                 >
-                  <ui-section label="Styled" level="4" styled collapsible>
+                  <ui-section label="Styled" level="4" appearance="styled" collapsible>
                     <p>Pairs well with <code>collapsible</code>.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -358,15 +358,15 @@
 
               <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
                 <ui-docs-example
-                  description='Boxed sections can join edge to edge:  `attached="top"` above, bare `attached` between, `attached="bottom"` below.'
+                  description='Boxed sections can join edge to edge:  `attach="top"` above, `attach="both"` between, `attach="bottom"` below.'
                 >
-                  <ui-section label="Step 1" level="4" bordered attached="top">
+                  <ui-section label="Step 1" level="4" appearance="bordered" attach="top">
                     <p>Choose a plan.</p>
                   </ui-section>
-                  <ui-section label="Step 2" level="4" bordered attached>
+                  <ui-section label="Step 2" level="4" appearance="bordered" attach="both">
                     <p>Add your details.</p>
                   </ui-section>
-                  <ui-section label="Step 3" level="4" bordered attached="bottom">
+                  <ui-section label="Step 3" level="4" appearance="bordered" attach="bottom">
                     <p>Confirm.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -377,7 +377,7 @@
                   <ui-section label="Red" level="4" color="red" dividing><p>Red.</p></ui-section>
                   <ui-section label="Teal" level="4" color="teal" dividing><p>Teal.</p></ui-section>
                   <ui-section label="Blue" level="4" color="blue" block><p>Blue.</p></ui-section>
-                  <ui-section label="Purple" level="4" color="purple" bordered><p>Purple.</p></ui-section>
+                  <ui-section label="Purple" level="4" color="purple" appearance="bordered"><p>Purple.</p></ui-section>
                 </ui-docs-example>
               </ui-section>
 
@@ -396,13 +396,13 @@
                 dividing
               >
                 <ui-docs-example
-                  description='`compact` tightens the space around the title;  `padded` (or `padded="very"`) gives the content more room.'
+                  description='`padding="compact"` tightens the space around the title;  `padding="md"` (or `lg`) gives the content more room.'
                 >
-                  <ui-section label="Compact" level="4" bordered compact
+                  <ui-section label="Compact" level="4" appearance="bordered" padding="compact"
                     ><p>Less space around the title.</p></ui-section
                   >
-                  <ui-section label="Padded" level="4" bordered padded><p>More padding in the content.</p></ui-section>
-                  <ui-section label="Very padded" level="4" bordered padded="very"><p>Even more.</p></ui-section>
+                  <ui-section label="Padded" level="4" appearance="bordered" padding="md"><p>More padding in the content.</p></ui-section>
+                  <ui-section label="Very padded" level="4" appearance="bordered" padding="lg"><p>Even more.</p></ui-section>
                 </ui-docs-example>
               </ui-section>
 
@@ -410,7 +410,7 @@
                 <ui-docs-example
                   description="A section can cap its content's height and scroll it:  `scrolling` (`short` ... `very long`, caps that grow with the viewport), or any CSS length as `height`."
                 >
-                  <ui-section label="Log" level="4" bordered scrolling="very short">
+                  <ui-section label="Log" level="4" appearance="bordered" scrolling="very short">
                     <p>09:00 Build started</p>
                     <p>09:01 Dependencies installed</p>
                     <p>09:03 Tests passed</p>
@@ -422,7 +422,7 @@
                     <p>09:20 Old version stopped</p>
                     <p>09:30 Done</p>
                   </ui-section>
-                  <ui-section label="Six em high" level="4" bordered height="6em">
+                  <ui-section label="Six em high" level="4" appearance="bordered" height="6em">
                     <p>Any CSS length caps the content.</p>
                     <p>Line two.</p>
                     <p>Line three.</p>
@@ -433,19 +433,19 @@
               </ui-section>
 
               <ui-section id="examples-variations-aligned" label="Aligned" sticky collapsible dividing>
-                <ui-docs-example description="`text-align` aligns the title `left`, `center` or `right`.">
-                  <ui-section label="Centered title" level="4" text-align="center" dividing>
+                <ui-docs-example description="`align` aligns the title `left`, `center` or `right`.">
+                  <ui-section label="Centered title" level="4" align="center" dividing>
                     <p>The content keeps its own alignment.</p>
                   </ui-section>
-                  <ui-section label="Right title" level="4" text-align="right" dividing>
+                  <ui-section label="Right title" level="4" align="right" dividing>
                     <p>The content keeps its own alignment.</p>
                   </ui-section>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example description="`basic` drops every box, rule and tint, whatever else is set.">
-                  <ui-section label="Basic" level="4" bordered dividing basic>
+                <ui-docs-example description="The `basic` look (`appearance`) drops every box, rule and tint, whatever else is set.">
+                  <ui-section label="Basic" level="4" appearance="bordered basic" dividing>
                     <p><code>bordered</code> and <code>dividing</code> are set, but <code>basic</code> wins.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -453,10 +453,10 @@
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
                 <ui-docs-example description="A section can use the dark scheme, for dark backgrounds.">
-                  <ui-section label="Inverted" level="4" bordered inverted>
+                  <ui-section label="Inverted" level="4" appearance="bordered" inverted>
                     <p>The dark scheme.</p>
                   </ui-section>
-                  <ui-section label="Inverted styled" level="4" styled inverted collapsible>
+                  <ui-section label="Inverted styled" level="4" appearance="styled" inverted collapsible>
                     <p>Styled, on dark.</p>
                   </ui-section>
                 </ui-docs-example>
@@ -483,7 +483,7 @@
 
                   An accordion's titles are buttons, not headings, and its panels are one group; each section closes on its own and
                   its title IS a heading. A section borrows Fomantic's looks for its box: `dividing` and `block` from the header,
-                  `bordered`, `raised`, `attached` and `padded` from the segment, `styled` from the accordion.
+                  the `bordered` and `raised` looks, `attach` and `padding` from the segment, the `styled` look from the accordion.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -629,7 +629,7 @@
             </ui-section>
 
             <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
-              <ui-table celled compact unstackable>
+              <ui-table celled padding="compact" unstackable>
                 <table>
                   <thead>
                     <tr>
@@ -720,7 +720,33 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-section"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-section" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -731,7 +757,7 @@
                   Theme with the public `--ui-section-*` tokens:
                   set one on the element, on any ancestor (`:root` for every section), or on the box through `::part(section)`.
 
-                  - `basic` replaces the box, rule and tint, whatever you set.
+                  - the `basic` look replaces the box, rule and tint, whatever you set.
                   - Never set the `--_ui-section-*` names:  they're the sheet's private plumbing.
 
                   Style the pieces with `::part()`:

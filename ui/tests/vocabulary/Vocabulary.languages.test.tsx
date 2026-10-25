@@ -21,13 +21,13 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
     expect(customElements.get("es-boton")).toBeDefined()
     expect(customElements.get("es-botones")).toBeDefined()
     const spanish = await ElementFixture.render<DOMElement>(
-      `<es-boton primario color="rojo" tamano="pequeño">Guardar</es-boton>`
+      `<es-boton apariencia="basic" color="rojo" tamano="pequeño">Guardar</es-boton>`
     )
     const english = await ElementFixture.render<DOMElement>(
-      `<ui-button primary color="red" size="small">Save</ui-button>`
+      `<ui-button appearance="basic" color="red" size="small">Save</ui-button>`
     )
     expect(buttonClasses(spanish)).toBe(buttonClasses(english))
-    expect(buttonClasses(spanish)).toBe("ui small red primary button")
+    expect(buttonClasses(spanish)).toBe("ui small red basic button")
   })
 
   it("dispatches Spanish events, and takes Spanish shared attributes", async () => {
@@ -41,26 +41,28 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
     expect(toggles).toEqual([true])
   })
 
-  it("names a Spanish tag's properties in Spanish:  `discontinuo` is `dashed`, by attribute and by property", async () => {
+  it("names a Spanish tag's properties in Spanish:  `apariencia` is `appearance`, by attribute and by property", async () => {
     await import("spell-ui/components/ui-card")
     const cardRoot = (host: DOMElement) => host.shadowRoot!.querySelector("[part~=card]")!
-    const byAttribute = await ElementFixture.render<DOMElement>(`<es-tarjeta discontinuo></es-tarjeta>`)
-    expect(cardRoot(byAttribute).className).toBe("ui dashed card")
-    // what spell's JSX writes for a value that can change, `prop:discontinuo`:  the element's own property
+    // the old switch, by its Spanish name (epic `ui-gaps` P4):  still `dashed`
+    const byOldName = await ElementFixture.render<DOMElement>(`<es-tarjeta discontinuo></es-tarjeta>`)
+    expect(cardRoot(byOldName).className).toBe("ui dashed card")
+    // what spell's JSX writes for a value that can change, `prop:apariencia`:  the element's own property
     const byProperty = await ElementFixture.render<DOMElement & Record<string, unknown>>(`<es-tarjeta></es-tarjeta>`)
-    expect("discontinuo" in byProperty).toBe(true)
-    expect("dashed" in byProperty).toBe(false)
-    byProperty.discontinuo = true
+    expect("apariencia" in byProperty).toBe(true)
+    expect("appearance" in byProperty).toBe(false)
+    byProperty.apariencia = "dashed"
     await ElementFixture.tick()
-    expect(byProperty.discontinuo).toBe(true)
-    expect(byProperty.hasAttribute("discontinuo")).toBe(true)
+    expect(byProperty.hasAttribute("apariencia")).toBe(true)
     expect(cardRoot(byProperty).className).toBe("ui dashed card")
-    // a dashed name's property is camelCase, as English's:  `sin-relleno` => `sinRelleno`
+    // a dashed name's property is camelCase, as English's:  `texto-activo` => `textoActivo`
     const button = await ElementFixture.render<DOMElement & Record<string, unknown>>(`<es-boton>Guardar</es-boton>`)
-    button.sinRelleno = true
-    button.primario = true
+    button.relleno = "none"
+    button.color = "primary"
+    button.textoActivo = "Hecho"
     await ElementFixture.tick()
     expect(buttonClasses(button)).toBe("ui primary unpadded button")
+    expect(button.getAttribute("texto-activo")).toBe("Hecho")
   })
 
   it("defines a family loaded afterwards as it's defined", async () => {

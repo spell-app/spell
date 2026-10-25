@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Dropdown">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-dropdown%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-dropdown%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/dropdown.html"
+              link="https://fomantic-ui.com/modules/dropdown.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's dropdown page, section by section, in its order (Types, Content, States, Variations, then
@@ -67,7 +67,7 @@
                     A dropdown, its items <code>&lt;ui-item&gt;</code>s. An item's <code>description</code> sits at the
                     end of its row, and its <code>icon</code> before the text.
                   </p>
-                  <ui-dropdown text="File">
+                  <ui-dropdown label="File">
                     <ui-item>New</ui-item>
                     <ui-item description="ctrl + o">Open...</ui-item>
                     <ui-item description="ctrl + s">Save as...</ui-item>
@@ -75,7 +75,7 @@
                     <ui-item>Make a copy</ui-item>
                     <ui-item icon="folder">Move to folder</ui-item>
                     <ui-item icon="trash">Move to trash</ui-item>
-                    <ui-item type="divider"></ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item>Download As...</ui-item>
                     <ui-item>E-mail Collaborators</ui-item>
                   </ui-dropdown>
@@ -616,45 +616,45 @@
                     in-menu search input also filters the items; ours is only shown, so use <code>search</code> to
                     filter.
                   </p>
-                  <ui-dropdown floating labeled button scrolling icon="filter" text="Filter Posts">
+                  <ui-dropdown floating labeled button scrolling icon="filter" label="Filter Posts">
                     <ui-input
                       slot="header"
                       icon="search"
                       placeholder="Search tags..."
                       aria-label="Search tags"
                     ></ui-input>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item type="header" icon="tags">Tag Label</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item kind="header" icon="tags">Tag Label</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="cannotfix"><ui-label color="black" empty circular></ui-label>Cannot Fix</ui-item>
-                    <ui-item value="news"><ui-label color="purple" empty circular></ui-label>News</ui-item>
+                    <ui-item value="cannotfix"><ui-label color="black" empty appearance="circular"></ui-label>Cannot Fix</ui-item>
+                    <ui-item value="news"><ui-label color="purple" empty appearance="circular"></ui-label>News</ui-item>
                     <ui-item value="enhancement"
-                      ><ui-label color="orange" empty circular></ui-label>Enhancement</ui-item
+                      ><ui-label color="orange" empty appearance="circular"></ui-label>Enhancement</ui-item
                     >
-                    <ui-item value="declined"><ui-label empty circular></ui-label>Change Declined</ui-item>
-                    <ui-item value="off-topic"><ui-label color="yellow" empty circular></ui-label>Off Topic</ui-item>
-                    <ui-item value="interesting"><ui-label color="pink" empty circular></ui-label>Interesting</ui-item>
-                    <ui-item value="discussion"><ui-label color="green" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="declined"><ui-label empty appearance="circular"></ui-label>Change Declined</ui-item>
+                    <ui-item value="off-topic"><ui-label color="yellow" empty appearance="circular"></ui-label>Off Topic</ui-item>
+                    <ui-item value="interesting"><ui-label color="pink" empty appearance="circular"></ui-label>Interesting</ui-item>
+                    <ui-item value="discussion"><ui-label color="green" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-dropdown multiple scrolling name="filters" placeholder="Filter Posts">
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="cannotfix"><ui-label color="black" empty circular></ui-label>Cannot Fix</ui-item>
-                    <ui-item value="news"><ui-label color="purple" empty circular></ui-label>News</ui-item>
+                    <ui-item value="cannotfix"><ui-label color="black" empty appearance="circular"></ui-label>Cannot Fix</ui-item>
+                    <ui-item value="news"><ui-label color="purple" empty appearance="circular"></ui-label>News</ui-item>
                     <ui-item value="enhancement"
-                      ><ui-label color="orange" empty circular></ui-label>Enhancement</ui-item
+                      ><ui-label color="orange" empty appearance="circular"></ui-label>Enhancement</ui-item
                     >
-                    <ui-item value="declined"><ui-label empty circular></ui-label>Change Declined</ui-item>
-                    <ui-item value="off-topic"><ui-label color="yellow" empty circular></ui-label>Off Topic</ui-item>
-                    <ui-item value="interesting"><ui-label color="pink" empty circular></ui-label>Interesting</ui-item>
-                    <ui-item value="discussion"><ui-label color="green" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="declined"><ui-label empty appearance="circular"></ui-label>Change Declined</ui-item>
+                    <ui-item value="off-topic"><ui-label color="yellow" empty appearance="circular"></ui-label>Off Topic</ui-item>
+                    <ui-item value="interesting"><ui-label color="pink" empty appearance="circular"></ui-label>Interesting</ui-item>
+                    <ui-item value="discussion"><ui-label color="green" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
               </ui-section>
@@ -678,10 +678,10 @@
                     <ui-icon name="trophy"></ui-icon>
                     Trending repos
                     <ui-dropdown inline value="today">
-                      <ui-item type="header">Adjust time span</ui-item>
-                      <ui-item value="today" text="today">Today</ui-item>
-                      <ui-item value="this week" text="this week">This Week</ui-item>
-                      <ui-item value="this month" text="this month">This Month</ui-item>
+                      <ui-item kind="header">Adjust time span</ui-item>
+                      <ui-item value="today" label="today">Today</ui-item>
+                      <ui-item value="this week" label="this week">This Week</ui-item>
+                      <ui-item value="this month" label="this month">This Month</ui-item>
                     </ui-dropdown>
                   </ui-header>
                 </ui-docs-example>
@@ -694,24 +694,24 @@
                     A dropdown can be formatted so that its menu is pointing: <code>pointing</code>, with a value for
                     where the menu's arrow sits.
                   </p>
-                  <ui-dropdown pointing text="Shopping">
-                    <ui-item type="header">Categories</ui-item>
+                  <ui-dropdown pointing label="Shopping">
+                    <ui-item kind="header">Categories</ui-item>
                     <ui-item>Clothing</ui-item>
                     <ui-item>Home Goods</ui-item>
                     <ui-item>Bedroom</ui-item>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item type="header">Order</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item kind="header">Order</ui-item>
                     <ui-item>Status</ui-item>
                     <ui-item>Cancellations</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown pointing="left" text="Messages">
+                  <ui-dropdown pointing="left" label="Messages">
                     <ui-item>Inbox</ui-item>
                     <ui-item>Starred</ui-item>
                     <ui-item>Sent Mail</ui-item>
                     <ui-item>Drafts (143)</ui-item>
-                    <ui-item type="divider"></ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item>Spam (1009)</ui-item>
                     <ui-item>Trash</ui-item>
                   </ui-dropdown>
@@ -719,11 +719,11 @@
                 <ui-docs-example>
                   <ui-dropdown button pointing="top left" aria-label="Settings">
                     <ui-icon slot="trigger" name="wrench"></ui-icon>
-                    <ui-item type="header">Display Density</ui-item>
+                    <ui-item kind="header">Display Density</ui-item>
                     <ui-item>Comfortable</ui-item>
                     <ui-item>Cozy</ui-item>
                     <ui-item>Compact</ui-item>
-                    <ui-item type="divider"></ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item>Settings</ui-item>
                     <ui-item>Upload Settings</ui-item>
                     <ui-item>Manage Apps</ui-item>
@@ -738,8 +738,8 @@
                     <ui-item>Open...</ui-item>
                     <ui-item>Save...</ui-item>
                     <ui-item>Edit Permissions</ui-item>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item type="header">Export</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item kind="header">Export</ui-item>
                     <ui-item>Share...</ui-item>
                     <ui-item>Save As...</ui-item>
                   </ui-dropdown>
@@ -751,15 +751,15 @@
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown labeled button pointing="top left" icon="filter" text="Filter Posts">
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                  <ui-dropdown labeled button pointing="top left" icon="filter" label="Filter Posts">
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item type="header">Filter by date</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item kind="header">Filter by date</ui-item>
                     <ui-item><ui-icon name="circle" color="olive"></ui-icon>This Week</ui-item>
                     <ui-item><ui-icon name="circle" color="violet"></ui-icon>This Month</ui-item>
                     <ui-item><ui-icon name="circle" color="orange"></ui-icon>This Year</ui-item>
@@ -768,21 +768,21 @@
                 <ui-docs-example>
                   <ui-dropdown button pointing="right" aria-label="Settings">
                     <ui-icon slot="trigger" name="cog"></ui-icon>
-                    <ui-item type="header">Filter by tag</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item kind="header">Filter by tag</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                   <ui-dropdown button pointing="left" aria-label="Settings">
                     <ui-icon slot="trigger" name="cog"></ui-icon>
-                    <ui-item type="header">Tag Label</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item kind="header">Tag Label</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
               </ui-section>
@@ -804,7 +804,7 @@
                 <ui-docs-example
                   description="A simple dropdown can open without JavaScript:  on hover and focus, with no popover."
                 >
-                  <ui-dropdown simple text="Dropdown">
+                  <ui-dropdown appearance="simple" label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -817,8 +817,8 @@
               <!-- GAP I107:  a header item's `icon` draws nothing;  slotted labels are tiny dots touching the text. -->
               <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
                 <ui-docs-example description='A dropdown menu can contain a header:  `type="header"`.'>
-                  <ui-dropdown floating labeled button icon="filter" text="Filter">
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
+                  <ui-dropdown floating labeled button icon="filter" label="Filter">
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
                     <ui-item>Important</ui-item>
                     <ui-item>Announcement</ui-item>
                     <ui-item>Discussion</ui-item>
@@ -830,9 +830,9 @@
                 <ui-docs-example
                   description='A dropdown menu can contain dividers to separate related content:  `type="divider"`.'
                 >
-                  <ui-dropdown floating labeled button icon="filter" text="Filter">
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item type="divider"></ui-item>
+                  <ui-dropdown floating labeled button icon="filter" label="Filter">
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item>Important</ui-item>
                     <ui-item>Announcement</ui-item>
                     <ui-item>Discussion</ui-item>
@@ -842,9 +842,9 @@
 
               <ui-section id="examples-content-icon" label="Icon" sticky collapsible dividing>
                 <ui-docs-example description="A dropdown menu can contain an icon:  `icon`.">
-                  <ui-dropdown floating labeled button icon="filter" text="Filter">
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item type="divider"></ui-item>
+                  <ui-dropdown floating labeled button icon="filter" label="Filter">
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item icon="exclamation">Important</ui-item>
                     <ui-item icon="comment">Announcement</ui-item>
                     <ui-item icon="comments">Discussion</ui-item>
@@ -854,9 +854,9 @@
 
               <ui-section id="examples-content-description" label="Description" sticky collapsible dividing>
                 <ui-docs-example description="A dropdown menu can contain a description:  `description`.">
-                  <ui-dropdown floating labeled button icon="filter" text="Filter Tags">
-                    <ui-item type="header">Filter by tag</ui-item>
-                    <ui-item type="divider"></ui-item>
+                  <ui-dropdown floating labeled button icon="filter" label="Filter Tags">
+                    <ui-item kind="header">Filter by tag</ui-item>
+                    <ui-item kind="divider"></ui-item>
                     <ui-item description="2 new">Important</ui-item>
                     <ui-item description="10 new">Hopper</ui-item>
                     <ui-item description="5 new">Discussion</ui-item>
@@ -873,14 +873,14 @@
                 <ui-docs-example
                   description="A dropdown menu can contain a label:  any markup inside an item is projected into its row."
                 >
-                  <ui-dropdown floating labeled button icon="filter" text="Filter">
-                    <ui-item type="header">Search Issues</ui-item>
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                  <ui-dropdown floating labeled button icon="filter" label="Filter">
+                    <ui-item kind="header">Search Issues</ui-item>
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
               </ui-section>
@@ -890,7 +890,7 @@
                 <ui-docs-example
                   description="A dropdown menu can contain a message:  the `header` slot holds any markup."
                 >
-                  <ui-dropdown floating labeled button icon="filter" text="Login">
+                  <ui-dropdown floating labeled button icon="filter" label="Login">
                     <ui-message slot="header" state="error" heading="Error"
                       >You must log-in to see all categories</ui-message
                     >
@@ -945,7 +945,7 @@
                     A dropdown menu can contain an input, in the <code>header</code> slot. It doesn't filter the items:
                     use <code>search</code> for that.
                   </p>
-                  <ui-dropdown floating labeled button icon="filter" text="Filter">
+                  <ui-dropdown floating labeled button icon="filter" label="Filter">
                     <ui-input
                       slot="header"
                       icon="search"
@@ -953,25 +953,25 @@
                       placeholder="Search..."
                       aria-label="Search"
                     ></ui-input>
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-content-image" label="Image" sticky collapsible dividing>
                 <ui-docs-example description="A dropdown menu can contain an image:  `image`.">
-                  <ui-dropdown floating labeled button icon="user plus" text="Add User">
-                    <ui-item type="header">People You Might Know</ui-item>
+                  <ui-dropdown floating labeled button icon="user plus" label="Add User">
+                    <ui-item kind="header">People You Might Know</ui-item>
                     <ui-item image="../images/avatar/small/jenny.jpg">Jenny Hess</ui-item>
                     <ui-item image="../images/avatar/small/elliot.jpg">Elliot Fu</ui-item>
                     <ui-item image="../images/avatar/small/stevie.jpg">Stevie Feliciano</ui-item>
-                    <ui-item type="header">Your Friends' Friends</ui-item>
+                    <ui-item kind="header">Your Friends' Friends</ui-item>
                     <ui-item image="../images/avatar/small/christian.jpg">Christian</ui-item>
                     <ui-item image="../images/avatar/small/matt.jpg">Matt</ui-item>
                     <ui-item image="../images/avatar/small/justen.jpg">Justen Kitsune</ui-item>
@@ -996,7 +996,7 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
                 <ui-docs-example description="A dropdown can show that it is currently loading data.">
-                  <ui-dropdown loading text="Dropdown">
+                  <ui-dropdown loading label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -1011,7 +1011,7 @@
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown loading color="teal" selection text="Dropdown">
+                  <ui-dropdown loading color="teal" selection label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -1021,14 +1021,14 @@
 
               <ui-section id="examples-states-error" label="Error" sticky collapsible dividing>
                 <ui-docs-example description='An errored dropdown can alert a user to a problem:  `state="error"`.'>
-                  <ui-dropdown floating state="error" text="Dropdown">
+                  <ui-dropdown floating state="error" label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown selection state="error" text="Dropdown">
+                  <ui-dropdown selection state="error" label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -1039,8 +1039,8 @@
                 <ui-docs-example
                   description="`state` also takes `info`, `success` and `warning`:  it tints the box, the text and the menu."
                 >
-                  <ui-dropdown state="info" selection text="Info"><ui-item>One</ui-item></ui-dropdown>
-                  <ui-dropdown state="success" selection text="Success"><ui-item>One</ui-item></ui-dropdown>
+                  <ui-dropdown state="info" selection label="Info"><ui-item>One</ui-item></ui-dropdown>
+                  <ui-dropdown state="success" selection label="Success"><ui-item>One</ui-item></ui-dropdown>
                   <ui-dropdown state="warning" multiple selection placeholder="Warning" value="warning">
                     <ui-item value="warning">Warning</ui-item>
                     <ui-item>One</ui-item>
@@ -1053,7 +1053,7 @@
                   <p slot="description">
                     An active dropdown has its menu open: <code>open</code>. Setting it fires no event.
                   </p>
-                  <ui-dropdown open text="Dropdown">
+                  <ui-dropdown open label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                   </ui-dropdown>
@@ -1064,14 +1064,14 @@
                 <ui-docs-example
                   description="A disabled dropdown menu or item does not allow user interaction.  A disabled dropdown isn't submitted."
                 >
-                  <ui-dropdown disabled text="Dropdown">
+                  <ui-dropdown disabled label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown text="Disabled Item">
+                  <ui-dropdown label="Disabled Item">
                     <ui-item>Choice 1</ui-item>
                     <ui-item disabled>Disabled</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -1083,7 +1083,7 @@
                 <ui-docs-example
                   description="A dropdown can be read-only and does not allow user interaction, but still submits with a form."
                 >
-                  <ui-dropdown readonly text="Dropdown">
+                  <ui-dropdown readonly label="Dropdown">
                     <ui-item>Choice 1</ui-item>
                     <ui-item>Choice 2</ui-item>
                     <ui-item>Choice 3</ui-item>
@@ -1169,21 +1169,21 @@
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-dropdown scrolling text="Filter Posts">
-                    <ui-item type="header" icon="tags">Tag Label</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                  <ui-dropdown scrolling label="Filter Posts">
+                    <ui-item kind="header" icon="tags">Tag Label</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="cannotfix"><ui-label color="black" empty circular></ui-label>Cannot Fix</ui-item>
-                    <ui-item value="news"><ui-label color="purple" empty circular></ui-label>News</ui-item>
+                    <ui-item value="cannotfix"><ui-label color="black" empty appearance="circular"></ui-label>Cannot Fix</ui-item>
+                    <ui-item value="news"><ui-label color="purple" empty appearance="circular"></ui-label>News</ui-item>
                     <ui-item value="enhancement"
-                      ><ui-label color="orange" empty circular></ui-label>Enhancement</ui-item
+                      ><ui-label color="orange" empty appearance="circular"></ui-label>Enhancement</ui-item
                     >
-                    <ui-item value="declined"><ui-label empty circular></ui-label>Change Declined</ui-item>
-                    <ui-item value="off-topic"><ui-label color="yellow" empty circular></ui-label>Off Topic</ui-item>
-                    <ui-item value="interesting"><ui-label color="pink" empty circular></ui-label>Interesting</ui-item>
-                    <ui-item value="discussion"><ui-label color="green" empty circular></ui-label>Discussion</ui-item>
+                    <ui-item value="declined"><ui-label empty appearance="circular"></ui-label>Change Declined</ui-item>
+                    <ui-item value="off-topic"><ui-label color="yellow" empty appearance="circular"></ui-label>Off Topic</ui-item>
+                    <ui-item value="interesting"><ui-label color="pink" empty appearance="circular"></ui-label>Interesting</ui-item>
+                    <ui-item value="discussion"><ui-label color="green" empty appearance="circular"></ui-label>Discussion</ui-item>
                   </ui-dropdown>
                 </ui-docs-example>
               </ui-section>
@@ -1206,13 +1206,13 @@
               >
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example description="A compact dropdown has no minimum width:  `compact`.">
-                  <ui-dropdown compact selection text="Compact">
+                <ui-docs-example description='A compact dropdown has no minimum width:  `padding="compact"`.'>
+                  <ui-dropdown padding="compact" selection label="Compact">
                     <ui-item>A</ui-item>
                     <ui-item>B</ui-item>
                     <ui-item>C</ui-item>
                   </ui-dropdown>
-                  <ui-dropdown compact selection text="Compact">
+                  <ui-dropdown padding="compact" selection label="Compact">
                     <ui-item>A very long item that takes up a lot of space</ui-item>
                     <ui-item>B</ui-item>
                   </ui-dropdown>
@@ -1221,12 +1221,12 @@
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
                 <ui-docs-example description="A dropdown can take the full width of its parent:  `fluid`.">
-                  <ui-menu vertical>
-                    <ui-item href="#link-1">Link 1</ui-item>
-                    <ui-item href="#link-2">Link 2</ui-item>
-                    <ui-item type="header">All Sections</ui-item>
+                  <ui-menu direction="vertical">
+                    <ui-item link="#link-1">Link 1</ui-item>
+                    <ui-item link="#link-2">Link 2</ui-item>
+                    <ui-item kind="header">All Sections</ui-item>
                     <ui-item>
-                      <ui-dropdown fluid selection text="More">
+                      <ui-dropdown fluid selection label="More">
                         <ui-item>Choice 1</ui-item>
                         <ui-item>Choice 2</ui-item>
                         <ui-item>Choice 3</ui-item>
@@ -1242,7 +1242,7 @@
                     A selection dropdown can be <code>long</code> (2x of default height) so that more items can be
                     glanced.
                   </p>
-                  <ui-dropdown long multiple search selection placeholder="State">
+                  <ui-dropdown length="long" multiple search selection placeholder="State">
                     <ui-item value="AL">Alabama</ui-item>
                     <ui-item value="AK">Alaska</ui-item>
                     <ui-item value="AZ">Arizona</ui-item>
@@ -1297,9 +1297,9 @@
                   </ui-dropdown>
                 </ui-docs-example>
                 <ui-docs-example
-                  description="Very long:  3x of default height (`very-long`).  `short` and `very-short` go the other way."
+                  description='Very long:  3x of default height (`length="very-long"`).  `short` and `very-short` go the other way.'
                 >
-                  <ui-dropdown very-long multiple search selection placeholder="State">
+                  <ui-dropdown length="very-long" multiple search selection placeholder="State">
                     <ui-item value="AL">Alabama</ui-item>
                     <ui-item value="AK">Alaska</ui-item>
                     <ui-item value="AZ">Arizona</ui-item>
@@ -1358,7 +1358,7 @@
                     Unlimited: no scrollbar and no height limitation (<code>unlimited</code>), especially with
                     <code>pointing</code>, to keep the arrow displayed.
                   </p>
-                  <ui-dropdown unlimited pointing multiple search selection placeholder="State">
+                  <ui-dropdown limit="none" pointing multiple search selection placeholder="State">
                     <ui-item value="AL">Alabama</ui-item>
                     <ui-item value="AK">Alaska</ui-item>
                     <ui-item value="AZ">Arizona</ui-item>
@@ -1420,15 +1420,15 @@
                     A dropdown menu can specify the direction it should open: <code>direction="left"</code> right-aligns
                     it, so it extends toward the start; <code>upward</code> opens it above.
                   </p>
-                  <ui-dropdown floating labeled button icon="caret down" direction="left" text="Menu">
+                  <ui-dropdown floating labeled button icon="caret down" direction="left" label="Menu">
                     <ui-item>Left</ui-item>
                     <ui-item>Still Left</ui-item>
                   </ui-dropdown>
-                  <ui-dropdown floating labeled button icon="caret down" text="Menu">
+                  <ui-dropdown floating labeled button icon="caret down" label="Menu">
                     <ui-item>Right</ui-item>
                     <ui-item>Still Right</ui-item>
                   </ui-dropdown>
-                  <ui-dropdown upward selection text="Upward">
+                  <ui-dropdown direction="up" selection label="Upward">
                     <ui-item>One</ui-item>
                     <ui-item>Two</ui-item>
                   </ui-dropdown>
@@ -1630,7 +1630,7 @@
                     <ui-item value="red">Red</ui-item>
                     <ui-item value="blue">Blue</ui-item>
                   </ui-dropdown>
-                  <ui-dropdown color="primary" button text="Actions">
+                  <ui-dropdown color="primary" button label="Actions">
                     <ui-item>Edit</ui-item>
                     <ui-item>Delete</ui-item>
                   </ui-dropdown>
@@ -1664,7 +1664,7 @@
                     <ui-item value="by" flag="by">Belarus</ui-item>
                   </ui-dropdown>
                   <ui-divider></ui-divider>
-                  <ui-segment secondary>
+                  <ui-segment appearance="secondary">
                     Show me
                     <ui-dropdown clearable inline scrolling name="skill" value="css" placeholder="any">
                       <ui-item value="angular">Angular</ui-item>
@@ -1877,7 +1877,7 @@
                           <ui-item value="0">Female</ui-item>
                         </ui-dropdown>
                       </ui-field>
-                      <ui-button primary type="reset">Restore All Dropdowns</ui-button>
+                      <ui-button type="reset" color="primary">Restore All Dropdowns</ui-button>
                     </form>
                   </ui-form>
                 </ui-docs-example>
@@ -1889,19 +1889,19 @@
                     A dropdown menu will automatically change which direction it opens if it can't fit on screen. To
                     open in a specific direction, use <code>upward</code>.
                   </p>
-                  <ui-segment attached="top">
+                  <ui-segment attach="top">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-menu attached="bottom">
+                  <ui-menu attach="bottom">
                     <ui-item>
-                      <ui-dropdown upward aria-label="Settings">
+                      <ui-dropdown direction="up" aria-label="Settings">
                         <ui-icon slot="trigger" name="cog"></ui-icon>
                         <ui-item>New</ui-item>
                         <ui-item>Open...</ui-item>
                         <ui-item>Save...</ui-item>
                         <ui-item>Edit Permissions</ui-item>
-                        <ui-item type="divider"></ui-item>
-                        <ui-item type="header">Export</ui-item>
+                        <ui-item kind="divider"></ui-item>
+                        <ui-item kind="header">Export</ui-item>
                         <ui-item>Share...</ui-item>
                         <ui-item>Save As...</ui-item>
                       </ui-dropdown>
@@ -1963,14 +1963,14 @@
                     hide and only the matching items show (Fomantic's <code>hideDividers</code>).
                   </p>
                   <ui-dropdown labeled button search pointing="top left" icon="filter" placeholder="Filter Posts">
-                    <ui-item type="header" icon="tags">Filter by tag</ui-item>
-                    <ui-item value="important"><ui-label color="red" empty circular></ui-label>Important</ui-item>
+                    <ui-item kind="header" icon="tags">Filter by tag</ui-item>
+                    <ui-item value="important"><ui-label color="red" empty appearance="circular"></ui-label>Important</ui-item>
                     <ui-item value="announcement"
-                      ><ui-label color="blue" empty circular></ui-label>Announcement</ui-item
+                      ><ui-label color="blue" empty appearance="circular"></ui-label>Announcement</ui-item
                     >
-                    <ui-item value="discussion"><ui-label color="black" empty circular></ui-label>Discussion</ui-item>
-                    <ui-item type="divider"></ui-item>
-                    <ui-item type="header" icon="calendar">Filter by date</ui-item>
+                    <ui-item value="discussion"><ui-label color="black" empty appearance="circular"></ui-label>Discussion</ui-item>
+                    <ui-item kind="divider"></ui-item>
+                    <ui-item kind="header" icon="calendar">Filter by date</ui-item>
                     <ui-item value="week">This Week</ui-item>
                     <ui-item value="month">This Month</ui-item>
                     <ui-item value="year">This Year</ui-item>
@@ -1994,15 +1994,15 @@
                   description="A button group can be formatted to show additional content as a dropdown."
                 >
                   <ui-buttons>
-                    <ui-dropdown button pointing="top left" text="Visit">
+                    <ui-dropdown button pointing="top left" label="Visit">
                       <ui-item>Home</ui-item>
                       <ui-item>Blog</ui-item>
                     </ui-dropdown>
-                    <ui-dropdown button pointing="top left" text="Edit">
+                    <ui-dropdown button pointing="top left" label="Edit">
                       <ui-item>Edit Post</ui-item>
                       <ui-item>Remove Post</ui-item>
                     </ui-dropdown>
-                    <ui-dropdown button pointing="top right" text="Share">
+                    <ui-dropdown button pointing="top right" label="Share">
                       <ui-item>Facebook</ui-item>
                       <ui-item>Twitter</ui-item>
                     </ui-dropdown>
@@ -2019,9 +2019,9 @@
                     >) isn't there yet.
                   </p>
                   <ui-menu>
-                    <ui-item href="#home">Home</ui-item>
+                    <ui-item link="#home">Home</ui-item>
                     <ui-item>
-                      <ui-dropdown text="Categories">
+                      <ui-dropdown label="Categories">
                         <ui-item>Electronics</ui-item>
                         <ui-item>Automotive</ui-item>
                         <ui-item>Home</ui-item>
@@ -2073,8 +2073,8 @@
                   (`type="divider"`), in order. No JavaScript to call: Fomantic's settings are attributes.
 
                   - The look: `selection` (a form select), `search`, `multiple`, `inline`, `button` (+ `labeled` with an `icon`),
-                    `floating`, `pointing`, `simple`, `compact`, `fluid`, `scrolling`, the heights ...
-                  - An item's `value` defaults to its text; `text` overrides what the dropdown shows once it's chosen;
+                    `floating`, `pointing`, `appearance="simple"`, `padding="compact"`, `fluid`, `scrolling`, the `length`s ...
+                  - An item's `value` defaults to its text; `label` overrides what the dropdown shows once it's chosen;
                     `description`, `icon`, `image` and `flag` decorate the row, and any markup inside is projected into it.
                   - Slots: `trigger` (your own trigger content), `header` (content at the top of the menu), `icon` (replaces the
                     caret, or a `labeled` icon).
@@ -2096,7 +2096,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Attributes carry primitives and are reflected; the rich `options` array is a JS property (frameworks find it with
-                  `"options" in element`), and first paint never needs it -- slotted `<ui-item>`s or the `value` / `text`
+                  `"options" in element`), and first paint never needs it -- slotted `<ui-item>`s or the `value` / `label`
                   attributes carry what server rendering must show. Options set through the property are added after the slotted
                   items. For remote data, fetch on `ui-search` and set `options`.
                 </script>
@@ -2228,7 +2228,33 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-dropdown"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-dropdown" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

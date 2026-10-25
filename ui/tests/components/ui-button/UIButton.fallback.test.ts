@@ -32,7 +32,7 @@ describe("ButtonFallback", () => {
       `<x-fb-button size="small" primary basic aria-label="Save it">Save</x-fb-button>`
     )
     const button = FallbackStub.shadow(host).querySelector("button")!
-    expect(button.className).toBe("ui small basic primary button")
+    expect(button.className).toBe("ui small primary basic button")
     expect(button.getAttribute("part")).toBe("button")
     expect(button.type).toBe("button")
     expect(button.getAttribute("aria-label")).toBe("Save it")

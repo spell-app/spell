@@ -19,7 +19,9 @@ describe("<ui-calendar> static render", () => {
     const html = StaticRender.fragment(
       `<ui-calendar id="due" type="date" name="due" value="2026-09-30" placeholder="Due"></ui-calendar>`
     )
-    expect(html).toMatch(/^<div [^>]*class="ui calendar"[^>]*><div class="ui left icon input" part="input"><input /)
+    expect(html).toMatch(
+      /^<div [^>]*class="ui calendar"[^>]*><div class="ui left icon input" part="input" style="anchor-name:--ui-calendar-\d+"><input /
+    )
     const field = html.match(/<input [^>]*part="control"[^>]*>/)?.[0] ?? ""
     expect(field).toContain(`value="September 30, 2026"`)
     // the flattener's mark, used and dropped:  the DOM element's id went to the field, not the root

@@ -2,7 +2,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import { tabVocabulary } from "./UITab.en"
-import type { TabOwner, TabPaneState } from "./UITab.types"
+import { BASIC, type TabOwner, type TabPaneState } from "./UITab.types"
 
 import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
 import tabCSS from "./UITab.css?inline"
@@ -122,8 +122,10 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
     if (owner) return owner.paneState(this.domElement)
     return {
       selected: this.isMarkedSelected,
-      attached: this.attached,
-      basic: this.basic,
+      attached: this.attach,
+      basic: String(this.appearance ?? "")
+        .split(" ")
+        .includes(BASIC),
       inverted: this.inverted
     }
   }
@@ -137,8 +139,8 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
   protected classValue(name: E.AttributeName<typeof tabVocabulary>): unknown {
     const state = this.paneState
     if (name === "selected") return state.selected
-    if (name === "attached") return state.attached
-    if (name === "basic") return state.basic
+    if (name === "attach") return state.attached
+    if (name === "appearance") return state.basic ? BASIC : undefined
     if (name === "inverted") return state.inverted
     return super.classValue(name)
   }

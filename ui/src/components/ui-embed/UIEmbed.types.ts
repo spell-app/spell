@@ -17,7 +17,7 @@ export type EmbedSourceSpec = {
   /** player URL, `{id}` for the video id */
   url: string
   /** its player parameters */
-  parameters: (settings: { autoplay: boolean; brandedUI: boolean }) => EmbedParameters
+  parameters: (settings: { autoplay: boolean }) => EmbedParameters
 }
 
 /** URL parameters;  booleans become `1` / `0`, `undefined` / `null` are left out. */
@@ -33,8 +33,6 @@ export type EmbedUrlOptions = {
   url?: string
   /** start playing as the frame loads */
   autoplay: boolean
-  /** keep the player's own branding (titles, logos) */
-  brandedUI: boolean
   /** the page's own player parameters, over the source's */
   parameters?: EmbedParameters
 }

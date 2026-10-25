@@ -184,11 +184,15 @@ describe("<ui-docs-api tag>", () => {
     expect([...tablesOf(other).keys()]).toEqual(["Parts"])
   })
 
-  it("draws Fomantic's compact celled definition tables, stacking by their own width", async () => {
+  // never stacked (Owen, 2026-10-25):  too wide, it scrolls sideways in its own box, which takes focus
+  it("draws Fomantic's compact celled definition tables, never stacked, scrolling in their own box", async () => {
     const host = await render(`<ui-docs-api tag="x-or"></ui-docs-api>`)
     const table = host.shadowRoot!.querySelector("ui-table")!
-    for (const name of ["celled", "compact", "definition", "stackable"]) expect(table.hasAttribute(name)).toBe(true)
-    expect(table.getAttribute("stack-by")).toBe("container")
+    for (const name of ["celled", "definition"]) expect(table.hasAttribute(name)).toBe(true)
+    expect(table.hasAttribute("stackable")).toBe(false)
+    expect(table.getAttribute("padding")).toBe("compact")
+    expect([table.getAttribute("stack-by"), table.getAttribute("tabindex")]).toEqual(["none", "0"])
+    expect(getComputedStyle(table).overflowX).toBe("auto")
     const native = table.querySelector("table")!
     expect(native.classList.contains("definition")).toBe(true)
     expect(native.getAttribute("aria-label")).toBe("Parts of <x-or>")
@@ -238,7 +242,13 @@ describe("<ui-docs-api tag>", () => {
     const labels = (name: string) => [...rowOf(attributes, name).cells[2]!.querySelectorAll("ui-label")]
 
     const hues = labels("color")
-    expect(hues.map((label) => [label.textContent, label.getAttribute("color"), label.hasAttribute("basic")])).toEqual([
+    expect(
+      hues.map((label) => [
+        label.textContent,
+        label.getAttribute("color"),
+        label.getAttribute("appearance") === "basic"
+      ])
+    ).toEqual([
       ["red", "red", false],
       ["blue", "blue", false]
     ])
@@ -246,7 +256,7 @@ describe("<ui-docs-api tag>", () => {
     expect(rowOf(attributes, "color").cells[2]!.querySelector("small")!.textContent).toBe("set hues")
 
     const sizes = labels("size")
-    expect(sizes.map((label) => [label.textContent, label.hasAttribute("basic")])).toEqual([
+    expect(sizes.map((label) => [label.textContent, label.getAttribute("appearance") === "basic"])).toEqual([
       ["small", true],
       ["large", true]
     ])
@@ -358,13 +368,134 @@ describe("<ui-docs-api family>", () => {
     } finally {
       spy.mockRestore()
     }
+  })
+})
 
-    /** One animation frame. */
-    function frame() {
-      return new Promise((resolve) => requestAnimationFrame(resolve))
+describe("<ui-docs-api only>", () => {
+  afterEach(() => history.replaceState(null, "", location.pathname + location.search))
+
+  /** `only`'s api inside a page section `sectionId`, drawn. */
+  async function inSection(attributes: string, sectionId = "api-attributes") {
+    SiteData.url = DATA_URL
+    const wrapper = await ElementFixture.render(
+      `<ui-section id="${sectionId}" label="X"><ui-docs-api ${attributes}></ui-docs-api></ui-section>`
+    )
+    const host = wrapper.querySelector<DOMElement>("ui-docs-api")!
+    await drawn(host)
+    return host
+  }
+
+  /** Every `[data-toc]` element of `host`'s shadow root:  its id, text, and whether it's a group. */
+  function marked(host: Element) {
+    return [...host.shadowRoot!.querySelectorAll("[data-toc]")].map((element) => [
+      element.id,
+      element.getAttribute("data-toc"),
+      element.hasAttribute("data-toc-group")
+    ])
+  }
+
+  it("draws ONE table, with no title:  the page's section has it", async () => {
+    const host = await inSection(`tag="x-button" only="events"`, "api-events")
+    expect(host.shadowRoot!.querySelectorAll("ui-table")).toHaveLength(1)
+    expect(host.shadowRoot!.querySelector("[part~=title]")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=note]")!.textContent).toContain("CustomEvent")
+    expect(host.shadowRoot!.querySelector("table")!.getAttribute("aria-label")).toBe("Events of <x-button>")
+  })
+
+  it("makes every row's name cell an anchor and an \"On this page\" entry, under its section's id", async () => {
+    const host = await inSection(`tag="x-button" only="slots"`, "api-slots")
+    expect(marked(host)).toEqual([
+      ["api-slots-default", "default", false],
+      ["api-slots-icon", "icon", false]
+    ])
+    const cell = host.shadowRoot!.getElementById("api-slots-icon")!
+    expect([cell.localName, cell.getAttribute("part")]).toEqual(["th", "member"])
+  })
+
+  it("starts its ids with `only` outside a section", async () => {
+    const host = await render(`<ui-docs-api tag="x-button" only="states"></ui-docs-api>`)
+    expect(marked(host)).toEqual([["states-pressed", "pressed", false]])
+  })
+
+  it("heads each tag of a family that has the table, as an entry group;  no summary, nor a tooltip", async () => {
+    const parts = await inSection(`family="x-button" only="parts"`, "api-parts")
+    expect(marked(parts)).toEqual([
+      ["api-parts-x-button", "<x-button>", true],
+      ["api-parts-x-button-button", "button", false],
+      ["api-parts-x-or", "<x-or>", true],
+      ["api-parts-x-or-or", "or", false]
+    ])
+    const header = parts.shadowRoot!.getElementById("api-parts-x-button")!
+    expect(header.hasAttribute("title")).toBe(false)
+    expect(parts.shadowRoot!.querySelector("[part~=description]")).toBeNull()
+    expect(header.querySelector("a")!.getAttribute("href")).toBe("#x-button")
+
+    const events = await inSection(`family="x-button" only="events"`, "api-events")
+    expect(events.shadowRoot!.querySelectorAll("[part~=header]")).toHaveLength(1)
+    expect(events.shadowRoot!.querySelectorAll("ui-table")).toHaveLength(1)
+  })
+
+  it("`tags`:  lists the family's tags with their summaries, each name a link to its first table", async () => {
+    const host = await inSection(`family="x-button" only="tags"`, "api-tags")
+    const root = host.shadowRoot!
+    expect(root.querySelectorAll("ui-table")).toHaveLength(1)
+    expect(root.querySelector("[part~=title]")).toBeNull()
+    expect(root.querySelector("[part~=header]")).toBeNull()
+    const table = root.querySelector("table")!
+    expect(table.getAttribute("aria-label")).toBe("Tags of the x-button family")
+    expect([...table.querySelectorAll("thead th")].map((th) => th.textContent)).toEqual(["Tag", "Description"])
+    const rows = [...table.querySelectorAll("tbody tr")].map((row) => [
+      row.querySelector("th a")?.getAttribute("href"),
+      row.querySelector("th")!.textContent,
+      row.querySelector("td")!.textContent
+    ])
+    expect(rows).toEqual([
+      ["#x-button", "<x-button>", "A button does things."],
+      ["#x-or", "<x-or>", "An or."]
+    ])
+    // the summary's code span is drawn as code, as visible text
+    expect(table.querySelector("tbody td code")!.textContent).toBe("does")
+    expect(marked(host)).toEqual([
+      ["api-tags-x-button", "<x-button>", false],
+      ["api-tags-x-or", "<x-or>", false]
+    ])
+    await expectAccessible(host)
+  })
+
+  it("`tags`:  draws nothing for a single tag", async () => {
+    const host = await inSection(`tag="x-button" only="tags"`, "api-tags")
+    expect(host.shadowRoot!.querySelector("ui-table")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=message]")).toBeNull()
+  })
+
+  it("draws nothing, and no message, when the tag has no such table", async () => {
+    const host = await inSection(`tag="x-or" only="events"`, "api-events")
+    expect(host.shadowRoot!.querySelector("ui-table")).toBeNull()
+    expect(host.shadowRoot!.querySelector("[part~=message]")).toBeNull()
+  })
+
+  it("flashes the row `location.hash` names, and doesn't scroll:  the page lands", async () => {
+    const spy = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {})
+    try {
+      history.replaceState(null, "", "#api-events-ui-click")
+      const host = await inSection(`tag="x-button" only="events"`, "api-events")
+      await frame()
+      await ElementFixture.settle(host)
+      const row = host.shadowRoot!.getElementById("api-events-ui-click")!.closest("tr")!
+      expect(row.classList.contains("landed")).toBe(true)
+      expect(spy).not.toHaveBeenCalled()
+      const other = host.shadowRoot!.getElementById("api-events-ui-toggle")!.closest("tr")!
+      expect(other.classList.contains("landed")).toBe(false)
+    } finally {
+      spy.mockRestore()
     }
   })
 })
+
+/** One animation frame. */
+function frame() {
+  return new Promise((resolve) => requestAnimationFrame(resolve))
+}
 
 ////////////////
 // ## Messages and states

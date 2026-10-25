@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
+import { localDate } from "spell/util/time"
 import { UI } from "spell-ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -90,8 +91,11 @@ describe("<ui-calendar> markup", () => {
   it("renders a field, an icon button and a closed popover dialog", async () => {
     const { root, input, trigger, popup } = await calendar(DATE)
     expect(root.className).toBe("ui calendar")
-    expect(root.style.getPropertyValue("--_ui-calendar-anchor")).toMatch(/^--ui-calendar-\d+$/)
     expect(input.parentElement!.className).toBe("ui left icon input")
+    // the field is the anchor, the popup hangs from it:  one name per element
+    const anchor = input.parentElement!.style.getPropertyValue("anchor-name")
+    expect(anchor).toMatch(/^--ui-calendar-\d+$/)
+    expect(popup.style.getPropertyValue("position-anchor")).toBe(anchor)
     expect(input.value).toBe("September 30, 2026")
     expect(input.getAttribute("aria-label")).toBe("Due")
     expect(trigger.getAttribute("aria-label")).toBe("Choose date")
@@ -254,9 +258,7 @@ describe("<ui-calendar> views", () => {
     expect(today()!.textContent).toBe("Today")
     today()!.click()
     await ElementFixture.tick()
-    const now = new Date()
-    const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
-    expect(host.value).toBe(iso)
+    expect(host.value).toBe(localDate())
   })
 })
 

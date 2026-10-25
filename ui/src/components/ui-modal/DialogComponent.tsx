@@ -47,7 +47,8 @@ import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
  *
  * - Buttons:  a click on an approve / deny element fires the cancelable `ui-approving` / `ui-denying`, then closes.
  *   - Those elements (`ModalActionSelectors`):
- *     Fomantic's `.approve` / `.deny` classes, `<ui-button positive / negative>`.
+ *     Fomantic's `.approve` / `.deny` classes, `<ui-button color="positive">` / `"negative"` (and the old
+ *     `<ui-button color="negative">`).
  *   - The `closable` icon closes (reason `close`).
  *
  * - `closable="false"` is Fomantic's `closable: false` AND `closeIcon: false`:
@@ -126,12 +127,24 @@ export abstract class DialogComponent<
     return this.isVisible ? this.shownClass : undefined
   }
 
+  /**
+   * Shown or hidden, as `visible` (`isVisible`):  `ui-opening` / `ui-closing` first, `ui-opened` / `ui-closed` once
+   * its transition ends (`onVisibleChange()`).
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isVisible",
+    detail: (visible, originalEvent): UIT.ModalOpenDetail | UIT.ModalCloseDetail =>
+      visible ? { visible, originalEvent } : { visible, reason: this.closeReason, originalEvent },
+    afterDetail: (visible): UIT.ModalOpenDetail => ({ visible })
+  })
+
+  /** Why the latest close was asked for:  `ui-closing`'s `reason`. */
+  private closeReason: UIT.ModalCloseReason = "escape"
+
   /** Show, dispatching the cancelable `ui-opening` first;  true when applied. */
-  @E.untracked
   requestOpen(originalEvent?: Event): boolean {
-    if (this.isVisible) return false
-    const detail: UIT.ModalOpenDetail = { visible: true, originalEvent }
-    return this.requestChange("isVisible", true, () => this.fire("ui-opening", detail))
+    return this.disclosure.open(originalEvent)
   }
 
   /** Hide for `reason`, dispatching the cancelable `ui-closing` first;  true when applied. */
@@ -140,8 +153,8 @@ export abstract class DialogComponent<
     if (!this.isVisible) return false
     this.isDismissing = true
     E.soon(() => (this.isDismissing = false))
-    const detail: UIT.ModalCloseDetail = { visible: false, reason, originalEvent }
-    return this.requestChange("isVisible", false, () => this.fire("ui-closing", detail))
+    this.closeReason = reason
+    return this.disclosure.close(originalEvent)
   }
 
   /**
@@ -160,8 +173,7 @@ export abstract class DialogComponent<
     if (visible) {
       this.show()
       if (keyframes) await UI.transitions.animate({ element: dialog, name: keyframes, direction: UIT.IN })
-      const detail: UIT.ModalOpenDetail = { visible: true }
-      if ((await this.transitionsEnd()) && this.isVisible) this.fire("ui-opened", detail)
+      if ((await this.transitionsEnd()) && this.isVisible) this.disclosure.sendAfter(true)
       return
     }
     const wasShown = UI.overlays.isOpen(this.overlayEntry)
@@ -169,9 +181,8 @@ export abstract class DialogComponent<
     // shown again while the keyframes ran
     if (this.isVisible) return
     this.hide()
-    const detail: UIT.ModalOpenDetail = { visible: false }
     if (!wasShown || !(await this.transitionsEnd())) return
-    if (!this.isVisible && this.domElement.isConnected) this.fire("ui-closed", detail)
+    if (!this.isVisible && this.domElement.isConnected) this.disclosure.sendAfter(false)
   }
 
   /**
@@ -297,10 +308,9 @@ export abstract class DialogComponent<
    */
   @E.untracked
   private readonly onClose = (event: Event) => {
-    if (this.dialog?.open || !this.domElement.isConnected || !this.isVisible) return
-    const detail: UIT.ModalCloseDetail = { visible: false, reason: "escape", originalEvent: event }
-    this.fire("ui-closing", detail)
-    this.isVisible = false
+    if (this.dialog?.open || !this.domElement.isConnected) return
+    this.closeReason = "escape"
+    this.disclosure.adopt(false, event)
   }
 
   ////////////////

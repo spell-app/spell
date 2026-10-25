@@ -4,6 +4,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import "spell-ui/components/ui-segment"
 import "spell-ui/components/ui-parts"
@@ -42,13 +43,22 @@ describe("<ui-segment> classes", () => {
     ['stacked="tall"', "ui tall stacked segment"],
     ['piled="yes"', "ui piled segment"],
     ["vertical placeholder", "ui placeholder vertical segment"],
-    ["circular compact basic clearing", "ui basic circular clearing compact segment"],
+    // the old names (epic ui-gaps P4), and the new
+    ["circular compact basic clearing", "ui compact clearing circular basic segment"],
+    ['appearance="circular basic" padding="compact" clearing', "ui compact clearing circular basic segment"],
+    ['padded="very" fitted', "ui fitted segment"],
+    ['padding="lg"', "ui very padded segment"],
+    ['stacked="tall" raised', "ui tall stacked raised segment"],
+    ['appearance="tall-stacked raised"', "ui tall stacked raised segment"],
+    ['text-align="center"', "ui center aligned segment"],
+    ['align="center"', "ui center aligned segment"],
     ['padded="very"', "ui very padded segment"],
     ['floated="right"', "ui right floated segment"],
     ['text-align="center"', "ui center aligned segment"],
     ["secondary", "ui secondary segment"],
     ['attached="top"', "ui top attached segment"],
-    ["attached seamless", "ui seamless attached segment"],
+    ["attached seamless", "ui attached seamless segment"],
+    ['attach="top" seamless', "ui top attached seamless segment"],
     ["loading disabled", "ui disabled loading segment"],
     ['fitted="horizontally"', "ui horizontally fitted segment"],
     ['scrolling="long" resizable', "ui resizable long scrolling segment"]
@@ -106,12 +116,12 @@ describe("<ui-segment> states and owner tokens", () => {
       const style = getComputedStyle(rootOf(id))
       expect(style.getPropertyValue("--ui-inverted").trim(), id).toBe("1")
       expect(style.colorScheme, id).toBe("dark")
-      expect(luminance(style.backgroundColor), id).toBeLessThan(0.3)
+      expect(Painted.luminance(style.backgroundColor), id).toBeLessThan(0.07)
     }
     const nested = getComputedStyle(rootOf("n"))
     expect(nested.getPropertyValue("--ui-inverted").trim()).toBe("0")
     expect(nested.colorScheme).toBe("light")
-    expect(luminance(nested.backgroundColor)).toBeGreaterThan(0.7)
+    expect(Painted.luminance(nested.backgroundColor)).toBeGreaterThan(0.45)
   })
 
   it("is busy while loading, with an announcement;  aria-disabled while disabled", async () => {
@@ -135,7 +145,8 @@ describe("<ui-segment> states and owner tokens", () => {
 describe("<ui-segments>", () => {
   it.each([
     ["", "ui segments"],
-    ["horizontal equal-width", "ui equal width horizontal segments"],
+    ["horizontal equal-width", "ui horizontal equal width segments"],
+    ['direction="horizontal" equal-width', "ui horizontal equal width segments"],
     ["raised", "ui raised segments"],
     ['stacked="tall"', "ui tall stacked segments"],
     ["piled", "ui piled segments"],
@@ -253,12 +264,3 @@ describe("<ui-segment> accessibility", () => {
     await expectAccessible(root, { rules: { "heading-order": headingOrder } })
   })
 })
-
-/** Relative luminance (0..1) of any CSS colour, via a canvas pixel. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
-}

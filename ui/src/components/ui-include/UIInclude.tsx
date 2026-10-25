@@ -80,7 +80,7 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
   ////////////////
 
   /** Insert the markup whenever the text, `select` or `page-styles` change, once loaded. */
-  @E.onChange("textToShow", "loadStatus", "select", "pageStyles")
+  @E.onChange("textToShow", "loadStatus", "selector", "pageStyles")
   protected onMarkupChanged(
     text: string,
     loadStatus: E.SourceStatus,
@@ -195,10 +195,10 @@ export class UIInclude extends E.LoadableComponent<typeof includeVocabulary> {
 
   /** With `select`:  the matched element's `id`, so only it is replaced;  it MUST have one. */
   protected saveFragment(): string | undefined {
-    if (!this.select) return undefined
+    if (!this.selector) return undefined
     const id = this.selected?.id
     if (!id) {
-      throw new E.SourceError(`UIInclude.save():  "${this.select}" matched an element with no id;  give it one`, {
+      throw new E.SourceError(`UIInclude.save():  "${this.selector}" matched an element with no id;  give it one`, {
         cause: { kind: "save" }
       })
     }

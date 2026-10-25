@@ -41,7 +41,14 @@ export const messageVocabulary = {
       description: "Consequence, tinting it like a colour."
     },
     { name: "floating", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its content." },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  only as wide as its content.  Old name:  `compact`."
+    },
     {
       name: "centered",
       group: "layout",
@@ -55,18 +62,23 @@ export const messageVocabulary = {
       description: "The dark scheme;  a coloured one keeps its hue in the text."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "Joined edge to edge with the segment or form below;  `bottom` joins the one above."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old " +
+        "name:  `attached` (bare is `both`)."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: ["center", "right"],
-      description: "Aligns its text `center` or `right`."
+      replaces: ["text-align"],
+      description: "Aligns its text `center` or `right`.  Old name:  `text-align`."
     },
     {
       name: "icon",

@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Emoji">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-emoji%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-emoji%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/emoji.html"
+              link="https://fomantic-ui.com/elements/emoji.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's emoji page (its Definition tab:  General, States, Variations), plus our own extras (In text,
@@ -126,7 +126,7 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
                 <ui-docs-example description="An emoji can show that it is disabled.">
-                  <ui-segment basic size="massive">
+                  <ui-segment size="massive" appearance="basic">
                     <ui-emoji name="anguished_face" disabled></ui-emoji>
                   </ui-segment>
                 </ui-docs-example>
@@ -136,7 +136,7 @@
                 <ui-docs-example
                   description="An emoji can be used as a simple loader.  It stands still when the reader asks for reduced motion."
                 >
-                  <ui-segment basic size="massive">
+                  <ui-segment size="massive" appearance="basic">
                     <ui-emoji name="baby_angel" loading></ui-emoji>
                     <ui-emoji name="smiling_face_with_smiling_eyes" loading></ui-emoji>
                     <ui-emoji name="beaming_face_with_smiling_eyes" loading></ui-emoji>
@@ -154,7 +154,7 @@
                     <code>big</code> 7.5em. <code>medium</code> is the default, the size of the text -- NOT Fomantic's
                     fixed 3em.</ui-message
                   >
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <ui-emoji name="smiling_face" size="small"></ui-emoji> Small
                     <br />
                     <ui-emoji name="smiling_face" size="medium"></ui-emoji> Medium
@@ -169,7 +169,7 @@
                 <ui-docs-example
                   description="If no specific size is given, every emoji is sized by the current element's font size."
                 >
-                  <ui-segment basic>
+                  <ui-segment appearance="basic">
                     <ui-header size="small">Within a header <ui-emoji name="smiling_face"></ui-emoji></ui-header>
                     <ui-button size="large">Within a button <ui-emoji name="smiling_face"></ui-emoji></ui-button>
                     <ui-divider spacer></ui-divider>
@@ -186,13 +186,13 @@
                 <ui-docs-example>
                   <p slot="description">An emoji can be formatted as a link.</p>
                   <ui-message slot="description" size="small"
-                    ><code>link</code> is only the look, a pointer cursor. Wrap the emoji in a
+                    ><code>appearance="link"</code> is only the look, a pointer cursor. Wrap the emoji in a
                     <code>&lt;ui-button&gt;</code> or <code>&lt;a&gt;</code> that does the work, and name
                     that.</ui-message
                   >
-                  <ui-segment basic size="massive">
+                  <ui-segment size="massive" appearance="basic">
                     <a href="#link" aria-label="React with a smile"
-                      ><ui-emoji name="slightly_smiling_face" link></ui-emoji
+                      ><ui-emoji name="slightly_smiling_face" appearance="link"></ui-emoji
                     ></a>
                   </ui-segment>
                 </ui-docs-example>
@@ -305,7 +305,17 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-docs-api family="ui-emoji"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-emoji" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-emoji" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-emoji" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

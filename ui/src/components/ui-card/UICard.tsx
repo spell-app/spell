@@ -3,7 +3,7 @@ import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import { cardVocabulary } from "./UICard.en"
-import type { UICards } from "./UICards"
+import { UICards } from "./UICards"
 
 import cardCSS from "./UICard.css?inline"
 
@@ -41,7 +41,7 @@ function isSameNouns(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
  *
  * - `loading`:  `aria-busy` (through `internals`) and a visually hidden `role=status` "Loading…".
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
- *   `aria-disabled`, everything inside inert;  and a link card loses its `href`.
+ *   `aria-disabled`, everything inside inert;  and a link card loses its `link`.
  ****************/
 export class UICard extends E.UIComponent<typeof cardVocabulary> {
   @E.proto static vocabulary = cardVocabulary
@@ -62,8 +62,16 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
     return this.context.ownerComponent<UICards>()
   }
 
-  /** A shared variation the card doesn't set comes from its group. */
+  /**
+   * A shared variation the card doesn't set comes from its group.
+   * - `appearance`:  its own words and the group's, together;  and `link` for a bare `link`, the old look.
+   */
   protected classValue(name: E.AttributeName<typeof cardVocabulary>): unknown {
+    if (name === UIT.APPEARANCE) {
+      const own = UICards.withBareLinkLook(this.appearance, this.attributes.link)
+      const words = new Set([own, this.group?.variationFor(UIT.APPEARANCE)].join(" ").split(" ").filter(Boolean))
+      return [...words].join(" ") || undefined
+    }
     const own = super.classValue(name)
     if (own || !SHARED_VARIATIONS.has(name)) return own
     return this.group?.variationFor(name as UIT.CardSharedVariation)
@@ -124,9 +132,9 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Root element:  a link with `href`, else an article. */
+  /** Root element:  a link with `link` (not bare:  that's the old look), else an article. */
   get rootTag(): "a" | "article" {
-    return this.href ? "a" : "article"
+    return this.link ? "a" : "article"
   }
 
   render(): JSX.Element {
@@ -136,7 +144,7 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("card")}
-        href={isLink() && !this.disabled ? this.href : undefined}
+        href={isLink() && !this.disabled ? this.link : undefined}
         target={isLink() ? this.target : undefined}
         aria-disabled={isLink() && this.disabled ? "true" : undefined}
       >
@@ -207,10 +215,8 @@ type Shorthand = (typeof Shorthands)[number]
 const SHARED_VARIATIONS: ReadonlySet<string> = new Set<UIT.CardSharedVariation>([
   "size",
   "color",
-  "horizontal",
-  "raised",
-  "link",
-  "basic",
+  "direction",
+  "appearance",
   "inverted"
 ])
 

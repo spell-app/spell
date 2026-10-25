@@ -131,7 +131,7 @@ const LETTER_A = 0x61
 // ## Item
 ////////////////
 
-/** `<ui-item type>`:  an option, a group header, or a divider. */
+/** `<ui-item kind>`:  an option, a group header, or a divider. */
 export type ItemType = "item" | "header" | "divider"
 
 /**
@@ -176,19 +176,6 @@ export type ItemOwner = {
    */
   itemContext(item: Element): ItemContext
 }
-
-////////////////
-// ## CSS contracts
-////////////////
-
-/**
- * Custom property `UIDropdown.css` reads for the anchor name, e.g. `--_ui-dropdown-anchor: --ui-dropdown-7`.
- * - The element sets it INLINE on its root, to a per-instance dashed ident (`UI.ids`);
- *   the root's `anchor-name` and the menu's `position-anchor` both read it.
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- * - Falls back to `--ui-dropdown`, which is enough inside one shadow root.
- */
-export const DROPDOWN_ANCHOR_PROPERTY = "--_ui-dropdown-anchor"
 
 ////////////////
 // ## Icon
@@ -355,7 +342,7 @@ export class StackClasses {
  * - `segmented` is ours, a segmented control:  a bordered group of joined items,
  *   the selected one filled with the menu's colour (the primary colour by default).
  *   It hugs its items;  `alignment` places it.
- * - NOTE: not `vertical` (an orientation every look combines with) or `basic` (`<ui-tabs basic>` is the panes')
+ * - NOTE: not `vertical` (an orientation every look combines with) or `basic` (`<ui-tabs appearance="basic">` is the panes')
  */
 export const MenuAppearances = ["tabular", "pointing", "secondary", "text", "segmented"] as const
 
@@ -389,8 +376,8 @@ export type MessageDismissDetail = {
 ////////////////
 
 /**
- * Inherited tokens a `<ui-breadcrumb>` sets INLINE on its root,
- * which every `<ui-breadcrumb-section>` draws as its leading divider.  See "Dividers" in `UIBreadcrumb.css`.
+ * Inherited tokens a `<ui-breadcrumbs>` sets INLINE on its root,
+ * which every `<ui-breadcrumb>` draws as its leading divider.  See "Dividers" in `UIBreadcrumbs.css`.
  * - `text` -- a CSS STRING (`"›"`), from `divider`;  quote and escape it as CSS (`\"`, `\\`, `\A `), not JSON
  * - `icon` -- an `<image>`, `url("data:image/svg+xml,...")` of the `divider-icon` SVG;
  *   painted as a mask in `currentColor`
@@ -618,7 +605,7 @@ export type ListSelectDetail = {
  * when it doesn't set the attribute itself (Fomantic's `.ui.raised.cards > .card`).
  * - Read through `UICards.variationFor()`.
  */
-export type CardSharedVariation = "size" | "color" | "horizontal" | "raised" | "link" | "basic" | "inverted"
+export type CardSharedVariation = "size" | "color" | "direction" | "appearance" | "inverted"
 
 ////////////////
 // ## Popup
@@ -689,8 +676,8 @@ export type ModalActionDetail = {
  *   the native fallback uses the same selectors.
  */
 export const ModalActionSelectors = {
-  approve: `.approve, .ok, .positive, [positive]:not([positive="false"], [positive="no"])`,
-  deny: `.deny, .cancel, .negative, [negative]:not([negative="false"], [negative="no"])`
+  approve: `.approve, .ok, .positive, [color="positive"], [positive]:not([positive="false"], [positive="no"])`,
+  deny: `.deny, .cancel, .negative, [color="negative"], [negative]:not([negative="false"], [negative="no"])`
 } as const
 
 ////////////////
@@ -812,13 +799,6 @@ export type SearchChangeDetail = {
   /** event of the person's action, when there was one */
   originalEvent?: Event
 }
-
-/**
- * Custom property `UISearch.css` reads for the anchor name, e.g. `--_ui-search-anchor: --ui-search-3`.
- * - The element sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- */
-export const SEARCH_ANCHOR_PROPERTY = "--_ui-search-anchor"
 
 ////////////////
 // ## Toast
@@ -1491,6 +1471,9 @@ export const HEADER = "header"
 /** The `heading` attribute:  the heading shorthand of a card, modal, message ... (its old name `header`). */
 export const HEADING = "heading"
 
+/** The `appearance` attribute:  a tag's look, several words at once (epic `ui-gaps` P4;  `basic`, `raised` ...). */
+export const APPEARANCE = "appearance"
+
 /** The `description` word:  a part, a class. */
 export const DESCRIPTION = "description"
 
@@ -1731,9 +1714,11 @@ export const SourceBodyAttributes = [
       "`load()` fetches it now, `reload()` again."
   },
   {
-    name: "select",
+    name: "selector",
     kind: "string",
-    description: "With `source`:  a CSS selector;  only its first match in the file becomes the content."
+    replaces: ["select"],
+    description:
+      "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
   }
 ] as const
 

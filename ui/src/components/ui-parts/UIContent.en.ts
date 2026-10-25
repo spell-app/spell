@@ -38,11 +38,13 @@ export const contentVocabulary = {
       description: "Floats `left` or `right`."
     },
     {
-      name: "text-align",
+      name: "align",
       group: "layout",
       kind: "textAlign",
       values: "alignments",
-      description: "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`)."
+      replaces: ["text-align"],
+      description:
+        "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`."
     },
     {
       name: "vertical-align",

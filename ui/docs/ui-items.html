@@ -28,17 +28,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Items">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-items%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-items%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/views/item.html"
+              link="https://fomantic-ui.com/views/item.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -56,7 +56,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's item page, section by section, in its order (Types, Content, States, Variations).
@@ -384,8 +384,7 @@
                           ><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image
                         ></ui-description>
                         <ui-extra>
-                          <ui-button primary floated="right"
-                            >Buy tickets <ui-icon name="chevron right"></ui-icon
+                          <ui-button floated="right" color="primary">Buy tickets <ui-icon name="chevron right"></ui-icon
                           ></ui-button>
                           <ui-label>Limited</ui-label>
                         </ui-extra>
@@ -399,8 +398,7 @@
                           ><ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image
                         ></ui-description>
                         <ui-extra>
-                          <ui-button primary floated="right"
-                            >Buy tickets <ui-icon name="chevron right"></ui-icon
+                          <ui-button floated="right" color="primary">Buy tickets <ui-icon name="chevron right"></ui-icon
                           ></ui-button>
                         </ui-extra>
                       </ui-content>
@@ -411,7 +409,7 @@
 
               <ui-section id="examples-variations-relaxed" label="Relaxed" sticky collapsible dividing>
                 <ui-docs-example description="A group of items can relax its padding to provide more negative space.">
-                  <ui-items relaxed>
+                  <ui-items spacing="lg">
                     <ui-item>
                       <ui-image size="tiny" src="images/wireframe/image.png" alt=""></ui-image>
                       <ui-content vertical-align="middle"><ui-header link="#">12 Years a Slave</ui-header></ui-content>
@@ -430,7 +428,7 @@
                 </ui-docs-example>
 
                 <ui-docs-example description='Even more with `relaxed="very"`.'>
-                  <ui-items relaxed="very">
+                  <ui-items spacing="xl">
                     <ui-item>
                       <ui-image size="tiny" src="images/wireframe/image.png" alt=""></ui-image>
                       <ui-content vertical-align="middle"><ui-header link="#">12 Years a Slave</ui-header></ui-content>
@@ -451,10 +449,10 @@
 
               <ui-section id="examples-variations-link-item" label="Link Item" sticky collapsible dividing>
                 <ui-docs-example
-                  description="An item can be formatted so that the entire contents link to another page:  `link` on the group is the hover look, `href` on an item the link."
+                  description='An item can be formatted so that the entire contents link to another page:  `appearance="link"` on the group is the hover look, `link` on an item the link.'
                 >
-                  <ui-items link>
-                    <ui-item href="#">
+                  <ui-items appearance="link">
+                    <ui-item link="#">
                       <ui-image size="tiny" src="images/avatar/large/stevie.jpg" alt=""></ui-image>
                       <ui-content>
                         <ui-header>Stevie Feliciano</ui-header>
@@ -463,7 +461,7 @@
                         ></ui-description>
                       </ui-content>
                     </ui-item>
-                    <ui-item href="#">
+                    <ui-item link="#">
                       <ui-image size="tiny" src="images/avatar/large/veronika.jpg" alt=""></ui-image>
                       <ui-content>
                         <ui-header>Veronika Ossi</ui-header>
@@ -472,7 +470,7 @@
                         ></ui-description>
                       </ui-content>
                     </ui-item>
-                    <ui-item href="#">
+                    <ui-item link="#">
                       <ui-image size="tiny" src="images/avatar/large/jenny.jpg" alt=""></ui-image>
                       <ui-content>
                         <ui-header>Jenny Hess</ui-header>
@@ -623,7 +621,7 @@
 
                   - The image: the `image` shorthand, a slotted `<img>` (both at the item's image width), or a `<ui-image size>`
                     (its own size).
-                  - `href` makes the whole item one link; `link` on the group is only the hover look.
+                  - `link` makes the whole item one link; `appearance="link"` on the group is only the hover look.
                   - `<ui-content vertical-align="middle|bottom">` aligns the content against the image; `floated` on a part
                     (a `<ui-button floated="right">` in `<ui-extra>`) floats it.
                   - Items stack, image above content, below 768px:  of the GROUP's width by default, of the window's with
@@ -670,7 +668,7 @@
                 <script type="text/markdown">
                   - The group is a `role="list"` and each item a `listitem`, so a screen reader hears how many there are.
                   - A link item is one `<a>` whose name is all of its text. Keep other links and buttons out of it, and don't give a
-                    linked header its own `href` inside one.
+                    linked header its own `link` inside one.
                   - Give a `<ui-header>` a `level` when an item's title should be a heading in the page outline.
                   - A slotted image needs its own `alt`; the `image` shorthand is decorative (`alt=""`), so put what matters in
                     the text.
@@ -684,7 +682,21 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-items"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-items" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-items" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-items" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-items" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -708,7 +720,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `divided`, `relaxed`, `link` and `unstackable` switch private tokens the items read; use the attributes, and
+                    `divided`, `spacing`, `appearance` and `unstackable` switch private tokens the items read; use the attributes, and
                     never set the `--_ui-*` / `--_items-*` names: they're the sheet's private plumbing.
                   </script>
                 </ui-markdown>

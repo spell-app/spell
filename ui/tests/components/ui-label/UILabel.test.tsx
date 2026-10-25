@@ -63,10 +63,10 @@ describe("<ui-label> classes", () => {
     ['pointing="below"', "ui below pointing label"],
     ['floating="left"', "ui left floating label"],
     ['attached="top right"', "ui top right attached label"],
-    ["horizontal circular empty", "ui circular empty horizontal label"],
+    ["horizontal circular empty", "ui horizontal empty circular label"],
     ["fluid centered", "ui centered fluid label"],
     ["prompt", "ui prompt label"],
-    ["active disabled inverted", "ui active disabled inverted label"],
+    ["active disabled inverted", "ui disabled inverted active label"],
     // `image` is a string kind:  no grammar slot, so the element adds the class as an extra, before the noun
     ["image", "ui image label"]
   ])("<ui-label %s>", async (attributes, classes) => {
@@ -198,7 +198,7 @@ describe("<ui-labels>", () => {
       `<ui-labels size="huge" color="blue" basic tag><ui-label>A</ui-label></ui-labels>`
     )
     const root = group.shadowRoot!.querySelector("[part~=group]")!
-    expect(root.className).toBe("ui huge blue basic tag labels")
+    expect(root.className).toBe("ui huge blue tag basic labels")
     expect(root.querySelector("slot")).not.toBeNull()
   })
 
@@ -369,5 +369,36 @@ describe("<ui-label> link", () => {
   it.each(["link", "href"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-label NAME="#there">Go</ui-label>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
+  })
+})
+
+////////////////
+// ## Old names
+//
+// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
+////////////////
+
+describe("<ui-label> old names", () => {
+  /** The class string of the element's first classed box. */
+  async function classesOf(html: string) {
+    const host = await ElementFixture.render<DOMElement>(html)
+    return host.shadowRoot!.querySelector("[class]")!.className
+  }
+
+  it("<ui-label>:  each old spelling draws as its new one", async () => {
+    expect(
+      await classesOf(`<ui-label basic circular attached="top left" centered horizontal active>A</ui-label>`)
+    ).toBe(
+      await classesOf(
+        `<ui-label appearance="basic circular" attach="top left" align="center" direction="horizontal" selected>A</ui-label>`
+      )
+    )
+  })
+  it("<ui-labels>:  each old spelling draws as its new one", async () => {
+    expect(await classesOf(`<ui-labels basic tinted circular centered horizontal>A</ui-labels>`)).toBe(
+      await classesOf(
+        `<ui-labels appearance="basic tinted circular" align="center" direction="horizontal">A</ui-labels>`
+      )
+    )
   })
 })

@@ -129,6 +129,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     `ParentLink` (the `parent` attribute:  an element joining the container with that id)
   - on Solid:
     - `FormComponent` + `DOMFormControl` (form controls)
+    - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker),
+      a `Disclosure` (the kit's `spell/element`) with the popover, its `UI.overlays` entry and its anchor on top
     - `PartComponent`:  the generic content parts' component, styled by their owner
     - `IconGlyph`
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
@@ -193,7 +195,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
       (WWOD §4 › "Circular imports";  `barrel.ssr.test.ts`).
 - [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`spell-ui/core`, `spell-ui/forms`).
   - `core`:  the element core, and the foundation JS every family needs.
-  - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`).
+  - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`,
+    `PopoverPanel`).
   - Component files import shared code ONLY through these (see "Solid authoring").
 - [`src/styles/`](src/styles/):  its own lib entry, `spell-ui/styles`.
   - `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`, `themes/`
@@ -224,6 +227,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `StubOwner`:  stand-in owners (card, feed ...)
   - `MemberClashes`:  a set's vocabulary attributes named like a base's member;  every set's tests run it over their own
   - `PerfRun` (the dropdown benchmark), `fallback.cases.ts`, `dictionary.es.ts`
+  - `Painted`:  a CSS colour as the browser paints it, and its luminance (the maths, the kit's `spell/util/color`)
   - `VisualOpen` + `test.types.ts`:  the visual tests' hooks
   - `visual/baselines/`:  the screenshots (`yarn test:visual`)
   - `fixtures/`:  files the tests load (component packs, sources, an icon pack)
@@ -255,7 +259,8 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - the site bundle's build, `site-bundle.ts`, watched by `site-dev.ts`
   - `site-check.ts`, `tokens-alias.ts`, `design-build.ts`
   - What several scripts share:
-    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  write-or-`--check`, `vp fmt`, markup escaping
+    - [`generatedFiles.ts`](src/tools/generatedFiles.ts):  write-or-`--check`, `vp fmt`, a page's status words
+      (escaping markup:  the kit's `escapeHTML()`, `spell/util/string`)
       - in `src/tools/` since epic `repo-split` P14:  a test reads it too, and only `src/` is imported
     - data:  `iconExtras.ts`, a camelCase helper file here, run by none
   - A class other code uses lives in `src/tools/` (PascalCase), and its script here is a few lines:
@@ -532,6 +537,9 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
 - `yarn site:sections [--check] [page...]` ([its script](scripts/site-sections.ts)):
   nests every page's flat level 2 / 3 headers and headed examples into `<ui-section>`s.
   - It writes (or fixes) their ids, `<tab>-<section>-<example>`;  idempotent.
+  - It splits a components page's API tab into a section per kind of table its tags have
+    (`<ui-docs-api family only="attributes">` ...), from the site's data:  rerun it after `yarn site:data`.
+    - A family of 2+ tags gets a Tags section first (`only="tags"`):  its tags, their summaries, links to their tables.
   - `site:index`, `site:kitchen` and `site:new` run it on what they write.
 - `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell design build`):
   the claude.ai design system's files (epic `claude-design`).

@@ -123,6 +123,14 @@ export class SiteSections {
   ////////////////
 
   /**
+   * Where top-level titles stick, px from the viewport's top (the last measure):  nothing above it is being read
+   * (`SitePatch` keeps the line below it where it is).
+   */
+  get stuckBottom(): number {
+    return this.top
+  }
+
+  /**
    * `main` is the page shown (its first load, or a swap):  restore its closed sections, set the sticky offsets,
    * and again once its `<ui-root>` is ready (the tabs' bar has drawn).
    * - `isFirst`:  before the sections are defined, so a restored close just starts closed.
@@ -301,12 +309,20 @@ export class SiteSections {
    * - an OLD link:  a pane's section of that name (`#types` => `#examples-types`),
    *   else the first page section whose id ends with it
    *   (an example's old slug:  `#vertical-divider` => `#examples-types-vertical-divider`)
+   * - a row of an API section (`#api-attributes-size`):  drawn later, in the shadow root of the section's
+   *   `<ui-docs-api only>`, whose id starts the row's
    * - a tag's own page's `<ui-docs-api tag>` for that tag (`ui-radio.html#ui-radio`):  the tables, headerless
-   * - a tag of the family (`#ui-or`):  its tables in the `<ui-docs-api>`, drawn in its shadow root later
+   * - a tag of the family (`#ui-or`):  its first header in the `<ui-docs-api>`s, drawn in their shadow roots later
+   *   (with `only`, each section's header for it is `<section id>-<tag>`)
    */
   private static resolve(main: HTMLElement, id: string): Found | undefined {
     const own = document.getElementById(id)
     if (own && main.contains(own)) return { target: own, id }
+    const rows = [...main.querySelectorAll<HTMLElement>(API_SECTION)].find((api) => {
+      const section = api.closest(SECTION_TAG)?.id
+      return !!section && id.startsWith(`${section}-`)
+    })
+    if (rows) return { apis: [rows], find: (root) => root.getElementById(id) }
     const tabs = SiteSections.tabsOf(main)
     for (const value of tabs ? SiteSections.paneValues(tabs) : []) {
       const section = document.getElementById(`${value}-${id}`)
@@ -319,8 +335,12 @@ export class SiteSections {
       (element) => element.getAttribute("tag") === id
     )
     if (single) return { target: single, id }
-    const api = main.querySelector<HTMLElement>("ui-docs-api[family]")
-    if (api && TAG_NAME.test(id)) return { api, tag: id }
+    const apis = [...main.querySelectorAll<HTMLElement>("ui-docs-api[family]")]
+    if (apis.length && TAG_NAME.test(id)) {
+      const find = (root: ShadowRoot) =>
+        root.getElementById(id) ?? root.querySelector(`[part~="header"][id$="-${CSS.escape(id)}"]`)
+      return { apis, tag: id, find }
+    }
     return undefined
   }
 
@@ -328,9 +348,9 @@ export class SiteSections {
   private async go(main: HTMLElement, found: Found, landing: number, scroll: LandingScroll): Promise<void> {
     await new Promise<void>((resolve) => TocIndex.whenReady(main, resolve))
     if (landing !== this.landings) return
-    const target = "api" in found ? await SiteSections.apiHeader(found.api, found.tag) : found.target
+    const target = "apis" in found ? await SiteSections.drawnTarget(found) : found.target
     if (!target || landing !== this.landings) return
-    const holder = "api" in found ? found.api : target
+    const holder = TocIndex.lightElementOf(target)
     const tabs = SiteSections.tabsOf(main)
     const pane = tabs && TocIndex.paneOf(tabs, holder)
     if (tabs && pane && TocIndex.shownPane(tabs) !== pane)
@@ -374,15 +394,22 @@ export class SiteSections {
   // ## Helpers
   ////////////////
 
-  /** `<ui-docs-api>`'s header for `tag`, once drawn (its data loads first);  `undefined` if it isn't the family's. */
-  private static async apiHeader(api: HTMLElement, tag: string): Promise<Element | undefined> {
-    const data = await SiteData.load().catch(() => undefined)
-    const family = api.getAttribute("family") ?? ""
-    if (!data || !SiteData.family(data, family)?.tags.includes(tag)) return undefined
+  /**
+   * What `found` names in its `<ui-docs-api>`s' shadow roots, the first that has it, once drawn (their data loads
+   * first);  `undefined` when none draws it, or a `tag` isn't the family's.
+   */
+  private static async drawnTarget(found: DrawnFound): Promise<Element | undefined> {
+    if (found.tag) {
+      const data = await SiteData.load().catch(() => undefined)
+      const family = found.apis[0]!.getAttribute("family") ?? ""
+      if (!data || !SiteData.family(data, family)?.tags.includes(found.tag)) return undefined
+    }
     const deadline = performance.now() + API_WAIT_MS
     while (performance.now() < deadline) {
-      const header = api.shadowRoot?.getElementById(tag)
-      if (header) return header
+      for (const api of found.apis) {
+        const target = api.shadowRoot && found.find(api.shadowRoot)
+        if (target) return target
+      }
       await SiteSections.frames(1)
     }
     return undefined
@@ -491,9 +518,22 @@ export class SiteSections {
 
 /**
  * What a hash names:  an element (with the id the URL should say),
- * or a tag of the family, drawn by `<ui-docs-api>` in its shadow root.
+ * or something `<ui-docs-api>` draws in its shadow root later (a row, a tag of the family).
  */
-type Found = { target: Element; id: string } | { api: HTMLElement; tag: string }
+type Found = { target: Element; id: string } | DrawnFound
+
+/** Something drawn in the shadow roots of `apis`, found by `find`;  a `tag` of their family, when it's a tag. */
+type DrawnFound = {
+  /** where to look, in order */
+  apis: HTMLElement[]
+  /** the element in one shadow root, once drawn */
+  find: (root: ShadowRoot) => Element | null
+  /** the tag a family's header is for (`#ui-or`):  checked against the family first */
+  tag?: string
+}
+
+/** An API section's table (`yarn site:sections` writes one per kind):  its rows' ids start with its section's. */
+const API_SECTION = "ui-docs-api[only]"
 
 /** Frames a section takes to draw what an opening revealed (the write lands on a microtask, the render next frame). */
 const OPEN_FRAMES = 3

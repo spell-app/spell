@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Icon">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-icon%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-icon%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/icon.html"
+              link="https://fomantic-ui.com/elements/icon.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's icon page (its Definition tab:  States, Variations, Groups), after our own Types (solid,
@@ -81,7 +81,7 @@
                 <ui-docs-example description="An `outline` word (or the `outline` attribute) names the regular icon.">
                   <ui-icon name="heart outline"></ui-icon>
                   <ui-icon name="bell outline"></ui-icon>
-                  <ui-icon name="envelope" outline></ui-icon>
+                  <ui-icon name="envelope" appearance="outline"></ui-icon>
                   <ui-icon name="circle outline"></ui-icon>
                 </ui-docs-example>
               </ui-section>
@@ -135,7 +135,7 @@
               <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
                 <ui-docs-example description="An icon can be fitted, without any space to the left or right of it.">
                   Tight spacing
-                  <ui-icon name="help" fitted></ui-icon>
+                  <ui-icon name="help" padding="none"></ui-icon>
                   Tight spacing
                 </ui-docs-example>
               </ui-section>
@@ -162,11 +162,11 @@
                 <ui-docs-example>
                   <p slot="description">An icon can be formatted as a link.</p>
                   <ui-message slot="description" size="small"
-                    ><code>link</code> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap
+                    ><code>appearance="link"</code> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap
                     the icon in a real <code>&lt;a&gt;</code> or <code>&lt;button&gt;</code>.</ui-message
                   >
-                  <ui-icon name="close" link></ui-icon>
-                  <ui-icon name="help" link></ui-icon>
+                  <ui-icon name="close" appearance="link"></ui-icon>
+                  <ui-icon name="help" appearance="link"></ui-icon>
                 </ui-docs-example>
               </ui-section>
 
@@ -189,10 +189,10 @@
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
                 <ui-docs-example description="An icon can be formatted to appear circular.">
-                  <ui-icon name="users" circular></ui-icon>
-                  <ui-icon name="users" color="teal" circular></ui-icon>
-                  <ui-icon name="users" circular inverted></ui-icon>
-                  <ui-icon name="users" color="teal" circular inverted></ui-icon>
+                  <ui-icon name="users" appearance="circular"></ui-icon>
+                  <ui-icon name="users" color="teal" appearance="circular"></ui-icon>
+                  <ui-icon name="users" inverted appearance="circular"></ui-icon>
+                  <ui-icon name="users" color="teal" inverted appearance="circular"></ui-icon>
                 </ui-docs-example>
               </ui-section>
               <ui-section
@@ -208,9 +208,9 @@
                     >Not ported: the <code>colored</code> word -- a coloured circular or bordered icon's ring always
                     follows its colour.</ui-message
                   >
-                  <ui-icon name="users" color="red" circular></ui-icon>
-                  <ui-icon name="users" color="green" circular></ui-icon>
-                  <ui-icon name="users" color="blue" circular></ui-icon>
+                  <ui-icon name="users" color="red" appearance="circular"></ui-icon>
+                  <ui-icon name="users" color="green" appearance="circular"></ui-icon>
+                  <ui-icon name="users" color="blue" appearance="circular"></ui-icon>
                 </ui-docs-example>
               </ui-section>
 
@@ -220,10 +220,10 @@
                   <ui-message slot="description" state="info" size="small"
                     >In Fomantic <code>0.x.x</code> bordered was formerly known as <code>squared</code>.</ui-message
                   >
-                  <ui-icon name="users" bordered></ui-icon>
-                  <ui-icon name="users" color="teal" bordered></ui-icon>
-                  <ui-icon name="users" color="black" bordered inverted></ui-icon>
-                  <ui-icon name="users" color="teal" bordered inverted></ui-icon>
+                  <ui-icon name="users" appearance="bordered"></ui-icon>
+                  <ui-icon name="users" color="teal" appearance="bordered"></ui-icon>
+                  <ui-icon name="users" color="black" inverted appearance="bordered"></ui-icon>
+                  <ui-icon name="users" color="teal" inverted appearance="bordered"></ui-icon>
                 </ui-docs-example>
               </ui-section>
               <ui-section
@@ -234,9 +234,9 @@
                 dividing
               >
                 <ui-docs-example description="The bordered color appears in the same color as the icon itself.">
-                  <ui-icon name="users" color="red" bordered></ui-icon>
-                  <ui-icon name="users" color="green" bordered></ui-icon>
-                  <ui-icon name="users" color="blue" bordered></ui-icon>
+                  <ui-icon name="users" color="red" appearance="bordered"></ui-icon>
+                  <ui-icon name="users" color="green" appearance="bordered"></ui-icon>
+                  <ui-icon name="users" color="blue" appearance="bordered"></ui-icon>
                 </ui-docs-example>
               </ui-section>
 
@@ -347,15 +347,15 @@
                 dividing
               >
                 <ui-docs-example description="The ring surrounds the whole group.">
-                  <ui-icons size="big" bordered>
+                  <ui-icons size="big" appearance="bordered">
                     <ui-icon name="user"></ui-icon>
                     <ui-icon name="cog" corner></ui-icon>
                   </ui-icons>
-                  <ui-icons size="big" circular>
+                  <ui-icons size="big" appearance="circular">
                     <ui-icon name="user"></ui-icon>
                     <ui-icon name="cog" corner="top right"></ui-icon>
                   </ui-icons>
-                  <ui-icons size="big" circular inverted>
+                  <ui-icons size="big" inverted appearance="circular">
                     <ui-icon name="user"></ui-icon>
                     <ui-icon name="cog" inverted corner></ui-icon>
                   </ui-icons>
@@ -432,7 +432,25 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-docs-api family="ui-icon"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-icon" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-icon" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-icon" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-icon" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-icon" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

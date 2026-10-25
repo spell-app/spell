@@ -79,8 +79,8 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
   /** Next-page glyph. */
   readonly nextGlyph = new E.IconGlyph({ owner: this, name: () => NEXT_ICON })
 
-  /** Ids / anchor name, from `UI.ids` once rendering. */
-  private ids = { popup: "", title: "", anchor: "" }
+  /** Ids, from `UI.ids` once rendering. */
+  private ids = { popup: "", title: "" }
 
   /** The text field (popup calendars only). */
   private control?: HTMLInputElement
@@ -225,41 +225,34 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     return this.isOpen && !this.inline
   }
 
-  /** This element's `UI.overlays` entry. */
-  private readonly overlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
-    onDismiss: () => void this.requestOpen(false)
-  }
-
   /**
-   * Open or close the popup, dispatching the cancelable `ui-opening` / `ui-closing` first;  true when applied.
+   * The popup, a popover panel on `isOpen` (open only as `popupIsOpen`, never `inline`):
+   * `ui-opening` / `ui-closing`, the overlay entry, the anchor.
+   * - Never opens while disabled or readonly.
    * - Opening starts over in the type's first view, on the value (or `initial-date`, or today).
    */
-  @E.untracked
-  requestOpen(open: boolean, originalEvent?: Event): boolean {
-    if (this.inline || open === this.popupIsOpen) return false
-    if (open && (this.isDisabled || this.readonly)) return false
-    const detail: UIT.CalendarOpenDetail = { open, originalEvent }
-    const isApplied = this.requestChange("isOpen", open, () => this.send(open ? "ui-opening" : "ui-closing", detail))
-    if (isApplied && open) {
+  readonly popover = new F.PopoverPanel({
+    component: this,
+    member: "isOpen",
+    isOpen: () => this.popupIsOpen,
+    canChange: (open) => !this.inline && (!open || !(this.isDisabled || this.readonly)),
+    detail: (open, originalEvent): UIT.CalendarOpenDetail => ({ open, originalEvent }),
+    onChange: (open) => {
+      if (!open) return
       this.explicitMode = undefined
       this.explicitFocus = undefined
     }
-    return isApplied
+  })
+
+  /** Open or close the popup as a person would (`popover.request()`);  true when applied. */
+  requestOpen(open: boolean, originalEvent?: Event): boolean {
+    return this.popover.request(open, originalEvent)
   }
 
-  /** Popover + overlay registration while open AND connected AND drawn. */
+  /** The popup shows while open AND connected AND drawn (`PopoverPanel.follow()`). */
   @E.onChange("popupIsOpen", "isConnected", "isReady")
   protected onPopupOpenChanged(popupIsOpen: boolean, isConnected: boolean, isReady: boolean) {
-    const { popup } = this
-    if (!popupIsOpen || !isConnected || !isReady || !popup) return
-    if (!popup.matches(":popover-open")) popup.showPopover()
-    UI.overlays.open(this.overlay)
-    return () => {
-      if (popup.matches(":popover-open")) popup.hidePopover()
-      UI.overlays.close(this.overlay)
-    }
+    return this.popover.follow(this.popup, popupIsOpen && isConnected && isReady)
   }
 
   /** A click in the field opens the popup;  focus stays in the field, for typing. */
@@ -535,9 +528,9 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
   ////////////////
 
   render(): JSX.Element {
-    this.ids = { popup: UI.ids.next(ID_PREFIX), title: UI.ids.next(ID_PREFIX), anchor: `--${UI.ids.next(ID_PREFIX)}` }
+    this.ids = { popup: UI.ids.next(ID_PREFIX), title: UI.ids.next(ID_PREFIX) }
     return (
-      <div class={this.rootClass} part={this.partForName("calendar")} style={{ [ANCHOR_PROPERTY]: this.ids.anchor }}>
+      <div class={this.rootClass} part={this.partForName("calendar")}>
         <Show when={this.inline} fallback={this.popupMode()}>
           <div
             class={PICKER_CLASS}
@@ -576,6 +569,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
         <div
           class={[INPUT_CLASS, { [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }]}
           part={this.partForName("input")}
+          style={this.popover.anchorStyle}
         >
           <input
             ref={(element) => (this.control = element)}
@@ -602,7 +596,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
             disabled={this.isDisabled || this.readonly}
             aria-label={this.chooseLabel}
             aria-haspopup="dialog"
-            aria-expanded={this.popupIsOpen ? "true" : "false"}
+            aria-expanded={this.popover.ariaExpanded}
             aria-controls={this.ids.popup}
             onClick={this.onTriggerClick}
           >
@@ -613,6 +607,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
           ref={(element) => (this.popup = element)}
           id={this.ids.popup}
           class={`${POPUP_CLASS} ${this.position ?? DEFAULT_POSITION}`}
+          style={this.popover.panelStyle}
           part={this.partForName("popup")}
           popover="manual"
           role="dialog"
@@ -923,9 +918,6 @@ const DEFAULT_POSITION = "bottom left"
 
 /** `UI.ids` prefix. */
 const ID_PREFIX = "ui-calendar"
-
-/** Inline custom property naming the field's anchor (`UICalendar.css`). */
-const ANCHOR_PROPERTY = "--_ui-calendar-anchor"
 
 /** Glyph of the popup button of a date calendar. */
 const CALENDAR_ICON = "calendar"

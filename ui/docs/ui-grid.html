@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Grid">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-grid%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-grid%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/collections/grid.html"
+              link="https://fomantic-ui.com/collections/grid.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's grid page, both of its tabs in order:  Overview (Introduction ... Responsive Grids) and
@@ -160,7 +160,7 @@
                       <ui-column><ui-segment></ui-segment></ui-column>
                     </ui-row>
                   </ui-grid>
-                  <ui-grid relaxed>
+                  <ui-grid spacing="lg">
                     <ui-row columns="3">
                       <ui-column><ui-segment></ui-segment></ui-column>
                       <ui-column><ui-segment></ui-segment></ui-column>
@@ -202,7 +202,7 @@
                     >, you may want to avoid using negative margins. You can do this by using a
                     <a href="#examples-variations-padded"><code>padded</code></a> variation.
                   </p>
-                  <ui-button attached="top">Button before grid</ui-button>
+                  <ui-button attach="top">Button before grid</ui-button>
                   <ui-grid>
                     <ui-column width="16"><ui-segment></ui-segment></ui-column>
                     <ui-column width="10"><ui-segment></ui-segment></ui-column>
@@ -211,7 +211,7 @@
                   <ui-grid>
                     <ui-column width="16"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
-                  <ui-button attached="bottom">Button after grid</ui-button>
+                  <ui-button attach="bottom">Button after grid</ui-button>
                 </ui-docs-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
@@ -292,8 +292,8 @@
                     working with a <a href="ui-menu.html#examples-types-tabbed"><code>vertical tabular</code> menu</a>
                   </p>
                   <ui-grid columns="2">
-                    <ui-column attached="left"><ui-segment></ui-segment></ui-column>
-                    <ui-column attached="right"><ui-segment></ui-segment></ui-column>
+                    <ui-column attach="left"><ui-segment></ui-segment></ui-column>
+                    <ui-column attach="right"><ui-segment></ui-segment></ui-column>
                   </ui-grid>
                 </ui-docs-example>
               </ui-section>
@@ -400,7 +400,7 @@
                     To include a color that is not available in the default palette, set <code>--ui-color</code> on the
                     row or column in your CSS.
                   </p>
-                  <ui-grid equal-width text-align="center" padded>
+                  <ui-grid equal-width align="center" padding="md">
                     <ui-row>
                       <ui-column color="olive">Olive</ui-column>
                       <ui-column color="black">Black</ui-column>
@@ -475,13 +475,13 @@
                     you to use adjacent class names.
                   </p>
                   <ui-grid>
-                    <ui-column width="6" text-align="right" floated="left">
+                    <ui-column width="6" align="right" floated="left">
                       <ui-segment>Left floated right aligned column</ui-segment>
                     </ui-column>
-                    <ui-column width="6" text-align="left" floated="right">
+                    <ui-column width="6" align="left" floated="right">
                       <ui-segment>Right floated left aligned column</ui-segment>
                     </ui-column>
-                    <ui-row columns="2" text-align="center">
+                    <ui-row columns="2" align="center">
                       <ui-column>
                         <ui-segment>Center aligned row</ui-segment>
                       </ui-column>
@@ -489,7 +489,7 @@
                         <ui-segment>Center aligned row</ui-segment>
                       </ui-column>
                     </ui-row>
-                    <ui-column width="16" text-align="right">
+                    <ui-column width="16" align="right">
                       <ui-segment>Right Aligned Column</ui-segment>
                     </ui-column>
                   </ui-grid>
@@ -990,7 +990,7 @@
                   </p>
                   <p slot="description">The following grid has vertical and horizontal gutters</p>
                   <ui-divider></ui-divider>
-                  <ui-grid columns="2" padded>
+                  <ui-grid columns="2" padding="md">
                     <ui-column>
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
@@ -1001,7 +1001,7 @@
                 </ui-docs-example>
                 <ui-docs-example description="The following grid has vertical gutters.">
                   <ui-divider></ui-divider>
-                  <ui-grid columns="2" padded="vertically">
+                  <ui-grid columns="2" padding="md-y">
                     <ui-column>
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
@@ -1012,7 +1012,7 @@
                 </ui-docs-example>
                 <ui-docs-example description="The following grid has horizontal gutters.">
                   <ui-divider></ui-divider>
-                  <ui-grid columns="2" padded="horizontally">
+                  <ui-grid columns="2" padding="md-x">
                     <ui-column>
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-column>
@@ -1027,7 +1027,7 @@
                   <p slot="description">A grid can appear compact with no or very little padding</p>
                   <p slot="description">The following grid is compact.</p>
                   <ui-divider></ui-divider>
-                  <ui-grid columns="2" celled="internally" compact>
+                  <ui-grid columns="2" celled="internally" spacing="compact">
                     <ui-row>
                       <ui-column>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -1048,7 +1048,7 @@
                 </ui-docs-example>
                 <ui-docs-example description="The following grid is very compact.">
                   <ui-divider></ui-divider>
-                  <ui-grid columns="2" celled="internally" compact="very">
+                  <ui-grid columns="2" celled="internally" spacing="xs">
                     <ui-row>
                       <ui-column>
                         <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -1070,7 +1070,7 @@
               </ui-section>
               <ui-section id="examples-variations-relaxed" label="Relaxed" sticky collapsible dividing>
                 <ui-docs-example description="A grid can increase its gutters to allow for more negative space.">
-                  <ui-grid columns="4" relaxed>
+                  <ui-grid columns="4" spacing="lg">
                     <ui-column>
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     </ui-column>
@@ -1086,7 +1086,7 @@
                   </ui-grid>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-grid columns="4" relaxed="very">
+                  <ui-grid columns="4" spacing="xl">
                     <ui-column>
                       <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     </ui-column>
@@ -1104,7 +1104,7 @@
               </ui-section>
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
                 <ui-docs-example description="A row or column can be colored.">
-                  <ui-grid columns="5" padded>
+                  <ui-grid columns="5" padding="md">
                     <ui-column color="red">Red</ui-column>
                     <ui-column color="orange">Orange</ui-column>
                     <ui-column color="yellow">Yellow</ui-column>
@@ -1121,7 +1121,7 @@
                   </ui-grid>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-grid padded>
+                  <ui-grid padding="md">
                     <ui-row color="red">
                       <ui-column>Red</ui-column>
                     </ui-row>
@@ -1200,50 +1200,50 @@
               </ui-section>
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
                 <ui-docs-example description="A grid, row, or column can specify its text alignment.">
-                  <ui-grid columns="3" text-align="center">
+                  <ui-grid columns="3" align="center">
                     <ui-row>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Cats</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Cats</ui-item>
                         </ui-menu>
                       </ui-column>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Dogs</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Dogs</ui-item>
                           <ui-item>Poodle</ui-item>
                           <ui-item>Cockerspaniel</ui-item>
                         </ui-menu>
                       </ui-column>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Monkeys</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Monkeys</ui-item>
                         </ui-menu>
                       </ui-column>
                     </ui-row>
                   </ui-grid>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-grid text-align="center">
+                  <ui-grid align="center">
                     <ui-row columns="3">
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Cats</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Cats</ui-item>
                         </ui-menu>
                       </ui-column>
-                      <ui-column text-align="left">
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Dogs</ui-item>
+                      <ui-column align="left">
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Dogs</ui-item>
                           <ui-item>Poodle</ui-item>
                           <ui-item>Cockerspaniel</ui-item>
                         </ui-menu>
                       </ui-column>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Monkeys</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Monkeys</ui-item>
                         </ui-menu>
                       </ui-column>
                     </ui-row>
-                    <ui-row text-align="justified">
+                    <ui-row align="justified">
                       <ui-column>
                         <p>
                           Justified content fits exactly inside the grid column, taking up the entire width from one
@@ -1258,23 +1258,23 @@
                   </ui-grid>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-grid columns="3" text-align="right">
+                  <ui-grid columns="3" align="right">
                     <ui-row>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Cats</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Cats</ui-item>
                         </ui-menu>
                       </ui-column>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Dogs</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Dogs</ui-item>
                           <ui-item>Poodle</ui-item>
                           <ui-item>Cockerspaniel</ui-item>
                         </ui-menu>
                       </ui-column>
                       <ui-column>
-                        <ui-menu vertical fluid>
-                          <ui-item type="header">Monkeys</ui-item>
+                        <ui-menu direction="vertical" fluid>
+                          <ui-item kind="header">Monkeys</ui-item>
                         </ui-menu>
                       </ui-column>
                     </ui-row>
@@ -1690,7 +1690,25 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-grid"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-grid" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-grid" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-grid" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-grid" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-grid" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -1719,7 +1737,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `relaxed` and `compact` swap in their own gutter tokens (`--ui-grid-relaxed-gutter`, `--ui-grid-compact-gutter`
+                    `spacing="lg"` and `spacing="compact"` swap in their own gutter tokens (`--ui-grid-relaxed-gutter`, `--ui-grid-compact-gutter`
                     ...), whatever the base gutter; `celled` reads the `--ui-grid-celled-*` ones. Never set the `--_ui-*` /
                     `--_grid-*` names: they're the sheet's private plumbing.
                   </script>

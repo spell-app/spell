@@ -19,32 +19,58 @@ export const segmentsVocabulary = {
   description: "A group of segments can be formatted to appear together.",
   attributes: [
     { name: "size", group: "appearance", kind: "size", description: "Text size of every segment in the group." },
-    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Side by side instead of stacked." },
+    {
+      name: "direction",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["horizontal"],
+      replaces: [{ from: "horizontal", value: "horizontal" }],
+      description: "`horizontal`:  side by side instead of stacked.  Its old name is `horizontal`."
+    },
     {
       name: "equal-width",
       group: "layout",
       kind: "keyOnly",
       key: "equal width",
-      description: "With `horizontal`:  every segment the same width."
+      description: 'With `direction="horizontal"`:  every segment the same width.'
     },
     {
       name: "wrapping",
       group: "layout",
       kind: "keyOnly",
-      description: "With `horizontal`:  segments wrap onto more rows."
+      description: 'With `direction="horizontal"`:  segments wrap onto more rows.'
     },
-    { name: "stackable", group: "layout", kind: "keyOnly", description: "With `horizontal`:  stacks on mobile." },
-    { name: "raised", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
     {
-      name: "stacked",
-      group: "appearance",
-      kind: "keyOrValueAndKey",
-      values: ["tall"],
-      description: "A page peeking out below."
+      name: "stackable",
+      group: "layout",
+      kind: "keyOnly",
+      description: 'With `direction="horizontal"`:  stacks on mobile.'
     },
-    { name: "piled", group: "appearance", kind: "keyOnly", description: "A pile of rotated sheets behind the group." },
-    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its content." },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box of its own." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["raised", "stacked", "tall-stacked", "piled", "basic"],
+      classes: { "tall-stacked": "tall stacked" },
+      replaces: [
+        { from: "raised", value: "raised" },
+        { from: "stacked", value: "stacked", values: { tall: "tall-stacked" } },
+        { from: "piled", value: "piled" },
+        { from: "basic", value: "basic" }
+      ],
+      description:
+        "The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a " +
+        "page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), " +
+        "`basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`."
+    },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  only as wide as its content.  Its old name is `compact`."
+    },
     {
       name: "inverted",
       group: "appearance",

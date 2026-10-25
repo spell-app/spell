@@ -1,11 +1,12 @@
-import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
+import { PrefStore } from "spell/util/persist/PrefStore"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
 import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
-import type { TocEntry } from "spell-ui/docs-components/ui-docs-toc/UIDocsToc.types"
+import { TOC_PREFS, type TocEntry } from "spell-ui/docs-components/ui-docs-toc/UIDocsToc.types"
 
 import "spell-ui/docs-components/ui-docs-toc"
 import "spell-ui/components/ui-section"
@@ -155,6 +156,22 @@ describe("<ui-docs-toc> scan", () => {
     const { toc } = await render(SECTIONS.replace("<ui-docs-toc ", "<ui-docs-toc expanded "))
     expect(links(toc, "entry")).toEqual(["Button", "Group ui-buttons", "Or", "Disabled"])
   })
+
+  it("lists a `<ui-docs-api>`'s marked rows once it says it has drawn (`ui-drawn`)", async () => {
+    const page = `
+      <div>
+        <ui-docs-toc for="api" expanded></ui-docs-toc>
+        <article id="api"><ui-section id="api-states" label="States"><ui-docs-api></ui-docs-api></ui-section></article>
+      </div>`
+    const { wrapper, toc } = await render(page)
+    expect(links(toc, "entry")).toEqual([])
+    const api = wrapper.querySelector("ui-docs-api")!
+    api.attachShadow({ mode: "open" }).innerHTML = `<p id="api-states-open" data-toc="open"></p>`
+    api.dispatchEvent(new CustomEvent("ui-drawn", { bubbles: true, composed: true }))
+    await vi.waitFor(() => expect(links(toc, "entry")).toEqual(["open"]))
+    const entry = toc.shadowRoot!.querySelector("[part~=entry]")!
+    expect(entry.getAttribute("href")).toBe("#api-states-open")
+  })
 })
 
 ////////////////
@@ -219,6 +236,103 @@ describe("<ui-docs-toc> following", () => {
     location.hash = "far-away"
     await vi.waitFor(() => expect(links(toc, "section")).toEqual(["Second"]))
     expect(wrapper.querySelector<HTMLElement & { value: string }>("ui-tabs")!.value).toBe("two")
+  })
+})
+
+////////////////
+// ## Folds
+////////////////
+
+describe("<ui-docs-toc> folds", () => {
+  afterEach(() => new PrefStore(TOC_PREFS.store).forgetAll())
+
+  /** `toc`'s fold button for the section titled `text`. */
+  function foldOf(toc: Element, text: string): HTMLButtonElement {
+    const rows = [...toc.shadowRoot!.querySelectorAll("[part~=section-row]")]
+    const row = rows.find((each) => each.querySelector("[part~=section]")!.textContent!.trim() === text)!
+    return row.querySelector<HTMLButtonElement>("[part~=fold]")!
+  }
+
+  /** `toc`'s expand all / collapse all button. */
+  function toggleOf(toc: Element): HTMLButtonElement {
+    return toc.shadowRoot!.querySelector<HTMLButtonElement>("[part~=toggle-all]")!
+  }
+
+  /** Click `button`, and wait for `toc` to redraw. */
+  async function click(toc: Element, button: HTMLElement) {
+    button.click()
+    await ElementFixture.settle(toc)
+  }
+
+  /** What the page's folds are kept as. */
+  function keptFolds() {
+    return PrefStore.getAt(`${TOC_PREFS.store}:${TOC_PREFS.folds}${location.pathname}`)
+  }
+
+  it("a section's chevron folds and opens its entries;  the heading stays a link", async () => {
+    const { toc } = await render(PAGE)
+    await vi.waitFor(() => expect(links(toc, "entry")).toEqual(["Button", "Labeled Icon"]))
+    const fold = foldOf(toc, "Types")
+    expect(fold.getAttribute("aria-expanded")).toBe("true")
+    expect(fold.title).toBe("Fold Types")
+    await click(toc, fold)
+    expect(links(toc, "entry")).toEqual([])
+    expect(fold.getAttribute("aria-expanded")).toBe("false")
+    expect(fold.title).toBe("Open Types")
+    expect(toc.shadowRoot!.querySelector("[part~=section]")!.getAttribute("href")).toBe("#types")
+    await click(toc, foldOf(toc, "States"))
+    expect(links(toc, "entry")).toEqual(["Disabled", "Loading"])
+  })
+
+  it("keeps the reader's folds for the page:  a new toc starts with them", async () => {
+    const first = await render(PAGE)
+    await click(first.toc, foldOf(first.toc, "Types"))
+    await click(first.toc, foldOf(first.toc, "States"))
+    expect(keptFolds()).toEqual({ types: false, "states-section": true })
+    const { toc } = await render(PAGE)
+    expect(links(toc, "entry")).toEqual(["Disabled", "Loading"])
+  })
+
+  it("ONE toggle in the header:  expand all, then collapse all;  kept for every page, the page's folds forgotten", async () => {
+    const { toc } = await render(PAGE)
+    await click(toc, foldOf(toc, "Types"))
+    const toggle = toggleOf(toc)
+    expect(toggle.getAttribute("aria-label")).toBe("Expand all")
+    await click(toc, toggle)
+    expect(links(toc, "entry")).toEqual(["Button", "Labeled Icon", "Disabled", "Loading"])
+    expect(toggle.getAttribute("aria-label")).toBe("Collapse all")
+    expect(PrefStore.getAt(`${TOC_PREFS.store}:${TOC_PREFS.all}`)).toBe("expanded")
+    expect(keptFolds()).toBeUndefined()
+    await click(toc, toggle)
+    expect(links(toc, "entry")).toEqual([])
+    expect(toggle.getAttribute("aria-label")).toBe("Expand all")
+    // another page:  folded too, the section in view included
+    const next = await render(SECTIONS)
+    expect(links(next.toc, "entry")).toEqual([])
+  })
+
+  it("a section folded or opened by hand wins over the toggle", async () => {
+    const { toc } = await render(PAGE)
+    await click(toc, toggleOf(toc))
+    await click(toc, foldOf(toc, "States"))
+    expect(links(toc, "entry")).toEqual(["Button", "Labeled Icon"])
+    expect(toggleOf(toc).getAttribute("aria-label")).toBe("Expand all")
+  })
+
+  it("expand all opens nested sections' entries too", async () => {
+    const { toc } = await render(SECTIONS)
+    await click(toc, toggleOf(toc))
+    expect(links(toc, "entry")).toEqual(["Button", "Group ui-buttons", "Or", "Disabled"])
+  })
+
+  it("shows no toggle and no chevron when nothing folds", async () => {
+    const { toc } = await render(
+      `<div><ui-docs-toc for="flat" header="Flat"></ui-docs-toc><section id="flat">` +
+        `<ui-header level="2">One</ui-header><ui-header level="2">Two</ui-header></section></div>`
+    )
+    expect(links(toc, "section")).toEqual(["One", "Two"])
+    expect(toc.shadowRoot!.querySelector("[part~=toggle-all], [part~=fold]")).toBeNull()
+    expect(toc.shadowRoot!.querySelector("[part~=header]")!.textContent).toBe("Flat")
   })
 })
 

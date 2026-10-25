@@ -41,7 +41,16 @@ export const popupVocabulary = {
       kind: "color",
       description: "Hue:  fills the popup (and its arrow), with a readable text colour."
     },
-    { name: "basic", group: "appearance", kind: "keyOnly", description: "No pointing arrow." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["basic"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "The look:  `basic`, no pointing arrow.  Old name:  `basic`."
+    },
     {
       name: "fixed",
       group: "layout",
@@ -106,10 +115,12 @@ export const popupVocabulary = {
         "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
     },
     {
-      name: "content",
+      name: "label",
       group: "content",
       kind: "string",
-      description: "Shorthand for the text (Fomantic's `content`);  slotted content is the rich version."
+      replaces: ["content"],
+      description:
+        "Shorthand for the text (Fomantic's `content`);  slotted content is the rich version.  Old name:  `content`."
     },
     {
       name: "hoverable",

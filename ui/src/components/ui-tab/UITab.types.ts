@@ -38,3 +38,6 @@ export type TabPaneState = {
  * - Here, though only `UITabs` reads it:  its `menuClassBuilder` reads it while the class is defined.
  */
 export const MENU = "menu"
+
+/** The `appearance` word for panes without the segment box:  `UITabs` sets it for its panes, `UITab` reads it. */
+export const BASIC = "basic"

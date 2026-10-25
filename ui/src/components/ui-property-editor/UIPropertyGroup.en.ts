@@ -36,10 +36,13 @@ export const propertyGroupVocabulary = {
   attributes: passThrough<E.AttributeSpec>(
     [
       {
-        name: "select",
+        name: "selector",
         group: "appearance",
         kind: "string",
-        description: "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6)."
+        replaces: ["select"],
+        description:
+          "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  " +
+          "Its old name is `select`."
       },
       {
         name: "readonly",

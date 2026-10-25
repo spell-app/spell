@@ -68,7 +68,10 @@
 
       /** Family => markup (also used for the failed copy) and the fallback root's selector (`src/test-helpers/fallback.cases.ts`). */
       const FAMILIES = {
-        button: [`<form><ui-button type="submit" name="action" value="save" primary>Save</ui-button></form>`, "button"],
+        button: [
+          `<form><ui-button type="submit" name="action" value="save" color="primary">Save</ui-button></form>`,
+          "button"
+        ],
         dropdown: [
           `<form><ui-dropdown name="fruit" selection placeholder="Fruit"><ui-item value="a">Apple</ui-item>` +
             `<ui-item value="b" selected>Banana</ui-item><ui-item value="c">Cherry</ui-item></ui-dropdown></form>`,

@@ -29,7 +29,7 @@ import sectionCSS from "./UISection.css?inline"
  *   - Its level, depth and sticky stack are read from the enclosing section's component,
  *     so they follow its attributes, and a move to another section.
  *
- * - *Folding* (`collapsible`):  the toggle becomes a `<button>`.
+ * - *Folding* (`collapsible`):  the toggle becomes a `<button>`;  its `disclosure` (the kit's `Disclosure`) folds.
  *   - Its accessible name is the label;  its `title` (the `fold` / `unfold` text) is only a tooltip.
  *   - Click, Enter and Space send the cancelable `ui-opening` / `ui-closing`,
  *     then flip `collapsed` (controlled, like the accordion's `open`).
@@ -204,18 +204,29 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   }
 
   /**
+   * Open unless folded, on `collapsed` (`isCollapsed`, true while closed):
+   * the cancelable `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed` (`onFoldedChanged()`);
+   * the toggle's `aria-expanded`;  find-in-page opening the folded content.
+   * - Folds only `isCollapsible`, and never while `disabled`.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isCollapsed",
+    memberMeans: "closed",
+    isOpen: () => !this.isFolded,
+    canChange: () => this.isCollapsible && !this.isDisabled,
+    detail: (open, originalEvent): UIT.SectionToggleDetail => ({ open, section: this.domElement, originalEvent }),
+    afterDetail: (open): UIT.SectionToggleDetail => ({ open, section: this.domElement })
+  })
+
+  /**
    * Fold or unfold as a person would:
    * the cancelable `ui-opening` / `ui-closing` first, then `collapsed`.
    * - True when applied.
    * - Does nothing unless `collapsible`, or while `disabled`.
    */
-  @E.untracked
   toggle(originalEvent?: Event): boolean {
-    if (!this.isCollapsible || this.isDisabled) return false
-    const opening = this.isFolded
-    const detail: UIT.SectionToggleDetail = { open: opening, section: this.domElement, originalEvent }
-    const event = opening ? "ui-opening" : "ui-closing"
-    return this.requestChange("isCollapsed", !opening, () => this.send(event, detail))
+    return this.disclosure.toggle(originalEvent)
   }
 
   /** A click on the toggle (Enter / Space on the button click it too). */
@@ -230,23 +241,10 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     this.toggle(event)
   }
 
-  /**
-   * Find-in-page matched inside the folded content:  the browser has already revealed it.
-   * - So announce `ui-opening` after the fact, not cancelable, and adopt it.
-   */
-  @E.untracked
-  private readonly onBeforeMatch = () => {
-    if (!this.isFolded) return
-    const detail: UIT.SectionToggleDetail = { open: true, section: this.domElement }
-    const init = { bubbles: true, composed: true, cancelable: false, detail }
-    this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-opening"), init))
-    this.isCollapsed = false
-  }
-
   /** Folded or unfolded, by any route:  `ui-closed` / `ui-opened` -- not at the start. */
   @E.onChange("isFolded", { defer: true })
   protected onFoldedChanged(isFolded: boolean) {
-    this.send(isFolded ? "ui-closed" : "ui-opened", { open: !isFolded, section: this.domElement })
+    this.disclosure.sendAfter(!isFolded)
   }
 
   ////////////////
@@ -382,7 +380,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   readonly body = new E.LoadableBody({
     domElement: this.domElement,
     source: () => this.source || undefined,
-    select: () => this.select || undefined,
+    select: () => this.selector || undefined,
     target: () => this.domElement,
     send: (name, detail) => this.send(name as never, detail)
   })
@@ -423,7 +421,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
    * - `LoadableBody.load()` loads once per `source` + `select`.
    * - An effect, not in `render()`:  a subclass drawing its own markup still loads its body.
    */
-  @E.onChange("source", "select", "isFolded", "isConnected")
+  @E.onChange("source", "selector", "isFolded", "isConnected")
   protected onBodyWanted(
     source: string | undefined,
     _select: string | undefined,
@@ -483,7 +481,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
           </div>
         </Show>
         <div
-          ref={(element) => element.addEventListener("beforematch", this.onBeforeMatch)}
+          ref={this.disclosure.revealOnMatch}
           id={CONTENT_ID}
           class={UIT.CONTENT}
           part={this.partForName("content")}
@@ -538,7 +536,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             type={this.isCollapsible ? "button" : undefined}
             class={TOGGLE}
             part={this.partForName("toggle")}
-            aria-expanded={this.isCollapsible ? (this.isFolded ? "false" : "true") : undefined}
+            aria-expanded={this.isCollapsible ? this.disclosure.ariaExpanded : undefined}
             aria-controls={this.isCollapsible ? CONTENT_ID : undefined}
             title={
               this.isCollapsible ? this.translationForKey(this.isFolded ? "openSection" : "closeSection") : undefined

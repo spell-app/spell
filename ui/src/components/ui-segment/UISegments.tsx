@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E, UIT } from "spell-ui/core"
 import { segmentsVocabulary } from "./UISegments.en"
 
 import segmentCSS from "./UISegment.css?inline"
@@ -16,10 +16,17 @@ export class UISegments extends E.UIComponent<typeof segmentsVocabulary> {
   @E.proto static vocabulary = segmentsVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: { segment: segmentCSS },
-    cssStates: ["piled"],
     // `loading`:  Fomantic's veil
     loading: "its own"
   } satisfies Partial<E.ElementSetup>
+
+  /** `appearance="piled"`:  `:state(piled)`, the element the stacking context its rotated sheets sit behind. */
+  @E.cssState("piled")
+  get isPiled(): boolean {
+    return String(this.appearance ?? "")
+      .split(UIT.WHITESPACE)
+      .includes(PILED)
+  }
 
   render(): JSX.Element {
     return (
@@ -32,3 +39,6 @@ export class UISegments extends E.UIComponent<typeof segmentsVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UISegments extends E.AttributeValues<typeof segmentsVocabulary> {}
+
+/** The `piled` look word of `appearance`. */
+const PILED = "piled"

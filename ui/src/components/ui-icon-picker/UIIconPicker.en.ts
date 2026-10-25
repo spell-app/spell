@@ -81,6 +81,19 @@ export const iconPickerVocabulary = {
       name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "The icon changed:  after `ui-changing`, unless it was cancelled."
+    },
+    {
+      name: "ui-opening",
+      detail: "{ open: true, originalEvent?: Event }",
+      cancelable: true,
+      description: "The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed."
+    },
+    {
+      name: "ui-closing",
+      detail: "{ open: false, originalEvent?: Event }",
+      cancelable: true,
+      description:
+        "The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open."
     }
   ],
   slots: [],
@@ -90,7 +103,15 @@ export const iconPickerVocabulary = {
     { name: "text", description: "The chosen icon's name, or the placeholder, in the field." },
     { name: "panel", description: "The open panel:  a popover under the field, holding the search box and the grid." },
     { name: "search", description: "The search box at the panel's top (`<input type=search>`)." },
-    { name: "grid", description: "The grid of glyphs (`role=listbox`)." },
+    {
+      name: "grid",
+      description:
+        "The grid of glyphs (`role=listbox`):  with no search, in groups, Font Awesome's own categories, then Other."
+    },
+    {
+      name: "heading",
+      description: "A group's heading in the grid;  the one at the grid's top stays there as it scrolls."
+    },
     { name: "cell", description: "One glyph in the grid (`role=option`), its name its tooltip." }
   ],
   states: [
@@ -101,6 +122,11 @@ export const iconPickerVocabulary = {
   texts: [
     { key: "searchIcons", text: "Search icons", description: "The search box's placeholder and accessible name." },
     { key: "noIcon", text: "none", description: "The field's text, and the first cell's name, for no icon." },
-    { key: "noIconsMatch", text: "No icons match", description: "The grid's message when the search finds nothing." }
+    { key: "noIconsMatch", text: "No icons match", description: "The grid's message when the search finds nothing." },
+    {
+      key: "otherIcons",
+      text: "Other",
+      description: "The heading of the grid's last group:  the icons in none of Font Awesome's categories."
+    }
   ]
 } as const satisfies E.ComponentVocabulary

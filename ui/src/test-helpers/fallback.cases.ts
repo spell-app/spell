@@ -53,7 +53,7 @@ export const ERROR_EVENT = "ui-error"
  *   (the case "a family without a fallback ...").
  */
 export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: string }[] = [
-  { family: "ui-button", html: `<ui-button primary>Save</ui-button>`, root: "button[part~=button]" },
+  { family: "ui-button", html: `<ui-button color="primary">Save</ui-button>`, root: "button[part~=button]" },
   {
     family: "ui-dropdown",
     html: `<ui-dropdown selection placeholder="Fruit"><ui-item value="a">Apple</ui-item></ui-dropdown>`,
@@ -98,7 +98,7 @@ export const FALLBACK_CASES: readonly FallbackCase[] = [
   {
     name: "a throw in render shows the native fallback:  one console error, one ui-error, :state(errored)",
     async run(adapter) {
-      const container = await adapter.mount(`<form><ui-button type="submit" primary>Save</ui-button></form>`)
+      const container = await adapter.mount(`<form><ui-button type="submit" color="primary">Save</ui-button></form>`)
       const host = container.querySelector<HTMLElement>("ui-button")!
       const events: CustomEvent[] = []
       container.addEventListener(ERROR_EVENT, (event) => events.push(event as CustomEvent))

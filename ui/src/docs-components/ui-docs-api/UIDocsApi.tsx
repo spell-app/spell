@@ -5,14 +5,26 @@ import { E, UIT } from "spell-ui/core"
 import type { UILabelAttributes } from "spell-ui/jsx"
 import {
   HeadingLevels,
+  TOC_ENTRY_ATTRIBUTE,
+  TOC_GROUP_ATTRIBUTE,
   type HeadingBounds,
   type SiteDataFile,
   type SiteTag
 } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
+// A leaf, not the barrel:  its slugs are the page's section ids' words, and the barrel would define `<ui-docs-toc>`
+import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
-import { type ApiCell, type ApiItem, type ApiMessage, type ApiSection, type DocsApiVocabulary } from "./UIDocsApi.types"
+import {
+  type ApiCell,
+  type ApiItem,
+  type ApiMessage,
+  type ApiRow,
+  type ApiSection,
+  type ApiSectionId,
+  type DocsApiVocabulary
+} from "./UIDocsApi.types"
 import { docsApiVocabulary } from "./UIDocsApi.en"
 
 import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
@@ -23,7 +35,7 @@ import apiCSS from "./UIDocsApi.css?inline"
  * The component behind `<ui-docs-api>`:  the API reference of a tag (`tag="ui-button"`),
  * or of every tag of a family (`family="ui-button"`), as Fomantic tables.
  *
- * - One `<ui-table celled compact definition>` per section, each under a `<ui-header>` title:
+ * - One `<ui-table celled padding="compact" definition>` per section, each under a `<ui-header>` title:
  *   attributes, properties, events, slots, parts, states, texts;  only the sections the tag has.
  * - Data:  `components.json5`, through `SiteData` (fetched once per page);  NEVER the vocabularies.
  *   What the tables hold comes from `ApiModel`.
@@ -32,10 +44,22 @@ import apiCSS from "./UIDocsApi.css?inline"
  *   - The link is an `<a>` INSIDE the heading, not `<ui-header href>` (its `<a role="heading">` fails axe).
  *   - Fragment links can't reach ids inside a shadow root, so the component scrolls to `location.hash` itself:
  *     once its tables are drawn, and on every `hashchange` while connected.
+ * - `only` (`only="attributes"`):  ONE kind of table, as one section of a page (the site's API tab:  a section per
+ *   kind, written by `yarn site:sections`).
+ *   - No table title:  the page's section has it.
+ *   - A family's tags each under a small header, when it has more than one;  a tag without that table is left out.
+ *     No summaries under them:  seven sections would say them seven times.
+ *   - `only="tags"` says them once instead (epic `epic-engine` J127):  the family's table of its tags,
+ *     each with its summary, its name a link to its first table below (`#ui-or`, which the page lands on).
+ *     Drawn only for a family of 2+ tags, so it's a family page's first API section.
+ *   - Every row's name cell has an id, `<anchor>-<name>` (`anchorFor()`), and marks itself an entry of the page's
+ *     "On this page" list (`TOC_ENTRY_ATTRIBUTE`);  so do the tag headers, as groups.
+ *   - The page lands on them (the site's `SiteSections`):  the browser can't reach an id in a shadow root.
+ *     This element only FLASHES the row the hash names (`landedId`), when its tables are drawn and on `hashchange`.
  * - Descriptions:  `` `code` `` spans become `<code>` (`InlineCode`), as text nodes, never HTML.
  * - Values:  compact `<ui-labels size="mini">`;  hues painted in their own colour, a numeric run as one label.
- * - Phone width:  every table is `stackable` by its OWN width (`stack-by="container"`):
- *   rows become blocks in a narrow column, whatever the viewport.
+ * - NEVER stacks (`stack-by="none"`;  Owen, 2026-10-25, on the API tab's tables stacked at 1400px wide in a 760px
+ *   column:  as every docs table, I36 "I hate it"):  too wide for its column, it scrolls sideways in its own box.
  * - Sheets:  `UITable.css` is adopted HERE too:
  *   `<ui-table>` styles its light-DOM `<table>` with a PAGE sheet, which never reaches a table inside this shadow root.
  * - A doc-only element (`src/docs-components/`):  its shadow DOM is built of other families' widgets,
@@ -102,6 +126,38 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     return !!this.message
   }
 
+  /** The one table `only` names;  `undefined` draws them all. */
+  get onlyId(): ApiSectionId | undefined {
+    return ApiModel.sectionIdFor(this.only)
+  }
+
+  /** What's drawn:  `items`, or with `only` each tag with just that table (the tags without it left out). */
+  @E.derived
+  get shownItems(): ApiItem[] {
+    const only = this.onlyId
+    const items = this.items ?? []
+    if (!only) return items
+    if (only === TAGS) return []
+    return items
+      .map((item) => ({ ...item, sections: item.sections.filter((section) => section.id === only) }))
+      .filter((item) => item.sections.length)
+  }
+
+  /** With `only="tags"`:  the family's table of its tags (2+ tags only). */
+  @E.derived
+  get tagsSection(): ApiSection | undefined {
+    if (this.onlyId !== TAGS || !this.family) return undefined
+    return ApiModel.tagsSectionFor((this.items ?? []).map((item) => item.tag))
+  }
+
+  /**
+   * A tag gets its own header:  with `family`;  with `only` too, only when the family has more than one tag
+   * (one tag's section needs no header saying which).
+   */
+  private hasHeader(item: ApiItem): boolean {
+    return item.isGrouped && (!this.onlyId || (this.items?.length ?? 0) > 1)
+  }
+
   /** Heading level of the topmost headers, clamped. */
   get headingLevel(): number {
     return HeadingLevels.levelFor(this.level, LEVELS)
@@ -133,70 +189,90 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
             </ui-message>
           )}
         </Show>
-        <For each={this.items ?? []}>{(item) => this.item(item)}</For>
+        <For each={this.shownItems}>{(item) => this.item(item)}</For>
+        <Show when={this.tagsSection}>{(section) => this.table(section(), this.tagsOwner)}</Show>
       </section>
     )
   }
 
   /** One tag:  its tables, under its own header and summary with `family`. */
   private item(item: ApiItem): JSX.Element {
-    if (!item.isGrouped) return <For each={item.sections}>{(section) => this.table(item, section)}</For>
+    if (!this.hasHeader(item))
+      return <For each={item.sections}>{(section) => this.table(section, this.ownerFor(item))}</For>
+    const only = !!this.onlyId
+    const tag = `<${item.tag.tag}>`
     return (
       <section class={TAG_CLASS} part={this.partForName("tag")}>
         <ui-header
           part={this.partForName("header")}
-          id={item.tag.tag}
+          id={only ? this.anchorFor(item) : item.tag.tag}
           level={HeadingLevels.attributeFor(this.headingLevel)}
           dividing=""
+          {...(only ? { [TOC_ENTRY_ATTRIBUTE]: tag, [TOC_GROUP_ATTRIBUTE]: "" } : {})}
         >
           <a href={`#${item.tag.tag}`}>
-            <code>{`<${item.tag.tag}>`}</code>
+            <code>{tag}</code>
           </a>
         </ui-header>
-        <Show when={item.tag.description}>
+        <Show when={!only && item.tag.description}>
           <p class={UIT.DESCRIPTION} part={this.partForName("description")}>
             {this.inline(item.tag.description ?? "")}
           </p>
         </Show>
-        <For each={item.sections}>{(section) => this.table(item, section)}</For>
+        <For each={item.sections}>{(section) => this.table(section, this.ownerFor(item))}</For>
       </section>
     )
   }
 
-  /** One table:  its title (and note), then the `<ui-table>`. */
-  private table(item: ApiItem, section: ApiSection): JSX.Element {
-    const tag = `<${item.tag.tag}>`
+  /** Whose tables these are:  `item`'s. */
+  private ownerFor(item: ApiItem): TableOwner {
+    return {
+      label: (section) => this.translationForKey("tableLabel", { section, tag: `<${item.tag.tag}>` }),
+      level: item.isGrouped ? this.headingLevel + 1 : this.headingLevel,
+      anchor: () => this.anchorFor(item)
+    }
+  }
+
+  /** The tags table's owner:  the family;  its rows' ids start with the section's (`api-tags-ui-or`). */
+  private get tagsOwner(): TableOwner {
+    return {
+      label: () => this.translationForKey("tagsTableLabel", { family: this.family ?? "" }),
+      level: this.headingLevel,
+      anchor: () => this.anchorBase
+    }
+  }
+
+  /** One table:  its title (none with `only`) and note, then the `<ui-table>`;  `owner` says whose. */
+  private table(section: ApiSection, owner: TableOwner): JSX.Element {
     return (
       <>
-        <ui-header
-          part={this.partForName("title")}
-          level={HeadingLevels.attributeFor(item.isGrouped ? this.headingLevel + 1 : this.headingLevel)}
-          size={SMALL}
-        >
-          {this.translationForKey(section.id)}
-        </ui-header>
+        <Show when={!this.onlyId}>
+          <ui-header part={this.partForName("title")} level={HeadingLevels.attributeFor(owner.level)} size={SMALL}>
+            {this.translationForKey(section.id)}
+          </ui-header>
+        </Show>
         <Show when={section.note}>
           <p class={NOTE_CLASS} part={this.partForName("note")}>
             {this.inline(section.note ? this.translationForKey(section.note) : "")}
           </p>
         </Show>
-        <ui-table part={this.partForName("table")} celled="" compact="" definition="" stackable="" stack-by="container">
-          <table
-            aria-label={this.translationForKey("tableLabel", { section: this.translationForKey(section.id), tag })}
-          >
+        <ui-table
+          part={this.partForName("table")}
+          celled=""
+          padding="compact"
+          definition=""
+          stack-by="none"
+          // it may scroll sideways (`UIDocsApi.css`):  a scrollable box takes the keyboard's focus
+          tabindex="0"
+        >
+          <table aria-label={owner.label(this.translationForKey(section.id))}>
             <thead>
               <tr>
                 <For each={section.columns}>{(column) => <th scope="col">{this.translationForKey(column)}</th>}</For>
               </tr>
             </thead>
             <tbody>
-              <For each={section.rows}>
-                {(row) => (
-                  <tr>
-                    <For each={row.cells}>{(cell) => this.cell(cell)}</For>
-                  </tr>
-                )}
-              </For>
+              <For each={section.rows}>{(row) => this.row(owner, row)}</For>
             </tbody>
           </table>
         </ui-table>
@@ -204,13 +280,35 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     )
   }
 
-  /** One cell:  a name as the row's `<th>`, prose with code spans, or values as labels. */
-  private cell(cell: ApiCell): JSX.Element {
+  /** One row;  with `only`, its name cell an anchor and an "On this page" entry, and the row flashing when landed on. */
+  private row(owner: TableOwner, row: ApiRow): JSX.Element {
+    const id = this.onlyId ? `${owner.anchor()}-${TocIndex.slug(row.name)}` : undefined
+    return (
+      <tr class={{ [LANDED_CLASS]: !!id && this.landedId === id }}>
+        <For each={row.cells}>{(cell) => this.cell(cell, id && { id, name: row.name })}</For>
+      </tr>
+    )
+  }
+
+  /**
+   * One cell:  a name as the row's `<th>`, prose with code spans, or values as labels.
+   * - `member`:  the row's anchor id and "On this page" text, with `only`.
+   */
+  private cell(cell: ApiCell, member?: { id: string; name: string } | ""): JSX.Element {
     if (cell.type === "name") {
       return (
-        <th scope="row">
+        <th
+          scope="row"
+          id={member ? member.id : undefined}
+          part={member ? this.partForName("member") : undefined}
+          {...(member ? { [TOC_ENTRY_ATTRIBUTE]: member.name } : {})}
+        >
           {cell.code === undefined ? (
             <em>{cell.label ? this.translationForKey(cell.label) : ""}</em>
+          ) : cell.href ? (
+            <a href={cell.href}>
+              <code>{cell.code}</code>
+            </a>
           ) : (
             <code>{cell.code}</code>
           )}
@@ -235,7 +333,10 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
           <For each={ApiModel.labelsFor(cell)}>
             {(value) => (
               // a swatch's value is a hue's name, from the site data:  JSON, so TypeScript can't see which
-              <ui-label basic={cell.isSwatch ? undefined : ""} color={cell.isSwatch ? (value as UIHue) : undefined}>
+              <ui-label
+                appearance={cell.isSwatch ? undefined : "basic"}
+                color={cell.isSwatch ? (value as UIHue) : undefined}
+              >
                 {value}
               </ui-label>
             )}
@@ -256,8 +357,44 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
   }
 
   ////////////////
-  // ## Scrolling to the hash
+  // ## Anchors
   ////////////////
+
+  /**
+   * The start of `item`'s ids, with `only`:  the id of the page's `<ui-section>` around this element
+   * (`api-attributes`), else `only`'s value;  then the tag when it has its own header (`api-attributes-ui-or`).
+   * - Read from the page as it's drawn:  the sections are written into the page, and never move.
+   */
+  private anchorFor(item: ApiItem): string {
+    const base = this.anchorBase
+    return this.hasHeader(item) ? `${base}-${item.tag.tag}` : base
+  }
+
+  /** The id of the page's `<ui-section>` around this element, else `only`'s value (`anchorFor()`). */
+  private get anchorBase(): string {
+    const section = isServer ? undefined : this.domElement.closest(SECTION_TAG)?.id
+    return section || this.only || ""
+  }
+
+  ////////////////
+  // ## Scrolling to the hash, and flashing a landed row
+  ////////////////
+
+  /** Id of the row flashing, just landed on (`only`). */
+  @E.state accessor landedId: string | undefined = undefined
+
+  /** Ends the flash. */
+  private flashTimer?: E.CancelablePromise<unknown>
+
+  /** Flash the row `id` names:  off first, so landing on it again flashes again;  off after `FLASH_SECONDS`. */
+  private flash(id: string): void {
+    this.flashTimer?.cancel()
+    this.landedId = undefined
+    E.beforeNextPaint(() => {
+      this.landedId = id
+      this.flashTimer = E.after(FLASH_SECONDS, () => (this.landedId = undefined))
+    })
+  }
 
   /** While connected:  follow `hashchange`. */
   @E.whileConnected
@@ -271,6 +408,8 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
 
   /**
    * Scroll the tag header `hash` names into view, if it's in this shadow root.
+   * - With `only`, the page lands instead (the site's `SiteSections`, below its stuck titles):
+   *   this only flashes the row `hash` names, if it's one of its own.
    * - Waits for the widgets in the shadow root to render first (`ready`):
    *   until they do, the tables above it are still growing, and the scroll would land short.
    * - Scrolls the header's `<section>` when the `<ui-header>` draws no box of its own (`display: contents`).
@@ -280,6 +419,10 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     const root = this.domElement.renderRoot
     const header = id ? (root as ShadowRoot).getElementById?.(id) : undefined
     if (!header) return
+    if (this.onlyId) {
+      if (header.localName === "th") this.flash(id)
+      return
+    }
     const elements = [...root.querySelectorAll("*")].filter((element) => "ready" in element)
     await Promise.all(elements.map((element) => (element as Element & { ready: Promise<void> }).ready))
     E.beforeNextPaint(() => (header.getClientRects().length ? header : header.parentElement)?.scrollIntoView())
@@ -325,6 +468,28 @@ type ItemsParams = {
   /** every tag of a family, each under its header;  wins over `tag` */
   family?: string
 }
+
+/** Whose table one is:  what `table()` and `row()` need of a tag, or of the family (the tags table). */
+type TableOwner = {
+  /** the table's accessible name, given its title */
+  label: (section: string) => string
+  /** its title's heading level, when it has one (no `only`) */
+  level: number
+  /** the start of its rows' ids, with `only` */
+  anchor: () => string
+}
+
+/** `only`'s family table:  its tags (`ApiModel.tagsSectionFor()`). */
+const TAGS = "tags"
+
+/** A page section:  `only`'s anchors start with the id of the one around this element. */
+const SECTION_TAG = "ui-section"
+
+/** Class of a row while it flashes, landed on. */
+const LANDED_CLASS = "landed"
+
+/** How long a landed row flashes, s (its animation in `UIDocsApi.css`, with a beat for the page's scroll first). */
+const FLASH_SECONDS = 2.5
 
 /** Class word of one tag's block, with `family`. */
 const TAG_CLASS = "tag"

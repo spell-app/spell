@@ -9,6 +9,7 @@
  */
 
 import type { E } from "spell-ui/core"
+import { ApiOnlyValues } from "./UIDocsApi.types"
 
 /****************
  * ### `docsApiVocabulary`
@@ -23,7 +24,7 @@ export const docsApiVocabulary = {
   noun: "api",
   description:
     "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from " +
-    "the site's generated data;  for a function component, its props and where it's drawn.",
+    "the site's generated data;  for a function component, its props and where it's drawn;  for a family, its tags.",
   attributes: [
     {
       name: "tag",
@@ -36,6 +37,16 @@ export const docsApiVocabulary = {
       description:
         "Document EVERY tag of a family instead, e.g. `ui-button` (`<ui-button>`, `<ui-buttons>`, `<ui-or>`):  " +
         "each under its own header, whose id is the tag, so `#ui-or` links to it.  A folder or any of its tags."
+    },
+    {
+      name: "only",
+      kind: "enum",
+      values: ApiOnlyValues,
+      description:
+        "Draw ONE kind of table, e.g. `attributes`, as one section of a page:  no title (the section has it).  " +
+        "`tags`, with `family`, is the family's own table:  each tag, its summary, and a link to its first table.  " +
+        'Each row is an entry of the page\'s "On this page" list, its id `<section id>-<name>` ' +
+        "(`api-attributes-size`;  with `family`, `api-attributes-ui-or-size`), and flashes when a link lands on it."
     },
     {
       name: "level",
@@ -61,10 +72,17 @@ export const docsApiVocabulary = {
       name: "header",
       description: "A tag's `<ui-header>`, with `family`:  its id is the tag, its text a link to itself."
     },
-    { name: "description", description: "A tag's one-line summary under its header, with `family`." },
+    {
+      name: "description",
+      description: 'A tag\'s one-line summary under its header, with `family` and no `only` (`only="tags"` lists them).'
+    },
     { name: "title", description: "A table's `<ui-header>` title, e.g. `Attributes`." },
     { name: "note", description: "The line under a table's title, e.g. how events travel." },
     { name: "table", description: "Each `<ui-table>`." },
+    {
+      name: "member",
+      description: "A row's name cell (`<th>`), with `only`:  its id is the row's anchor."
+    },
     { name: "message", description: "The `<ui-message>` shown when the data can't be loaded or has no such tag." }
   ],
   states: [
@@ -72,6 +90,7 @@ export const docsApiVocabulary = {
     { name: "error", description: "The data couldn't be loaded, or has no such tag:  the message shows." }
   ],
   texts: [
+    { key: "tags", text: "Tags", description: "Title of a family's table of its tags." },
     { key: "props", text: "Props", description: "Title of a function component's props table." },
     { key: "attributes", text: "Attributes", description: "Title of the attributes table." },
     { key: "properties", text: "Properties", description: "Title of the rich-data properties table." },
@@ -111,6 +130,7 @@ export const docsApiVocabulary = {
       text: "Every component that draws it, as the source shows.",
       description: "Line under the used-in title."
     },
+    { key: "tag", text: "Tag", description: "Column header of the tags table." },
     { key: "prop", text: "Prop", description: "Column header." },
     { key: "type", text: "Type", description: "Column header:  a prop's type, as written." },
     { key: "component", text: "Component", description: "Column header of the used-in table." },
@@ -143,6 +163,11 @@ export const docsApiVocabulary = {
       key: "tableLabel",
       text: "{section} of {tag}",
       description: "Accessible name of a table, e.g. `Attributes of <ui-or>`."
+    },
+    {
+      key: "tagsTableLabel",
+      text: "Tags of the {family} family",
+      description: "Accessible name of the tags table, e.g. `Tags of the ui-button family`."
     },
     { key: "noTag", text: "Set `tag` or `family`.", description: "Message:  neither attribute is set." },
     { key: "notFound", text: "No API data for `{tag}`.", description: "Message:  the data has no such tag." },

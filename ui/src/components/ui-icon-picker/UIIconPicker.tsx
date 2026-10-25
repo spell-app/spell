@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
 import { F } from "spell-ui/forms"
-import { IconCatalog, type IconChoice, type IconSearchTerms } from "./IconCatalog"
+import { IconCatalog, type IconChoice, type IconGroup, type IconSearchWords } from "./IconCatalog"
 import { iconPickerVocabulary } from "./UIIconPicker.en"
 import { IconPickerFallback } from "./UIIconPicker.fallback"
 
@@ -23,10 +23,15 @@ import iconPickerCSS from "./UIIconPicker.css?inline"
  *     not offered while `required`
  *   - each glyph's name as its tooltip (`title`)
  * - Its icons are every icon the picker's icon packs know (its nearest `<ui-root icons>`'s, else the page's),
- *   one per glyph, A-Z;  a search puts the best matches first.
+ *   one per glyph (`IconCatalog`).
+ *   - With no search:  in groups, Font Awesome's own categories (Animals, Arrows ...), each under a heading,
+ *     then "Other";  the heading of the group at the grid's top stays stuck there as it scrolls.
+ *     Until the categories have loaded (as it first opens), one list, A-Z.
+ *   - A search:  one list, the best matches first.
  *   - The grid draws only the rows in view, and a few either side (`gridWindow`):
  *     each glyph is an SVG file of its own, and the default packs hold ~1,800.
  *     The rows box inside the grid is as tall as every row, so it scrolls the whole list.
+ *     A heading takes a row of its own, as tall as a row of glyphs, so every row is the same height.
  * - Opening shows the chosen icon, highlighted, its row scrolled into the middle.
  * - Keyboard, with the focus in the search box (an APG combobox over a listbox):
  *   - arrows move the highlight through the grid, Enter picks it
@@ -128,63 +133,69 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   @E.state
   accessor isOpen = false
 
-  /** This element's `UI.overlays` entry:  an outside click or Escape closes the panel. */
-  private readonly overlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
+  /**
+   * The panel, a popover panel on `isOpen`:  the cancelable `ui-opening` / `ui-closing`, the overlay entry,
+   * the anchor.
+   * - Never opens while disabled or readonly.
+   * - An outside click or Escape closes it;  Escape puts the focus back on the field.
+   */
+  readonly popover = new F.PopoverPanel({
+    component: this,
+    member: "isOpen",
     restoreFocus: false,
+    canChange: (open) => !open || !(this.isDisabled || this.isReadOnly),
+    onChange: (open) => {
+      if (!open) return
+      this.query = this.queryOnOpen
+      this.highlighted = -1
+      this.scrollTop = 0
+    },
     onDismiss: (reason) => {
       this.close({ refocus: reason === ESCAPE_REASON })
     }
-  }
+  })
+
+  /** What the search box starts with as the panel opens (`open()`'s `query`). */
+  private queryOnOpen = ""
 
   /**
-   * Open the panel, searching for `query`:  its search box empty, unless a letter typed on the field opened it.
-   * - Not while disabled or readonly.
+   * Open the panel as a person would, searching for `query`:
+   * its search box empty, unless a letter typed on the field opened it.
+   * - The cancelable `ui-opening` first (`popover.request()`).
    * - Returns true when it opened.
    */
-  @E.untracked
-  open(query = ""): boolean {
-    if (this.isOpen || this.isDisabled || this.isReadOnly) return false
-    this.query = query
-    this.highlighted = -1
-    this.scrollTop = 0
-    this.isOpen = true
-    return true
+  open(query = "", originalEvent?: Event): boolean {
+    this.queryOnOpen = query
+    return this.popover.request(true, originalEvent)
   }
 
   /**
-   * Close the panel;  `refocus`:  the focus back on the field (a pick, Escape).
+   * Close the panel as a person would;  `refocus`:  the focus back on the field (a pick, Escape).
+   * - The cancelable `ui-closing` first (`popover.request()`).
    * - Returns true when it closed.
    */
-  @E.untracked
-  close({ refocus = false }: { refocus?: boolean } = {}): boolean {
-    if (!this.isOpen) return false
-    this.isOpen = false
+  close({ refocus = false, originalEvent }: { refocus?: boolean; originalEvent?: Event } = {}): boolean {
+    if (!this.popover.request(false, originalEvent)) return false
     if (refocus) this.field?.focus()
     return true
   }
 
   /**
-   * The popover and the overlay entry while open AND connected, once rendered;  the search box focused,
-   * the grid measured.
+   * The panel shows while open AND connected, once rendered (`PopoverPanel.follow()`):
+   * the search box focused, the grid measured.
    * - `isConnected`:  a removed element keeps its state (`keepAlive`), but the page must not keep its overlay entry.
    */
   @E.onChange("isOpen", "isConnected", "isReady")
   protected onOpenChanged(isOpen: boolean, isConnected: boolean, isReady: boolean) {
     const { panel, search } = this
-    if (!isOpen || !isConnected || !isReady || !panel) return undefined
-    if (!panel.matches(":popover-open")) panel.showPopover()
-    UI.overlays.open(this.overlay)
+    const undo = this.popover.follow(panel, isOpen && isConnected && isReady)
+    if (!undo) return undefined
     this.measureGrid()
     if (search) {
       search.value = this.query
       search.focus()
     }
-    return () => {
-      if (panel.matches(":popover-open")) panel.hidePopover()
-      UI.overlays.close(this.overlay)
-    }
+    return undo
   }
 
   ////////////////
@@ -194,8 +205,8 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   /** Every icon the picker's packs offer, A-Z;  `undefined` until they've loaded (`IconCatalog`). */
   @E.state accessor catalog: readonly IconChoice[] | undefined = undefined
 
-  /** Font Awesome's search terms, once the first search has loaded them. */
-  @E.state accessor terms: IconSearchTerms | undefined = undefined
+  /** Font Awesome's search terms and categories, once loaded as the panel first opened. */
+  @E.state accessor searchWords: IconSearchWords | undefined = undefined
 
   /** What's typed in the search box. */
   @E.state accessor query = ""
@@ -203,13 +214,28 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   /** The icons that match the search, best first;  every icon for none. */
   @E.derived({ equals: E.isSameList })
   get matches(): readonly IconChoice[] {
-    return IconCatalog.matches(this.catalog ?? [], this.query, this.terms)
+    return IconCatalog.matches(this.catalog ?? [], this.query, this.searchWords?.terms)
   }
 
-  /** Every cell of the grid:  "none" first (`NONE_CELL`), unless `required`, then the matches. */
+  /**
+   * The grid's groups, Font Awesome's categories:  with no search, once they've loaded;
+   * else `undefined`, one list.
+   */
+  @E.derived
+  get groups(): readonly IconGroup[] | undefined {
+    const categories = this.searchWords?.categories
+    if (!categories?.length || E.IconName.normalize(this.query)) return undefined
+    return IconCatalog.groupsOf(this.catalog ?? [], categories)
+  }
+
+  /**
+   * Every cell of the grid:  "none" first (`NONE_CELL`), unless `required`, then each group's icons, or the matches.
+   * - A glyph in several groups is here once for each.
+   */
   @E.derived({ equals: E.isSameList })
   get cells(): readonly IconChoice[] {
-    return this.required ? this.matches : [NONE_CELL, ...this.matches]
+    const shown = this.groups ? this.groups.flatMap((group) => group.choices) : this.matches
+    return this.required ? shown : [NONE_CELL, ...shown]
   }
 
   /** Cells before the matches:  1 for "none", else 0. */
@@ -218,7 +244,35 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   }
 
   /**
-   * Load the icons each time the panel opens (the page's packs may have changed), then show the chosen one.
+   * The grid's rows, top to bottom, laid out for its columns:
+   * - one list:  the cells, a row of `columns` at a time
+   * - in groups:  "none" alone, then each group's heading, and its cells a row at a time
+   */
+  @E.derived
+  get rows(): readonly GridRow[] {
+    const { columns } = this.gridLayout
+    const groups = this.groups
+    if (!groups) return cellRows(0, this.cells.length)
+    const rows = cellRows(0, this.firstMatchCell)
+    let start = this.firstMatchCell
+    for (const group of groups) {
+      const end = start + group.choices.length
+      rows.push({ group, start, end: start }, ...cellRows(start, end))
+      start = end
+    }
+    return rows
+
+    /** Rows of cells `start` up to (not including) `end`, `columns` a row. */
+    function cellRows(start: number, end: number): GridRow[] {
+      const made: GridRow[] = []
+      for (let at = start; at < end; at += columns) made.push({ start: at, end: Math.min(end, at + columns) })
+      return made
+    }
+  }
+
+  /**
+   * Load the icons each time the panel opens (the page's packs may have changed), then show the chosen one;
+   * and Font Awesome's search words, the first time:  its categories group the grid at once.
    * - NEVER throws:  icons that won't load leave the grid with "none" alone.
    */
   @E.onChange("isOpen", "isReady")
@@ -233,18 +287,28 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
         this.highlightChosen()
       })
       .catch((error: unknown) => E.Warnings.warn("<ui-icon-picker>", "can't list the page's icons:", error))
+    if (!this.searchWords) {
+      void IconCatalog.searchWords().then((words) => {
+        if (isCurrent) this.onSearchWordsLoaded(words)
+      })
+    }
     return () => {
       isCurrent = false
     }
   }
 
-  /** The first search loads Font Awesome's search terms. */
-  @E.onChange("query")
-  protected onQueryChanged(query: string) {
-    if (!query || this.terms || isServer) return
-    void IconCatalog.terms().then((terms) => {
-      this.terms = terms
-    })
+  /**
+   * The search words are in:  the grid takes its groups (or a search more matches),
+   * and the highlighted icon keeps its highlight, in its new place.
+   */
+  @E.untracked
+  private onSearchWordsLoaded(words: IconSearchWords) {
+    const highlighted = this.cells[this.highlighted]
+    this.searchWords = words
+    const at = highlighted ? this.cells.indexOf(highlighted) : -1
+    if (at < 0) return
+    this.highlighted = at
+    E.afterSolidUpdate(() => this.reveal(at, "center"))
   }
 
   ////////////////
@@ -262,18 +326,35 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   /** The rows drawn:  `first` up to (not including) `end`, and how many rows the whole grid has. */
   get gridWindow(): { first: number; end: number; rows: number } {
     const { columns, rowHeight, rowsInView } = this.gridLayout
-    const rows = Math.ceil(this.cells.length / columns)
+    const rows = this.rows.length
     if (!rowHeight) return { first: 0, end: Math.min(rows, Math.ceil(FIRST_DRAW / columns)), rows }
     const first = Math.max(0, Math.floor(this.scrollTop / rowHeight) - SPARE_ROWS)
     return { first, end: Math.min(rows, first + rowsInView + 2 * SPARE_ROWS), rows }
   }
 
-  /** The cells drawn, and the place of the first in the grid. */
-  @E.derived({ equals: (a, b) => a.start === b.start && E.isSameList(a.cells, b.cells) })
-  get drawnCells(): { start: number; cells: readonly IconChoice[] } {
+  /** The rows drawn (`gridWindow`). */
+  @E.derived({ equals: E.isSameList })
+  get drawnRows(): readonly GridRow[] {
     const { first, end } = this.gridWindow
-    const { columns } = this.gridLayout
-    return { start: first * columns, cells: this.cells.slice(first * columns, end * columns) }
+    return this.rows.slice(first, end)
+  }
+
+  /**
+   * The heading stuck at the grid's top:  the group of the row there, once its own heading has reached the top;
+   * `undefined` above the first heading, or in one list.
+   * - `offset` (px, 0 or less):  the next group's heading, coming up under it, pushes it up and out.
+   */
+  get stuckHeading(): { group: IconGroup; offset: number } | undefined {
+    const { rowHeight } = this.gridLayout
+    if (!this.groups || !rowHeight) return undefined
+    const rows = this.rows
+    const top = Math.floor(this.scrollTop / rowHeight)
+    const group = rows.slice(0, top + 1).findLast((row) => row.group)?.group
+    if (!group) return undefined
+    // how far below the grid's top the next heading starts (px)
+    const next = rows.findIndex((row, at) => at > top && row.group)
+    const below = next < 0 ? rowHeight : next * rowHeight - this.scrollTop
+    return { group, offset: Math.min(0, below - rowHeight) }
   }
 
   /**
@@ -313,11 +394,13 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   @E.untracked
   private reveal(cell: number, block: "nearest" | "center" = "nearest") {
     const grid = this.grid
-    const { columns, rowHeight } = this.gridLayout
+    const { rowHeight } = this.gridLayout
     if (!grid || !rowHeight) return
-    const top = Math.floor(cell / columns) * rowHeight
+    const top = this.rowOf(cell) * rowHeight
+    // in groups, the stuck heading covers the top row
+    const covered = this.groups ? rowHeight : 0
     if (block === "center") grid.scrollTop = top - (grid.clientHeight - rowHeight) / 2
-    else if (top < grid.scrollTop) grid.scrollTop = top
+    else if (top < grid.scrollTop + covered) grid.scrollTop = top - covered
     else if (top + rowHeight > grid.scrollTop + grid.clientHeight) grid.scrollTop = top + rowHeight - grid.clientHeight
     // now, not on the `scroll` event:  the cell must be drawn for `aria-activedescendant`
     this.scrollTop = grid.scrollTop
@@ -344,12 +427,34 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     E.afterSolidUpdate(() => this.reveal(at, "center"))
   }
 
+  /** The row holding cell `cell` (`rows`);  0 for none. */
+  private rowOf(cell: number): number {
+    const at = this.rows.findIndex((row) => !row.group && row.start <= cell && cell < row.end)
+    return Math.max(0, at)
+  }
+
+  /**
+   * The cell `rowsDown` rows of cells below cell `cell` (above, when negative), headings skipped:
+   * in the same column, else the row's last;  `cell` itself past the first or last row.
+   */
+  private cellBelow(cell: number, rowsDown: number): number {
+    const rows = this.rows
+    const from = this.rowOf(cell)
+    if (!rows[from]) return cell
+    const column = cell - rows[from].start
+    for (let at = from + rowsDown; at >= 0 && at < rows.length; at += rowsDown) {
+      const row = rows[at]
+      if (!row.group) return Math.min(row.start + column, row.end - 1)
+    }
+    return cell
+  }
+
   /** Move the highlight to cell `cell` (kept in the grid), and its row into view. */
   @E.untracked
   private highlight(cell: number) {
     const last = this.cells.length - 1
     if (last < 0) return
-    this.highlighted = Math.min(last, Math.max(0, cell))
+    this.highlighted = E.clamp(cell, 0, last)
     this.reveal(this.highlighted)
   }
 
@@ -372,8 +477,8 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Ids and the anchor name, from `UI.ids` once rendering. */
-  private ids = { panel: "", grid: "", anchor: "" }
+  /** Ids, from `UI.ids` once rendering. */
+  private ids = { panel: "", grid: "" }
 
   /** The field (the closed control). */
   private field?: HTMLButtonElement
@@ -391,8 +496,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
   private rowsBox?: HTMLElement
 
   render(): JSX.Element {
-    this.ids = { panel: UI.ids.next(ID_PREFIX), grid: UI.ids.next(ID_PREFIX), anchor: `--${UI.ids.next(ID_PREFIX)}` }
-    const anchor = { [ANCHOR_PROPERTY]: this.ids.anchor }
+    this.ids = { panel: UI.ids.next(ID_PREFIX), grid: UI.ids.next(ID_PREFIX) }
     return (
       <>
         <button
@@ -400,10 +504,10 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           type="button"
           class={this.rootClass}
           part={this.partForName("field")}
-          style={anchor}
+          style={this.popover.anchorStyle}
           disabled={this.isDisabled}
           aria-haspopup="listbox"
-          aria-expanded={this.isOpen ? "true" : "false"}
+          aria-expanded={this.popover.ariaExpanded}
           aria-controls={this.ids.panel}
           aria-label={this.fieldLabel}
           aria-invalid={this.isShownInvalid ? "true" : undefined}
@@ -420,20 +524,20 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
             {this.iconName || this.placeholderText}
           </span>
         </button>
-        {this.panelBox(anchor)}
+        {this.panelBox()}
       </>
     )
   }
 
   /** The panel:  the search box over the grid. */
-  private panelBox(anchor: JSX.CSSProperties): JSX.Element {
+  private panelBox(): JSX.Element {
     return (
       <div
         ref={(element) => (this.panel = element)}
         id={this.ids.panel}
         class={PANEL}
         part={this.partForName("panel")}
-        style={anchor}
+        style={this.popover.panelStyle}
         // a server render can't show a popover:  the panel stays shut
         popover={isServer ? undefined : "manual"}
         onMouseDown={this.onPanelMouseDown}
@@ -446,7 +550,7 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           role="combobox"
           placeholder={this.translationForKey("searchIcons")}
           aria-label={this.translationForKey("searchIcons")}
-          aria-expanded={this.isOpen ? "true" : "false"}
+          aria-expanded={this.popover.ariaExpanded}
           aria-controls={this.ids.grid}
           aria-autocomplete="list"
           aria-activedescendant={this.highlighted >= 0 ? this.cellId(this.highlighted) : undefined}
@@ -464,9 +568,21 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
           aria-label={this.accessibleName ?? this.translationForKey("searchIcons")}
           onScroll={this.onGridScroll}
         >
+          <Show when={this.isOpen && this.stuckHeading}>
+            {(stuck) => (
+              <div
+                class={[HEADING, STUCK]}
+                part={this.partForName("heading")}
+                style={{ translate: `0 ${stuck().offset}px` }}
+                aria-hidden="true"
+              >
+                <span>{this.headingOf(stuck().group)}</span>
+              </div>
+            )}
+          </Show>
           <div ref={(element) => (this.rowsBox = element)} class={ROWS} role="none" style={this.rowsBoxSize}>
             <Show when={this.isOpen}>
-              <For each={this.drawnCells.cells}>{(choice, index) => this.cell(choice, index)}</For>
+              <For each={this.drawnRows}>{(row) => this.row(row)}</For>
             </Show>
           </div>
         </div>
@@ -479,24 +595,46 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     )
   }
 
-  /** One cell:  a glyph, its name its tooltip;  or "none", a circle with a slash. */
-  private cell(choice: IconChoice, index: () => number): JSX.Element {
+  /**
+   * One row of the grid:  a group's heading, or its cells.
+   * - The heading is hidden from assistive tech:  a listbox holds only options, and each option's name says what it is.
+   */
+  private row(row: GridRow): JSX.Element {
+    const { group } = row
+    if (group) {
+      return (
+        <div class={HEADING} part={this.partForName("heading")} aria-hidden="true">
+          <span>{this.headingOf(group)}</span>
+        </div>
+      )
+    }
+    return (
+      <For each={this.cells.slice(row.start, row.end)}>{(choice, index) => this.cell(choice, row.start + index())}</For>
+    )
+  }
+
+  /** What group `group`'s heading says:  its category's label, else "Other". */
+  private headingOf(group: IconGroup): string {
+    return group.label ?? this.translationForKey("otherIcons")
+  }
+
+  /** Cell `cell`:  a glyph, its name its tooltip;  or "none", a circle with a slash. */
+  private cell(choice: IconChoice, cell: number): JSX.Element {
     const isNone = choice === NONE_CELL
     const name = isNone ? this.translationForKey("noIcon") : choice.name
     const glyph = isNone ? undefined : new E.IconGlyph({ owner: this, name: () => choice.name })
-    const cell = () => this.drawnCells.start + index()
     const isChosen = () => (isNone ? !this.iconName : !!this.iconName && choice.names.includes(this.iconName))
     return (
       <div
-        id={this.cellId(cell())}
-        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted === cell() }]}
+        id={this.cellId(cell)}
+        class={[CELL, { [NONE]: isNone, [UIT.ACTIVE]: isChosen(), [UIT.SELECTED]: this.highlighted === cell }]}
         part={this.partForName("cell")}
         role="option"
         aria-selected={isChosen() ? "true" : "false"}
         aria-label={name}
         title={name}
         onClick={(event) => this.choose(isNone ? "" : choice.name, event)}
-        onPointerMove={() => this.hover(cell())}
+        onPointerMove={() => this.hover(cell)}
       >
         {glyph ? glyph.svg : UIIconPicker.noneGlyph()}
       </div>
@@ -514,9 +652,9 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
 
   /** The field opens and closes the panel. */
   @E.untracked
-  private readonly onFieldClick = () => {
-    if (this.isOpen) this.close()
-    else this.open()
+  private readonly onFieldClick = (event: MouseEvent) => {
+    if (this.isOpen) this.close({ originalEvent: event })
+    else this.open("", event)
   }
 
   /** Down / Up open the panel (Enter and Space click the field);  a letter opens it searching for that letter. */
@@ -526,10 +664,10 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     const { key } = event
     if (key === UIT.Key.arrowDown || key === UIT.Key.arrowUp) {
       event.preventDefault()
-      this.open()
+      this.open("", event)
     } else if (key.length === 1 && key !== UIT.Key.space) {
       event.preventDefault()
-      this.open(key)
+      this.open(key, event)
     }
   }
 
@@ -553,11 +691,11 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
     if (key === UIT.Key.escape) {
       event.preventDefault()
       event.stopPropagation()
-      this.close({ refocus: true })
+      this.close({ refocus: true, originalEvent: event })
       return
     }
     if (key === UIT.Key.tab) {
-      this.close()
+      this.close({ originalEvent: event })
       return
     }
     if (key === UIT.Key.enter) {
@@ -565,21 +703,26 @@ export class UIIconPicker extends F.FormComponent<typeof iconPickerVocabulary> {
       this.pickHighlighted(event)
       return
     }
-    const step = this.arrowStep(key)
-    if (step === undefined || event.altKey || event.ctrlKey || event.metaKey) return
+    const next = this.cellForArrow(key)
+    if (next === undefined || event.altKey || event.ctrlKey || event.metaKey) return
     event.preventDefault()
-    this.highlight(this.highlighted < 0 ? 0 : this.highlighted + step)
+    this.highlight(next)
   }
 
-  /** How far an arrow key moves the highlight:  a cell across, a row down or up;  `undefined` for another key. */
-  private arrowStep(key: string): number | undefined {
+  /**
+   * Where an arrow key moves the highlight:  a cell across, or a row of cells down or up;
+   * `undefined` for another key.
+   */
+  private cellForArrow(key: string): number | undefined {
+    const cell = this.highlighted
     const across = getComputedStyle(this.domElement).direction === "rtl" ? -1 : 1
-    const { columns } = this.gridLayout
-    if (key === UIT.Key.arrowRight) return across
-    if (key === UIT.Key.arrowLeft) return -across
-    if (key === UIT.Key.arrowDown) return columns
-    if (key === UIT.Key.arrowUp) return -columns
-    return undefined
+    let next: number | undefined
+    if (key === UIT.Key.arrowRight) next = cell + across
+    else if (key === UIT.Key.arrowLeft) next = cell - across
+    else if (key === UIT.Key.arrowDown) next = this.cellBelow(cell, 1)
+    else if (key === UIT.Key.arrowUp) next = this.cellBelow(cell, -1)
+    // nothing highlighted yet:  any arrow starts at the first cell
+    return next === undefined || cell >= 0 ? next : 0
   }
 
   /** Pick the highlighted cell, if there is one. */
@@ -639,6 +782,19 @@ type GridLayout = {
   readonly rowsInView: number
 }
 
+/**
+ * One row of the grid (`rows`):  a group's heading, or cells `start` up to (not including) `end` of `cells`.
+ * - A heading's `start` and `end` are both its group's first cell.
+ */
+type GridRow = {
+  /** the group this row is the heading of;  absent for a row of cells */
+  readonly group?: IconGroup
+  /** its first cell, in `cells` */
+  readonly start: number
+  /** the cell after its last */
+  readonly end: number
+}
+
 /** The grid before it's measured:  `FIRST_DRAW` cells are drawn. */
 const UNMEASURED: GridLayout = { columns: 1, rowHeight: 0, rowsInView: 0 }
 
@@ -651,11 +807,8 @@ const FIRST_DRAW = 60
 /** Rows drawn beyond those in view, above and below:  so a fast scroll rarely shows an empty row. */
 const SPARE_ROWS = 3
 
-/** `UI.ids` prefix of the panel's, the grid's and the cells' ids, and the anchor name. */
+/** `UI.ids` prefix of the panel's, the grid's and the cells' ids. */
 const ID_PREFIX = "ui-icon-picker"
-
-/** Private custom property the field's anchor name rides in, to the field and the panel. */
-const ANCHOR_PROPERTY = "--_ui-icon-picker-anchor"
 
 /** `UI.overlays`' reason for an Escape. */
 const ESCAPE_REASON = "escape"
@@ -680,6 +833,12 @@ const ROWS = "rows"
 
 /** Class of each cell. */
 const CELL = "cell"
+
+/** Class of a group's heading. */
+const HEADING = "heading"
+
+/** Class of the heading stuck at the grid's top. */
+const STUCK = "stuck"
 
 /** Class of the "none" cell. */
 const NONE = "none"

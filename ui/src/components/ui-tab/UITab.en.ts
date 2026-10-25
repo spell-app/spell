@@ -5,8 +5,8 @@
  *   the tabs you click are the items of a `tabular` (or `pointing` / `secondary` / `text`) MENU.
  *   So `<ui-tab>` is the pane, and `<ui-tabs>` draws the menu from its panes' `label`s, with `UIMenu.css`.
  * - Class words come out through `ClassBuilder`:
- *   - `<ui-tabs tabular attached size="small">` => the root `ui small tabular top attached tabs` and its tab list
- *     `ui small tabular top attached menu` (the same words, Fomantic's noun `menu`)
+ *   - `<ui-tabs appearance="tabular" attach="top" size="small">` => the root `ui small tabular top attached tabs`
+ *     and its tab list `ui small tabular top attached menu` (the same words, Fomantic's noun `menu`)
  *   - `<ui-tab>` in those tabs => `ui active bottom attached tab segment`
  *     (the menu's opposite edge;  `active` while selected)
  * - `selected` is the canonical chosen state (`active`, Fomantic's word, is an alias);
@@ -65,11 +65,15 @@ export const tabVocabulary = {
         "`first: true` to fill it yourself)."
     },
     {
-      name: "attached",
+      name: "attach",
       group: "layout",
-      kind: "keyOrValueAndKey",
-      values: ["top", "bottom"],
-      description: "Joined to a menu edge;  inside `<ui-tabs>`, the tabs decide."
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  " +
+        "Its old name is `attached`."
     },
     {
       name: "parent",
@@ -80,10 +84,14 @@ export const tabVocabulary = {
         "it joins them, in page order, as if nested there."
     },
     {
-      name: "basic",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "No segment box;  inside `<ui-tabs>`, the tabs decide."
+      kind: "multiple",
+      values: ["basic"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "basic", value: "basic" }],
+      description: "The look:  `basic`, no segment box;  inside `<ui-tabs>`, the tabs decide.  Old name:  `basic`."
     },
     {
       name: "inverted",

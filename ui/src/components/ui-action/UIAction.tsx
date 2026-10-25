@@ -83,10 +83,10 @@ export class UIAction extends UIItem {
     return super.isSelected || !!this.actionToDraw?.isSelected
   }
 
-  /** Always a button (a link with `href`):  something to press, in any owner. */
+  /** Always a button (a link with `link`):  something to press, in any owner. */
   get rootTag(): "a" | "button" | "div" {
-    if (this.type !== UIT.ITEM) return "div"
-    return this.href ? "a" : "button"
+    if (this.kind !== UIT.ITEM) return "div"
+    return this.link ? "a" : "button"
   }
 
   /** SIDE EFFECT:  a click on it runs its action, unless it's disabled. */

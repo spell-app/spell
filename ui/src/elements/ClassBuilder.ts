@@ -14,6 +14,7 @@ import { E } from "spell-ui/core"
  * - Fixed order, as Fomantic writes it (`ui primary icon button`;  see `notes/grammar.md`):
  *   `ui`, size, color, keyOnly (alphabetical), valueAndKey / keyOrValueAndKey (vocabulary order),
  *   multiple, width, textAlign, verticalAlign, `extra`, noun (the vocabulary's, or `options.noun`).
+ * - A spec with `classes` maps its values to Fomantic's words first (`padding="md"` => `padded`), in its kind's place.
  * - The constructor sorts the vocabulary ONCE;  `build()` only walks that list and fills one array.
  * - Reads attribute names and CSS keys from the vocabulary, never literals.
  *   The grammar's own connective words (`aligned`, `wide` ...) are `@proto static grammar`.
@@ -84,6 +85,11 @@ export class ClassBuilder {
       // `true` means "bare";  anything that isn't a string / number / array emits nothing.
       const text = value === true ? undefined : ClassBuilder.text(value)
       if (value !== true && text === undefined) continue
+      // a value whose class words aren't the value itself (`padding="md"` => `padded`;  epic `ui-gaps` P4)
+      if (spec.classes && text) {
+        this.pushClasses(classes, text, spec)
+        continue
+      }
       switch (spec.kind) {
         case "size":
           if (text && text !== grammar.medium) classes.push(text)
@@ -124,6 +130,19 @@ export class ClassBuilder {
   ////////////////
   // ## Internals
   ////////////////
+
+  /**
+   * `text`'s class words through `spec.classes`:  each word looked up on its own for `kind: "multiple"`
+   * (`appearance="basic circular"`), the whole text otherwise;  a word the map doesn't name draws as it is,
+   * and `""` draws none.
+   */
+  private pushClasses(classes: string[], text: string, spec: E.AttributeSpec) {
+    const words = spec.kind === "multiple" ? text.trim().split(E.WHITESPACE) : [text]
+    for (const word of words) {
+      const mapped = spec.classes![word] ?? word
+      if (mapped) classes.push(mapped)
+    }
+  }
 
   /**
    * `useMultipleProp`:  `"mobile tablet"` + `only` => `mobile only tablet only`.

@@ -58,11 +58,23 @@ export const stepVocabulary = {
     {
       name: "link",
       group: "link",
-      kind: "keyOnly",
-      description: "Clickable without `href`:  renders a `<button>`, with the link hover.  The page handles `click`."
+      kind: "string",
+      replaces: ["href"],
+      description: "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`."
     },
-    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a step." },
-    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["link"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "link", value: "link" }],
+      description:
+        "The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  " +
+        "the page handles `click`.  Its old name is the bare `link` switch."
+    },
     { name: "icon", group: "content", kind: "icon", description: "Icon name, before the content." },
     {
       name: "heading",

@@ -66,24 +66,24 @@ export const dropdownVocabulary = {
       description: "A labeled icon button:  the `icon` in its own block, no caret.  Use with `button`."
     },
     {
-      name: "compact",
+      name: "padding",
       group: "layout",
-      kind: "keyOnly",
-      description: "No minimum width;  the menu sizes to its items."
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  no minimum width;  the menu sizes to its items.  Old name:  `compact`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     { name: "scrolling", group: "layout", kind: "keyOnly", description: "The menu scrolls after a fixed height." },
     {
-      name: "upward",
-      group: "layout",
-      kind: "keyOnly",
-      description: "Opens above (the menu still flips when there's no room)."
-    },
-    {
-      name: "simple",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Opens on hover / focus, with no script and no popover."
+      kind: "multiple",
+      values: ["simple"],
+      // each word is its own class (a `multiple` without `classes` would add its key:  `simple appearance`)
+      classes: {},
+      replaces: [{ from: "simple", value: "simple" }],
+      description: "`simple`:  opens on hover / focus, with no script and no popover.  Old name:  `simple`."
     },
     { name: "clearable", group: "form", kind: "keyOnly", description: "Shows a clear button while there's a value." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },
@@ -107,26 +107,36 @@ export const dropdownVocabulary = {
       kind: "keyOnly",
       description: "For dark backgrounds:  the dark scheme's colours."
     },
-    { name: "unlimited", group: "appearance", kind: "keyOnly", description: "A selection menu that never scrolls." },
+    {
+      name: "limit",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["none"],
+      classes: { none: "unlimited" },
+      replaces: [{ from: "unlimited", value: "none" }],
+      description: "`none`:  a selection menu that never scrolls.  Old name:  `unlimited`."
+    },
     {
       name: "resizable",
       group: "behaviour",
       kind: "keyOnly",
       description: "A `scrolling` menu people can resize vertically."
     },
-    { name: "short", group: "appearance", kind: "keyOnly", description: "A shorter selection menu (3/4 height)." },
     {
-      name: "very-short",
+      name: "length",
       group: "appearance",
-      kind: "keyOnly",
-      description: "A much shorter selection menu (1/2 height)."
-    },
-    { name: "long", group: "appearance", kind: "keyOnly", description: "A longer selection menu (2x height)." },
-    {
-      name: "very-long",
-      group: "appearance",
-      kind: "keyOnly",
-      description: "A much longer selection menu (3x height)."
+      kind: "valueOnly",
+      values: ["very-short", "short", "long", "very-long"],
+      classes: { "very-short": "very short", "very-long": "very long" },
+      replaces: [
+        { from: "short", value: "short" },
+        { from: "very-short", value: "very-short" },
+        { from: "long", value: "long" },
+        { from: "very-long", value: "very-long" }
+      ],
+      description:
+        "A selection menu's height:  `very-short` (1/2), `short` (3/4), `long` (2x), `very-long` (3x).  " +
+        "Old names:  `short`, `very-short`, `long`, `very-long`."
     },
     {
       name: "open",
@@ -155,10 +165,15 @@ export const dropdownVocabulary = {
     {
       name: "direction",
       group: "layout",
-      kind: "enum",
-      values: ["left", "right"],
-      default: "right",
-      description: "Which way the menu extends from the dropdown's edge;  `left` right-aligns it (`.left.menu`)."
+      kind: "multiple",
+      values: ["up", "left", "right"],
+      // `left` / `right` are the MENU's (`.left.menu`), not the dropdown's own classes
+      classes: { up: "upward", left: "", right: "" },
+      replaces: [{ from: "upward", value: "up" }],
+      description:
+        "Which way the menu opens:  `up` above the dropdown (it still flips when there's no room);  `left` " +
+        "extends it leftward from the dropdown's edge, `right` (the default) rightward;  `up left` both.  " +
+        "Old name:  `upward`."
     },
     { name: "icon", group: "content", kind: "icon", description: "Icon name for a `labeled` dropdown's icon block." },
     { name: "placeholder", group: "form", kind: "string", description: "Text shown while nothing is chosen." },
@@ -170,11 +185,14 @@ export const dropdownVocabulary = {
         "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
     },
     {
-      name: "text",
+      name: "label",
       group: "name",
       kind: "string",
       reflect: false,
-      description: "Text shown for the current value, e.g. before `options` arrive.  Property only by default."
+      replaces: ["text"],
+      description:
+        "Text shown for the current value, e.g. before `options` arrive.  Property only by default.  " +
+        "Old name:  `text`."
     },
     {
       name: "name",

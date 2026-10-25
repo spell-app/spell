@@ -108,20 +108,26 @@ afterEach(() => {
 describe("<ui-tabs> classes", () => {
   it.each([
     ["", "ui tabs", "ui menu"],
-    ["tabular attached", "ui tabular top attached tabs", "ui tabular top attached menu"],
-    ['tabular attached="bottom"', "ui tabular bottom attached tabs", "ui tabular bottom attached menu"],
+    ["tabular attached", "ui top attached tabular tabs", "ui top attached tabular menu"],
+    ['tabular attached="bottom"', "ui bottom attached tabular tabs", "ui bottom attached tabular menu"],
     ["pointing secondary", "ui pointing secondary tabs", "ui pointing secondary menu"],
     ['size="small" color="red" text', "ui small red text tabs", "ui small red text menu"],
-    ["vertical tabular fluid", "ui fluid tabular vertical tabs", "ui fluid tabular vertical menu"],
-    ["vertical tabular attached", "ui tabular vertical tabs", "ui tabular vertical menu"],
-    ["inverted basic", "ui basic inverted tabs", "ui inverted menu"],
-    ["compact basic", "ui basic compact tabs", "ui compact menu"],
-    ['appearance="segmented" basic', "ui segmented basic tabs", "ui segmented menu"],
-    ['appearance="tabular" attached', "ui tabular top attached tabs", "ui tabular top attached menu"],
+    ["vertical tabular fluid", "ui vertical fluid tabular tabs", "ui vertical fluid tabular menu"],
+    ["vertical tabular attached", "ui vertical tabular tabs", "ui vertical tabular menu"],
+    ["inverted basic", "ui inverted basic tabs", "ui inverted menu"],
+    ["compact basic", "ui compact basic tabs", "ui compact menu"],
+    ['appearance="segmented basic"', "ui segmented basic tabs", "ui segmented menu"],
+    ['appearance="tabular" attached', "ui top attached tabular tabs", "ui top attached tabular menu"],
     [
       'appearance="segmented" alignment="fluid" equal',
-      "ui segmented equal fluid aligned tabs",
-      "ui segmented equal fluid aligned menu"
+      "ui equal fluid aligned segmented tabs",
+      "ui equal fluid aligned segmented menu"
+    ],
+    // the docs site's page tabs, in the new words (epic `ui-gaps` P4)
+    [
+      'appearance="segmented basic" align="fluid" equal',
+      "ui equal fluid aligned segmented basic tabs",
+      "ui equal fluid aligned segmented menu"
     ],
     ['vertical alignment="center"', "ui vertical tabs", "ui vertical menu"]
   ])("<ui-tabs %s>", async (attributes, rootClass, menuClasses) => {
@@ -132,9 +138,9 @@ describe("<ui-tabs> classes", () => {
 
   it.each([
     ["", "ui active tab segment"],
-    ["tabular attached", "ui active bottom attached tab segment"],
-    ['attached="bottom"', "ui active top attached tab segment"],
-    ["basic inverted", "ui basic inverted active tab segment"]
+    ["tabular attached", "ui bottom attached active tab segment"],
+    ['attached="bottom"', "ui top attached active tab segment"],
+    ["basic inverted", "ui inverted active basic tab segment"]
   ])("panes of <ui-tabs %s>", async (attributes, classes) => {
     const { panes } = await tabs(attributes)
     expect(boxOf(panes[0]!).className).toBe(classes)
@@ -634,6 +640,19 @@ describe("<ui-tabs> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-tabs> old names", () => {
+  it.each([
+    ["tabular attached basic", 'appearance="tabular basic" attach="top"'],
+    [
+      'pointing secondary vertical compact alignment="right"',
+      'appearance="pointing secondary" direction="vertical" padding="compact" align="right"'
+    ]
+  ])("<ui-tabs %s> draws as the new spelling", async (old, spelling) => {
+    const [before, after] = [await tabs(old), await tabs(spelling)]
+    expect([before.root.className, before.menu.className]).toEqual([after.root.className, after.menu.className])
   })
 })
 

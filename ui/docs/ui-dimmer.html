@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Dimmer">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-dimmer%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-dimmer%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/modules/dimmer.html"
+              link="https://fomantic-ui.com/modules/dimmer.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's dimmer page, section by section, in its order (Types, States, Variations, then its Examples
@@ -202,7 +202,7 @@
                   <ui-segment>
                     <ui-dimmer vertical-align="top" visible closedby="none">
                       <ui-header level="2" inverted>Title</ui-header>
-                      <ui-button primary>Add</ui-button>
+                      <ui-button color="primary">Add</ui-button>
                       <ui-button>View</ui-button>
                     </ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -213,7 +213,7 @@
                   <ui-segment>
                     <ui-dimmer vertical-align="bottom" visible closedby="none">
                       <ui-header level="2" inverted>Title</ui-header>
-                      <ui-button primary>Add</ui-button>
+                      <ui-button color="primary">Add</ui-button>
                       <ui-button>View</ui-button>
                     </ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -229,7 +229,7 @@
                     <code>visible</code> shows it.
                   </p>
                   <ui-segment>
-                    <ui-dimmer simple visible closedby="none"></ui-dimmer>
+                    <ui-dimmer appearance="simple" visible closedby="none"></ui-dimmer>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
                   </ui-segment>
@@ -299,11 +299,11 @@
                     A dimmer can trigger a visibility change on an event: <code>show-on="hover"</code> shows it while the
                     pointer is over its parent, or keyboard focus is inside it (Tab reaches its buttons).
                   </p>
-                  <ui-segment basic compact>
+                  <ui-segment padding="compact" appearance="basic">
                     <ui-image size="large" src="images/wireframe/image.png" alt=""></ui-image>
                     <ui-dimmer show-on="hover">
                       <ui-header level="2" inverted>Title</ui-header>
-                      <ui-button primary>Add</ui-button>
+                      <ui-button color="primary">Add</ui-button>
                       <ui-button>View</ui-button>
                     </ui-dimmer>
                   </ui-segment>
@@ -489,7 +489,29 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-dimmer"></ui-docs-api>
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-dimmer" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

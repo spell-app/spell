@@ -3,6 +3,7 @@ import { E, UI } from "spell-ui/core"
 import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
 import { ExampleSource } from "spell-ui/docs-components/ui-docs-example/ExampleSource"
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
+import type { SitePatch } from "./SitePatch"
 import { SiteSections } from "./SiteSections"
 import { SiteShell } from "./SiteShell"
 import { PAGE_MAIN } from "./site.types"
@@ -10,7 +11,7 @@ import { PAGE_MAIN } from "./site.types"
 /****************
  * ### `SiteRouter`
  * Moves between the site's pages WITHOUT leaving the layout:  a click on a link to another page of the site swaps
- * only the page's `main`, through a `<ui-include select="main#main">` in the layout's content box, and
+ * only the page's `main`, through a `<ui-include selector="main#main">` in the layout's content box, and
  * `history.pushState`s the page's real URL.  Back / forward swap it back.
  * - Each swap:  the new page's text is fetched (`UI.sources`, cached), the families it uses loaded, THEN the include
  *   pointed at it, so it goes in already defined;  inside a View Transition where the browser has them.
@@ -19,6 +20,8 @@ import { PAGE_MAIN } from "./site.types"
  * - After a swap:  the title, the nav's `current`, live reload's file (`SPELL_SERVER.file`) and the file on disk
  *   (`SPELL_SERVER.source`, the header's "open in VS Code"), inline scripts run again, then the hash (or the top,
  *   or the scroll kept for back / forward), and focus to `main`.
+ * - The new page's source, as fetched, is the live patch's baseline (`SitePatch.shown()`):  an edit to its file then
+ *   shows in place.
  * - Anything that fails falls back to a full load of the URL.
  * - Plain DOM, no Solid.
  ****************/
@@ -28,6 +31,9 @@ export class SiteRouter {
 
   /** The layout's content box, holding the page's `main`. */
   private readonly content: HTMLElement
+
+  /** The live patch, told each page's source as it's shown. */
+  private readonly patch?: SitePatch
 
   /** The include that swaps pages, once the first swap made it. */
   private include?: HTMLElement
@@ -47,9 +53,10 @@ export class SiteRouter {
   /** The first page's file on disk, as the page server named it (`SPELL_SERVER.source`):  `serverSource()`'s anchor. */
   private readonly firstSource = SiteRouter.server()?.source
 
-  constructor({ siteRoot, content }: SiteRouterProps) {
+  constructor({ siteRoot, content, patch }: SiteRouterProps) {
     this.siteRoot = siteRoot
     this.content = content
+    this.patch = patch
   }
 
   ////////////////
@@ -196,6 +203,7 @@ export class SiteRouter {
       await this.swap(page.href)
       if (navigation !== this.navigation) return
       this.page = url.pathname
+      this.patch?.shown(text)
       this.shown(parsed.title, url)
       this.land(url, { scrollY })
     } catch (error) {
@@ -401,6 +409,8 @@ export type SiteRouterProps = {
   siteRoot: URL
   /** the layout's content box, holding the page's `main` */
   content: HTMLElement
+  /** the live patch (`SitePatch`), told each page's source as it's shown */
+  patch?: SitePatch
 }
 
 /** How `SiteRouter.land()` lands. */

@@ -14,8 +14,6 @@ export const dropdownEs = {
   attributes: {
     search: "busqueda",
     button: "boton",
-    upward: "hacia-arriba",
-    unlimited: "ilimitado",
     columnar: "en-columnas",
     "allow-additions": "permitir-adiciones",
     "max-selections": "max-selecciones",

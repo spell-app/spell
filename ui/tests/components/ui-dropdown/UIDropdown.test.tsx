@@ -132,7 +132,7 @@ describe("<ui-dropdown> markup", () => {
 
   it("anchors the menu to the root", async () => {
     const { root, menu, combobox } = await dropdown(GENDER)
-    const anchor = root.style.getPropertyValue("--_ui-dropdown-anchor")
+    const anchor = root.style.getPropertyValue("anchor-name")
     expect(anchor).toMatch(/^--ui-dropdown-\d+$/)
     combobox.click()
     await ElementFixture.tick()
@@ -743,5 +743,31 @@ describe("<ui-dropdown> invoker commands", () => {
     } finally {
       supports.invokers = was
     }
+  })
+})
+
+////////////////
+// ## Old names
+//
+// Owen's attribute renames (epic `ui-gaps` P4):  the old spellings still draw the same.
+////////////////
+
+describe("<ui-dropdown> old names", () => {
+  it.each([
+    [
+      "compact upward simple unlimited short",
+      'padding="compact" direction="up" appearance="simple" limit="none" length="short"'
+    ],
+    ['very-long text="Pick"', 'length="very-long" label="Pick"']
+  ])("<ui-dropdown %s> draws as <ui-dropdown %s>", async (old, current) => {
+    const before = await dropdown(`<ui-dropdown selection ${old}></ui-dropdown>`)
+    const after = await dropdown(`<ui-dropdown selection ${current}></ui-dropdown>`)
+    expect(before.root.className).toBe(after.root.className)
+    expect(before.text.textContent).toBe(after.text.textContent)
+  })
+
+  it("`direction` takes both ways at once:  `up left`", async () => {
+    const { root, menu } = await dropdown(`<ui-dropdown selection direction="up left"></ui-dropdown>`)
+    expect([root.classList.contains("upward"), menu.classList.contains("left")]).toEqual([true, true])
   })
 })

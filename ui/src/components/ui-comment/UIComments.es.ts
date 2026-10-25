@@ -11,6 +11,6 @@ export const commentsEs = {
   tag: "ui-comments",
   name: "comentarios",
   aka: ["comentarios", "discusión", "hilo", "respuestas"],
-  attributes: { threaded: "en-hilos", minimal: "minimo" },
+  attributes: { threaded: "en-hilos" },
   parts: { comments: "comentarios" }
 } as const satisfies E.TagDictionary

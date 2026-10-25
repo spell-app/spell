@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Comment">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-comment%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-comment%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/views/comment.html"
+              link="https://fomantic-ui.com/views/comment.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's comment page, section by section, in its order (Types, Content, States, Variations), plus
@@ -205,7 +205,7 @@
                       <ui-form slot="reply">
                         <form method="dialog">
                           <ui-field><ui-textarea aria-label="Reply"></ui-textarea></ui-field>
-                          <ui-button primary labeled icon="pen to square" type="submit">Add Reply</ui-button>
+                          <ui-button labeled icon="pen to square" type="submit" color="primary">Add Reply</ui-button>
                         </form>
                       </ui-form>
                     </ui-comment>
@@ -243,7 +243,7 @@
                     <ui-form slot="reply">
                       <form method="dialog">
                         <ui-field><ui-textarea aria-label="Reply"></ui-textarea></ui-field>
-                        <ui-button primary labeled icon="pen to square" type="submit">Add Comment</ui-button>
+                        <ui-button labeled icon="pen to square" type="submit" color="primary">Add Comment</ui-button>
                       </form>
                     </ui-form>
                   </ui-comments>
@@ -390,7 +390,7 @@
                 <ui-docs-example
                   description="Comments can hide extra information unless a user shows intent to interact with a comment:  the actions show while a comment is hovered or holds keyboard focus."
                 >
-                  <ui-comments minimal>
+                  <ui-comments appearance="minimal">
                     <ui-header level="3" dividing>Comments</ui-header>
                     <ui-comment>
                       <ui-avatar src="images/avatar/small/matt.jpg"></ui-avatar>
@@ -620,7 +620,7 @@
                     as deep as the conversation goes.
                   - The `reply` slot takes a reply form (`<ui-form>`): on the list, below every comment; on one comment, to answer
                     it.
-                  - A thread has no variations of its own: `threaded`, `minimal`, `inverted` and `size` are set once on the outer
+                  - A thread has no variations of its own: `threaded`, `appearance="minimal"`, `inverted` and `size` are set once on the outer
                     list and reach every thread.
                   - `collapsed` and `disabled` work anywhere: on the list, a thread or one comment.
                 </script>
@@ -697,7 +697,7 @@
                   `<ui-actions>`, the author link, the reply form's fields. **Tab** reaches them in reading order, and **Enter** /
                   **Space** come from the browser.
 
-                  - `minimal` shows a comment's actions while it holds keyboard focus, so a focused action is never invisible.
+                  - the `minimal` look shows a comment's actions while it holds keyboard focus, so a focused action is never invisible.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -727,7 +727,25 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-comment"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-comment" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-comment" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-comment" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-comment" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-comment" only="states"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -759,7 +777,7 @@
               <ui-message state="info" size="small">
                 <ui-markdown>
                   <script type="text/markdown">
-                    `minimal`, `threaded` and `inverted` are switches the top list sets for its threads and parts; use the
+                    the `minimal` look, `threaded` and `inverted` are switches the top list sets for its threads and parts; use the
                     attributes. Never set the `--_ui-*` / `--_comments-*` names (`--_ui-comments-minimal` ...): they're the sheet's
                     private plumbing.
                   </script>

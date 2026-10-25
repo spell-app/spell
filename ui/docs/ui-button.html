@@ -25,17 +25,17 @@
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="Button">
-      <ui-segment vertical class="site-masthead">
+      <ui-segment class="site-masthead" appearance="vertical">
         <ui-container>
           <ui-menu icon floated="right" class="site-page-links" aria-label="About this page">
             <ui-item
-              href="https://github.com/spell-app/spell-ui/issues/new?title=ui-button%3A%20%20"
+              link="https://github.com/spell-app/spell-ui/issues/new?title=ui-button%3A%20%20"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
-              href="https://fomantic-ui.com/elements/button.html"
+              link="https://fomantic-ui.com/elements/button.html"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -50,7 +50,7 @@
       </ui-segment>
 
       <ui-container class="site-body">
-        <ui-tabs id="site-tabs" class="site-tabs" history basic appearance="segmented" alignment="fluid" equal>
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
             <!--
               EXAMPLES:  Fomantic's button page, section by section, in its order (Types, Groups, Content, States,
@@ -78,11 +78,11 @@
                     >Set your brand colours in the <code>--ui-primary</code> and <code>--ui-secondary</code> tokens (see
                     the Theming tab). Every element's primary and secondary look follows.</ui-message
                   >
-                  <ui-button primary>Save</ui-button>
+                  <ui-button color="primary">Save</ui-button>
                   <ui-button>Discard</ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-button secondary>Okay</ui-button>
+                  <ui-button color="secondary">Okay</ui-button>
                   <ui-button>Cancel</ui-button>
                 </ui-docs-example>
               </ui-section>
@@ -98,10 +98,9 @@
                     >The button is sized by its visible content, so make sure there is room for the hidden content to
                     show.</ui-message
                   >
-                  <ui-button animated icon="arrow right">Next</ui-button>
-                  <ui-button animated="vertical" icon="shop">Shop</ui-button>
-                  <ui-button animated="fade"
-                    ><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button
+                  <ui-button reveal="slide" icon="arrow right">Next</ui-button>
+                  <ui-button reveal="vertical" icon="shop">Shop</ui-button>
+                  <ui-button reveal="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button
                   >
                 </ui-docs-example>
               </ui-section>
@@ -109,7 +108,7 @@
               <ui-section id="examples-types-labeled" label="Labeled" sticky collapsible dividing>
                 <ui-docs-example>
                   <p slot="description">
-                    A button can appear alongside a label:  <code>label</code>, or the label slot, joins one.
+                    A button can appear alongside a badge:  <code>badge</code>, or the label slot, joins one.
                     <code>labeled="left"</code> puts it first.
                   </p>
                   <ui-message slot="description" size="small" class="site-not-ported"
@@ -117,13 +116,13 @@
                     Shapes belong to <code>&lt;ui-label&gt;</code>, so the joined label is a plain basic
                     label.</ui-message
                   >
-                  <ui-button icon="heart" label="2,048">Like</ui-button>
-                  <ui-button labeled="left" icon="heart" label="2,048">Like</ui-button>
-                  <ui-button labeled="left" icon="fork" label="1,048" aria-label="Fork"></ui-button>
+                  <ui-button icon="heart" badge="2,048">Like</ui-button>
+                  <ui-button labeled="left" icon="heart" badge="2,048">Like</ui-button>
+                  <ui-button labeled="left" icon="fork" badge="1,048" aria-label="Fork"></ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-button color="red" icon="heart" label="1,048">Like</ui-button>
-                  <ui-button color="blue" basic icon="fork" label="1,048">Forks</ui-button>
+                  <ui-button color="red" icon="heart" badge="1,048">Like</ui-button>
+                  <ui-button color="blue" icon="fork" badge="1,048" appearance="basic">Forks</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -145,51 +144,51 @@
 
               <ui-section id="examples-types-basic" label="Basic" sticky collapsible dividing>
                 <ui-docs-example description="A basic button is less pronounced.">
-                  <ui-button basic icon="user">Add Friend</ui-button>
+                  <ui-button icon="user" appearance="basic">Add Friend</ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-button primary basic>Primary</ui-button>
-                  <ui-button secondary basic>Secondary</ui-button>
-                  <ui-button positive basic>Positive</ui-button>
-                  <ui-button negative basic>Negative</ui-button>
+                  <ui-button color="primary" appearance="basic">Primary</ui-button>
+                  <ui-button color="secondary" appearance="basic">Secondary</ui-button>
+                  <ui-button color="positive" appearance="basic">Positive</ui-button>
+                  <ui-button color="negative" appearance="basic">Negative</ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-button color="red" basic>Red</ui-button>
-                  <ui-button color="orange" basic>Orange</ui-button>
-                  <ui-button color="yellow" basic>Yellow</ui-button>
-                  <ui-button color="olive" basic>Olive</ui-button>
-                  <ui-button color="green" basic>Green</ui-button>
-                  <ui-button color="teal" basic>Teal</ui-button>
-                  <ui-button color="blue" basic>Blue</ui-button>
-                  <ui-button color="violet" basic>Violet</ui-button>
-                  <ui-button color="purple" basic>Purple</ui-button>
-                  <ui-button color="pink" basic>Pink</ui-button>
-                  <ui-button color="brown" basic>Brown</ui-button>
-                  <ui-button color="grey" basic>Grey</ui-button>
-                  <ui-button color="black" basic>Black</ui-button>
+                  <ui-button color="red" appearance="basic">Red</ui-button>
+                  <ui-button color="orange" appearance="basic">Orange</ui-button>
+                  <ui-button color="yellow" appearance="basic">Yellow</ui-button>
+                  <ui-button color="olive" appearance="basic">Olive</ui-button>
+                  <ui-button color="green" appearance="basic">Green</ui-button>
+                  <ui-button color="teal" appearance="basic">Teal</ui-button>
+                  <ui-button color="blue" appearance="basic">Blue</ui-button>
+                  <ui-button color="violet" appearance="basic">Violet</ui-button>
+                  <ui-button color="purple" appearance="basic">Purple</ui-button>
+                  <ui-button color="pink" appearance="basic">Pink</ui-button>
+                  <ui-button color="brown" appearance="basic">Brown</ui-button>
+                  <ui-button color="grey" appearance="basic">Grey</ui-button>
+                  <ui-button color="black" appearance="basic">Black</ui-button>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-types-tertiary" label="Tertiary" sticky collapsible dividing>
                 <ui-docs-example description="A borderless, less important button.">
-                  <ui-button tertiary>Cancel Action</ui-button>
+                  <ui-button appearance="tertiary">Cancel Action</ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-button primary tertiary>Primary</ui-button>
-                  <ui-button secondary tertiary>Secondary</ui-button>
-                  <ui-button color="red" tertiary>Red</ui-button>
-                  <ui-button color="orange" tertiary>Orange</ui-button>
-                  <ui-button color="yellow" tertiary>Yellow</ui-button>
-                  <ui-button color="olive" tertiary>Olive</ui-button>
-                  <ui-button color="green" tertiary>Green</ui-button>
-                  <ui-button color="teal" tertiary>Teal</ui-button>
-                  <ui-button color="blue" tertiary>Blue</ui-button>
-                  <ui-button color="violet" tertiary>Violet</ui-button>
-                  <ui-button color="purple" tertiary>Purple</ui-button>
-                  <ui-button color="pink" tertiary>Pink</ui-button>
-                  <ui-button color="brown" tertiary>Brown</ui-button>
-                  <ui-button color="grey" tertiary>Grey</ui-button>
-                  <ui-button color="black" tertiary>Black</ui-button>
+                  <ui-button color="primary" appearance="tertiary">Primary</ui-button>
+                  <ui-button color="secondary" appearance="tertiary">Secondary</ui-button>
+                  <ui-button color="red" appearance="tertiary">Red</ui-button>
+                  <ui-button color="orange" appearance="tertiary">Orange</ui-button>
+                  <ui-button color="yellow" appearance="tertiary">Yellow</ui-button>
+                  <ui-button color="olive" appearance="tertiary">Olive</ui-button>
+                  <ui-button color="green" appearance="tertiary">Green</ui-button>
+                  <ui-button color="teal" appearance="tertiary">Teal</ui-button>
+                  <ui-button color="blue" appearance="tertiary">Blue</ui-button>
+                  <ui-button color="violet" appearance="tertiary">Violet</ui-button>
+                  <ui-button color="purple" appearance="tertiary">Purple</ui-button>
+                  <ui-button color="pink" appearance="tertiary">Pink</ui-button>
+                  <ui-button color="brown" appearance="tertiary">Brown</ui-button>
+                  <ui-button color="grey" appearance="tertiary">Grey</ui-button>
+                  <ui-button color="black" appearance="tertiary">Black</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -197,8 +196,8 @@
                 <ui-docs-example description="A button can be formatted to appear on dark backgrounds.">
                   <ui-segment inverted>
                     <ui-button inverted>Standard</ui-button>
-                    <ui-button inverted primary>Primary</ui-button>
-                    <ui-button inverted secondary>Secondary</ui-button>
+                    <ui-button inverted color="primary">Primary</ui-button>
+                    <ui-button inverted color="secondary">Secondary</ui-button>
                     <ui-button inverted color="red">Red</ui-button>
                     <ui-button inverted color="orange">Orange</ui-button>
                     <ui-button inverted color="yellow">Yellow</ui-button>
@@ -217,22 +216,22 @@
                 <!-- GAP I21:  `inverted basic` buttons with a colour draw white, not the hue. -->
                 <ui-docs-example>
                   <ui-segment inverted>
-                    <ui-button inverted basic>Basic</ui-button>
-                    <ui-button inverted primary basic>Primary</ui-button>
-                    <ui-button inverted secondary basic>Secondary</ui-button>
-                    <ui-button inverted color="red" basic>Basic Red</ui-button>
-                    <ui-button inverted color="orange" basic>Basic Orange</ui-button>
-                    <ui-button inverted color="yellow" basic>Basic Yellow</ui-button>
-                    <ui-button inverted color="olive" basic>Basic Olive</ui-button>
-                    <ui-button inverted color="green" basic>Basic Green</ui-button>
-                    <ui-button inverted color="teal" basic>Basic Teal</ui-button>
-                    <ui-button inverted color="blue" basic>Basic Blue</ui-button>
-                    <ui-button inverted color="violet" basic>Basic Violet</ui-button>
-                    <ui-button inverted color="purple" basic>Basic Purple</ui-button>
-                    <ui-button inverted color="pink" basic>Basic Pink</ui-button>
-                    <ui-button inverted color="brown" basic>Basic Brown</ui-button>
-                    <ui-button inverted color="grey" basic>Basic Grey</ui-button>
-                    <ui-button inverted color="black" basic>Basic Black</ui-button>
+                    <ui-button inverted appearance="basic">Basic</ui-button>
+                    <ui-button inverted color="primary" appearance="basic">Primary</ui-button>
+                    <ui-button inverted color="secondary" appearance="basic">Secondary</ui-button>
+                    <ui-button inverted color="red" appearance="basic">Basic Red</ui-button>
+                    <ui-button inverted color="orange" appearance="basic">Basic Orange</ui-button>
+                    <ui-button inverted color="yellow" appearance="basic">Basic Yellow</ui-button>
+                    <ui-button inverted color="olive" appearance="basic">Basic Olive</ui-button>
+                    <ui-button inverted color="green" appearance="basic">Basic Green</ui-button>
+                    <ui-button inverted color="teal" appearance="basic">Basic Teal</ui-button>
+                    <ui-button inverted color="blue" appearance="basic">Basic Blue</ui-button>
+                    <ui-button inverted color="violet" appearance="basic">Basic Violet</ui-button>
+                    <ui-button inverted color="purple" appearance="basic">Basic Purple</ui-button>
+                    <ui-button inverted color="pink" appearance="basic">Basic Pink</ui-button>
+                    <ui-button inverted color="brown" appearance="basic">Basic Brown</ui-button>
+                    <ui-button inverted color="grey" appearance="basic">Basic Grey</ui-button>
+                    <ui-button inverted color="black" appearance="basic">Basic Black</ui-button>
                   </ui-segment>
                 </ui-docs-example>
               </ui-section>
@@ -272,18 +271,18 @@
                   <ui-buttons>
                     <ui-button>Cancel</ui-button>
                     <ui-or></ui-or>
-                    <ui-button positive>Save</ui-button>
+                    <ui-button color="positive">Save</ui-button>
                   </ui-buttons>
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-message slot="description" state="info" size="small"
-                    >The <code>or</code> text is translated with the page's language, or set it with <code>text</code>.
+                    >The <code>or</code> text is translated with the page's language, or set it with <code>label</code>.
                     If the size of the conditional changes, adjust <code>--ui-button-or-size</code>.</ui-message
                   >
                   <ui-buttons>
                     <ui-button>un</ui-button>
-                    <ui-or text="ou"></ui-or>
-                    <ui-button positive>deux</ui-button>
+                    <ui-or label="ou"></ui-or>
+                    <ui-button color="positive">deux</ui-button>
                   </ui-buttons>
                 </ui-docs-example>
               </ui-section>
@@ -291,14 +290,14 @@
               <ui-section id="examples-content-icon-and-text" label="Icon and text" sticky collapsible dividing>
                 <ui-docs-example description="The `icon` attribute takes a name;  the `icon` slot takes any markup.">
                   <ui-button icon="cloud upload">Upload</ui-button>
-                  <ui-button primary icon="download">Download</ui-button>
-                  <ui-button content="Next"><ui-icon slot="icon" name="arrow right"></ui-icon></ui-button>
+                  <ui-button icon="download" color="primary">Download</ui-button>
+                  <ui-button label="Next"><ui-icon slot="icon" name="arrow right"></ui-icon></ui-button>
                 </ui-docs-example>
                 <ui-docs-example
                   description="`icon-position=&quot;right&quot;` puts the icon after the text (Fomantic's `right` icon), `--ui-button-icon-spacing` from it."
                 >
                   <ui-button icon="arrow right" icon-position="right">Next</ui-button>
-                  <ui-button primary circular icon="arrow right" icon-position="right">Open app</ui-button>
+                  <ui-button icon="arrow right" icon-position="right" color="primary" appearance="circular">Open app</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -319,7 +318,7 @@
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
                 <ui-docs-example description="A button can show it is currently the active user selection.">
-                  <ui-button active icon="user">Follow</ui-button>
+                  <ui-button selected icon="user">Follow</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -333,9 +332,9 @@
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
                 <ui-docs-example description="A button can show a loading indicator.">
                   <ui-button loading>Loading</ui-button>
-                  <ui-button basic loading>Loading</ui-button>
-                  <ui-button primary loading>Loading</ui-button>
-                  <ui-button secondary loading>Loading</ui-button>
+                  <ui-button loading appearance="basic">Loading</ui-button>
+                  <ui-button loading color="primary">Loading</ui-button>
+                  <ui-button loading color="secondary">Loading</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -344,7 +343,7 @@
                   description="A `toggle` button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow."
                 >
                   <ui-button toggle inactive-text="Follow" active-text="Following"></ui-button>
-                  <ui-button toggle primary active inactive-text="Subscribe" active-text="Subscribed"></ui-button>
+                  <ui-button toggle selected inactive-text="Subscribe" active-text="Subscribed" color="primary"></ui-button>
                 </ui-docs-example>
                 <ui-docs-example description="With only `active-text`, the button's own content is the inactive label.">
                   <ui-button toggle icon="bell" active-text="Watching">Watch</ui-button>
@@ -404,9 +403,9 @@
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
                 <ui-docs-example description="A button can reduce its padding to fit into tighter spaces.">
-                  <ui-button compact>Hold</ui-button>
-                  <ui-button compact icon="pause" aria-label="Pause"></ui-button>
-                  <ui-button compact labeled icon="pause">Pause</ui-button>
+                  <ui-button padding="compact">Hold</ui-button>
+                  <ui-button icon="pause" aria-label="Pause" padding="compact"></ui-button>
+                  <ui-button labeled icon="pause" padding="compact">Pause</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -414,10 +413,10 @@
                 <ui-docs-example
                   description="A button can drop its padding altogether, as `compact` taken to none:  the box hugs its text or icon.  A `labeled` icon button keeps room for its icon block."
                 >
-                  <ui-button unpadded>Hold</ui-button>
-                  <ui-button unpadded icon="pause" aria-label="Pause"></ui-button>
-                  <ui-button unpadded labeled icon="pause">Pause</ui-button>
-                  <ui-button unpadded basic>Basic</ui-button>
+                  <ui-button padding="none">Hold</ui-button>
+                  <ui-button icon="pause" aria-label="Pause" padding="none"></ui-button>
+                  <ui-button labeled icon="pause" padding="none">Pause</ui-button>
+                  <ui-button appearance="basic" padding="none">Basic</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -431,13 +430,13 @@
 
               <ui-section id="examples-variations-positive" label="Positive" sticky collapsible dividing>
                 <ui-docs-example description="A button can hint towards a positive consequence.">
-                  <ui-button positive>Positive Button</ui-button>
+                  <ui-button color="positive">Positive Button</ui-button>
                 </ui-docs-example>
               </ui-section>
 
               <ui-section id="examples-variations-negative" label="Negative" sticky collapsible dividing>
                 <ui-docs-example description="A button can hint towards a negative consequence.">
-                  <ui-button negative>Negative Button</ui-button>
+                  <ui-button color="negative">Negative Button</ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -454,7 +453,7 @@
                   <div style="max-width: 10em">
                     <ui-button>Stays on one line, however long</ui-button>
                     <ui-divider spacer></ui-divider>
-                    <ui-button wrapped>Wraps onto more lines when it's long</ui-button>
+                    <ui-button wrap>Wraps onto more lines when it's long</ui-button>
                   </div>
                 </ui-docs-example>
               </ui-section>
@@ -466,7 +465,7 @@
                   <div style="max-width: 14em">
                     <ui-button ellipsis fluid icon="download">Download the whole archive</ui-button>
                     <ui-divider spacer></ui-divider>
-                    <ui-button ellipsis primary>Save every change to this document</ui-button>
+                    <ui-button ellipsis color="primary">Save every change to this document</ui-button>
                     <ui-divider spacer></ui-divider>
                     <ui-button ellipsis style="width: 9em">A width of its own</ui-button>
                   </div>
@@ -475,13 +474,13 @@
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
                 <ui-docs-example description="A button can be circular.">
-                  <ui-button circular icon="settings" aria-label="Settings"></ui-button>
+                  <ui-button icon="settings" aria-label="Settings" appearance="circular"></ui-button>
                 </ui-docs-example>
                 <ui-docs-example description="Fomantic's circular social buttons, with a brand `icon` and a `color`.">
-                  <ui-button circular color="blue" icon="facebook" aria-label="Facebook"></ui-button>
-                  <ui-button circular color="teal" icon="twitter" aria-label="Twitter"></ui-button>
-                  <ui-button circular color="blue" icon="linkedin" aria-label="LinkedIn"></ui-button>
-                  <ui-button circular color="red" icon="google plus" aria-label="Google Plus"></ui-button>
+                  <ui-button color="blue" icon="facebook" aria-label="Facebook" appearance="circular"></ui-button>
+                  <ui-button color="teal" icon="twitter" aria-label="Twitter" appearance="circular"></ui-button>
+                  <ui-button color="blue" icon="linkedin" aria-label="LinkedIn" appearance="circular"></ui-button>
+                  <ui-button color="red" icon="google plus" aria-label="Google Plus" appearance="circular"></ui-button>
                 </ui-docs-example>
               </ui-section>
 
@@ -494,21 +493,21 @@
                 dividing
               >
                 <ui-docs-example description="A button can be attached to the top or bottom of other content.">
-                  <ui-button attached="top">Top</ui-button>
-                  <ui-segment attached>
+                  <ui-button attach="top">Top</ui-button>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-button attached="bottom">Bottom</ui-button>
+                  <ui-button attach="bottom">Bottom</ui-button>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-buttons width="2" attached="top">
+                  <ui-buttons width="2" attach="top">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                   </ui-buttons>
-                  <ui-segment attached>
+                  <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
-                  <ui-buttons width="2" attached="bottom">
+                  <ui-buttons width="2" attach="bottom">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                   </ui-buttons>
@@ -523,8 +522,8 @@
                 dividing
               >
                 <ui-docs-example description="A button can be attached to the left or right of other content.">
-                  <ui-button attached="left">Left</ui-button>
-                  <ui-button attached="right">Right</ui-button>
+                  <ui-button attach="left">Left</ui-button>
+                  <ui-button attach="right">Right</ui-button>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -538,7 +537,7 @@
                 dividing
               >
                 <ui-docs-example description="Groups can be formatted to appear vertically.">
-                  <ui-buttons vertical>
+                  <ui-buttons direction="vertical">
                     <ui-button>Feed</ui-button>
                     <ui-button>Messages</ui-button>
                     <ui-button>Events</ui-button>
@@ -582,7 +581,7 @@
                 dividing
               >
                 <ui-docs-example description="Groups can be formatted as labeled icons.">
-                  <ui-buttons vertical labeled icon>
+                  <ui-buttons direction="vertical" labeled icon>
                     <ui-button icon="pause">Pause</ui-button>
                     <ui-button icon="play">Play</ui-button>
                     <ui-button icon="shuffle">Shuffle</ui-button>
@@ -630,7 +629,7 @@
                     <ui-button>Support</ui-button>
                   </ui-buttons>
                   <ui-divider></ui-divider>
-                  <ui-buttons equal fluid basic>
+                  <ui-buttons equal fluid appearance="basic">
                     <ui-button>Overview</ui-button>
                     <ui-button>Specifications</ui-button>
                     <ui-button>Support</ui-button>
@@ -662,13 +661,13 @@
                 dividing
               >
                 <ui-docs-example description="A button group can be less pronounced.">
-                  <ui-buttons basic>
+                  <ui-buttons appearance="basic">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
                   <ui-divider></ui-divider>
-                  <ui-buttons vertical basic>
+                  <ui-buttons direction="vertical" appearance="basic">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
@@ -676,9 +675,9 @@
                 </ui-docs-example>
                 <ui-docs-example>
                   <ui-buttons>
-                    <ui-button color="red" basic>One</ui-button>
-                    <ui-button color="blue" basic>Two</ui-button>
-                    <ui-button color="green" basic>Three</ui-button>
+                    <ui-button color="red" appearance="basic">One</ui-button>
+                    <ui-button color="blue" appearance="basic">Two</ui-button>
+                    <ui-button color="green" appearance="basic">Three</ui-button>
                   </ui-buttons>
                 </ui-docs-example>
               </ui-section>
@@ -692,7 +691,7 @@
                   </ui-buttons>
                 </ui-docs-example>
                 <ui-docs-example>
-                  <ui-buttons size="small" basic icon>
+                  <ui-buttons size="small" icon appearance="basic">
                     <ui-button icon="file" aria-label="New"></ui-button>
                     <ui-button icon="save" aria-label="Save"></ui-button>
                     <ui-button icon="upload" aria-label="Upload"></ui-button>
@@ -759,10 +758,10 @@
                     <code>wrapping</code> on responsive layouts.
                   </p>
                   <ui-message slot="description" state="info" size="small"
-                    >Add <code>compact</code> to a <code>wrapping</code> group when the buttons of each row should not
+                    >Add <code>padding="compact"</code> to a <code>wrapping</code> group when the buttons of each row should not
                     share the row's width, especially for spaced buttons.</ui-message
                   >
-                  <ui-buttons wrapping spaced>
+                  <ui-buttons wrapping spacing="md">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
@@ -797,7 +796,7 @@
                 <ui-docs-example
                   description="Circular buttons inside groups get a slight margin so they don't appear attached together."
                 >
-                  <ui-buttons circular>
+                  <ui-buttons appearance="circular">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
@@ -819,12 +818,12 @@
                     <ui-button>Group</ui-button>
                   </ui-buttons>
                   <ui-divider></ui-divider>
-                  <ui-buttons compact>
+                  <ui-buttons padding="compact">
                     <ui-button>Compact</ui-button>
                     <ui-button>Group</ui-button>
                   </ui-buttons>
                   <ui-buttons toggle>
-                    <ui-button active>On</ui-button>
+                    <ui-button selected>On</ui-button>
                     <ui-button>Off</ui-button>
                   </ui-buttons>
                 </ui-docs-example>
@@ -839,7 +838,7 @@
                 <script type="text/markdown">
                   Write `<ui-button>` with text inside, and add attributes for the look. Most attributes become
                   Fomantic's class words on the real `<button>` in the shadow root:
-                  `<ui-button size="small" primary basic>` renders `ui small basic primary button`.
+                  `<ui-button size="small" color="primary" appearance="basic">` renders `ui small basic primary button`.
 
                   - A boolean attribute is true when present, empty, `"true"` or `"yes"`, and false for `"false"` or
                     `"no"`.
@@ -921,9 +920,9 @@
                   <ui-popup
                     id="button-invoker-popup"
                     open-on="manual"
-                    content="Toggled by the button, no script."
+                    label="Toggled by the button, no script."
                   ></ui-popup>
-                  <ui-button primary commandfor="button-invoker-modal" command="--show">Open modal</ui-button>
+                  <ui-button commandfor="button-invoker-modal" command="--show" color="primary">Open modal</ui-button>
                   <ui-modal
                     id="button-invoker-modal"
                     header="Invoked"
@@ -954,8 +953,8 @@
                   <ui-form>
                     <form action="/subscribe">
                       <ui-input name="email" type="email" required></ui-input>
-                      <ui-button type="submit" primary name="action" value="subscribe">Subscribe</ui-button>
-                      <ui-button type="reset" basic>Reset</ui-button>
+                      <ui-button type="submit" name="action" value="subscribe" color="primary">Subscribe</ui-button>
+                      <ui-button type="reset" appearance="basic">Reset</ui-button>
                     </form>
                   </ui-form>
                 </script>
@@ -1004,26 +1003,21 @@
               <ui-header level="4" id="framework-react">React 19</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
-                  <ui-button primary toggle onui-toggle={(event) => setOn(event.detail.active)}>Vote</ui-button>
+                  <ui-button toggle onui-toggle={(event) => setOn(event.detail.active)} color="primary">Vote</ui-button>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-vue">Vue 3.5</ui-header>
               <ui-code language="html">
                 <script type="text/plain">
                   <!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
-                  <ui-button primary toggle @ui-toggle="(event) => (on = event.detail.active)">Vote</ui-button>
+                  <ui-button toggle @ui-toggle="(event) => (on = event.detail.active)" color="primary">Vote</ui-button>
                 </script>
               </ui-code>
               <ui-header level="4" id="framework-solid">Solid 2</ui-header>
               <ui-code language="jsx">
                 <script type="text/plain">
                   // events and rich data are plain props:  `on-<event>={...}`, `options={...}`
-                  <ui-button
-                    primary
-                    toggle
-                    on-ui-selected={(event) => setOn(event.detail.active)}
-                    on-ui-deselected={(event) => setOn(event.detail.active)}
-                  >
+                  <ui-button toggle on-ui-selected={(event) => setOn(event.detail.active)} on-ui-deselected={(event) => setOn(event.detail.active)} color="primary">
                     Vote
                   </ui-button>
                 </script>
@@ -1033,7 +1027,33 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-docs-api family="ui-button"></ui-docs-api>
+            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-button" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">

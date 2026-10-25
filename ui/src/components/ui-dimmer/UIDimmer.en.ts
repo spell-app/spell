@@ -50,10 +50,15 @@ export const dimmerVocabulary = {
       description: "Blurs and greys what's behind it (`backdrop-filter`)."
     },
     {
-      name: "simple",
+      name: "appearance",
       group: "appearance",
-      kind: "keyOnly",
-      description: "Fomantic's CSS-only dimmer;  the element's look is the same."
+      kind: "multiple",
+      values: ["simple"],
+      // each word draws itself:  no key after it
+      classes: {},
+      replaces: [{ from: "simple", value: "simple" }],
+      description:
+        "The look:  `simple`, Fomantic's CSS-only dimmer;  the element's look is the same.  Old name:  `simple`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Never shows." },
     {

@@ -134,7 +134,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /** `aria-current` while selected:  the owner's value on a link (`page`), else `true`. */
   private get ariaCurrent(): UIT.ItemContext["current"] | undefined {
-    if (!this.isSelected || this.type !== UIT.ITEM) return undefined
+    if (!this.isSelected || this.kind !== UIT.ITEM) return undefined
     return this.rootTag === "a" ? (this.itemContext?.current ?? "page") : "true"
   }
 
@@ -145,9 +145,16 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
   /** Root element:  link, button, or plain box. */
   get rootTag(): RootTag {
     const context = this.itemContext
-    if (this.type !== UIT.ITEM) return "div"
-    if (this.href) return "a"
-    return this.link || context?.interactive ? "button" : "div"
+    if (this.kind !== UIT.ITEM) return "div"
+    if (this.link) return "a"
+    return this.looksLikeALink || context?.interactive ? "button" : "div"
+  }
+
+  /** `appearance` holds `link`:  interactive without a `link` to go to, a `<button>` with the link hover. */
+  get looksLikeALink(): boolean {
+    return String(this.appearance ?? "")
+      .split(" ")
+      .includes(LINK_LOOK)
   }
 
   /** The rendered item box, while owned. */
@@ -169,7 +176,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
    */
   protected get extraClass(): string | undefined {
     const color = this.color
-    const extra = [this.type === UIT.HEADER ? UIT.HEADER : "", color ? `${UIT.COLOR_CLASS_PREFIX}${color}` : ""]
+    const extra = [this.kind === UIT.HEADER ? UIT.HEADER : "", color ? `${UIT.COLOR_CLASS_PREFIX}${color}` : ""]
     return extra.filter(Boolean).join(" ") || undefined
   }
 
@@ -202,7 +209,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
     return (
       <Show when={this.itemContext} fallback={this.unowned()}>
         <Show
-          when={this.type !== DIVIDER}
+          when={this.kind !== DIVIDER}
           fallback={<div class={DIVIDER} part={this.partForName("item")} role="separator" />}
         >
           {this.box()}
@@ -241,10 +248,10 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("item")}
-        href={this.rootTag === "a" && !this.isDisabled ? this.href : undefined}
+        href={this.rootTag === "a" && !this.isDisabled ? this.link : undefined}
         target={this.rootTag === "a" ? this.target : undefined}
         type={this.rootTag === "button" ? "button" : undefined}
-        role={this.type === UIT.ITEM ? this.itemContext?.role : undefined}
+        role={this.kind === UIT.ITEM ? this.itemContext?.role : undefined}
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}
         aria-disabled={this.isDisabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
         aria-current={this.ariaCurrent}
@@ -291,6 +298,9 @@ type RootTag = "a" | "button" | "div"
 
 /** The `divider` type, and the class of its root. */
 const DIVIDER = "divider"
+
+/** The `appearance` word for an interactive item with the link hover. */
+const LINK_LOOK = "link"
 
 /** Classes of the `image` shorthand, unless the owner says otherwise:  an avatar, as in Fomantic's list examples. */
 const IMAGE_CLASS = "ui avatar image"

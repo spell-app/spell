@@ -14,7 +14,6 @@ export const buttonEs = {
   attributes: {
     "active-text": "texto-activo",
     "inactive-text": "texto-inactivo",
-    unpadded: "sin-relleno",
     ellipsis: "elipsis"
   },
   events: { "ui-selected": "seleccionado", "ui-deselected": "deseleccionado" },
