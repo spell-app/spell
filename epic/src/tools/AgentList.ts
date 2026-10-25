@@ -59,6 +59,11 @@ export class AgentList {
     return new AgentList(resolve(dirname(file), "..", ".."), { epic })
   }
 
+  /** The epic whose list this is, when it's one's (`epics/<epic>/agents.json5`);  else `undefined`. */
+  get epic(): string | undefined {
+    return basename(this.file) === LIST_FILE ? basename(dirname(this.file)) : undefined
+  }
+
   /** `name` with the prefix:  `aaa` -> `skillz-aaa`;  already prefixed:  as it is. */
   fullName(name: string): string {
     return name.startsWith(`${this.prefix}-`) ? name : `${this.prefix}-${name}`

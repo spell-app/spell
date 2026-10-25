@@ -117,8 +117,8 @@ export const epicPageVocabulary = {
       kind: "boolean",
       description:
         "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its " +
-        "review inbox answering -- so items and Overview parts show their review controls, and the header Send and " +
-        "its countdown.  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
+        "review inbox answering -- so items and Overview parts show their review controls, and the header Send." +
+        "  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
     }
   ],
   events: [],
@@ -147,7 +147,7 @@ export const epicPageVocabulary = {
     {
       name: "header",
       description:
-        "The sticky page header:  the h1, then at its right Send and its countdown (while reviewed), the bedtime label, " +
+        "The sticky page header:  the h1, then at its right Send (while reviewed), the bedtime label, " +
         "the step label (the state in it) and the git toggle."
     },
     {
@@ -175,24 +175,25 @@ export const epicPageVocabulary = {
     {
       name: "pill",
       description:
-        "Under the review line, while marks, comments or Do Now requests wait and nobody can take them:  no Claude " +
-        "session reviewing (orange), or airplane mode;  once a Send or Do Now woke the epic, what the wake did " +
+        "Under the review line, while marks, comments or requests for now wait and nobody can take them:  no Claude " +
+        "session reviewing (orange), or airplane mode;  once a Send woke the epic, what the wake did " +
         "(`Typed /epic review <name> into 🚧 <name>:  press Enter there`).  A click copies the review line's command."
     },
     {
       name: "send",
       description:
-        "In the header while the page is reviewed, Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` " +
+        "In the header while the page is reviewed, Send (`<epic-send-buttons>`, epic `epic-engine` " +
         "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
-        "some unsent, outlined blue once sent);  the wand turns countdown mode on and off.  On, " +
-        "what's unsent goes by itself 2 minutes after Owen stops, every revisit asked now, as Review Now did.  While " +
-        "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases."
+        "some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While " +
+        "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, " +
+        "with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
+        "dotted once each has his mark;  its tooltip names them."
     },
     { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
     {
       name: "status",
       description:
-        "The header's right side:  the changes to accept, Send and its countdown (while reviewed), the bedtime label, " +
+        "The header's right side:  the changes to accept, Send (while reviewed), the bedtime label, " +
         "the step label, the git toggle."
     },
     {
@@ -389,24 +390,15 @@ export const epicPageVocabulary = {
     },
     { key: "nothingOpen", text: "no questions open", description: "The stage button's tooltip:  nothing open." },
     {
-      key: "acceptPlanOne",
-      text: "Accept plan",
-      description: "While building, the header's button for one waiting build plan (epic `epic-engine` I119)."
+      key: "plansWaitOne",
+      text: "1 build plan waits for your Accept:  {phases}",
+      description:
+        "While building, Send's tooltip begins so while a phase's build plan waits (the pill ringed 3px);  `{phases}`:  `P43`."
     },
     {
-      key: "acceptPlansMany",
-      text: "Accept {count} plans",
-      description: "The same, for several waiting build plans."
-    },
-    {
-      key: "acceptPlansTip",
-      text: "Claude's build plans for {phases} wait:  a press accepts them all, and Claude builds straight through",
-      description: "Its tooltip:  which phases (`P5, P6`)."
-    },
-    {
-      key: "acceptedPlans",
-      text: "Plans accepted:  waiting for Claude to build",
-      description: "Its tooltip once pressed."
+      key: "plansWaitMany",
+      text: "{count} build plans wait for your Accept:  {phases}",
+      description: "The same, for several:  `{phases}` like `P43, P44`."
     },
     {
       key: "acceptSends",

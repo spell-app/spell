@@ -72,6 +72,14 @@ export const epicItemVocabulary = {
         "on the mark takes it off."
     },
     {
+      name: "taken-in",
+      kind: "string",
+      description:
+        "TAKEN UP IN A PHASE (epic `epic-engine` I128):  the phase that fixed or did it (`p-fix-open-issues`), set " +
+        "when an issue or todo is closed while that phase is active, or when a done phase's text links it " +
+        "(`PhaseTakes`);  its line links the phase, `in P1`, as `handled` does, but it stays green:  not a state."
+    },
+    {
       name: "changed",
       kind: "string",
       format: "time",
@@ -94,7 +102,7 @@ export const epicItemVocabulary = {
       kind: "enum",
       values: ["approve", "todo", "revisit", "now", "next", "drop", "skip"],
       description:
-        "How Owen's review mark was handled (`now`:  a Do Now request, done;  `next`, `drop`:  a todo queued into " +
+        "How Owen's review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into " +
         "the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the " +
         "buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
     },
@@ -250,7 +258,8 @@ export const epicItemVocabulary = {
       name: "handled",
       description:
         "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
-        "`epic-engine` P31)."
+        "`epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that " +
+        "fixed or did it."
     },
     {
       name: "git",
@@ -309,6 +318,11 @@ export const epicItemVocabulary = {
       key: "handledTip",
       text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
       description: "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
+    },
+    {
+      key: "takenTip",
+      text: "Taken up in {phase}:  fixed or done there",
+      description: "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
     },
     { key: "tipTodo", text: "to do:  {work}", description: "Id chip and review label tooltip:  the queued work." },
     { key: "tipReviewed", text: "reviewed {date}", description: "Id chip tooltip:  reviewed." },

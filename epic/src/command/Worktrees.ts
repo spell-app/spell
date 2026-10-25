@@ -2,9 +2,11 @@ import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, mkdirSync, readFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
+import { checkoutOf } from "spell/server/checkout"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { EpicRepo } from "spell-epic/config/EpicRepo"
-import { RealPath } from "spell-epic/config/RealPath"
 import { SessionFolders } from "spell-epic/config/SessionFolders"
 import { URGENT_STATES } from "spell-epic/list/EpicState"
 
@@ -26,7 +28,7 @@ import {
 } from "./command.types"
 import { CheckoutPatches } from "./CheckoutPatches"
 import { CheckoutServers } from "./CheckoutServers"
-import { Git } from "./Git"
+import { EpicCheckout } from "./EpicCheckout"
 import { LeftoverFolders } from "./LeftoverFolders"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
@@ -141,7 +143,7 @@ export class Worktrees {
         return EXIT.OK
       }
       case "merge-main": {
-        const checkout = Git.nearestCheckout({ marker: ".git" })
+        const checkout = EpicCheckout.nearest({ marker: ".git" })
         const reports = MainMerge.runAll(checkout, flags.continue ? "continue" : "start")
         // one repo:  its report as before;  a multi-repo top:  one per repo, `repo` in each
         const single = reports.length === 1 && !reports[0]!.repo
@@ -155,7 +157,7 @@ export class Worktrees {
         return reports.some(failed) ? EXIT.ERRORS : EXIT.OK
       }
       case "patch": {
-        const here = Git.nearestCheckout({ marker: ".git" })
+        const here = EpicCheckout.nearest({ marker: ".git" })
         const checkouts = flags.all ? CheckoutPatches.allCheckouts(here) : CheckoutPatches.checkoutsAt(here)
         const reports = new CheckoutPatches({ dryRun: Boolean(flags.dryRun) }).patchAll(checkouts)
         if (flags.json) out(JSON.stringify(reports, null, 2))
@@ -500,7 +502,7 @@ export class Worktrees {
     const todo = files.filter((file) => !PLAN_SUMMARIES.has(file))
     // the first whose install has `tsx`, as Node's resolver finds it:  a hoisted install (the top `spell`'s, epic
     // `epic-engine` P10) has no `<root>/node_modules/tsx` (I60)
-    const root = [Git.CODE_ROOT, this.main].find((it) => tsxImports(it).length)
+    const root = [EpicCheckout.CODE_ROOT, this.main].find((it) => tsxImports(it).length)
     if (todo.length && root) {
       // the docs tools, and the tsconfig they run on:  spell-epic's `src/tools/` (epic `epic-eject` J14);  else a
       // spell-app checkout's package, `epics` since epic `people-and-orgs` P16, `docs` on a checkout from before
@@ -549,10 +551,10 @@ export class Worktrees {
    * - static:  any folder, in any repo
    */
   static checkoutOf(cwd: string): CheckoutPlace {
-    const top = Git.run(["rev-parse", "--show-toplevel"], cwd)
-    if (!top.ok) return { label: "(not in git)", branch: "", inside: cwd }
-    const root = top.out
-    const label = RealPath.same(root, Git.mainRoot(cwd)) ? "main checkout" : `worktree ${basename(root)}`
+    const checkout = checkoutOf(cwd)
+    if (!checkout) return { label: "(not in git)", branch: "", inside: cwd }
+    const { root } = checkout
+    const label = RealPath.same(root, checkout.main) ? "main checkout" : `worktree ${basename(root)}`
     const branch = Git.run(["branch", "--show-current"], cwd).out || "(detached)"
     const inside = relative(root, cwd)
     return { root, label, branch, inside }

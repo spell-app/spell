@@ -8,6 +8,8 @@ import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
 import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
+// plain DOM, the page's ONE zoom:  the docs runtime's too
+import { ImageZoom } from "spell-epic/components/epic-zoom/ImageZoom"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
@@ -33,7 +35,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - a fold:  the chevron (`fold.button()`) and its label as the title row, folded to start with
  *   - open or folded is its `open` attribute (`Fold`'s `kept`):  page state the live patch keeps, never written
  *   - its screenshots are thumbnails, a page sheet's (`EpicField.requests.css`:  they're light DOM, out of reach of
- *     the shadow sheet);  a click shows one full size in a `<ui-modal>`, never its link
+ *     the shadow sheet);  a click shows one full size in the page's `<epic-zoom>` (`ImageZoom`), never its link
  *     (kept for a page without scripts, or opened from disk)
  ****************/
 export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
@@ -45,9 +47,6 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
 
   /** `open`:  a request unfolded (a boolean is always the DOM element's, see `@controlled`). */
   @E.controlled("open") accessor isMarkedOpen = false
-
-  /** The screenshot shown full size (its address and its alt text), while the zoom shows. */
-  @E.state accessor zoomed: Zoomed | undefined = undefined
 
   /** Its look:  icon and label key;  Symptom's for an unknown name. */
   get look(): FieldLook {
@@ -113,24 +112,13 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
   }
 
   /**
-   * A click on a request's screenshot (or Enter on its link):  shown full size in the modal, not opened as its link.
+   * A click on a request's screenshot (or Enter on its link):  shown full size (`ImageZoom`), not opened as its link.
+   * - the docs runtime takes every other image's click on the page;  this one is for a page without it (Epic UI's)
    * - with a modifier key (or not the main button):  the link's, as usual (a new tab)
    */
   @E.on("click")
   protected onClick(event: MouseEvent) {
-    if (!this.isRequest || event.defaultPrevented || event.button !== 0) return
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-    const target = event.target instanceof Element ? event.target : null
-    const image = target?.closest("img") ?? target?.closest("a")?.querySelector("img")
-    if (!image || image.closest("epic-field") !== this.domElement) return
-    event.preventDefault()
-    this.zoomed = { src: image.currentSrc || image.src, alt: image.alt }
-  }
-
-  /** The zoom closed (Escape, its close button, a click outside). */
-  @E.on("ui-closed", { target: "renderRoot" })
-  protected onZoomClosed() {
-    this.zoomed = undefined
+    if (this.isRequest) ImageZoom.onClick(event)
   }
 
   render(): JSX.Element {
@@ -162,7 +150,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
     )
   }
 
-  /** A request:  its title row (the fold chevron, its label), its prose under it, folded;  the zoom's modal. */
+  /** A request:  its title row (the fold chevron, its label), its prose under it, folded. */
   private request(): JSX.Element {
     return (
       <div class={[this.rootClass, FIELD, REQUEST]} part={this.partForName("base")}>
@@ -186,19 +174,6 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
         >
           <slot />
         </div>
-        <ui-modal
-          class={ZOOM}
-          part={this.partForName("zoom")}
-          appearance="basic"
-          closable=""
-          visible={this.zoomed ? "" : undefined}
-        >
-          <Show when={this.zoomed}>
-            {(zoomed) => (
-              <img class={ZOOMED} src={zoomed().src} alt={this.translationForKey("zoomed", { alt: zoomed().alt })} />
-            )}
-          </Show>
-        </ui-modal>
       </div>
     )
   }
@@ -262,15 +237,10 @@ const REQUESTS = 'epic-field[name="requests"]'
 /** Name of the page sheet that draws a request's screenshots as thumbnails. */
 const REQUESTS_PAGE_SHEET = "epic-field-requests"
 
-/** A screenshot zoomed:  its address and its own alt text. */
-type Zoomed = { src: string; alt: string }
-
-/** Classes of a request's shadow markup:  its box, the title row, its prose, the modal and its image. */
+/** Classes of a request's shadow markup:  its box, the title row, its prose. */
 const REQUEST = "request"
 const HEAD = "head"
 const BODY = "body"
-const ZOOM = "zoom"
-const ZOOMED = "zoomed"
 
 /** Ids of a request's shadow markup:  its label (the fold button's name), the box it folds. */
 const LABEL_ID = "label"

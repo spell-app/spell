@@ -194,9 +194,9 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
 import { checkoutOf } from "spell/server/checkout"
+import { RealPath } from "spell/server/RealPath"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { RealPath } from "spell-epic/config/RealPath.ts"
 import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
 import { SessionMoves } from "spell-epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell-epic/command/WorktreeGuard.ts"
@@ -1548,7 +1548,10 @@ function closingBracket(text, start) {
   return text.length
 }
 
-/** Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's. */
+/**
+ * Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's.
+ * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` runs this script, and can't load the kit's `PidFile`
+ */
 function isAlive(pid) {
   try {
     process.kill(pid, 0)

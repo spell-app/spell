@@ -3,7 +3,8 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, NOBODY_LISTENING, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
+import { DraftSaver } from "spell-epic/answers"
+import { DRAFT_SAVE_MS, FOCUS_HOLD_MS, clockOf, isImmediate, type InboxMark } from "spell-epic/review"
 
 import { epicReviewVocabulary } from "./EpicReview.en"
 import { ReviewState } from "./ReviewState"
@@ -19,12 +20,6 @@ import {
   NOTE_SAVED,
   NOTE_TEXT,
   REVIEW_CONTROLS,
-  REVIEW_ACCEPT,
-  REVIEW_DEFER,
-  REVIEW_MIDDLE,
-  PRESSED,
-  REVIEW_PLAN,
-  REVIEW_DO_NOW,
   REVIEW_GROUP,
   REVIEW_NOTED,
   REVIEW_PICK,
@@ -131,42 +126,32 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    * - the group:  Approve, Revisit, Make Todo
    *   - a todo's group instead:  the plane (do it in the next phase), Revisit,
    *     the x (drop it:  Owen, 2026-10-09)
-   * - then Do Now apart (decision Q20, the wand)
    *
    * How they look and act:
    * - every button shows at every step, its FILL saying how far its mark has got (`ReviewFill`):
    *   - a grey outline:  available
    *   - dashed in its colour:  pressed, not sent
-   *   - outlined:  sent (a Do Now:  taken)
+   *   - outlined:  sent (a revisit now:  taken)
    *   - then CLEARED, a grey outline again, once Claude has handled it
    *     (they're Owen's input:  the id chip carries the result, Owen, 2026-10-08)
    * - colours:
    *   - green:  decided (Approve, Make Todo, a todo's plane)
-   *   - blue:  an ask of Claude (Revisit, Do Now)
+   *   - blue:  an ask of Claude (Revisit)
    *   - grey:  no longer relevant (a todo's x)
    * - work on its way or under way (`ReviewState.busyButton()`):
    *   - that button's icon turns while Claude is on it (`data-busy`)
    *   - queued with nobody listening, it stays dashed, "waiting for a session" (and what the page server's wake did:
    *     epic `epic-workflow` P16)
    *   - clicked then:  "nevermind"
-   * - Revisit takes the reader to the note box (`takeToNote()`);
-   *   Do Now takes the note in it along (`ReviewClient.press()`)
+   * - Revisit takes the reader to the note box (`takeToNote()`)
+   * - no Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand"
    * - tooltips:  the plain browser ones (`title`):  just the name (Q8), then the element's review label
    *   (`tip`, `Approve · reviewed 10/7/26`:  Owen, 2026-10-07, in place of the label beside them);
    *   a screen reader hears the state too
    */
   private controls(): JSX.Element {
     const specs = () => BUTTONS_OF[this.buttons ?? "item"]
-    // a waiting plan's Accept plan, in WORDS, apart from the icons:  the page asks for it (Owen, 2026-10-25:  "p37 not
-    // asking me to accept";  a small grey check before)
-    const accept = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "approve") : undefined)
-    // ... and Defer Phase beside it (Owen, 2026-10-25)
-    const defer = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "defer") : undefined)
-    // ... and Revisit between them, in the same pill (Owen, 2026-10-25:  "revisit should be between accept / defer")
-    const revisit = () => (this.buttons === "plan" ? specs().find((spec) => spec.action === "revisit") : undefined)
-    const inPill = (spec: ReviewButtonSpec) => spec === accept() || spec === revisit() || spec === defer()
-    const group = () => specs().filter((spec) => spec.action !== "details" && !inPill(spec))
-    const doNow = () => specs().find((spec) => spec.action === "details")
+    const group = specs
     return (
       <span
         class={REVIEW_CONTROLS}
@@ -190,29 +175,25 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             </span>
           )}
         </Show>
-        <Show when={accept()}>
-          <span class={REVIEW_PLAN}>
-            <Show when={accept()}>
-              {(spec) => this.button(spec(), REVIEW_ACCEPT, this.translationForKey(spec().label))}
-            </Show>
-            <Show when={revisit()}>
-              {(spec) =>
-                this.button(
-                  spec(),
-                  `${REVIEW_ACCEPT} ${REVIEW_DEFER} ${REVIEW_MIDDLE}`,
-                  this.translationForKey(spec().label)
-                )
-              }
-            </Show>
-            <Show when={defer()}>
-              {(spec) => this.button(spec(), `${REVIEW_ACCEPT} ${REVIEW_DEFER}`, this.translationForKey(spec().label))}
-            </Show>
-          </span>
-        </Show>
-        <ui-buttons class={REVIEW_GROUP} appearance="basic" icon="" size="mini">
+        {/* a waiting plan's Accept, Revisit and Defer:  icons like every row's, so they line up row to row;  the group
+            ringed 2px #666 while it waits on Owen, dotted once he's pressed one (Owen, 2026-10-25:  "Make the entire
+            group just icons, black border.  Dotted when action is being taken, 3px solid when you're waiting on input
+            from me") */}
+        <ui-buttons
+          class={REVIEW_GROUP}
+          appearance="basic"
+          icon=""
+          size="mini"
+          data-asks={
+            this.buttons === "plan"
+              ? group().some((spec) => this.fillOf(spec) !== "none")
+                ? "taken"
+                : "waiting"
+              : undefined
+          }
+        >
           <For each={group()}>{(spec) => this.button(spec)}</For>
         </ui-buttons>
-        <Show when={doNow()}>{(spec) => this.button(spec(), REVIEW_DO_NOW)}</Show>
       </span>
     )
   }
@@ -259,15 +240,11 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     this.send(THREAD_ANSWER, { act: spec.act })
   }
 
-  /** One review button, as its action stands;  `words`:  its label shown beside its icon (Accept plan). */
-  private button(spec: ReviewButtonSpec, extra?: string, words?: string): JSX.Element {
+  /** One review button, as its action stands. */
+  private button(spec: ReviewButtonSpec): JSX.Element {
     const busy = () => this.review.busyButton() === spec.action
     return (
       <ui-button
-        // `pressed`:  marked (dashed or outlined), for a look that's more than the fill (the plan pill's)
-        class={[extra, this.fillOf(spec) !== "none" && PRESSED].filter(Boolean).join(" ") || undefined}
-        appearance={extra ? "basic" : undefined}
-        size={extra ? "mini" : undefined}
         icon={spec.icon}
         data-action={spec.action}
         data-color={spec.color}
@@ -278,9 +255,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         }
         aria-label={`${this.translationForKey(spec.label)} · ${this.stateOf(spec)}`}
         onClick={(event: MouseEvent) => this.press(event, spec)}
-      >
-        {words}
-      </ui-button>
+      />
     )
   }
 
@@ -327,8 +302,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const fill = this.fillOf(spec)
     if (fill === "dashed") return this.translationForKey("chosenUnsent")
     if (fill === "outline") return this.translationForKey("chosenSent")
-    const tip = this.translationForKey(spec.tip)
-    return spec.action === "details" && !review.listening() ? `${tip}.  ${NOBODY_LISTENING}` : tip
+    return this.translationForKey(spec.tip)
   }
 
   /** What Owen wrote:  the draft, else the mark's note;  `""` for none. */
@@ -358,8 +332,16 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** The note's `<textarea>`, once drawn. */
   private noteInput: HTMLTextAreaElement | undefined
 
-  /** The timer saving a draft once typing stops;  `undefined` with nothing pending. */
-  private saveTimer: E.CancelablePromise<unknown> | undefined
+  /**
+   * The note's saves (epic `coherence` C10):  `DRAFT_SAVE_MS` after the last key, one at a time, retried every 3s
+   * after a failure, sent as the page goes;  the floppy follows where they stand (`showSave()`).
+   * - no browser copy of its own:  the client backs every key up (`ReviewClient.type()`)
+   */
+  private readonly drafts = new DraftSaver({
+    save: (save) => this.saveNote(save),
+    wait: DRAFT_SAVE_MS,
+    onChange: () => this.showSave()
+  })
 
   /**
    * The note box (Owen, 2026-10-06, Q8):  Owen's voice, on ivory.
@@ -370,9 +352,8 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
    *     Owen, 2026-10-09, in place of Make Todo, which stays on the line)
    * - a todo's buttons (`TODO_NOTE_BUTTONS`), in its line's order:
    *   the plane (green), Revisit Later, the x (grey:  drop it)
-   * - Do Now is the line's (decision Q20):  it takes the note along
    * - SAVED as typed, `DRAFT_SAVE_MS` after the last key, and at once when the box loses focus or the page goes away
-   *   (`watchPageHide()`)
+   *   (`watchPageHide()`), by its `DraftSaver`:  a failed save tried again every 3s
    *   - as the mark it makes (`ReviewClient.saveTyped()`;  epic `epic-engine` P20):  words typed turn Revisit ON, at
    *     the first key, so Send and the countdown hand them over;  the box stays open under the cursor
    *   - a request at work, or an emptied box with no revisit:  a draft, as before
@@ -462,10 +443,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.whileConnected
   protected watchPageHide() {
     if (this.shows !== "note") return undefined
-    const onPageHide = () => this.flush({ keepalive: true })
-    window.addEventListener("pagehide", onPageHide)
+    const unwatch = this.drafts.watch(window)
     return () => {
-      window.removeEventListener("pagehide", onPageHide)
+      unwatch()
       this.flush()
     }
   }
@@ -480,9 +460,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     const id = this.review.id()
     const text = this.noteInput!.value
     client?.type(id, text)
-    this.saved = undefined
-    this.saveTimer?.cancel()
-    this.saveTimer = E.after(DRAFT_SAVE_MS / 1000, () => void this.saveDraft())
+    this.drafts.changed()
     const made = client?.typedMark(id, text)
     if (made && made !== "draft" && made.action !== client?.markOf(id)?.action) this.flush()
   }
@@ -500,8 +478,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   /** A note box button:  the note becomes a mark (an action chosen:  `epic-chosen`);  the box empties. */
   @E.untracked
   private use(how: NoteHow) {
-    this.saveTimer?.cancel()
-    this.saveTimer = undefined
+    this.drafts.done()
     const note = this.noteInput!
     const text = note.value.trim()
     note.value = ""
@@ -526,22 +503,28 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
 
   /** Save a pending draft now (`keepalive`:  the page is going away). */
   private flush({ keepalive = false } = {}) {
-    if (!this.saveTimer) return
-    this.saveTimer.cancel()
-    void this.saveDraft({ keepalive })
+    void this.drafts.save({ keepalive })
   }
 
-  /** Save the note as the mark it makes, else as the element's draft (`ReviewClient.saveTyped()`);  the floppy says how. */
-  private async saveDraft({ keepalive = false } = {}) {
-    this.saveTimer = undefined
+  /**
+   * `DraftSaver`'s save:  the note as the mark it makes, else as the element's draft (`ReviewClient.saveTyped()`).
+   * - throws the client's last write error when it didn't go through
+   */
+  private async saveNote({ keepalive }: { keepalive: boolean }): Promise<undefined> {
     const client = this.review.client
     const note = this.noteInput
-    if (!client || !note) return
-    const text = note.value
-    const ok = await client.saveTyped(this.review.id(), text, { keepalive })
-    if (note.value !== text) return
-    if (!ok) this.saved = { ok: false }
-    else this.saved = text.trim() ? { ok: true, at: new Date().toISOString() } : undefined
+    if (!client || !note) return undefined
+    const ok = await client.saveTyped(this.review.id(), note.value, { keepalive })
+    if (!ok) throw new Error(this.review.lastWriteError || "not saved")
+    return undefined
+  }
+
+  /** The floppy, as the saves stand:  hidden while typing;  Saved (with when) once through, red when not. */
+  private showSave() {
+    const state = this.drafts.state
+    if (state.kind === "unsaved" || state.kind === "idle") this.saved = undefined
+    else if (state.kind === "saved") this.saved = this.noteInput?.value.trim() ? { ok: true, at: state.at } : undefined
+    else if (this.drafts.isError) this.saved = { ok: false }
   }
 
   /** The floppy's tooltip:  when it was saved, or why not. */
@@ -684,7 +667,7 @@ const HOW_KEYS: Partial<Record<string, "howTodo" | "howNext" | "howDrop" | "howS
 
 /**
  * The note box button `mark` stands for:  the x (`skip`;  a todo's `drop`), a todo's plane (`next`), `soon` (Later);
- * else none (a Make Todo or a Do Now is the line's).
+ * else none (a Make Todo is the line's).
  */
 function markButton(mark: InboxMark | undefined): NoteHow | undefined {
   if (mark?.action === "skip" || mark?.action === "next" || mark?.action === "drop") return mark.action

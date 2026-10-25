@@ -1,29 +1,29 @@
 import { spawnSync } from "node:child_process"
-import {
-  appendFileSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync
-} from "node:fs"
+import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, relative } from "node:path"
 
+import { checkoutOf } from "spell/server/checkout"
+import { FileLock } from "spell/server/FileLock"
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
 import { EpicConfig, type CheckoutPatch } from "spell-epic/config/EpicConfig.ts"
-import { RealPath } from "spell-epic/config/RealPath.ts"
 
 import type { PatchReport } from "./command.types.ts"
 
 /** what a checkout remembers having had, in its own git folder:  `{ "applied": { "<id>": "<when>" } }` */
 const STAMP = "epic-patches.json"
 
-/** held while a checkout is being patched, in its own git folder:  a second run (two sessions starting) skips it */
-const LOCK = "epic-patches.lock"
+/**
+ * held while a checkout is being patched, in its own git folder, as `epic-patches.lock` (`FileLock`'s):
+ * a second run (two sessions starting) skips it
+ */
+const LOCK = "epic-patches"
 
 /** a lock older than this was left by a run that died:  taken over */
 const LOCK_STALE_MS = 10 * 60 * 1000
+
+/** how long a git run here may take:  the session-start hook runs this */
+const GIT_TIMEOUT_MS = 5000
 
 /** how long a `run` patch's command may take */
 const RUN_TIMEOUT_MS = 10 * 60 * 1000
@@ -118,14 +118,12 @@ export class CheckoutPatches {
       return report
     }
     if (!patches.length) return report
-    const gitDir = gitOut(checkout, ["rev-parse", "--path-format=absolute", "--git-dir"])
+    const gitDir = Git.out(["rev-parse", "--path-format=absolute", "--git-dir"], checkout, { timeout: GIT_TIMEOUT_MS })
     if (!gitDir) {
       report.failed.push({ id: "git", error: "not a git checkout" })
       return report
     }
-    const unlock = this.dryRun ? () => {} : lock(gitDir)
-    if (!unlock) return { ...report, busy: true }
-    try {
+    const patchAll = () => {
       const stamp = readStamp(gitDir)
       for (const patch of patches) {
         try {
@@ -140,10 +138,11 @@ export class CheckoutPatches {
         }
       }
       if (!this.dryRun) writeFileSync(join(gitDir, STAMP), `${JSON.stringify(stamp, null, 2)}\n`)
-    } finally {
-      unlock()
+      return report
     }
-    return report
+    if (this.dryRun) return patchAll()
+    const done = FileLock.runOnce(join(gitDir, LOCK), patchAll, { stale: LOCK_STALE_MS })
+    return done === FileLock.HELD ? { ...report, busy: true } : done
   }
 
   /**
@@ -153,7 +152,9 @@ export class CheckoutPatches {
    */
   static markApplied(checkout: string): void {
     try {
-      const gitDir = gitOut(checkout, ["rev-parse", "--path-format=absolute", "--git-dir"])
+      const gitDir = Git.out(["rev-parse", "--path-format=absolute", "--git-dir"], checkout, {
+        timeout: GIT_TIMEOUT_MS
+      })
       if (!gitDir) return
       const stamp = readStamp(gitDir)
       const now = new Date().toISOString()
@@ -172,7 +173,7 @@ export class CheckoutPatches {
    */
   private copy(file: string, { checkout, main }: { checkout: string; main: string }): string[] {
     if (RealPath.of(checkout) === RealPath.of(main)) return []
-    if (gitOk(checkout, ["ls-files", "--error-unmatch", "--", file])) return []
+    if (Git.run(["ls-files", "--error-unmatch", "--", file], checkout, { timeout: GIT_TIMEOUT_MS }).ok) return []
     const source = join(main, file)
     if (!existsSync(source)) throw new Error(`main has no ${file} to copy`)
     const target = join(checkout, file)
@@ -217,21 +218,10 @@ export class CheckoutPatches {
 // ## Helpers
 ////////////////
 
-/** `git -C dir ...args`, trimmed;  `""` on any failure. */
-function gitOut(dir: string, args: string[]): string {
-  const run = spawnSync("git", ["-C", dir, ...args], { encoding: "utf8", timeout: 5000 })
-  return run.status === 0 ? run.stdout.trim() : ""
-}
-
-/** Whether `git -C dir ...args` succeeds. */
-function gitOk(dir: string, args: string[]): boolean {
-  return spawnSync("git", ["-C", dir, ...args], { encoding: "utf8", timeout: 5000 }).status === 0
-}
-
-/** The git checkout `path` is in, its real path;  `""` outside git. */
+/** The git checkout `path` is in, its real path;  `""` outside git, or when `path` isn't there. */
 function toplevel(path: string): string {
-  const root = existsSync(path) ? gitOut(path, ["rev-parse", "--show-toplevel"]) : ""
-  return root && RealPath.of(root)
+  const root = existsSync(path) ? checkoutOf(path)?.root : undefined
+  return root ? RealPath.of(root) : ""
 }
 
 /** Whether checkout `root` is a multi-repo top's:  its config lists child repos. */
@@ -256,8 +246,7 @@ function withChildren(root: string): string[] {
 
 /** Every checkout of the repo `checkout` is in:  `git worktree list`, the main checkout first. */
 function worktreesOf(checkout: string): string[] {
-  return gitOut(checkout, ["worktree", "list", "--porcelain"])
-    .split("\n")
+  return Git.lines(["worktree", "list", "--porcelain"], checkout, { timeout: GIT_TIMEOUT_MS })
     .filter((line) => line.startsWith("worktree "))
     .map((line) => line.slice("worktree ".length))
 }
@@ -270,11 +259,11 @@ function worktreesOf(checkout: string): string[] {
 function exclude(target: string): "added" | "there" {
   let folder = dirname(target)
   while (!existsSync(folder)) folder = dirname(folder)
-  const root = gitOut(folder, ["rev-parse", "--show-toplevel"])
-  const common = gitOut(folder, ["rev-parse", "--path-format=absolute", "--git-common-dir"])
-  if (!root || !common) throw new Error(`${folder} isn't in a git checkout`)
-  const line = `/${relative(RealPath.of(root), RealPath.of(target)).split("\\").join("/")}`
-  const file = join(common, "info", "exclude")
+  const checkout = checkoutOf(folder)
+  if (!checkout) throw new Error(`${folder} isn't in a git checkout`)
+  const line = `/${relative(RealPath.of(checkout.root), RealPath.of(target)).split("\\").join("/")}`
+  // the common git folder:  the main checkout's `.git`
+  const file = join(checkout.main, ".git", "info", "exclude")
   const text = existsSync(file) ? readFileSync(file, "utf8") : ""
   if (text.split("\n").includes(line)) return "there"
   mkdirSync(dirname(file), { recursive: true })
@@ -291,19 +280,4 @@ function readStamp(gitDir: string): { applied: Record<string, string> } {
   } catch {
     return { applied: {} }
   }
-}
-
-/**
- * Take the patch lock in git folder `gitDir`;  the function that lets it go, or `undefined` when another run holds it.
- * - a lock older than `LOCK_STALE_MS` is taken over
- */
-function lock(gitDir: string): (() => void) | undefined {
-  const file = join(gitDir, LOCK)
-  try {
-    if (existsSync(file) && Date.now() - statSync(file).mtimeMs < LOCK_STALE_MS) return undefined
-    writeFileSync(file, `${process.pid}\n`)
-  } catch {
-    return undefined
-  }
-  return () => rmSync(file, { force: true })
 }

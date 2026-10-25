@@ -5,6 +5,7 @@ import { E } from "spell-ui/core"
 import type { UILabelAttributes } from "spell-ui/jsx"
 
 import { SHOT_MAX_BYTES, type ReviewClient, type TestResult, type TestsEntry } from "spell-epic/review"
+import { DraftSaver } from "spell-epic/answers"
 // its view of the review inbox:  the file, not `epic-review`'s barrel
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
@@ -96,8 +97,14 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   /** What's typed in each test's comment box, not saved yet:  test id -> text. */
   private readonly typed = new Map<string, string>()
 
-  /** The note's save, waiting for the typing to stop. */
-  private noteTimer?: E.CancelablePromise<unknown>
+  /**
+   * The comment's saves (epic `coherence` C10):  `NOTE_SAVE_MS` after the typing stops, at once as the box is left,
+   * one at a time, retried every 3s after a failure, sent as the page goes.
+   */
+  private readonly drafts = new DraftSaver({ save: () => this.saveNote(), wait: NOTE_SAVE_MS })
+
+  /** The tests whose comments wait to be saved. */
+  private readonly unsavedNotes = new Set<string>()
 
   /** The move after an answer, waiting a moment so the press shows. */
   private moveTimer?: E.CancelablePromise<unknown>
@@ -212,8 +219,10 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     document.addEventListener("paste", this.onPaste, { signal: listeners.signal })
     // the docs runtime's scroll-follow writes the section being read into the address:  none shows in a run
     addEventListener(PLACE_EVENT, this.keepPlace, { signal: listeners.signal })
+    const unsave = this.drafts.watch(window)
     return () => {
       listeners.abort()
+      unsave()
       this.flushNote()
       leave()
     }
@@ -655,8 +664,9 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
     const id = this.at
     const client = this.review.client
     if (!client?.reviewing || !this.item()) return
-    this.noteTimer?.cancel()
-    this.noteTimer = undefined
+    // the answer carries the comment:  nothing left to save for it
+    this.unsavedNotes.delete(id)
+    if (!this.unsavedNotes.size) this.drafts.done()
     const note = this.commentOf(id).trim()
     const prior = client.testAnswerOf(id)
     const shot = prior?.shot ?? this.heldShots[id]
@@ -851,42 +861,54 @@ export class EpicTestRun extends E.UIComponent<typeof epicTestRunVocabulary> {
   @E.untracked
   private typeNote(id: string) {
     this.typed.set(id, this.noteBox?.value ?? "")
-    this.noteTimer?.cancel()
-    this.noteTimer = E.after(NOTE_SAVE_MS / 1000, () => this.saveNote(id))
+    this.unsavedNotes.add(id)
+    this.drafts.changed()
   }
 
   /** Save the comment being typed now, if any (the box left, a move). */
   @E.untracked
   private flushNote() {
-    if (!this.noteTimer) return
-    this.saveNote(this.at)
+    void this.drafts.save()
+  }
+
+  /**
+   * `DraftSaver`'s save:  each waiting test's typed comment (`saveNoteOf()`), in turn.
+   * - throws the inbox's last write error when one didn't go through:  it and those after it wait for the next try
+   */
+  private async saveNote(): Promise<undefined> {
+    for (const id of Array.from(this.unsavedNotes)) {
+      const text = this.typed.get(id)
+      await this.saveNoteOf(id)
+      // typed again meanwhile:  the next save takes it
+      if (this.typed.get(id) === text) this.unsavedNotes.delete(id)
+    }
+    return undefined
   }
 
   /**
    * Save test `id`'s typed comment:  into its answer (unchanged:  nothing);  no answer yet, as the inbox's draft
    * for it, which its answer takes over (the route drops the draft once a mark carries a note).
+   * - throws the inbox's last write error when it didn't go through
    */
-  @E.untracked
-  private saveNote(id: string) {
-    this.noteTimer?.cancel()
-    this.noteTimer = undefined
+  private async saveNoteOf(id: string): Promise<void> {
     const client = this.review.client
     const text = this.typed.get(id)
     if (!client?.reviewing || text === undefined) return
     const answer = client.testAnswerOf(id)
     const note = text.trim()
+    let saving: Promise<boolean> | undefined
     if (!answer) {
-      if ((client.draftOf(id)?.note ?? "") !== text) this.track(client.saveDraft(id, text))
-      return
-    }
-    if ((answer.note ?? "") === note) return
-    this.track(
-      client.answerTest(id, {
+      if ((client.draftOf(id)?.note ?? "") !== text) saving = client.saveDraft(id, text)
+    } else if ((answer.note ?? "") !== note) {
+      saving = client.answerTest(id, {
         result: answer.result,
         ...(note && { note }),
         ...(answer.shot && { shot: answer.shot })
       })
-    )
+    }
+    if (!saving) return
+    this.track(saving)
+    if (!(await saving)) throw new Error(client.lastWriteError || "not saved")
   }
 
   /** A paste anywhere on the page, while a test's card shows:  an image in it is the test's screenshot. */

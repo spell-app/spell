@@ -49,6 +49,7 @@ import { epicThreadVocabulary } from "spell-epic/components/epic-thread/EpicThre
 import { epicThreadMessageVocabulary } from "spell-epic/components/epic-thread/EpicThreadMessage.en"
 import { epicThreadsVocabulary } from "spell-epic/components/epic-thread/EpicThreads.en"
 import { epicUpdateVocabulary } from "spell-epic/components/epic-update/EpicUpdate.en"
+import { epicZoomVocabulary } from "spell-epic/components/epic-zoom/EpicZoom.en"
 
 import { Formats, type EpicAttributeSpec, type EpicTag, type EpicVocabulary } from "./definitions.types"
 
@@ -95,6 +96,8 @@ export class Definitions {
     "epic-link": epicLinkVocabulary,
     // a change mark (epic `epic-engine` P30):  words an answer changed, in the text itself
     "epic-change": epicChangeVocabulary,
+    // a screenshot full size over the page (epic `epic-engine` I129):  made by a click, never written in a page
+    "epic-zoom": epicZoomVocabulary,
     // the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12):  details and choice pages
     "epic-ask": epicAskVocabulary,
     "epic-text-box": epicTextBoxVocabulary,

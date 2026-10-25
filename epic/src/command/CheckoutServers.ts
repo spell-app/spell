@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join, resolve, sep } from "node:path"
 
@@ -8,6 +8,7 @@ import { join, resolve, sep } from "node:path"
 // servers on this machine, by process:  what `spell server prune` / `epic server prune` run.
 import { orphanServers, serverProcesses } from "spell/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
+import { RealPath } from "spell/server/RealPath"
 
 import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
 
@@ -151,12 +152,7 @@ export class CheckoutServers {
   /** `path` as given, and its real path when that differs (`/tmp` -> `/private/tmp`):  `lsof` gives real ones. */
   private static forms(path: string): string[] {
     const given = resolve(path)
-    let real = given
-    try {
-      real = realpathSync(given)
-    } catch {
-      // gone already:  as given
-    }
+    const real = RealPath.of(given)
     return real === given ? [given] : [given, real]
   }
 }
@@ -178,7 +174,10 @@ function inside(path: string, folder: string): boolean {
   return path === folder || path.startsWith(folder.endsWith(sep) ? folder : `${folder}${sep}`)
 }
 
-/** Whether process `pid` still runs. */
+/**
+ * Whether process `pid` still runs.
+ * - a copy of the kit's `SRV.isProcessAlive()`:  plain `node` loads this file, and can't load the kit's `PidFile`
+ */
 function alive(pid: number): boolean {
   try {
     process.kill(pid, 0)

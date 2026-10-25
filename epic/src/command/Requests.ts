@@ -4,6 +4,7 @@ import { join } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
+import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { DataFile } from "spell-epic/data/DataFile"
 import { PhaseIds } from "spell-epic/phases"
@@ -20,9 +21,9 @@ import {
   type SentRequest,
   type VerbArgs
 } from "./command.types"
+import { EpicCheckout } from "./EpicCheckout"
 import { parseTarget, phaseLabel, phaseOf } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
-import { Git } from "./Git"
 import { Sessions } from "./Sessions"
 import { StrayFiles } from "./StrayFiles"
 
@@ -66,10 +67,10 @@ export class Requests {
   readonly sessions: Sessions
 
   /**
-   * - `root`:  default the nearest checkout of a repo set up for epics (`Git.nearestCheckout()`)
+   * - `root`:  default the nearest checkout of a repo set up for epics (`EpicCheckout.nearest()`)
    * - `sessions`:  default `new Sessions()`
    */
-  constructor({ root = Git.nearestCheckout(), sessions = new Sessions() }: RequestsProps = {}) {
+  constructor({ root = EpicCheckout.nearest(), sessions = new Sessions() }: RequestsProps = {}) {
     this.root = root
     this.epics = join(EpicConfig.contentOf(root), "epics")
     this.sessions = sessions

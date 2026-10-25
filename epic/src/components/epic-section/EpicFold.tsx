@@ -106,15 +106,20 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   accessor isOpen = false
 
   /**
+   * Open or folded, as `open` (`isOpen`;  the kit's `Disclosure`):  the cancelable `ui-opening` / `ui-closing` first.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    member: "isOpen",
+    detail: (open, originalEvent): FoldToggleDetail => ({ open, element: this.domElement, originalEvent })
+  })
+
+  /**
    * Fold or unfold as the user would:  the cancelable `ui-opening` / `ui-closing` first, then `open`.
    * - true when applied
    */
   toggle(originalEvent?: Event): boolean {
-    const opening = !this.isOpen
-    const detail: FoldToggleDetail = { open: opening, element: this.domElement, originalEvent }
-    return this.requestChange("isOpen", opening, () =>
-      this.send((opening ? "ui-opening" : "ui-closing") as never, detail)
-    )
+    return this.disclosure.toggle(originalEvent)
   }
 
   /**
@@ -123,25 +128,18 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
    * - NEVER rejects:  a part that can't load shows its note.
    */
   reveal(): Promise<void> {
-    if (!this.isOpen) {
-      const detail: FoldToggleDetail = { open: true, element: this.domElement }
-      const init = { bubbles: true, composed: true, cancelable: false, detail }
-      this.domElement.dispatchEvent(new CustomEvent(this.elementDefinition.event("ui-opening" as never), init))
-      this.isOpen = true
-    }
+    this.disclosure.adopt(true)
     return this.foldAttrs.source ? this.body.load().catch(() => undefined) : Promise.resolve()
   }
 
   /** Fold it, if open, as a click on its title would (`toggle()`);  true when it folded. */
-  @E.untracked
   collapse(): boolean {
-    return this.isOpen ? this.toggle() : false
+    return this.disclosure.close()
   }
 
   /** Open it, if folded, as a click on its title would (`toggle()`);  true when it opened.  Expand-all's. */
-  @E.untracked
   expand(): boolean {
-    return this.isOpen ? false : this.toggle()
+    return this.disclosure.open()
   }
 
   /** Its toggle-all's last use, holding while it stays open:  everything inside opened. */

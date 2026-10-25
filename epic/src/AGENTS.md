@@ -61,6 +61,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - A piece several families draw is a family of its own.
     - It's drawn in their shadow roots, and never written in a doc.
     - Those pieces:  `<epic-review>`, `<epic-new-item>`, `<epic-agents>`, `<epic-thread-message>`.
+  - `<epic-zoom>` (epic `epic-engine` I129):  a screenshot full size over the page, ONE per page, made at the end of
+    `<body>` by `ImageZoom` (`spell-epic/components/epic-zoom/ImageZoom`), never written in a page.
+    - `ImageZoom` is plain DOM:  the docs runtime imports that leaf alone (the barrel would bundle the element), and
+      `<epic-field>`'s request thumbnails call it;  its docstring has the rule for which images open.
     - Each family that draws one imports its barrel first,
       so it's defined wherever they are.
     - Unless it can't be a tag.
@@ -105,11 +109,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - A time alone (`saved 14:42`):  `PlanDates.clock()`.
   - `phases/` -- `PhaseIds`:  a phase's STABLE id and the number people see (epic `epic-workflow` P15).
     - The id is made once from the phase's name, `p-epic-migrate`, and kept through renames and inserts.
-    - "P7" is its place among the whole-numbered phases, worked out as it's drawn or printed:  never written, never
-      its id.
-    - A phase added on the fly is a DECIMAL of the one before it, P11.1, written on it (`<epic-phase number>`;
-      epic `epic-engine` P39):  so adding one renumbers nothing (`decimalAfter()`, `misplacedDecimals()`).
-    - Finding a phase as people name it (`7`, `P7`, `P11.1`, its id, name or slug), and an old `#p7` landing on P7.
+    - "P7" is its place, worked out as it's drawn or printed:  never written, never its id.
+    - Every number WHOLE (epic `epic-engine` I126;  Owen, 2026-10-25:  "ditch the 17.1 and just reorder"):  adding or
+      moving a phase renumbers the to-do phases after it, and the tool's `PhaseNumbers` rewrites what names them.
+      - P39's DECIMAL phases (`<epic-phase number="11.1">`) are made whole by the migration `whole-phase-numbers`;
+        one not migrated yet still reads as its own number (`decimalOf()`).
+    - Finding a phase as people name it (`7`, `P7`, its id, name or slug), and an old `#p7` landing on P7.
   - `comments/` (`spell-epic/comments`) -- `ThreadFacts`:  what a comment's THREAD shows, worked out ONE way for the
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
     - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`M3`), the few words it's on, its times,
@@ -137,6 +142,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `epic inbox status`, the inbox's `doing`), whose styled tooltip lists what it's answering.
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
+    - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
+      - `isServed()` (the write token, not `file://`) and `canRead()` (not `file://`):  the ONE "am I served?" test
+      - `get()` on the kit's `$fetch()`:  a 404 answers its `missing` default, any other failure throws;  no caller
+        checks a response itself
+      - `post()`:  the token, refreshed once from the page as served now after a restart;  the one stale-token rule
+      - `ServerLink.watch(window, files, refresh, { every, polls })`:  the one poll, the page coming into view, the
+        server's word that a file changed (a name, or a test of the path)
+      - `ServerLink.forPage()`:  the page's own link, for reads and writes with no client of their own (`<epic-page>`'s
+        See Also, `<epic-cards>`, `<epic-link>`, the docs pages' comments, the syntax page)
   - `answers/` (`spell-epic/answers`) -- the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12),
     as their elements keep them.
     - No Solid, no Spell UI:  node-safe at import.
@@ -151,6 +165,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - text whose id leaves the page is KEPT (`kept`):  drawn by the notes box, and sent with the rest
       - each part says the ids it holds, with their titles (`labelsInto()`), so kept text keeps its old title
       - `AnswerDraft`:  the rules, pure (what's laid over what, what's kept, which draft is newest)
+    - `DraftSaver` (epic `coherence` C10):  a draft that saves itself, the ONE way every page Owen types into keeps
+      what's typed and not sent:  the three forms, `<epic-review>`'s note, `<epic-test-run>`'s comment, the docs
+      pages' comments and the syntax page
+      - handed the save call, the wait after the last change and the browser copy's key;  it saves once typing stops,
+        one save at a time, tries a failed one again every 3s, sends at once as the page hides or goes (`keepalive`)
+      - one wording of where it stands:  "not saved yet", "saving…", "saved 14:04", "kept in this browser only:  ..."
+      - its browser copy through the kit's `StoragePlace`:  blocked storage keeps it in memory, nothing throws
+      - plain timers, not the kit's `after()`:  `spell/element`'s leaves are neither a pack's shared module nor allowed
+        in the docs bundles
     - `RunForm`, one per run page (epic `epic-engine` P23):  a command's review page, `<epic-run>`'s
       - reads the run (`GET /api/runs/<id>`);  each row's answer saved as Owen gives it (`POST .../answer`, half a
         second after typing, a pick or a tick at once;  a failed save tried again every 3s);  Send (`POST .../send`)
@@ -227,14 +250,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `contentOf()` never falls back to the checkout itself silently when the file NAMES a content folder:  it says so
       - `epic window init` drops a worktree window's folder that's gone (the old content folder) and adds the one in
         force (`withContentFolder()`, [window.mjs](./window.mjs))
-    - `RealPath` (epic `epic-engine` I59):  every compare of checkout, worktree, content-folder and session paths,
-      links followed on BOTH sides
+    - `RealPath` (epic `epic-engine` I59), the kit's since epic `coherence` P7 (`spell/server/RealPath`):  every
+      compare of checkout, worktree, content-folder and session paths, links followed on BOTH sides
       - `of()`:  the real path;  a missing one, its nearest folder that's there, real, then the rest as given
       - `same()`, `isIn()`, `from()`:  equal, inside, the path inside
       - who:  `EpicConfig` (`main`, `worktreeNameOf()`), `Worktrees` (`named()`, `idle()`, `remove()`,
         `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
         `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)
-      - plain `node` loads it by path:  node's own modules only
+      - plain `node` loads it by its own name:  node's own modules only
     - node only, NOT in the `spell-epic` barrel (`spell-epic/config/EpicConfig`)
       - plain `node` loads it by path too, before a worktree's `yarn install`:
         the hooks ([hooks/](../hooks/)) and the window script ([window.mjs](./window.mjs))
@@ -309,6 +332,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Sessions.named()` (`epic session find`, `epic worktree status`) reads only the transcripts that changed since:
         the transcripts are 1.6GB, and reading them all took 1.7s of a 2s command, more with every session
       - keyed by each file's size and modified time;  best effort, never throws
+    - `ActiveTime`, `WorkTime`:  how long Claude WORKED, from the transcripts (epic `epic-engine` P41)
+      - `ActiveTime`:  one transcript's working stretches, never the waits for Owen (his next prompt, an answer, a
+        permission, a background wait for his notes);  side by side counted once
+      - `WorkTime`:  a phase's (its own agents, else the epic's sessions while it was active) and an agent's, found in
+        Claude's folder (`<session>/subagents/`, each agent named by its meta file's `description`)
+      - used by `epic phase … done | took` (`<epic-phase took>`) and `epic agents done`
     - `WorktreeGuard`:  what the `SessionStart` hook ([worktree-guard.mjs](../hooks/worktree-guard.mjs)) tells
       a worktree's session that starts outside its worktree, or in it unrecorded (epic `epic-eject` I3)
       - plain `node` loads it by path
@@ -343,10 +372,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - the window script's worktree commands say it too when the hook can't run, since then the prompt hook can't
           either
       - plain `node` loads it by path
-    - `Git`:  running git, and finding checkouts:  the main one, the caller's, the one this code is in
+    - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
+      (`CODE_ROOT`);  `mustGit()`, a git run whose failure is the verb's own error
+      - running git is the kit's `Git` (`spell/server/Git`), a checkout's main checkout without a git run its
+        `checkoutOf()` (`spell/server/checkout`):  spell-epic's own `Git` until epic `coherence` P7
     - ONE copy of the code:  every verb runs THIS checkout's code, on the caller's checkout's data.
       - the `epic` on the `PATH` is the main checkout's
-      - the caller's checkout:  `Git.nearestCheckout()`
+      - the caller's checkout:  `EpicCheckout.nearest()`
       - the tools get it as `EPIC_CHECKOUT`, which [pages.js](tools/pages.js) and the window script take as their root
     - `epicArgs.ts`:  `epic <verb> <epic>#<id>` turned into the `epic` tool's own order (`planDocArgs()`)
     - this folder NEVER imports the kit's `spell` program, and loads no spell
@@ -388,7 +420,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - its Send wakes `/epic review SAGA:/<id>`
     - the page server's review routes ([reviewRoutes.ts](tool/reviewRoutes.ts)) and what they call:
       - `ReviewInbox`:  the inbox file
-      - `ReviewStart`:  the pill's start, and WAKING the epic when Send or Do Now finds nobody listening
+      - `ReviewStart`:  the pill's start, and WAKING the epic when Send finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
     - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR, one beside every session
       ([monitors.json](../monitors/monitors.json);  epic `epic-engine` P18):
@@ -487,8 +519,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
     - A page-named filter is under `spell-filter:` too.
   - Stays raw:
-    - [spell-syntax.js](tools/_assets/spell-syntax.js), a classic script loaded before the bundle
     - [check-spell.js](tools/check-spell.js), which clears a page's folds from Playwright
+    - the syntax page went through `PrefStore` once bundled (epic `coherence` C12)
 - Every sheet NAME starts `epic-` too:  `elementSetup = { styleSheets: { "epic-item": itemCSS } }`.
   - Spell UI keeps ONE sheet per name for the whole page, and the first class to register a name wins.
   - So a bare `item` drew `<epic-item>` with `<ui-item>`'s sheet, on any page that had both (I9).
@@ -496,7 +528,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The tooling's data files are JSON5, read and written through `DataFile` (`spell-epic/data/DataFile`, see "Overview"):
   never `JSON.parse()` / `JSON.stringify()` on one, which would refuse or drop Owen's comments.
   - A new one:  `<name>.json5`, its path given to `DataFile`.
-  - A browser reader drops comments before `JSON.parse()` (`commands.js`' `parseData()`).
+  - A browser reader reads it with the kit's `parseJSON5()` (`commands.entry.js`, bundled since epic `coherence` C12).
 - A change to epic page markup adds its MIGRATION STEP in the SAME commit (epic `epic-workflow` P8).
   - epic page markup:  what the tool writes, or what an element reads
   - the step:  a class in [migrations/](tool/migrations/), last in `Migrations.all`, with its test
@@ -872,6 +904,14 @@ In `tools/`:
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the content folder's `goals/`.
     - their look, and their live buttons:  PARKED since 2026-10-11, each says "TODO:  this will ..." (`parked()`)
     - `goals.css` holds every rule the saga pages took from `plan-doc.css`, which they no longer link.
+  - The DATA PAGES' scripts (epic `coherence` C12):  `commands.entry.js` -> `commands.js`,
+    `core-reference.entry.js` -> `core-reference.js`, `spell-syntax.entry.js` -> `spell-syntax.js`.
+    - BUNDLED by [bundle-spell-ui.js](tools/bundle-spell-ui.js) (`--data-pages`:  only them), classic scripts with no
+      Spell UI in them, as the comments' own;  edit the entries, NEVER the bundles.
+    - They import what exists instead of copying it:  the docs helpers' `el()`, `titleInside()`, notice, section
+      numbers and their one start, `drawThenBoot()`;  the kit's `slug()`, `parseJSON5()`, `clockTime()`;
+      `ChoicesForm`'s file links, `ServerLink`, `DraftSaver`.
+    - The pages load them by the same paths as before (`/_epic/assets/commands.js`):  no page changed.
   - `commands.js`:  command reference pages ([the commands template](../templates/commands.html)).
     - It draws their tables from the page's JSON, then loads `spell-ui.js` itself.
     - Built from Spell UI's elements (`<ui-section>`, `<ui-table>`, `<ui-statistic>`), never markup in strings
@@ -1127,7 +1167,7 @@ In `tools/`:
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
       - the page header and its toolbar's tools:
-        Send and its countdown while reviewed (`<epic-send-buttons>`), the step label, git
+        Send while reviewed (`<epic-send-buttons>`;  no wand or countdown since 2026-10-25), the step label, git
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
       - every review control on the page's ONE review client
@@ -1181,8 +1221,8 @@ In `tools/`:
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
   - Code colors:  highlight.js (`highlight.min.js`, in `_assets/`), committed so pages load offline.
-    - Older pages still name cdnjs:  the page servers swap that tag for the local copy (`HIGHLIGHT_JS` in
-      `server.types.ts`;  the epic server's `localHighlight()`, spell-app's in its `src/page-server/`).
+    - Older pages still name cdnjs:  the page servers swap that tag for the local copy, by spell-epic's settings'
+      `"localCopies"` (the kit's `withLocalCopies()`;  `HIGHLIGHT_JS` in `server.types.ts` names the same two URLs).
 - Headings:
   - One `h1`.
   - A numbered top-level `<ui-section>` per major section (`label="2. Read-after-write"`), each with a stable `id`.
@@ -1434,7 +1474,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       moved after the others)
     - while Claude's build plan for it waits (`plan="waiting"`, epic `epic-engine` P33):  Accept plan (`approve`:
       `inbox apply` marks the plan accepted, "plan accepted:  build it") and Revisit
-    - else Revisit, Make Caveat, Do Now:  notes on the plan, no Approve
+    - else Make Caveat, Revisit:  notes on the plan, no Approve
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
@@ -1473,7 +1513,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
     P19):  live exactly while that process runs, with no heartbeat.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
-    - Send (or its countdown) or Do Now with nobody listening wakes it, inside the request:
+    - Send with nobody listening wakes it, inside the request:
       `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
     - Claimed under the inbox's lock (`claimWake()`):  two Sends at once wake once.
     - It stands 10 minutes (`WAKE_COOLDOWN_MS`), or until a session listens (`setListening()` clears it).
@@ -1489,7 +1529,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST now { page, id, action, note? }`:  Add Details, or revisit now, queued on `now`
       - revisit now keeps the item's pick
     - `POST cancel { page, id }`:  "nevermind"
-    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20),
+    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
       every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
     - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
@@ -1740,7 +1780,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - a block with a TITLE ROW:  in that row, its `actions` slot, never over a button
         - a docs section:  `<ui-section>`'s own slot (`.at-section`)
         - an epic page's Overview, item, update (with a date), aside and code block (`.at-title`, `TITLE_ROW_BLOCKS`):
-          after the title, before the block's own buttons (review pills, Do Now, the date, the fold)
+          after the title, before the block's own buttons (review pills, the date, the fold)
         - every epic element with a title row has the slot:  [Fold.types.ts](components/epic-item/Fold.types.ts)
       - a block with NO title row (a paragraph, a table, a list, a message, cards, a phase's field, the summary):
         first in the block's ACTIONS ROW (`.at-block`;  `addBlockAction()`, epic `epic-engine` I26)
@@ -2273,12 +2313,12 @@ In this order, from spell-epic's root (a page by its path in the checkout it's i
   - Their header comments have the details.
   - Every one serves its copies from a page server of its own,
     [DemoServer.ts](demo/DemoServer.ts) (epic `epic-engine` I11):  spell-epic's `EpicServer`, this checkout's code.
-    - It WAKES NOBODY:  a Send or Do Now with nobody listening reaches a stubbed wake, never a window or a session.
+    - It WAKES NOBODY:  a Send with nobody listening reaches a stubbed wake, never a window or a session.
     - Airplane mode is off for it, whatever the machine's switch says.
   - `node src/demo/check-review-epics.mjs [--doc <name>] [outDir]`, from the root:
     - It clicks through every review flow on `<epic-*>` controls, and reads each back from the inbox:
-      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, Do Now, nevermind,
-      Add Details Now, Send, the countdown's send.
+      Approve, Make Caveat, Revisit and its note box, drafts across a reload, Later, a typed revisit,
+      Send.
     - No control past the window, or over a title, at 280 / 900px, light and dark.
     - It refuses while the copy's inbox file exists.
     - Run it after touching the review controls or `ReviewClient`.

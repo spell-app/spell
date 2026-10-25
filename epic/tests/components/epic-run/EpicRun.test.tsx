@@ -70,7 +70,7 @@ function fakeRoutes({
 }: { waiting?: boolean; page?: RunPage; answers?: RunAnswers } = {}) {
   let answers: RunAnswers = given
   return vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-    if (!init?.method) return Response.json({ page, answers, waiting })
+    if (!init?.method || init.method === "GET") return Response.json({ page, answers, waiting })
     const body = JSON.parse(init.body as string) as Record<string, unknown>
     if (url.endsWith("/answer")) {
       const { rowId, ...answer } = body

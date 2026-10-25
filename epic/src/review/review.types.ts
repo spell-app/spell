@@ -99,12 +99,12 @@ export const REVISIT_KEY_PREFIX = "spell-revisit:"
 /**
  * What the page says when no Claude session waits on the inbox (epic page `review-review`, D6):
  * `listening` null, which the routes also answer once a session's heartbeat stops (`ReviewInbox.forPage()`).
- * - since epic `epic-workflow` P16, Send and Do Now wake the epic's session then (the page server types
+ * - since epic `epic-workflow` P16, Send (and a request for now) wakes the epic's session then (the page server types
  *   `/epic review <epic>` into it, or opens one):  what a wake did is `ReviewClient.waitingWhy`
  */
 export const NOBODY_LISTENING = isAirplane()
   ? "Airplane mode:  queued for when you land (/airplane land)"
-  : "No Claude session is reviewing this doc:  Send or Do Now wakes one"
+  : "No Claude session is reviewing this doc:  Send wakes one"
 
 /**
  * Airplane mode is on (epic `airplane`):  Owen works with no Claude, and everything waits for `/airplane land`.
@@ -251,6 +251,18 @@ export type ServerInfo = {
   token: string
   /** the page's file, as the server announces changes (`spell-server:changed`'s `path`) */
   file?: string
+  /** the checkout it serves, on disk:  a file's `vscode://` link (`ChoicesForm.fileUrl()`) */
+  root?: string
+  /** the folder it serves worktrees from, `/worktrees/<w>/` pages' checkouts */
+  worktrees?: string
+}
+
+/** The browser's storage, or what finds it (`StoragePlace` calls it, and keeps memory when it throws). */
+export type StorageFinder = Storage | (() => Storage) | null | undefined
+
+/** `storage` as `StoragePlace` takes it:  the storage, found now;  none for none (memory). */
+export function storageNow(storage: StorageFinder): Storage | undefined {
+  return (typeof storage === "function" ? storage() : storage) ?? undefined
 }
 
 /** What a `ServerLink` (and an `AgentsClient`) is made from:  the page's facts, and `fetch` (stubbed in tests). */
@@ -274,8 +286,11 @@ export type ServerLinkOptions = {
 
 /** What a `ReviewClient` is made from:  its link's facts, plus the browser's storage and the page's items. */
 export type ReviewClientOptions = ServerLinkOptions & {
-  /** `localStorage`, for the note backups;  `null`:  none (blocked, private window) */
-  storage?: Storage | null
+  /**
+   * `localStorage`, for the note backups, or what finds it;  `null`:  none (private window, tests)
+   * - a finder that throws (blocked site data):  this page's memory (`StoragePlace`)
+   */
+  storage?: StorageFinder
   /**
    * Is `id` an item or section of this page?
    * - a backup for one that's gone is dropped

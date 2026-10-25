@@ -47,10 +47,13 @@
           <p class="lede"><code>&lt;epic-phase&gt;</code> is one phase of the plan, in the Phases section.</p>
           <ul>
             <li>
-              Its attributes hold its id, title, status and estimate; its children are its fields, plan changes and
+              Its attributes hold its id, title, status, estimate and what it took; its children are its fields, plan changes and
               commits.
             </li>
-            <li>It draws the title line (<code>P2 · Title</code>) with its status icon and the estimate, and folds.</li>
+            <li>
+              It draws the title line (<code>P2 · Title</code>) with its status icon and the estimate (once done, what
+              it took), and folds.
+            </li>
             <li>
               Its plan changes are
               <a href="epic-update.html" target="src-packages-epics-docs-epic-update-html"
@@ -167,7 +170,8 @@
                 <li>A click on one never folds or unfolds it.</li>
                 <li>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</li>
                 <li>
-                  The estimate (<code>2-3h</code>) stays just after the title, where Spell UI's section draws its badge.
+                  The estimate (<code>2-3h</code>) comes just before the review buttons, one width on every row, so the
+                  buttons line up row to row.
                 </li>
               </ul>
               <epic-phase id="p-actions-example" title="Header Actions Slot" status="active" estimate="2-3h">
@@ -189,6 +193,35 @@
                       <epic-phase id="p-actions-example" title="Header Actions Slot" status="active" estimate="2-3h">
                         <epic-field name="symptom">A block's bullhorn floated over its title row's buttons.</epic-field>
                         <ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+                      </epic-phase>
+                    </script></ui-code
+                  >
+                </ui-content>
+              </ui-accordion>
+            </ui-section>
+            <ui-section id="epic-phase-took" label="Done, and what it took" sticky collapsible dividing collapsed>
+              <p>
+                Once it's done, the pill says how long Claude really worked on it (<code>took</code>), in green; its
+                estimate is the pill's tooltip (<code>~3-4h</code>). Epic <code>epic-engine</code> P41.
+              </p>
+              <ul>
+                <li>
+                  <code>epic phase seo#P3 done</code> writes it, from the transcripts of the agents that built it (else
+                  the epic's sessions while it was active), never the time waiting on Owen.
+                </li>
+                <li><code>epic phase seo#P3 took</code> works it out again for a phase done before.</li>
+                <li>Not done yet, or never timed: the estimate, as before.</li>
+              </ul>
+              <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m">
+                <epic-field name="symptom">Each page server patched pages its own way.</epic-field>
+              </epic-phase>
+              <ui-accordion class="spell-code" styled>
+                <ui-title>The example above · 3 lines</ui-title>
+                <ui-content>
+                  <ui-code language="html"
+                    ><script type="text/plain">
+                      <epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m">
+                        <epic-field name="symptom">Each page server patched pages its own way.</epic-field>
                       </epic-phase>
                     </script></ui-code
                   >
@@ -483,6 +516,18 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <td><code>took</code></td>
+                    <td>text</td>
+                    <td>
+                      How long Claude really worked on it, written by the epic tool when it's done (<code>epic phase
+                      … done</code>, or <code>… took</code> later; epic <code>epic-engine</code> P41): <code>21m</code>,
+                      <code>1h 30m</code>. Its agents' and sessions' working time, side by side counted once, never the
+                      time waiting on Owen. A done phase shows it in place of its estimate, the estimate in its tooltip
+                      (<code>~3-4h</code>).
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>source</code></td>
                     <td>text</td>
                     <td>
@@ -598,10 +643,17 @@
                     <tr>
                       <td><code>tools</code></td>
                       <td>
-                        At the title's end: the page's own buttons (the <code>actions</code> slot), then its review
-                        buttons, while the page is reviewed: Revisit, Make Todo, Do Now; while the page's phases are
+                        At the title's end: the page's own buttons (the <code>actions</code> slot), then its estimate
+                        (once done and timed, what it took), then its review buttons, while the page is reviewed: Make Todo, Revisit; while the page's phases are
                         agreed (<code>&lt;epic-page stage="phases"&gt;</code>, epic <code>epic-engine</code> P29), an
                         open phase's are Looks good and Defer (after the others, still to do).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>estimate</code></td>
+                      <td>
+                        Its time pill, just before its review buttons (<code>2-3h</code>), one width so they line up row
+                        to row; done and timed, what it <code>took</code> (<code>21m</code>), the estimate its tooltip.
                       </td>
                     </tr>
                     <tr>

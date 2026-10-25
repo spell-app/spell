@@ -45,7 +45,7 @@ import { mkdtempSync, mkdirSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { chromium } from "playwright"
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 
 import { PACK_TAG, openPage, settle } from "./browserPage.js"
 import { browserUrlFor, pageFile } from "./pages.js"
@@ -67,7 +67,7 @@ const out = outArg ?? mkdtempSync(join(tmpdir(), "check-spell-"))
 mkdirSync(out, { recursive: true })
 const seen = new Map()
 const url = pageUrl(docPath)
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 
 const desk = await open({ width: 1440, height: 900 })
 await desk.screenshot({ path: join(out, "desk-top.png") })

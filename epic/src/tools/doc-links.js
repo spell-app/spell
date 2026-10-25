@@ -24,7 +24,7 @@
  *   the epics tool's `EpicTargets` knows the sagas (epic `epic-workflow` P15).
  * - NOTE:  ported from `doc-links.py` on 2026-10-03;  makes the same edits to every page.
  */
-import { readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, relative, resolve as resolvePath } from "node:path"
 import { pathToFileURL } from "node:url"
 
@@ -64,7 +64,7 @@ function linkerUnder(root) {
 }
 
 /** The content folder, real:  a page in it takes `contentLinker`, whichever link it's reached through. */
-const REAL_CONTENT = realOr(CONTENT)
+const REAL_CONTENT = SRV.RealPath.of(CONTENT)
 
 /**
  * The linker for a page in `docDir`, and that folder as it takes it:
@@ -72,18 +72,9 @@ const REAL_CONTENT = realOr(CONTENT)
  */
 function linkerFor(docDir) {
   if (contentLinker === linker) return { linker, dir: docDir }
-  const real = realOr(resolvePath(docDir))
+  const real = SRV.RealPath.of(resolvePath(docDir))
   if (real === REAL_CONTENT || real.startsWith(`${REAL_CONTENT}/`)) return { linker: contentLinker, dir: real }
   return { linker, dir: docDir }
-}
-
-/** `path`'s real path (links followed);  `path` itself when it isn't there. */
-function realOr(path) {
-  try {
-    return realpathSync(path)
-  } catch {
-    return path
-  }
 }
 
 /**

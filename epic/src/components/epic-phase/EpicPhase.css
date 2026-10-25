@@ -68,17 +68,18 @@
     border-end-end-radius: var(--epic-phase-bottom-radius, 0px);
   }
 
-  /* its estimate, after the review controls:  the small pill a fold's badge is (`EpicFold.css`) */
+  /* its time pill (the estimate;  done and timed, what it took), just BEFORE the review controls, so they end at one
+     right edge row to row (Owen, 2026-10-25):  the small pill a fold's badge is (`EpicFold.css`) */
   .estimate {
     display: inline-flex;
     flex: none;
     align-items: center;
     box-sizing: border-box;
     justify-content: center;
-    /* one width, whatever it says ("8-12h"), so the review buttons before it line up row to row */
+    /* one width, whatever it says ("8-12h", "21m"), so it and the review buttons after it line up row to row */
     min-width: 52px;
     height: 22px;
-    margin-inline-start: 6px;
+    margin-inline-end: 6px;
     padding: 0 6px;
     border-radius: 999px;
     background: var(--epic-card, var(--ui-surface));
@@ -87,6 +88,11 @@
     font: 600 12px/1 var(--epic-sans, var(--ui-font-family));
     font-variant-numeric: tabular-nums;
     letter-spacing: 0;
+  }
+  /* done and timed:  what it took, in done's green;  the estimate is its tooltip (epic `epic-engine` P41) */
+  .estimate.took {
+    color: var(--ui-green-text, var(--ui-green));
+    cursor: help;
   }
   .icon.todo {
     color: var(--ui-grey-text, var(--ui-text-muted));

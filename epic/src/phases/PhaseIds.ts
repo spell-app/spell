@@ -9,9 +9,11 @@ import { slug } from "spell/util/string.ts"
  *   - So links (`#p-epic-migrate`), Owen's comments (`p-epic-migrate#field-1`), marks and part files
  *     (`parts/p-epic-migrate.html`) stay on their phase.
  * - The NUMBER is what people see and say:  "P7", worked out as the page draws (`numberOf()`).
- *   - a whole number is never written:  "P7" is the 7th WHOLE-numbered phase, counting only those
- *   - a phase added on the fly is a DECIMAL of the phase before it (epic `epic-engine` P39):  P11.1, P11.2 ...,
- *     written on it (`<epic-phase number="11.1">`), so adding one renumbers nothing
+ *   - never written:  "P7" is the 7th phase;  adding or moving one renumbers the phases after it, and the tool
+ *     rewrites what names them (`PhaseNumbers`, in the tool)
+ *   - P39 wrote DECIMAL phases (`<epic-phase number="11.1">`);  epic `epic-engine` I126 took them out (Owen,
+ *     2026-10-25:  "ditch the 17.1 and just reorder"), the migration `whole-phase-numbers` making each one whole;
+ *     one still on a page (not migrated yet) reads as before:  its own number, the rest counted without it
  * - Before P15 the id WAS the number (`p7`):  such OLD ids still read as phase ids, until the migration
  *   `stable-phase-ids` turns them into stable ones;  an old address (`#p7`) lands on the 7th phase (`landing()`).
  * - STATIC, pure, node-safe:  the elements, the epic tool and its migrations alike import it (`spell-epic/phases`).
@@ -73,9 +75,10 @@ export class PhaseIds {
   }
 
   /**
-   * `phase`'s number, as people say it:  `"7"`, or `"11.1"` for a decimal phase;  `"0"` for a phase in no list.
-   * - a decimal phase:  its own `number` (`<epic-phase number="11.1">`)
-   * - any other:  its place among the WHOLE-numbered phases beside it, from 1;  so P12 stays P12 when P11.1 comes in
+   * `phase`'s number, as people say it:  `"7"`;  `"0"` for a phase in no list;
+   * `"11.1"` for an old decimal phase, not migrated yet
+   * - an old decimal phase:  its own `number` (`<epic-phase number="11.1">`)
+   * - any other:  its place among the WHOLE-numbered phases beside it, from 1
    */
   static numberOf(phase: Element): string {
     const own = PhaseIds.decimalOf(phase)
@@ -92,70 +95,10 @@ export class PhaseIds {
     return `P${PhaseIds.numberOf(phase)}`
   }
 
-  /** `phase`'s own decimal number (`11.1`), when it has one;  else `undefined`:  its number is its place. */
+  /** `phase`'s own OLD decimal number (`11.1`, P39), not migrated yet;  else `undefined`:  its number is its place. */
   static decimalOf(phase: Element): string | undefined {
     const number = phase.getAttribute("number")
     return number !== null && DECIMAL.test(number) ? number : undefined
-  }
-
-  /** The whole number a phase's number starts with:  `11` for `11.1` and for `11`. */
-  static wholeOf(number: string): string {
-    return number.replace(/\..*$/, "")
-  }
-
-  /**
-   * Where a new decimal phase goes after `base` among `phases` (`add-phase --after 11`), and its number:
-   * `{ number: "11.1", after: <P11> }`, or `11.2` after P11.1 when that's there.
-   * - after the last of the base's decimals:  P11.1, P11.2 ... stay in order, and none of them changes its number
-   * - `base` a decimal itself (`--after 11.1`):  its whole phase's next decimal, at the end of their run
-   * - `base` before every whole-numbered phase (a decimal with no whole one before it):  `0.1` ...
-   */
-  static decimalAfter(phases: readonly Element[], base: Element): { number: string; after: Element } {
-    const whole = PhaseIds.wholeOf(PhaseIds.numberOf(base))
-    let at = phases.indexOf(base)
-    // to the end of the run of decimals right after it
-    while (at + 1 < phases.length && PhaseIds.decimalOf(phases[at + 1]!)) at++
-    const subs = phases
-      .map((phase) => PhaseIds.decimalOf(phase))
-      .filter((number) => number !== undefined && PhaseIds.wholeOf(number) === whole)
-      .map((number) => Number(number!.slice(whole.length + 1)))
-    return { number: `${whole}.${Math.max(0, ...subs) + 1}`, after: phases[at]! }
-  }
-
-  /**
-   * The decimal phases of `phases` whose number no longer fits their place, with the number that does:
-   * after a phase moved (`epic move`, a drag, `add-phase --before`), or a page edited by hand.
-   * - a decimal fits when it's of the whole-numbered phase before it, and comes after the decimals before it
-   *   (`11.1` then `11.2`;  a gap, `11.1` then `11.3`, fits too:  nothing renumbers what didn't move)
-   * - one that doesn't fit:  the next decimal of the whole phase before it;  `null` when there's no whole phase
-   *   before it, and it becomes a whole one
-   * - returns `[]` when every one fits;  pure:  the caller writes them (`PlanDoc`)
-   */
-  static misplacedDecimals(phases: readonly Element[]): { phase: Element; number: string | null }[] {
-    const misplaced: { phase: Element; number: string | null }[] = []
-    let whole = 0
-    let sub = 0
-    for (const phase of phases) {
-      const own = PhaseIds.decimalOf(phase)
-      if (!own) {
-        whole++
-        sub = 0
-        continue
-      }
-      const [base, rest] = own.split(".")
-      if (whole && Number(base) === whole && Number(rest) > sub) {
-        sub = Number(rest)
-        continue
-      }
-      if (!whole) {
-        misplaced.push({ phase, number: null })
-        whole++
-        continue
-      }
-      sub++
-      misplaced.push({ phase, number: `${whole}.${sub}` })
-    }
-    return misplaced
   }
 
   /**
@@ -206,7 +149,7 @@ const OLD_ID = /^p(\d+)$/
 /** A phase named by its number:  `7`, `P7`, `p7`, `11.1`, `P11.1`. */
 const NUMBER_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
 
-/** A decimal phase's number:  `11.1`. */
+/** An old decimal phase's number:  `11.1`. */
 const DECIMAL = /^\d+\.[1-9]\d*$/
 
 /** The phases of a page:  its Phases section's `<epic-phase>`s. */

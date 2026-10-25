@@ -510,7 +510,7 @@ function plane(host: Element): HTMLButtonElement {
 }
 
 /** What the tooltips add while nobody listens. */
-const NOBODY = ".  No Claude session is reviewing this doc:  Send or Do Now wakes one"
+const NOBODY = ".  No Claude session is reviewing this doc:  Send wakes one"
 
 describe("<epic-page> Send and its countdown", () => {
   afterEach(() => {
@@ -565,7 +565,8 @@ describe("<epic-page> Send and its countdown", () => {
     await ElementFixture.tick()
     expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"])
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
-    // the countdown running out sends as Review Now did (decision Q7):  every revisit asked now
+    // a countdown running out (the wand's, should it come back) sends as Review Now did (decision Q7):  every revisit
+    // asked now
     sendGroup(host).dispatchEvent(
       new CustomEvent("epic-send-saving", { detail: { auto: true }, bubbles: true, composed: true })
     )
@@ -1147,8 +1148,8 @@ describe("<epic-page> stages", () => {
     const button = () => plane(host)
     await vi.waitFor(() => expect(button()?.textContent).toContain("Accept Overview"))
     expect(button().title).toBe("The Overview is agreed:  Claude writes the phases next · 2 questions open")
-    // the wand stays:  the countdown still sends answers by itself
-    expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).not.toBeNull()
+    // no wand (Owen, 2026-10-25:  "remove the wand EVERYWHERE")
+    expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).toBeNull()
     button().click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
     expect(routes.posts[0]![1]).toEqual({
@@ -1167,6 +1168,51 @@ describe("<epic-page> stages", () => {
     host.setAttribute("stage", "building")
     await vi.waitFor(() => expect(sendGroup(host).hasAttribute("accept")).toBe(false))
     expect(button().textContent).not.toContain("Accept")
+    await expectAccessible(host)
+  })
+
+  // Owen, 2026-10-25:  "This just needs to be `send|wand` and not green -- I may not be accepting the phases"
+  test("building, build plans waiting:  Send as ever, ringed 2px #666 (waiting on you), the plans in its tooltip;  dotted once marked", async () => {
+    const routes = new FakeRoutes()
+    const at = new Date().toISOString()
+    routes.inbox.listening = { session: "s1", since: at, seen: at }
+    // one mark not sent yet, so a press has something to send
+    routes.inbox.marks.q1 = { action: "approve", at }
+    await adoptClient(routes)
+    const html = stagedPage("building")
+      .replace(
+        `<epic-phase id="p-one" title="One" status="todo">`,
+        `<epic-phase id="p-one" title="One" status="todo" plan="waiting">`
+      )
+      .replace(
+        `<epic-phase id="p-two" title="Two" status="done">`,
+        `<epic-phase id="p-two" title="Two" status="done"></epic-phase><epic-phase id="p-three" title="Three" status="todo" plan="waiting">`
+      )
+    const host = await render(html)
+    await vi.waitFor(() => expect(sendGroup(host).getAttribute("asks")).toBe("waiting"))
+    // no green Accept:  the plane alone, no stage words, no wand
+    expect(sendGroup(host).hasAttribute("accept")).toBe(false)
+    expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+    expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).toBeNull()
+    expect(plane(host).title).toBe("2 build plans wait for your Accept:  P1, P3 · Send 1 mark to Claude")
+    const base = sendGroup(host).shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
+    expect([getComputedStyle(base).borderTopStyle, getComputedStyle(base).borderTopWidth]).toEqual(["solid", "2px"])
+    // a press is a plain Send:  no accept marks
+    plane(host).click()
+    await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
+    // each plan marked on its phase:  dotted
+    routes.inbox.marks["p-one"] = { action: "approve", at }
+    routes.inbox.marks["p-three"] = { action: "defer", at }
+    // the send may still be writing:  a refresh waits for it
+    await vi.waitFor(async () => {
+      await ReviewClient.forPage().refresh()
+      expect(sendGroup(host).getAttribute("asks")).toBe("taken")
+    })
+    expect(getComputedStyle(base).borderTopStyle).toBe("dotted")
+    // none waiting:  no ring
+    for (const phase of host.querySelectorAll("epic-phase[plan]")) phase.setAttribute("plan", "accepted")
+    await vi.waitFor(() => expect(sendGroup(host).hasAttribute("asks")).toBe(false))
+    expect(getComputedStyle(base).borderTopWidth).toBe("1px")
     await expectAccessible(host)
   })
 
@@ -1191,8 +1237,8 @@ describe("<epic-page> stages", () => {
     const host = await render(stagedPage("phases"))
     const [one, two] = Array.from(host.querySelectorAll("epic-phase"))
     await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["approve", "defer"]))
-    expect(pillsOf(two!)).toEqual(["todo", "revisit", "details"])
+    expect(pillsOf(two!)).toEqual(["todo", "revisit"])
     host.setAttribute("stage", "building")
-    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["todo", "revisit", "details"]))
+    await vi.waitFor(() => expect(pillsOf(one!)).toEqual(["todo", "revisit"]))
   })
 })

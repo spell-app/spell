@@ -18,7 +18,7 @@ import "spell-epic/components/epic-text-box"
  */
 function fakeRoute({ listening }: { listening?: { since: string; seen: string } | null } = {}) {
   return vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
-    if (!init?.method) return Response.json({ answer: null, draft: null, listening })
+    if (!init?.method || init.method === "GET") return Response.json({ answer: null, draft: null, listening })
     const body = JSON.parse(init.body as string) as Record<string, unknown>
     if (url === "/api/docs/details/draft")
       return Response.json({ ok: true, draft: { ...body, saved: "2026-10-14T04:00:00.000Z" } })
@@ -104,10 +104,10 @@ describe("<epic-send>", () => {
     field.value = "half a thought"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
-    expect(part(send, "draft")!.textContent).toBe("draft not saved yet")
+    expect(part(send, "draft")!.textContent).toBe("not saved yet")
     await form.saveDraft()
     await ElementFixture.settle()
-    expect(part(send, "draft")!.textContent).toMatch(/^draft saved \d\d:\d\d$/)
+    expect(part(send, "draft")!.textContent).toMatch(/^saved \d\d:\d\d$/)
     expect([part(send, "draft")!.classList.contains("draft-failed"), fetch.mock.calls.at(-1)![0]]).toEqual([
       false,
       "/api/docs/details/draft"
@@ -119,7 +119,7 @@ describe("<epic-send>", () => {
 
   test("a draft's save that failed:  on its own line under the rest, red and bold (P15)", async () => {
     const route = vi.fn(async (_url: string, init?: RequestInit): Promise<Response> => {
-      if (!init?.method) return Response.json({ answer: null, draft: null })
+      if (!init?.method || init.method === "GET") return Response.json({ answer: null, draft: null })
       return Response.json({ error: "disk full" }, { status: 500 })
     })
     const { form } = adoptForm(route)
@@ -136,7 +136,7 @@ describe("<epic-send>", () => {
     expect([line.localName, line.getAttribute("role"), line.textContent]).toEqual([
       "p",
       "alert",
-      "draft kept in this browser only:  disk full;  trying again every 3s"
+      "kept in this browser only:  disk full;  trying again every 3s"
     ])
     expect(getComputedStyle(line).fontWeight).toBe("600")
     // not in the line beside Send, where the side bar's width would cut it short

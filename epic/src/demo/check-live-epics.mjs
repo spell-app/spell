@@ -60,8 +60,9 @@ if (!process.env.CHECK_LIVE_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes } = await import("./demoPages.mjs")
 const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
 
 /** What the reader types into the note box. */
@@ -105,19 +106,17 @@ const url = `${server.base}/epics/${name}/${name}.plan.html`
 
 const problems = []
 const summary = { url, item: itemId, bundle: bundle ?? null, edits: [] }
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 
 try {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
   const errors = []
-  page.on("pageerror", (error) => errors.push(String(error)))
+  const page = await BrowserPage.newPage(browser, {
+    viewport: { width: 1280, height: 900 },
+    consoleTypes: [],
+    onProblem: (text) => errors.push(text),
+    routes: bundleRoutes(bundle)
+  })
   await page.route("**/api/epics/review/**", (route) => route.fulfill({ json: inboxFor(route.request()) }))
-  if (bundle) {
-    const script = readFileSync(resolve(bundle))
-    await page.route("**/_epic/assets/spell-ui.js", (route) =>
-      route.fulfill({ body: script, contentType: "text/javascript" })
-    )
-  }
   await page.goto(url)
   await page.waitForFunction(() => customElements.get("epic-item") && window.SPELL_SERVER?.readPage, null, {
     timeout: 20_000

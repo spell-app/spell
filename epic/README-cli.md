@@ -315,7 +315,8 @@ so links and comments stay on the phase they meant.
 | `epic add-phase <epic> "Short Name" --symptom <html> --changes <html>` | adds a phase:  what's wrong, in a line, and what changes, in two or three;  `--goal`, `--files`, `--verify`, `--estimate 2h`;  `--before N` inserts it as P*N*, and links' words follow the renumbering |
 | `epic update <epic>#P3 --goal "<p>...</p>"` | sets a phase's fields, an item's title, or the page's flags:  everything it takes is below |
 | `epic updated <epic>#P3 "<p>...</p>"` | records a change to a phase's plan:  a dated Update block at the end of its description;  `--summary "..."`, else its first sentence;  `--file <file>` for longer HTML |
-| `epic phase <epic>#P3 todo \| active \| done` | sets a phase's status;  `done --done "<ul>...</ul>"` writes what was built, and clears its UPDATE labels;  it brings the page forward in VS Code, unless `--no-open` |
+| `epic phase <epic>#P3 todo \| active \| done` | sets a phase's status;  `done --done "<ul>...</ul>"` writes what was built, and clears its UPDATE labels;  `done` writes how long Claude really worked on it too (`took`, from the transcripts, never the time waiting on you);  it brings the page forward in VS Code, unless `--no-open` |
+| `epic phase <epic>#P3 took [--dry-run]` | works out again how long a phase done before took, from its log's `active` to its `done` |
 | `epic commit <epic>#P3 <sha> "what it did"` | lists a commit under a phase, or an item (`<epic>#J3`), replacing its entry there |
 | `epic commits <epic> --backfill` | finds every commit in the history whose subject names a phase or an item (`P3:  ...`, `seo I3:  ...`), and lists each one where it belongs, once |
 
@@ -624,7 +625,7 @@ The same group keeps the comments you leave on any docs page, the background age
 | `epic agents [list]` | lists the background agents running now, oldest first:  this epic's, else this checkout's |
 | `epic agents add <name> "<task>"` | records an agent starting, and prints its full name (below);  exit 1 if it's running already;  `--status`, `--task-id` |
 | `epic agents set <name>` | sets an agent's status (`active`, or `"blocked on <name>"`) or its task id |
-| `epic agents done <name>` | takes an agent off the list:  it's back |
+| `epic agents done <name>` | takes an agent off the list:  it's back;  says how long it worked, and logs it on the epic page |
 | `epic agents wait` | waits until you send an agent a note from the epic page (exit 0, printing it) or none is left running (exit 3);  `--every 2`, `--max 3600` seconds |
 | `epic agents told <name>` | marks your notes to the agent as passed on:  the page shows them told |
 | `epic airplane [status]` | says whether airplane mode is on, and since when |

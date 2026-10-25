@@ -45,9 +45,9 @@ afterEach(() => SendCountdown.adopt(undefined))
 ////////////////
 
 describe("<epic-send-buttons>", () => {
-  test("idle:  a grey group, the plane and the wand (pressed:  countdown on by default);  axe", async () => {
+  test("idle:  a grey group, the plane and, with `wand`, the wand (pressed:  countdown on by default);  axe", async () => {
     adoptCountdown()
-    const group = await ElementFixture.render(`<epic-send-buttons send-tip="Nothing to send"></epic-send-buttons>`)
+    const group = await ElementFixture.render(`<epic-send-buttons send-tip="Nothing to send" wand></epic-send-buttons>`)
     await ElementFixture.settle()
     expect(part(group, "base")!.dataset.state).toBe("idle")
     expect([part(group, "send")!.title, part(group, "send")!.getAttribute("aria-label")]).toEqual([
@@ -73,9 +73,10 @@ describe("<epic-send-buttons>", () => {
     expect(heard).toEqual([false])
   })
 
-  test("`manual` (a run page):  no wand, unsent waits filled for a press, the page's countdown never starts", async () => {
+  // Owen, 2026-10-25:  "remove the wand EVERYWHERE"
+  test("by default (no `wand`):  Send alone, unsent waits filled for a press, the page's countdown never starts", async () => {
     const countdown = adoptCountdown()
-    const group = await ElementFixture.render(`<epic-send-buttons state="unsent" manual></epic-send-buttons>`)
+    const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
     await ElementFixture.settle()
     expect(part(group, "countdown")).toBeNull()
     expect(group.matches(":state(waiting)")).toBe(true)
@@ -88,7 +89,7 @@ describe("<epic-send-buttons>", () => {
 
     test("unsent:  the ring turns blue over 2 minutes, then it asks to send (`auto` true);  sent, it's gone", async () => {
       adoptCountdown()
-      const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
+      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(group)
       expect(part(group, "ring")).not.toBeNull()
@@ -107,7 +108,7 @@ describe("<epic-send-buttons>", () => {
     test("a key on the page starts it again;  the wand turns it off:  the plane is filled, and nothing is sent", async () => {
       const countdown = adoptCountdown()
       const unwatch = countdown.watch(window)
-      const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
+      const group = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(group)
       vi.advanceTimersByTime(COUNTDOWN_MS - 1000)
@@ -127,11 +128,11 @@ describe("<epic-send-buttons>", () => {
 
     test("drawn again (a guide's Send, at each redraw):  the countdown goes on where it was", async () => {
       adoptCountdown()
-      const first = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
+      const first = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
       await ElementFixture.settle()
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       first.remove()
-      const second = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
+      const second = await ElementFixture.render(`<epic-send-buttons state="unsent" wand></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(second)
       const elapsed = part(second, "ring")!.querySelector<SVGCircleElement>(".elapsed")!
@@ -168,6 +169,33 @@ describe("<epic-send-buttons accept>", () => {
     // the words' green
     expect(rule()).not.toBe(grey)
     expect(rule()).toBe(getComputedStyle(send).color)
+    await expectAccessible(group)
+  })
+})
+
+// Owen, 2026-10-25:  "Maybe try the thicker border if you are waiting on me to accept"
+describe("<epic-send-buttons asks>", () => {
+  test("waiting on you:  the pill's own border 2px #666, ONE border;  taken:  dotted;  none:  the hairline;  still the plane", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(`<epic-send-buttons state="idle" asks="waiting"></epic-send-buttons>`)
+    await ElementFixture.settle()
+    const base = part(group, "base")!
+    const ring = () => {
+      const style = getComputedStyle(base)
+      return [style.borderTopStyle, style.borderTopWidth, style.borderTopColor, style.outlineStyle]
+    }
+    // its own border, no outline beside it (Owen, 2026-10-25:  "there are two borders if you zoom in close")
+    expect(ring()).toEqual(["solid", "2px", "rgb(102, 102, 102)", "none"])
+    // grown 1px each way, so the round ends inside keep their size
+    expect(base.getBoundingClientRect().height).toBe(30)
+    expect(part(group, "send")!.querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
+    group.setAttribute("asks", "taken")
+    await ElementFixture.tick()
+    expect(ring()).toEqual(["dotted", "2px", "rgb(102, 102, 102)", "none"])
+    group.removeAttribute("asks")
+    await ElementFixture.tick()
+    expect(ring().slice(0, 2)).toEqual(["solid", "1px"])
+    expect(base.getBoundingClientRect().height).toBe(28)
     await expectAccessible(group)
   })
 })

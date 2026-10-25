@@ -84,10 +84,19 @@
   }
   ui-section::part(icon),
   ui-section::part(badge),
-  ui-section::part(actions),
   ui-section::part(fold-icon) {
     align-self: flex-start;
     translate: 0 calc((var(--_epic-fold-line) - 100%) / 2);
+  }
+  /*
+   * the actions (review buttons, a time pill, expand-all) are taller than the line (a 26px group on a 21.6px line):
+   * one LINE tall, their contents centred in it and running over it evenly, so the row's height is the title's line
+   * and its padding the same above and below (Owen, 2026-10-25:  "top and bottom padding is uneven for the entire
+   * line":  8px over, 12.4px under, a phase folded)
+   */
+  ui-section::part(actions) {
+    align-self: flex-start;
+    height: var(--_epic-fold-line);
   }
   ui-section::part(icon) {
     color: var(--epic-accent, var(--ui-link));

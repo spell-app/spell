@@ -219,9 +219,6 @@ export function bareTitle(title: string): string {
 // ## Worktrees and parked work
 ////////////////
 
-/** What `Git.run()` returns. */
-export type GitResult = { ok: boolean; out: string; err: string; code: number }
-
 /**
  * The checkout holding a folder -- `Worktrees.checkoutOf()`.
  * - `label`:  `main checkout` or `worktree <name>`;  outside git, `root` is `undefined` and `label` `(not in git)`
@@ -801,3 +798,27 @@ export const LOC_TABLE: { group: string; columns: { key: keyof LocCounts; name: 
     ]
   }
 ]
+
+////////////////
+// ## Working time (epic `epic-engine` P41)
+////////////////
+
+/** A stretch of time, `[from, to)`, in ms since the epoch:  Claude at work (`ActiveTime`). */
+export type TimeSpan = {
+  /** when it began, ms */
+  from: number
+  /** when it ended, ms */
+  to: number
+}
+
+/**
+ * How long Claude worked on something -- `WorkTime.ofPhase()`, `WorkTime.ofAgent()`.
+ * - `minutes`:  the working time, rounded;  parallel work counted once (wall clock)
+ * - `agents`:  the background agents it counted, by full name (`epic-engine-p40`)
+ * - `sessions`:  the sessions it counted, by id (only when no agent of its own did the work)
+ */
+export type WorkMeasure = {
+  minutes: number
+  agents: string[]
+  sessions: string[]
+}

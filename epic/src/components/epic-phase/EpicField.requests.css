@@ -2,7 +2,7 @@
  * `<epic-field>`'s PAGE sheet (`EpicField.tsx` registers it once, `page: true`):  a request's screenshots, small.
  * - They're the request's light DOM (`<p><a><img></a></p>`, as `epic file` writes it):
  *   out of reach of the field's shadow sheet, so they're drawn from the page.
- * - Thumbnails:  200px wide or 140px tall at most, a thin border;  a click shows one full size (the field's modal).
+ * - Thumbnails:  200px wide or 140px tall at most, a thin border;  a click shows one full size (the page's `<epic-zoom>`).
  * - `!important`:  the markup's own `style="max-width: 100%"` is inline, which beats any rule but an important one.
  */
 

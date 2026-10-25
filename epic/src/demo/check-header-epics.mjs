@@ -14,7 +14,7 @@
  *     `src/demo/shots/header/epics/<name>/` (git-ignored), as deep as a real one, so its links need no change
  * - the server:  a page server of its OWN (`DemoServer`:  spell-epic's `EpicServer` on a free port, no pid file),
  *   serving `src/demo/shots/header/`;  it wakes nobody;  stopped at the end.
- *   Send and its countdown aren't pressed here:  `check-review-epics.mjs` checks those
+ *   Send isn't pressed here:  `check-review-epics.mjs` checks those
  * - fails (exit 1) on a page error, a wrong count, a filter that doesn't hide, a missing box, a header control or
  *   chip running past the window, or a glyph off its box's centre by more than 1px;  at 280px and 900px, light and dark
  * - screenshots (outDir, default `src/demo/shots/p10/`):  `<doc>-<width>-<scheme>-top.png` (the header),
@@ -46,14 +46,15 @@ if (!process.env.CHECK_HEADER_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
+const { bundleRoutes, logInto } = await import("./demoPages.mjs")
 const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
 
 const args = process.argv.slice(2)
 const docs = args.flatMap((arg, index) => (args[index - 1] === "--doc" ? [arg] : []))
 if (!docs.length) docs.push("review-review", "epic-components")
-const bundle = args.includes("--bundle") ? readFileSync(resolve(args[args.indexOf("--bundle") + 1])) : undefined
+const bundle = args.includes("--bundle") ? resolve(args[args.indexOf("--bundle") + 1]) : undefined
 const out =
   args.find((arg, index) => !arg.startsWith("--") && !["--doc", "--bundle"].includes(args[index - 1])) ??
   join(HERE, "shots/p10")
@@ -64,7 +65,7 @@ const summary = {}
 const CONTENT = join(HERE, "shots/header")
 for (const doc of docs) copyDoc(doc)
 const server = await DemoServer.start({ content: CONTENT, port: 47_900 + Math.floor(Math.random() * 90) })
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 try {
   for (const doc of docs) await check(doc)
 } catch (error) {
@@ -88,22 +89,15 @@ async function check(doc) {
   const url = `${server.base}/epics/${doc}/${doc}.plan.html`
   for (const scheme of ["light", "dark"]) {
     for (const width of [280, 900]) {
-      const context = await browser.newContext({
-        viewport: { width, height: 1000 },
-        deviceScaleFactor: 2,
-        colorScheme: scheme
-      })
-      const page = await context.newPage()
-      if (bundle)
-        await page.route("**/_epic/assets/spell-ui.js", (route) =>
-          route.fulfill({ body: bundle, contentType: "text/javascript" })
-        )
       const logs = []
-      page.on("pageerror", (error) => logs.push(`pageerror:  ${error.message}`))
-      // a failed load is reported by `response` below, with its URL:  the review routes refuse a preview copy's path
-      page.on("console", (message) => {
-        if (message.type() === "error" && !/^Failed to load resource/.test(message.text()))
-          logs.push(`console:  ${message.text()}`)
+      const page = await BrowserPage.newPage(browser, {
+        viewport: { width, height: 1000 },
+        colorScheme: scheme,
+        context: { deviceScaleFactor: 2 },
+        // a failed load is reported by `response` below, with its URL:  the review routes refuse a preview copy's path
+        ignore: /^Failed to load resource/,
+        onProblem: logInto(logs),
+        routes: bundleRoutes(bundle)
       })
       page.on("response", (response) => {
         if (response.status() >= 400 && !response.url().includes("/api/epics/review/"))
@@ -224,7 +218,7 @@ async function check(doc) {
       }
       summary[where].filtered = filtered
       if (logs.length) problems.push(...logs.map((log) => `${where}:  ${log}`))
-      await context.close()
+      await page.close()
     }
   }
 }
@@ -237,7 +231,7 @@ function readFacts(width) {
   const line = root.querySelector(".review-line")
   const epic = page.getAttribute("epic")
   if (!line.textContent.includes(`/epic review ${epic}`)) found.push(`the review line reads "${line.textContent}"`)
-  // every round control of the header (Send's plane and wand, epic `epic-engine` P20;  git), and every chip, in the
+  // every round control of the header (Send's plane, epic `epic-engine` P20;  git), and every chip, in the
   // window and its glyph centred
   const boxes = [
     ...(root.querySelector("epic-send-buttons")?.shadowRoot?.querySelectorAll("button") ?? []),

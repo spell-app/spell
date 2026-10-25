@@ -22,6 +22,12 @@ export const SEND_STATES = ["idle", "unsent", "sent"] as const
 /** One of `SEND_STATES`. */
 export type SendState = (typeof SEND_STATES)[number]
 
+/**
+ * Whether the pill WAITS ON OWEN (`asks`;  Owen, 2026-10-25:  "try the thicker border if you are waiting on me"):
+ * `waiting`, its border 2px #666, solid;  `taken`, dotted once he's pressed what it waits for.
+ */
+export const SEND_ASKS = ["waiting", "taken"] as const
+
 // the tag its owners draw in their shadow roots
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {

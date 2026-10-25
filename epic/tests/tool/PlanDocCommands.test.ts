@@ -27,9 +27,20 @@ const FILES = new PlanDocFiles({ root })
 let printed: string[]
 let warned: string[]
 
-/** The commands, on the scratch checkout, their output caught in `printed` / `warned`. */
+/** What the phase timer was asked (`phaseTimer`), and the minutes it answers. */
+let timed: { epic: string; phase: string; window: { from: number; to: number } }[]
+let timerMinutes = 0
+
+/**
+ * The commands, on the scratch checkout, their output caught in `printed` / `warned`;  a phase's time is
+ * `timerMinutes`, never the real transcripts'.
+ */
 function commands() {
-  const owner = new PlanDocCommands({ files: FILES })
+  const phaseTimer = (request: (typeof timed)[number]) => {
+    timed.push(request)
+    return timerMinutes
+  }
+  const owner = new PlanDocCommands({ files: FILES, phaseTimer })
   vi.spyOn(owner, "print").mockImplementation((text) => void printed.push(text))
   vi.spyOn(owner, "warn").mockImplementation((text) => void warned.push(text))
   return owner
@@ -38,6 +49,8 @@ function commands() {
 beforeEach(async () => {
   printed = []
   warned = []
+  timed = []
+  timerMinutes = 0
   rmSync(join(root, "epics"), { recursive: true, force: true })
   mkdirSync(join(root, "epics", "x"), { recursive: true })
   const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
@@ -51,6 +64,46 @@ afterEach(() => {
 })
 
 afterAll(() => rmSync(root, { recursive: true, force: true }))
+
+// epic `epic-engine` P41:  how long Claude worked on a phase, beside its estimate
+describe("PlanDocCommands phase … done / took", () => {
+  test("done:  the time since it went active, as `took`;  logged;  the Overview's total says it", async () => {
+    expect(await commands().run(["estimate", "x", "2", "3-4h"])).toBe(0)
+    expect(await commands().run(["phase", "x", "2", "active", "--no-open"])).toBe(0)
+    timerMinutes = 21
+    expect(await commands().run(["phase", "x", "2", "done", "--no-open"])).toBe(0)
+    expect(timed).toHaveLength(1)
+    expect(timed[0]).toMatchObject({ epic: "x", phase: "P2" })
+    expect(timed[0]!.window.to - timed[0]!.window.from).toBeLessThan(2 * 60_000)
+    const plan = FILES.read(file)
+    expect(plan.phase(2).getAttribute("took")).toBe("21m")
+    const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
+    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P2 done: took 21m")
+    expect(plan.estimate).toBe("3h-4h in all, 0m left (P1, P3 not estimated);  1 done took 21m, estimated 3h-4h")
+  })
+
+  test("done with no time found, or never logged active:  no `took`", async () => {
+    expect(await commands().run(["phase", "x", "3", "done", "--no-open"])).toBe(0)
+    expect(timed).toEqual([])
+    expect(FILES.read(file).phase(3).hasAttribute("took")).toBe(false)
+  })
+
+  test("took:  a done phase's time worked out again, from its active to its done;  --dry-run writes nothing", async () => {
+    expect(await commands().run(["phase", "x", "2", "active", "--no-open"])).toBe(0)
+    expect(await commands().run(["phase", "x", "2", "done", "--no-open"])).toBe(0)
+    timerMinutes = 58
+    expect(await commands().run(["phase", "x", "2", "took", "--dry-run"])).toBe(0)
+    expect(FILES.read(file).phase(2).hasAttribute("took")).toBe(false)
+    expect(await commands().run(["phase", "x", "2", "took"])).toBe(0)
+    expect(printed).toEqual(["P2 took 58m  (dry run:  not written)", "P2 took 58m"])
+    expect(FILES.read(file).phase(2).getAttribute("took")).toBe("58m")
+    // not done, or never active:  says why
+    expect(await commands().run(["phase", "x", "3", "took"])).toBe(1)
+    expect(warned.at(-1)).toBe("epic:  took:  P3 isn't done yet")
+    expect(await commands().run(["phase", "x", "1", "took"])).toBe(1)
+    expect(warned.at(-1)).toBe("epic:  took:  the log doesn't say when P1 was active, and done")
+  })
+})
 
 describe("PlanDocCommands add-phase --before", () => {
   test("inserts the phase, logs what moved;  ids stay, so every part file stays where it is", async () => {
@@ -86,24 +139,28 @@ describe("PlanDocCommands add-phase --before", () => {
     ])
   })
 
-  // epic `epic-engine` P39:  `--after 2` adds P2.1, then P2.2;  nothing moves, so no links-agree pass
-  test("--after:  a decimal phase after its base, printed and logged;  no other phase renumbered", async () => {
+  // epic `epic-engine` I126:  `--after 1` adds a WHOLE P2, the to-do phases after it moving down (P39 made P1.1)
+  test("--after:  the next whole number, printed and logged;  the phases after it renumbered", async () => {
     expect(await commands().run(["add-phase", "x", "Notebook", "--after", "1"])).toBe(0)
-    expect(await commands().run(["add-phase", "x", "Reassess", "--after", "P1"])).toBe(0)
-    expect(printed).toEqual(["P1.1", "P1.2"])
+    expect(await commands().run(["add-phase", "x", "Reassess", "--after", "P2"])).toBe(0)
+    expect(printed).toEqual(["P2", "P3"])
     const plan = FILES.read(file)
     expect(plan.phases.map((phase) => `P${phase.number} ${phase.name}`)).toEqual([
       "P1 One",
-      "P1.1 Notebook",
-      "P1.2 Reassess",
-      "P2 Two",
-      "P3 Three"
+      "P2 Notebook",
+      "P3 Reassess",
+      "P4 Two",
+      "P5 Three"
     ])
+    expect(plan.phaseElements.some((phase) => phase.hasAttribute("number"))).toBe(false)
     const last = Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!
-    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P1.2 added: Reassess")
-    // the tool's verbs take it by its number
-    expect(await commands().run(["phase", "x", "P1.1", "active", "--no-open"])).toBe(0)
-    expect(FILES.read(file).phases[1]!.status).toBe("active")
+    expect(last.textContent!.replace(/\s+/g, " ")).toBe("P3 added: Reassess; P3-P4 moved down to P4-P5")
+    // a title naming markup, quotes and all, written to the file and read back
+    const title = `a <ui-menu direction="vertical"> & a right click's`
+    expect(await commands().run(["add", "x", "judgement", title])).toBe(0)
+    const written = readFileSync(file, "utf8")
+    expect(written).not.toContain("<ui-menu")
+    expect(FILES.read(file).document.getElementById(printed.at(-1)!.toLowerCase())!.getAttribute("title")).toBe(title)
   })
 
   // epic `epic-engine` I1 (epic-workflow's I7):  the inbox keys a phase by its STABLE id, so an insert moves nothing

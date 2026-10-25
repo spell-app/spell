@@ -1,10 +1,11 @@
-import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { basename, dirname, join, sep } from "node:path"
 
+import { Git } from "spell/server/Git"
+import { RealPath } from "spell/server/RealPath"
+
 // By relative path, `.ts` and all:  the hooks load this file with plain `node` (types stripped)
 import { EpicConfig } from "./EpicConfig.ts"
-import { RealPath } from "./RealPath.ts"
 
 /****************
  * ### `EpicRepo`
@@ -171,8 +172,7 @@ export class EpicRepo {
 
   /** Checkout `dir`'s `origin` URL;  `null` for none. */
   static originOf(dir: string): string | null {
-    const run = spawnSync("git", ["remote", "get-url", "origin"], { cwd: dir, encoding: "utf8", timeout: 5_000 })
-    return run.status === 0 ? run.stdout.trim() || null : null
+    return Git.out(["remote", "get-url", "origin"], dir, { timeout: 5_000 }) || null
   }
 
   /**

@@ -59,7 +59,8 @@ if (!process.env.CHECK_TOOLTIPS_UNDER_TSX) {
   process.exit(run.status ?? 1)
 }
 
-const { chromium } = await import("playwright")
+const { BrowserPage } = await import("spell/element-tools/BrowserPage")
+const { bundleRoutes, logInto } = await import("./demoPages.mjs")
 const { DemoServer } = await import("./DemoServer.ts")
 const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
@@ -71,7 +72,7 @@ const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
 const args = process.argv.slice(2)
 const docName = args.includes("--doc") ? args[args.indexOf("--doc") + 1] : "tooltip-sample"
 const listAll = args.includes("--list")
-const bundle = args.includes("--bundle") ? readFileSync(resolve(args[args.indexOf("--bundle") + 1])) : undefined
+const bundle = args.includes("--bundle") ? args[args.indexOf("--bundle") + 1] : undefined
 const problems = []
 
 /** The agent the "Agents running" panel shows:  `/api/epics/agents` answered by the page itself. */
@@ -119,7 +120,7 @@ if (docName === "tooltip-sample") await addPickCall()
 const server = await DemoServer.start({ content: SHOTS, port: 47_300 + Math.floor(Math.random() * 300) })
 const url = `${server.base}/epics/${docName}/${docName}.plan.html`
 
-const browser = await chromium.launch()
+const browser = await BrowserPage.launch()
 let controls = []
 try {
   controls = await run()
@@ -150,11 +151,12 @@ if (problems.length) {
 
 /** Open the copy, unfold and open everything that draws controls, then hit-test every control. */
 async function run() {
-  const context = await browser.newContext({ viewport: { width: 900, height: 1000 } })
-  const page = await context.newPage()
-  if (bundle)
-    await page.route("**/_epic/assets/spell-ui.js", (route) => route.fulfill({ body: bundle, contentType: "text/javascript" }))
-  page.on("pageerror", (error) => problems.push(`pageerror:  ${error.message}`))
+  const page = await BrowserPage.newPage(browser, {
+    viewport: { width: 900, height: 1000 },
+    consoleTypes: [],
+    onProblem: logInto(problems),
+    routes: bundleRoutes(bundle)
+  })
   await page.route("**/api/epics/agents?*", (route) => route.fulfill({ json: { agents: [AGENT] } }))
   await page.goto(url)
   await page

@@ -33,12 +33,13 @@
  * - `--json`:  `{ files, misses, counts }`, for the skill
  * - Exits 1 when it finds a miss, 0 when clean, 2 on a usage error.
  */
-import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
 import { extname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { escapeRegExp } from "spell/util/string.ts"
+import { checkoutOf } from "spell/server/checkout"
+import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 
 /**
@@ -904,13 +905,12 @@ function generatedAmong(files: string[], cwd: string): Set<string> {
 
 /** The root of the git checkout around `cwd`;  `undefined` outside one. */
 function gitRoot(cwd: string): string | undefined {
-  return git(cwd, ["rev-parse", "--show-toplevel"])?.trim()
+  return checkoutOf(cwd)?.root
 }
 
-/** `git <args>`'s output in `cwd`, `input` on its stdin;  `undefined` when it fails. */
+/** `git <args>`'s output in `cwd`, untrimmed, `input` on its stdin;  `undefined` when it fails. */
 function git(cwd: string, args: string[], input?: string): string | undefined {
-  const result = spawnSync("git", args, { cwd, input, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })
-  return result.status === 0 ? result.stdout : undefined
+  return Git.out(args, cwd, { input, trim: false })
 }
 
 /** The paths in `git status --porcelain=v1 -z` output:  each entry's, a rename's new name (its old one follows). */

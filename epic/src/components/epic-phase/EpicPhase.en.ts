@@ -31,10 +31,10 @@ export const epicPhaseVocabulary = {
   noun: "phase",
   ui: false,
   description:
-    "One phase of the plan:  its status icon and estimate in its title line;  its fields (Symptom, Changes, " +
+    "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Changes, " +
     "Requests, Goal), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
     "description), then Done, commits, Files, Verify and To review, as children in that order.  " +
-    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Revisit, Make Todo, Do Now.",
+    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
   attributes: [
     {
       name: "id",
@@ -75,6 +75,15 @@ export const epicPhaseVocabulary = {
       kind: "string",
       description:
         "Wall-clock time for Claude to do it, agents included, Owen's review not:  `30m`, `2h`, `1h30m`, `1-2h`."
+    },
+    {
+      name: "took",
+      kind: "string",
+      description:
+        "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or " +
+        "`… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, " +
+        "side by side counted once, never the time waiting on Owen.  A done phase shows it in place of its " +
+        "estimate, the estimate in its tooltip (`~3-4h`)."
     },
     {
       name: "source",
@@ -142,10 +151,15 @@ export const epicPhaseVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then its review buttons, while the page " +
-        "is reviewed, then its estimate."
+        "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, " +
+        "what it took), then its review buttons, while the page is reviewed."
     },
-    { name: "estimate", description: "Its `estimate`, a small pill after its review buttons (`2-3h`)." },
+    {
+      name: "estimate",
+      description:
+        "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and " +
+        "timed, what it `took` (`21m`), the estimate its tooltip."
+    },
     ...REVIEW_PARTS
   ],
   states: [
@@ -162,6 +176,11 @@ export const epicPhaseVocabulary = {
     { key: "statusTodo", text: "To do", description: "The status icon's name:  `todo`." },
     { key: "statusActive", text: "Under way", description: "The status icon's name:  `active`." },
     { key: "statusDone", text: "Done", description: "The status icon's name:  `done`." },
+    {
+      key: "tookTip",
+      text: "~{estimate}",
+      description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
+    },
     {
       key: "changedTip",
       text: "Its plan changed:  {count} × Update, at the end of its description",

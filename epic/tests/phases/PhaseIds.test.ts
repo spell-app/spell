@@ -67,8 +67,8 @@ describe("PhaseIds", () => {
   })
 })
 
-// epic `epic-engine` P39:  a phase added on the fly is a decimal of the phase before it, renumbering nothing
-describe("PhaseIds:  decimal phases", () => {
+// epic `epic-engine` P39 wrote decimal phases;  I126 made them whole, but one not migrated yet still reads
+describe("PhaseIds:  old decimal phases", () => {
   /** Phases `numbers`, in order:  `""` a whole one (its number its place), else its own decimal. */
   function phases(...numbers: string[]): Element[] {
     const html = numbers
@@ -92,23 +92,5 @@ describe("PhaseIds:  decimal phases", () => {
     ])
     // an old address lands on the phase numbered so
     expect(PhaseIds.landing(list[0]!.ownerDocument, "p2")).toBe("p-3")
-  })
-
-  test("the next decimal after a phase:  at the end of its run, the next free number", () => {
-    const list = phases("", "", "2.1", "2.2", "")
-    expect(PhaseIds.decimalAfter(list, list[0]!)).toEqual({ number: "1.1", after: list[0] })
-    expect(PhaseIds.decimalAfter(list, list[1]!)).toEqual({ number: "2.3", after: list[3] })
-    expect(PhaseIds.decimalAfter(list, list[2]!)).toEqual({ number: "2.3", after: list[3] })
-  })
-
-  test("decimals out of place:  the one that fits;  none before a whole one:  whole;  gaps fit", () => {
-    expect(PhaseIds.misplacedDecimals(phases("", "1.1", "1.3", ""))).toEqual([])
-    const moved = phases("", "2.1", "", "1.1")
-    expect(PhaseIds.misplacedDecimals(moved)).toEqual([
-      { phase: moved[1], number: "1.1" },
-      { phase: moved[3], number: "2.1" }
-    ])
-    const first = phases("3.1", "")
-    expect(PhaseIds.misplacedDecimals(first)).toEqual([{ phase: first[0], number: null }])
   })
 })

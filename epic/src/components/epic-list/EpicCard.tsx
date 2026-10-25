@@ -54,9 +54,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
 
   /** Can its star star it:  served by the page server with a write token, never from `file://`. */
   get canStar(): boolean {
-    if (isServer) return false
-    const server = (window as { SPELL_SERVER?: { token?: string } }).SPELL_SERVER
-    return !!server?.token && location.protocol !== "file:"
+    return !isServer && ServerLink.isServed()
   }
 
   ////////////////

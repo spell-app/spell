@@ -1,12 +1,9 @@
-// Import directly:  the persist barrel would bring the database and server places too
-import { PrefStore } from "spell/util/persist/PrefStore"
-import { StoragePlace } from "spell/util/persist/StoragePlace"
 import { PlanDates } from "spell-epic/dates"
-import { ServerLink, sentence, type ServerLinkOptions } from "spell-epic/review"
+import { ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell-epic/review"
 
 import { AnswerDraft } from "./AnswerDraft"
+import { DraftSaver } from "./DraftSaver"
 import {
-  ANSWER_RETRY_MS,
   DETAILS_API,
   DETAILS_DRAFT_API,
   DETAILS_LISTEN_POLL_MS,
@@ -30,8 +27,11 @@ import {
 
 /** What an `AnswerForm` is made from:  its link's facts, and the browser's storage for the draft's own copy. */
 export type AnswerFormOptions = ServerLinkOptions & {
-  /** `localStorage`;  `null` or none:  no copy in the browser (blocked, private window, tests) */
-  storage?: Storage | null
+  /**
+   * `localStorage`, or what finds it;  `null` or none:  no copy in the browser (private window, tests)
+   * - a finder that throws (blocked site data):  this page's memory (`StoragePlace`)
+   */
+  storage?: StorageFinder
 }
 
 /****************
@@ -58,10 +58,10 @@ export type AnswerFormOptions = ServerLinkOptions & {
  * - Keeps a DRAFT of what's typed and not sent (P18:  agents rewrote a page under Owen, and lost what he typed):
  *   - every change Owen makes (`edited()`) goes into `typed` at once:  the page as he left it
  *   - a copy goes into the browser's storage at once, and to the page server as he types:
- *     `DETAILS_SAVE_MS` (half a second) after a change, one save at a time, and as the page goes away (`watch()`)
+ *     `DETAILS_SAVE_MS` (half a second) after a change, and as the page goes away (`watch()`)
  *     - the server's copy:  `POST /api/docs/details/draft`, which writes `<slug>.draft.json5`
- *   - a save that fails says so in red, and tries again every `ANSWER_RETRY_MS` (3s) until one goes through:
- *     a page server back on its address takes it, with its new token (`ServerLink`;  epic `epic-engine` P15, r14)
+ *   - saved by the page's `DraftSaver` (epic `coherence` C10):  one save at a time, a failure said in red and tried
+ *     again every 3s until one goes through (a page server back on its address takes it, with its new token)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
@@ -103,12 +103,6 @@ export class AnswerForm {
    */
   typed: TypedAnswer | undefined
 
-  /** The draft's save:  `draft saved 14:04`, `saving draft…`, or why it can't be (`isDraftError`). */
-  draftText = ""
-
-  /** The draft's last save failed:  `draftText` says why. */
-  isDraftError = false
-
   /**
    * The session waiting for the answer (`epic ask wait`);  `null` for none;  `undefined` while unknown (not asked
    * yet, no page server, not a details page).
@@ -133,17 +127,8 @@ export class AnswerForm {
   /** `load()`'s promise:  one load per form. */
   private loading: Promise<void> | undefined
 
-  /** Something changed since the draft's last save. */
-  private isUnsaved = false
-
-  /** The draft's save waiting for typing to stop. */
-  private saveTimer: ReturnType<typeof setTimeout> | undefined
-
-  /** The next try after the draft's save failed (`ANSWER_RETRY_MS`). */
-  private retryTimer: ReturnType<typeof setTimeout> | undefined
-
-  /** The draft's saves queued, one at a time:  a later save never lands before an earlier one. */
-  private saving: Promise<void> = Promise.resolve()
+  /** The draft's saves, its browser copy (`DRAFT_KEY_PREFIX` + the page's path) and where it stands. */
+  private readonly drafts: DraftSaver
 
   /** `settle()` waiting for the parts of a rewrite to join. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined
@@ -156,6 +141,14 @@ export class AnswerForm {
 
   constructor(private readonly options: AnswerFormOptions) {
     this.link = new ServerLink(options)
+    this.drafts = new DraftSaver({
+      save: (save) => this.postDraft(save),
+      wait: DETAILS_SAVE_MS,
+      key: `${DRAFT_KEY_PREFIX}${options.page}`,
+      storage: options.storage,
+      link: this.link,
+      onChange: () => this.changed()
+    })
   }
 
   ////////////////
@@ -167,22 +160,14 @@ export class AnswerForm {
 
   /** The page's form, made on the first call (browser only). */
   static forPage(): AnswerForm {
-    AnswerForm.current ??= new AnswerForm({ ...ServerLink.pageOptions(), storage: AnswerForm.storageOf(window) })
+    // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
+    AnswerForm.current ??= new AnswerForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
     return AnswerForm.current
   }
 
   /** Make `form` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
   static adopt(form: AnswerForm | undefined) {
     AnswerForm.current = form
-  }
-
-  /** `window`'s localStorage, or `null` where reading it throws (blocked site data):  a choice page's too. */
-  static storageOf(window: Window): Storage | null {
-    try {
-      return window.localStorage
-    } catch {
-      return null
-    }
   }
 
   ////////////////
@@ -374,7 +359,7 @@ export class AnswerForm {
     if (this.isSending) return
     if (!this.sent && this.isEmpty)
       return this.fail("Pick an option, or write something (Other, a comment, a note) first.")
-    if (!this.options.server?.token || this.options.protocol === "file:")
+    if (!this.link.isServed)
       return this.fail("This page isn't on the page server, so it can't send:  answer in chat instead.")
     this.isSending = true
     this.error = ""
@@ -443,11 +428,8 @@ export class AnswerForm {
     this.kept = kept ?? []
     const shown = this.shown!
     for (const part of this.parts) part.showAnswer(shown)
-    this.setDraftText(`draft from ${clockOf(draft.saved)} put back`)
-    if (!isSaved) {
-      this.isUnsaved = true
-      this.saveSoon()
-    }
+    this.drafts.tell(`draft from ${clockOf(draft.saved)} put back`)
+    if (!isSaved) this.saveSoon()
     this.settleSoon()
   }
 
@@ -515,77 +497,54 @@ export class AnswerForm {
     const shown = this.shown!
     for (const part of this.parts) part.showAnswer(shown)
     this.writeLocal()
-    this.isUnsaved = true
     this.saveSoon()
     this.changed()
+  }
+
+  /** The draft's save:  `saved 14:04`, `saving…`, or why it can't be (`isDraftError`):  `DraftSaver.text`. */
+  get draftText(): string {
+    return this.drafts.text
+  }
+
+  /** The draft's last save failed, or can't be made:  `draftText` says why. */
+  get isDraftError(): boolean {
+    return this.drafts.isError
   }
 
   /**
    * Save the draft to the page server now, if anything changed since the last save;  after any save on its way.
    * - `keepalive`:  the page is going away;  the request outlives it
    * - NEVER throws:  a failure shows in `draftText`, in red (the browser's copy still has it),
-   *   and it tries again in `ANSWER_RETRY_MS`
+   *   and it tries again in 3s (`DraftSaver`)
    */
-  saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
-    if (this.saveTimer) clearTimeout(this.saveTimer)
-    this.saving = this.saving.then(() => this.saveNow(keepalive))
-    return this.saving
+  async saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    await this.drafts.save({ keepalive })
   }
 
-  /** `saveDraft()`'s work, one at a time. */
-  private async saveNow(keepalive: boolean): Promise<void> {
-    if (this.retryTimer) clearTimeout(this.retryTimer)
-    if (!this.isUnsaved || !this.typed || !this.keepsDrafts) return
-    if (!this.options.server?.token || this.options.protocol === "file:")
-      return this.setDraftText("draft kept in this browser only:  this page isn't on the page server", true)
-    this.isUnsaved = false
+  /** `DraftSaver`'s save:  the draft as it stands to the page server;  when it was saved. */
+  private async postDraft({ keepalive }: { keepalive: boolean }): Promise<string> {
     // the server stamps it `saved`
     const { page, answers, comments, notes, labels, kept } = this.draftNow()
     this.writeLocal()
-    // a failure stays in view while it tries again
-    if (!this.isDraftError) this.setDraftText("saving draft…")
-    this.changed()
-    try {
-      const body = { page, answers, comments, notes, labels, kept: kept ?? [] }
-      const reply = (await this.link.post(DETAILS_DRAFT_API, body, { keepalive })) as { draft: DetailsDraft }
-      // sent meanwhile:  the send said where things stand
-      if (this.typed) this.setDraftText(`draft saved ${clockOf(reply.draft.saved)}`)
-    } catch (failure) {
-      // sent meanwhile:  nothing left to save
-      if (!this.typed) return this.changed()
-      this.isUnsaved = true
-      const why = (failure as Error).message.replace(/[.!]$/, "")
-      this.setDraftText(
-        `draft kept in this browser only:  ${why};  trying again every ${ANSWER_RETRY_MS / 1000}s`,
-        true
-      )
-      this.retryTimer = setTimeout(() => void this.saveDraft(), ANSWER_RETRY_MS)
-    }
-    this.changed()
+    const body = { page, answers, comments, notes, labels, kept: kept ?? [] }
+    const reply = (await this.link.post(DETAILS_DRAFT_API, body, { keepalive })) as { draft: DetailsDraft }
+    return reply.draft.saved
   }
 
   /**
-   * Save the draft as the page goes away (`pagehide`, or the page hidden), on `window`'s page;  returns the undo.
+   * On `window`'s page:  save the draft as the page goes away (`pagehide`, or the page hidden), and ask who is
+   * waiting while it's in view (every `DETAILS_LISTEN_POLL_MS`, and as it comes back:  a wait that ends announces
+   * nothing);  returns the undo.
    * - SIDE EFFECT:  listens on `window` and its document until undone
    */
   watch(window: Window): () => void {
-    const leaving = () => void this.saveDraft({ keepalive: true })
-    const hidden = () => {
-      if (window.document.visibilityState === "hidden") leaving()
-      else void this.refreshListening()
-    }
-    window.addEventListener("pagehide", leaving)
-    window.document.addEventListener("visibilitychange", hidden)
-    // who is waiting, asked again while the page is in view:  a wait that ends announces nothing
-    const poll = window.setInterval(() => {
-      if (window.document.visibilityState === "visible") void this.refreshListening()
-    }, DETAILS_LISTEN_POLL_MS)
+    const unsave = this.drafts.watch(window)
+    const unpoll = ServerLink.watch(window, undefined, () => void this.refreshListening(), {
+      every: DETAILS_LISTEN_POLL_MS
+    })
     return () => {
-      window.clearInterval(poll)
-      window.removeEventListener("pagehide", leaving)
-      window.document.removeEventListener("visibilitychange", hidden)
-      if (this.saveTimer) clearTimeout(this.saveTimer)
-      if (this.retryTimer) clearTimeout(this.retryTimer)
+      unsave()
+      unpoll()
       if (this.settleTimer) clearTimeout(this.settleTimer)
     }
   }
@@ -601,12 +560,9 @@ export class AnswerForm {
     return { page: this.options.page, saved: new Date().toISOString(), ...typed }
   }
 
-  /** Save the draft `DETAILS_SAVE_MS` after the last change. */
+  /** Save the draft `DETAILS_SAVE_MS` after the last change (a details page only). */
   private saveSoon() {
-    this.isUnsaved = true
-    if (this.saveTimer) clearTimeout(this.saveTimer)
-    this.saveTimer = setTimeout(() => void this.saveDraft(), DETAILS_SAVE_MS)
-    if (!this.isDraftError) this.setDraftText("draft not saved yet")
+    if (this.keepsDrafts) this.drafts.changed()
   }
 
   /** `settle()` once the parts of a rewrite have joined (`DETAILS_SETTLE_MS`). */
@@ -617,39 +573,18 @@ export class AnswerForm {
 
   /** Sent:  the draft is done with;  nothing to save, and the browser's copy goes. */
   private draftDone() {
-    if (this.saveTimer) clearTimeout(this.saveTimer)
-    if (this.retryTimer) clearTimeout(this.retryTimer)
-    this.isUnsaved = false
     this.typed = undefined
-    this.setDraftText("")
-    PrefStore.setAt(this.localKey, undefined, this.copies)
+    this.drafts.done()
   }
 
-  /** The draft's save status;  `isError`:  in red, as a choice page's failed save (P15:  "says so loudly"). */
-  private setDraftText(text: string, isError = false) {
-    this.draftText = text
-    this.isDraftError = isError
-  }
-
-  /** The browser's copy's key:  `DRAFT_KEY_PREFIX` + the page's path. */
-  private get localKey(): string {
-    return `${DRAFT_KEY_PREFIX}${this.options.page}`
-  }
-
-  /**
-   * Where the browser's copy is kept:  `options.storage`, through `PrefStore`.
-   * - None, or storage that throws (blocked, full):  this page's memory;  the page server's copy still is.
-   */
-  private copies = new StoragePlace({ storage: () => this.options.storage ?? undefined, description: "this browser" })
-
-  /** Write the draft to the browser's copy, as JSON. */
+  /** Write the draft to the browser's copy, at once. */
   private writeLocal() {
-    PrefStore.setAt(this.localKey, this.draftNow(), this.copies)
+    this.drafts.keep(this.draftNow())
   }
 
   /** The browser's copy of the draft, or `undefined` (none, or not a draft). */
   private readLocal(): DetailsDraft | undefined {
-    const draft = PrefStore.getAt(this.localKey, this.copies) as DetailsDraft | undefined
+    const draft = this.drafts.kept<DetailsDraft>()
     return draft && typeof draft.saved === "string" && draft.answers && draft.labels ? draft : undefined
   }
 
@@ -665,17 +600,8 @@ export class AnswerForm {
    * `GET <api>?page=` for this page:  the whole reply, or `undefined` (no route, no page server, a failure).
    * - NEVER throws
    */
-  private async fetchReply<T>(api: string): Promise<T | undefined> {
-    if (!this.options.server || this.options.protocol === "file:") return undefined
-    try {
-      const response = await this.options.fetch(`${api}?page=${encodeURIComponent(this.options.page)}`, {
-        cache: "no-store"
-      })
-      if (!response.ok) return undefined
-      return (await response.json()) as T
-    } catch {
-      return undefined
-    }
+  private fetchReply<T>(api: string): Promise<T | undefined> {
+    return this.link.getForPage<T>(api).catch(() => undefined)
   }
 }
 
@@ -697,11 +623,6 @@ const EMPTY: TypedAnswer = { answers: {}, comments: {}, notes: "", labels: {} }
 /** `record` with its keys sorted. */
 function sorted<T>(record: Record<string, T>): Record<string, T> {
   return Object.fromEntries(Object.entries(record).sort(([one], [other]) => (one < other ? -1 : one > other ? 1 : 0)))
-}
-
-/** `iso`'s local time of day, `14:04`. */
-function clockOf(iso: string): string {
-  return PlanDates.clock(new Date(iso))
 }
 
 /**

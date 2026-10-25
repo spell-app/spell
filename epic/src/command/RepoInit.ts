@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
+import { Git } from "spell/server/Git"
 import { EpicConfig, type EpicSettings } from "spell-epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
-import { Git } from "./Git"
 import { Shared } from "./Shared"
 
 /****************

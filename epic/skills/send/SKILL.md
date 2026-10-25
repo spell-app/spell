@@ -56,7 +56,7 @@ and this session carries on with its own work (epic `epic-workflow`, Owen, 2026-
    - `this session is <epic>'s own`:  do it here, as [the epic skill](../epic/SKILL.md), "12. Request".
    - `no session of <epic> is running`:  run the `epic window launch ...` line it printed.
      It opens the epic's window with `/epic request <epic> <rN>` typed in:  Owen presses Enter there.
-   - The epic page's own Send and Do Now wake an epic the same way, from the page server (epic `epic-workflow` P16).
+   - The epic page's own Send wakes an epic the same way, from the page server (epic `epic-workflow` P16).
 7. Reply ONE line, then go back to this session's own work:
    - "sent to `<epic>` as `<rN>`";  plus "its window is open:  press Enter on `/epic request ...` there", when it was.
    - NEVER do the request here as well, nor edit the tooling's files because of it.

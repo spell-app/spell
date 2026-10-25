@@ -48,6 +48,9 @@
  *   - the comments wait in an inbox file (a docs page's own, an epic page's review inbox), drawn under their blocks
  *   - their own module, `spell-doc-comments.js` (epic `epic-engine` P2), which Epic UI's pages load alone too
  *   - PAGE NOTES (`wireNotes()`), written into docs pages before them:  each `<spell-note>` a folded card
+ * - SCREENSHOTS open full size (`wireImageZoom()`, epic `epic-engine` I129):  a click on a content image (one shown
+ *   smaller than its size, in a `<figure>`, or in a link to an image) shows it over the page, in the epics pack's
+ *   `<epic-zoom>`, never following its link;  the rule is `ImageZoom`'s
  * - the EPICS PAGE's sort buttons, `<epic-sort>`, in its header (`wireEpicSort()`):
  *   its list, its cards' stars and saga chips are the epics pack's elements (`<epic-list>`, `<epic-card>`),
  *   which do their own
@@ -88,7 +91,6 @@ import {
   growField,
   nextFrames,
   noteToast,
-  postJSON,
   readJSON,
   titleInside,
   writeJSON
@@ -106,6 +108,9 @@ import {
 import { readingTime } from "spell-epic/tools/ReadingTime.js"
 import { EpicAddress, PageTargets } from "spell-epic/links"
 import { PageStages } from "spell-epic/phases"
+import { ServerLink } from "spell-epic/review"
+// plain DOM, no Solid:  the element it opens, `<epic-zoom>`, is the epics pack's
+import { ImageZoom } from "spell-epic/components/epic-zoom/ImageZoom"
 import { ComponentPacks } from "spell-ui/components/ui-components"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
@@ -283,6 +288,7 @@ async function start() {
   // listening at once:  an edit that comes in while this is still wiring waits for `live.ready()`
   const live = wireLiveUpdate(main)
   highlight()
+  wireImageZoom()
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
   if (main.querySelector("epic-page")) {
@@ -944,7 +950,7 @@ const EPIC_PAGE_STATE = ["open", "reviewing"]
  * Attributes the reader's state lives in (folds, counts, the item filter, `EPIC_PAGE_STATE`):
  * a patch keeps them (`PagePatch`'s `keptAttributes`, beside the shared `collapsed` and `open`).
  */
-const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", ...EPIC_PAGE_STATE]
+const KEPT_ATTRIBUTES = ["collapsed", "badge", "data-show", "data-epic-zoom", ...EPIC_PAGE_STATE]
 
 /**
  * Elements that manage their children (panels and tabs by index, options):  a change inside replaces the whole
@@ -1043,17 +1049,29 @@ function wireLiveUpdate(main) {
     const [before, page] = await Promise.all([base, started])
     // no motion while the page takes the change:  it's the file, not the reader, moving things
     quietFor(QUIET_PATCH_MS)
-    const patched =
-      before === null
-        ? null
-        : patcher.page({
-            before: parse(before),
-            after: parse(html),
-            live: page.main,
-            mainOf: mainIn,
-            top: () => stuckBottom(page.main)
-          })
-    if (!patched) return reload()
+    let patched = null
+    try {
+      patched =
+        before === null
+          ? null
+          : patcher.page({
+              before: parse(before),
+              after: parse(html),
+              live: page.main,
+              mainOf: mainIn,
+              top: () => stuckBottom(page.main)
+            })
+    } catch (error) {
+      // says WHY, so a page that keeps falling back to its reload can be fixed (the reload waits until out of sight)
+      console.warn("live update:  can't patch this page in place;  it reloads once out of sight:", error)
+      return reload()
+    }
+    if (!patched) {
+      console.warn(
+        `live update:  can't patch this page in place (${before === null ? "its source as loaded is unknown" : "its head or shell changed, or too much of it"});  it reloads once out of sight`
+      )
+      return reload()
+    }
     base = Promise.resolve(html)
     await rewire(page, patched.changed)
   }
@@ -1081,6 +1099,9 @@ function canPatch(main) {
   if (!main.querySelector(":scope > :is(ui-section, epic-page)")) return false
   if (document.querySelector("[data-spell-filter], [data-spell-filter-badge]")) return false
   return Array.from(document.scripts).every((script) => {
+    // one the page server added to every page (`PageServer.withPageScripts()`, spell-app's spell colours):  in the
+    // source the patch compares too;  without this, every epic page reloaded on every edit (2026-10-25)
+    if (script.hasAttribute("data-spell-page-script")) return true
     const src = script.getAttribute("src")
     if (!src) return PagePatch.isInert(script) || script.textContent.includes("SPELL_SERVER")
     return /^\/api\/server\//.test(src) || /(^|\/)(spell-ui|highlight(\.min)?|[\w-]+\.pack)\.js$/.test(src)
@@ -2947,6 +2968,23 @@ function drawNoteCards(main) {
 }
 
 ////////////////
+// ## Screenshots full size
+////////////////
+
+/**
+ * SCREENSHOTS open full size (epic `epic-engine` I129;  Owen, 2026-10-25:  "Can't click on images in the page to
+ * expand so I can't tell"):  ONE pair of listeners for the whole page, `ImageZoom`'s.
+ * - a click on a zoomable image shows it in `<epic-zoom>`, its link never followed (a `target="_blank"` one too)
+ * - the pointer over one marks it `data-epic-zoom`, the zoom-in cursor (`spell-doc.css`);  a patch keeps the mark
+ *   (`KEPT_ATTRIBUTES`)
+ * - a request's thumbnail takes its own click first (`<epic-field>`):  this one sees it prevented, and leaves it
+ */
+function wireImageZoom() {
+  document.addEventListener("click", ImageZoom.onClick)
+  document.addEventListener("pointerover", ImageZoom.onPointerOver, { passive: true })
+}
+
+////////////////
 // ## The Epics page's sort
 ////////////////
 
@@ -2988,7 +3026,7 @@ const OLD_NEW_EPIC_DRAFT_KEY = "spell-new-epic-draft"
  */
 function wireNewEpic(main) {
   if (!/(^|\/)epics\/(index\.html)?$/.test(location.pathname)) return
-  if (!window.SPELL_SERVER?.token || location.protocol === "file:") return
+  if (!ServerLink.isServed()) return
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
   // the browser's own tooltip, a `title` (Owen, 2026-10-10:  never a `<ui-popup>` as a tooltip)
@@ -3046,7 +3084,10 @@ function newEpicBox() {
     if (!title.value.trim()) return title.focus()
     save.setAttribute("loading", "")
     try {
-      const { name } = await postJSON(NEW_EPIC_API, { title: title.value.trim(), prompt: prompt.value.trim() })
+      const { name } = await ServerLink.forPage().post(NEW_EPIC_API, {
+        title: title.value.trim(),
+        prompt: prompt.value.trim()
+      })
       writeJSON(NEW_EPIC_DRAFT_KEY, {})
       close()
       noteToast(`Future epic ${name} written down`, "success")
