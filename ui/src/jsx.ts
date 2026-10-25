@@ -12196,6 +12196,18 @@ export interface UIIconPickerEventMap {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-opening": CustomEvent<{ open: true; originalEvent?: Event }>
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-closing": CustomEvent<{ open: false; originalEvent?: Event }>
 }
 
 /** `<ui-icon-picker>`'s own attributes, from its vocabulary. */
@@ -12445,6 +12457,18 @@ export interface UIIconPickerAttributes {
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UIIconPickerEventMap["ui-changed"]) => void
+  /**
+   * `ui-opening`:  The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed.
+   * - `event.detail`:  `{ open: true, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-opening"?: (event: UIIconPickerEventMap["ui-opening"]) => void
+  /**
+   * `ui-closing`:  The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open.
+   * - `event.detail`:  `{ open: false, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-closing"?: (event: UIIconPickerEventMap["ui-closing"]) => void
 }
 
 /** `<ui-icon-picker>` in JSX:  its own attributes, and HTML's global ones. */
@@ -34476,7 +34500,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
        * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
-       * - events:  `ui-changing`, `ui-changed`
+       * - events:  `ui-changing`, `ui-changed`, `ui-opening`, `ui-closing`
        */
       "ui-icon-picker": UIIconPickerJSXAttributes
       /**

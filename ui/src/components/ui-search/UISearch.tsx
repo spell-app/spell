@@ -273,40 +273,32 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     return this.isOpen && this.queryIsLongEnough && (!!this.shownResults.length || !!this.message)
   }
 
-  /** This element's `UI.overlays` entry. */
-  private readonly overlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
+  /**
+   * The results, a popover panel on `isOpen`:  `ui-opening` / `ui-closing`, the overlay entry, the anchor.
+   * - Never opens while disabled or readonly;  opening highlights the first result (`select-first-result`) or none.
+   */
+  readonly popover = new F.PopoverPanel({
+    component: this,
+    member: "isOpen",
     restoreFocus: false,
-    onDismiss: () => void this.requestOpen(false)
-  }
+    canChange: (open) => !open || !(this.isDisabled || this.isReadOnly),
+    onChange: (open) => {
+      if (open) this.highlightedIndex = this.selectFirstResult ? 0 : -1
+    }
+  })
 
   /** Show the popover and open the overlay entry while results show in the page;  undone when they stop. */
   @E.onChange("resultsAreShowing", "isConnected")
   protected onPopoverChanged(resultsAreShowing: boolean, isConnected: boolean) {
-    const box = this.resultsBox
-    if (!resultsAreShowing || !isConnected || !box) return
-    if (!box.matches(":popover-open")) box.showPopover()
-    UI.overlays.open(this.overlay)
-    return () => {
-      if (box.matches(":popover-open")) box.hidePopover()
-      UI.overlays.close(this.overlay)
-    }
+    return this.popover.follow(this.resultsBox, resultsAreShowing && isConnected)
   }
 
   /**
-   * Show or hide the results, dispatching the cancelable `ui-opening` / `ui-closing` first.
+   * Show or hide the results as a person would (`popover.request()`);  true when it changed.
    * - Not `open()` / `close()`:  `open` is the attribute's.
    */
-  @E.untracked
   requestOpen(open: boolean, originalEvent?: Event): boolean {
-    if (open === this.isOpen) return false
-    if (open && (this.isDisabled || this.isReadOnly)) return false
-    const isDone = this.requestChange("isOpen", open, () =>
-      this.send(open ? "ui-opening" : "ui-closing", { open, originalEvent })
-    )
-    if (isDone && open) this.highlightedIndex = this.selectFirstResult ? 0 : -1
-    return isDone
+    return this.popover.request(open, originalEvent)
   }
 
   /**
@@ -395,8 +387,8 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   /** Stable DOM id per result. */
   private readonly resultIds = new WeakMap<UIT.SearchResult, string>()
 
-  /** Ids / anchor name, from `UI.ids` once rendering. */
-  private ids = { results: "", anchor: "" }
+  /** Ids, from `UI.ids` once rendering. */
+  private ids = { results: "" }
 
   /** The text input. */
   private input?: HTMLInputElement
@@ -411,13 +403,9 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   private resultsBox?: HTMLElement
 
   render(): JSX.Element {
-    this.ids = { results: UI.ids.next(ID_PREFIX), anchor: `--${UI.ids.next(ID_PREFIX)}` }
+    this.ids = { results: UI.ids.next(ID_PREFIX) }
     return (
-      <div
-        class={this.rootClass}
-        part={this.partForName("search")}
-        style={{ [UIT.SEARCH_ANCHOR_PROPERTY]: this.ids.anchor }}
-      >
+      <div class={this.rootClass} part={this.partForName("search")} style={this.popover.anchorStyle}>
         <div
           class={[INPUT, { [LOADING]: this.isLoading, [UIT.FLUID]: this.fluid, [UIT.DISABLED]: this.isDisabled }]}
           part={this.partForName("input")}
@@ -481,6 +469,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
         ref={(element) => (this.resultsBox = element)}
         id={this.ids.results}
         class={RESULTS}
+        style={this.popover.panelStyle}
         popover="manual"
         part={this.partForName("results")}
         role={this.shownResults.length ? "listbox" : undefined}

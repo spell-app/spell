@@ -132,7 +132,7 @@ describe("<ui-dropdown> markup", () => {
 
   it("anchors the menu to the root", async () => {
     const { root, menu, combobox } = await dropdown(GENDER)
-    const anchor = root.style.getPropertyValue("--_ui-dropdown-anchor")
+    const anchor = root.style.getPropertyValue("anchor-name")
     expect(anchor).toMatch(/^--ui-dropdown-\d+$/)
     combobox.click()
     await ElementFixture.tick()

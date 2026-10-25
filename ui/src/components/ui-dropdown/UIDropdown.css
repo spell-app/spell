@@ -5,7 +5,7 @@
  * - The shadow markup it expects (class grammar on semantic elements), in this order inside the root:
  *
  *     <div class="ui [size color state] [selection search multiple ...] dropdown [active] [disabled] [loading]"
- *          style="--_ui-dropdown-anchor: --ui-dropdown-7">
+ *          style="anchor-name: --ui-dropdown-7">
  *       <span class="ui label" part="label">Angular<button class="delete icon" aria-label="..."></button></span>
  *       <input class="search" part="search" role="combobox">          (search:  the combobox)
  *       <span class="sizer" aria-hidden="true">query</span>           (multiple search:  measures the input)
@@ -13,7 +13,7 @@
  *       <span class="[default] [filtered] text" part="text"><slot name="trigger">...</slot></span>
  *       <button class="remove icon" part="clear" aria-label="...">    (clearable, when there's a value)
  *       <span class="dropdown icon" part="icon"><slot name="icon"></slot></span>  (empty:  a caret;  or slot an svg)
- *       <div class="[left] menu" role="listbox" popover part="menu">
+ *       <div class="[left] menu" role="listbox" popover part="menu" style="position-anchor: --ui-dropdown-7">
  *         <div class="header">, <hr class="divider">, <div class="message">,
  *         <div class="[active] [selected] [disabled] [addition] item" role="option" part="item">
  *           <span class="icon">, <img class="image">, <span class="flag">, <span class="description">,
@@ -33,11 +33,10 @@
  * - Open:  the root is open when it has `active` OR its menu is `:popover-open`, so the CSS works whichever way
  *   the component signals it.  `visible` on the menu shows a NON-popover menu (static examples, `simple`).
  * - Positioning:  POPOVER + ANCHOR, no JS.
- *   - root:  `anchor-name: var(--_ui-dropdown-anchor, --ui-dropdown)`, `anchor-scope: all`
- *   - `.menu[popover]`:  `position-anchor: var(--_ui-dropdown-anchor, --ui-dropdown)`, `position-area` below
+ *   - the anchor's name, and the menu hung from it:  inline, per element (the component's `PopoverPanel`)
+ *   - root:  `anchor-scope: all`
+ *   - `.menu[popover]`:  `position-area` below
  *     and flipping (`flip-block, flip-inline`);  `upward` / `.left.menu` / `pointing="..."` pick other areas
- *   - the component SHOULD set `--_ui-dropdown-anchor` inline to a per-instance dashed ident;
- *     one shadow root holds one dropdown, so the fallback name also works there
  *   - a menu WITHOUT `popover` falls back to Fomantic's `top: 100%` positioning (static markup, `simple`)
  * - The `:state()`s the component sets:  `:state(fluid)` (a block-level DOM element),
  *   plus `open` / `disabled` / `loading` / `invalid` for PAGE styling only -- this sheet keys on the root's classes.
@@ -165,7 +164,6 @@
     position: relative;
     box-sizing: border-box;
     display: inline-block;
-    anchor-name: var(--_ui-dropdown-anchor, --ui-dropdown);
     anchor-scope: all;
     font-family: var(--ui-font-family);
     font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
@@ -227,7 +225,6 @@
    */
   .ui.dropdown > .menu[popover] {
     position: fixed;
-    position-anchor: var(--_ui-dropdown-anchor, --ui-dropdown);
     position-area: block-end span-inline-end;
     position-try-fallbacks: flip-block, flip-inline;
     /* below or above, whichever has more room:  capped to it (`max-height`), the menu always fits */

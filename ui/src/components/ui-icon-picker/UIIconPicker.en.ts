@@ -81,6 +81,19 @@ export const iconPickerVocabulary = {
       name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
       description: "The icon changed:  after `ui-changing`, unless it was cancelled."
+    },
+    {
+      name: "ui-opening",
+      detail: "{ open: true, originalEvent?: Event }",
+      cancelable: true,
+      description: "The panel is about to open (a click, Down / Up, a letter);  `preventDefault()` keeps it closed."
+    },
+    {
+      name: "ui-closing",
+      detail: "{ open: false, originalEvent?: Event }",
+      cancelable: true,
+      description:
+        "The panel is about to close (a pick, Escape, Tab, a click outside);  `preventDefault()` keeps it open."
     }
   ],
   slots: [],

@@ -178,19 +178,6 @@ export type ItemOwner = {
 }
 
 ////////////////
-// ## CSS contracts
-////////////////
-
-/**
- * Custom property `UIDropdown.css` reads for the anchor name, e.g. `--_ui-dropdown-anchor: --ui-dropdown-7`.
- * - The element sets it INLINE on its root, to a per-instance dashed ident (`UI.ids`);
- *   the root's `anchor-name` and the menu's `position-anchor` both read it.
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- * - Falls back to `--ui-dropdown`, which is enough inside one shadow root.
- */
-export const DROPDOWN_ANCHOR_PROPERTY = "--_ui-dropdown-anchor"
-
-////////////////
 // ## Icon
 ////////////////
 
@@ -812,13 +799,6 @@ export type SearchChangeDetail = {
   /** event of the person's action, when there was one */
   originalEvent?: Event
 }
-
-/**
- * Custom property `UISearch.css` reads for the anchor name, e.g. `--_ui-search-anchor: --ui-search-3`.
- * - The element sets it inline on its root, as the dropdown does (`DROPDOWN_ANCHOR_PROPERTY`).
- * - PRIVATE (`--_ui-`):  a switch the element decides, never a theming surface.
- */
-export const SEARCH_ANCHOR_PROPERTY = "--_ui-search-anchor"
 
 ////////////////
 // ## Toast
