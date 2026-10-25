@@ -376,7 +376,7 @@
               <ui-code language="jsx">
                 <script type="text/plain">
                   {sizes.map((size) => (
-                    <ui-radio key={size} name="size" value={size} selected={chosen === size} onui-change={() => setChosen(size)}>
+                    <ui-radio key={size} name="size" value={size} selected={chosen === size} onui-changed={() => setChosen(size)}>
                       {size}
                     </ui-radio>
                   ))}

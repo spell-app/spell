@@ -240,11 +240,11 @@ describe("ComponentPacks.reload()", () => {
     expect(await ComponentPacks.reload("/nowhere/none.pack.js", PackHotSwap.swap)).toBe("none")
   })
 
-  it("the live client's offer (`spell-server:scripts`):  taken when every changed script is a pack on the page", () => {
+  it("the live client's offer (`spell-server:scripts-reloading`):  taken when every changed script is a pack on the page", () => {
     PackHotSwap.install()
     build("three", { "swap-a": "a2", "swap-b": "b1" })
     const offer = (paths: string[]) => {
-      const event = new CustomEvent("spell-server:scripts", { cancelable: true, detail: { paths } })
+      const event = new CustomEvent("spell-server:scripts-reloading", { cancelable: true, detail: { paths } })
       return !dispatchEvent(event)
     }
     expect(offer(["/_epic/pack/swap.pack.js"])).toBe(true)

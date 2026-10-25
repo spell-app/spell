@@ -10151,10 +10151,16 @@ export interface UIIconJSXAttributes
 /** `<ui-icon-picker>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIIconPickerEventMap {
   /**
-   * `ui-change`:  An icon was picked (`""` for none).  A handler that re-sets `value` wins.
+   * `ui-changing`:  An icon was picked (`""` for none);  `preventDefault()` keeps the old one, and a handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-changing": CustomEvent<{ value: string; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  The icon changed:  after `ui-changing`, unless it was cancelled.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "ui-change": CustomEvent<{ value: string; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
 }
 
 /** `<ui-icon-picker>`'s own attributes, from its vocabulary. */
@@ -10340,10 +10346,16 @@ export interface UIIconPickerAttributes {
     | "glow"
     | "none"
   /**
-   * `ui-change`:  An icon was picked (`""` for none).  A handler that re-sets `value` wins.
+   * `ui-changing`:  An icon was picked (`""` for none);  `preventDefault()` keeps the old one, and a handler that re-sets `value` wins.
+   * - `event.detail`:  `{ value: string, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-changing"?: (event: UIIconPickerEventMap["ui-changing"]) => void
+  /**
+   * `ui-changed`:  The icon changed:  after `ui-changing`, unless it was cancelled.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
-  "on-ui-change"?: (event: UIIconPickerEventMap["ui-change"]) => void
+  "on-ui-changed"?: (event: UIIconPickerEventMap["ui-changed"]) => void
 }
 
 /** `<ui-icon-picker>` in JSX:  its own attributes, and HTML's global ones. */
@@ -28825,7 +28837,7 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-icon-picker>`:  An icon picker lets people choose an icon by searching for it and clicking its glyph.
        * - also known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search
-       * - events:  `ui-change`
+       * - events:  `ui-changing`, `ui-changed`
        */
       "ui-icon-picker": UIIconPickerJSXAttributes
       /**

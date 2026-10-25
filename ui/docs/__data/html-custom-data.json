@@ -10857,7 +10857,7 @@
       "name": "ui-icon-picker",
       "description": {
         "kind": "markdown",
-        "value": "An icon picker lets people choose an icon by searching for it and clicking its glyph.\n\nAlso known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search.\n\n**Events:**  `ui-change`"
+        "value": "An icon picker lets people choose an icon by searching for it and clicking its glyph.\n\nAlso known as:  icon chooser, icon selector, glyph picker, symbol picker, icon search.\n\n**Events:**  `ui-changing`, `ui-changed`"
       },
       "attributes": [
         {

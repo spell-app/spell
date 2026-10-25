@@ -10151,8 +10151,15 @@
           "members": [],
           "events": [
             {
-              "name": "ui-change",
-              "description": "An icon was picked (`\"\"` for none).  A handler that re-sets `value` wins.",
+              "name": "ui-changing",
+              "description": "An icon was picked (`\"\"` for none);  `preventDefault()` keeps the old one, and a handler that re-sets `value` wins.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "The icon changed:  after `ui-changing`, unless it was cancelled.",
               "type": {
                 "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
               }

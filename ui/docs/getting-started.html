@@ -203,9 +203,9 @@
 
                 | Framework | Usage                                                                                                                 |
                 | --------- | --------------------------------------------------------------------------------------------------------------------- |
-                | React 19  | `<ui-dropdown options={arr} value="x" open onui-change={fn} />`                                                       |
+                | React 19  | `<ui-dropdown options={arr} value="x" open onui-changed={fn} />`                                                       |
                 | Vue 3.5   | `isCustomElement: (tag) => tag.startsWith("ui-")`, then `<ui-dropdown .options="arr" value="x" open @ui-changed="fn">` |
-                | Svelte 5  | `<ui-dropdown options={arr} value="x" open onui-change={fn}>`                                                         |
+                | Svelte 5  | `<ui-dropdown options={arr} value="x" open onui-changed={fn}>`                                                         |
                 | Solid     | `<ui-dropdown options={arr} value="x" open={o} on-ui-changed={fn}>`                                                    |
                 | Angular   | `[options]="arr" (ui-changed)="fn($event)"` plus `CUSTOM_ELEMENTS_SCHEMA`                                              |
 
