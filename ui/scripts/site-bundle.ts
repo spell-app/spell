@@ -18,6 +18,7 @@ import path from "node:path"
 import { gzipSync } from "node:zlib"
 import { build } from "vite"
 
+import { kb } from "spell/util/number"
 import { SITE_ASSETS } from "spell-ui/vite.site.config.ts"
 import { Terminal } from "spell/element-tools/Terminal"
 
@@ -94,11 +95,6 @@ function staticGraph(folder: string, entry: string, seen = new Set<string>()): S
     staticGraph(folder, path.posix.join(path.posix.dirname(entry), match[1]!), seen)
   }
   return seen
-}
-
-/** `bytes` as `12.3 KB`. */
-function kb(bytes: number): string {
-  return `${(bytes / 1024).toFixed(1)} KB`
 }
 
 /** Total `key` size of `sizes`. */

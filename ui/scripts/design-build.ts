@@ -14,6 +14,7 @@
 import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
+import { kb } from "spell/util/number"
 import { DesignExport } from "spell-ui/tools/DesignExport"
 import { environment } from "spell-ui/tools/environment"
 import { Terminal } from "spell/element-tools/Terminal"
@@ -29,9 +30,7 @@ const result = exporter.write(out)
 const groups = new Map<string, number>()
 for (const family of result.families) groups.set(family.group, (groups.get(family.group) ?? 0) + 1)
 const bytes = result.files.reduce((sum, file) => sum + Buffer.byteLength(file.text), 0)
-Terminal.out(
-  `design system:  ${result.files.length} files, ${(bytes / 1024).toFixed(1)} KB, in ${join(out, "project")}`
-)
+Terminal.out(`design system:  ${result.files.length} files, ${kb(bytes)}, in ${join(out, "project")}`)
 Terminal.out(
   `  cards:  ${result.families.length} (${[...groups].map(([group, count]) => `${group} ${count}`).join(", ")})`
 )

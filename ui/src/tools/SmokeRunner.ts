@@ -4,6 +4,8 @@ import { mkdirSync, writeFileSync } from "node:fs"
 import { isAbsolute, join, relative } from "node:path"
 import { chromium, type Browser } from "playwright"
 
+import { localDate } from "spell/util/time"
+
 import type { ImportMap, PageResult, SmokePage, SmokePageKind, SmokeResults } from "./tools.types.ts"
 import { HostApp } from "./HostApp.ts"
 import { StaticServer } from "./StaticServer.ts"
@@ -64,7 +66,7 @@ export class SmokeRunner {
     }
     const results: SmokeResults = {
       package: this.options.name,
-      date: new Date().toISOString().slice(0, 10),
+      date: localDate(),
       browser: `chromium ${version}`,
       pages
     }

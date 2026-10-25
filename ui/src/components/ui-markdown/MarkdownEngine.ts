@@ -1,5 +1,7 @@
 import { Marked, type Tokens } from "marked"
 
+import { clamp } from "spell/util/number"
+import { slug } from "spell/util/string"
 // Import directly:  see the class docs
 import { SourceError } from "spell-ui/runtime/runtime.types"
 
@@ -10,13 +12,14 @@ import type { MarkdownHeading, MarkdownOptions, MarkdownResult } from "./UIMarkd
  * marked, in `<ui-markdown>`'s LAZY chunk:  imported by `MarkdownRenderer` on the first render, so a page pays for it
  * only when it shows markdown.
  * - GitHub-flavoured (`gfm`):  tables, task lists, strikethrough, autolinks.
- * - Headings get GitHub's ids (`slug()`:  lowercase, punctuation dropped, spaces to `-`, repeats numbered),
+ * - Headings get GitHub's ids (the kit's `slug(text, { as: "github" })`:  lowercase, punctuation dropped,
+ *   spaces to `-`;  repeats numbered here),
  *   so `[see](#setup)` links work;  `headingOffset` shifts their levels.
  * - Returns MARKUP, never sanitized:  the element sanitizes it when `sanitized`, in a chunk of its own
  *   (`MarkdownSanitizer`).
  * - The element turns code blocks into `<ui-code>` and resolves URLs.
- * - NEVER a value import but marked and `SourceError`:  the docs bundler builds this file ALONE into a
- *   classic script (`MarkdownRenderer.engineLoader`).
+ * - NEVER a value import but marked, `SourceError` and the kit's standalone `string` and `number` leaves:
+ *   the docs bundler builds this file ALONE into a classic script (`MarkdownRenderer.engineLoader`).
  * - Imports `SourceError` straight from `spell-ui/runtime/runtime.types` (built into `core.js`), and USES it:
  *   a lazy chunk that needs Rolldown's helpers (`__name`, from `keepNames`) without depending on core makes Rolldown
  *   split them into a `rolldown-runtime-<hash>.js` EVERY page loads (`yarn measure`'s `runtimeChunks`;
@@ -38,8 +41,8 @@ export class MarkdownEngine {
         heading({ tokens, depth }: Tokens.Heading) {
           const html = this.parser.parseInline(tokens)
           const plain = MarkdownEngine.plainText(html)
-          const id = MarkdownEngine.unique(MarkdownEngine.slug(plain), ids)
-          const level = Math.min(MAX_LEVEL, Math.max(1, depth + options.headingOffset))
+          const id = MarkdownEngine.unique(slug(plain, { as: "github" }), ids)
+          const level = clamp(depth + options.headingOffset, 1, MAX_LEVEL)
           headings.push({ level, text: plain, id })
           return `<h${level} id="${id}">${html}</h${level}>\n`
         }
@@ -52,18 +55,6 @@ export class MarkdownEngine {
       })
     }
     return { html, headings }
-  }
-
-  /**
-   * GitHub's heading slug:  `Getting started!` => `getting-started`.
-   * - Static:  pure.
-   */
-  static slug(text: string): string {
-    return text
-      .trim()
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}\p{M}\s_-]/gu, "")
-      .replace(/\s/g, "-")
   }
 
   /**

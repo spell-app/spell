@@ -1,3 +1,5 @@
+import { rgbToHex } from "spell/util/color"
+
 import { FALLBACK_HEX } from "./UIDocsTokens.types"
 
 /****************
@@ -9,6 +11,7 @@ import { FALLBACK_HEX } from "./UIDocsTokens.types"
  * - Lossy on purpose:  alpha is flattened onto the page background and wide-gamut colours clip,
  *   both the native input's limits.  The token keeps its real value until the person picks a colour.
  * - Scheme:  `light-dark()` resolves in `context`'s scheme at the time of the probe.
+ * - The painting is the browser's;  the hex, the kit's `rgbToHex()`.
  * - Static:  one 1px canvas for the page, made on first use.
  ****************/
 export class ColorProbe {
@@ -54,7 +57,7 @@ export class ColorProbe {
     canvas.fillRect(0, 0, 1, 1)
     const [red, green, blue, alpha] = canvas.getImageData(0, 0, 1, 1).data
     if (!alpha) return FALLBACK_HEX
-    return `#${[red!, green!, blue!].map((channel) => channel.toString(16).padStart(2, "0")).join("")}`
+    return rgbToHex({ r: red! / 255, g: green! / 255, b: blue! / 255 })
   }
 
   ////////////////

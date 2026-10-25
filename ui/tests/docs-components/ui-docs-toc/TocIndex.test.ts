@@ -7,10 +7,11 @@ import type { TocEntry } from "spell-ui/docs-components/ui-docs-toc/UIDocsToc.ty
 const TREE: TocEntry[] = [entryOf("types", [entryOf("button"), entryOf("group", [entryOf("or")])]), entryOf("states")]
 
 describe("TocIndex.slug()", () => {
-  test("makes lowercase words joined by `-`, accents dropped;  `section` when nothing is left", () => {
+  test("makes lowercase words joined by `-`, accents dropped, apostrophes splitting;  `section` when nothing is left", () => {
     expect(TocIndex.slug("Labeled Icon")).toBe("labeled-icon")
     expect(TocIndex.slug("  Émphasis & More! ")).toBe("emphasis-more")
     expect(TocIndex.slug("---")).toBe("section")
+    expect(TocIndex.slug("Spell UI’s own")).toBe("spell-ui-s-own")
   })
 })
 

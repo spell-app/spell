@@ -1,7 +1,7 @@
 /**
  * What the generators share:  write only the files whose text changed (or, under `--check`, fail on them), format
- * what they wrote as `yarn format` would, splice a generated block into a hand-kept page, and escape the text they
- * write into markup.
+ * what they wrote as `yarn format` would, and splice a generated block into a hand-kept page.
+ * - Escaping the text they write into markup:  the kit's `escapeHTML()` (`spell/util/string`).
  * - Used by `site:data`, `site:index`, `site:kitchen`, `site:sections`, `site:new`, `gen:root`, `gen:styles`,
  *   `tokens:alias`.
  * - Node only:  imported by `scripts/`, never by `src/`.
@@ -79,11 +79,6 @@ const PACKAGE_ROOT = fileURLToPath(new URL("../../", import.meta.url))
 
 /** A family's `status` (`docs/__data/pages.json5`) as its label's words;  `done` shows none. */
 export const STATUS_TEXT: Readonly<Record<string, string>> = { planned: "Planned", "in-progress": "In progress" }
-
-/** `text` safe inside an attribute or element. */
-export function escapeHtml(text: string): string {
-  return text.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-}
 
 /** `text` without markdown code ticks:  a card or a summary line shows plain text. */
 export function withoutTicks(text: string): string {

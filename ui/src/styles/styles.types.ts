@@ -79,7 +79,7 @@ export type ColorRecipe = {
 
 /**
  * A foreground candidate for text on a solid colour (`onColors`).
- * - `color` is what `ColorContrast` measures, `css` what `--ui-<name>-on` emits -- the same colour, but `css`
+ * - `color` is what the contrast check measures (`spell/util/color`'s `contrast()`), `css` what `--ui-<name>-on` emits -- the same colour, but `css`
  *   may be a token (`var(--ui-ink-on-light)`) so a theme's re-ink reaches it.
  */
 export type OnColor = {

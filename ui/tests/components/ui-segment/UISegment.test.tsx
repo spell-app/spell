@@ -4,6 +4,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import "spell-ui/components/ui-segment"
 import "spell-ui/components/ui-parts"
@@ -115,12 +116,12 @@ describe("<ui-segment> states and owner tokens", () => {
       const style = getComputedStyle(rootOf(id))
       expect(style.getPropertyValue("--ui-inverted").trim(), id).toBe("1")
       expect(style.colorScheme, id).toBe("dark")
-      expect(luminance(style.backgroundColor), id).toBeLessThan(0.3)
+      expect(Painted.luminance(style.backgroundColor), id).toBeLessThan(0.07)
     }
     const nested = getComputedStyle(rootOf("n"))
     expect(nested.getPropertyValue("--ui-inverted").trim()).toBe("0")
     expect(nested.colorScheme).toBe("light")
-    expect(luminance(nested.backgroundColor)).toBeGreaterThan(0.7)
+    expect(Painted.luminance(nested.backgroundColor)).toBeGreaterThan(0.45)
   })
 
   it("is busy while loading, with an announcement;  aria-disabled while disabled", async () => {
@@ -263,12 +264,3 @@ describe("<ui-segment> accessibility", () => {
     await expectAccessible(root, { rules: { "heading-order": headingOrder } })
   })
 })
-
-/** Relative luminance (0..1) of any CSS colour, via a canvas pixel. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
-}

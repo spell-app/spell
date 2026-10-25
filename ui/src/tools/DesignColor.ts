@@ -1,3 +1,6 @@
+import { hexToRgb, oklchToRgb, rgbToHex, rgbToOklch } from "spell/util/color"
+import { clamp } from "spell/util/number"
+
 /****************
  * ### `DesignColor`
  * Colour math for the design-system export (`DesignTokens`):  just enough CSS Color 4 / 5 to turn our token
@@ -6,9 +9,10 @@
  *   with `calc()` / `min()` / `max()` / `clamp()` channel maths, and `color-mix(in oklab | oklch | srgb, ...)`.
  * - NOT:  `var()` and `light-dark()`:  the caller (`DesignTokens.resolve()`) resolves those first, per theme, and
  *   hands each argument back through its own `resolve` callback.
- * - Conversions:  Björn Ottosson's OKLab matrices;  sRGB output is clipped to the gamut (our palettes are sRGB hex).
+ * - Conversions:  the kit's colour maths (`spell/util/color`);  sRGB output is clipped to the gamut
+ *   (our palettes are sRGB hex).
  * - Single-letter names are the colour spaces' own channels (`l`, `c`, `h`, `a`, `b`, `r`, `g`), on purpose.
- * - STATIC and instance-free:  pure maths, no state.  Imports nothing.
+ * - STATIC and instance-free:  pure maths, no state.  Imports only the kit's `color` and `number`, by file.
  ****************/
 export class DesignColor {
   /**
@@ -37,16 +41,7 @@ export class DesignColor {
 
   /** `color` as `#rrggbb`, or `#rrggbbaa` when it isn't opaque;  clipped to sRGB. */
   static toHex(color: Oklch): string {
-    const [r, g, b] = DesignColor.toSrgb(color)
-    const alpha = color.alpha >= 1 ? "" : byte(color.alpha)
-    return `#${byte(r)}${byte(g)}${byte(b)}${alpha}`
-
-    /** A 0..1 channel as two hex digits, clipped. */
-    function byte(unit: number): string {
-      return Math.round(Math.min(1, Math.max(0, unit)) * 255)
-        .toString(16)
-        .padStart(2, "0")
-    }
+    return rgbToHex({ ...oklchToRgb(color), alpha: color.alpha })
   }
 
   /** Whether `text` is a colour value the design-system format takes as is:  hex, or `rgb()` / `oklch()` of numbers. */
@@ -60,15 +55,9 @@ export class DesignColor {
 
   /** `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`. */
   static fromHex(hex: string): Oklch | undefined {
-    let digits = hex.slice(1)
-    if (!/^[0-9a-f]+$/i.test(digits) || ![3, 4, 6, 8].includes(digits.length)) return undefined
-    if (digits.length <= 4) digits = digits.replace(/./g, (digit) => digit + digit)
-    return DesignColor.fromSrgb(channel(0), channel(1), channel(2), digits.length === 8 ? channel(3) : 1)
-
-    /** Channel `index` (two hex digits) as 0..1. */
-    function channel(index: number): number {
-      return parseInt(digits.slice(index * 2, index * 2 + 2), 16) / 255
-    }
+    if (!HEX_COLOR.test(hex)) return undefined
+    const { r, g, b, alpha = 1 } = hexToRgb(hex)
+    return DesignColor.fromSrgb(r, g, b, alpha)
   }
 
   /** `rgb()`'s arguments, modern (`200 206 231 / 0.16`) or legacy (`200, 206, 231, 0.16`);  numbers or percentages. */
@@ -119,7 +108,7 @@ export class DesignColor {
     const h = ChannelMath.evaluate(channels[2]!, scope, 1)
     const alpha = slash < 0 ? base.alpha : ChannelMath.evaluate(parts[slash + 1] ?? "", scope, 1)
     if (l === undefined || c === undefined || h === undefined || alpha === undefined) return undefined
-    return { l, c: Math.max(0, c), h, alpha: Math.min(1, Math.max(0, alpha)) }
+    return { l, c: Math.max(0, c), h, alpha: clamp(alpha, 0, 1) }
   }
 
   /**
@@ -191,17 +180,7 @@ export class DesignColor {
 
   /** sRGB channels (0..1) to OKLCH. */
   static fromSrgb(r: number, g: number, b: number, alpha: number): Oklch {
-    const linear = [r, g, b].map((unit) => (unit <= 0.04045 ? unit / 12.92 : ((unit + 0.055) / 1.055) ** 2.4))
-    const [lr, lg, lb] = linear as [number, number, number]
-    const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb)
-    const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb)
-    const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb)
-    return DesignColor.fromOklab(
-      0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
-      1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
-      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
-      alpha
-    )
+    return { ...rgbToOklch({ r, g, b }), alpha }
   }
 
   /** OKLab to OKLCH;  a grey's hue is 0. */
@@ -219,20 +198,8 @@ export class DesignColor {
 
   /** OKLCH to sRGB channels `[r, g, b]` (0..1, NOT clipped). */
   static toSrgb(color: Oklch): [number, number, number] {
-    const [L, a, b] = DesignColor.toOklab(color)
-    const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-    const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-    const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
-    const linear = [
-      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-      -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s
-    ]
-    return linear.map((unit) => {
-      const sign = unit < 0 ? -1 : 1
-      const abs = Math.abs(unit)
-      return sign * (abs <= 0.0031308 ? 12.92 * abs : 1.055 * abs ** (1 / 2.4) - 0.055)
-    }) as [number, number, number]
+    const { r, g, b } = oklchToRgb(color)
+    return [r, g, b]
   }
 
   ////////////////
@@ -283,6 +250,9 @@ export type Oklch = {
   /** opacity, 0..1 */
   alpha: number
 }
+
+/** A hex colour `fromHex()` reads:  `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`. */
+const HEX_COLOR = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 
 /** Colour values the design-system format takes as they are:  hex, or `rgb()` / `rgba()` / `oklch()` of numbers. */
 const PLAIN_COLOR = /^(#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(?:rgba?|oklch)\(\s*[-\d.%\s,/]+\))$/i
@@ -352,7 +322,7 @@ class ChannelMath {
         if (name === "calc" && args.length === 1) return args[0]!
         if (name === "min") return Math.min(...args)
         if (name === "max") return Math.max(...args)
-        if (name === "clamp" && args.length === 3) return Math.min(Math.max(args[1]!, args[0]!), args[2]!)
+        if (name === "clamp" && args.length === 3) return clamp(args[1]!, args[0]!, args[2]!)
         throw new Error(name)
       }
       if (name in scope) return scope[name]!

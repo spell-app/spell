@@ -1,3 +1,4 @@
+import { withoutAccents } from "spell-ui/util"
 import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import {
   GROUP_LIMIT,
@@ -125,12 +126,7 @@ export class SearchIndex {
 
   /** `text` folded for matching:  lower case, no accents, single spaces. */
   static fold(text: string): string {
-    return text
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/\p{M}+/gu, "")
-      .replace(/\s+/g, " ")
-      .trim()
+    return withoutAccents(text.normalize("NFKD")).toLowerCase().replace(/\s+/g, " ").trim()
   }
 
   /** `text` without anything but letters and digits:  `ui-or` ~== `uior` ~== `UI Or`. */

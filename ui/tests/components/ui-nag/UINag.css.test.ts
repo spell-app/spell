@@ -6,6 +6,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { nagVocabulary } from "spell-ui/components/ui-nag/UINag.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import nagCSS from "spell-ui/components/ui-nag/UINag.css?inline"
 import nagRaw from "spell-ui/components/ui-nag/UINag.css?raw"
@@ -66,8 +67,8 @@ describe("UINag.css examples", () => {
     expect(style.position).toBe("relative")
     expect(style.textAlign).toBe("center")
     expect(nag.getBoundingClientRect().width).toBe(nag.parentElement!.getBoundingClientRect().width)
-    expect(luminance(style.backgroundColor)).toBeLessThan(0.5)
-    expect(luminance(style.color)).toBeGreaterThan(0.8)
+    expect(Painted.luminance(style.backgroundColor)).toBeLessThan(0.2)
+    expect(Painted.luminance(style.color)).toBeGreaterThan(0.6)
     expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThan(0)
     const title = getComputedStyle(nag.querySelector(".title")!)
     expect(title.display).toBe("inline-block")
@@ -102,8 +103,8 @@ describe("UINag.css examples", () => {
     Sheets.adopt([...foundationCSS, nagCSS])
     const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
     const inverted = getComputedStyle(root.querySelector('.ui.inverted.nag[class="ui inverted nag"]')!)
-    expect(luminance(inverted.backgroundColor)).toBeGreaterThan(0.8)
-    expect(luminance(inverted.color)).toBeLessThan(0.3)
+    expect(Painted.luminance(inverted.backgroundColor)).toBeGreaterThan(0.6)
+    expect(Painted.luminance(inverted.color)).toBeLessThan(0.07)
     const probe = getComputedStyle(
       Fixture.render(`<span class="ui teal" style="background: var(--ui-color); color: var(--ui-color-on)"></span>`)
     )
@@ -122,15 +123,6 @@ describe("UINag.css examples", () => {
     expect(getComputedStyle(root.querySelector(".ui.huge.nag")!).lineHeight).toBe(`${size("huge")}px`)
   })
 })
-
-/** Relative luminance (0..1) of a computed colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
-}
 
 ////////////////
 // ## Tokens

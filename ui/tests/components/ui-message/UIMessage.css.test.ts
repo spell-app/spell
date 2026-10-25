@@ -6,6 +6,7 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell-ui/test-helpers/Sheets"
 
 import { messageVocabulary } from "spell-ui/components/ui-message/UIMessage.en"
+import { Painted } from "spell-ui/test-helpers/Painted"
 
 import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
 import messageCSS from "spell-ui/components/ui-message/UIMessage.css?inline"
@@ -183,9 +184,9 @@ describe("UIMessage.css examples", () => {
     const inverted = style('.ui.inverted.message[class="ui inverted message"]')
     expect(inverted.colorScheme).toBe("dark")
     expect(inverted.getPropertyValue("--ui-inverted").trim()).toBe("1")
-    expect(luminance(inverted.backgroundColor)).toBeLessThan(0.3)
-    expect(luminance(inverted.color)).toBeGreaterThan(0.6)
-    expect(luminance(style(".ui.red.inverted.message").backgroundColor)).toBeLessThan(0.3)
+    expect(Painted.luminance(inverted.backgroundColor)).toBeLessThan(0.07)
+    expect(Painted.luminance(inverted.color)).toBeGreaterThan(0.3)
+    expect(Painted.luminance(style(".ui.red.inverted.message").backgroundColor)).toBeLessThan(0.07)
   })
 
   it("scales by size;  medium is the default", () => {
@@ -274,15 +275,6 @@ describe("UIMessage.css in shadow roots", () => {
 /** The foundation plus `UIMessage.css`, as a `<ui-message>` adopts them. */
 function sheets(): string[] {
   return [...foundationCSS, messageCSS]
-}
-
-/** Relative luminance (0..1) of a computed `rgb()` / `oklch()` colour, via a canvas round trip. */
-function luminance(color: string): number {
-  const context = document.createElement("canvas").getContext("2d")!
-  context.fillStyle = color
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
 }
 
 ////////////////
