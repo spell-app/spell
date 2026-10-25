@@ -245,7 +245,7 @@ export class PagePatch {
 
   /**
    * The rules every runtime shares, laid under its own (`new PagePatch(rules)`):
-   * - kept:  `collapsed` and `open`, the folds and open panels the reader set
+   * - kept:  `open`, the folds and open panels the reader set (a folded section is `open="false"`)
    * - replaced whole when they change:  what draws its children itself, or holds text that isn't plain
    *   (code, a highlighted `<pre>`, an include, a script)
    * - never touched:  an open editor (Monaco's, or anything marked `data-spell-editor`)
@@ -253,7 +253,7 @@ export class PagePatch {
    *   (`keepReaderState()`)
    */
   static readonly SHARED: PatchRules = {
-    keptAttributes: ["collapsed", "open"],
+    keptAttributes: ["open"],
     replacedWhole: "pre, ui-code, ui-markdown, ui-include, script, style, template, svg",
     fixed: ".monaco-editor, [data-spell-editor]",
     prepare: (copy, live) => {
