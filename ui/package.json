@@ -462,6 +462,11 @@
       "default": "./src/*.ts"
     },
     "./package.json": "./package.json",
+    "./site/_src/SitePatch": {
+      "spell-ui-source": "./site/_src/SitePatch.ts",
+      "types": "./dist-types/site/_src/SitePatch.d.ts",
+      "default": "./site/_src/SitePatch.ts"
+    },
     "./site/_src/site.types": {
       "spell-ui-source": "./site/_src/site.types.ts",
       "types": "./dist-types/site/_src/site.types.d.ts",
