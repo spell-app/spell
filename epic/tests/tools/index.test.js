@@ -1,7 +1,23 @@
+import { spawnSync } from "node:child_process"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
 import { parseHTML } from "linkedom"
 import { describe, expect, it } from "vite-plus/test"
 
-import { END, LISTS, START, areaCards, listSection, planOf, replaceBetween, skeleton } from "spell-epic/tools/index.js"
+import {
+  END,
+  LISTS,
+  START,
+  areaCards,
+  listSection,
+  planOf,
+  replaceBetween,
+  sameList,
+  skeleton
+} from "spell-epic/tools/index.js"
+import { TEMPLATES, TOOLS } from "spell-epic/tools/pages.js"
 
 /** A described epic page (`describe()`'s shape) with `phases`, each a status. */
 function epic(name, statuses, updated = new Date().toISOString().slice(0, 10)) {
@@ -173,9 +189,7 @@ describe("the list pages", () => {
   it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header root=".."></spell-site-header>`)
-    expect(html).toContain(
-      `<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>`
-    )
+    expect(html).toContain(`<ui-breadcrumb href="../pages/index.html" target="_self">Docs</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)
@@ -232,5 +246,32 @@ describe("planOf():  an epic page's card data (epic-components P8)", () => {
 <ui-section id="phases"><ui-section data-phase="1" data-status="done" label="P1 · First Go"></ui-section></ui-section>
 <ui-list class="plan-items"><ui-item id="q1" data-status="open"></ui-item></ui-list></body></html>`)
     expect(planOf(document)).toEqual({ phases: [], updated: null, future: false, saga: null, urgent: [] })
+  })
+})
+
+// epic `epic-engine` I131:  every test run rewrote the engine's tracked Templates page, raw
+describe("the engine's Templates page (epic-engine I131)", () => {
+  it("sameList():  a body with character references matches the page oxfmt wrote them out in", () => {
+    const body = "<ui-card>Spell UI&#39;s page &amp; the set&#39;s</ui-card>"
+    const page = `<main>${START}\n  <ui-card\n    >Spell UI's page &amp; the set's</ui-card\n  >\n${END}</main>`
+    expect(sameList(page, body)).toBe(true)
+    expect(sameList(page, body.replace("page", "pages"))).toBe(false)
+  })
+
+  it("a run on a made-up checkout (PlanDocCommands' scratch root) leaves its bytes EXACTLY as they were", () => {
+    const file = join(TEMPLATES, "index.html")
+    const before = readFileSync(file)
+    const root = mkdtempSync(join(tmpdir(), "index-made-up-"))
+    try {
+      mkdirSync(join(root, "epics", "x"), { recursive: true })
+      // as `PlanDocFiles.reindex()` runs it:  the engine's own tools, told the checkout
+      spawnSync(process.execPath, [join(TOOLS, "index.js")], {
+        encoding: "utf8",
+        env: { ...process.env, EPIC_CHECKOUT: root }
+      })
+      expect(readFileSync(file).equals(before)).toBe(true)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
