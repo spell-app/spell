@@ -4861,6 +4861,271 @@
       ]
     },
     {
+      "name": "ui-cell",
+      "description": {
+        "kind": "markdown",
+        "value": "A cell holds one value of a table row;  a header cell names its column or row.\n\nAlso known as:  table cell, td, th, header cell.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "header",
+          "description": {
+            "kind": "markdown",
+            "value": "A header cell:  in a `header` row it names its column;  in a body row, its row (the first cell, say).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "span",
+          "description": {
+            "kind": "markdown",
+            "value": "How many columns it covers;  default 1.  Cells never span rows.\n\nTakes:  number"
+          }
+        },
+        {
+          "name": "align",
+          "description": {
+            "kind": "markdown",
+            "value": "Aligns its text:  `left`, `center`, `right` or `justified`.\n\nTakes:  `left` · `center` · `right` · `justified`"
+          },
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "center"
+            },
+            {
+              "name": "right"
+            },
+            {
+              "name": "justified"
+            }
+          ]
+        },
+        {
+          "name": "vertical-align",
+          "description": {
+            "kind": "markdown",
+            "value": "Aligns its content to the `top`, `middle` or `bottom` of the row.\n\nTakes:  `top` · `middle` · `bottom`"
+          },
+          "values": [
+            {
+              "name": "top"
+            },
+            {
+              "name": "middle"
+            },
+            {
+              "name": "bottom"
+            }
+          ]
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "href",
+          "description": {
+            "kind": "markdown",
+            "value": "An old name:  write `link`.  It still works until every page is rewritten."
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-checkbox",
       "description": {
         "kind": "markdown",
@@ -28362,9 +28627,23 @@
       "name": "ui-row",
       "description": {
         "kind": "markdown",
-        "value": "A row is a horizontal grouping of columns.\n\nAlso known as:  grid row.\n\n**Slots:**  default"
+        "value": "A row is a horizontal grouping of columns;  in a table, of cells.\n\nAlso known as:  grid row, table row, tr.\n\n**Slots:**  default"
       },
       "attributes": [
+        {
+          "name": "header",
+          "description": {
+            "kind": "markdown",
+            "value": "In a table:  the header row, its cells the column headers.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "footer",
+          "description": {
+            "kind": "markdown",
+            "value": "In a table:  a footer row, under the body (totals, notes).\n\nTakes:  flag (present / absent)"
+          }
+        },
         {
           "name": "color",
           "description": {
@@ -35067,7 +35346,7 @@
       "name": "ui-table",
       "description": {
         "kind": "markdown",
-        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default\n\n**Events:**  `ui-sorting`"
+        "value": "A table displays a collection of data grouped into rows.\n\nAlso known as:  data table, data grid, grid, spreadsheet.\n\n**Slots:**  default, `caption`\n\n**Events:**  `ui-sorting`"
       },
       "attributes": [
         {
@@ -35558,6 +35837,13 @@
           "description": {
             "kind": "markdown",
             "value": "Slotted tables:  reorder the `tbody` rows by the sorted column's cell text on `ui-sorting` (numeric-aware).  Off, the app sorts its own rows.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "caption",
+          "description": {
+            "kind": "markdown",
+            "value": "The table's title, drawn above it and naming it for screen readers.  The `caption` slot is its rich version;  a native table's own `<caption>` wins.\n\nTakes:  text"
           }
         },
         {

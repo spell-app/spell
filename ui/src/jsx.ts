@@ -4194,6 +4194,218 @@ export interface UICardsAttributes {
 export interface UICardsJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UICardsAttributes>, UICardsAttributes {}
 
+/** `<ui-cell>`'s own attributes, from its vocabulary. */
+export interface UICellAttributes {
+  /**
+   * A header cell:  in a `header` row it names its column;  in a body row, its row (the first cell, say).
+   * - takes:  flag (present / absent)
+   */
+  header?: boolean | ""
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
+  "prop:header"?: boolean | ""
+  /**
+   * How many columns it covers;  default 1.  Cells never span rows.
+   * - takes:  number
+   */
+  span?: number | `${number}`
+  /**
+   * `span`, as the DOM element's property.
+   * @deprecated write `span` -- `prop:` stays only for compiled spell
+   */
+  "prop:span"?: number | `${number}`
+  /**
+   * Aligns its text:  `left`, `center`, `right` or `justified`.
+   * - takes:  `left` · `center` · `right` · `justified`
+   */
+  align?: "left" | "center" | "right" | "justified"
+  /**
+   * `align`, as the DOM element's property.
+   * @deprecated write `align` -- `prop:` stays only for compiled spell
+   */
+  "prop:align"?: "left" | "center" | "right" | "justified"
+  /**
+   * Aligns its content to the `top`, `middle` or `bottom` of the row.
+   * - takes:  `top` · `middle` · `bottom`
+   */
+  "vertical-align"?: "top" | "middle" | "bottom"
+  /**
+   * `vertical-align`, as the DOM element's property.
+   * @deprecated write `vertical-align` -- `prop:` stays only for compiled spell
+   */
+  "prop:verticalAlign"?: "top" | "middle" | "bottom"
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   */
+  href?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-cell>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UICellJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UICellAttributes>, UICellAttributes {}
+
 /** `<ui-checkbox>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UICheckboxEventMap {
   /**
@@ -24626,6 +24838,26 @@ export interface UIRootJSXAttributes
 /** `<ui-row>`'s own attributes, from its vocabulary. */
 export interface UIRowAttributes {
   /**
+   * In a table:  the header row, its cells the column headers.
+   * - takes:  flag (present / absent)
+   */
+  header?: boolean | ""
+  /**
+   * `header`, as the DOM element's property.
+   * @deprecated write `header` -- `prop:` stays only for compiled spell
+   */
+  "prop:header"?: boolean | ""
+  /**
+   * In a table:  a footer row, under the body (totals, notes).
+   * - takes:  flag (present / absent)
+   */
+  footer?: boolean | ""
+  /**
+   * `footer`, as the DOM element's property.
+   * @deprecated write `footer` -- `prop:` stays only for compiled spell
+   */
+  "prop:footer"?: boolean | ""
+  /**
    * Fills the row with a hue, contrast text on top.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
@@ -30705,6 +30937,16 @@ export interface UITableAttributes {
    */
   "prop:columnDefs"?: unknown
   /**
+   * The table's title, drawn above it and naming it for screen readers.  The `caption` slot is its rich version;  a native table's own `<caption>` wins.
+   * - takes:  text
+   */
+  caption?: string
+  /**
+   * `caption`, as the DOM element's property.
+   * @deprecated write `caption` -- `prop:` stays only for compiled spell
+   */
+  "prop:caption"?: string
+  /**
    * Data mode:  `Record<string, unknown>[]`;  with no slotted `<table>`, the element renders one (text only) into its light DOM.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
@@ -34321,6 +34563,13 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-cards": UICardsJSXAttributes
       /**
+       * `<ui-cell>`:  A cell holds one value of a table row;  a header cell names its column or row.
+       * - also known as:  table cell, td, th, header cell
+       * - slots:
+       *   - default:  The cell's content:  text, or any element.
+       */
+      "ui-cell": UICellJSXAttributes
+      /**
        * `<ui-checkbox>`:  A checkbox lets people choose a value from a small set of options, often on or off.
        * - also known as:  check box, toggle, switch, tick box
        * - slots:
@@ -34821,10 +35070,10 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-root": UIRootJSXAttributes
       /**
-       * `<ui-row>`:  A row is a horizontal grouping of columns.
-       * - also known as:  grid row
+       * `<ui-row>`:  A row is a horizontal grouping of columns;  in a table, of cells.
+       * - also known as:  grid row, table row, tr
        * - slots:
-       *   - default:  `<ui-column>`s.
+       *   - default:  `<ui-column>`s;  in a table, `<ui-cell>`s.
        */
       "ui-row": UIRowJSXAttributes
       /**
@@ -34963,7 +35212,8 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-table>`:  A table displays a collection of data grouped into rows.
        * - also known as:  data table, data grid, grid, spreadsheet
        * - slots:
-       *   - default:  One native `<table>`.
+       *   - default:  One native `<table>`, or `<ui-row>`s of `<ui-cell>`s.
+       *   - `caption`:  The rich version of `caption`:  links, emphasis, an icon.
        * - events:  `ui-sorting`
        */
       "ui-table": UITableJSXAttributes
@@ -35126,6 +35376,7 @@ declare global {
     "ui-calendar": UIHTMLElement<UICalendarEventMap>
     "ui-card": HTMLElement
     "ui-cards": HTMLElement
+    "ui-cell": HTMLElement
     "ui-checkbox": UIHTMLElement<UICheckboxEventMap>
     "ui-code": UIHTMLElement<UICodeEventMap>
     "ui-column": HTMLElement

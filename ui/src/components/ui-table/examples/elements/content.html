@@ -1,6 +1,35 @@
 <!-- `src/components/ui-table/examples/content.html` as element markup. -->
 <div class="ui-stack">
   <section>
+    <h4>Rows and cells, with no native table</h4>
+    <ui-table celled appearance="striped" sortable client-sort caption="Team members">
+      <ui-row header>
+        <ui-cell header>Name</ui-cell>
+        <ui-cell header>Joined</ui-cell>
+        <ui-cell header>Projects</ui-cell>
+      </ui-row>
+      <ui-row>
+        <ui-cell header>John Lilki</ui-cell>
+        <ui-cell>September 14, 2013</ui-cell>
+        <ui-cell align="right">12</ui-cell>
+      </ui-row>
+      <ui-row>
+        <ui-cell header>Jamie Harington</ui-cell>
+        <ui-cell>January 11, 2014</ui-cell>
+        <ui-cell align="right">7</ui-cell>
+      </ui-row>
+      <ui-row>
+        <ui-cell header>Jill Lewis</ui-cell>
+        <ui-cell>May 11, 2014</ui-cell>
+        <ui-cell align="right">21</ui-cell>
+      </ui-row>
+      <ui-row footer>
+        <ui-cell span="2">3 members</ui-cell>
+        <ui-cell align="right">40</ui-cell>
+      </ui-row>
+    </ui-table>
+  </section>
+  <section>
     <h4>Caption, row headers, full-width header and footer</h4>
     <ui-table definition padding="compact" celled>
       <table>

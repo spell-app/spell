@@ -4222,6 +4222,223 @@
       "href": "ui-card.html#ui-cards"
     },
     {
+      "tag": "ui-cell",
+      "name": "Cell",
+      "folder": "ui-table",
+      "topics": [
+        "tables",
+        "collections"
+      ],
+      "aka": [
+        "table cell",
+        "td",
+        "th",
+        "header cell"
+      ],
+      "description": "A cell holds one value of a table row;  a header cell names its column or row.",
+      "noun": "cell",
+      "attributes": [
+        {
+          "name": "header",
+          "kind": "boolean",
+          "description": "A header cell:  in a `header` row it names its column;  in a body row, its row (the first cell, say)."
+        },
+        {
+          "name": "span",
+          "kind": "number",
+          "description": "How many columns it covers;  default 1.  Cells never span rows."
+        },
+        {
+          "name": "align",
+          "kind": "textAlign",
+          "values": [
+            "left",
+            "center",
+            "right",
+            "justified"
+          ],
+          "valueSet": "alignments",
+          "description": "Aligns its text:  `left`, `center`, `right` or `justified`."
+        },
+        {
+          "name": "vertical-align",
+          "kind": "verticalAlign",
+          "values": [
+            "top",
+            "middle",
+            "bottom"
+          ],
+          "valueSet": "verticalAlignments",
+          "description": "Aligns its content to the `top`, `middle` or `bottom` of the row."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "replaces": [
+            {
+              "name": "href"
+            }
+          ],
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The cell's content:  text, or any element."
+        }
+      ],
+      "events": [],
+      "parts": [],
+      "states": [
+        {
+          "name": "header",
+          "description": "Set while it's a header cell (`header`)."
+        },
+        {
+          "name": "in-table",
+          "description": "Set while it's in a `<ui-table>`."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-table",
+      "main": false,
+      "page": false,
+      "href": "ui-table.html#ui-cell"
+    },
+    {
       "tag": "ui-checkbox",
       "name": "Checkbox",
       "folder": "ui-checkbox",
@@ -24145,11 +24362,23 @@
         "collections"
       ],
       "aka": [
-        "grid row"
+        "grid row",
+        "table row",
+        "tr"
       ],
-      "description": "A row is a horizontal grouping of columns.",
+      "description": "A row is a horizontal grouping of columns;  in a table, of cells.",
       "noun": "row",
       "attributes": [
+        {
+          "name": "header",
+          "kind": "boolean",
+          "description": "In a table:  the header row, its cells the column headers."
+        },
+        {
+          "name": "footer",
+          "kind": "boolean",
+          "description": "In a table:  a footer row, under the body (totals, notes)."
+        },
         {
           "name": "color",
           "kind": "color",
@@ -24404,7 +24633,7 @@
       "slots": [
         {
           "name": "",
-          "description": "`<ui-column>`s."
+          "description": "`<ui-column>`s;  in a table, `<ui-cell>`s."
         }
       ],
       "events": [],
@@ -24415,6 +24644,18 @@
         }
       ],
       "states": [
+        {
+          "name": "header",
+          "description": "Set while it's a table's header row (`header`)."
+        },
+        {
+          "name": "footer",
+          "description": "Set while it's a table's footer row (`footer`)."
+        },
+        {
+          "name": "in-table",
+          "description": "Set while it's a row of a `<ui-table>`."
+        },
         {
           "name": "disabled",
           "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
@@ -30000,6 +30241,11 @@
           "description": "Data mode:  `TableColumn[]` (`key`, `header`, `textAlign`, `sortable`, `width`);  default the first row's keys."
         },
         {
+          "name": "caption",
+          "kind": "string",
+          "description": "The table's title, drawn above it and naming it for screen readers.  The `caption` slot is its rich version;  a native table's own `<caption>` wins."
+        },
+        {
           "name": "rows",
           "kind": "json",
           "reflect": false,
@@ -30115,7 +30361,11 @@
       "slots": [
         {
           "name": "",
-          "description": "One native `<table>`."
+          "description": "One native `<table>`, or `<ui-row>`s of `<ui-cell>`s."
+        },
+        {
+          "name": "caption",
+          "description": "The rich version of `caption`:  links, emphasis, an icon."
         }
       ],
       "events": [
@@ -30128,11 +30378,23 @@
       ],
       "parts": [
         {
+          "name": "caption",
+          "description": "The caption above the table (`caption`)."
+        },
+        {
           "name": "scroller",
           "description": "Box around the slotted table;  scrolls (a focusable, named region) with `scrolling` / `overflowing`, and sideways, its height uncapped, while a table that doesn't stack is wider than it."
         }
       ],
       "states": [
+        {
+          "name": "rows",
+          "description": "Set while it holds `<ui-row>`s rather than a native table:  a CSS grid, its rows subgrids."
+        },
+        {
+          "name": "captioned",
+          "description": "Set while it draws its own caption (`caption`, or the `caption` slot)."
+        },
         {
           "name": "attached",
           "description": "Set while `attach` is set (any edge):  the host drops the outer margin it carries."
@@ -44461,7 +44723,8 @@
       "status": "done",
       "docs": false,
       "tags": [
-        "ui-table"
+        "ui-table",
+        "ui-cell"
       ],
       "tokens": [
         {

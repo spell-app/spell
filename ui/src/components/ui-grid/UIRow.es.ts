@@ -10,5 +10,6 @@ export const rowEs = {
   lang: "es",
   tag: "ui-row",
   name: "fila",
-  aka: ["fila", "fila de cuadrícula"]
+  aka: ["fila", "fila de cuadrícula", "fila de tabla"],
+  attributes: { header: "encabezado", footer: "pie" }
 } as const satisfies E.TagDictionary
