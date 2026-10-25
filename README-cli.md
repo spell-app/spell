@@ -93,6 +93,7 @@ spell lint @spell/examples
 @spell/examples holds several projects -- name one, or pass --all:
   @spell/examples/bill-splitter
   @spell/examples/calculator
+  @spell/examples/Counter
   @spell/examples/fizzbuzz
   @spell/examples/flash-cards
   @spell/examples/habit-tracker
@@ -115,6 +116,7 @@ spell lint --all @spell/examples
 ```text
 ✓ @spell/examples/bill-splitter
 ✓ @spell/examples/calculator
+✓ @spell/examples/Counter
 ✓ @spell/examples/fizzbuzz
 ✓ @spell/examples/flash-cards
 ✓ @spell/examples/habit-tracker
