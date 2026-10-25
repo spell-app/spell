@@ -3,7 +3,7 @@ import { readFileSync, statSync, watch, type FSWatcher } from "node:fs"
 import { join, relative, resolve, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
-import type { UpgradeHandler } from "spell/server"
+import type { PageSource, UpgradeHandler } from "spell/server"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
 
@@ -15,6 +15,9 @@ import { acceptWebSocket, pingFrame, textFrame } from "./webSocket"
  *   - a stylesheet it uses:  swaps it
  *   - a script it loaded, or one beside it:  hot-reloads (`liveAction()`)
  * - each message is JSON `{ event, data }`, e.g. `{ event: "change", data: { path: "/guides/x.html" } }`
+ *   - a PAGE's change carries the page itself, as a navigation to it gets it, and its `ETag`:
+ *     `{ path, html, etag }` (`pages`, `PAGE_LIMIT`;  epic `epic-engine` P40), so the page that shows it patches
+ *     itself without fetching it
  * - a page's socket opens with `{ event: "hello", data: { run } }`:  this server's `run`
  *   - a page served by an EARLIER run (the server restarted:  a merge changed its code) reloads,
  *     so it gets the new `/api/server/live.js` and write token
@@ -54,6 +57,12 @@ export class LiveReload {
 
   /** keeps sockets alive */
   private beat?: NodeJS.Timeout
+
+  /**
+   * the page at a URL path, as it's served (`StaticHandler.render()`):  sent with its change;
+   * `undefined`, or none set:  the change goes alone, and the page fetches itself
+   */
+  pages?: (path: string) => Promise<PageSource | undefined>
 
   constructor({ root, debounce = 250, heartbeat = 30_000 }: LiveReloadProps) {
     this.root = resolve(root)
@@ -127,7 +136,7 @@ export class LiveReload {
       path,
       setTimeout(() => {
         this.timers.delete(path)
-        if (!this.sameAsReported(file, path)) this.send("change", { path })
+        if (!this.sameAsReported(file, path)) void this.report(path)
       }, this.debounce)
     )
   }
@@ -151,6 +160,18 @@ export class LiveReload {
     else this.reported.set(key, hash)
     return same
   }
+
+  /**
+   * Send `path`'s change, with the page when it's one (`pages`).
+   * - NEVER throws:  a page that can't be rendered goes as a plain change
+   */
+  private async report(path: string): Promise<void> {
+    const page = /\.html?$/i.test(path) ? await this.pages?.(path).catch(() => undefined) : undefined
+    this.send("change", page ? { path, html: page.html, etag: page.etag } : { path })
+  }
+
+  /** the largest page sent with its change (`report()`), in bytes:  a bigger one is fetched by the page */
+  static readonly PAGE_LIMIT = 4 * 1024 * 1024
 
   /** the largest file whose contents are compared before a report (`sameAsReported()`), in bytes */
   static readonly HASH_LIMIT = 32 * 1024 * 1024

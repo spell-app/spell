@@ -162,3 +162,23 @@ describe("StaticHandler layers", () => {
     rmSync(dir, { recursive: true, force: true })
   })
 })
+
+// epic `epic-engine` P40:  what live reload sends a page with its change
+describe("StaticHandler.render()", () => {
+  it("renders a page as a navigation gets it:  through the html hooks, with its ETag", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "srv-render-"))
+    writeFileSync(join(dir, "page.html"), "<p>page</p>")
+    writeFileSync(join(dir, "data.json"), "{}")
+    const files = new SRV.StaticHandler({
+      mounts: [{ prefix: "/", dir }],
+      html: [(html, served) => `${html}<!-- ${served.path} -->`]
+    })
+    const page = await files.render("/page.html")
+    expect(page?.html).toBe("<p>page</p><!-- /page.html -->")
+    expect(page?.etag).toMatch(/^"[0-9a-f]+-[0-9a-f]+"$/)
+    expect(await files.render("/data.json")).toBeUndefined()
+    expect(await files.render("/missing.html")).toBeUndefined()
+    expect(await files.render("/page.html", 4)).toBeUndefined()
+    rmSync(dir, { recursive: true, force: true })
+  })
+})

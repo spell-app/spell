@@ -72,13 +72,17 @@ export type PageSource = { html: string; etag?: string }
 
 /**
  * `detail` of `spell-server:reloading`, the event `liveClient()` fires on `window` when the page's OWN file changed.
- * - `html` / `etag`:  the new version, already fetched (`readPage()`)
+ * - `html` / `etag`:  the new version, as served:  sent by the server with the change (`LiveReload`), else fetched
+ *   (`readPage()`)
+ * - `own`:  it's the version the page's own save just wrote (`saveFile()` / `editPage()` with `shown`):
+ *   the page shows it already, so a patcher only takes it as its new baseline
  * - `reload()`:  reload, keeping the scroll position:  for a page that took the change, then can't patch after all
  * - the event is cancelable:
- *   `preventDefault()` takes it, and the page updates itself (e.g. `spell-doc-runtime.js` `wireLiveUpdate()`)
- * - nobody took it:  the client reloads
+ *   `preventDefault()` takes it, and the page updates itself (the kit's `PagePatch`, run by spell-epic's docs runtime
+ *   and Spell UI's site)
+ * - nobody took it:  the client reloads, unless it's `own`
  */
-export type PageChange = { path: string; html: string; etag?: string; reload: () => void }
+export type PageChange = { path: string; html: string; etag?: string; own?: boolean; reload: () => void }
 
 /**
  * `detail` of `spell-server:changed`, the event `liveClient()` fires on `window` when ANOTHER file changed:
@@ -103,9 +107,11 @@ export type ScriptsChange = { paths: string[] }
  * One save of a whole file (`PUT /api/pages`), or of one element of a page (`fragment`:  its `id`, `PATCH`).
  * - `path`:  URL path of the file, e.g. `/guides/notes.md`
  * - `etag`:  the version it was edited from (the `ETag` it was fetched with);  REQUIRED by the server
+ * - `shown`:  the page shows this version already (a notebook's cell, saved as it's typed in):
+ *   its change comes back marked `own` (`PageChange`), and isn't patched in again
  * - what `<ui-include>` / `<ui-code>` / `<ui-markdown>` save through (`UI.sources.saver`, set by the docs runtime)
  */
-export type FileSave = { path: string; text: string; etag?: string; fragment?: string }
+export type FileSave = { path: string; text: string; etag?: string; fragment?: string; shown?: boolean }
 
 /**
  * One edit of the page's own file, through `PATCH /api/pages`.
@@ -114,8 +120,9 @@ export type FileSave = { path: string; text: string; etag?: string; fragment?: s
  * - `inner`:  replace its content only
  * - `parent`:  a tag name:  replace `#id`'s nearest such ancestor instead (a section, through its heading)
  * - `etag`:  the version edited (default:  the page's, as loaded)
+ * - `shown`:  the page shows the edit already:  as `FileSave`'s
  */
-export type PageEdit = { id: string; html: string; inner?: boolean; parent?: string; etag?: string }
+export type PageEdit = { id: string; html: string; inner?: boolean; parent?: string; etag?: string; shown?: boolean }
 
 /** What an edit answered:  `ok`, or the status and error;  `etag` is the file's new one. */
 export type PageEditResult = { ok: boolean; status: number; etag?: string; error?: string }
@@ -123,8 +130,10 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
 /**
  * Start live reload in this page, and add `SPELL_SERVER.editPage()`.
  * - the page's own file changed:
- *   fetches the new version and offers it to the page (`spell-server:reloading`, `PageChange`)
+ *   offers the new version to the page (`spell-server:reloading`, `PageChange`):  as the server sent it with the
+ *   change, else fetched
  *   - a page that takes it updates itself in place, else it reloads
+ *   - the version the page's own save wrote (its `ETag`, `shown`) is `own`:  never reloaded for
  * - a stylesheet the page uses (linked, or `@import`ed by one it links) changed:  swapped in place, no reload
  * - a script the page loaded, or one beside it, changed (`liveAction()`):  HOT RELOAD, so the page runs the new code
  *   - e.g. a merge rebuilt `spell-ui.js` and its lazy chunks, or `epics.pack.js`
@@ -201,6 +210,8 @@ export function liveClient(): void {
   let pill: HTMLButtonElement | undefined
   // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
   const changedScripts = new Set<string>()
+  // the `ETag`s the page's own saves got back, of versions it shows already (`shown`):  their changes are `own`
+  const ownEtags = new Set<string>()
   // the server restarted since:  the page reloads whatever it takes, for the new client and write token
   let restarted = false
   // new code the page couldn't take waits for a reload:  it comes once the page is out of sight (`reloadUnseen()`)
@@ -245,7 +256,7 @@ export function liveClient(): void {
   if (!liveParent()) connect()
 
   let etag = config.etag
-  config.editPage = async ({ id, html, inner, parent, etag: version = etag }) => {
+  config.editPage = async ({ id, html, inner, parent, etag: version = etag, shown }) => {
     const url = `${config.edit ?? "/api/pages"}?path=${encodeURIComponent(config.file)}`
     const answer = await fetch(url, {
       method: "PATCH",
@@ -258,10 +269,11 @@ export function liveClient(): void {
     })
     const body = (await answer.json().catch(() => ({}))) as { etag?: string; error?: string }
     if (answer.ok) etag = body.etag
+    if (answer.ok && shown && body.etag) ownEtags.add(body.etag)
     return { ok: answer.ok, status: answer.status, etag: body.etag, error: body.error }
   }
 
-  config.saveFile = async ({ path, text, etag: version, fragment }) => {
+  config.saveFile = async ({ path, text, etag: version, fragment, shown }) => {
     const url = `${config.edit ?? "/api/pages"}?path=${encodeURIComponent(path)}`
     const answer = await fetch(url, {
       method: fragment ? "PATCH" : "PUT",
@@ -274,20 +286,25 @@ export function liveClient(): void {
     })
     const body = (await answer.json().catch(() => ({}))) as { etag?: string; error?: string }
     if (answer.ok && path === config.file) etag = body.etag
+    if (answer.ok && shown && body.etag && path === config.file) ownEtags.add(body.etag)
     return { ok: answer.ok, status: answer.status, etag: body.etag, error: body.error }
   }
 
-  /** A file changed:  hand it to our same-origin frames first (a reload here drops them anyway), then act on it. */
-  function onChange(path: string) {
+  /**
+   * A file changed:  hand it to our same-origin frames first (a reload here drops them anyway), then act on it.
+   * - `page`:  the page at `path` as served, when the server sent it with the change
+   */
+  function onChange(path: string, page?: PageSource) {
     for (const frame of document.querySelectorAll("iframe")) {
       try {
-        ;(frame.contentWindow as LiveWindow | null)?.__spellLiveChange?.(path)
+        ;(frame.contentWindow as LiveWindow | null)?.__spellLiveChange?.(path, page)
       } catch {
         // cross-origin:  it has its own connection
       }
     }
-    const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded() })
-    if (action === "page") updating = updating.then(updatePage).catch(reloadUnseen)
+    const address = servedPath(location.pathname, location.href, config!.worktreesPath)
+    const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded(), address })
+    if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadUnseen)
     else if (action === "style") swapStyles(path)
     else if (action === "script") {
       changedScripts.add(path)
@@ -313,8 +330,12 @@ export function liveClient(): void {
     let opened = false
     socket.addEventListener("open", () => (opened = true))
     socket.addEventListener("message", (message: MessageEvent<string>) => {
-      const { event, data } = JSON.parse(message.data) as { event: string; data: { path?: string; run?: string } }
-      if (event === "change" && data.path) onChange(data.path)
+      const { event, data } = JSON.parse(message.data) as {
+        event: string
+        data: { path?: string; run?: string; html?: string; etag?: string }
+      }
+      if (event === "change" && data.path)
+        onChange(data.path, typeof data.html === "string" ? { html: data.html, etag: data.etag } : undefined)
       // a server run other than the one that served the page:  it restarted, maybe on new code
       if (event === "hello" && config!.run && data.run && data.run !== config!.run) {
         restarted = true
@@ -381,15 +402,19 @@ export function liveClient(): void {
   }
 
   /**
-   * The page's file changed:  fetch it and offer it to the page (`spell-server:reloading`);  reload unless taken.
-   * - taken:  `etag` (and `SPELL_SERVER.etag`) move to the new version, so the next edit isn't refused as stale
+   * The page's file changed:  offer the new version to the page (`spell-server:reloading`);  reload unless taken.
+   * - `pushed`:  the version the server sent with the change;  none:  fetched
+   * - the version the page's own save wrote (`ownEtags`) is `own`:  offered, never reloaded for
+   * - taken (or `own`):  `etag` (and `SPELL_SERVER.etag`) move to the new version, so the next edit isn't refused as
+   *   stale
    */
-  async function updatePage() {
+  async function updatePage(pushed?: PageSource) {
     const server = config as ServerConfig
-    const page = await readPage()
-    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, reload }
+    const page = pushed ?? (await readPage())
+    const own = !!page.etag && ownEtags.delete(page.etag)
+    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload }
     const change = new CustomEvent("spell-server:reloading", { cancelable: true, detail })
-    if (dispatchEvent(change)) return reload()
+    if (dispatchEvent(change) && !own) return reload()
     etag = page.etag
     server.etag = page.etag
   }
@@ -980,7 +1005,10 @@ export type KeyPlace = { apple: boolean; field?: "text" | "rich" }
 
 /**
  * What a changed file means to a page (`liveClient()` `onChange()`):
- * - `"page"`:  the page's own file (`file`)
+ * - `"page"`:  the page's own file (`file`), or the file at its own address (`address`, a folder's as its
+ *   `index.html`)
+ *   - why the address:  a component set's page is reported where it's served (`/components/ui/ui-button.html`),
+ *     while its `file` is its path in the checkout (`/spell-ui/docs/ui-button.html`;  epic `epic-engine` P40)
  * - `"style"`:  a stylesheet:  swapped in place, if the page uses it
  * - `"script"`:  a script the page loaded (`scripts`), or one in the same folder as one it loaded
  *   (a rebuilt bundle's lazy chunks get new names):  HOT RELOAD
@@ -990,8 +1018,11 @@ export type KeyPlace = { apple: boolean; field?: "text" | "rich" }
  * - `path` and `scripts` are served paths (`servedPath()`)
  * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
  */
-export function liveAction(path: string, { file, scripts }: { file: string; scripts: string[] }): LiveAction {
-  if (path === file) return "page"
+export function liveAction(
+  path: string,
+  { file, scripts, address }: { file: string; scripts: string[]; address?: string }
+): LiveAction {
+  if (path === file || (address && path === (address.endsWith("/") ? `${address}index.html` : address))) return "page"
   if (/\.css$/.test(path)) return "style"
   if (!/\.m?js$/.test(path)) return "file"
   for (const script of scripts) {
@@ -1082,7 +1113,7 @@ export type ReloadGate = { request: () => void; settle: () => void }
 type LiveWindow = Window & {
   SPELL_SERVER?: ServerConfig
   __spellLive?: boolean
-  __spellLiveChange?: (path: string) => void
+  __spellLiveChange?: (path: string, page?: PageSource) => void
 }
 
 /**

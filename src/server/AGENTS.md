@@ -61,8 +61,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins).
     - NEVER an `EventSource`, or any other request held open:
       each takes one of Chrome's 6 connections per host, and every VS Code window shares them.
+    - A PAGE's change comes WITH the page, as a navigation gets it (`StaticHandler.render()`), and its `ETag`
+      (epic `epic-engine` P40):  `{ event: "change", data: { path, html, etag } }`, so the page needn't fetch it.
+      - the live client hands it on as `spell-server:reloading` (`PageChange`), fetching it only when it came alone
+        (a page over `LiveReload.PAGE_LIMIT`, 4 MB, or one at no address the server serves, such as a worktree's
+        file under the main server's `../` path)
+      - the version the page's OWN save wrote (`saveFile()` / `editPage()` with `shown`, by the `ETag` it got
+        back) comes as `own`:  a runtime takes it as its baseline, never patches it in again, and it never reloads
     - HOT RELOAD (epic `epic-workflow` P24):  what a changed file means to a page is `liveAction()`:
-      - its own file:  patched in place (the docs runtime), else reloaded
+      - its own file:  patched in place (the kit's `PagePatch`, run by the docs runtime and Spell UI's site), else
+        reloaded
+        - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
+          (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Epic Docs and Review):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
@@ -259,6 +269,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `spell/server/site/...` -- browser code:
+    - the PAGE PATCHER, `PagePatch` (epic `epic-engine` P40):  the ONE way an edited page shows in place, for every
+      page runtime (spell-epic's docs runtime, Spell UI's site), each with its rules over one shared set
+      - a planner over ANY keyed tree (`PatchTree`:  the DOM is one;  a Spell notebook's chunks another), its steps a
+        list (`PatchStep`:  text, attribute, replace, remove, insert, move), their nodes named by place
+        (`#p-x/section[2]/p[3]/text()[1]`);  a runner that applies them to the live DOM
+      - plain DOM, no imports:  any page's bundle takes it;  its class docstring has the rules
     - the site header every page shows
       - its TABS are data (`SiteTab`, epic `repo-split` I4):  it names no site's parts
         - served:  the settings' `"siteTabs"`, in the header's order, told every page as `SPELL_SERVER.siteTabs`

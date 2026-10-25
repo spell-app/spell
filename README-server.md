@@ -1003,7 +1003,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [Guard.ts](src/server/Guard.ts), [FileLock.ts](src/server/FileLock.ts), [FileOperations.ts](src/server/FileOperations.ts), [PidFile.ts](src/server/PidFile.ts) | safety, locks, writes, the pid file |
 | [ports.ts](src/server/ports.ts), [open.ts](src/server/open.ts), [proxy.ts](src/server/proxy.ts), [checkout.ts](src/server/checkout.ts), [mainServer.ts](src/server/mainServer.ts), [untilInterrupted.ts](src/server/untilInterrupted.ts) | ports, openers, proxies, checkouts |
 | [page/](src/server/page/) | the page server:  `PageServer`, `PageEditor`, `BundleBuild`, its settings (`pageServerSettings()`, `kitRootOf()`), its command line, `prune` |
-| [site/](src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the favicon, the logo |
+| [site/](src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the page patcher (`PagePatch`:  an edited page patched in place), the favicon, the logo |
 | [test/](src/server/test/) | the test helpers |
 | [scripts/favicon.ts](scripts/favicon.ts) | `yarn favicon` |
 | [runs/](src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](src/server/runs/runs.types.ts)) |
@@ -1018,7 +1018,8 @@ Tests (node), at the same paths under [tests/server/](tests/server/):
 - `checkout`, `mainServer`, `ports`, `proxy`, `safePath`, `webSocket`, `liveClient`
 - `runs/CommandRun`
 - `page/PageServer`, `page/BundleBuild`, `page/settings`, `page/prune`
-- `site/SiteHeader`, `site/site.types`, `site/siteTabs`
+- `site/SiteHeader`, `site/site.types`, `site/siteTabs`, `site/PagePatch` (its planner;  its runner on a served page:
+  `site/PagePatch.browser`)
 - and the page-writing steps':  `Bundle`, `DataFile`, `Linker`, `format`
 
 </details>
