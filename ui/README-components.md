@@ -202,7 +202,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-65 families, 107 tags;  3 families in progress.
+66 families, 108 tags;  3 families in progress.
 
 ### Elements
 
@@ -303,6 +303,7 @@ Elements with no Fomantic counterpart.
 
 | Picture | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- | --- |
+|  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 | <img src="docs/images/components/ui-markdown.png" alt="Markdown, its first example" width="131" height="96"> | [Markdown](docs/ui-markdown.html) | `<ui-markdown>` | Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. | markdown, md, gfm, readme |
@@ -316,12 +317,12 @@ Elements with no Fomantic counterpart.
 
 | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- |
-| Docs api | `<ui-docs-api>` | An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn. | api reference, api table, props table, properties table |
+| Docs api | `<ui-docs-api>` | An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data;  for a function component, its props and where it's drawn;  for a family, its tags. | api reference, api table, props table, properties table |
 | Docs example | `<ui-docs-example>` | An example shows its own markup live, under a header and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
-| Docs table of contents | `<ui-docs-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll. | table of contents, on this page, page index, scrollspy |
+| Docs table of contents | `<ui-docs-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the reader's folds are kept. | table of contents, on this page, page index, scrollspy |
 | Docs themes | `<ui-docs-themes>` | Theme controls switch the page between light and dark, and pick its theme, and remember both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |
 
