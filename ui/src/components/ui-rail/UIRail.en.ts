@@ -48,7 +48,7 @@ export const railVocabulary = {
       values: ["both"],
       classes: { both: "attached" },
       replaces: [{ from: "attached", value: "both" }],
-      description: "`both`:  flush against its container, no gap.  Its old name is `attached`."
+      description: "`both`:  flush against its container, no gap.  Its old name was `attached`."
     },
     {
       name: "close",

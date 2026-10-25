@@ -85,7 +85,7 @@ export const columnVocabulary = {
       values: ["left", "right"],
       classes: { left: "left attached", right: "right attached" },
       replaces: ["attached"],
-      description: "No gutter on the `left` / `right` side.  Its old name is `attached`."
+      description: "No gutter on the `left` / `right` side.  Its old name was `attached`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its line." },
     {
@@ -107,7 +107,7 @@ export const columnVocabulary = {
       kind: "textAlign",
       values: "alignments",
       replaces: ["text-align"],
-      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
+      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`."
     },
     {
       name: "vertical-align",

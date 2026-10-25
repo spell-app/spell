@@ -368,39 +368,8 @@ describe("<ui-label> accessibility", () => {
 ////////////////
 
 describe("<ui-label> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-label NAME="#there">Go</ui-label>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
-  })
-})
-
-////////////////
-// ## Old names
-//
-// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
-////////////////
-
-describe("<ui-label> old names", () => {
-  /** The class string of the element's first classed box. */
-  async function classesOf(html: string) {
-    const host = await ElementFixture.render<DOMElement>(html)
-    return host.shadowRoot!.querySelector("[class]")!.className
-  }
-
-  it("<ui-label>:  each old spelling draws as its new one", async () => {
-    expect(
-      await classesOf(`<ui-label basic circular attached="top left" centered horizontal active>A</ui-label>`)
-    ).toBe(
-      await classesOf(
-        `<ui-label appearance="basic circular" attach="top left" align="center" direction="horizontal" selected>A</ui-label>`
-      )
-    )
-  })
-  it("<ui-labels>:  each old spelling draws as its new one", async () => {
-    expect(await classesOf(`<ui-labels basic tinted circular centered horizontal>A</ui-labels>`)).toBe(
-      await classesOf(
-        `<ui-labels appearance="basic tinted circular" align="center" direction="horizontal">A</ui-labels>`
-      )
-    )
   })
 })

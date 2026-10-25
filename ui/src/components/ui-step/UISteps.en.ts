@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-steps ordered vertical="right" widths="3">` => `ui ordered right vertical three steps`;
+ *   `<ui-steps ordered direction="vertical-right" widths="3">` => `ui ordered right vertical three steps`;
  *   `<ui-step selected completed>` => `completed active step` (a step has no `ui`, as Fomantic's `.ui.steps > .step`).
  *   `UIStep.css` keys on those words.
  * - Chosen state:  `selected` is canonical (`AGENTS.md`), its class word Fomantic's `active`;
@@ -56,7 +56,7 @@ export const stepsVocabulary = {
       replaces: [{ from: "vertical", value: "vertical", values: { right: "vertical-right" } }],
       description:
         "Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or " +
-        "`vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` " +
+        "`vertical-right`, for a group on the right of its content (arrow at left).  Its old name was `vertical` " +
         '(`vertical="right"`).'
     },
     {
@@ -69,7 +69,7 @@ export const stepsVocabulary = {
       replaces: [{ from: "circular", value: "circular" }],
       description:
         "The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content " +
-        "beside it.  Its old name is the bare `circular` switch."
+        "beside it.  Its old name was the bare `circular` switch."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
@@ -89,7 +89,7 @@ export const stepsVocabulary = {
       replaces: [{ from: "attached", value: "both" }],
       description:
         "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  " +
-        "Its old name is `attached`."
+        "Its old name was `attached`."
     },
     {
       name: "unstackable",

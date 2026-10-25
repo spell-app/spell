@@ -48,7 +48,7 @@ export const imagesVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  rows centred in the container.  Its old name is `centered`."
+      description: "`center`:  rows centred in the container.  Its old name was `centered`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "The whole group faded." },
     {

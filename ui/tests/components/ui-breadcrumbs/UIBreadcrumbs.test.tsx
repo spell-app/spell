@@ -261,19 +261,8 @@ describe("<ui-breadcrumbs> accessibility", () => {
 ////////////////
 
 describe("<ui-breadcrumb> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-breadcrumb NAME="#there">Go</ui-breadcrumb>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
-  })
-})
-
-describe("<ui-breadcrumb> old names", () => {
-  it("`active` reads as `selected`:  the current page", async () => {
-    const [old, spelled] = [
-      await breadcrumb("", `<ui-breadcrumb active>Here</ui-breadcrumb>`),
-      await breadcrumb("", `<ui-breadcrumb selected>Here</ui-breadcrumb>`)
-    ]
-    expect(sectionOf(old.sections[0]!).outerHTML).toBe(sectionOf(spelled.sections[0]!).outerHTML)
-    expect(old.sections[0]!.matches(":state(selected)")).toBe(true)
   })
 })

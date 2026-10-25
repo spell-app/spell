@@ -63,7 +63,7 @@ export const headerVocabulary = {
       classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
       replaces: [{ from: "attached", value: "both" }],
       description:
-        "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`."
+        "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`."
     },
     {
       name: "seamless",
@@ -77,7 +77,7 @@ export const headerVocabulary = {
       kind: "textAlign",
       values: "alignments",
       replaces: ["text-align"],
-      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
+      description: "Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`."
     },
     {
       name: "padding",
@@ -86,7 +86,7 @@ export const headerVocabulary = {
       values: ["none"],
       classes: { none: "fitted" },
       replaces: [{ from: "fitted", value: "none" }],
-      description: "`none`:  no padding.  Its old name is `fitted`."
+      description: "`none`:  no padding.  Its old name was `fitted`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed." },
     {
@@ -100,7 +100,7 @@ export const headerVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`) styled as a header.  Its old name is `href`."
+      description: "Renders a link (`<a>`) styled as a header.  Its old name was `href`."
     }
   ],
   events: [],

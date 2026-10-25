@@ -19,7 +19,7 @@
  * - Every rule pairs Fomantic's static selectors (`.ui.card` and the ui-less `.ui.cards > .card`) with the
  *   element's, where they differ:  a card in a group carries `:state(in-cards)`
  *   (`:host(:state(in-cards)) > .card`) and takes the group's variations as its own classes (`UICard`),
- *   so `.ui.raised.card` covers `<ui-cards raised>`.
+ *   so `.ui.raised.card` covers `<ui-cards appearance="raised">`.
  * - Public tokens (`--ui-card-*`, `--ui-cards-*`) are NEVER declared here:  the token blocks read each through a
  *   private alias (`--_ui-card-radius: var(--ui-card-radius, var(--ui-radius))`) and rules read the alias,
  *   so a value set on `:root`, an ancestor, the DOM element or `::part(card)` reaches the box (`notes/theming.md`

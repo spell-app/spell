@@ -177,9 +177,7 @@ describe("<ui-header> standalone", () => {
     ['align="center"', "ui center aligned header"],
     ['align="justified"', "ui justified header"],
     // the old names (epic ui-gaps P4), and the new
-    ["fitted disabled inverted", "ui fitted disabled inverted header"],
     ['padding="none" disabled inverted', "ui fitted disabled inverted header"],
-    ['attached="top"', "ui top attached header"],
     ['attach="top"', "ui top attached header"],
     ['size="huge" color="teal" inverted', "ui huge teal inverted header"]
   ])("<ui-header %s>", async (attributes, classes) => {
@@ -460,7 +458,7 @@ describe("<ui-{part}> accessibility", () => {
 ////////////////
 
 describe("<ui-header> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-header NAME="#there">Go</ui-header>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
   })
@@ -473,7 +471,7 @@ describe("<ui-header> link", () => {
 ////////////////
 
 describe("<ui-title> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-title NAME="#there">Go</ui-title>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
   })
@@ -486,7 +484,7 @@ describe("<ui-title> link", () => {
 ////////////////
 
 describe("<ui-author> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-author NAME="#there">Go</ui-author>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
   })
@@ -499,7 +497,7 @@ describe("<ui-author> link", () => {
 ////////////////
 
 describe("<ui-detail> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-detail NAME="#there">Go</ui-detail>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
   })

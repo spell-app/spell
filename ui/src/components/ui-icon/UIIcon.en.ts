@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-icon name="heart" size="large" color="red" circular>` => `ui large red circular icon`.
+ *   `<ui-icon name="heart" size="large" color="red" appearance="circular">` => `ui large red circular icon`.
  *   `UIIcon.css` keys on those words;  `name`, `outline` and `label` write no class:  they pick the SVG (`UI.icons`).
  * - `iconsVocabulary.ownsParts` lists `icon`:  a `<ui-icon>` directly inside a `<ui-icons>` finds it
  *   through `OwnerContext` and sets `:state(in-icons)`, which `UIIcon.css` stacks and positions it by.
@@ -73,7 +73,7 @@ export const iconVocabulary = {
       values: ["none"],
       classes: { none: "fitted" },
       replaces: [{ from: "fitted", value: "none" }],
-      description: "`none`:  no gap after the glyph and no extra width.  Its old name is `fitted`."
+      description: "`none`:  no gap after the glyph and no extra width.  Its old name was `fitted`."
     },
     {
       name: "appearance",

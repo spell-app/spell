@@ -60,15 +60,11 @@ export class SharedVocabulary {
   }
 
   /**
-   * The shared attributes' names, and the old names they replace (`href`), which every tag observes unless its
-   * vocabulary declares its own:  what a root adds to a tag it defines before its family loads
-   * (`RootLoader.defineEarly()`).
+   * The shared attributes' names, which every tag observes unless its vocabulary declares its own:
+   * what a root adds to a tag it defines before its family loads (`RootLoader.defineEarly()`).
    */
   static get attributeNames(): readonly string[] {
-    return SHARED_ATTRIBUTES.flatMap(({ name, replaces = [] }) => [
-      name,
-      ...replaces.map((old) => (typeof old === "string" ? old : old.from))
-    ])
+    return SHARED_ATTRIBUTES.map(({ name }) => name)
   }
 
   /** Is `name` one of the shared attributes? */
@@ -158,7 +154,7 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     description:
       "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  " +
       "A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click " +
-      "goes there, except on a control of its own inside.  Its old name is `href`."
+      "goes there, except on a control of its own inside.  Its old name was `href`."
   },
   {
     name: "target",

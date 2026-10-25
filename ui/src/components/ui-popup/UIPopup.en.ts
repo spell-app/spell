@@ -112,7 +112,7 @@ export const popupVocabulary = {
       group: "name",
       kind: "string",
       description:
-        "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
+        "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name was `header`."
     },
     {
       name: "label",

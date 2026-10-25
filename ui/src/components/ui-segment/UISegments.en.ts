@@ -25,7 +25,7 @@ export const segmentsVocabulary = {
       kind: "valueOnly",
       values: ["horizontal"],
       replaces: [{ from: "horizontal", value: "horizontal" }],
-      description: "`horizontal`:  side by side instead of stacked.  Its old name is `horizontal`."
+      description: "`horizontal`:  side by side instead of stacked.  Its old name was `horizontal`."
     },
     {
       name: "equal-width",
@@ -61,7 +61,7 @@ export const segmentsVocabulary = {
       description:
         "The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a " +
         "page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), " +
-        "`basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`."
+        "`basic` (no box of its own).  Their old names were `raised`, `stacked`, `piled`, `basic`."
     },
     {
       name: "padding",
@@ -69,7 +69,7 @@ export const segmentsVocabulary = {
       kind: "valueOnly",
       values: ["compact"],
       replaces: [{ from: "compact", value: "compact" }],
-      description: "`compact`:  only as wide as its content.  Its old name is `compact`."
+      description: "`compact`:  only as wide as its content.  Its old name was `compact`."
     },
     {
       name: "inverted",

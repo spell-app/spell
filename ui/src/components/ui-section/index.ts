@@ -10,9 +10,9 @@
  */
 
 import { UISections } from "./UISections"
-import { DOMSectionElement, UISection } from "./UISection"
+import { UISection } from "./UISection"
 
 UISections.define()
 UISection.define()
 
-export { DOMSectionElement, UISection, UISections }
+export { UISection, UISections }

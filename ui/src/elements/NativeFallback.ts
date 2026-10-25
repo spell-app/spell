@@ -152,46 +152,26 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
 
   /**
    * Fomantic class string the real element would render, e.g. `ui small primary button`.
-   * - Every class-emitting vocabulary attribute is read from the DOM element:  its converted value, so an old name
-   *   (`<ui-button basic>`) draws as its new one does;  else the attribute's text.
+   * - Every class-emitting vocabulary attribute is read from the DOM element:  its converted value;
+   *   else the attribute's text.
    * - An absent one takes its vocabulary `default`, as the element's props do (`<ui-sidebar>` => `ui left sidebar`).
    */
   protected classes(extra?: string): string {
     const input: Record<string, unknown> = {}
-    // the DOM element's own values, converted:  old names (`<ui-button basic>`, `AttributeSpec.replaces`)
-    // and a translated tag's names included
+    // the DOM element's own values, converted:  a translated tag's names included
     const { valueNamed } = this.domElement as Partial<Pick<E.DOMElement, "valueNamed">>
     for (const spec of this.vocabulary.attributes) {
       if (valueNamed) {
         input[spec.name] = valueNamed.call(this.domElement, spec.name)
         continue
       }
-      const value =
-        this.domElement.getAttribute(spec.name) ?? this.oldText(spec) ?? NativeFallback.defaultText(spec.default)
+      const value = this.domElement.getAttribute(spec.name) ?? NativeFallback.defaultText(spec.default)
       if (value === undefined) continue
       if (spec.kind === "keyOnly") input[spec.name] = E.Converters.boolean(value, spec.name)
       else if (spec.kind === "keyOrValueAndKey") input[spec.name] = E.Converters.keyOrValue(value, undefined)
       else input[spec.name] = value
     }
     return this.builder.build(input, { extra })
-  }
-
-  /**
-   * The text `spec`'s old names (`AttributeSpec.replaces`) stand for on the DOM element, read raw:
-   * `<x basic circular>` => `"basic circular"` for an `appearance` that replaces both;  `undefined` for none written.
-   * - For a host that isn't one of our DOM elements (a test's stub);  ours convert them themselves (`valueNamed()`).
-   */
-  private oldText(spec: E.AttributeSpec): string | undefined {
-    const words: string[] = []
-    for (const old of spec.replaces ?? []) {
-      const { from, value, values } = typeof old === "string" ? { from: old, value: undefined, values: undefined } : old
-      const text = this.domElement.getAttribute(from)
-      if (text === null || !E.Converters.boolean(text, from)) continue
-      const trimmed = text.trim()
-      const word = values?.[trimmed] ?? (value !== undefined && ["", "true", "yes"].includes(trimmed) ? value : trimmed)
-      words.push(word || (value ?? ""))
-    }
-    return words.length ? words.join(" ") : undefined
   }
 
   /** Builds `classes()`;  made on first use, over the DOM element tag's `vocabulary`. */

@@ -70,7 +70,6 @@ describe("<ui-accordion> classes", () => {
     ['appearance="basic styled"', "ui basic styled accordion"],
     ['padding="compact"', "ui compact accordion"],
     // old names and new draw the same words (epic `ui-gaps` P4)
-    ['compact="very" styled', "ui very compact styled accordion"],
     ['padding="xs" appearance="styled"', "ui very compact styled accordion"],
     ["tree", "ui tree accordion"],
     ['exclusive="no" collapsible="no" open="1"', "ui accordion"]

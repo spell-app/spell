@@ -223,15 +223,3 @@ describe("<ui-item> owned", () => {
     await expectAccessible(owner)
   })
 })
-
-describe("<ui-item> old names", () => {
-  it("draws as the new spelling:  `href`, `text`, `type`, `fitted` and the bare `link` look", async () => {
-    const { items } = await owned(
-      `<ui-item href="#a" fitted="horizontally">A</ui-item><ui-item link>B</ui-item><ui-item type="header">C</ui-item>` +
-        `<ui-item link="#a" padding="none-x">A</ui-item><ui-item appearance="link">B</ui-item><ui-item kind="header">C</ui-item>`
-    )
-    const boxes = items.map(boxOf).map((box) => [box.localName, box.className, box.getAttribute("href")])
-    expect(boxes.slice(0, 3)).toEqual(boxes.slice(3))
-    expect((items[0] as DOMElement & { link?: string }).link).toBe("#a")
-  })
-})

@@ -74,7 +74,7 @@ export const tabsVocabulary = {
       replaces: [{ from: "vertical", value: "vertical" }],
       description:
         "Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes " +
-        "(ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch."
+        "(ArrowUp / ArrowDown move between them).  Its old name was the bare `vertical` switch."
     },
     {
       name: "fluid",
@@ -100,7 +100,7 @@ export const tabsVocabulary = {
       replaces: ["alignment"],
       description:
         "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a " +
-        '`segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name is `alignment`.'
+        '`segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name was `alignment`.'
     },
     {
       name: "equal",
@@ -119,7 +119,7 @@ export const tabsVocabulary = {
       replaces: [{ from: "attached", value: "top" }],
       description:
         "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, " +
-        "`bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`)."
+        "`bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`)."
     },
     {
       name: "value",

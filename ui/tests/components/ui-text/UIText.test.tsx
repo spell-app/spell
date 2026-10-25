@@ -159,11 +159,6 @@ describe("<ui-text> link and font", () => {
     await expectAccessible(host)
   })
 
-  it("reads `href`, the old name, as `link`", async () => {
-    const { root } = await text(`<ui-text href="help.html">the help</ui-text>`)
-    expect([root.localName, root.getAttribute("href")]).toEqual(["a", "help.html"])
-  })
-
   it("draws each `font` word as its HTML element, outermost first", async () => {
     const { root } = await text(`<ui-text font="italic bold highlight">free</ui-text>`)
     expect(root.querySelector("strong > em > mark > slot")).not.toBe(null)

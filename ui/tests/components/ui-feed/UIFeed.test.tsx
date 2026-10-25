@@ -69,7 +69,6 @@ describe("<ui-feed> classes and markup", () => {
     ['size="small"', "ui small feed"],
     ['color="blue" connected ordered', "ui blue connected ordered feed"],
     // the old name and the new draw the same words (epic `ui-gaps` P4)
-    ["divided basic inverted", "ui divided inverted basic feed"],
     ['divided appearance="basic" inverted', "ui divided inverted basic feed"],
     ['divided="no" disabled', "ui disabled feed"]
   ])("<ui-feed %s>", async (attributes, classes) => {

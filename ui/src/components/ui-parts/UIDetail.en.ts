@@ -28,7 +28,7 @@ export const detailVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: 'Renders a link (`<a class="detail" href>`).  Its old name is `href`.'
+      description: 'Renders a link (`<a class="detail" href>`).  Its old name was `href`.'
     }
   ],
   events: [],

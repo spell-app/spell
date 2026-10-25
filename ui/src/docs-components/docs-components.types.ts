@@ -222,15 +222,6 @@ export type SiteUse = {
   readonly file: string
 }
 
-/** One attribute of a tag, as its vocabulary declares it. */
-/** An old name an attribute replaces:  a plain name (`href`), or an old switch and the value it stands for. */
-export type SiteOldName = {
-  /** the old name, as authors wrote it */
-  readonly name: string
-  /** an old switch's value (`primary`);  absent for a plain old name */
-  readonly value?: string
-}
-
 /** One attribute of a component, as the site shows it. */
 export type SiteAttribute = {
   /** canonical attribute name, e.g. `text-align` */
@@ -245,11 +236,6 @@ export type SiteAttribute = {
   readonly default?: string | number | boolean | null
   /** other attribute names accepted for it, e.g. `checked` for `selected` */
   readonly aliases?: readonly string[]
-  /**
-   * the OLD names it replaces, still read until every page is rewritten (`AttributeSpec.replaces`, epic `ui-gaps`):
-   * `{ name: "href" }` on `link`, `{ name: "primary", value: "primary" }` on `color`
-   */
-  readonly replaces?: readonly SiteOldName[]
   /** JS property name, when it isn't `camelCase(name)` */
   readonly property?: string
   /** `false`:  not reflected to the attribute (rich data) */

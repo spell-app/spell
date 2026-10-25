@@ -37,7 +37,7 @@ export const contentVocabulary = {
       values: "alignments",
       replaces: ["text-align"],
       description:
-        "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`."
+        "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`."
     },
     {
       name: "vertical-align",

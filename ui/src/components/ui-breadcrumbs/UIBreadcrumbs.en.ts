@@ -4,7 +4,7 @@
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The family's attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-breadcrumbs size="large" inverted>` => `ui large inverted breadcrumb`;
- *   `<ui-breadcrumb active>` => `active section` (no `ui`:  Fomantic styles sections by context).
+ *   `<ui-breadcrumb selected>` => `active section` (no `ui`:  Fomantic styles sections by context).
  * - Each section draws its divider, from tokens the breadcrumb publishes
  *   (`--ui-breadcrumb-divider*`, `BreadcrumbDividerTokens`):  see `UIBreadcrumbs.css`.
  */

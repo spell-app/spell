@@ -61,7 +61,7 @@ export const revealVocabulary = {
       replaces: [{ from: "unclipped", value: "none" }],
       description:
         "`none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class " +
-        "word stays `visible`).  Its old name is `unclipped`."
+        "word stays `visible`).  Its old name was `unclipped`."
     },
     { name: "active", group: "states", kind: "keyOnly", description: "Revealed now, without hover or focus." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Never reveals." }

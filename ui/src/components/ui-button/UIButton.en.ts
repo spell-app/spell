@@ -2,11 +2,12 @@
  * Every name `<ui-button>`, `<ui-buttons>` and `<ui-or>` use:  tags, attributes (kind + allowed values),
  * events, slots, parts, states, texts.  Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-button size="small" primary basic>` => `ui small basic primary button`.  `UIButton.css` keys on those words.
- * - Group context needs NO element help:  `<ui-buttons basic>` renders `ui basic buttons`,
+ *   `<ui-button size="small" color="primary" appearance="basic">` => `ui small basic primary button`.  `UIButton.css` keys on those words.
+ * - Group context needs NO element help:  `<ui-buttons appearance="basic">` renders `ui basic buttons`,
  *   and `UIButton.css` hands the look to its children through inherited tokens.
  * - `primary` / `secondary` / `positive` / `negative` are values of `color` (epic `ui-gaps` P4, Owen's request r1);
- *   their old switches (`<ui-button primary>`) still work, and every colour remaps `--ui-color` (`colors.css`).
+ *   their old switches (`<ui-button primary>`) did nothing after P13, and every colour remaps `--ui-color`
+ *   (`colors.css`).
  * - The looks are words of `appearance` (`basic`, `tertiary`, `circular`), the padding a value of `padding`;
  *   each old switch still works, through the attribute's `replaces`.
  */
@@ -44,7 +45,7 @@ export const buttonVocabulary = {
         "Its hue:  it fills the button, or only its ring and text when `basic`.  " +
         "`primary` and `secondary` are the brand's colours.  " +
         "`positive` and `negative` say what pressing it does.  " +
-        "Those four also work written alone, their old names."
+        "Written alone, they were its old names."
     },
     {
       name: "appearance",
@@ -63,7 +64,7 @@ export const buttonVocabulary = {
         "`basic` is less pronounced:  transparent, with a hairline ring.  " +
         "`tertiary` is the least:  text only, underlined on hover.  " +
         "`circular` is pill-shaped, and round when it holds only an icon.  " +
-        "Each word also works written alone, its old name."
+        "Written alone, each was its old name."
     },
     {
       name: "inverted",
@@ -85,7 +86,7 @@ export const buttonVocabulary = {
       kind: "keyOnly",
       key: "active",
       replaces: ["active"],
-      description: "Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`."
+      description: "Pressed / on;  with `toggle`, in the positive colour.  Its old name was `active`."
     },
     {
       name: "active-text",
@@ -134,7 +135,7 @@ export const buttonVocabulary = {
       replaces: ["wrapped"],
       description:
         "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  " +
-        "Its old name is `wrapped`."
+        "Its old name was `wrapped`."
     },
     {
       name: "ellipsis",
@@ -162,7 +163,7 @@ export const buttonVocabulary = {
       replaces: [{ from: "animated", value: "slide" }],
       description:
         "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  " +
-        "Its old name is `animated`."
+        "Its old name was `animated`."
     },
     {
       name: "attach",
@@ -173,7 +174,7 @@ export const buttonVocabulary = {
       replaces: [{ from: "attached", value: "both" }],
       description:
         "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  " +
-        "Its old name is `attached`."
+        "Its old name was `attached`."
     },
     {
       name: "icon",
@@ -203,7 +204,7 @@ export const buttonVocabulary = {
       description:
         "The button's text, written as an attribute instead of in the default slot.  " +
         "Children in the slot win.  " +
-        "Its old name is `content`.  " +
+        "Its old name was `content`.  " +
         "NOTE:  `label` used to be the joined badge, which is `badge` now."
     },
     {
@@ -251,7 +252,7 @@ export const buttonVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`) styled as a button.  Its old name is `href`."
+      description: "Renders a link (`<a>`) styled as a button.  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {

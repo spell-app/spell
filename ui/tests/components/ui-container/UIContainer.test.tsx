@@ -26,12 +26,8 @@ describe("<ui-container> classes and layout", () => {
     ['fluid="yes"', "ui fluid container"],
     ["wide", "ui wide container"],
     // the old names (epic ui-gaps P4), and the new
-    ['grid relaxed="very"', "ui very relaxed grid container"],
     ['grid spacing="xl"', "ui very relaxed grid container"],
-    ["grid relaxed", "ui relaxed grid container"],
     ['grid spacing="lg"', "ui relaxed grid container"],
-    ['text-align="justified"', "ui justified container"],
-    ['text-align="center"', "ui center aligned container"],
     ['scrolling="very short" resizable', "ui resizable very short scrolling container"]
   ])("<ui-container %s>", async (attributes, classes) => {
     const host = await ElementFixture.render<DOMElement>(`<ui-container ${attributes}><p>x</p></ui-container>`)

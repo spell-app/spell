@@ -73,7 +73,7 @@ export const tabVocabulary = {
       replaces: [{ from: "attached", value: "both" }],
       description:
         "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  " +
-        "Its old name is `attached`."
+        "Its old name was `attached`."
     },
     {
       name: "parent",

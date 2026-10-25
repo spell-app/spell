@@ -42,7 +42,7 @@ export const iconsVocabulary = {
       values: ["none"],
       classes: { none: "fitted" },
       replaces: [{ from: "fitted", value: "none" }],
-      description: "`none`:  no gap after the group.  Its old name is `fitted`."
+      description: "`none`:  no gap after the group.  Its old name was `fitted`."
     },
     {
       name: "appearance",

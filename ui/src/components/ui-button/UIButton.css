@@ -58,7 +58,7 @@
  *   - social buttons (`facebook`, `twitter` ...):  colour a button with `color` / `--ui-color` instead
  *   - Fomantic's `wrapped` groups (a corner tweak for multi-row basic groups) and the stacked-border tricks of
  *     basic / inverted groups (overlapping negative margins):  a group's track draws one border, plus dividers
- *     - `<ui-button wrapped>` is ours:  a label that may wrap, where a button's text stays on one line by default
+ *     - `<ui-button wrap>` is ours:  a label that may wrap, where a button's text stays on one line by default
  *   - pointing / tag / corner shapes of the `labeled` button's label -- they belong to `label.less`
  *   - a child's OWN colour inside a basic / inverted / tertiary GROUP:  the group resolves those looks where
  *     it declares them, so colour the group (Fomantic's docs only colour groups)

@@ -107,9 +107,7 @@ export class SlottedItems {
   private static valueFor(element: Element, definition: E.ElementDefinition | undefined, name: string): unknown {
     if (!definition) {
       const spec: E.AttributeSpec = itemVocabulary.attributes.find((attribute) => attribute.name === name)!
-      // a plain old name (`type`, `text`:  epic `ui-gaps` P4) stands in while the new one isn't written
-      const oldName = spec.replaces?.find((old): old is string => typeof old === "string")
-      const raw = element.getAttribute(spec.name) ?? (oldName ? element.getAttribute(oldName) : null)
+      const raw = element.getAttribute(spec.name)
       if (spec.kind === "keyOnly") return E.Converters.boolean(raw, spec.name)
       if (spec.kind === "icon") return E.Converters.icon(raw, spec.default)
       return raw ?? undefined
@@ -118,16 +116,7 @@ export class SlottedItems {
     if (!isServer && element.matches(":defined") && !E.DOMElement.isPending(element)) {
       return (element as unknown as Record<string, unknown>)[attribute.property]
     }
-    const text = element.getAttribute(attribute.attribute)
-    if (text !== null) return definition.convert(attribute, text)
-    // not upgraded yet:  an old name (`type`, `text`) stands in for its new one, as the element would read it
-    for (const oldName of definition.oldAttributeNames) {
-      const old = definition.oldAttributeNamed(oldName)!
-      const oldText = element.getAttribute(oldName)
-      if (old.attribute === attribute && oldText !== null)
-        return definition.valueFromOld(old, oldText, undefined)?.value
-    }
-    return definition.convert(attribute, null)
+    return definition.convert(attribute, element.getAttribute(attribute.attribute))
   }
 
   /**

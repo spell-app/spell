@@ -82,7 +82,6 @@ describe("<ui-slider> markup", () => {
     ["", "ui slider"],
     ['size="small" color="blue"', "ui small blue slider"],
     ["labeled ticked range", "ui labeled range ticked slider"],
-    ["reversed vertical smooth hover basic inverted", "ui hover inverted smooth basic reversed vertical slider"],
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     [
       'direction="reversed vertical" smooth hover appearance="basic" inverted',

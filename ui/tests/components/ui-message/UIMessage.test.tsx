@@ -56,12 +56,9 @@ describe("<ui-message> classes", () => {
     ['state="warning" attach="bottom"', "ui warning bottom attached message"],
     ['attach="both"', "ui attached message"],
     // old names (`compact`, `text-align`, `attached`) and the new ones draw the same words (epic `ui-gaps` P4)
-    ['floating compact="yes" centered inverted', "ui compact centered floating inverted message"],
     ['floating padding="compact" centered inverted', "ui compact centered floating inverted message"],
-    ['attached="bottom" text-align="right"', "ui bottom attached right aligned message"],
     ['attach="bottom" align="right"', "ui bottom attached right aligned message"],
     ['floating="no"', "ui message"],
-    ['text-align="right"', "ui right aligned message"],
     ['icon="envelope"', "ui icon message"]
   ])("<ui-message %s>", async (attributes, classes) => {
     const { root } = await message(`<ui-message ${attributes}>Text</ui-message>`)
@@ -279,22 +276,5 @@ describe("<ui-message> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
-  })
-})
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-message> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-message header="Old">Body</ui-message>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-message heading="New">Body</ui-message>`
-    )
-    expect(written.heading).toBe("New")
   })
 })

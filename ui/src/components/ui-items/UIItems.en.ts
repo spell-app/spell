@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-items divided relaxed="very" link>` => `ui divided link very relaxed items`.  `UIItems.css` keys on those.
+ *   `<ui-items divided spacing="xl" appearance="link">` => `ui divided link very relaxed items`.  `UIItems.css` keys on those.
  * - Fomantic's Items VIEW, with the SAME generic `<ui-item>` as dropdown, list and menu (`ownsParts:  item`) --
  *   never a second item tag (decided 2026-09-29, `notes/grammar.md` "Items").  Here the item owns its content parts
  *   (`ItemContext.ownsParts`), so they style themselves `:state(in-item)`.
@@ -39,7 +39,7 @@ export const itemsVocabulary = {
       values: ["lg", "xl"],
       classes: { lg: "relaxed", xl: "very relaxed" },
       replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
-      description: 'Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).'
+      description: 'Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed="very"`).'
     },
     {
       name: "appearance",
@@ -51,7 +51,7 @@ export const itemsVocabulary = {
       replaces: [{ from: "link", value: "link" }],
       description:
         "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link " +
-        "needs an item's `link`.  Its old name is the bare `link` switch."
+        "needs an item's `link`.  Its old name was the bare `link` switch."
     },
     {
       name: "unstackable",

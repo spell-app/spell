@@ -2,7 +2,7 @@
  * Every name `<ui-slider>` uses:  tag, attributes (kind + allowed values), events, parts, states, texts.
  * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-slider color="blue" labeled ticked range aligned="bottom">` =>
+ *   `<ui-slider color="blue" labeled ticked range align="bottom">` =>
  *   `ui blue labeled range ticked bottom aligned slider`.
  * - `value` and `end` are Fomantic's `start` / `end` settings:  the (first) thumb, and a `range`'s second thumb.
  */

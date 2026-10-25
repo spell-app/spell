@@ -83,7 +83,7 @@ export const flyoutVocabulary = {
       group: "name",
       kind: "string",
       description:
-        "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`."
+        "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`."
     },
     {
       name: "content",

@@ -89,16 +89,6 @@ export class ServerDOMElement {
       const text = element.getAttribute(attribute.attribute)
       values[attribute.key] = text === null ? definition.startingValue(attribute) : definition.convert(attribute, text)
     }
-    // an OLD name (`href`, `primary`:  `AttributeSpec.replaces`) stands for its new attribute, which wins when written
-    for (const name of definition.oldAttributeNames) {
-      const text = element.getAttribute(name)
-      const old = definition.oldAttributeNamed(name)!
-      if (text === null || element.hasAttribute(old.attribute.attribute)) continue
-      // an old switch named like a new attribute (`link`) is the old one only written bare
-      if (definition.attributeNamed(name) && text !== "") continue
-      const next = definition.valueFromOld(old, text, values[old.attribute.key])
-      if (next) values[old.attribute.key] = next.value
-    }
     if (definition.takesShared("visible")) {
       values.visible = definition.visibleInMarkup((name) => element.getAttribute(name), startsVisible)
     }

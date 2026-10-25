@@ -32,7 +32,9 @@ describe("ElementManifests.jsxTypes()", () => {
     const text = new ElementManifests({ data: DATA, packageFolder: UI }).jsxTypes()
     for (const tag of DATA.components) expect(text).toContain(`"${tag.tag}": `)
     expect(text).not.toContain('"ui-docs-')
-    expect(text).toMatch(/export interface UIButtonAttributes \{[^}]*\n {2}basic\?: boolean \| ""\n/)
+    expect(text).toMatch(/export interface UIButtonAttributes \{[^}]*\n {2}fluid\?: boolean \| ""\n/)
+    // the old names (epic `ui-gaps`) are gone from the types too
+    expect(text).not.toMatch(/export interface UIButtonAttributes \{[^}]*\n {2}basic\?:/)
     expect(text).toContain("export interface UIButtonJSXAttributes")
     expect(text).toContain("  options?: unknown")
     expect(text).toContain('  "prop:options"?: unknown')

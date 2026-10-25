@@ -14,7 +14,7 @@
  *   - `<ui-labels>`:  `<div class="ui … labels" part="group"><slot></slot></div>`
  *
  * - A slotted `<ui-detail>` is a content part:  it styles itself from `UIParts.css` (context `in-label`).
- *   `<ui-detail href>` draws its `<a class="detail">` in its OWN shadow root, which this sheet can't reach
+ *   `<ui-detail link>` draws its `<a class="detail">` in its OWN shadow root, which this sheet can't reach
  *   through a `.ui.label` ancestor:  so the link rule keys on `.detail` and `.detail ::slotted(a)` alone.
  *
  * - The DOM elements are `display: contents` (`:host`):  the inner box IS the label.
@@ -24,7 +24,7 @@
  * - Looks are driven by TOKENS, so a group needs no help from the components:
  *   - a look class (`basic`, `inverted`, `circular`, `horizontal`, `tag`, `fluid`, `centered`, `disabled`)
  *     declares private `--_label-*` tokens on `.label` OR `.labels`, and labels read them with fallbacks.
- *     So `<ui-labels basic>` makes its children basic by inheritance, through `<slot>` into each child's shadow.
+ *     So `<ui-labels appearance="basic">` makes its children basic by inheritance, through `<slot>` into each child's shadow.
  *   - `tag` shapes come from `::before` / `::after`, switched on by `--_label-tag`
  *     through a style query the pseudo-elements run against their own label
  *   - colours (`--ui-color*`) and sizes (`--ui-scale`) inherit the same way
@@ -523,7 +523,7 @@
 
 @layer ui.components.label.content {
   /*
-   * Links inside a label (slotted `<a>`s), plus one inside a `.detail` -- a `<ui-detail href>` renders its own
+   * Links inside a label (slotted `<a>`s), plus one inside a `.detail` -- a `<ui-detail link>` renders its own
    * `<a class="detail">` in ITS OWN shadow root, where there's no `.ui.label` ancestor to key on,
    * so `.detail` covers that root standalone;  `.detail ::slotted(a)` covers a plain link projected into a
    * `<ui-detail>` (`<ui-detail><a>...</a></ui-detail>`), reachable ONLY from `<ui-detail>`'s own shadow,

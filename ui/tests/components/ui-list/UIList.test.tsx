@@ -581,11 +581,3 @@ describe("<ui-list> accessibility", () => {
     await expectAccessible(root)
   })
 })
-
-describe("<ui-list> old names", () => {
-  it('<ui-list link animated horizontal relaxed="very" fitted> draws as the new spelling', async () => {
-    const before = await list(`link animated horizontal relaxed="very" fitted`)
-    const after = await list(`appearance="link" hover="indent" direction="horizontal" spacing="xl" padding="none"`)
-    expect(before.root.className).toBe(after.root.className)
-  })
-})

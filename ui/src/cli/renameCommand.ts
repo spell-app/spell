@@ -10,11 +10,12 @@ import type { RenameOptions } from "./cli.types"
  * `spell ui rename [--write] <paths...>`:  Spell UI's old attribute names, rewritten into their new ones
  * (`<ui-button primary>` => `<ui-button color="primary">`), in every page and code file under `paths`
  * (epic `ui-gaps` P6;  the rewrite itself:  `OldNames`).
+ * - Since epic `ui-gaps` P13 the old names do nothing on a page:  this is how markup still in them catches up.
  * - Without `--write`:  lists each file and what it would change;  nothing is written.
  * - With it:  rewrites them in place.
  * - `--markup-only`:  only tags a browser draws, never escaped markup in a code sample:  for pages that quote the old
  *   names on purpose (an epic's record of what was decided).
- * - Reads HTML, Markdown and code (`.ts`, `.tsx`, `.js`, `.mjs`);  leaves out what's built (bundles, packs,
+ * - Reads HTML, Markdown, code (`.ts`, `.tsx`, `.js`, `.mjs`) and spell (`.spell`);  leaves out what's built (bundles, packs,
  *   generated data, `node_modules`), minified files, and the vocabularies (`UIButton.en.ts`), which name their old
  *   names on purpose.
  * - Leaves alone a file that says `spell ui rename: leave this file`:  one whose old names are the point
@@ -76,7 +77,7 @@ function isReadable(file: string, size: number): boolean {
 const LEAVE_MARKER = "spell ui rename: leave this file"
 
 /** The kinds of file it reads. */
-const READ_EXTENSIONS = new Set([".html", ".md", ".ts", ".tsx", ".js", ".mjs"])
+const READ_EXTENSIONS = new Set([".html", ".md", ".ts", ".tsx", ".js", ".mjs", ".spell"])
 
 /** Folders it never walks into:  built, vendored, or results. */
 const SKIPPED_FOLDERS = new Set([

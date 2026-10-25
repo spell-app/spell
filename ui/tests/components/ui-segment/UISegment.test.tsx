@@ -44,22 +44,12 @@ describe("<ui-segment> classes", () => {
     ['appearance="piled"', "ui piled segment"],
     ['appearance="vertical" placeholder', "ui placeholder vertical segment"],
     // the old names (epic ui-gaps P4), and the new
-    ["circular compact basic clearing", "ui compact clearing circular basic segment"],
     ['appearance="circular basic" padding="compact" clearing', "ui compact clearing circular basic segment"],
-    ['padded="very" fitted', "ui fitted segment"],
     ['padding="lg"', "ui very padded segment"],
-    ['stacked="tall" raised', "ui tall stacked raised segment"],
     ['appearance="tall-stacked raised"', "ui tall stacked raised segment"],
-    ['text-align="center"', "ui center aligned segment"],
     ['align="center"', "ui center aligned segment"],
-    ['padded="very"', "ui very padded segment"],
-    ['text-align="center"', "ui center aligned segment"],
-    ["secondary", "ui secondary segment"],
-    ['attached="top"', "ui top attached segment"],
-    ["attached seamless", "ui attached seamless segment"],
     ['attach="top" seamless', "ui top attached seamless segment"],
     ["loading disabled", "ui disabled loading segment"],
-    ['fitted="horizontally"', "ui horizontally fitted segment"],
     ['scrolling="long" resizable', "ui resizable long scrolling segment"]
   ])("<ui-segment %s>", async (attributes, classes) => {
     const { root } = await render(`<ui-segment ${attributes}>x</ui-segment>`)

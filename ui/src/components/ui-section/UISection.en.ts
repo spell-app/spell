@@ -104,8 +104,8 @@ export const sectionVocabulary = {
       replaces: [{ from: "collapsed", value: "false" }],
       description:
         'Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  ' +
-        "`ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is " +
-        "`collapsed` (turned round), still a property of the element too."
+        "`ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was " +
+        "`collapsed` (turned round)."
     },
     {
       name: "fold-icon",

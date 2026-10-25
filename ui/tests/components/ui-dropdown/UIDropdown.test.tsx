@@ -747,25 +747,10 @@ describe("<ui-dropdown> invoker commands", () => {
 })
 
 ////////////////
-// ## Old names
-//
-// Owen's attribute renames (epic `ui-gaps` P4):  the old spellings still draw the same.
+// ## Direction
 ////////////////
 
-describe("<ui-dropdown> old names", () => {
-  it.each([
-    [
-      "compact upward simple unlimited short",
-      'padding="compact" direction="up" appearance="simple" limit="none" length="short"'
-    ],
-    ['very-long text="Pick"', 'length="very-long" label="Pick"']
-  ])("<ui-dropdown %s> draws as <ui-dropdown %s>", async (old, current) => {
-    const before = await dropdown(`<ui-dropdown selection ${old}></ui-dropdown>`)
-    const after = await dropdown(`<ui-dropdown selection ${current}></ui-dropdown>`)
-    expect(before.root.className).toBe(after.root.className)
-    expect(before.text.textContent).toBe(after.text.textContent)
-  })
-
+describe("<ui-dropdown> direction", () => {
   it("`direction` takes both ways at once:  `up left`", async () => {
     const { root, menu } = await dropdown(`<ui-dropdown selection direction="up left"></ui-dropdown>`)
     expect([root.classList.contains("upward"), menu.classList.contains("left")]).toEqual([true, true])

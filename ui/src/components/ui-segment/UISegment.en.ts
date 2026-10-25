@@ -58,7 +58,7 @@ export const segmentVocabulary = {
         "peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` " +
         "(a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no " +
         "box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), " +
-        "`tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, " +
+        "`tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, " +
         "`vertical`, `circular`, `basic`, `secondary`, `tertiary`."
     },
     {
@@ -86,7 +86,7 @@ export const segmentVocabulary = {
       ],
       description:
         "Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its " +
-        "content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`."
+        "content), `md` more, `lg` even more.  Its old names were `fitted`, `compact`, `padded`."
     },
     { name: "clearing", group: "appearance", kind: "keyOnly", description: "Contains its floated children." },
     {
@@ -95,7 +95,7 @@ export const segmentVocabulary = {
       kind: "textAlign",
       values: ["left", "center", "right"],
       replaces: ["text-align"],
-      description: "Aligns its text `left`, `center` or `right`.  Its old name is `text-align`."
+      description: "Aligns its text `left`, `center` or `right`.  Its old name was `text-align`."
     },
     {
       name: "attach",
@@ -112,7 +112,7 @@ export const segmentVocabulary = {
       replaces: [{ from: "attached", value: "both" }],
       description:
         "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits " +
-        "in the middle.  Its old name is `attached`."
+        "in the middle.  Its old name was `attached`."
     },
     {
       name: "seamless",

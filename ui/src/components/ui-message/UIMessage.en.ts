@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-message state="negative" attached="bottom" size="small">` => `ui small negative bottom attached message`.
+ *   `<ui-message state="negative" attach="bottom" size="small">` => `ui small negative bottom attached message`.
  *   The component adds `icon` when it shows an icon.
  * - `color` and `state` are both remaps (`colors.css`);  `state` is `kind: "valueOnly"` because it emits its value
  *   alone (`ui negative message`), as dropdown's `state` does.
@@ -92,7 +92,7 @@ export const messageVocabulary = {
       group: "name",
       kind: "string",
       description:
-        "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name is `header`."
+        "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name was `header`."
     },
     {
       name: "dismissible",

@@ -30,14 +30,12 @@ export class ButtonFallback extends E.NativeFallback<typeof buttonVocabulary> {
 
   protected override build() {
     const { domElement } = this
-    // `href`:  `link`'s old name (`AttributeSpec.replaces`)
-    const href = this.attr("link") ?? domElement.getAttribute("href") ?? undefined
+    const href = this.attr("link") ?? undefined
     const isDisabled = this.flag("disabled")
     const isToggle = this.flag("toggle")
     // a bare `icon` (`"true"`) names no glyph, so it can't name the button either
     const icon = E.Converters.icon(this.attr("icon"))
-    // `content`:  `label`'s old name (`AttributeSpec.replaces`)
-    const text = this.attr("label") ?? domElement.getAttribute("content") ?? undefined
+    const text = this.attr("label") ?? undefined
     const isIconOnly = icon && !text && !domElement.textContent?.trim()
     const control =
       href !== undefined

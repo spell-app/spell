@@ -100,11 +100,7 @@ describe("<ui-table> classes, mirrored onto the table", () => {
     ['celled="no"', "ui table"],
     ['size="medium"', "ui table"],
     ['size="small" color="red"', "ui small red table"],
-    ["sortable celled striped", "ui celled sortable striped table"],
     ["single-line", "ui single line table"],
-    ['basic="very"', "ui very basic table"],
-    ['compact="very"', "ui very compact table"],
-    ['padded="very"', "ui very padded table"],
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     ['appearance="very-basic striped"', "ui very basic striped table"],
     ['padding="xs"', "ui very compact table"],

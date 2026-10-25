@@ -4,7 +4,7 @@
  * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only,
  *   `UIT` by value straight from `components.types`.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-search category fluid aligned="right">` => `ui category fluid right aligned search`.
+ *   `<ui-search category fluid align="right">` => `ui category fluid right aligned search`.
  *   `UISearch.css` keys on those words.
  * - Rich data is a PROPERTY (`source`, `kind: "json"`);
  *   first paint never needs it -- the input and its `value` are all SSR must show.

@@ -43,7 +43,7 @@ export const labelsVocabulary = {
       kind: "valueOnly",
       values: ["horizontal"],
       replaces: [{ from: "horizontal", value: "horizontal" }],
-      description: "`horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`."
+      description: "`horizontal`:  every label a fixed-width tag.  Its old name was `horizontal`."
     },
     { name: "image", group: "content", kind: "keyOnly", description: "Every label an image label." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Every label full width." },
@@ -54,7 +54,7 @@ export const labelsVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  every label centred.  Its old name is `centered`."
+      description: "`center`:  every label centred.  Its old name was `centered`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every label for dark backgrounds." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Every label dimmed and inert." }

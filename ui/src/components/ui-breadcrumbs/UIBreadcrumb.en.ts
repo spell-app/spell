@@ -26,14 +26,14 @@ export const breadcrumbVocabulary = {
       kind: "keyOnly",
       key: "active",
       replaces: ["active"],
-      description: 'The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.'
+      description: 'The current page:  bold, not a link, `aria-current="page"`.  Its old name was `active`.'
     },
     {
       name: "link",
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`) to this level.  Its old name is `href`."
+      description: "Renders a link (`<a>`) to this level.  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],

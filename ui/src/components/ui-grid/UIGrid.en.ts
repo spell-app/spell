@@ -75,7 +75,7 @@ export const gridVocabulary = {
       classes: { md: "padded", "md-x": "horizontally padded", "md-y": "vertically padded" },
       replaces: [{ from: "padded", value: "md", values: { horizontally: "md-x", vertically: "md-y" } }],
       description:
-        "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`."
+        "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name was `padded`."
     },
     {
       name: "spacing",
@@ -89,7 +89,7 @@ export const gridVocabulary = {
       ],
       description:
         "The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider " +
-        "still).  Its old names are `compact` and `relaxed`."
+        "still).  Its old names were `compact` and `relaxed`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its columns in each line." },
     {
@@ -146,7 +146,8 @@ export const gridVocabulary = {
       kind: "textAlign",
       values: "alignments",
       replaces: ["text-align"],
-      description: "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`."
+      description:
+        "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name was `text-align`."
     },
     {
       name: "vertical-align",

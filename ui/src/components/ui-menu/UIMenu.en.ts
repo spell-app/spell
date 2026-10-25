@@ -85,7 +85,7 @@ export const menuVocabulary = {
       replaces: [{ from: "vertical", value: "vertical" }],
       description:
         "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  " +
-        "Its old name is the bare `vertical` switch."
+        "Its old name was the bare `vertical` switch."
     },
     { name: "pagination", group: "appearance", kind: "keyOnly", description: "Page links:  compact, centred items." },
     { name: "icon", group: "content", kind: "keyOnly", description: "Icon-only items." },
@@ -112,7 +112,7 @@ export const menuVocabulary = {
       kind: "keyOnly",
       key: "wrapped",
       replaces: ["wrapped"],
-      description: "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`."
+      description: "With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`."
     },
     {
       name: "inverted",
@@ -143,7 +143,7 @@ export const menuVocabulary = {
       replaces: [{ from: "attached", value: "both" }],
       description:
         "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  " +
-        "Its old name is `attached`."
+        "Its old name was `attached`."
     },
     {
       name: "fixed",
@@ -162,7 +162,7 @@ export const menuVocabulary = {
       description:
         "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of " +
         'a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  ' +
-        "Its old name is `alignment`."
+        "Its old name was `alignment`."
     },
     {
       name: "equal",

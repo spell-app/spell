@@ -445,10 +445,3 @@ describe("<ui-items> accessibility", () => {
     await expectAccessible(root)
   })
 })
-
-describe("<ui-items> old names", () => {
-  it("<ui-items relaxed link> draws as the new spelling", async () => {
-    const [before, after] = [await view("relaxed link"), await view(`spacing="lg" appearance="link"`)]
-    expect(before.root.className).toBe(after.root.className)
-  })
-})

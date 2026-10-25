@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-divider horizontal text-align="left">` => `ui horizontal left aligned divider`.
+ *   `<ui-divider direction="horizontal" align="left">` => `ui horizontal left aligned divider`.
  */
 
 import type { E } from "spell-ui/core"
@@ -39,7 +39,7 @@ export const dividerVocabulary = {
       ],
       description:
         "`horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional " +
-        "text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`."
+        "text, centred in a `position: relative` owner (segment, grid).  Its old names were `horizontal`, `vertical`."
     },
     {
       name: "spacer",
@@ -57,7 +57,7 @@ export const dividerVocabulary = {
       values: ["none"],
       classes: { none: "fitted" },
       replaces: [{ from: "fitted", value: "none" }],
-      description: "`none`:  no space above or below.  Its old name is `fitted`."
+      description: "`none`:  no space above or below.  Its old name was `fitted`."
     },
     { name: "clearing", group: "appearance", kind: "keyOnly", description: "Clears floated content above it." },
     {
@@ -74,7 +74,7 @@ export const dividerVocabulary = {
       values: ["left", "center", "right"],
       replaces: ["text-align"],
       description:
-        'With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`.'
+        'With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name was `text-align`.'
     },
     { name: "icon", group: "content", kind: "icon", description: "Icon name, shown before the text." }
   ],

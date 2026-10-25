@@ -31,7 +31,7 @@ export const avatarVocabulary = {
       replaces: ["alt"],
       description:
         "Who it is:  the picture's tooltip and its alternative text for screen readers.  " +
-        "Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`."
+        "Default none (decorative:  the name is nearly always beside it).  Its old name was `alt`."
     }
   ],
   events: [],

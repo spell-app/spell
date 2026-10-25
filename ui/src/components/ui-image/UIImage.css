@@ -5,7 +5,7 @@
  * - It styles the components' shadow DOM, in Fomantic's class names on semantic elements:
  *   - `<ui-image>`:  `<img class="ui [size] [keyOnly ...] [valueAndKey ...] [vertical-align] image" part="image"
  *     src alt width height loading>`
- *   - `<ui-image href>`:  `<a class="ui … image" part="image" href><img part="img" src alt …></a>`,
+ *   - `<ui-image link>`:  `<a class="ui … image" part="image" href><img part="img" src alt …></a>`,
  *     Fomantic's wrapper form (`.ui.image img`), so the inner `<img>` fills and follows the link's box
  *   - `<ui-images>`:  `<div class="ui [size] [keyOnly ...] [valueAndKey ...] [vertical-align] images"
  *     part="group"><slot></slot></div>`

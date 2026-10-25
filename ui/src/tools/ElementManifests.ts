@@ -3,7 +3,6 @@ import { join } from "node:path"
 
 import type {
   SiteAttribute,
-  SiteOldName,
   SiteDataFile,
   SiteEvent,
   SiteNamed,
@@ -115,26 +114,19 @@ export class ElementManifests {
         attributes: tag.attributes
           .filter((attribute) => attribute.kind !== "json")
           .flatMap((attribute) =>
-            [attribute.name, ...(attribute.aliases ?? [])]
-              .map((name) => ({
-                name,
-                description: {
-                  kind: "markdown" as const,
-                  value: ElementManifests.attributeMarkdown(
-                    attribute,
-                    name === attribute.name ? undefined : attribute.name
-                  )
-                },
-                ...(ElementManifests.values(attribute).length && {
-                  values: ElementManifests.values(attribute).map((value) => ({ name: value }))
-                })
-              }))
-              .concat(
-                (attribute.replaces ?? []).map((old) => ({
-                  name: old.name,
-                  description: { kind: "markdown" as const, value: ElementManifests.oldNameMarkdown(attribute, old) }
-                }))
-              )
+            [attribute.name, ...(attribute.aliases ?? [])].map((name) => ({
+              name,
+              description: {
+                kind: "markdown" as const,
+                value: ElementManifests.attributeMarkdown(
+                  attribute,
+                  name === attribute.name ? undefined : attribute.name
+                )
+              },
+              ...(ElementManifests.values(attribute).length && {
+                values: ElementManifests.values(attribute).map((value) => ({ name: value }))
+              })
+            }))
           )
       }))
     }
@@ -394,14 +386,6 @@ export class ElementManifests {
           `  ${key}?: ${ElementManifests.jsxType(attribute)}`
         ])
       }
-      for (const old of attribute.replaces ?? []) {
-        if (members.has(old.name)) continue
-        const key = /^[a-zA-Z_$][\w$]*$/.test(old.name) ? old.name : JSON.stringify(old.name)
-        members.set(old.name, [
-          ...ElementManifests.docstring([`@deprecated ${ElementManifests.oldNameMarkdown(attribute, old)}`], "  "),
-          `  ${key}?: ${old.value === undefined ? ElementManifests.jsxType(attribute) : 'boolean | ""'}`
-        ])
-      }
       ElementManifests.deprecatedProp(
         members,
         attribute.property ?? ElementManifests.camel(attribute.name),
@@ -626,12 +610,6 @@ export class ElementManifests {
     lines.push("", `Takes:  ${ElementManifests.valueWords(attribute)}`)
     if (attribute.default !== undefined && attribute.default !== null) lines.push(`Default:  \`${attribute.default}\``)
     return lines.join("\n")
-  }
-
-  /** What an OLD name says in editors:  `An old name:  write \`color="primary"\`.` */
-  static oldNameMarkdown(attribute: SiteAttribute, old: SiteOldName): string {
-    const instead = old.value === undefined ? attribute.name : `${attribute.name}="${old.value}"`
-    return `An old name:  write \`${instead}\`.  It still works until every page is rewritten.`
   }
 
   /** `ui-breadcrumb` => `BreadcrumbSection`. */

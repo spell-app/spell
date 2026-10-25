@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and texts.
  *   The shape is `ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-ad unit="medium rectangle" centered>` => `ui medium rectangle centered ad`.
+ *   `<ui-ad unit="medium rectangle" align="center">` => `ui medium rectangle centered ad`.
  *   `UIAd.css` keys on those phrases (`[class*="medium rectangle"]`).
  * - `unit` is the IAB unit, written as its bare words, hence `kind: "valueOnly"` (as the menu's `position`).
  *   NOT `size`:  that's the generic `mini` … `massive`, and `medium rectangle` would read as one.
@@ -65,7 +65,7 @@ export const adVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  centred in its container.  Its old name is `centered`."
+      description: "`center`:  centred in its container.  Its old name was `centered`."
     },
     {
       name: "test",

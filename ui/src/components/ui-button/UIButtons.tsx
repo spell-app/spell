@@ -56,7 +56,7 @@ export class UIButtons extends E.UIComponent<typeof buttonsVocabulary> {
 
   /**
    * A child draws its own look:  a `color`, or `basic` among its `appearance` words.
-   * - Read from its attribute values, which already take old names (`primary`, `basic`) and other languages.
+   * - Read from its attribute values, which already take other languages.
    */
   private static drawsOwnLook(child: Element): boolean {
     const values = (child as Partial<E.DOMElement>).attributeValues

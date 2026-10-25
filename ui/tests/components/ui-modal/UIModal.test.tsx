@@ -657,20 +657,3 @@ describe("UI.modals", () => {
     }
   })
 })
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-modal> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-modal header="Old">Body</ui-modal>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-modal heading="New">Body</ui-modal>`
-    )
-    expect(written.heading).toBe("New")
-  })
-})

@@ -122,14 +122,6 @@ export interface UIAccordionAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
-   */
-  styled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -159,10 +151,6 @@ export interface UIAccordionAttributes {
    * - takes:  `compact` · `xs`
    */
   padding?: "compact" | "xs"
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -221,14 +209,10 @@ export interface UIAccordionAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -345,14 +329,10 @@ export interface UIAccordionAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -501,14 +481,10 @@ export interface UIActionAttributes {
    */
   "prop:value"?: string
   /**
-   * Dropdown:  its words;  defaults to the text content.  Its old name is `text`.
+   * Dropdown:  its words;  defaults to the text content.  Its old name was `text`.
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  text?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -555,14 +531,10 @@ export interface UIActionAttributes {
    */
   "prop:flag"?: string
   /**
-   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.
+   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -579,7 +551,7 @@ export interface UIActionAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
@@ -609,29 +581,21 @@ export interface UIActionAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).
+   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name was `fitted` (`horizontally`, `vertically`).
    * - takes:  `none` · `none-x` · `none-y`
    */
   padding?: "none" | "none-x" | "none-y"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "none" | "none-x" | "none-y"
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.
+   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
   kind?: "item" | "header" | "divider"
-  /**
-   * @deprecated An old name:  write `kind`.  It still works until every page is rewritten.
-   */
-  type?: "item" | "header" | "divider"
   /**
    * `kind`, as the DOM element's property.
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
@@ -897,14 +861,10 @@ export interface UIActionsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -1015,14 +975,10 @@ export interface UIAdAttributes {
     | "half banner"
     | "large mobile banner"
   /**
-   * `center`:  centred in its container.  Its old name is `centered`.
+   * `center`:  centred in its container.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -1149,14 +1105,10 @@ export interface UIAdAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -1390,14 +1342,10 @@ export interface UIAudioAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -1467,14 +1415,10 @@ export interface UIAudioJSXAttributes
 /** `<ui-author>`'s own attributes, from its vocabulary. */
 export interface UIAuthorAttributes {
   /**
-   * Renders a link (`<a>`), e.g. to a profile.  Its old name is `href`.
+   * Renders a link (`<a>`), e.g. to a profile.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -1649,14 +1593,10 @@ export interface UIAvatarAttributes {
    */
   "prop:src"?: string
   /**
-   * Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`.
+   * Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name was `alt`.
    * - takes:  text
    */
   tooltip?: string
-  /**
-   * @deprecated An old name:  write `tooltip`.  It still works until every page is rewritten.
-   */
-  alt?: string
   /**
    * `tooltip`, as the DOM element's property.
    * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
@@ -1773,14 +1713,10 @@ export interface UIAvatarAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -1825,28 +1761,20 @@ export interface UIAvatarJSXAttributes
 /** `<ui-breadcrumb>`'s own attributes, from its vocabulary. */
 export interface UIBreadcrumbAttributes {
   /**
-   * The current page:  bold, not a link, `aria-current="page"`.  Its old name is `active`.
+   * The current page:  bold, not a link, `aria-current="page"`.  Its old name was `active`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /**
-   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
-   */
-  active?: boolean | ""
   /**
    * `selected`, as the DOM element's property.
    * @deprecated write `selected` -- `prop:` stays only for compiled spell
    */
   "prop:selected"?: boolean | ""
   /**
-   * Renders a link (`<a>`) to this level.  Its old name is `href`.
+   * Renders a link (`<a>`) to this level.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -2161,14 +2089,10 @@ export interface UIBreadcrumbsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -2248,7 +2172,7 @@ export interface UIButtonAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Those four also work written alone, their old names.
+   * Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Written alone, they were its old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2269,22 +2193,6 @@ export interface UIButtonAttributes {
     | "black"
     | "positive"
     | "negative"
-  /**
-   * @deprecated An old name:  write `color="primary"`.  It still works until every page is rewritten.
-   */
-  primary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="positive"`.  It still works until every page is rewritten.
-   */
-  positive?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="negative"`.  It still works until every page is rewritten.
-   */
-  negative?: boolean | ""
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -2308,22 +2216,10 @@ export interface UIButtonAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Each word also works written alone, its old name.
+   * The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
-   */
-  tertiary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -2350,14 +2246,10 @@ export interface UIButtonAttributes {
    */
   "prop:toggle"?: boolean | ""
   /**
-   * Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`.
+   * Pressed / on;  with `toggle`, in the positive colour.  Its old name was `active`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /**
-   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
-   */
-  active?: boolean | ""
   /**
    * `selected`, as the DOM element's property.
    * @deprecated write `selected` -- `prop:` stays only for compiled spell
@@ -2419,27 +2311,15 @@ export interface UIButtonAttributes {
    */
   padding?: "none" | "compact"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  unpadded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "none" | "compact"
   /**
-   * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name is `wrapped`.
+   * Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name was `wrapped`.
    * - takes:  flag (present / absent)
    */
   wrap?: boolean | ""
-  /**
-   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
-   */
-  wrapped?: boolean | ""
   /**
    * `wrap`, as the DOM element's property.
    * @deprecated write `wrap` -- `prop:` stays only for compiled spell
@@ -2466,28 +2346,20 @@ export interface UIButtonAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name is `animated`.
+   * On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name was `animated`.
    * - takes:  `slide` · `fade` · `vertical`
    */
   reveal?: "slide" | "fade" | "vertical"
-  /**
-   * @deprecated An old name:  write `reveal="slide"`.  It still works until every page is rewritten.
-   */
-  animated?: boolean | ""
   /**
    * `reveal`, as the DOM element's property.
    * @deprecated write `reveal` -- `prop:` stays only for compiled spell
    */
   "prop:reveal"?: "slide" | "fade" | "vertical"
   /**
-   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -2514,14 +2386,10 @@ export interface UIButtonAttributes {
    */
   "prop:iconPosition"?: "left" | "right"
   /**
-   * The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.
+   * The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name was `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  content?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -2569,14 +2437,10 @@ export interface UIButtonAttributes {
    */
   "prop:command"?: string
   /**
-   * Renders a link (`<a>`) styled as a button.  Its old name is `href`.
+   * Renders a link (`<a>`) styled as a button.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -2761,7 +2625,7 @@ export interface UIButtonsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Those four also work written alone, their old names.
+   * The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Written alone, they were its old names.
    * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
    */
   color?:
@@ -2782,22 +2646,6 @@ export interface UIButtonsAttributes {
     | "black"
     | "positive"
     | "negative"
-  /**
-   * @deprecated An old name:  write `color="primary"`.  It still works until every page is rewritten.
-   */
-  primary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="positive"`.  It still works until every page is rewritten.
-   */
-  positive?: boolean | ""
-  /**
-   * @deprecated An old name:  write `color="negative"`.  It still works until every page is rewritten.
-   */
-  negative?: boolean | ""
   /**
    * `color`, as the DOM element's property.
    * @deprecated write `color` -- `prop:` stays only for compiled spell
@@ -2821,22 +2669,10 @@ export interface UIButtonsAttributes {
     | "positive"
     | "negative"
   /**
-   * The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Each word also works written alone, its old name.
+   * The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Written alone, each was its old name.
    * - takes:  space-separated:  `basic` · `tertiary` · `circular`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
-   */
-  tertiary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -2873,14 +2709,10 @@ export interface UIButtonsAttributes {
    */
   "prop:labeled"?: boolean | "" | "left" | "right"
   /**
-   * Room inside every button:  `compact` (reduced).  Its old name is `compact`.
+   * Room inside every button:  `compact` (reduced).  Its old name was `compact`.
    * - takes:  `compact`
    */
   padding?: "compact"
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -2897,14 +2729,10 @@ export interface UIButtonsAttributes {
    */
   "prop:toggle"?: boolean | ""
   /**
-   * Which way the buttons run:  `vertical` stacks them.  Its old name is `vertical`.
+   * Which way the buttons run:  `vertical` stacks them.  Its old name was `vertical`.
    * - takes:  `vertical`
    */
   direction?: "vertical"
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -2941,14 +2769,10 @@ export interface UIButtonsAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * Room between the buttons:  `md` separates them with gaps.  Its old name is `spaced`.
+   * Room between the buttons:  `md` separates them with gaps.  Its old name was `spaced`.
    * - takes:  `md`
    */
   spacing?: "md"
-  /**
-   * @deprecated An old name:  write `spacing="md"`.  It still works until every page is rewritten.
-   */
-  spaced?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
@@ -2965,14 +2789,10 @@ export interface UIButtonsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`.
+   * Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -3133,14 +2953,10 @@ export interface UIButtonsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -3290,10 +3106,6 @@ export interface UICalendarAttributes {
    * - takes:  `compact`
    */
   padding?: "compact"
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -3664,14 +3476,10 @@ export interface UICalendarAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -3805,36 +3613,20 @@ export interface UICardAttributes {
     | "positive"
     | "negative"
   /**
-   * `horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name is `horizontal`.
+   * `horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
   "prop:direction"?: "horizontal"
   /**
-   * The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`.
+   * The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names were `raised`, `link` (bare), `basic`, `dashed`.
    * - takes:  space-separated:  `raised` · `link` · `basic` · `dashed`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="dashed"`.  It still works until every page is rewritten.
-   */
-  dashed?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -3851,14 +3643,10 @@ export interface UICardAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * `center`:  centred in its container.  Its old name is `centered`.
+   * `center`:  centred in its container.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -3895,14 +3683,10 @@ export interface UICardAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance="link"`.  Its old name is `href`.
+   * Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance="link"`.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -3919,14 +3703,10 @@ export interface UICardAttributes {
    */
   "prop:target"?: string
   /**
-   * Shorthand:  the header of a content block.  Its old name is `header`.
+   * Shorthand:  the header of a content block.  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -4205,46 +3985,30 @@ export interface UICardsAttributes {
    */
   "prop:stackWith"?: "container" | "page"
   /**
-   * `center`:  centres each row of cards.  Its old name is `centered`.
+   * `center`:  centres each row of cards.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
   "prop:align"?: "center"
   /**
-   * `horizontal`:  every card horizontal.  Its old name is `horizontal`.
+   * `horizontal`:  every card horizontal.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
   "prop:direction"?: "horizontal"
   /**
-   * Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`.
+   * Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names were `raised`, `link` (bare), `basic`.
    * - takes:  space-separated:  `raised` · `link` · `basic`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -4371,14 +4135,10 @@ export interface UICardsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -4583,14 +4343,10 @@ export interface UICellAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -4713,10 +4469,6 @@ export interface UICheckboxAttributes {
    */
   appearance?: "slider" | "toggle"
   /**
-   * @deprecated An old name:  write `appearance`.  It still works until every page is rewritten.
-   */
-  type?: "slider" | "toggle"
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -4737,10 +4489,6 @@ export interface UICheckboxAttributes {
    */
   padding?: "none"
   /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -4760,10 +4508,6 @@ export interface UICheckboxAttributes {
    * - takes:  `right`
    */
   align?: "right"
-  /**
-   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
-   */
-  "right-aligned"?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -4960,14 +4704,10 @@ export interface UICheckboxAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -5246,14 +4986,10 @@ export interface UICodeAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -5662,14 +5398,10 @@ export interface UIColumnAttributes {
     | "16"
     | (string & {})
   /**
-   * No gutter on the `left` / `right` side.  Its old name is `attached`.
+   * No gutter on the `left` / `right` side.  Its old name was `attached`.
    * - takes:  `left` · `right`
    */
   attach?: "left" | "right"
-  /**
-   * @deprecated An old name:  write `attach`.  It still works until every page is rewritten.
-   */
-  attached?: "left" | "right"
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -5706,14 +5438,10 @@ export interface UIColumnAttributes {
    */
   "prop:only"?: string
   /**
-   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
+   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -5840,14 +5568,10 @@ export interface UIColumnAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -6022,14 +5746,10 @@ export interface UICommentAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -6108,10 +5828,6 @@ export interface UICommentsAttributes {
    * - takes:  space-separated:  `minimal`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="minimal"`.  It still works until every page is rewritten.
-   */
-  minimal?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -6248,14 +5964,10 @@ export interface UICommentsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -6430,14 +6142,10 @@ export interface UIComponentsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -6532,28 +6240,20 @@ export interface UIContainerAttributes {
    */
   "prop:grid"?: boolean | ""
   /**
-   * With `grid`:  room for a grid's wider gutters (`spacing="lg"`, `xl` wider still).  Its old name is `relaxed`.
+   * With `grid`:  room for a grid's wider gutters (`spacing="lg"`, `xl` wider still).  Its old name was `relaxed`.
    * - takes:  `lg` · `xl`
    */
   spacing?: "lg" | "xl"
-  /**
-   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
-   */
-  relaxed?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
    */
   "prop:spacing"?: "lg" | "xl"
   /**
-   * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`.
+   * Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -6690,14 +6390,10 @@ export interface UIContainerAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -6772,14 +6468,10 @@ export interface UIContentAttributes {
    */
   "prop:scrolling"?: boolean | ""
   /**
-   * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`.
+   * Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -6906,14 +6598,10 @@ export interface UIContentAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -7088,14 +6776,10 @@ export interface UIDateAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -7260,14 +6944,10 @@ export interface UIDescriptionAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -7322,14 +7002,10 @@ export interface UIDescriptionJSXAttributes
 /** `<ui-detail>`'s own attributes, from its vocabulary. */
 export interface UIDetailAttributes {
   /**
-   * Renders a link (`<a class="detail" href>`).  Its old name is `href`.
+   * Renders a link (`<a class="detail" href>`).  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -7565,10 +7241,6 @@ export interface UIDimmerAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="simple"`.  It still works until every page is rewritten.
-   */
-  simple?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -7715,14 +7387,10 @@ export interface UIDimmerAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -7853,18 +7521,10 @@ export interface UIDividerAttributes {
     | "positive"
     | "negative"
   /**
-   * `horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`.
+   * `horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names were `horizontal`, `vertical`.
    * - takes:  `horizontal` · `vertical`
    */
   direction?: "horizontal" | "vertical"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -7881,14 +7541,10 @@ export interface UIDividerAttributes {
    */
   "prop:spacer"?: boolean | ""
   /**
-   * `none`:  no space above or below.  Its old name is `fitted`.
+   * `none`:  no space above or below.  Its old name was `fitted`.
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -7925,14 +7581,10 @@ export interface UIDividerAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`.
+   * With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -8059,14 +7711,10 @@ export interface UIDividerAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -8296,10 +7944,6 @@ export interface UIDropdownAttributes {
    */
   padding?: "compact"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -8329,10 +7973,6 @@ export interface UIDropdownAttributes {
    * - takes:  space-separated:  `simple`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="simple"`.  It still works until every page is rewritten.
-   */
-  simple?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -8394,10 +8034,6 @@ export interface UIDropdownAttributes {
    */
   limit?: "none"
   /**
-   * @deprecated An old name:  write `limit="none"`.  It still works until every page is rewritten.
-   */
-  unlimited?: boolean | ""
-  /**
    * `limit`, as the DOM element's property.
    * @deprecated write `limit` -- `prop:` stays only for compiled spell
    */
@@ -8417,22 +8053,6 @@ export interface UIDropdownAttributes {
    * - takes:  `very-short` · `short` · `long` · `very-long`
    */
   length?: "very-short" | "short" | "long" | "very-long"
-  /**
-   * @deprecated An old name:  write `length="short"`.  It still works until every page is rewritten.
-   */
-  short?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="very-short"`.  It still works until every page is rewritten.
-   */
-  "very-short"?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="long"`.  It still works until every page is rewritten.
-   */
-  long?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="very-long"`.  It still works until every page is rewritten.
-   */
-  "very-long"?: boolean | ""
   /**
    * `length`, as the DOM element's property.
    * @deprecated write `length` -- `prop:` stays only for compiled spell
@@ -8494,10 +8114,6 @@ export interface UIDropdownAttributes {
    */
   direction?: string
   /**
-   * @deprecated An old name:  write `direction="up"`.  It still works until every page is rewritten.
-   */
-  upward?: boolean | ""
-  /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
@@ -8537,10 +8153,6 @@ export interface UIDropdownAttributes {
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  text?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -8719,14 +8331,10 @@ export interface UIDropdownAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -9043,14 +8651,10 @@ export interface UIEmbedAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -9256,14 +8860,10 @@ export interface UIEmojiAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -9387,10 +8987,6 @@ export interface UIFeedEventAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -9506,14 +9102,10 @@ export interface UIFeedEventAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -9678,14 +9270,10 @@ export interface UIExtraAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -9829,10 +9417,6 @@ export interface UIFeedAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -9958,14 +9542,10 @@ export interface UIFeedAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -10296,14 +9876,10 @@ export interface UIFieldAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -10528,14 +10104,10 @@ export interface UIFieldsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -10720,14 +10292,10 @@ export interface UIFlagAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -10936,14 +10504,10 @@ export interface UIFlyoutAttributes {
    */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
-   * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`.
+   * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -11070,14 +10634,10 @@ export interface UIFlyoutAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -11467,14 +11027,10 @@ export interface UIFormAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -11646,32 +11202,20 @@ export interface UIGridAttributes {
    */
   "prop:celled"?: boolean | "" | "internally"
   /**
-   * `md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`.
+   * `md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name was `padded`.
    * - takes:  `md` · `md-x` · `md-y`
    */
   padding?: "md" | "md-x" | "md-y"
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "md" | "md-x" | "md-y"
   /**
-   * The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names are `compact` and `relaxed`.
+   * The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names were `compact` and `relaxed`.
    * - takes:  `xs` · `compact` · `lg` · `xl`
    */
   spacing?: "xs" | "compact" | "lg" | "xl"
-  /**
-   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
-   */
-  relaxed?: boolean | ""
-  /**
-   * @deprecated An old name:  write `spacing="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
@@ -11758,14 +11302,10 @@ export interface UIGridAttributes {
    */
   "prop:stackWith"?: "container" | "page"
   /**
-   * Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
+   * Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -11892,14 +11432,10 @@ export interface UIGridAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -12058,14 +11594,10 @@ export interface UIHeaderAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`.
+   * Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -12082,28 +11614,20 @@ export interface UIHeaderAttributes {
    */
   "prop:seamless"?: boolean | ""
   /**
-   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.
+   * Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
   "prop:align"?: "left" | "center" | "right" | "justified"
   /**
-   * `none`:  no padding.  Its old name is `fitted`.
+   * `none`:  no padding.  Its old name was `fitted`.
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -12130,14 +11654,10 @@ export interface UIHeaderAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Renders a link (`<a>`) styled as a header.  Its old name is `href`.
+   * Renders a link (`<a>`) styled as a header.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -12396,14 +11916,10 @@ export interface UIIconAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * `none`:  no gap after the glyph and no extra width.  Its old name is `fitted`.
+   * `none`:  no gap after the glyph and no extra width.  Its old name was `fitted`.
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -12414,18 +11930,6 @@ export interface UIIconAttributes {
    * - takes:  space-separated:  `outline` · `link` · `circular` · `bordered`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="outline"`.  It still works until every page is rewritten.
-   */
-  outline?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -12552,14 +12056,10 @@ export interface UIIconAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -12811,14 +12311,10 @@ export interface UIIconPickerAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -12938,14 +12434,10 @@ export interface UIIconsAttributes {
    */
   "prop:loading"?: boolean | ""
   /**
-   * `none`:  no gap after the group.  Its old name is `fitted`.
+   * `none`:  no gap after the group.  Its old name was `fitted`.
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -12956,14 +12448,6 @@ export interface UIIconsAttributes {
    * - takes:  space-separated:  `circular` · `bordered`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -13070,14 +12554,10 @@ export interface UIIconsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -13147,31 +12627,15 @@ export interface UIImageAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="rounded"`.  It still works until every page is rewritten.
-   */
-  rounded?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
   /**
-   * `center`:  a block centred in its container.  Its old name is `centered`.
+   * `center`:  a block centred in its container.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -13218,14 +12682,10 @@ export interface UIImageAttributes {
    */
   "prop:floated"?: "left" | "right"
   /**
-   * Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`.
+   * Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name was `spaced`.
    * - takes:  `md` · `left` · `right`
    */
   spacing?: "md" | "left" | "right"
-  /**
-   * @deprecated An old name:  write `spacing="md"`.  It still works until every page is rewritten.
-   */
-  spaced?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
@@ -13302,14 +12762,10 @@ export interface UIImageAttributes {
    */
   "prop:loading"?: "eager" | "lazy"
   /**
-   * Renders a link (`<a>`) around the image.  Its old name is `href`.
+   * Renders a link (`<a>`) around the image.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -13479,31 +12935,15 @@ export interface UIImagesAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="rounded"`.  It still works until every page is rewritten.
-   */
-  rounded?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
   /**
-   * `center`:  rows centred in the container.  Its old name is `centered`.
+   * `center`:  rows centred in the container.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -13640,14 +13080,10 @@ export interface UIImagesAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -13763,14 +13199,10 @@ export interface UIIncludeAttributes {
    */
   "prop:load"?: "eager" | "visible" | "idle"
   /**
-   * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name is `select`.
+   * CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -13897,14 +13329,10 @@ export interface UIIncludeAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -14084,10 +13512,6 @@ export interface UIInputAttributes {
    * - takes:  space-separated:  `transparent`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="transparent"`.  It still works until every page is rewritten.
-   */
-  transparent?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -14474,14 +13898,10 @@ export interface UIInputAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -14600,14 +14020,10 @@ export interface UIItemAttributes {
    */
   "prop:value"?: string
   /**
-   * Dropdown:  its words;  defaults to the text content.  Its old name is `text`.
+   * Dropdown:  its words;  defaults to the text content.  Its old name was `text`.
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  text?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -14654,14 +14070,10 @@ export interface UIItemAttributes {
    */
   "prop:flag"?: string
   /**
-   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.
+   * List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -14678,7 +14090,7 @@ export interface UIItemAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
@@ -14708,29 +14120,21 @@ export interface UIItemAttributes {
    */
   "prop:selected"?: boolean | ""
   /**
-   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).
+   * Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name was `fitted` (`horizontally`, `vertically`).
    * - takes:  `none` · `none-x` · `none-y`
    */
   padding?: "none" | "none-x" | "none-y"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "none" | "none-x" | "none-y"
   /**
-   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.
+   * An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.
    * - takes:  `item` · `header` · `divider`
    * - default:  `item`
    */
   kind?: "item" | "header" | "divider"
-  /**
-   * @deprecated An old name:  write `kind`.  It still works until every page is rewritten.
-   */
-  type?: "item" | "header" | "divider"
   /**
    * `kind`, as the DOM element's property.
    * @deprecated write `kind` -- `prop:` stays only for compiled spell
@@ -14885,28 +14289,20 @@ export interface UIItemsAttributes {
    */
   "prop:divided"?: boolean | ""
   /**
-   * Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).
+   * Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed="very"`).
    * - takes:  `lg` · `xl`
    */
   spacing?: "lg" | "xl"
-  /**
-   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
-   */
-  relaxed?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
    */
   "prop:spacing"?: "lg" | "xl"
   /**
-   * The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name is the bare `link` switch.
+   * The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name was the bare `link` switch.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
-   */
-  link?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -15053,9 +14449,10 @@ export interface UIItemsAttributes {
     | "glow"
     | "none"
   /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
    */
-  href?: string
+  link?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -15241,14 +14638,10 @@ export interface UIKeysAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -15432,45 +14825,25 @@ export interface UILabelAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="tinted"`.  It still works until every page is rewritten.
-   */
-  tinted?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
   /**
-   * Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` (bare:  `top`).
+   * Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`).
    * - takes:  `top` · `bottom` · `top left` · `top right` · `bottom left` · `bottom right`
    */
   attach?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
-  /**
-   * @deprecated An old name:  write `attach="top"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
   "prop:attach"?: "top" | "bottom" | "top left" | "top right" | "bottom left" | "bottom right"
   /**
-   * `horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`.
+   * `horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -15497,14 +14870,10 @@ export interface UILabelAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * `center` centres its content.  Its old name is `centered`.
+   * `center` centres its content.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -15521,14 +14890,10 @@ export interface UILabelAttributes {
    */
   "prop:prompt"?: boolean | ""
   /**
-   * Selected / on.  Its old name is `active`.
+   * Selected / on.  Its old name was `active`.
    * - takes:  flag (present / absent)
    */
   selected?: boolean | ""
-  /**
-   * @deprecated An old name:  write `selected`.  It still works until every page is rewritten.
-   */
-  active?: boolean | ""
   /**
    * `selected`, as the DOM element's property.
    * @deprecated write `selected` -- `prop:` stays only for compiled spell
@@ -15585,14 +14950,10 @@ export interface UILabelAttributes {
    */
   "prop:removable"?: boolean | ""
   /**
-   * Renders a link (`<a>`) styled as a label.  Its old name is `href`.
+   * Renders a link (`<a>`) styled as a label.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -15822,31 +15183,15 @@ export interface UILabelsAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="tinted"`.  It still works until every page is rewritten.
-   */
-  tinted?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
   /**
-   * `horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`.
+   * `horizontal`:  every label a fixed-width tag.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -15873,14 +15218,10 @@ export interface UILabelsAttributes {
    */
   "prop:fluid"?: boolean | ""
   /**
-   * `center`:  every label centred.  Its old name is `centered`.
+   * `center`:  every label centred.  Its old name was `centered`.
    * - takes:  `center`
    */
   align?: "center"
-  /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -16007,14 +15348,10 @@ export interface UILabelsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -16243,14 +15580,10 @@ export interface UILinkAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -16354,14 +15687,10 @@ export interface UIListAttributes {
    */
   "prop:suffixed"?: boolean | ""
   /**
-   * The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name is the bare `link` switch.
+   * The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name was the bare `link` switch.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
-   */
-  link?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -16378,28 +15707,20 @@ export interface UIListAttributes {
    */
   "prop:selection"?: boolean | ""
   /**
-   * What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`.
+   * What an item does when hovered:  `indent`, it moves in.  Its old name was `animated`.
    * - takes:  `indent`
    */
   hover?: "indent"
-  /**
-   * @deprecated An old name:  write `hover="indent"`.  It still works until every page is rewritten.
-   */
-  animated?: boolean | ""
   /**
    * `hover`, as the DOM element's property.
    * @deprecated write `hover` -- `prop:` stays only for compiled spell
    */
   "prop:hover"?: "indent"
   /**
-   * Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name is the bare `horizontal` switch.
+   * Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name was the bare `horizontal` switch.
    * - takes:  `vertical` · `horizontal`
    */
   direction?: "vertical" | "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -16426,28 +15747,20 @@ export interface UIListAttributes {
    */
   "prop:celled"?: boolean | ""
   /**
-   * Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).
+   * Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed="very"`).
    * - takes:  `lg` · `xl`
    */
   spacing?: "lg" | "xl"
-  /**
-   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
-   */
-  relaxed?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
    */
   "prop:spacing"?: "lg" | "xl"
   /**
-   * `none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name is `fitted`.
+   * `none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name was `fitted`.
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -16584,9 +15897,10 @@ export interface UIListAttributes {
     | "glow"
     | "none"
   /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
    */
-  href?: string
+  link?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -16745,10 +16059,6 @@ export interface UILoaderAttributes {
    */
   align?: "center"
   /**
-   * @deprecated An old name:  write `align="center"`.  It still works until every page is rewritten.
-   */
-  centered?: boolean | ""
-  /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
@@ -16894,14 +16204,10 @@ export interface UILoaderAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -17188,14 +16494,10 @@ export interface UIMarkdownAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -17362,30 +16664,6 @@ export interface UIMenuAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
-   */
-  tabular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
-   */
-  pointing?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
-   */
-  text?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
-   */
-  link?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="borderless"`.  It still works until every page is rewritten.
-   */
-  borderless?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -17401,14 +16679,10 @@ export interface UIMenuAttributes {
    */
   "prop:position"?: "left" | "right" | "center"
   /**
-   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.
+   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name was the bare `vertical` switch.
    * - takes:  `horizontal` · `vertical`
    */
   direction?: "horizontal" | "vertical"
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -17485,14 +16759,10 @@ export interface UIMenuAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.
+   * With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`.
    * - takes:  flag (present / absent)
    */
   wrap?: boolean | ""
-  /**
-   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
-   */
-  wrapped?: boolean | ""
   /**
    * `wrap`, as the DOM element's property.
    * @deprecated write `wrap` -- `prop:` stays only for compiled spell
@@ -17514,27 +16784,15 @@ export interface UIMenuAttributes {
    */
   padding?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -17551,14 +16809,10 @@ export interface UIMenuAttributes {
    */
   "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
-   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name is `alignment`.
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name was `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   align?: "fluid" | "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  alignment?: "fluid" | "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -17739,9 +16993,10 @@ export interface UIMenuAttributes {
     | "glow"
     | "none"
   /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
    */
-  href?: string
+  link?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -17891,10 +17146,6 @@ export interface UIMessageAttributes {
    */
   padding?: "compact"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -17925,10 +17176,6 @@ export interface UIMessageAttributes {
    */
   attach?: "both" | "top" | "bottom"
   /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
-  /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
    */
@@ -17938,10 +17185,6 @@ export interface UIMessageAttributes {
    * - takes:  `center` · `right`
    */
   align?: "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -17958,14 +17201,10 @@ export interface UIMessageAttributes {
    */
   "prop:icon"?: string
   /**
-   * Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name is `header`.
+   * Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -18092,14 +17331,10 @@ export interface UIMessageAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -18272,14 +17507,10 @@ export interface UIMetaAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -18387,10 +17618,6 @@ export interface UIModalAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -18467,14 +17694,10 @@ export interface UIModalAttributes {
    */
   "prop:closedBy"?: "any" | "closerequest" | "none"
   /**
-   * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`.
+   * Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -18601,14 +17824,10 @@ export interface UIModalAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -18870,10 +18089,6 @@ export interface UINagAttributes {
    */
   persistent?: boolean | ""
   /**
-   * @deprecated An old name:  write `persistent`.  It still works until every page is rewritten.
-   */
-  persist?: boolean | ""
-  /**
    * `persistent`, as the DOM element's property.
    * @deprecated write `persistent` -- `prop:` stays only for compiled spell
    */
@@ -19040,14 +18255,10 @@ export interface UINagAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -19118,14 +18329,10 @@ export interface UINagJSXAttributes
 /** `<ui-or>`'s own attributes, from its vocabulary. */
 export interface UIOrAttributes {
   /**
-   * Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`.
+   * Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name was `text`.
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  text?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -19242,14 +18449,10 @@ export interface UIOrAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -19543,14 +18746,10 @@ export interface UIPageAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -19742,15 +18941,11 @@ export interface UIPanelAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   open?: boolean | ""
-  /**
-   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
-   */
-  collapsed?: boolean | ""
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
@@ -19867,22 +19062,6 @@ export interface UIPanelAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
-   */
-  styled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -19893,14 +19072,6 @@ export interface UIPanelAttributes {
    */
   padding?: "compact" | "md" | "lg"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -19910,10 +19081,6 @@ export interface UIPanelAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -19944,10 +19111,6 @@ export interface UIPanelAttributes {
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -19994,14 +19157,10 @@ export interface UIPanelAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -20098,14 +19257,10 @@ export interface UIPanelAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -20318,14 +19473,10 @@ export interface UIPlaceholderAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -20500,14 +19651,10 @@ export interface UIPlaceholderHeaderAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -20694,14 +19841,10 @@ export interface UIPlaceholderImageAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -20876,14 +20019,10 @@ export interface UIPlaceholderLineAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -21048,14 +20187,10 @@ export interface UIPlaceholderParagraphAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -21187,10 +20322,6 @@ export interface UIPopupAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -21312,14 +20443,10 @@ export interface UIPopupAttributes {
    */
   "prop:htmlFor"?: string
   /**
-   * Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`.
+   * Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -21330,10 +20457,6 @@ export interface UIPopupAttributes {
    * - takes:  text
    */
   label?: string
-  /**
-   * @deprecated An old name:  write `label`.  It still works until every page is rewritten.
-   */
-  content?: string
   /**
    * `label`, as the DOM element's property.
    * @deprecated write `label` -- `prop:` stays only for compiled spell
@@ -21484,14 +20607,10 @@ export interface UIPopupAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -21641,10 +20760,6 @@ export interface UIProgressAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -21685,10 +20800,6 @@ export interface UIProgressAttributes {
    */
   align?: "right"
   /**
-   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
-   */
-  "right-aligned"?: boolean | ""
-  /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
@@ -21708,10 +20819,6 @@ export interface UIProgressAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -21889,14 +20996,10 @@ export interface UIProgressAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -22268,14 +21371,10 @@ export interface UIPropertyAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -22462,14 +21561,10 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`.
+   * With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -22730,15 +21825,11 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   open?: boolean | ""
-  /**
-   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
-   */
-  collapsed?: boolean | ""
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
@@ -22845,22 +21936,6 @@ export interface UIPropertyEditorAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
-   */
-  styled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -22871,14 +21946,6 @@ export interface UIPropertyEditorAttributes {
    */
   padding?: "compact" | "md" | "lg"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -22888,10 +21955,6 @@ export interface UIPropertyEditorAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -22922,10 +21985,6 @@ export interface UIPropertyEditorAttributes {
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -23022,14 +22081,10 @@ export interface UIPropertyEditorAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -23218,14 +22273,10 @@ export interface UIPropertyGroupEventMap {
 /** `<ui-property-group>`'s own attributes, from its vocabulary. */
 export interface UIPropertyGroupAttributes {
   /**
-   * A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name is `select`.
+   * A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -23352,15 +22403,11 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   open?: boolean | ""
-  /**
-   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
-   */
-  collapsed?: boolean | ""
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
@@ -23477,22 +22524,6 @@ export interface UIPropertyGroupAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
-   */
-  styled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -23503,14 +22534,6 @@ export interface UIPropertyGroupAttributes {
    */
   padding?: "compact" | "md" | "lg"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -23520,10 +22543,6 @@ export interface UIPropertyGroupAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -23554,10 +22573,6 @@ export interface UIPropertyGroupAttributes {
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -23684,14 +22699,10 @@ export interface UIPropertyGroupAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -23891,14 +22902,10 @@ export interface UIPushableAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -24063,14 +23070,10 @@ export interface UIPusherAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -24255,14 +23258,10 @@ export interface UIQuoteAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -24385,10 +23384,6 @@ export interface UIRadioAttributes {
    */
   appearance?: "slider" | "toggle"
   /**
-   * @deprecated An old name:  write `appearance`.  It still works until every page is rewritten.
-   */
-  type?: "slider" | "toggle"
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -24398,10 +23393,6 @@ export interface UIRadioAttributes {
    * - takes:  `none`
    */
   padding?: "none"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -24422,10 +23413,6 @@ export interface UIRadioAttributes {
    * - takes:  `right`
    */
   align?: "right"
-  /**
-   * @deprecated An old name:  write `align="right"`.  It still works until every page is rewritten.
-   */
-  "right-aligned"?: boolean | ""
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -24612,14 +23599,10 @@ export interface UIRadioAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -24709,14 +23692,10 @@ export interface UIRailAttributes {
    */
   "prop:dividing"?: boolean | ""
   /**
-   * `both`:  flush against its container, no gap.  Its old name is `attached`.
+   * `both`:  flush against its container, no gap.  Its old name was `attached`.
    * - takes:  `both`
    */
   attach?: "both"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -24843,14 +23822,10 @@ export interface UIRailAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -25150,14 +24125,10 @@ export interface UIRatingAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -25348,14 +24319,10 @@ export interface UIRepeatAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -25470,14 +24437,10 @@ export interface UIRevealAttributes {
    */
   "prop:instant"?: boolean | ""
   /**
-   * `none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name is `unclipped`.
+   * `none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name was `unclipped`.
    * - takes:  `none`
    */
   clip?: "none"
-  /**
-   * @deprecated An old name:  write `clip="none"`.  It still works until every page is rewritten.
-   */
-  unclipped?: boolean | ""
   /**
    * `clip`, as the DOM element's property.
    * @deprecated write `clip` -- `prop:` stays only for compiled spell
@@ -25604,14 +24567,10 @@ export interface UIRevealAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -25915,14 +24874,10 @@ export interface UIRootAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -26125,14 +25080,10 @@ export interface UIRowAttributes {
    */
   "prop:divided"?: boolean | ""
   /**
-   * Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`.
+   * Wider gutters:  `lg`, `xl` wider still.  Its old name was `relaxed`.
    * - takes:  `lg` · `xl`
    */
   spacing?: "lg" | "xl"
-  /**
-   * @deprecated An old name:  write `spacing="lg"`.  It still works until every page is rewritten.
-   */
-  relaxed?: boolean | ""
   /**
    * `spacing`, as the DOM element's property.
    * @deprecated write `spacing` -- `prop:` stays only for compiled spell
@@ -26199,14 +25150,10 @@ export interface UIRowAttributes {
    */
   "prop:reversed"?: string
   /**
-   * Aligns its columns' text.  Its old name is `text-align`.
+   * Aligns its columns' text.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -26333,14 +25280,10 @@ export interface UIRowAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -26457,10 +25400,6 @@ export interface UISearchAttributes {
    */
   direction?: "horizontal"
   /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
-  /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
@@ -26501,22 +25440,6 @@ export interface UISearchAttributes {
    */
   length?: "very-short" | "short" | "long" | "very-long"
   /**
-   * @deprecated An old name:  write `length="short"`.  It still works until every page is rewritten.
-   */
-  short?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="very-short"`.  It still works until every page is rewritten.
-   */
-  "very-short"?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="long"`.  It still works until every page is rewritten.
-   */
-  long?: boolean | ""
-  /**
-   * @deprecated An old name:  write `length="very-long"`.  It still works until every page is rewritten.
-   */
-  "very-long"?: boolean | ""
-  /**
    * `length`, as the DOM element's property.
    * @deprecated write `length` -- `prop:` stays only for compiled spell
    */
@@ -26526,10 +25449,6 @@ export interface UISearchAttributes {
    * - takes:  `left` · `right`
    */
   align?: "left" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  aligned?: "left" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -26823,14 +25742,10 @@ export interface UISearchAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -27044,15 +25959,11 @@ export interface UISectionAttributes {
    */
   "prop:collapsible"?: boolean | ""
   /**
-   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.
+   * Open;  `open="false"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).
    * - takes:  flag (present / absent)
    * - default:  `true`
    */
   open?: boolean | ""
-  /**
-   * @deprecated An old name:  write `open="false"`.  It still works until every page is rewritten.
-   */
-  collapsed?: boolean | ""
   /**
    * `open`, as the DOM element's property.
    * @deprecated write `open` -- `prop:` stays only for compiled spell
@@ -27169,22 +26080,6 @@ export interface UISectionAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="bordered"`.  It still works until every page is rewritten.
-   */
-  bordered?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="styled"`.  It still works until every page is rewritten.
-   */
-  styled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -27195,14 +26090,6 @@ export interface UISectionAttributes {
    */
   padding?: "compact" | "md" | "lg"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -27212,10 +26099,6 @@ export interface UISectionAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -27246,10 +26129,6 @@ export interface UISectionAttributes {
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -27296,14 +26175,10 @@ export interface UISectionAttributes {
    */
   "prop:source"?: string
   /**
-   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.
+   * With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.
    * - takes:  text
    */
   selector?: string
-  /**
-   * @deprecated An old name:  write `selector`.  It still works until every page is rewritten.
-   */
-  select?: string
   /**
    * `selector`, as the DOM element's property.
    * @deprecated write `selector` -- `prop:` stays only for compiled spell
@@ -27400,14 +26275,10 @@ export interface UISectionAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -27612,14 +26483,10 @@ export interface UISectionsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -27728,42 +26595,10 @@ export interface UISegmentAttributes {
     | "positive"
     | "negative"
   /**
-   * The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.
+   * The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.
    * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `vertical` · `circular` · `basic` · `secondary` · `tertiary`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="stacked"`.  It still works until every page is rewritten.
-   */
-  stacked?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="piled"`.  It still works until every page is rewritten.
-   */
-  piled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="tertiary"`.  It still works until every page is rewritten.
-   */
-  tertiary?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -27780,22 +26615,10 @@ export interface UISegmentAttributes {
    */
   "prop:placeholder"?: boolean | ""
   /**
-   * Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`.
+   * Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names were `fitted`, `compact`, `padded`.
    * - takes:  `none` · `none-x` · `none-y` · `compact` · `md` · `lg`
    */
   padding?: "none" | "none-x" | "none-y" | "compact" | "md" | "lg"
-  /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -27812,28 +26635,20 @@ export interface UISegmentAttributes {
    */
   "prop:clearing"?: boolean | ""
   /**
-   * Aligns its text `left`, `center` or `right`.  Its old name is `text-align`.
+   * Aligns its text `left`, `center` or `right`.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right`
    */
   align?: "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
    */
   "prop:align"?: "left" | "center" | "right"
   /**
-   * Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name is `attached`.
+   * Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom` · `left` · `right`
    */
   attach?: "both" | "top" | "bottom" | "left" | "right"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -27990,14 +26805,10 @@ export interface UISegmentAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -28062,14 +26873,10 @@ export interface UISegmentsAttributes {
    */
   "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
   /**
-   * `horizontal`:  side by side instead of stacked.  Its old name is `horizontal`.
+   * `horizontal`:  side by side instead of stacked.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -28106,40 +26913,20 @@ export interface UISegmentsAttributes {
    */
   "prop:stackable"?: boolean | ""
   /**
-   * The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`.
+   * The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names were `raised`, `stacked`, `piled`, `basic`.
    * - takes:  space-separated:  `raised` · `stacked` · `tall-stacked` · `piled` · `basic`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="raised"`.  It still works until every page is rewritten.
-   */
-  raised?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="stacked"`.  It still works until every page is rewritten.
-   */
-  stacked?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="piled"`.  It still works until every page is rewritten.
-   */
-  piled?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
   /**
-   * `compact`:  only as wide as its content.  Its old name is `compact`.
+   * `compact`:  only as wide as its content.  Its old name was `compact`.
    * - takes:  `compact`
    */
   padding?: "compact"
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -28266,14 +27053,10 @@ export interface UISegmentsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -28371,10 +27154,6 @@ export interface UISelectAttributes {
    * - takes:  `compact`
    */
   padding?: "compact"
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
   /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
@@ -28572,14 +27351,10 @@ export interface UISelectAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -28810,14 +27585,10 @@ export interface UIShapeAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -28987,14 +27758,10 @@ export interface UISideAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -29291,14 +28058,10 @@ export interface UISidebarAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -29450,10 +28213,6 @@ export interface UISliderAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -29544,14 +28303,6 @@ export interface UISliderAttributes {
    */
   direction?: string
   /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
-  /**
-   * @deprecated An old name:  write `direction="reversed"`.  It still works until every page is rewritten.
-   */
-  reversed?: boolean | ""
-  /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
@@ -29561,10 +28312,6 @@ export interface UISliderAttributes {
    * - takes:  `bottom` · `right`
    */
   align?: "bottom" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  aligned?: "bottom" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -29765,14 +28512,10 @@ export interface UISliderAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -30009,14 +28752,10 @@ export interface UIStackAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -30125,14 +28864,10 @@ export interface UIStatisticAttributes {
     | "positive"
     | "negative"
   /**
-   * `horizontal`:  value and label on one line.  Its old name is `horizontal`.
+   * `horizontal`:  value and label on one line.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -30299,14 +29034,10 @@ export interface UIStatisticAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -30405,14 +29136,10 @@ export interface UIStatisticsAttributes {
     | "positive"
     | "negative"
   /**
-   * `horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`.
+   * `horizontal`:  statistics stacked, each with its label beside its value.  Its old name was `horizontal`.
    * - takes:  `horizontal`
    */
   direction?: "horizontal"
-  /**
-   * @deprecated An old name:  write `direction="horizontal"`.  It still works until every page is rewritten.
-   */
-  horizontal?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -30579,14 +29306,10 @@ export interface UIStatisticsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -30715,14 +29438,10 @@ export interface UIStepAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
-   * Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`.
+   * Where it goes:  renders a link (`<a>`) styled as a step.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -30739,7 +29458,7 @@ export interface UIStepAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name is the bare `link` switch.
+   * The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name was the bare `link` switch.
    * - takes:  space-separated:  `link`
    */
   appearance?: string
@@ -30759,14 +29478,10 @@ export interface UIStepAttributes {
    */
   "prop:icon"?: string
   /**
-   * Shorthand for the title (Fomantic's `.title`).  Its old name is `header`.
+   * Shorthand for the title (Fomantic's `.title`).  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -30995,28 +29710,20 @@ export interface UIStepsAttributes {
    */
   "prop:ordered"?: boolean | ""
   /**
-   * Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` (`vertical="right"`).
+   * Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name was `vertical` (`vertical="right"`).
    * - takes:  `horizontal` · `vertical` · `vertical-right`
    */
   direction?: "horizontal" | "vertical" | "vertical-right"
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
    */
   "prop:direction"?: "horizontal" | "vertical" | "vertical-right"
   /**
-   * The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name is the bare `circular` switch.
+   * The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name was the bare `circular` switch.
    * - takes:  space-separated:  `circular`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="circular"`.  It still works until every page is rewritten.
-   */
-  circular?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -31043,14 +29750,10 @@ export interface UIStepsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name is `attached`.
+   * Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -31217,14 +29920,10 @@ export interface UIStepsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -31435,14 +30134,10 @@ export interface UIStickyAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -31617,14 +30312,10 @@ export interface UISummaryAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -31763,14 +30454,10 @@ export interface UITabAttributes {
    */
   "prop:lazy"?: boolean | ""
   /**
-   * Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name is `attached`.
+   * Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -31791,10 +30478,6 @@ export interface UITabAttributes {
    * - takes:  space-separated:  `basic`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -31901,14 +30584,10 @@ export interface UITabAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -32122,18 +30801,6 @@ export interface UITableAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="striped"`.  It still works until every page is rewritten.
-   */
-  striped?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="structured"`.  It still works until every page is rewritten.
-   */
-  structured?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -32154,14 +30821,6 @@ export interface UITableAttributes {
    */
   padding?: "xs" | "compact" | "md" | "lg"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="md"`.  It still works until every page is rewritten.
-   */
-  padded?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
@@ -32171,10 +30830,6 @@ export interface UITableAttributes {
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -32279,10 +30934,6 @@ export interface UITableAttributes {
    * - takes:  `left` · `center` · `right` · `justified`
    */
   align?: "left" | "center" | "right" | "justified"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  "text-align"?: "left" | "center" | "right" | "justified"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -32471,14 +31122,10 @@ export interface UITableAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -32613,26 +31260,6 @@ export interface UITabsAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
-   */
-  tabular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
-   */
-  pointing?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
-   */
-  text?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="basic"`.  It still works until every page is rewritten.
-   */
-  basic?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -32648,14 +31275,10 @@ export interface UITabsAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch.
+   * Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name was the bare `vertical` switch.
    * - takes:  `horizontal` · `vertical`
    */
   direction?: "horizontal" | "vertical"
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -32677,23 +31300,15 @@ export interface UITabsAttributes {
    */
   padding?: "compact"
   /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "compact"
   /**
-   * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name is `alignment`.
+   * Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction="vertical"`.  Its old name was `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   align?: "fluid" | "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  alignment?: "fluid" | "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -32710,14 +31325,10 @@ export interface UITabsAttributes {
    */
   "prop:equal"?: boolean | ""
   /**
-   * Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`).
+   * Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`).
    * - takes:  `top` · `bottom`
    */
   attach?: "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="top"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -32865,14 +31476,10 @@ export interface UITabsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -33068,14 +31675,10 @@ export interface UITermAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -33252,14 +31855,10 @@ export interface UITermsAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -33508,14 +32107,10 @@ export interface UITextAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -33608,10 +32203,6 @@ export interface UITextareaAttributes {
    * - takes:  space-separated:  `transparent`
    */
   appearance?: string
-  /**
-   * @deprecated An old name:  write `appearance="transparent"`.  It still works until every page is rewritten.
-   */
-  transparent?: boolean | ""
   /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
@@ -33849,14 +32440,10 @@ export interface UITextareaAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -34073,14 +32660,10 @@ export interface UIThemeEditorAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -34152,14 +32735,10 @@ export interface UIThemeEditorJSXAttributes
 /** `<ui-title>`'s own attributes, from its vocabulary. */
 export interface UITitleAttributes {
   /**
-   * Renders a link (`<a>`).  Its old name is `href`.
+   * Renders a link (`<a>`).  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -34420,14 +32999,10 @@ export interface UIToastAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
-   * Bold first line (Fomantic's `title`).  Its old name is `header`.
+   * Bold first line (Fomantic's `title`).  Its old name was `header`.
    * - takes:  text
    */
   heading?: string
-  /**
-   * @deprecated An old name:  write `heading`.  It still works until every page is rewritten.
-   */
-  header?: string
   /**
    * `heading`, as the DOM element's property.
    * @deprecated write `heading` -- `prop:` stays only for compiled spell
@@ -34647,14 +33222,10 @@ export interface UIToastAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -34806,30 +33377,6 @@ export interface UIToolbarAttributes {
    */
   appearance?: string
   /**
-   * @deprecated An old name:  write `appearance="tabular"`.  It still works until every page is rewritten.
-   */
-  tabular?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="pointing"`.  It still works until every page is rewritten.
-   */
-  pointing?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="secondary"`.  It still works until every page is rewritten.
-   */
-  secondary?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="text"`.  It still works until every page is rewritten.
-   */
-  text?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="link"`.  It still works until every page is rewritten.
-   */
-  link?: boolean | ""
-  /**
-   * @deprecated An old name:  write `appearance="borderless"`.  It still works until every page is rewritten.
-   */
-  borderless?: boolean | ""
-  /**
    * `appearance`, as the DOM element's property.
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
@@ -34845,14 +33392,10 @@ export interface UIToolbarAttributes {
    */
   "prop:position"?: "left" | "right" | "center"
   /**
-   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.
+   * Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name was the bare `vertical` switch.
    * - takes:  `horizontal` · `vertical`
    */
   direction?: "horizontal" | "vertical"
-  /**
-   * @deprecated An old name:  write `direction="vertical"`.  It still works until every page is rewritten.
-   */
-  vertical?: boolean | ""
   /**
    * `direction`, as the DOM element's property.
    * @deprecated write `direction` -- `prop:` stays only for compiled spell
@@ -34929,14 +33472,10 @@ export interface UIToolbarAttributes {
    */
   "prop:wrapping"?: boolean | ""
   /**
-   * With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.
+   * With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`.
    * - takes:  flag (present / absent)
    */
   wrap?: boolean | ""
-  /**
-   * @deprecated An old name:  write `wrap`.  It still works until every page is rewritten.
-   */
-  wrapped?: boolean | ""
   /**
    * `wrap`, as the DOM element's property.
    * @deprecated write `wrap` -- `prop:` stays only for compiled spell
@@ -34958,27 +33497,15 @@ export interface UIToolbarAttributes {
    */
   padding?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * @deprecated An old name:  write `padding="none"`.  It still works until every page is rewritten.
-   */
-  fitted?: boolean | ""
-  /**
-   * @deprecated An old name:  write `padding="compact"`.  It still works until every page is rewritten.
-   */
-  compact?: boolean | ""
-  /**
    * `padding`, as the DOM element's property.
    * @deprecated write `padding` -- `prop:` stays only for compiled spell
    */
   "prop:padding"?: "none" | "none-x" | "none-y" | "compact"
   /**
-   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.
+   * Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.
    * - takes:  `both` · `top` · `bottom`
    */
   attach?: "both" | "top" | "bottom"
-  /**
-   * @deprecated An old name:  write `attach="both"`.  It still works until every page is rewritten.
-   */
-  attached?: boolean | ""
   /**
    * `attach`, as the DOM element's property.
    * @deprecated write `attach` -- `prop:` stays only for compiled spell
@@ -34995,14 +33522,10 @@ export interface UIToolbarAttributes {
    */
   "prop:fixed"?: boolean | "" | "top" | "bottom" | "left" | "right"
   /**
-   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name is `alignment`.
+   * Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align="center"` => `center aligned`.  Its old name was `alignment`.
    * - takes:  `fluid` · `left` · `center` · `right`
    */
   align?: "fluid" | "left" | "center" | "right"
-  /**
-   * @deprecated An old name:  write `align`.  It still works until every page is rewritten.
-   */
-  alignment?: "fluid" | "left" | "center" | "right"
   /**
    * `align`, as the DOM element's property.
    * @deprecated write `align` -- `prop:` stays only for compiled spell
@@ -35183,9 +33706,10 @@ export interface UIToolbarAttributes {
     | "glow"
     | "none"
   /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
    */
-  href?: string
+  link?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -35491,14 +34015,10 @@ export interface UITransitionAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -35691,14 +34211,10 @@ export interface UITreeDiagramAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -35873,14 +34389,10 @@ export interface UIValueAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -36145,14 +34657,10 @@ export interface UIVideoAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell
@@ -36429,14 +34937,10 @@ export interface UIVisibilityAttributes {
     | "glow"
     | "none"
   /**
-   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
    * - takes:  text
    */
   link?: string
-  /**
-   * @deprecated An old name:  write `link`.  It still works until every page is rewritten.
-   */
-  href?: string
   /**
    * `link`, as the DOM element's property.
    * @deprecated write `link` -- `prop:` stays only for compiled spell

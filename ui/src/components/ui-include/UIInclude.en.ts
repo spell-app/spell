@@ -31,7 +31,7 @@ export const includeVocabulary = {
       kind: "string",
       description:
         "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  " +
-        "With it, `save()` saves just that element, by its `id`.  Its old name is `select`."
+        "With it, `save()` saves just that element, by its `id`.  Its old name was `select`."
     },
     {
       name: "page-styles",

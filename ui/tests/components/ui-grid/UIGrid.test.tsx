@@ -48,20 +48,13 @@ describe("<ui-grid> classes", () => {
     ["equal-width", "ui equal width grid"],
     ['divided="vertically" stackable', "ui stackable vertically divided grid"],
     // the old names (epic ui-gaps P4), and the new
-    ['celled="internally" relaxed="very"', "ui very relaxed internally celled grid"],
     ['celled="internally" spacing="xl"', "ui very relaxed internally celled grid"],
-    ['compact="very"', "ui very compact grid"],
-    ['padded="vertically"', "ui vertically padded grid"],
     ['padding="md-y"', "ui vertically padded grid"],
-    ['text-align="center"', "ui center aligned grid"],
     ['align="center"', "ui center aligned grid"],
-    ['padded="horizontally" compact', "ui horizontally padded compact grid"],
     ['centered="yes" doubling="no" inverted', "ui centered inverted grid"],
     ['only="mobile tablet"', "ui mobile only tablet only grid"],
     ['only="large screen"', "ui large screen only grid"],
     ['reversed="mobile tablet vertically"', "ui mobile reversed tablet vertically reversed grid"],
-    ['text-align="center" vertical-align="middle"', "ui center aligned middle aligned grid"],
-    ['columns="2" stretched text-align="justified"', "ui stretched two column justified grid"],
     ['stack-with="container"', "ui stack-with-container grid"]
   ])("<ui-grid %s>", async (attributes, classes) => {
     const host = await ElementFixture.render<DOMElement>(`<ui-grid ${attributes}></ui-grid>`)

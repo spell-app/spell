@@ -63,7 +63,6 @@ describe("<ui-comments> classes and markup", () => {
     ["", "ui comments"],
     ['size="small"', "ui small comments"],
     // the old name and the new draw the same words (epic `ui-gaps` P4)
-    ["threaded minimal", "ui threaded minimal comments"],
     ['threaded appearance="minimal"', "ui threaded minimal comments"],
     ["inverted disabled", "ui disabled inverted comments"],
     ['threaded="no" collapsed', "ui collapsed comments"]

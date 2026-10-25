@@ -50,7 +50,7 @@ export const itemVocabulary = {
       group: "name",
       kind: "string",
       replaces: ["text"],
-      description: "Dropdown:  its words;  defaults to the text content.  Its old name is `text`."
+      description: "Dropdown:  its words;  defaults to the text content.  Its old name was `text`."
     },
     {
       name: "description",
@@ -76,7 +76,7 @@ export const itemVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`."
+      description: "List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {
@@ -89,7 +89,7 @@ export const itemVocabulary = {
       replaces: [{ from: "link", value: "link" }],
       description:
         "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  " +
-        "Its old name is the bare `link` switch."
+        "Its old name was the bare `link` switch."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be chosen or followed." },
     {
@@ -110,7 +110,7 @@ export const itemVocabulary = {
       replaces: [{ from: "fitted", value: "none", values: { horizontally: "none-x", vertically: "none-y" } }],
       description:
         "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  " +
-        "Its old name is `fitted` (`horizontally`, `vertically`)."
+        "Its old name was `fitted` (`horizontally`, `vertically`)."
     },
     {
       name: "kind",
@@ -120,7 +120,7 @@ export const itemVocabulary = {
       default: "item",
       replaces: ["type"],
       description:
-        "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`."
+        "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`."
     }
   ],
   events: [],

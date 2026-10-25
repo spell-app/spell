@@ -268,23 +268,3 @@ describe("<ui-icon> in a <ui-root icons>", () => {
 function path(host: DOMElement): string | undefined {
   return host.shadowRoot!.querySelector("svg path")?.getAttribute("d") ?? undefined
 }
-
-////////////////
-// ## Old names
-//
-// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
-////////////////
-
-describe("<ui-icon> old names", () => {
-  /** The class string of the element's first classed box. */
-  async function classesOf(html: string) {
-    const host = await ElementFixture.render<DOMElement>(html)
-    return host.shadowRoot!.querySelector("[class]")!.className
-  }
-
-  it("<ui-icon>:  each old spelling draws as its new one", async () => {
-    expect(await classesOf(`<ui-icon name="bell" circular bordered fitted>A</ui-icon>`)).toBe(
-      await classesOf(`<ui-icon name="bell" appearance="circular bordered" padding="none">A</ui-icon>`)
-    )
-  })
-})

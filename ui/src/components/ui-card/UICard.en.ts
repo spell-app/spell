@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-card raised color="red" size="small">` => `ui small red raised card`;
+ *   `<ui-card appearance="raised" color="red" size="small">` => `ui small red raised card`;
  *   `<ui-cards columns="3" doubling stackable>` => `ui doubling stackable three cards`.  `UICard.css` keys on those.
  * - A card owns the generic content parts (`ownsParts`):  `<ui-content>`, `<ui-header>`, `<ui-meta>`,
  *   `<ui-description>`, `<ui-extra>`, `<ui-avatar>` inside it get `:state(in-card)` (`UIParts.css`).
@@ -47,7 +47,7 @@ export const cardVocabulary = {
       replaces: [{ from: "horizontal", value: "horizontal" }],
       description:
         "`horizontal`:  image and content side by side;  the extra content spans the bottom.  " +
-        "Its old name is `horizontal`."
+        "Its old name was `horizontal`."
     },
     {
       name: "appearance",
@@ -65,7 +65,7 @@ export const cardVocabulary = {
         "The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises " +
         "on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), " +
         "`dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  " +
-        "not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`."
+        "not Fomantic's).  Their old names were `raised`, `link` (bare), `basic`, `dashed`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the width of its container." },
     {
@@ -75,7 +75,7 @@ export const cardVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  centred in its container.  Its old name is `centered`."
+      description: "`center`:  centred in its container.  Its old name was `centered`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {
@@ -92,7 +92,7 @@ export const cardVocabulary = {
       replaces: ["href"],
       description:
         "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, " +
-        '`appearance="link"`.  Its old name is `href`.'
+        '`appearance="link"`.  Its old name was `href`.'
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {
@@ -100,7 +100,7 @@ export const cardVocabulary = {
       replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Shorthand:  the header of a content block.  Its old name is `header`."
+      description: "Shorthand:  the header of a content block.  Its old name was `header`."
     },
     { name: "meta", group: "content", kind: "string", description: "Shorthand:  metadata below the header." },
     {

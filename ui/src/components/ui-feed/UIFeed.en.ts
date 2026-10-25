@@ -4,7 +4,7 @@
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-feed connected ordered size="small">` => `ui small connected ordered feed`;  an event has no `ui`
- *   (`<ui-event basic>` => `basic event`).  `UIFeed.css` keys on those.
+ *   (`<ui-event appearance="basic">` => `basic event`).  `UIFeed.css` keys on those.
  * - The FEED owns the content parts (`ownsParts`):  an event is a part itself, transparent to their climbs,
  *   so `<ui-summary>`, `<ui-date>`, `<ui-meta>`, `<ui-extra>`, `<ui-author>` (Fomantic's `.user`) inside it get
  *   `:state(in-feed)` -- Fomantic's `.ui.feed > .event > .content .summary`.

@@ -2,7 +2,7 @@
  * Every name `<ui-modal>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
  * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-modal size="tiny" basic vertical-align="top" visible>` => `ui tiny basic top aligned active modal`;
+ *   `<ui-modal size="tiny" appearance="basic" vertical-align="top" visible>` => `ui tiny basic top aligned active modal`;
  *   `active`, Fomantic's shown-modal class, is the element's own while it shows (the shared `visible` / `hidden`).
  * - Sizes are WIDTHS here (Fomantic's modal ratios), not text sizes:
  *   `UIModal.css` reads the size class, never `--ui-scale`.
@@ -92,7 +92,7 @@ export const modalVocabulary = {
       group: "name",
       kind: "string",
       description:
-        "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`."
+        "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`."
     },
     {
       name: "content",

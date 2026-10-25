@@ -8,22 +8,6 @@ import { FoldIconPlace, type SectionVocabulary } from "./UISection.types"
 
 import sectionCSS from "./UISection.css?inline"
 
-/**
- * The DOM element of a `<ui-section>` (and of a panel, which is one):  a loadable body's, plus the old `collapsed`
- * property, `open` turned round (epic `ui-gaps`).
- * - `section.collapsed = true` folds it, as `section.open = false` does;  code written before `open` keeps working.
- */
-export class DOMSectionElement extends E.DOMLoadableBodyElement {
-  /** DEPRECATED:  `open` turned round, its old name.  `true` while folded. */
-  get collapsed(): boolean {
-    return (this as unknown as { open?: boolean }).open === false
-  }
-
-  set collapsed(value: boolean) {
-    ;(this as unknown as { open: boolean }).open = !value
-  }
-}
-
 /****************
  * ### `UISection`
  * The component behind `<ui-section>`:  a titled block of content that can fold away,
@@ -100,7 +84,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { section: sectionCSS },
     cssStates: ["inverted"],
-    DOMElement: DOMSectionElement,
+    DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false,
     // `loading`:  Fomantic's veil
@@ -186,7 +170,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /**
    * `open`:  the DOM element's (a boolean is always the DOM element's, see `@controlled`);  `false` folds it.
    * - Folds only `isCollapsible`.
-   * - Its old name is `collapsed`, turned round:  the attribute (`replaces`) and the property (`DOMSectionElement`).
+   * - Its old name was `collapsed`, turned round (epic `ui-gaps` J13).
    */
   @E.controlled("open") accessor isMarkedOpen = true
 

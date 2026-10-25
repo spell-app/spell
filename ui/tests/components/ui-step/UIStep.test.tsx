@@ -484,42 +484,6 @@ describe("<ui-step> accessibility", () => {
 })
 
 ////////////////
-// ## Old names
-////////////////
-
-describe("<ui-step> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-step header="Old">Body</ui-step>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-step heading="New">Body</ui-step>`
-    )
-    expect(written.heading).toBe("New")
-  })
-})
-
-describe("<ui-steps> and <ui-step> old names", () => {
-  it("draw as the new spelling", async () => {
-    const old = await render(
-      `<ui-steps vertical="right" circular attached="top"><ui-step href="#a">A</ui-step></ui-steps>`
-    )
-    const spelled = await render(
-      `<ui-steps direction="vertical-right" appearance="circular" attach="top"><ui-step link="#a">A</ui-step></ui-steps>`
-    )
-    expect(old.root.className).toBe(spelled.root.className)
-    const [before, after] = [stepRoots(old.host)[0]!, stepRoots(spelled.host)[0]!]
-    expect([before.localName, before.getAttribute("href")]).toEqual([after.localName, after.getAttribute("href")])
-  })
-
-  it("a bare `link` is the old look:  a <button>", async () => {
-    const { host } = await render(`<ui-steps><ui-step link>A</ui-step></ui-steps>`)
-    expect(stepRoots(host)[0]!.localName).toBe("button")
-  })
-})
-
-////////////////
 // ## Parent
 ////////////////
 

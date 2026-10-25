@@ -90,7 +90,7 @@
             },
             {
               "name": "selector",
-              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.",
+              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -130,7 +130,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -430,7 +430,7 @@
             },
             {
               "name": "label",
-              "description": "Dropdown:  its words;  defaults to the text content.  Its old name is `text`.",
+              "description": "Dropdown:  its words;  defaults to the text content.  Its old name was `text`.",
               "type": {
                 "text": "string"
               },
@@ -470,7 +470,7 @@
             },
             {
               "name": "link",
-              "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.",
+              "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -486,7 +486,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -510,7 +510,7 @@
             },
             {
               "name": "padding",
-              "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).",
+              "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name was `fitted` (`horizontally`, `vertically`).",
               "type": {
                 "text": "\"none\" | \"none-x\" | \"none-y\""
               },
@@ -518,7 +518,7 @@
             },
             {
               "name": "kind",
-              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.",
               "type": {
                 "text": "\"item\" | \"header\" | \"divider\""
               },
@@ -703,7 +703,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  centred in its container.  Its old name is `centered`.",
+              "description": "`center`:  centred in its container.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -751,7 +751,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -899,7 +899,7 @@
           "attributes": [
             {
               "name": "selected",
-              "description": "The current page:  bold, not a link, `aria-current=\"page\"`.  Its old name is `active`.",
+              "description": "The current page:  bold, not a link, `aria-current=\"page\"`.  Its old name was `active`.",
               "type": {
                 "text": "boolean"
               },
@@ -907,7 +907,7 @@
             },
             {
               "name": "link",
-              "description": "Renders a link (`<a>`) to this level.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`) to this level.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -1114,7 +1114,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -1270,7 +1270,7 @@
             },
             {
               "name": "color",
-              "description": "Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Those four also work written alone, their old names.",
+              "description": "Its hue:  it fills the button, or only its ring and text when `basic`.  `primary` and `secondary` are the brand's colours.  `positive` and `negative` say what pressing it does.  Written alone, they were its old names.",
               "type": {
                 "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
               },
@@ -1278,7 +1278,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Each word also works written alone, its old name.",
+              "description": "The look, several words at once.  `basic` is less pronounced:  transparent, with a hairline ring.  `tertiary` is the least:  text only, underlined on hover.  `circular` is pill-shaped, and round when it holds only an icon.  Written alone, each was its old name.",
               "type": {
                 "text": "string"
               },
@@ -1302,7 +1302,7 @@
             },
             {
               "name": "selected",
-              "description": "Pressed / on;  with `toggle`, in the positive colour.  Its old name is `active`.",
+              "description": "Pressed / on;  with `toggle`, in the positive colour.  Its old name was `active`.",
               "type": {
                 "text": "boolean"
               },
@@ -1358,7 +1358,7 @@
             },
             {
               "name": "wrap",
-              "description": "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name is `wrapped`.",
+              "description": "Lets a long text wrap onto more lines.  Without it, a button's text stays on one line.  Its old name was `wrapped`.",
               "type": {
                 "text": "boolean"
               },
@@ -1382,7 +1382,7 @@
             },
             {
               "name": "reveal",
-              "description": "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name is `animated`.",
+              "description": "On hover, it brings the `icon` slot in over the content, the way its value names:  `slide` is sideways.  Its old name was `animated`.",
               "type": {
                 "text": "\"slide\" | \"fade\" | \"vertical\""
               },
@@ -1390,7 +1390,7 @@
             },
             {
               "name": "attach",
-              "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name is `attached`.",
+              "description": "Joins it to the edge of a segment or another element:  the side its value names, or `both`.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
@@ -1414,7 +1414,7 @@
             },
             {
               "name": "label",
-              "description": "The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name is `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.",
+              "description": "The button's text, written as an attribute instead of in the default slot.  Children in the slot win.  Its old name was `content`.  NOTE:  `label` used to be the joined badge, which is `badge` now.",
               "type": {
                 "text": "string"
               },
@@ -1455,7 +1455,7 @@
             },
             {
               "name": "link",
-              "description": "Renders a link (`<a>`) styled as a button.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`) styled as a button.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -1833,7 +1833,7 @@
             },
             {
               "name": "color",
-              "description": "The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Those four also work written alone, their old names.",
+              "description": "The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  Written alone, they were its old names.",
               "type": {
                 "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
               },
@@ -1841,7 +1841,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Each word also works written alone, its old name.",
+              "description": "The look of every button, several words at once.  `basic` puts them inside one outer border, and `tertiary` is text only.  `circular` makes them separate pill-shaped buttons.  Written alone, each was its old name.",
               "type": {
                 "text": "string"
               },
@@ -1873,7 +1873,7 @@
             },
             {
               "name": "padding",
-              "description": "Room inside every button:  `compact` (reduced).  Its old name is `compact`.",
+              "description": "Room inside every button:  `compact` (reduced).  Its old name was `compact`.",
               "type": {
                 "text": "\"compact\""
               },
@@ -1889,7 +1889,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the buttons run:  `vertical` stacks them.  Its old name is `vertical`.",
+              "description": "Which way the buttons run:  `vertical` stacks them.  Its old name was `vertical`.",
               "type": {
                 "text": "\"vertical\""
               },
@@ -1921,7 +1921,7 @@
             },
             {
               "name": "spacing",
-              "description": "Room between the buttons:  `md` separates them with gaps.  Its old name is `spaced`.",
+              "description": "Room between the buttons:  `md` separates them with gaps.  Its old name was `spaced`.",
               "type": {
                 "text": "\"md\""
               },
@@ -1937,7 +1937,7 @@
             },
             {
               "name": "attach",
-              "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`.",
+              "description": "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
@@ -1985,7 +1985,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -2092,7 +2092,7 @@
           "attributes": [
             {
               "name": "label",
-              "description": "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`.",
+              "description": "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name was `text`.",
               "type": {
                 "text": "string"
               },
@@ -2132,7 +2132,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -2532,7 +2532,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -2897,7 +2897,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  image and content side by side;  the extra content spans the bottom.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -2905,7 +2905,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names are `raised`, `link` (bare), `basic`, `dashed`.",
+              "description": "The look, several words at once:  `raised` (lifted off the page with a stronger shadow), `link` (rises on hover, as a link card does;  a look only:  `link=` makes it one), `basic` (no border or shadow), `dashed` (a placeholder:  a dashed border, `--ui-card-border-color`, and no drop shadow unless `raised`;  not Fomantic's).  Their old names were `raised`, `link` (bare), `basic`, `dashed`.",
               "type": {
                 "text": "string"
               },
@@ -2921,7 +2921,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  centred in its container.  Its old name is `centered`.",
+              "description": "`center`:  centred in its container.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -2953,7 +2953,7 @@
             },
             {
               "name": "link",
-              "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name is `href`.",
+              "description": "Makes the whole card a link (`<a>`), going here.  Written bare (`<ui-card link>`):  the old look, `appearance=\"link\"`.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -2969,7 +2969,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand:  the header of a content block.  Its old name is `header`.",
+              "description": "Shorthand:  the header of a content block.  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -3325,7 +3325,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  centres each row of cards.  Its old name is `centered`.",
+              "description": "`center`:  centres each row of cards.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -3333,7 +3333,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  every card horizontal.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  every card horizontal.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -3341,7 +3341,7 @@
             },
             {
               "name": "appearance",
-              "description": "Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`.",
+              "description": "Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need `link=` on the cards), `basic` (no border or shadow).  Their old names were `raised`, `link` (bare), `basic`.",
               "type": {
                 "text": "string"
               },
@@ -3389,7 +3389,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -3688,7 +3688,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -4133,7 +4133,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -4382,7 +4382,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -4707,7 +4707,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -4943,7 +4943,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -5142,7 +5142,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -5291,7 +5291,7 @@
             },
             {
               "name": "spacing",
-              "description": "With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name is `relaxed`.",
+              "description": "With `grid`:  room for a grid's wider gutters (`spacing=\"lg\"`, `xl` wider still).  Its old name was `relaxed`.",
               "type": {
                 "text": "\"lg\" | \"xl\""
               },
@@ -5299,7 +5299,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`.",
+              "description": "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -5355,7 +5355,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -5640,7 +5640,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -5869,7 +5869,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names are `horizontal`, `vertical`.",
+              "description": "`horizontal`:  text (or an icon) between two horizontal rules;  `vertical`:  a vertical rule with optional text, centred in a `position: relative` owner (segment, grid).  Its old names were `horizontal`, `vertical`.",
               "type": {
                 "text": "\"horizontal\" | \"vertical\""
               },
@@ -5885,7 +5885,7 @@
             },
             {
               "name": "padding",
-              "description": "`none`:  no space above or below.  Its old name is `fitted`.",
+              "description": "`none`:  no space above or below.  Its old name was `fitted`.",
               "type": {
                 "text": "\"none\""
               },
@@ -5917,7 +5917,7 @@
             },
             {
               "name": "align",
-              "description": "With `direction=\"horizontal\"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name is `text-align`.",
+              "description": "With `direction=\"horizontal\"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\""
               },
@@ -5965,7 +5965,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -6458,7 +6458,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -7000,7 +7000,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -7264,7 +7264,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -7484,7 +7484,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -7687,7 +7687,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -7935,7 +7935,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -8161,7 +8161,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`.",
+              "description": "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -8209,7 +8209,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -8609,7 +8609,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -8885,7 +8885,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -9127,7 +9127,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -9433,7 +9433,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -9668,7 +9668,7 @@
             },
             {
               "name": "attach",
-              "description": "No gutter on the `left` / `right` side.  Its old name is `attached`.",
+              "description": "No gutter on the `left` / `right` side.  Its old name was `attached`.",
               "type": {
                 "text": "\"left\" | \"right\""
               },
@@ -9700,7 +9700,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.",
+              "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -9748,7 +9748,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -9883,7 +9883,7 @@
             },
             {
               "name": "padding",
-              "description": "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name is `padded`.",
+              "description": "`md`:  keeps its outer gutters inside its box;  `md-x` / `md-y` for one axis.  Its old name was `padded`.",
               "type": {
                 "text": "\"md\" | \"md-x\" | \"md-y\""
               },
@@ -9891,7 +9891,7 @@
             },
             {
               "name": "spacing",
-              "description": "The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names are `compact` and `relaxed`.",
+              "description": "The room between its columns and rows:  `compact` narrower (`xs` narrower still), `lg` wider (`xl` wider still).  Its old names were `compact` and `relaxed`.",
               "type": {
                 "text": "\"xs\" | \"compact\" | \"lg\" | \"xl\""
               },
@@ -9963,7 +9963,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.",
+              "description": "Aligns every column's text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -10011,7 +10011,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -10239,7 +10239,7 @@
             },
             {
               "name": "spacing",
-              "description": "Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`.",
+              "description": "Wider gutters:  `lg`, `xl` wider still.  Its old name was `relaxed`.",
               "type": {
                 "text": "\"lg\" | \"xl\""
               },
@@ -10295,7 +10295,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its columns' text.  Its old name is `text-align`.",
+              "description": "Aligns its columns' text.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -10343,7 +10343,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -10570,7 +10570,7 @@
             },
             {
               "name": "padding",
-              "description": "`none`:  no gap after the glyph and no extra width.  Its old name is `fitted`.",
+              "description": "`none`:  no gap after the glyph and no extra width.  Its old name was `fitted`.",
               "type": {
                 "text": "\"none\""
               },
@@ -10626,7 +10626,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -10862,7 +10862,7 @@
             },
             {
               "name": "padding",
-              "description": "`none`:  no gap after the group.  Its old name is `fitted`.",
+              "description": "`none`:  no gap after the group.  Its old name was `fitted`.",
               "type": {
                 "text": "\"none\""
               },
@@ -10902,7 +10902,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -11125,7 +11125,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -11478,7 +11478,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  a block centred in its container.  Its old name is `centered`.",
+              "description": "`center`:  a block centred in its container.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -11518,7 +11518,7 @@
             },
             {
               "name": "spacing",
-              "description": "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`.",
+              "description": "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name was `spaced`.",
               "type": {
                 "text": "\"md\" | \"left\" | \"right\""
               },
@@ -11582,7 +11582,7 @@
             },
             {
               "name": "link",
-              "description": "Renders a link (`<a>`) around the image.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`) around the image.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -11823,7 +11823,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  rows centred in the container.  Its old name is `centered`.",
+              "description": "`center`:  rows centred in the container.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -11879,7 +11879,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -12039,7 +12039,7 @@
             },
             {
               "name": "selector",
-              "description": "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name is `select`.",
+              "description": "CSS selector:  include only the first element of `source` it matches (default:  everything in its `<body>`).  With it, `save()` saves just that element, by its `id`.  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -12087,7 +12087,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -12526,7 +12526,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -12995,7 +12995,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -13193,7 +13193,7 @@
             },
             {
               "name": "label",
-              "description": "Dropdown:  its words;  defaults to the text content.  Its old name is `text`.",
+              "description": "Dropdown:  its words;  defaults to the text content.  Its old name was `text`.",
               "type": {
                 "text": "string"
               },
@@ -13233,7 +13233,7 @@
             },
             {
               "name": "link",
-              "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name is `href`.",
+              "description": "List / menu:  where it goes:  renders a link (`<a>`).  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -13249,7 +13249,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name is the bare `link` switch.",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -13273,7 +13273,7 @@
             },
             {
               "name": "padding",
-              "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name is `fitted` (`horizontally`, `vertically`).",
+              "description": "Menu:  `none`, no padding;  `none-x` / `none-y` drop only the left and right, or top and bottom.  Its old name was `fitted` (`horizontally`, `vertically`).",
               "type": {
                 "text": "\"none\" | \"none-x\" | \"none-y\""
               },
@@ -13281,7 +13281,7 @@
             },
             {
               "name": "kind",
-              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name is `type`.",
+              "description": "An item, a group `header` (dropdown, menu), or a `divider` line (dropdown).  Its old name was `type`.",
               "type": {
                 "text": "\"item\" | \"header\" | \"divider\""
               },
@@ -13449,7 +13449,7 @@
             },
             {
               "name": "spacing",
-              "description": "Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed=\"very\"`).",
+              "description": "Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed=\"very\"`).",
               "type": {
                 "text": "\"lg\" | \"xl\""
               },
@@ -13457,7 +13457,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name is the bare `link` switch.",
+              "description": "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link needs an item's `link`.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -13521,7 +13521,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -13762,7 +13762,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -13981,7 +13981,7 @@
             },
             {
               "name": "attach",
-              "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` (bare:  `top`).",
+              "description": "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` (bare:  `top`).",
               "type": {
                 "text": "\"top\" | \"bottom\" | \"top left\" | \"top right\" | \"bottom left\" | \"bottom right\""
               },
@@ -13989,7 +13989,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -14013,7 +14013,7 @@
             },
             {
               "name": "align",
-              "description": "`center` centres its content.  Its old name is `centered`.",
+              "description": "`center` centres its content.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -14029,7 +14029,7 @@
             },
             {
               "name": "selected",
-              "description": "Selected / on.  Its old name is `active`.",
+              "description": "Selected / on.  Its old name was `active`.",
               "type": {
                 "text": "boolean"
               },
@@ -14077,7 +14077,7 @@
             },
             {
               "name": "link",
-              "description": "Renders a link (`<a>`) styled as a label.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`) styled as a label.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -14503,7 +14503,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  every label a fixed-width tag.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  every label a fixed-width tag.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -14527,7 +14527,7 @@
             },
             {
               "name": "align",
-              "description": "`center`:  every label centred.  Its old name is `centered`.",
+              "description": "`center`:  every label centred.  Its old name was `centered`.",
               "type": {
                 "text": "\"center\""
               },
@@ -14575,7 +14575,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -14750,7 +14750,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name is the bare `link` switch.",
+              "description": "The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -14766,7 +14766,7 @@
             },
             {
               "name": "hover",
-              "description": "What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`.",
+              "description": "What an item does when hovered:  `indent`, it moves in.  Its old name was `animated`.",
               "type": {
                 "text": "\"indent\""
               },
@@ -14774,7 +14774,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name is the bare `horizontal` switch.",
+              "description": "Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  Its old name was the bare `horizontal` switch.",
               "type": {
                 "text": "\"vertical\" | \"horizontal\""
               },
@@ -14798,7 +14798,7 @@
             },
             {
               "name": "spacing",
-              "description": "Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed=\"very\"`).",
+              "description": "Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed=\"very\"`).",
               "type": {
                 "text": "\"lg\" | \"xl\""
               },
@@ -14806,7 +14806,7 @@
             },
             {
               "name": "padding",
-              "description": "`none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name is `fitted`.",
+              "description": "`none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  Its old name was `fitted`.",
               "type": {
                 "text": "\"none\""
               },
@@ -14862,7 +14862,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -15386,7 +15386,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -15688,7 +15688,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -16033,7 +16033,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.",
+              "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name was the bare `vertical` switch.",
               "type": {
                 "text": "\"horizontal\" | \"vertical\""
               },
@@ -16097,7 +16097,7 @@
             },
             {
               "name": "wrap",
-              "description": "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.",
+              "description": "With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`.",
               "type": {
                 "text": "boolean"
               },
@@ -16121,7 +16121,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.",
+              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
@@ -16137,7 +16137,7 @@
             },
             {
               "name": "align",
-              "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name is `alignment`.",
+              "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name was `alignment`.",
               "type": {
                 "text": "\"fluid\" | \"left\" | \"center\" | \"right\""
               },
@@ -16201,7 +16201,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -16810,7 +16810,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name is `header`.",
+              "description": "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -16858,7 +16858,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -17205,7 +17205,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name is `header`.",
+              "description": "Shorthand for a header;  a slotted `<ui-header>` is the rich version (and names the dialog).  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -17253,7 +17253,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -17708,7 +17708,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -18060,7 +18060,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -18359,7 +18359,7 @@
             },
             {
               "name": "open",
-              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).",
               "type": {
                 "text": "boolean"
               },
@@ -18505,7 +18505,7 @@
             },
             {
               "name": "selector",
-              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.",
+              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -18529,7 +18529,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -18898,7 +18898,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19017,7 +19017,7 @@
           "attributes": [
             {
               "name": "link",
-              "description": "Renders a link (`<a>`), e.g. to a profile.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`), e.g. to a profile.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19168,7 +19168,7 @@
             },
             {
               "name": "tooltip",
-              "description": "Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name is `alt`.",
+              "description": "Who it is:  the picture's tooltip and its alternative text for screen readers.  Default none (decorative:  the name is nearly always beside it).  Its old name was `alt`.",
               "type": {
                 "text": "string"
               },
@@ -19208,7 +19208,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19335,7 +19335,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name is `text-align`.",
+              "description": "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`).  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -19383,7 +19383,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19582,7 +19582,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19721,7 +19721,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -19856,7 +19856,7 @@
           "attributes": [
             {
               "name": "link",
-              "description": "Renders a link (`<a class=\"detail\" href>`).  Its old name is `href`.",
+              "description": "Renders a link (`<a class=\"detail\" href>`).  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -20035,7 +20035,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -20206,7 +20206,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name is `attached`.",
+              "description": "Joined to a segment below (`top`) or above (`bottom`);  `both` sits between two.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
@@ -20222,7 +20222,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name is `text-align`.",
+              "description": "Aligns its text `left`, `center`, `right` or `justified`.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\" | \"justified\""
               },
@@ -20230,7 +20230,7 @@
             },
             {
               "name": "padding",
-              "description": "`none`:  no padding.  Its old name is `fitted`.",
+              "description": "`none`:  no padding.  Its old name was `fitted`.",
               "type": {
                 "text": "\"none\""
               },
@@ -20254,7 +20254,7 @@
             },
             {
               "name": "link",
-              "description": "Renders a link (`<a>`) styled as a header.  Its old name is `href`.",
+              "description": "Renders a link (`<a>`) styled as a header.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -20613,7 +20613,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -20764,7 +20764,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -20871,7 +20871,7 @@
           "attributes": [
             {
               "name": "link",
-              "description": "Renders a link (`<a>`).  Its old name is `href`.",
+              "description": "Renders a link (`<a>`).  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -21058,7 +21058,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -21433,7 +21433,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -21673,7 +21673,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -21824,7 +21824,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -21962,7 +21962,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -22092,7 +22092,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -22381,7 +22381,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name is `header`.",
+              "description": "Shorthand for a header line (Fomantic's `title`);  a slotted `<ui-header>` is the rich version.  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -22448,7 +22448,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -22854,7 +22854,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -23274,7 +23274,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -23486,7 +23486,7 @@
             },
             {
               "name": "selector",
-              "description": "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`.",
+              "description": "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -23689,7 +23689,7 @@
             },
             {
               "name": "open",
-              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).",
               "type": {
                 "text": "boolean"
               },
@@ -23811,7 +23811,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -24208,7 +24208,7 @@
           "attributes": [
             {
               "name": "selector",
-              "description": "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name is `select`.",
+              "description": "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -24312,7 +24312,7 @@
             },
             {
               "name": "open",
-              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).",
               "type": {
                 "text": "boolean"
               },
@@ -24466,7 +24466,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -24850,7 +24850,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -25022,7 +25022,7 @@
             },
             {
               "name": "attach",
-              "description": "`both`:  flush against its container, no gap.  Its old name is `attached`.",
+              "description": "`both`:  flush against its container, no gap.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\""
               },
@@ -25070,7 +25070,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -25328,7 +25328,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -25555,7 +25555,7 @@
             },
             {
               "name": "clip",
-              "description": "`none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name is `unclipped`.",
+              "description": "`none`:  content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays `visible`).  Its old name was `unclipped`.",
               "type": {
                 "text": "\"none\""
               },
@@ -25603,7 +25603,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -25901,7 +25901,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -26297,7 +26297,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -26718,7 +26718,7 @@
             },
             {
               "name": "open",
-              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name is `collapsed` (turned round), still a property of the element too.",
+              "description": "Open;  `open=\"false\"` closes it, so only the title shows.  Controlled:  set it to close or open;  `ui-opening` / `ui-closing` can veto a person's changes.  Find-in-page opens a match.  Its old name was `collapsed` (turned round).",
               "type": {
                 "text": "boolean"
               },
@@ -26864,7 +26864,7 @@
             },
             {
               "name": "selector",
-              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`.",
+              "description": "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`.",
               "type": {
                 "text": "string"
               },
@@ -26888,7 +26888,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -27376,7 +27376,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -27543,7 +27543,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names are `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.",
+              "description": "The look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` shows two), `piled` (a pile of rotated sheets behind it), `vertical` (a band of a page:  no box, a rule above), `circular` (a round badge sized by its content), `basic` (no box:  no background, border or shadow), `secondary` (less emphasis:  a tinted surface, muted text), `tertiary` (least emphasis:  a darker tint).  Their old names were `raised`, `stacked`, `piled`, `vertical`, `circular`, `basic`, `secondary`, `tertiary`.",
               "type": {
                 "text": "string"
               },
@@ -27559,7 +27559,7 @@
             },
             {
               "name": "padding",
-              "description": "Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names are `fitted`, `compact`, `padded`.",
+              "description": "Its padding:  `none` (`none-x` / `none-y` keep the other axis'), `compact` (only as wide as its content), `md` more, `lg` even more.  Its old names were `fitted`, `compact`, `padded`.",
               "type": {
                 "text": "\"none\" | \"none-x\" | \"none-y\" | \"compact\" | \"md\" | \"lg\""
               },
@@ -27575,7 +27575,7 @@
             },
             {
               "name": "align",
-              "description": "Aligns its text `left`, `center` or `right`.  Its old name is `text-align`.",
+              "description": "Aligns its text `left`, `center` or `right`.  Its old name was `text-align`.",
               "type": {
                 "text": "\"left\" | \"center\" | \"right\""
               },
@@ -27583,7 +27583,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name is `attached`.",
+              "description": "Joined edge to edge with the elements above / below:  `top`, `bottom`, `left`, `right`;  `both` sits in the middle.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\" | \"left\" | \"right\""
               },
@@ -27655,7 +27655,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -27924,7 +27924,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  side by side instead of stacked.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  side by side instead of stacked.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -27956,7 +27956,7 @@
             },
             {
               "name": "appearance",
-              "description": "The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names are `raised`, `stacked`, `piled`, `basic`.",
+              "description": "The group's look, several words at once:  `raised` (lifted off the page with a shadow), `stacked` (a page peeking out below;  `tall-stacked` two), `piled` (a pile of rotated sheets behind the group), `basic` (no box of its own).  Their old names were `raised`, `stacked`, `piled`, `basic`.",
               "type": {
                 "text": "string"
               },
@@ -27964,7 +27964,7 @@
             },
             {
               "name": "padding",
-              "description": "`compact`:  only as wide as its content.  Its old name is `compact`.",
+              "description": "`compact`:  only as wide as its content.  Its old name was `compact`.",
               "type": {
                 "text": "\"compact\""
               },
@@ -28012,7 +28012,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -28279,7 +28279,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -28679,7 +28679,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -28856,7 +28856,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -29051,7 +29051,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -29190,7 +29190,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -29387,7 +29387,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -29804,7 +29804,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -30161,7 +30161,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -30299,7 +30299,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  value and label on one line.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  value and label on one line.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -30379,7 +30379,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -30535,7 +30535,7 @@
             },
             {
               "name": "direction",
-              "description": "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`.",
+              "description": "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name was `horizontal`.",
               "type": {
                 "text": "\"horizontal\""
               },
@@ -30615,7 +30615,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -30798,7 +30798,7 @@
             },
             {
               "name": "link",
-              "description": "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`.",
+              "description": "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -30814,7 +30814,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name is the bare `link` switch.",
+              "description": "The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  the page handles `click`.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -30830,7 +30830,7 @@
             },
             {
               "name": "heading",
-              "description": "Shorthand for the title (Fomantic's `.title`).  Its old name is `header`.",
+              "description": "Shorthand for the title (Fomantic's `.title`).  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -31169,7 +31169,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name is `vertical` (`vertical=\"right\"`).",
+              "description": "Which way the steps run:  `horizontal` (the default), `vertical` (stacked top to bottom), or `vertical-right`, for a group on the right of its content (arrow at left).  Its old name was `vertical` (`vertical=\"right\"`).",
               "type": {
                 "text": "\"horizontal\" | \"vertical\" | \"vertical-right\""
               },
@@ -31177,7 +31177,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name is the bare `circular` switch.",
+              "description": "The look:  `circular` -- Fomantic's circular steps:  a ring per step on a connecting line, the content beside it.  Its old name was the bare `circular` switch.",
               "type": {
                 "text": "string"
               },
@@ -31201,7 +31201,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name is `attached`.",
+              "description": "Joined to a segment below (`both`, `top`) or above (`bottom`), overlapping its border.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
@@ -31281,7 +31281,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -31494,7 +31494,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -31717,7 +31717,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name is `attached`.",
+              "description": "Joined to a menu edge (`top`, `bottom`, or `both`);  inside `<ui-tabs>`, the tabs decide.  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
@@ -31765,7 +31765,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -31921,7 +31921,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name is the bare `vertical` switch.",
+              "description": "Which way the tabs run:  `horizontal` (the default), or `vertical`, stacked in a column beside the panes (ArrowUp / ArrowDown move between them).  Its old name was the bare `vertical` switch.",
               "type": {
                 "text": "\"horizontal\" | \"vertical\""
               },
@@ -31945,7 +31945,7 @@
             },
             {
               "name": "align",
-              "description": "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction=\"vertical\"`.  Its old name is `alignment`.",
+              "description": "Where the tabs sit:  `fluid` -- they fill the row;  `left` / `center` / `right` -- packed at that end (a `segmented` tab list moves as a whole).  Ignored when `direction=\"vertical\"`.  Its old name was `alignment`.",
               "type": {
                 "text": "\"fluid\" | \"left\" | \"center\" | \"right\""
               },
@@ -31961,7 +31961,7 @@
             },
             {
               "name": "attach",
-              "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name is `attached` (bare ~== `top`).",
+              "description": "Joins the tab menu and the panes edge to edge:  `top` puts the tabs above (`top attached` menu, `bottom attached` panes);  `bottom` puts them below.  Its old name was `attached` (bare ~== `top`).",
               "type": {
                 "text": "\"top\" | \"bottom\""
               },
@@ -32026,7 +32026,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -32264,7 +32264,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -32618,7 +32618,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -33097,7 +33097,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -33258,7 +33258,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -33473,7 +33473,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -33648,7 +33648,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -33890,7 +33890,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -34092,7 +34092,7 @@
             },
             {
               "name": "heading",
-              "description": "Bold first line (Fomantic's `title`).  Its old name is `header`.",
+              "description": "Bold first line (Fomantic's `title`).  Its old name was `header`.",
               "type": {
                 "text": "string"
               },
@@ -34215,7 +34215,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -34568,7 +34568,7 @@
             },
             {
               "name": "direction",
-              "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name is the bare `vertical` switch.",
+              "description": "Which way the items run:  `horizontal` (the default) or `vertical`, stacked top to bottom.  Its old name was the bare `vertical` switch.",
               "type": {
                 "text": "\"horizontal\" | \"vertical\""
               },
@@ -34632,7 +34632,7 @@
             },
             {
               "name": "wrap",
-              "description": "With `wrapping`:  square corners where the lines meet.  Its old name is `wrapped`.",
+              "description": "With `wrapping`:  square corners where the lines meet.  Its old name was `wrapped`.",
               "type": {
                 "text": "boolean"
               },
@@ -34656,7 +34656,7 @@
             },
             {
               "name": "attach",
-              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name is `attached`.",
+              "description": "Joined edge to edge with a segment above (`top`), below (`bottom`), or both (`both`, in the middle).  Its old name was `attached`.",
               "type": {
                 "text": "\"both\" | \"top\" | \"bottom\""
               },
@@ -34672,7 +34672,7 @@
             },
             {
               "name": "align",
-              "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name is `alignment`.",
+              "description": "Where the items sit:  `fluid` -- they fill the bar;  `left` / `center` / `right` -- packed at that end of a full-width bar (a `segmented` menu moves as a whole).  `align=\"center\"` => `center aligned`.  Its old name was `alignment`.",
               "type": {
                 "text": "\"fluid\" | \"left\" | \"center\" | \"right\""
               },
@@ -34736,7 +34736,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -35044,7 +35044,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -35234,7 +35234,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -35506,7 +35506,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -35727,7 +35727,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },
@@ -35967,7 +35967,7 @@
             },
             {
               "name": "link",
-              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name is `href`.",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
               "type": {
                 "text": "string"
               },

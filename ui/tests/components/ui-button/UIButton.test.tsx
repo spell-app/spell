@@ -85,15 +85,6 @@ describe("<ui-button> classes", () => {
     expect(host.hasAttribute("appearance")).toBe(false)
   })
 
-  it('draws an old name as its new one:  `primary basic` is `color="primary" appearance="basic"`', async () => {
-    const old = await button(`<ui-button primary basic compact attached="top" active>Go</ui-button>`)
-    const now = await button(
-      `<ui-button color="primary" appearance="basic" padding="compact" attach="top" selected>Go</ui-button>`
-    )
-    expect(old.control.className).toBe(now.control.className)
-    expect(now.control.className).toBe("ui primary compact top attached active basic button")
-  })
-
   it("wraps a joined label in a `labeled` root", async () => {
     const { host } = await button(`<ui-button labeled="left" color="red" icon="heart" badge="2,048">Like</ui-button>`)
     const root = host.shadowRoot!.firstElementChild!
@@ -846,7 +837,7 @@ describe("<ui-button> accessibility", () => {
 ////////////////
 
 describe("<ui-button> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(`<ui-button NAME="#there">Go</ui-button>`.replace("NAME", name))
     expect(element.shadowRoot!.querySelector("a")?.getAttribute("href")).toBe("#there")
   })

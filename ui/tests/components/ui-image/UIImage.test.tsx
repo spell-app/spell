@@ -230,7 +230,7 @@ describe("<ui-image> accessibility", () => {
 ////////////////
 
 describe("<ui-image> link", () => {
-  it.each(["link", "href"])("%s draws a real link", async (name) => {
+  it.each(["link"])("%s draws a real link", async (name) => {
     const element = await ElementFixture.render(
       `<ui-image NAME="#there" src="${SRC}" alt="There"></ui-image>`.replace("NAME", name)
     )
@@ -239,29 +239,8 @@ describe("<ui-image> link", () => {
 })
 
 ////////////////
-// ## Old names
-//
-// Owen's attribute renames (epic `ui-gaps` P4):  every old spelling still draws as the new one does.
+// ## Figure
 ////////////////
-
-describe("<ui-image> old names", () => {
-  /** The class string of the element's first classed box. */
-  async function classesOf(html: string) {
-    const host = await ElementFixture.render<DOMElement>(html)
-    return host.shadowRoot!.querySelector("[class]")!.className
-  }
-
-  it("<ui-image>:  each old spelling draws as its new one", async () => {
-    expect(await classesOf(`<ui-image src="a.png" rounded bordered centered spaced="left">A</ui-image>`)).toBe(
-      await classesOf(`<ui-image src="a.png" appearance="rounded bordered" align="center" spacing="left">A</ui-image>`)
-    )
-  })
-  it("<ui-images>:  each old spelling draws as its new one", async () => {
-    expect(await classesOf(`<ui-images rounded circular centered>A</ui-images>`)).toBe(
-      await classesOf(`<ui-images appearance="rounded circular" align="center">A</ui-images>`)
-    )
-  })
-})
 
 /** A 120 x 80 picture, as a data URL. */
 const PICTURE = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="teal"/></svg>')}`

@@ -801,20 +801,3 @@ describe("<ui-toast> invoker commands", () => {
     }
   })
 })
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-toast> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-toast header="Old">Body</ui-toast>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-toast heading="New">Body</ui-toast>`
-    )
-    expect(written.heading).toBe("New")
-  })
-})

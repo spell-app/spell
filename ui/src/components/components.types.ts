@@ -1757,7 +1757,7 @@ export const SourceBodyAttributes = [
     kind: "string",
     replaces: ["select"],
     description:
-      "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name is `select`."
+      "With `source`:  a CSS selector;  only its first match in the file becomes the content.  Its old name was `select`."
   }
 ] as const
 

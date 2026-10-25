@@ -26,7 +26,7 @@ export const buttonsVocabulary = {
       replaces: COLOR_SWITCHES,
       description:
         "The hue of every button in the group:  any hue, or one of the four a button takes (`primary` ...).  " +
-        "Those four also work written alone, their old names."
+        "Written alone, they were its old names."
     },
     {
       name: "appearance",
@@ -44,7 +44,7 @@ export const buttonsVocabulary = {
         "The look of every button, several words at once.  " +
         "`basic` puts them inside one outer border, and `tertiary` is text only.  " +
         "`circular` makes them separate pill-shaped buttons.  " +
-        "Each word also works written alone, its old name."
+        "Written alone, each was its old name."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Inverted buttons, for dark backgrounds." },
     { name: "icon", group: "content", kind: "keyOnly", description: "Icon-only buttons:  square padding." },
@@ -61,7 +61,7 @@ export const buttonsVocabulary = {
       kind: "valueOnly",
       values: ["compact"],
       replaces: [{ from: "compact", value: "compact" }],
-      description: "Room inside every button:  `compact` (reduced).  Its old name is `compact`."
+      description: "Room inside every button:  `compact` (reduced).  Its old name was `compact`."
     },
     {
       name: "toggle",
@@ -75,7 +75,7 @@ export const buttonsVocabulary = {
       kind: "valueOnly",
       values: ["vertical"],
       replaces: [{ from: "vertical", value: "vertical" }],
-      description: "Which way the buttons run:  `vertical` stacks them.  Its old name is `vertical`."
+      description: "Which way the buttons run:  `vertical` stacks them.  Its old name was `vertical`."
     },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
     {
@@ -94,7 +94,7 @@ export const buttonsVocabulary = {
       values: ["md"],
       classes: { md: "spaced" },
       replaces: [{ from: "spaced", value: "md" }],
-      description: "Room between the buttons:  `md` separates them with gaps.  Its old name is `spaced`."
+      description: "Room between the buttons:  `md` separates them with gaps.  Its old name was `spaced`."
     },
     { name: "stackable", group: "layout", kind: "keyOnly", description: "Stacks vertically on mobile." },
     {
@@ -105,7 +105,7 @@ export const buttonsVocabulary = {
       classes: ATTACH_CLASSES,
       replaces: [{ from: "attached", value: "both" }],
       description:
-        "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name is `attached`."
+        "Joins it to the edge of a segment:  the side its value names, or `both`.  Its old name was `attached`."
     },
     {
       name: "width",

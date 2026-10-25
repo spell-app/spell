@@ -51,7 +51,6 @@ describe("<ui-progress> classes", () => {
     ['size="small" color="teal"', "ui small teal progress"],
     ["active indicating", "ui active indicating progress"],
     ['state="warning"', "ui warning progress"],
-    ["basic inverted right-aligned disabled", "ui right aligned disabled inverted basic progress"],
     // the new words (epic `ui-gaps` P4):  the old names above draw the same
     ['appearance="basic" inverted align="right" disabled', "ui right aligned disabled inverted basic progress"],
     ['attach="top"', "ui top attached progress"],

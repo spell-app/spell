@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-container text text-align="justified">` => `ui text justified container`.
+ *   `<ui-container text align="justified">` => `ui text justified container`.
  */
 
 import type { E } from "spell-ui/core"
@@ -38,7 +38,7 @@ export const containerVocabulary = {
       replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
       description:
         'With `grid`:  room for a grid\'s wider gutters (`spacing="lg"`, `xl` wider still).  ' +
-        "Its old name is `relaxed`."
+        "Its old name was `relaxed`."
     },
     {
       name: "align",
@@ -47,7 +47,7 @@ export const containerVocabulary = {
       values: "alignments",
       replaces: ["text-align"],
       description:
-        "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name is `text-align`."
+        "Aligns its text `left`, `center`, `right`, or `justified` (with hyphenation).  Its old name was `text-align`."
     },
     {
       name: "scrolling",

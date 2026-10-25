@@ -428,20 +428,3 @@ describe("<ui-flyout> sliding out", () => {
     expect(dialog.getAnimations().length).toBeGreaterThan(0)
   })
 })
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-flyout> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-flyout header="Old">Body</ui-flyout>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-flyout heading="New">Body</ui-flyout>`
-    )
-    expect(written.heading).toBe("New")
-  })
-})

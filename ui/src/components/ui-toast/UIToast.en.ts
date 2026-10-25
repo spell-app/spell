@@ -44,7 +44,7 @@ export const toastVocabulary = {
       replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Bold first line (Fomantic's `title`).  Its old name is `header`."
+      description: "Bold first line (Fomantic's `title`).  Its old name was `header`."
     },
     { name: "message", group: "appearance", kind: "string", description: "Body text;  slotted content follows it." },
     {

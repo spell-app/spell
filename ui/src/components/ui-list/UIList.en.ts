@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-list relaxed="very" divided size="large">` => `ui large divided very relaxed list`.
+ *   `<ui-list spacing="xl" divided size="large">` => `ui large divided very relaxed list`.
  *   `UIList.css` keys on those words.
  * - Items are the GENERIC `<ui-item>` (`ownsParts` lists `item`), never a `ui-list-item`:  the list tells each
  *   item how to render (`ItemOwner.itemContext()`) and hands it `UIList.css`.
@@ -56,7 +56,7 @@ export const listVocabulary = {
       replaces: [{ from: "link", value: "link" }],
       description:
         "The look:  `link` -- items are links:  muted until hovered, the selected one strongest.  " +
-        "Its old name is the bare `link` switch."
+        "Its old name was the bare `link` switch."
     },
     {
       name: "selection",
@@ -71,7 +71,7 @@ export const listVocabulary = {
       values: ["indent"],
       classes: { indent: "animated" },
       replaces: [{ from: "animated", value: "indent" }],
-      description: "What an item does when hovered:  `indent`, it moves in.  Its old name is `animated`."
+      description: "What an item does when hovered:  `indent`, it moves in.  Its old name was `animated`."
     },
     {
       name: "direction",
@@ -82,7 +82,7 @@ export const listVocabulary = {
       replaces: [{ from: "horizontal", value: "horizontal" }],
       description:
         "Which way the items run:  `vertical` (the default) or `horizontal`, in a row.  " +
-        "Its old name is the bare `horizontal` switch."
+        "Its old name was the bare `horizontal` switch."
     },
     { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
     { name: "celled", group: "layout", kind: "keyOnly", description: "A rule around every item." },
@@ -93,7 +93,7 @@ export const listVocabulary = {
       values: ["lg", "xl"],
       classes: { lg: "relaxed", xl: "very relaxed" },
       replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
-      description: 'Room between items:  `lg` more, `xl` even more.  Its old name is `relaxed` (`relaxed="very"`).'
+      description: 'Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed="very"`).'
     },
     {
       name: "padding",
@@ -104,7 +104,7 @@ export const listVocabulary = {
       replaces: [{ from: "fitted", value: "none" }],
       description:
         "`none`:  no horizontal item padding;  a `selection` list's hover background reaches past its edges.  " +
-        "Its old name is `fitted`."
+        "Its old name was `fitted`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {

@@ -56,8 +56,7 @@ export class StaticFlattener {
       StaticFlattener.decorate(
         root,
         element,
-        // old names too (`href`):  they're the element's attributes, never the root's
-        [...family.definition.attributes.map((each) => each.attribute), ...family.definition.oldAttributeNames]
+        family.definition.attributes.map((each) => each.attribute)
       )
       root.setAttribute(SSR.ROOT_ATTRIBUTE, family.kind)
     }

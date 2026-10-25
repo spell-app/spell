@@ -23,7 +23,7 @@ export const orVocabulary = {
       group: "content",
       kind: "string",
       replaces: ["text"],
-      description: "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name is `text`."
+      description: "Badge text;  default the translated `or` text.  Keep it to a short word.  Its old name was `text`."
     }
   ],
   events: [],

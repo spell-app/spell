@@ -40,7 +40,7 @@ const OWN_ATTRIBUTES = [
     kind: "string",
     replaces: ["select"],
     description:
-      "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name is `select`."
+      "With `source`:  a CSS selector;  only its first match in the layout page is used.  Its old name was `select`."
   },
   {
     name: "readonly",

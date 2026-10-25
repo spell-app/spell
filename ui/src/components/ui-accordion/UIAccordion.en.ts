@@ -5,7 +5,7 @@
  * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`),
  *   so `spell-ui/core` for types only, and `UIT` by value straight from `components.types`.
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-accordion styled compact="very" inverted>` => `ui inverted styled very compact accordion`.
+ *   `<ui-accordion appearance="styled" padding="xs" inverted>` => `ui inverted styled very compact accordion`.
  *   `UIAccordion.css` keys on those words.
  * - The panels are the light children in PAIRS:  a `<ui-title>` (the generic part) and the element after it
  *   (usually a `<ui-content>`), as Fomantic's `.title` + `.content`, one to one.

@@ -44,9 +44,9 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
   it("names a Spanish tag's properties in Spanish:  `apariencia` is `appearance`, by attribute and by property", async () => {
     await import("spell-ui/components/ui-card")
     const cardRoot = (host: DOMElement) => host.shadowRoot!.querySelector("[part~=card]")!
-    // the old switch, by its Spanish name (epic `ui-gaps` P4):  still `dashed`
-    const byOldName = await ElementFixture.render<DOMElement>(`<es-tarjeta discontinuo></es-tarjeta>`)
-    expect(cardRoot(byOldName).className).toBe("ui dashed card")
+    // by its Spanish attribute
+    const byAttribute = await ElementFixture.render<DOMElement>(`<es-tarjeta apariencia="dashed"></es-tarjeta>`)
+    expect(cardRoot(byAttribute).className).toBe("ui dashed card")
     // what spell's JSX writes for a value that can change, `prop:apariencia`:  the element's own property
     const byProperty = await ElementFixture.render<DOMElement & Record<string, unknown>>(`<es-tarjeta></es-tarjeta>`)
     expect("apariencia" in byProperty).toBe(true)

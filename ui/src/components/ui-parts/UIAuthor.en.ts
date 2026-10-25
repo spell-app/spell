@@ -28,7 +28,7 @@ export const authorVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`), e.g. to a profile.  Its old name is `href`."
+      description: "Renders a link (`<a>`), e.g. to a profile.  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],

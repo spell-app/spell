@@ -107,8 +107,6 @@ describe("<ui-menu> classes", () => {
     // the new spelling wins over an old switch written beside it (`AttributeSpec.replaces`)
     ['appearance="pointing" secondary', "ui pointing menu"],
     ['appearance="pointing secondary"', "ui pointing secondary menu"],
-    ['alignment="center"', "ui center aligned menu"],
-    ['alignment="fluid" equal', "ui equal fluid aligned menu"],
     ["equal", "ui equal menu"]
   ])("<ui-menu %s>", async (attributes, classes) => {
     const { root } = await menu(attributes)
@@ -681,19 +679,6 @@ describe("<ui-menu> ui-select", () => {
 ////////////////
 
 describe("<ui-menu> appearance, alignment, equal", () => {
-  it("takes the look as one word:  the boolean words stay aliases with the same classes", async () => {
-    for (const [attributes, alias] of [
-      ['appearance="tabular"', "tabular"],
-      ['appearance="pointing"', "pointing"],
-      ['appearance="secondary"', "secondary"],
-      ['appearance="text"', "text"]
-    ]) {
-      const { root } = await menu(attributes!)
-      const { root: aliased } = await menu(alias!)
-      expect(root.className).toBe(aliased.className)
-    }
-  })
-
   it("segmented:  a bordered group hugging its items, the selected one filled with the primary colour", async () => {
     const { root, items } = await bar('appearance="segmented"')
     const box = styleOf(items[1]!)
@@ -867,17 +852,5 @@ describe("<ui-menu> accessibility", () => {
   it.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await expectAccessible(root)
-  })
-})
-
-describe("<ui-menu> old names", () => {
-  it.each([
-    ["secondary pointing link borderless", 'appearance="secondary pointing link borderless"'],
-    ['vertical compact attached="top"', 'direction="vertical" padding="compact" attach="top"'],
-    ['fitted="vertically" wrapped alignment="center"', 'padding="none-y" wrap align="center"'],
-    ["attached", 'attach="both"']
-  ])("<ui-menu %s> draws as the new spelling", async (old, spelling) => {
-    const [before, after] = [await menu(old), await menu(spelling)]
-    expect(before.root.className).toBe(after.root.className)
   })
 })

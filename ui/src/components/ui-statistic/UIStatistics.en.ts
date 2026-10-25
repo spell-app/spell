@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-statistic size="large" color="red" horizontal>` => `ui large red horizontal statistic`;
+ *   `<ui-statistic size="large" color="red" direction="horizontal">` => `ui large red horizontal statistic`;
  *   `<ui-statistics widths="3" stackable>` => `ui stackable three statistics`.  `UIStatistic.css` keys on those words.
  * - Content is the GENERIC parts, owned by the statistic (`ownsParts`):  `<ui-value>` (Fomantic's `.value`) and
  *   `<ui-label>` (Fomantic's `.label`).  There is NO separate label part tag:  a `<ui-label>` inside a statistic
@@ -38,7 +38,7 @@ export const statisticsVocabulary = {
       values: ["horizontal"],
       replaces: [{ from: "horizontal", value: "horizontal" }],
       description:
-        "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name is `horizontal`."
+        "`horizontal`:  statistics stacked, each with its label beside its value.  Its old name was `horizontal`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every statistic for dark backgrounds." },
     {

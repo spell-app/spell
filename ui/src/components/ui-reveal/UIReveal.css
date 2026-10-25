@@ -20,7 +20,7 @@
  *   reaches the box (`notes/theming.md` "Component tokens").
  * - NOTE: left out, on purpose:
  *   - Fomantic's `!important`s:  the specific type rules outrank the base ones, and states sit in a later sublayer
- *   - `ui reveal image` / `circular` couplings with `image.less`:  put a `<ui-image circular>` in each content
+ *   - `ui reveal image` / `circular` couplings with `image.less`:  put a `<ui-image appearance="circular">` in each content
  *   - `.ui.reveal > .ui.ribbon.label` (a label is its own element, not a child of this root)
  */
 

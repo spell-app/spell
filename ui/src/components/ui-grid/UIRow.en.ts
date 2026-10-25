@@ -73,7 +73,7 @@ export const rowVocabulary = {
       values: ["lg", "xl"],
       classes: { lg: "relaxed", xl: "very relaxed" },
       replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
-      description: "Wider gutters:  `lg`, `xl` wider still.  Its old name is `relaxed`."
+      description: "Wider gutters:  `lg`, `xl` wider still.  Its old name was `relaxed`."
     },
     { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its columns." },
     { name: "stretched", group: "layout", kind: "keyOnly", description: "Columns fill the row's height." },
@@ -104,7 +104,7 @@ export const rowVocabulary = {
       kind: "textAlign",
       values: "alignments",
       replaces: ["text-align"],
-      description: "Aligns its columns' text.  Its old name is `text-align`."
+      description: "Aligns its columns' text.  Its old name was `text-align`."
     },
     {
       name: "vertical-align",

@@ -740,20 +740,3 @@ describe("<ui-popup> invoker commands", () => {
     expect(shown(host)).toBe(false)
   })
 })
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-popup> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-popup header="Old">Body</ui-popup>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-popup heading="New">Body</ui-popup>`
-    )
-    expect(written.heading).toBe("New")
-  })
-})

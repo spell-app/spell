@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-label color="red" pointing="left" basic>` => `ui red basic left pointing label`.
+ *   `<ui-label color="red" pointing="left" appearance="basic">` => `ui red basic left pointing label`.
  *   `UILabel.css` keys on those words.
  * - A group needs no help from the components:  `<ui-labels tag>` draws `ui tag labels`,
  *   and `UILabel.css` hands the look to its children through inherited tokens.
@@ -109,7 +109,7 @@ export const labelVocabulary = {
       },
       replaces: [{ from: "attached", value: "top" }],
       description:
-        "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name is `attached` " +
+        "Attached across (or on a corner of) the owner's top or bottom edge.  Its old name was `attached` " +
         "(bare:  `top`)."
     },
     {
@@ -119,7 +119,7 @@ export const labelVocabulary = {
       values: ["horizontal"],
       replaces: [{ from: "horizontal", value: "horizontal" }],
       description:
-        "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name is `horizontal`."
+        "`horizontal`:  a fixed-width tag before a line of text, e.g. in a list.  Its old name was `horizontal`."
     },
     { name: "empty", group: "appearance", kind: "keyOnly", description: "With `circular`:  an empty dot." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
@@ -130,7 +130,7 @@ export const labelVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center` centres its content.  Its old name is `centered`."
+      description: "`center` centres its content.  Its old name was `centered`."
     },
     {
       name: "prompt",
@@ -144,7 +144,7 @@ export const labelVocabulary = {
       kind: "keyOnly",
       key: "active",
       replaces: ["active"],
-      description: "Selected / on.  Its old name is `active`."
+      description: "Selected / on.  Its old name was `active`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
@@ -171,7 +171,7 @@ export const labelVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`) styled as a label.  Its old name is `href`."
+      description: "Renders a link (`<a>`) styled as a label.  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." }
   ],

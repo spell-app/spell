@@ -96,15 +96,10 @@ describe("<ui-section> classes", () => {
     ['size="small" block', "ui small block section"],
     ['size="medium"', "ui section"],
     // old names and new draw the same words (epic `ui-gaps` P4)
-    ["bordered raised compact", "ui compact bordered raised section"],
     ['appearance="bordered raised" padding="compact"', "ui compact bordered raised section"],
-    ['padded="very" attached="top" bordered', "ui very padded top attached bordered section"],
     ['padding="lg" attach="top" appearance="bordered"', "ui very padded top attached bordered section"],
-    ['text-align="center"', "ui center aligned section"],
     ['align="center"', "ui center aligned section"],
     ['scrolling="very short"', "ui very short scrolling section"],
-    ['text-align="center" inverted', "ui inverted center aligned section"],
-    ["styled basic loading disabled", "ui disabled loading styled basic section"],
     ['collapsible collapsed label="H" hint="S" level="3" badge="2" icon="bug" offset="4"', "ui section"]
   ])("<ui-section %s>", async (attributes, classes) => {
     const { root } = await section(`<ui-section ${attributes}>Body</ui-section>`)
@@ -350,17 +345,6 @@ describe("<ui-section> folding", () => {
     await ElementFixture.tick()
     expect(host.open).toBe(false)
     expect(seen).toEqual([])
-  })
-
-  it("still takes `collapsed`, its old name turned round, as an attribute and a property", async () => {
-    const { host, content } = await section(`<ui-section label="H" collapsible collapsed>Body</ui-section>`)
-    expect(host.open).toBe(false)
-    expect(host.collapsed).toBe(true)
-    await expect.poll(() => folded(content)).toBe(true)
-    host.collapsed = false
-    await ElementFixture.tick()
-    expect(host.open).toBe(true)
-    expect(content.hasAttribute("hidden")).toBe(false)
   })
 
   it("doesn't fold while `disabled`", async () => {

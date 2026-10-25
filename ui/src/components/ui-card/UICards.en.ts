@@ -58,7 +58,7 @@ export const cardsVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  centres each row of cards.  Its old name is `centered`."
+      description: "`center`:  centres each row of cards.  Its old name was `centered`."
     },
     {
       name: "direction",
@@ -66,7 +66,7 @@ export const cardsVocabulary = {
       kind: "valueOnly",
       values: ["horizontal"],
       replaces: [{ from: "horizontal", value: "horizontal" }],
-      description: "`horizontal`:  every card horizontal.  Its old name is `horizontal`."
+      description: "`horizontal`:  every card horizontal.  Its old name was `horizontal`."
     },
     {
       name: "appearance",
@@ -81,7 +81,7 @@ export const cardsVocabulary = {
       ],
       description:
         "Every card's look, several words at once:  `raised`, `link` (rises on hover;  a look, links need " +
-        "`link=` on the cards), `basic` (no border or shadow).  Their old names are `raised`, `link` (bare), `basic`."
+        "`link=` on the cards), `basic` (no border or shadow).  Their old names were `raised`, `link` (bare), `basic`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "Every card in the dark scheme." }
   ],

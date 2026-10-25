@@ -647,19 +647,6 @@ describe("<ui-tabs> accessibility", () => {
   })
 })
 
-describe("<ui-tabs> old names", () => {
-  it.each([
-    ["tabular attached basic", 'appearance="tabular basic" attach="top"'],
-    [
-      'pointing secondary vertical compact alignment="right"',
-      'appearance="pointing secondary" direction="vertical" padding="compact" align="right"'
-    ]
-  ])("<ui-tabs %s> draws as the new spelling", async (old, spelling) => {
-    const [before, after] = [await tabs(old), await tabs(spelling)]
-    expect([before.root.className, before.menu.className]).toEqual([after.root.className, after.menu.className])
-  })
-})
-
 ////////////////
 // ## Parent
 ////////////////

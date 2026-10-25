@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-comments threaded minimal size="small">` => `ui small minimal threaded comments`;  a comment has no `ui`
+ *   `<ui-comments threaded appearance="minimal" size="small">` => `ui small minimal threaded comments`;  a comment has no `ui`
  *   (`<ui-comment collapsed>` => `collapsed comment`).  `UIComment.css` keys on those.
  * - A comment owns the generic content parts (`ownsParts`):  `<ui-avatar>`, `<ui-content>`, `<ui-author>`,
  *   `<ui-meta>` (Fomantic's `.metadata`), `<ui-description>` (Fomantic's `.text`), `<ui-actions>` inside it get

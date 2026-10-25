@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
- *   `<ui-image size="small" rounded floated="right" vertical-align="top">` =>
+ *   `<ui-image size="small" appearance="rounded" floated="right" vertical-align="top">` =>
  *   `ui small rounded right floated top aligned image`.
  * - `size` is a WIDTH here (Fomantic's 35px … 960px ladder), not a text scale.
  *   `medium` stays the no-op default (the natural size), so the component never writes Fomantic's 300px `.medium`.
@@ -59,7 +59,7 @@ export const imageVocabulary = {
       values: ["center"],
       classes: { center: "centered" },
       replaces: [{ from: "centered", value: "center" }],
-      description: "`center`:  a block centred in its container.  Its old name is `centered`."
+      description: "`center`:  a block centred in its container.  Its old name was `centered`."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Faded:  shown as unavailable." },
     { name: "fluid", group: "layout", kind: "keyOnly", description: "Fills its container's width." },
@@ -84,7 +84,7 @@ export const imageVocabulary = {
       classes: { md: "spaced", left: "left spaced", right: "right spaced" },
       replaces: [{ from: "spaced", value: "md" }],
       description:
-        "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name is `spaced`."
+        "Room from the text around it:  `md` on both sides, or `left` / `right` only.  Its old name was `spaced`."
     },
     {
       name: "vertical-align",
@@ -134,7 +134,7 @@ export const imageVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`) around the image.  Its old name is `href`."
+      description: "Renders a link (`<a>`) around the image.  Its old name was `href`."
     }
   ],
   events: [],

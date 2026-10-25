@@ -3,7 +3,7 @@
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
- *   `<ui-steps ordered vertical="right" widths="3">` => `ui ordered right vertical three steps`;
+ *   `<ui-steps ordered direction="vertical-right" widths="3">` => `ui ordered right vertical three steps`;
  *   `<ui-step selected completed>` => `completed active step` (a step has no `ui`, as Fomantic's `.ui.steps > .step`).
  *   `UIStep.css` keys on those words.
  * - Chosen state:  `selected` is canonical (`AGENTS.md`), its class word Fomantic's `active`;
@@ -60,7 +60,7 @@ export const stepVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name is `href`."
+      description: "Where it goes:  renders a link (`<a>`) styled as a step.  Its old name was `href`."
     },
     { name: "target", group: "link", kind: "string", description: "Link target, with `link`." },
     {
@@ -73,7 +73,7 @@ export const stepVocabulary = {
       replaces: [{ from: "link", value: "link" }],
       description:
         "The look:  `link` -- clickable without a `link` to go to:  renders a `<button>`, with the link hover;  " +
-        "the page handles `click`.  Its old name is the bare `link` switch."
+        "the page handles `click`.  Its old name was the bare `link` switch."
     },
     { name: "icon", group: "content", kind: "icon", description: "Icon name, before the content." },
     {
@@ -81,7 +81,7 @@ export const stepVocabulary = {
       replaces: ["header"],
       group: "name",
       kind: "string",
-      description: "Shorthand for the title (Fomantic's `.title`).  Its old name is `header`."
+      description: "Shorthand for the title (Fomantic's `.title`).  Its old name was `header`."
     },
     {
       name: "description",

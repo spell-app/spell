@@ -18,11 +18,6 @@ describe("UIComponent.define(tag, dictionary)", () => {
     expect(host.shadowRoot!.querySelector("button")!.className).toBe("ui small red button")
   })
 
-  it('reads an old name in Spanish too:  `primario` is `color="primary"` (epic `ui-gaps` P4)', async () => {
-    const host = await ElementFixture.render<DOMElement>(`<ie-boton primario tamano="pequeno">Guardar</ie-boton>`)
-    expect(host.shadowRoot!.querySelector("button")!.className).toBe("ui small primary button")
-  })
-
   it("reflects canonical values back in Spanish", async () => {
     const host = await ElementFixture.render<DOMElement & { color: string }>(`<ie-boton>Guardar</ie-boton>`)
     host.color = "azul"
@@ -80,8 +75,6 @@ describe("UIComponent.define(tag, dictionary)", () => {
       "destino",
       "letra",
       "ayuda",
-      // the shared `link`'s old name
-      "href",
       "hidden"
     ])
   })

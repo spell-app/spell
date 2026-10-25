@@ -16,7 +16,7 @@
  *   - `<ui-date datetime>` renders `<time>`
  *   - `<ui-avatar src>` renders `<span class="avatar"><img alt=""></span>`
  *   - `<ui-detail>` / `<ui-date>` / `<ui-author>` are `<span>`s,
- *     or `<a class="detail" href>` / `<a class="author" href>` for `<ui-detail href>` / `<ui-author href>`
+ *     or `<a class="detail" href>` / `<a class="author" href>` for `<ui-detail link>` / `<ui-author link>`
  *   - a `<ui-label>` inside a `<ui-statistic>` is that statistic's `.label` part:
  *     it adopts this sheet after `UILabel.css` and renders `<div class="label" part="label">`, no `ui`
  * - DOM elements are `display: contents`:  the root IS the part,

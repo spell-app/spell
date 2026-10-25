@@ -67,9 +67,7 @@ describe("<ui-card> classes and markup", () => {
     ['appearance="raised"', "ui raised card"],
     ["", "ui card"],
     // the old names (epic ui-gaps P4), and the new
-    ["horizontal fluid", "ui horizontal fluid card"],
     ['direction="horizontal" fluid', "ui horizontal fluid card"],
-    ["link centered basic", "ui centered basic link card"],
     ['appearance="link basic" align="center"', "ui centered link basic card"],
     ["inverted disabled loading", "ui disabled inverted loading card"]
   ])("<ui-card %s>", async (attributes, classes) => {
@@ -516,22 +514,5 @@ describe("<ui-card> accessibility", () => {
     const root = await ElementFixture.render(EXAMPLES[path]!)
     await ElementFixture.settle(root)
     await expectAccessible(root)
-  })
-})
-
-////////////////
-// ## Old names
-////////////////
-
-describe("<ui-card> heading", () => {
-  it("takes `header`, its old name, as `heading`", async () => {
-    const element = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-card header="Old">Body</ui-card>`
-    )
-    expect(element.heading).toBe("Old")
-    const written = await ElementFixture.render<DOMElement & { heading?: string }>(
-      `<ui-card heading="New">Body</ui-card>`
-    )
-    expect(written.heading).toBe("New")
   })
 })

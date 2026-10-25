@@ -28,7 +28,7 @@ export const titleVocabulary = {
       group: "link",
       kind: "string",
       replaces: ["href"],
-      description: "Renders a link (`<a>`).  Its old name is `href`."
+      description: "Renders a link (`<a>`).  Its old name was `href`."
     }
   ],
   events: [],

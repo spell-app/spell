@@ -42,7 +42,7 @@ export const propertyGroupVocabulary = {
         replaces: ["select"],
         description:
           "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6).  " +
-          "Its old name is `select`."
+          "Its old name was `select`."
       },
       {
         name: "readonly",

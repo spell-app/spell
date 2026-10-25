@@ -5,10 +5,10 @@
  * - It styles the component's shadow DOM:
  *   `<div class="ui [size] toc" part="toc">` holding a `<div class="head" part="head">` row
  *   (an optional `<ui-header part="header">`, the `<button class="toggle-all">`)
- *   and `<ui-menu vertical text fluid part="menu">` of section rows:
+ *   and `<ui-menu direction="vertical" appearance="text" fluid part="menu">` of section rows:
  *   `<div class="section-row">`, its `<button class="fold">` chevron in the gutter, its
  *   `<ui-item class="section" part="section">` link.
- *   - Under the open section, an `<ui-item class="entries" fitted="vertically">`,
+ *   - Under the open section, an `<ui-item class="entries" padding="none-y">`,
  *     holding `<ui-menu part="entries">` of `<ui-item part="entry">` links.
  *   - An open entry with entries of its own (nested `<ui-section>`s) is followed by the same pair again,
  *     one indent further.
