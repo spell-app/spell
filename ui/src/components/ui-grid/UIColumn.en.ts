@@ -27,17 +27,20 @@ export const columnVocabulary = {
   attributes: [
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Fills the column with a hue, contrast text on top."
     },
     {
       name: "width",
+      group: "layout",
       kind: "width",
       values: "widths",
       description: "Width in columns of 16:  `4`, `1/4` or `25%`."
     },
     {
       name: "width-mobile",
+      group: "appearance",
       kind: "width",
       values: "widths",
       widthClass: "wide mobile",
@@ -45,6 +48,7 @@ export const columnVocabulary = {
     },
     {
       name: "width-tablet",
+      group: "appearance",
       kind: "width",
       values: "widths",
       widthClass: "wide tablet",
@@ -52,6 +56,7 @@ export const columnVocabulary = {
     },
     {
       name: "width-computer",
+      group: "appearance",
       kind: "width",
       values: "widths",
       widthClass: "wide computer",
@@ -59,6 +64,7 @@ export const columnVocabulary = {
     },
     {
       name: "width-large",
+      group: "appearance",
       kind: "width",
       values: "widths",
       widthClass: "wide large screen",
@@ -66,34 +72,50 @@ export const columnVocabulary = {
     },
     {
       name: "width-widescreen",
+      group: "appearance",
       kind: "width",
       values: "widths",
       widthClass: "wide widescreen",
       description: "Width while the grid is 1920px wide or more."
     },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Pushed to the `left` or `right` end." },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Pushed to the `left` or `right` end."
+    },
     {
       name: "attached",
+      group: "layout",
       kind: "valueAndKey",
       values: ["left", "right"],
       description: "No gutter on the `left` / `right` side."
     },
-    { name: "centered", kind: "keyOnly", description: "Centred in its line." },
-    { name: "stretched", kind: "keyOnly", description: "Fills the line's height;  its content grows." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centred in its line." },
+    {
+      name: "stretched",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Fills the line's height;  its content grows."
+    },
     {
       name: "only",
+      group: "layout",
       kind: "multiple",
       values: OnlyDevices,
       description: "Shown only on these devices (by the viewport)."
     },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: "alignments",
       description: "Aligns its text `left`, `center`, `right` or `justified`."
     },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: "verticalAlignments",
       description: "Sits at the `top`, `middle` or `bottom` of its line."

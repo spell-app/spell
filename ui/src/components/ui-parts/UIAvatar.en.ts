@@ -23,8 +23,13 @@ export const avatarVocabulary = {
   ui: false,
   description: "A small picture of a person:  a comment's or a card's.",
   attributes: [
-    { name: "src", kind: "string", description: "Image URL;  renders the `<img>` (or slot one)." },
-    { name: "alt", kind: "string", description: 'Alternative text;  default `""` (decorative, the name is nearby).' }
+    { name: "src", group: "link", kind: "string", description: "Image URL;  renders the `<img>` (or slot one)." },
+    {
+      name: "alt",
+      group: "content",
+      kind: "string",
+      description: 'Alternative text;  default `""` (decorative, the name is nearby).'
+    }
   ],
   events: [],
   slots: [{ name: "", description: "An `<img>`, instead of `src`." }],

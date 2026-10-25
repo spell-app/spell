@@ -27,8 +27,8 @@ export const commentVocabulary = {
   ui: false,
   description: "One comment:  who wrote it, when, what, and the replies to it.",
   attributes: [
-    { name: "collapsed", kind: "keyOnly", description: "Hidden:  folded away." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert." }
+    { name: "collapsed", group: "states", kind: "keyOnly", description: "Hidden:  folded away." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],
   events: [],
   slots: [

@@ -28,35 +28,55 @@ export const itemVocabulary = {
   attributes: [
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Menu:  hue of the item while selected (`red active item`)."
     },
     {
       name: "position",
+      group: "layout",
       kind: "valueOnly",
       values: ["left", "right"],
       description: "Menu:  `right` pushes the item (and what follows) to the far end."
     },
-    { name: "value", kind: "string", description: "Value;  defaults to `text`.  Ordered list:  shown as the marker." },
-    { name: "text", kind: "string", description: "Dropdown:  text;  defaults to the text content." },
-    { name: "description", kind: "string", description: "Dropdown:  secondary text, shown at the end." },
-    { name: "icon", kind: "icon", description: "Icon name, shown before the text." },
+    {
+      name: "value",
+      group: "form",
+      kind: "string",
+      description: "Value;  defaults to `text`.  Ordered list:  shown as the marker."
+    },
+    { name: "text", group: "name", kind: "string", description: "Dropdown:  text;  defaults to the text content." },
+    {
+      name: "description",
+      group: "content",
+      kind: "string",
+      description: "Dropdown:  secondary text, shown at the end."
+    },
+    { name: "icon", group: "content", kind: "icon", description: "Icon name, shown before the text." },
     {
       name: "image",
+      group: "content",
       kind: "string",
       description: "Image URL, shown before the text:  an avatar in a list, the item's picture in the Items view."
     },
-    { name: "flag", kind: "string", description: "Dropdown:  country code, shown as a flag before the text." },
-    { name: "href", kind: "string", description: "List / menu:  renders a link (`<a>`)." },
-    { name: "target", kind: "string", description: "Link target, with `href`." },
+    {
+      name: "flag",
+      group: "content",
+      kind: "string",
+      description: "Dropdown:  country code, shown as a flag before the text."
+    },
+    { name: "href", group: "link", kind: "string", description: "List / menu:  renders a link (`<a>`)." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." },
     {
       name: "link",
+      group: "link",
       kind: "keyOnly",
       description: "List / menu:  interactive without `href` -- renders a `<button>`, with the link hover."
     },
-    { name: "disabled", kind: "keyOnly", description: "Can't be chosen or followed." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be chosen or followed." },
     {
       name: "selected",
+      group: "states",
       kind: "keyOnly",
       key: "active",
       description:
@@ -65,12 +85,14 @@ export const itemVocabulary = {
     },
     {
       name: "fitted",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["horizontally", "vertically"],
       description: "Menu:  no padding;  `horizontally` / `vertically` keep the other axis' padding."
     },
     {
       name: "type",
+      group: "content",
       kind: "enum",
       values: ["item", "header", "divider"],
       default: "item",

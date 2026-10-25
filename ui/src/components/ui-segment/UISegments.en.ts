@@ -18,24 +18,41 @@ export const segmentsVocabulary = {
   noun: "segments",
   description: "A group of segments can be formatted to appear together.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size of every segment in the group." },
-    { name: "horizontal", kind: "keyOnly", description: "Side by side instead of stacked." },
+    { name: "size", group: "appearance", kind: "size", description: "Text size of every segment in the group." },
+    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Side by side instead of stacked." },
     {
       name: "equal-width",
+      group: "layout",
       kind: "keyOnly",
       key: "equal width",
       description: "With `horizontal`:  every segment the same width."
     },
-    { name: "wrapping", kind: "keyOnly", description: "With `horizontal`:  segments wrap onto more rows." },
-    { name: "stackable", kind: "keyOnly", description: "With `horizontal`:  stacks on mobile." },
-    { name: "raised", kind: "keyOnly", description: "Lifted off the page with a shadow." },
-    { name: "stacked", kind: "keyOrValueAndKey", values: ["tall"], description: "A page peeking out below." },
-    { name: "piled", kind: "keyOnly", description: "A pile of rotated sheets behind the group." },
-    { name: "compact", kind: "keyOnly", description: "Only as wide as its content." },
-    { name: "basic", kind: "keyOnly", description: "No box of its own." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme, for every segment in the group." },
-    { name: "loading", kind: "keyOnly", description: "Dims the group under a spinner." },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and inert." }
+    {
+      name: "wrapping",
+      group: "layout",
+      kind: "keyOnly",
+      description: "With `horizontal`:  segments wrap onto more rows."
+    },
+    { name: "stackable", group: "layout", kind: "keyOnly", description: "With `horizontal`:  stacks on mobile." },
+    { name: "raised", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
+    {
+      name: "stacked",
+      group: "appearance",
+      kind: "keyOrValueAndKey",
+      values: ["tall"],
+      description: "A page peeking out below."
+    },
+    { name: "piled", group: "appearance", kind: "keyOnly", description: "A pile of rotated sheets behind the group." },
+    { name: "compact", group: "layout", kind: "keyOnly", description: "Only as wide as its content." },
+    { name: "basic", group: "appearance", kind: "keyOnly", description: "No box of its own." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The dark scheme, for every segment in the group."
+    },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Dims the group under a spinner." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." }
   ],
   events: [],
   slots: [{ name: "", description: "`<ui-segment>`s and nested `<ui-segments>`." }],

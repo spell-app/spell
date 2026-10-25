@@ -37,22 +37,30 @@ export const propertyGroupVocabulary = {
     [
       {
         name: "select",
+        group: "appearance",
         kind: "string",
         description: "A CSS selector:  the group's properties are its first match in the editor's `source` page (P6)."
       },
       {
         name: "readonly",
+        group: "form",
         kind: "boolean",
         description: "Shows every value;  nothing can be changed.  Reaches every property in it."
       },
       {
         name: "state",
+        group: "form",
         kind: "valueOnly",
         values: UIT.FormStates,
         description: "Its state:  tints its title.  A property in it failing validation shows `error` on top."
       },
-      { name: "output", kind: "string", description: 'A value at the end of the title bar;  `slot="output"`.' },
-      { name: "error", kind: "string", description: "An error under the title, and the `error` state." }
+      {
+        name: "output",
+        group: "content",
+        kind: "string",
+        description: 'A value at the end of the title bar;  `slot="output"`.'
+      },
+      { name: "error", group: "form", kind: "string", description: "An error under the title, and the `error` state." }
     ] as const satisfies readonly E.AttributeSpec[],
     [sectionVocabulary.attributes],
     SOURCE_ONLY

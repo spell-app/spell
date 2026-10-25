@@ -22,58 +22,83 @@ export const embedVocabulary = {
   noun: "embed",
   description: "An embed displays content from other websites, like YouTube videos, loaded only when asked for.",
   attributes: [
-    { name: "source", kind: "enum", values: ["youtube", "vimeo"], description: "Video host of `video-id`." },
+    {
+      name: "source",
+      group: "content",
+      kind: "enum",
+      values: ["youtube", "vimeo"],
+      description: "Video host of `video-id`."
+    },
     {
       name: "video-id",
+      group: "appearance",
       kind: "string",
       property: "videoId",
       description: "The video's id at `source` (Fomantic's `data-id`)."
     },
     {
       name: "url",
+      group: "link",
       kind: "string",
       description:
         "Any `http(s)` URL to frame, instead of `source` + `video-id`;  a YouTube / Vimeo one gets their player parameters."
     },
-    { name: "placeholder", kind: "string", description: "Image shown (and clicked) before the frame loads." },
+    {
+      name: "placeholder",
+      group: "form",
+      kind: "string",
+      description: "Image shown (and clicked) before the frame loads."
+    },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description:
         "What it is, e.g. `Product tour`:  names the play button (`Play Product tour`) and the frame.  Default `alt`, else `video` / `embedded content`."
     },
-    { name: "alt", kind: "string", description: "Fomantic's placeholder `alt`;  used as `label` when there is none." },
+    {
+      name: "alt",
+      group: "content",
+      kind: "string",
+      description: "Fomantic's placeholder `alt`;  used as `label` when there is none."
+    },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       default: "circle-play",
       description: 'Icon over the placeholder;  bare `icon` (or `"true"`) keeps the default, `icon="false"` shows none.'
     },
     {
       name: "aspect-ratio",
+      group: "appearance",
       kind: "enum",
       values: ["16:9", "4:3", "21:9", "square"],
       description: "Shape of the box;  `16:9` (widescreen) is the default."
     },
     {
       name: "autoplay",
+      group: "behaviour",
       kind: "boolean",
       default: true,
       description: "The video plays as soon as the frame loads:  the click on the placeholder already asked for it."
     },
     {
       name: "branded-ui",
+      group: "advanced",
       kind: "boolean",
       property: "brandedUI",
       description: "Keep the player's own branding (Fomantic's `brandedUI`)."
     },
     {
       name: "parameters",
+      group: "behaviour",
       kind: "json",
       description: "Extra URL parameters for the frame, e.g. `{ start: 30 }` (a JS property;  JSON in the attribute)."
     },
     {
       name: "active",
+      group: "states",
       kind: "keyOnly",
       description:
         "The frame is loaded.  Controlled:  set it to load / unload;  a click (or `host.activate()`) fires the cancelable `ui-activate` first."

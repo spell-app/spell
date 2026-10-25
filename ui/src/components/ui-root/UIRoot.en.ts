@@ -24,6 +24,7 @@ export const rootVocabulary = {
   attributes: [
     {
       name: "display",
+      group: "appearance",
       kind: "enum",
       values: ["skeleton", "when-ready", "immediately"],
       default: "skeleton",
@@ -34,22 +35,36 @@ export const rootVocabulary = {
     },
     {
       name: "loading",
+      group: "states",
       kind: "string",
       description:
         "A loader with this message while components load (bare `loading`:  the default text).  Not with `immediately`."
     },
     {
       name: "timeout",
+      group: "behaviour",
       kind: "string",
       default: "5s",
       description:
         "Longest wait before showing the content anyway:  `5s`, `500ms`, or milliseconds.  A component that didn't " +
         "load fires `ui-error` and shows its native fallback."
     },
-    { name: "theme", kind: "enum", values: ["light", "dark"], description: "Colour scheme of everything inside." },
-    { name: "size", kind: "size", description: "Size of everything inside, `mini` ... `massive`." },
+    {
+      name: "theme",
+      group: "appearance",
+      kind: "enum",
+      values: ["light", "dark"],
+      description: "Colour scheme of everything inside."
+    },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size of everything inside, `mini` ... `massive`."
+    },
     {
       name: "stack-with",
+      group: "layout",
       kind: "enum",
       values: UIT.StackWithValues,
       description:
@@ -59,6 +74,7 @@ export const rootVocabulary = {
     },
     {
       name: "width",
+      group: "layout",
       kind: "string",
       description:
         "Width as a CSS length (`600px`, `40em`, `50%`) or `window` (the viewport's).  With a width or height the root " +
@@ -67,11 +83,13 @@ export const rootVocabulary = {
     },
     {
       name: "height",
+      group: "layout",
       kind: "string",
       description: "Height as a CSS length or `window` (the viewport's, following a phone's address bar)."
     },
     {
       name: "icons",
+      group: "content",
       kind: "string",
       description:
         "Icon packs for everything inside, comma-separated:  built-in ids (`fa7-free`, `fa7-brands`, `fomantic`) or " +
@@ -79,12 +97,14 @@ export const rootVocabulary = {
     },
     {
       name: "emoji",
+      group: "content",
       kind: "enum",
       values: ["cldr", "fomantic"],
       description: "Emoji names for everything inside:  `cldr` (the default) or `fomantic`."
     },
     {
       name: "assets",
+      group: "link",
       kind: "string",
       description:
         "Folder the built-in icon packs load from (`<assets>icon-packs/<id>/pack.js`), relative to the page;  " +
@@ -92,6 +112,7 @@ export const rootVocabulary = {
     },
     {
       name: "fixed",
+      group: "layout",
       kind: "boolean",
       description:
         "Fills the viewport and stays there (`position: fixed`):  the page never scrolls, the root does.  A " +
@@ -99,6 +120,7 @@ export const rootVocabulary = {
     },
     {
       name: "pure",
+      group: "advanced",
       kind: "boolean",
       description:
         "Leaves the browser's `setAttribute()` alone.  Spell UI's own components keep a function or object a " +

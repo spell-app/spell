@@ -27,84 +27,115 @@ export const labelVocabulary = {
   plural: "labels",
   description: "A label displays content classification.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "color", kind: "color", description: "Hue;  fills the label (its ring and text when `basic`)." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
+    {
+      name: "color",
+      group: "appearance",
+      kind: "color",
+      description: "Hue;  fills the label (its ring and text when `basic`)."
+    },
     {
       name: "image",
+      group: "content",
       kind: "string",
       description:
         'Image label:  a photo flush with the start edge (class `image`).  Presence (`""`, bare `image`) means ' +
         "an image label styled around a slotted `<img>`;  a non-empty value is the `src` of the label's own " +
         "`img.image` child."
     },
-    { name: "tag", kind: "keyOnly", description: "Shaped like a price tag." },
+    { name: "tag", group: "appearance", kind: "keyOnly", description: "Shaped like a price tag." },
     {
       name: "corner",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
       description: 'A triangle on the owner\'s top corner holding an icon:  `corner` (end) or `corner="left"`.'
     },
     {
       name: "ribbon",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["right"],
       description: 'A ribbon pulled past the owner\'s start edge;  `ribbon="right"` past its end edge.'
     },
     {
       name: "pointing",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["above", "below", "left", "right"],
       description: "An arrow pointing at related content:  `pointing` (above), `below`, `left` or `right`."
     },
     {
       name: "floating",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["left", "bottom", "bottom left"],
       description: "Floats over the owner's top end corner, e.g. a count on a menu item;  `left` / `bottom` move it."
     },
-    { name: "basic", kind: "keyOnly", description: "Less pronounced:  an outline on the surface colour." },
+    {
+      name: "basic",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Less pronounced:  an outline on the surface colour."
+    },
     {
       name: "tinted",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "Soft:  the colour's tint as the fill and its text colour as the text, as a pill or badge.  Not Fomantic's."
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom", "top left", "top right", "bottom left", "bottom right"],
       description: "Attached across (or on a corner of) the owner's top or bottom edge;  bare `attached` is `top`."
     },
-    { name: "horizontal", kind: "keyOnly", description: "A fixed-width tag before a line of text, e.g. in a list." },
-    { name: "circular", kind: "keyOnly", description: "A round badge." },
-    { name: "empty", kind: "keyOnly", description: "With `circular`:  an empty dot." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "centered", kind: "keyOnly", description: "Centres its content." },
+    {
+      name: "horizontal",
+      group: "layout",
+      kind: "keyOnly",
+      description: "A fixed-width tag before a line of text, e.g. in a list."
+    },
+    { name: "circular", group: "appearance", kind: "keyOnly", description: "A round badge." },
+    { name: "empty", group: "appearance", kind: "keyOnly", description: "With `circular`:  an empty dot." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Centres its content." },
     {
       name: "prompt",
+      group: "content",
       kind: "keyOnly",
       description: "A form field's validation message:  the negative colour on the surface, wins over `color`."
     },
-    { name: "active", kind: "keyOnly", description: "Selected / on." },
-    { name: "disabled", kind: "keyOnly", description: "Dimmed and inert." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
+    { name: "active", group: "states", kind: "keyOnly", description: "Selected / on." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Dimmed and inert." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       description: "Icon name, shown before the text;  with no text the label gets the `icon` class (icon centred)."
     },
     {
       name: "detail",
+      group: "content",
       kind: "string",
       description: "Shorthand for a dimmer second value after the text, e.g. a count."
     },
     {
       name: "removable",
+      group: "behaviour",
       kind: "boolean",
       description: "Shows a delete icon button;  clicking it dispatches `ui-remove`."
     },
-    { name: "href", kind: "string", description: "Renders a link (`<a>`) styled as a label." },
-    { name: "target", kind: "string", description: "Link target, with `href`." }
+    { name: "href", group: "link", kind: "string", description: "Renders a link (`<a>`) styled as a label." },
+    { name: "target", group: "link", kind: "string", description: "Link target, with `href`." }
   ],
   events: [
     {

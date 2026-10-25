@@ -22,6 +22,7 @@ export const placeholderLineVocabulary = {
   attributes: [
     {
       name: "length",
+      group: "appearance",
       kind: "valueOnly",
       values: ["full", "very long", "long", "medium", "short", "very short"],
       description:

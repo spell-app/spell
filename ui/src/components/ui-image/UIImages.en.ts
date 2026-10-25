@@ -18,17 +18,34 @@ export const imagesVocabulary = {
   noun: "images",
   description: "A group of images can be formatted together.",
   attributes: [
-    { name: "size", kind: "size", description: "Width of every image in the group, `mini` ... `massive`." },
-    { name: "avatar", kind: "keyOnly", description: "Every image a small circle." },
-    { name: "bordered", kind: "keyOnly", description: "Every image with a hairline border." },
-    { name: "centered", kind: "keyOnly", description: "Rows centred in the container." },
-    { name: "circular", kind: "keyOnly", description: "Every image cropped to a circle." },
-    { name: "disabled", kind: "keyOnly", description: "The whole group faded." },
-    { name: "fluid", kind: "keyOnly", description: "Every image fills the group's width, one per row." },
-    { name: "rounded", kind: "keyOnly", description: "Every image with softly rounded corners." },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats the group `left` or `right`." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Width of every image in the group, `mini` ... `massive`."
+    },
+    { name: "avatar", group: "content", kind: "keyOnly", description: "Every image a small circle." },
+    { name: "bordered", group: "appearance", kind: "keyOnly", description: "Every image with a hairline border." },
+    { name: "centered", group: "layout", kind: "keyOnly", description: "Rows centred in the container." },
+    { name: "circular", group: "appearance", kind: "keyOnly", description: "Every image cropped to a circle." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "The whole group faded." },
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Every image fills the group's width, one per row."
+    },
+    { name: "rounded", group: "appearance", kind: "keyOnly", description: "Every image with softly rounded corners." },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Floats the group `left` or `right`."
+    },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: ["top", "middle", "bottom"],
       description: "Aligns the images of a row `top`, `middle` (default) or `bottom`."

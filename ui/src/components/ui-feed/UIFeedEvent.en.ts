@@ -22,18 +22,30 @@ export const eventVocabulary = {
   attributes: [
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of its number circle and of the line to the next event (`connected`)."
     },
-    { name: "icon", kind: "icon", description: "Icon name, shown as the label." },
-    { name: "image", kind: "string", description: 'Image URL, shown round as the label (decorative, `alt=""`).' },
+    { name: "icon", group: "content", kind: "icon", description: "Icon name, shown as the label." },
+    {
+      name: "image",
+      group: "content",
+      kind: "string",
+      description: 'Image URL, shown round as the label (decorative, `alt=""`).'
+    },
     {
       name: "label",
+      group: "name",
       kind: "string",
       description: "Short text in a circle as the label, e.g. an initial (Fomantic's `data-text`)."
     },
-    { name: "basic", kind: "keyOnly", description: "Its number / text circle outlined instead of filled." },
-    { name: "disabled", kind: "keyOnly", description: "Faded and inert." }
+    {
+      name: "basic",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Its number / text circle outlined instead of filled."
+    },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
   ],
   events: [],
   slots: [

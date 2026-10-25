@@ -26,6 +26,7 @@ export const themeEditorVocabulary = {
   attributes: [
     {
       name: "base",
+      group: "link",
       kind: "string",
       description:
         "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  " +
@@ -33,6 +34,7 @@ export const themeEditorVocabulary = {
     },
     {
       name: "value",
+      group: "form",
       kind: "json",
       reflect: false,
       description:

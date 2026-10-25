@@ -24,15 +24,22 @@ export const breadcrumbVocabulary = {
   noun: "breadcrumb",
   description: "A breadcrumb is used to show hierarchy between content.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
     {
       name: "divider",
+      group: "content",
       kind: "string",
       description: "Text drawn between sections, e.g. `›` (`/` when unset);  published as `--ui-breadcrumb-divider`."
     },
     {
       name: "divider-icon",
+      group: "appearance",
       kind: "string",
       description:
         "Icon name drawn between sections instead of `divider`, e.g. `chevron right`;  published as " +

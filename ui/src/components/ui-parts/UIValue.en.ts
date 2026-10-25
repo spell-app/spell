@@ -22,7 +22,9 @@ export const valueVocabulary = {
   noun: "value",
   ui: false,
   description: "A statistic's value;  a search result's price.",
-  attributes: [{ name: "text", kind: "keyOnly", description: "In a statistic:  a word value, smaller and bold." }],
+  attributes: [
+    { name: "text", group: "name", kind: "keyOnly", description: "In a statistic:  a word value, smaller and bold." }
+  ],
   events: [],
   slots: [{ name: "", description: "The value:  a number, a word, an icon or image." }],
   parts: [{ name: "value", description: "The value box." }],

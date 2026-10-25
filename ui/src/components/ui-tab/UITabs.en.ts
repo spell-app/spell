@@ -34,16 +34,19 @@ export const tabsVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Size of the tab menu, `mini` ... `massive`;  `medium` is the default."
     },
     {
       name: "color",
+      group: "appearance",
       kind: "color",
       description: "Hue of the selected tab (`segmented`:  its fill;  default the primary colour)."
     },
     {
       name: "appearance",
+      group: "appearance",
       kind: "valueOnly",
       values: UIT.MenuAppearances,
       description:
@@ -53,35 +56,51 @@ export const tabsVocabulary = {
     },
     {
       name: "tabular",
+      group: "layout",
       kind: "keyOnly",
       description: 'Tabs drawn as file-folder tabs (Fomantic\'s classic tab look).  Alias of `appearance="tabular"`.'
     },
     {
       name: "pointing",
+      group: "layout",
       kind: "keyOnly",
       description:
         'The selected tab points at its pane;  an underline with `secondary`.  Alias of `appearance="pointing"`.'
     },
     {
       name: "secondary",
+      group: "appearance",
       kind: "keyOnly",
       description: 'De-emphasized tabs:  no box.  Alias of `appearance="secondary"`.'
     },
-    { name: "text", kind: "keyOnly", description: 'Plain text tabs.  Alias of `appearance="text"`.' },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme for the tabs and the panes." },
+    { name: "text", group: "name", kind: "keyOnly", description: 'Plain text tabs.  Alias of `appearance="text"`.' },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The dark scheme for the tabs and the panes."
+    },
     {
       name: "vertical",
+      group: "layout",
       kind: "keyOnly",
       description: "Tabs stacked in a column beside the panes;  ArrowUp / ArrowDown move between them."
     },
-    { name: "fluid", kind: "keyOnly", description: "The tab menu takes the full width (or, vertical, its column's)." },
+    {
+      name: "fluid",
+      group: "layout",
+      kind: "keyOnly",
+      description: "The tab menu takes the full width (or, vertical, its column's)."
+    },
     {
       name: "compact",
+      group: "layout",
       kind: "keyOnly",
       description: "The tab menu is only as wide as its tabs (Fomantic's `compact` menu)."
     },
     {
       name: "alignment",
+      group: "layout",
       kind: "valueAndKey",
       key: "aligned",
       values: UIT.ItemAlignments,
@@ -91,6 +110,7 @@ export const tabsVocabulary = {
     },
     {
       name: "equal",
+      group: "layout",
       kind: "keyOnly",
       description:
         'Every tab the same width, from the tabs themselves (no count):  with `alignment="fluid"` an equal share ' +
@@ -98,11 +118,13 @@ export const tabsVocabulary = {
     },
     {
       name: "basic",
+      group: "appearance",
       kind: "keyOnly",
       description: "Panes without the segment box (Fomantic's `basic segment`):  no border, no shadow."
     },
     {
       name: "attached",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["top", "bottom"],
       description:
@@ -111,6 +133,7 @@ export const tabsVocabulary = {
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       description:
         "Value of the selected pane (its `value`, else its index).  Controlled:  set it to switch panes;  " +
@@ -118,6 +141,7 @@ export const tabsVocabulary = {
     },
     {
       name: "activation",
+      group: "behaviour",
       kind: "enum",
       values: ["automatic", "manual"],
       default: "automatic",
@@ -127,6 +151,7 @@ export const tabsVocabulary = {
     },
     {
       name: "history",
+      group: "advanced",
       kind: "boolean",
       description:
         "Mirror the selected pane in the URL hash (`#value`):  selecting pushes a history entry, Back / Forward and " +

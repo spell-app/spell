@@ -26,44 +26,66 @@ export const listVocabulary = {
   noun: "list",
   description: "A list groups related content.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size, `mini` ... `massive`;  `medium` is the default." },
-    { name: "bulleted", kind: "keyOnly", description: "Marks each item with a bullet." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "bulleted", group: "appearance", kind: "keyOnly", description: "Marks each item with a bullet." },
     {
       name: "ordered",
+      group: "appearance",
       kind: "keyOnly",
       description:
         "Numbers each item (`1.`, `1.1` in a sub-list);  an item's `value` replaces its number.  Renders `<ol>`."
     },
-    { name: "suffixed", kind: "keyOnly", description: "Ordered:  a dot follows each number (`1.`)." },
+    {
+      name: "suffixed",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "Ordered:  a dot follows each number (`1.`)."
+    },
     {
       name: "link",
+      group: "link",
       kind: "keyOnly",
       description: "Items are links:  muted until hovered, the selected one strongest."
     },
     {
       name: "selection",
+      group: "appearance",
       kind: "keyOnly",
       description: "Items are choices:  `<button>`s with a hover background, `ui-select` on activation."
     },
-    { name: "animated", kind: "keyOnly", description: "Items indent when hovered." },
-    { name: "horizontal", kind: "keyOnly", description: "Items sit in a row." },
-    { name: "divided", kind: "keyOnly", description: "A rule between items." },
-    { name: "celled", kind: "keyOnly", description: "A rule around every item." },
+    { name: "animated", group: "appearance", kind: "keyOnly", description: "Items indent when hovered." },
+    { name: "horizontal", group: "layout", kind: "keyOnly", description: "Items sit in a row." },
+    { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
+    { name: "celled", group: "layout", kind: "keyOnly", description: "A rule around every item." },
     {
       name: "relaxed",
+      group: "layout",
       kind: "keyOrValueAndKey",
       values: ["very"],
       description: 'More space between items;  `relaxed="very"` even more.'
     },
     {
       name: "fitted",
+      group: "layout",
       kind: "keyOnly",
       description: "No horizontal item padding;  a `selection` list's hover background reaches past its edges."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right`." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Floats `left` or `right`."
+    },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: "verticalAlignments",
       description: "Aligns each item's icon, image and content:  `top` (default), `middle` or `bottom`."

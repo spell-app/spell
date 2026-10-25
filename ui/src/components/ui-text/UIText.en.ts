@@ -23,18 +23,20 @@ export const textVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       description: "Size relative to the surrounding text, `mini` (0.4em) ... `massive` (8em);  `medium` is 1em."
     },
-    { name: "color", kind: "color", description: "Hue of the text." },
+    { name: "color", group: "appearance", kind: "color", description: "Hue of the text." },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
       description: "Semantic colour of a status message."
     },
-    { name: "inverted", kind: "keyOnly", description: "The hue as it reads on a dark surface." },
-    { name: "disabled", kind: "keyOnly", description: "Faded:  shown as unavailable." }
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "The hue as it reads on a dark surface." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded:  shown as unavailable." }
   ],
   events: [],
   slots: [{ name: "", description: "The text." }],

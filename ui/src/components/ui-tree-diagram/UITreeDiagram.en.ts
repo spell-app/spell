@@ -35,6 +35,7 @@ export const treeDiagramVocabulary = {
   attributes: [
     {
       name: "tree",
+      group: "content",
       kind: "json",
       reflect: false,
       description:

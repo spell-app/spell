@@ -23,37 +23,46 @@ export const revealVocabulary = {
   noun: "reveal",
   description: "A reveal displays additional content in place of previous content when activated.",
   attributes: [
-    { name: "size", kind: "size", description: "Text size of both contents, `mini` ... `massive`." },
-    { name: "fade", kind: "keyOnly", description: "The visible content fades out." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size of both contents, `mini` ... `massive`."
+    },
+    { name: "fade", group: "appearance", kind: "keyOnly", description: "The visible content fades out." },
     {
       name: "move",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["right", "up", "down"],
       description: "The visible content moves out:  left (bare), `right`, `up` or `down`."
     },
     {
       name: "rotate",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["left", "right"],
       description: "The visible content rotates away around a bottom corner:  right (bare) or `left`."
     },
     {
       name: "slide",
+      group: "appearance",
       kind: "keyOrValueAndKey",
       values: ["right", "up", "down"],
       description: "Both contents slide:  left (bare), `right`, `up` or `down`."
     },
-    { name: "instant", kind: "keyOnly", description: "No delay before the transition starts." },
+    { name: "instant", group: "appearance", kind: "keyOnly", description: "No delay before the transition starts." },
     {
       name: "unclipped",
+      group: "appearance",
       kind: "keyOnly",
       key: "visible",
       description:
         "Content overflowing the box stays visible, not clipped (Fomantic's `visible` reveal:  the class word stays " +
         "`visible`).  Renamed because `visible` shows or hides every element."
     },
-    { name: "active", kind: "keyOnly", description: "Revealed now, without hover or focus." },
-    { name: "disabled", kind: "keyOnly", description: "Never reveals." }
+    { name: "active", group: "states", kind: "keyOnly", description: "Revealed now, without hover or focus." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Never reveals." }
   ],
   events: [],
   slots: [

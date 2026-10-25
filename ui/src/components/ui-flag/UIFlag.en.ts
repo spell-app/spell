@@ -39,6 +39,7 @@ export const flagVocabulary = {
   attributes: [
     {
       name: "size",
+      group: "appearance",
       kind: "size",
       values: ["small", "medium", "large", "big", "huge", "massive"],
       description:
@@ -47,6 +48,7 @@ export const flagVocabulary = {
     },
     {
       name: "country",
+      group: "appearance",
       kind: "string",
       description:
         "ISO 3166-1 alpha-2 code in any case (`fr`, `US`), or one of Fomantic's names and aliases " +

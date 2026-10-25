@@ -27,24 +27,37 @@ export const toastVocabulary = {
   attributes: [
     {
       name: "type",
+      group: "appearance",
       kind: "valueOnly",
       values: ["info", "success", "warning", "error", "neutral"],
       description: "Consequence (Fomantic's `class`), tinting it like a colour;  `error` also announces it as an alert."
     },
-    { name: "color", kind: "color", description: "Hue:  a filled toast in that colour." },
-    { name: "inverted", kind: "keyOnly", description: "The dark scheme;  a coloured one takes its light variant." },
-    { name: "header", kind: "string", description: "Bold first line (Fomantic's `title`)." },
-    { name: "message", kind: "string", description: "Body text;  slotted content follows it." },
+    { name: "color", group: "appearance", kind: "color", description: "Hue:  a filled toast in that colour." },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The dark scheme;  a coloured one takes its light variant."
+    },
+    { name: "header", group: "name", kind: "string", description: "Bold first line (Fomantic's `title`)." },
+    { name: "message", group: "appearance", kind: "string", description: "Body text;  slotted content follows it." },
     {
       name: "icon",
+      group: "content",
       kind: "icon",
       description:
         'Icon name beside the content;  bare `icon` (or `"true"`, as frameworks write it) uses the type\'s own ' +
         "(info, check, warning, cross)."
     },
-    { name: "closable", kind: "boolean", description: "Shows a close icon (Fomantic's `closeIcon`)." },
+    {
+      name: "closable",
+      group: "behaviour",
+      kind: "boolean",
+      description: "Shows a close icon (Fomantic's `closeIcon`)."
+    },
     {
       name: "close-on-click",
+      group: "appearance",
       kind: "boolean",
       default: true,
       description:
@@ -53,6 +66,7 @@ export const toastVocabulary = {
     },
     {
       name: "display-time",
+      group: "behaviour",
       kind: "string",
       description:
         "Milliseconds before it closes itself;  absent or `0` keeps it until closed;  `auto` ~== reading time " +
@@ -60,25 +74,29 @@ export const toastVocabulary = {
     },
     {
       name: "progress",
+      group: "appearance",
       kind: "enum",
       values: ["top", "bottom"],
       description: "Shows a bar counting the display time down, at the `top` or `bottom` (Fomantic's `showProgress`)."
     },
-    { name: "progress-up", kind: "boolean", description: "The bar fills up instead of emptying." },
+    { name: "progress-up", group: "behaviour", kind: "boolean", description: "The bar fills up instead of emptying." },
     {
       name: "pause-on-hover",
+      group: "behaviour",
       kind: "boolean",
       default: true,
       description: "Pauses the countdown while the pointer is over it.  Focus inside ALWAYS pauses it."
     },
     {
       name: "compact",
+      group: "layout",
       kind: "boolean",
       default: true,
       description: 'A fixed width (350px);  `compact="false"` sizes it to its content.'
     },
     {
       name: "actions",
+      group: "appearance",
       kind: "string",
       values: ["basic", "left", "attached", "vertical", "top", "bottom"],
       description:

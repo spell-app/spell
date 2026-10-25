@@ -23,17 +23,30 @@ export const contentVocabulary = {
   ui: false,
   description: "The main content block of a card, item, event, comment, modal, message, list item, step ...",
   attributes: [
-    { name: "image", kind: "keyOnly", description: "In a modal:  an image beside the description (a flex row)." },
-    { name: "scrolling", kind: "keyOnly", description: "In a modal:  a capped height that scrolls." },
-    { name: "floated", kind: "valueAndKey", values: "floats", description: "Floats `left` or `right`." },
+    {
+      name: "image",
+      group: "content",
+      kind: "keyOnly",
+      description: "In a modal:  an image beside the description (a flex row)."
+    },
+    { name: "scrolling", group: "layout", kind: "keyOnly", description: "In a modal:  a capped height that scrolls." },
+    {
+      name: "floated",
+      group: "layout",
+      kind: "valueAndKey",
+      values: "floats",
+      description: "Floats `left` or `right`."
+    },
     {
       name: "text-align",
+      group: "layout",
       kind: "textAlign",
       values: "alignments",
       description: "Aligns its text `left`, `center`, `right` or `justified` (a card's `center aligned content`)."
     },
     {
       name: "vertical-align",
+      group: "layout",
       kind: "verticalAlign",
       values: "verticalAlignments",
       description: "In an item or a list:  `top`, `middle` or `bottom` against the image or icon beside it."

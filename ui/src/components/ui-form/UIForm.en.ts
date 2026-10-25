@@ -33,9 +33,15 @@ export const formVocabulary = {
   noun: "form",
   description: "A form displays a set of related input fields in a structured way.",
   attributes: [
-    { name: "size", kind: "size", description: "Size of everything inside, `mini` ... `massive`." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size of everything inside, `mini` ... `massive`."
+    },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: UIT.FormStates,
       description:
@@ -43,16 +49,23 @@ export const formVocabulary = {
     },
     {
       name: "equal-width",
+      group: "layout",
       kind: "keyOnly",
       key: "equal width",
       description: "Every row of fields shares its width equally."
     },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  light labels." },
-    { name: "loading", kind: "keyOnly", description: "Busy:  dimmed behind a spinner, not usable." },
-    { name: "disabled", kind: "keyOnly", description: "Nothing inside can be used (`inert`)." },
-    { name: "unstackable", kind: "keyOnly", description: "Rows of fields never stack on narrow forms." },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  light labels." },
+    { name: "loading", group: "states", kind: "keyOnly", description: "Busy:  dimmed behind a spinner, not usable." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Nothing inside can be used (`inert`)." },
+    {
+      name: "unstackable",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Rows of fields never stack on narrow forms."
+    },
     {
       name: "stack-with",
+      group: "layout",
       kind: "enum",
       values: UIT.StackWithValues,
       description:
@@ -62,6 +75,7 @@ export const formVocabulary = {
     },
     {
       name: "validate",
+      group: "form",
       kind: "enum",
       // not `validate`:  that's the DOM element's `validate()`
       property: "validateOn",
@@ -73,6 +87,7 @@ export const formVocabulary = {
     },
     {
       name: "apply",
+      group: "form",
       kind: "enum",
       values: FormApplyModes,
       default: "immediately",
@@ -82,6 +97,7 @@ export const formVocabulary = {
     },
     {
       name: "rules",
+      group: "form",
       kind: "json",
       reflect: false,
       description:
@@ -90,17 +106,20 @@ export const formVocabulary = {
     },
     {
       name: "error-focus",
+      group: "advanced",
       kind: "boolean",
       default: true,
       description: 'Focus the first invalid field when a submit fails;  `error-focus="no"` to keep focus.'
     },
     {
       name: "prevent-leaving",
+      group: "advanced",
       kind: "boolean",
       description: "Ask before leaving the page while fields differ from their starting values."
     },
     {
       name: "value",
+      group: "form",
       kind: "json",
       reflect: false,
       description:
@@ -110,6 +129,7 @@ export const formVocabulary = {
     },
     {
       name: "debug",
+      group: "advanced",
       kind: "boolean",
       description: "Show the bound `value` (else `values`) as JSON below the form, live."
     }

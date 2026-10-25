@@ -29,47 +29,79 @@ export const textareaVocabulary = {
   noun: "input",
   description: "A textarea is a multi-line field used to elicit a longer response.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: UIT.FormStates,
       description: "Form state, tinting the box, text and placeholder."
     },
-    { name: "transparent", kind: "keyOnly", description: "No box:  text only." },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, left out of the form." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
+    { name: "transparent", group: "appearance", kind: "keyOnly", description: "No box:  text only." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used;  dimmed, left out of the form."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       property: "readOnly",
       description: "Shows its value but can't be edited;  still submitted."
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       reflect: false,
       description: "Value.  Attribute:  the starting (and reset) value;  property:  the live value."
     },
-    { name: "name", kind: "string", description: "Form field name." },
-    { name: "placeholder", kind: "string", description: "Hint shown while empty." },
-    { name: "required", kind: "boolean", description: "Constraint:  must not be empty (`valueMissing`)." },
+    { name: "name", group: "name", kind: "string", description: "Form field name." },
+    { name: "placeholder", group: "form", kind: "string", description: "Hint shown while empty." },
+    {
+      name: "required",
+      group: "form",
+      kind: "boolean",
+      description: "Constraint:  must not be empty (`valueMissing`)."
+    },
     {
       name: "minlength",
+      group: "form",
       kind: "number",
       property: "minLength",
       description: "Constraint:  fewest characters (checked once someone has edited it)."
     },
-    { name: "maxlength", kind: "number", property: "maxLength", description: "Constraint:  most characters." },
+    {
+      name: "maxlength",
+      group: "form",
+      kind: "number",
+      property: "maxLength",
+      description: "Constraint:  most characters."
+    },
     {
       name: "rows",
+      group: "content",
       kind: "number",
       description: "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em)."
     },
-    { name: "autocomplete", kind: "string", description: "Autofill hint, forwarded to the native textarea." },
+    {
+      name: "autocomplete",
+      group: "form",
+      kind: "string",
+      description: "Autofill hint, forwarded to the native textarea."
+    },
     {
       name: "rules",
+      group: "form",
       kind: "json",
       reflect: false,
       description: "Fomantic validation rules checked with the native constraints (`ValidationRule`s)."

@@ -30,43 +30,74 @@ export const selectVocabulary = {
   noun: "select",
   description: "A select lets people choose one or more values from a native list of options.",
   attributes: [
-    { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Size, `mini` ... `massive`;  `medium` is the default."
+    },
     {
       name: "state",
+      group: "form",
       kind: "valueOnly",
       values: ["error", "info", "success", "warning"],
       description: "Form state, tinting the box and text."
     },
-    { name: "fluid", kind: "keyOnly", description: "Takes the full width of its container." },
-    { name: "compact", kind: "keyOnly", description: "No minimum width:  as wide as its longest option." },
-    { name: "inverted", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme's colours." },
-    { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, and left out of the form." },
+    { name: "fluid", group: "layout", kind: "keyOnly", description: "Takes the full width of its container." },
+    {
+      name: "compact",
+      group: "layout",
+      kind: "keyOnly",
+      description: "No minimum width:  as wide as its longest option."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "For dark backgrounds:  the dark scheme's colours."
+    },
+    {
+      name: "disabled",
+      group: "states",
+      kind: "keyOnly",
+      description: "Can't be used;  dimmed, and left out of the form."
+    },
     {
       name: "readonly",
+      group: "form",
       kind: "boolean",
       property: "readOnly",
       description: "Shows its value but can't be changed (a change is undone);  still focusable and submitted."
     },
     {
       name: "multiple",
+      group: "form",
       kind: "keyOnly",
       description: "Chooses several values:  a native list box (never the customizable picker)."
     },
     {
       name: "placeholder",
+      group: "form",
       kind: "string",
       description: "Text of the empty first option shown while nothing is chosen."
     },
     {
       name: "value",
+      group: "form",
       kind: "string",
       description:
         "Chosen value.  Property:  `string`, or `string[]` with `multiple`;  attribute:  a comma / space list."
     },
-    { name: "name", kind: "string", description: "Form field name;  `multiple` submits one entry per value." },
-    { name: "required", kind: "boolean", description: "Form validation:  a value must be chosen." },
+    {
+      name: "name",
+      group: "name",
+      kind: "string",
+      description: "Form field name;  `multiple` submits one entry per value."
+    },
+    { name: "required", group: "form", kind: "boolean", description: "Form validation:  a value must be chosen." },
     {
       name: "options",
+      group: "form",
       kind: "json",
       reflect: false,
       description: "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
